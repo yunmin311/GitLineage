@@ -1,0 +1,102 @@
+# Project state
+
+Decisions here are binding on the implementation unless this file is changed.
+Anything not listed as a decision is a proposal and must not be treated as
+settled.
+
+## Decision
+
+Confirmed and implemented in this repository.
+
+| Decision | Detail |
+| --- | --- |
+| Three separate object kinds | `Entity`, `Relationship` and `Evidence` are never merged. Evidence is first-class data in `graph.json`, not UI text. |
+| Three evidence statuses | `VERIFIED`, `DECLARED`, `DETECTED`. No generic `INFERRED`. |
+| Ten relationship types | `forked_from`, `derived_from`, `shares_history_with`, `depends_on`, `uses_submodule`, `declared_inspiration`, `references`, `contains_exact_content_from`, `similar_to`, `evolved_into`. `copied_from` and similar accusations do not exist. |
+| Two admission guards | Evidence type to relationship type, and status to both. A collector proposes, the resolver disposes. Rejections become diagnostics. |
+| Direction is fixed by the ontology | `shares_history_with` and `similar_to` are undirected; everything else is directed. |
+| Dependency is `DECLARED` only | A manifest is an author's statement. GitLineage never runs a package manager. |
+| `derived_from` needs containment plus ordering | Shared commits alone give `shares_history_with`, never a direction. Truncated windows can never prove containment. |
+| Exact content only, no similarity | `contains_exact_content_from` uses identical Git blob ids. No threshold, no score. `similar_to` exists in the ontology but no detector ships. |
+| Declarations require a resolvable repository | An attribution phrase without a repository URL in its window produces no relationship, only a diagnostic. Code blocks and indented code are not prose. |
+| `thanks to` is a reference | An acknowledgement is a link, not a claim of derivation. |
+| Collector boundary | Collectors observe and emit `Observation[]`. They never merge evidence, never choose a status, never touch the graph. |
+| Only `git` is ever executed | Fixed subcommand allowlist, no shell, scrubbed environment, stdin-only `--file`, https-only transport. |
+| SSRF defence | Four-host outbound allowlist, per-hop redirect revalidation, https only, no credentials in URLs. |
+| Resource limits are hard caps | Centralised in `src/platform/limits.ts`, always reported through diagnostics. |
+| Deterministic output | Same revision, same graph, apart from timestamps. Codepoint ordering, content-derived ids, no clock or locale input. |
+| Public repositories only in V1 | The `private` cache namespace is refused outright; a live test asserts that no storage is created. |
+| Bounded git access | Shallow, tagless, blob-filtered, submodule-free, timeout-bounded, with a post-fetch size budget that fails loudly. |
+| Blob identity from the tree API | Exact content costs one API call per candidate instead of a clone. |
+| Implementation language | TypeScript on Node >= 22.18, executed directly through Node's type stripping, with `tsc --noEmit` as the type gate and `node:test` as the test runner. |
+| Single package, not a monorepo | One `package.json`. Module boundaries under `src/` match the proposed layout so a later split is mechanical. |
+| Minimal dependencies | Runtime: `smol-toml` only. Dev: `typescript`, `@types/node`, `ajv`, `ajv-formats` for JSON Schema cross-checking. |
+| CLI first, web later | `analyze` produces `graph.json`; the renderer consumes it and must not change the contract. |
+
+### Implementation decisions taken during this work
+
+These were not in the specification; they are recorded here so they are not
+mistaken for product requirements.
+
+- `Package -> references -> Repository` is how a resolved package source
+  repository is expressed, instead of introducing a new relationship type. It is
+  `DECLARED` registry metadata, never an ancestry claim.
+- Go module paths are treated as repository paths, so `depends_on` can point at a
+  `Repository` entity directly.
+- A repository URL yields at most one relationship per target, at the strongest
+  declared meaning, so a URL covered by "inspired by" does not also appear as a
+  bare `references` edge.
+- `contains_exact_content_from` is `VERIFIED`-only for now. Normalised-hash
+  detection would need a new evidence type and an explicit ontology amendment.
+- Submodule identity is joined on `path` against the tree's gitlink entries
+  rather than on the submodule name, because a name may contain dots.
+- Unparseable or unreadable inputs produce diagnostics and partial results, never
+  a failed analysis and never a silent claim.
+- Redirects are followed manually up to three hops, each re-validated, so that
+  renamed repositories keep working.
+
+## Proposal
+
+Open, not implemented, not binding.
+
+| Proposal | Notes |
+| --- | --- |
+| Interactive explorer | Consume `graph.json` only. Needs a layout that separates ancestry, dependency, declaration, exact content and detection visually, and an evidence inspector per edge. |
+| Timeline / evolution view | First observed, last observed, introduced in commit, removed in commit. |
+| Similarity detector | Token fingerprints and candidate retrieval, `DETECTED` only, never allowed near the verified layer. |
+| Normalised content hashing | Would need a new evidence type and an ontology amendment before any code. |
+| `ExternalProject` entities | For projects hosted outside GitHub, so a declaration about a non-GitHub project is representable instead of being dropped. |
+| Manifest git-dependency to repository edge | Today a `git+https` spec is recorded inside the evidence and used as a candidate; a direct edge would need a new ontology decision. |
+| More ecosystems | Maven, Gradle, Composer, RubyGems, crates.io, NuGet. |
+| More registries | crates.io, the Go module proxy, npm scoped-package metadata. |
+| Software Heritage adapter | Archival source when GitHub metadata is incomplete or a repository is gone. |
+| World of Code adapter | Global cross-repository provenance signals, as an optional adapter and never a V1 blocker. |
+| ScanCode / SPDX adapters | Deterministic license, copyright and composition signals. Optional; the core must work without them. |
+| Cross-forge support | GitLab, Codeberg, Bitbucket, self-hosted Git. The canonical model does not bind GitHub, so this should not require restructuring. |
+| Private repository analysis | Credential model, private cache, artifact encryption, cross-repository permission checks. Explicitly must not reuse the public pipeline. |
+| Exporters | GraphML, Mermaid, SPDX references, SVG. Consumers of the canonical graph only. |
+| Artifact store and cache service | Revision-aware cache keyed on repository identity, resolved revision and schema version. |
+| SPDX / SBOM authoring | Out of scope; GitLineage consumes such data, it does not produce it. |
+
+## Deprecated
+
+| Option | Status | Reason |
+| --- | --- | --- |
+| A generic `INFERRED` status | Rejected | Mixes clues with facts and pushes the system toward heuristic or AI inference. A future inference type must be separate and must not share the visual language of verified relationships. |
+| Running package managers to obtain metadata | Rejected | Repository code is untrusted data and is never executed. |
+| Similarity upgraded to provenance | Rejected | Similarity cannot establish direction, authorship or origin. |
+| Implicit `INFERRED` naming (`copied_from`, `stolen_from`) | Rejected | The analyzer has no standing to make that claim. |
+| Unbounded full clone per repository | Rejected | Storage, bandwidth and latency blow up immediately. Bounded fetch plus the tree API covers the same signals. |
+| Framework-first implementation | Not started | The specification deliberately left the language open until the analyzer contract was proven. It is now fixed by the decision above; the choice is recorded rather than debated. |
+| A monorepo with separate packages | Deferred | A single package with the proposed module layout proves the contract with less machinery. Revisit if the web layer needs independent deployables. |
+
+## Verification status
+
+| Check | Command | Status |
+| --- | --- | --- |
+| Types | `npm run typecheck` | passes |
+| Unit, contract, regression, schema, offline pipeline | `npm test` | 69 pass, 3 live tests skipped |
+| Live integration on real repositories | `npm run test:live` | 7 pass |
+| Artifact validation | `node src/cli/main.ts validate <graph.json>` | passes on every produced artifact |
+
+Details and recorded results: `docs/integration-validation.md`.

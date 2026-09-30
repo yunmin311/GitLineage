@@ -1,0 +1,26 @@
+{
+  "name": "gitlineage",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Evidence-backed repository lineage and software provenance explorer (V1 provenance core).",
+  "type": "module",
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "node --test \"test/**/*.test.ts\"",
+    "test:live": "node test/live/run-live-validation.ts",
+    "analyze": "node src/cli/main.ts analyze",
+    "check": "npm run typecheck && npm test"
+  },
+  "dependencies": {
+    "smol-toml": "^1.4.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
+    "typescript": "^5.8.2"
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "schemaVersion": "1.0.0",
+  "recordedAt": "2026-09-30",
+  "note": "Expectations are recorded facts about public repositories. They are asserted by the live integration suite, which is skipped unless GITLINEAGE_LIVE=1.",
+  "cases": [
+    {
+      "id": "unmodified-fork",
+      "repository": "nachocebey/is",
+      "family": "sindresorhus/is -> nachocebey/is",
+      "description": "A fork of sindresorhus/is with an unmodified history. Platform metadata, shared commits and identical blobs must all agree.",
+      "expectRelationship": {
+        "type": "forked_from",
+        "target": "repo:github:sindresorhus/is",
+        "status": "VERIFIED"
+      },
+      "expectAlsoPresent": [
+        { "type": "shares_history_with", "target": "repo:github:sindresorhus/is", "status": "VERIFIED" },
+        { "type": "contains_exact_content_from", "target": "repo:github:sindresorhus/is", "status": "VERIFIED" }
+      ],
+      "expectAbsent": ["derived_from", "similar_to", "depends_on_to_repository"]
+    },
+    {
+      "id": "submodule-host",
+      "repository": "grpc/grpc",
+      "family": "grpc/grpc submodules",
+      "description": "A repository that pins many external Git repositories through .gitmodules. Every entry must resolve to a real repository with a pinned commit.",
+      "expectRelationship": {
+        "type": "uses_submodule",
+        "target": "repo:github:protocolbuffers/protobuf",
+        "status": "VERIFIED"
+      },
+      "expectAlsoPresent": [
+        { "type": "uses_submodule", "target": "repo:github:google/boringssl", "status": "VERIFIED" }
+      ],
+      "expectAbsent": ["similar_to"],
+      "minimumSubmoduleCount": 10
+    },
+    {
+      "id": "declared-fork-in-readme",
+      "repository": "vitest-dev/vitest",
+      "family": "vitest-dev/vitest README",
+      "description": "The README states a fork relationship that GitHub metadata does not record. The declaration must appear as DECLARED, never as VERIFIED.",
+      "expectRelationship": {
+        "type": "forked_from",
+        "target": "repo:github:vitest-dev/istanbuljs",
+        "status": "DECLARED"
+      },
+      "expectAbsent": ["similar_to"]
+    },
+    {
+      "id": "unrelated-repositories",
+      "repository": "octocat/Spoon-Knife",
+      "family": "octocat/Hello-World vs octocat/Spoon-Knife",
+      "description": "Two GitHub tutorial repositories that share no commit and no fork metadata. No lineage relationship may be produced.",
+      "expectAbsent": ["forked_from", "derived_from", "shares_history_with", "similar_to", "declared_inspiration"],
+      "expectNoCandidateEvidenceFor": "repo:github:octocat/hello-world"
+    }
+  ]
+}

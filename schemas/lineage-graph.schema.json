@@ -1,0 +1,169 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gitlineage.dev/schemas/lineage-graph-1.0.0.json",
+  "title": "GitLineage canonical lineage graph",
+  "description": "Machine-readable provenance graph. Entity, Relationship and Evidence are three separate object kinds and are never merged. Every relationship must reference at least one evidence record.",
+  "type": "object",
+  "required": ["schemaVersion", "graph", "entities", "relationships", "evidence", "diagnostics"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "graph": {
+      "type": "object",
+      "required": ["rootEntityId", "provider", "revision", "generatedAt", "analyzer"],
+      "additionalProperties": false,
+      "properties": {
+        "rootEntityId": { "type": "string", "minLength": 1 },
+        "provider": { "type": "string", "minLength": 1 },
+        "generatedAt": { "type": "string", "format": "date-time" },
+        "revision": {
+          "type": "object",
+          "required": ["commit", "resolvedAt"],
+          "additionalProperties": false,
+          "properties": {
+            "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+            "ref": { "type": "string" },
+            "defaultBranch": { "type": "string" },
+            "resolvedAt": { "type": "string", "format": "date-time" }
+          }
+        },
+        "analyzer": {
+          "type": "object",
+          "required": ["name", "version", "schemaVersion", "namespace", "extractors", "adapters"],
+          "additionalProperties": false,
+          "properties": {
+            "name": { "type": "string" },
+            "version": { "type": "string" },
+            "schemaVersion": { "type": "string" },
+            "namespace": { "enum": ["public", "private"] },
+            "extractors": { "type": "array", "items": { "type": "string" } },
+            "adapters": { "type": "array", "items": { "type": "string" } },
+            "limitsApplied": { "type": "object" }
+          }
+        }
+      }
+    },
+    "entities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "display", "attributes"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "type": {
+            "enum": ["Repository", "Package", "Commit", "Release", "SourceArtifact", "ExternalProject"]
+          },
+          "display": {
+            "type": "object",
+            "required": ["name"],
+            "additionalProperties": false,
+            "properties": {
+              "name": { "type": "string" },
+              "fullName": { "type": "string" },
+              "url": { "type": "string" }
+            }
+          },
+          "attributes": { "type": "object" },
+          "sourceUrl": { "type": "string" }
+        }
+      }
+    },
+    "relationships": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "source", "target", "directed", "status", "evidenceIds", "attributes"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^rel_[0-9a-f]{16}$" },
+          "type": {
+            "enum": [
+              "forked_from",
+              "derived_from",
+              "shares_history_with",
+              "depends_on",
+              "uses_submodule",
+              "declared_inspiration",
+              "references",
+              "contains_exact_content_from",
+              "similar_to",
+              "evolved_into"
+            ]
+          },
+          "source": { "type": "string", "minLength": 1 },
+          "target": { "type": "string", "minLength": 1 },
+          "directed": { "type": "boolean" },
+          "status": { "enum": ["VERIFIED", "DECLARED", "DETECTED"] },
+          "evidenceIds": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string", "pattern": "^ev_[0-9a-f]{16}$" }
+          },
+          "attributes": { "type": "object" }
+        }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "status", "collector", "extractor", "data", "observedAt"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^ev_[0-9a-f]{16}$" },
+          "type": {
+            "enum": [
+              "github_repository_identity",
+              "github_fork_metadata",
+              "git_shared_commits",
+              "git_history_containment",
+              "git_blob_identity",
+              "git_submodule_entry",
+              "package_manifest",
+              "package_lockfile",
+              "package_registry_metadata",
+              "document_attribution",
+              "document_reference",
+              "token_fingerprint"
+            ]
+          },
+          "status": { "enum": ["VERIFIED", "DECLARED", "DETECTED"] },
+          "collector": { "type": "string", "minLength": 1 },
+          "extractor": { "type": "string", "minLength": 1 },
+          "repository": { "type": "string" },
+          "sourceUrl": { "type": "string" },
+          "locator": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "path": { "type": "string" },
+              "lineStart": { "type": "integer", "minimum": 1 },
+              "lineEnd": { "type": "integer", "minimum": 1 },
+              "field": { "type": "string" },
+              "spec": { "type": "string" }
+            }
+          },
+          "observedText": { "type": "string" },
+          "data": { "type": "object" },
+          "observedAt": { "type": "string", "format": "date-time" }
+        }
+      }
+    },
+    "diagnostics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["code", "level", "message"],
+        "additionalProperties": false,
+        "properties": {
+          "code": { "type": "string", "minLength": 1 },
+          "level": { "enum": ["info", "warning", "error"] },
+          "message": { "type": "string" },
+          "collector": { "type": "string" },
+          "context": { "type": "object" }
+        }
+      }
+    }
+  }
+}
