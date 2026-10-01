@@ -8,7 +8,9 @@ Run with `npm run test:live`. Live tests read the public GitHub API and perform
 bounded git fetches, so they are excluded from `npm test`. Expectations are
 recorded in `fixtures/integration/real-repositories.json`.
 
-Recorded run: 2026-09-30, Node 24.13, git 2.53.
+Recorded run: 2026-10-01, Node 24.21, git 2.43, WSL2. The core analyzer run
+above was re-confirmed at Web Phase 2 (`npm run test:live`, 7 pass); the client
+runs recorded below were added by that phase.
 
 ## Result summary
 
@@ -123,9 +125,41 @@ alone.
   three allowlisted hops so that a URL-first product keeps working; a repository
   that has moved to another forge is still reported as unsupported.
 
+## Web Phase 2 client validation
+
+Run with `npm run test:web`. Drives the real production bundle in headless
+Chromium against the real server against real GitHub, and asserts 26 behaviours.
+
+| Behaviour | Result |
+| --- | --- |
+| Landing renders before a repository is chosen, with four real samples | pass |
+| A cold `/owner/repo` route reaches the explorer and draws nodes and edges | pass |
+| The canonical graph endpoint is same-origin and reports schema 2.0.0 | pass |
+| The second load is labelled `cached` | pass |
+| A symmetric relationship renders with no arrowhead | pass |
+| A directed relationship keeps its arrowhead | pass |
+| Selecting a relationship opens the drawer with real evidence records | pass |
+| The selection is written to the URL | pass |
+| A shared link reproduces the same selection from cold | pass |
+| Search reports a hit count and is reflected in the URL | pass |
+| Clearing search restores a clean URL | pass |
+| The layers popover lists all five families; layer state is in the URL | pass |
+| Zoom-in changes the viewport; fit returns to the fitted frame | pass |
+| The graph survives a 420px viewport, drawer as a sheet | pass |
+| A repository with no lineage states that plainly instead of failing | pass |
+| No link points at a hard-coded host | pass |
+| The client logs no uncaught errors | pass |
+
+Every check passed. Each of the eight defects these checks caught is listed in
+`docs/web-slice.md`.
+
 ## Not validated in this run
 
 - `similar_to`: no detector ships in V1, so there is nothing to validate.
 - `evolved_into`: reserved, no extractor.
 - Cross-forge candidates, private repositories, non-GitHub platforms.
-- The interactive renderer, which does not exist yet.
+- Keyboard-only and screen-reader navigation of the Explorer. Pointer, URL and
+  `Esc` behaviour is covered; a full accessibility pass has not been done.
+- Load behaviour under concurrency or a cold shared cache in production. A single
+  cold analysis of `grpc/grpc` takes roughly 150 seconds, which is why the client
+  scripts accept a warm cache directory.

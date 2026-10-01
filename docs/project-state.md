@@ -33,11 +33,16 @@ Confirmed and implemented in this repository.
 | Implementation language | TypeScript on Node >= 22.18, executed directly through Node's type stripping, with `tsc --noEmit` as the type gate and `node:test` as the test runner. |
 | Single package, not a monorepo | One `package.json`. Module boundaries under `src/` match the proposed layout so a later split is mechanical. |
 | Minimal dependencies | Runtime: `smol-toml` only. Dev: `typescript`, `@types/node`, `ajv`, `ajv-formats`, `playwright` (screenshot capture only). |
-| Core contract frozen for the Web phase | Phase 1 of the Web slice changed no ontology, collector, evidence semantic, resolver behaviour or graph schema field for presentation convenience. Every visual problem found in real data was fixed in `src/web/view-model.ts` and the client layout. Deviations are listed in `docs/web-slice.md`. |
+| Core contract frozen for the Web phase | Phases 1 and 2 of the Web slice changed no ontology, collector, evidence semantic, resolver behaviour or graph schema field for presentation convenience. Every visual problem found in real data was fixed in `src/web/view-model.ts` and the client layout. Deviations are listed in `docs/web-slice.md`. |
 | Graph schema 2.0.0 | Bumped for the breaking rename. `validateGraph` refuses any other version; artifact cache paths embed `v2.0.0`; the JSON Schema pins `const: "2.0.0"`. A 1.x artifact cannot be served, reused or validated. |
-| Two HTTP surfaces, not one | `/api/graph/:owner/:repo` returns the canonical graph unchanged; `/api/view/:owner/:repo` returns the presentation view-model. No renderer field ever enters the canonical graph. |
-| `/owner/repo` as the primary route | So a future domain replacement is a DNS change. Selection state lives in the query string for shareability. |
+| Two HTTP surfaces, not one | `/api/graph/:owner/:repo` returns the canonical graph unchanged; `/api/view/:owner/:repo` returns the presentation view-model. No renderer field ever enters the canonical graph. The client calls only `/api/view`, since fetching both would double the analysis wait for one result. |
+| `/owner/repo` as the primary route | So a future domain replacement is a DNS change. The whole frame lives in the query string (`edge`, `node`, `layers`, `q`, `bundles`, `depth`), so a shared link reproduces it exactly. `/` is the landing page. |
+| Freshness is stated, not implied | Both analysis endpoints return `cacheHit`, `resolvedRevision`, `resolvedRef`, `defaultBranch` and `elapsedMs`. The UI shows `cached <time>` in the app bar, so "reload gives the same result" is checkable. |
+| No localhost anywhere | Deployment settings come from the environment, and the production bundle is asserted to contain neither `localhost` nor `127.0.0.1`. Asset URLs are root-absolute, because the shell is also served at `/owner/repo`. |
+| Client logic is pure and testable | Everything under `src/web/client/lib/` is DOM-free and unit-tested in Node; `app.js` is the only DOM-aware file. `*.d.mts` declarations tie the browser modules to the view-model types. |
+| Browser scripts typecheck separately | `tsconfig.web-scripts.json` adds the DOM lib for the Playwright drivers, so the main config stays DOM-free and server code cannot reach for browser globals by accident. |
 | Bundling is presentation-only | `vitest-dev/vitest` yields 102 one-hop edges. Secondary relationships collapse into counted bundles; nothing is dropped and every member stays reachable in the Evidence drawer. |
+| Hub layout wraps, it does not stack | `grpc/grpc` has 20 submodule peers in one slot. A slot wraps into a grid and is pushed clear of the subject by its own half-extent, and labels are thinned by node degree — 20 distinct pairs is 20 fans of one, so parallel-edge count does not predict the collision. |
 | CLI first, web later | `analyze` produces `graph.json`; the renderer consumes it and must not change the contract. |
 
 ### Implementation decisions taken during this work
@@ -79,7 +84,8 @@ Open, not implemented, not binding.
 
 | Proposal | Notes |
 | --- | --- |
-| Interactive explorer | **Shipped in Phase 1.** `src/web/` exposes the canonical graph and the view-model over HTTP, with the R3.1 one-hop Explorer as a static client. Remaining: zoom/pan controls, fork-family cluster toggle, path focus on selection, timeline attributes, compare view, multi-hop views. |
+| Interactive explorer | **Shipped through Phase 2.** `src/web/` exposes the canonical graph and the view-model over HTTP, with the R3.1 one-hop Explorer as a production-bundled, URL-first, responsive client. Zoom/pan/fit, search, layers, bundles and the Evidence Drawer all work and are all in the URL. Remaining: fork-family cluster toggle, timeline attributes, compare view, multi-hop views. |
+| Deployment | **Configuration exists, hosting not decided.** The build is a static `dist/web` plus one Node server, driven entirely by environment variables, so hosting is a deployment question rather than a code change. Still to choose: domain, TLS, and whether a shared artifact cache is needed. |
 | Timeline / evolution view | First observed, last observed, introduced in commit, removed in commit. |
 | Similarity detector | Token fingerprints and candidate retrieval, `DETECTED` only, never allowed near the verified layer. |
 | Normalised content hashing | Would need a new evidence type and an ontology amendment before any code. |
@@ -115,17 +121,18 @@ Open, not implemented, not binding.
 
 | Check | Command | Status |
 | --- | --- | --- |
-| Types | `npm run typecheck` | passes, 0 errors |
-| Unit, contract, regression, view-model, HTTP, schema, offline pipeline | `npm test` | 130 tests, 127 pass, 3 live skipped, 0 fail |
+| Types | `npm run typecheck` | passes, 0 errors (server config and browser-script config) |
+| Unit, contract, regression, view-model, HTTP, schema, offline pipeline | `npm test` | 163 tests, 160 pass, 3 live skipped, 0 fail |
 | Live integration on real repositories | `npm run test:live` | 7 pass |
-| Live Web boundary on the four real families | `node test/web/live-web-validation.ts` | all checks pass |
-| Screenshots of real repositories | `node test/web/screenshots.ts` | 5 PNGs, no console errors, no horizontal overflow |
+| Production build and its served artefact | `npm run build` + `test/web-build.test.ts` | passes; bundle served over HTTP with no hard-coded host |
+| Live client behaviour on real repositories | `npm run test:web` | 26/26 checks pass |
+| Screenshots of real repositories | `npm run shots` | 20 PNGs across landing, explorer, drawer, search, layers and phone, no console errors, no horizontal overflow |
 | Artifact validation | `node src/cli/main.ts validate <graph.json>` | passes on every produced artifact |
 
-Recorded run for the Web slice: graph schema 2.0.0, analyzer 0.2.0, Node 24.21,
-git 2.43.0, WSL2.
+Recorded run for Web Phase 2: graph schema 2.0.0, analyzer 0.2.0, Node 24.21,
+git 2.43.0, WSL2, Chromium from the WSL Playwright cache.
 
-Superseded run note: 89 tests at the direction-audit commit. The Web slice run
-is recorded in the verification table above.
+Superseded run note: 89 tests at the direction-audit commit, 130 at the Phase 1
+commit. The current run is recorded in the verification table above.
 
 Details and recorded results: `docs/integration-validation.md`.

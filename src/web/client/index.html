@@ -3,72 +3,167 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>GitLineage</title>
+<title>GitLineage — evidence-backed repository lineage</title>
+<meta name="description" content="Paste a GitHub repository. GitLineage traces its ancestry, dependencies and declared attribution — and shows the evidence behind every relationship it draws." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='4' cy='12' r='2' fill='%2317150F'/%3E%3Ccircle cx='12' cy='4' r='2' fill='%23486884'/%3E%3Cpath d='M4 12 L12 4' stroke='%2317150F' stroke-width='1.2'/%3E%3C/svg%3E" />
+<!--
+  Asset URLs are root-absolute, never relative: the shell is also served at
+  `/owner/repo`, where a relative `./app.css` would resolve to
+  `/owner/app.css` and 404.
+-->
 <link rel="stylesheet" href="/app.css" />
 </head>
 <body>
-<header class="bar" id="bar">
-  <nav class="crumb"><a href="/" class="brand">GitLineage</a><span class="sep">/</span><span id="crumb-repo" class="mono crumb-repo">owner/repo</span></nav>
-  <div class="bar-right">
-    <span id="state" class="mono state">idle</span>
-    <a id="open-source" class="mono link" href="#" target="_blank" rel="noreferrer noopener" hidden>open source &#8599;</a>
+
+<header class="appbar" id="appbar">
+  <a class="brand" href="/">
+    <svg class="brand-mark" viewBox="0 0 16 16" aria-hidden="true"><circle cx="4" cy="12" r="2.2"/><circle cx="12" cy="4" r="2.2" class="mark-pig"/><path d="M4 12 L12 4"/></svg>
+    <span>GitLineage</span>
+  </a>
+  <div class="appbar-mid" id="appbar-mid" hidden>
+    <span class="crumb-sep">|</span>
+    <span class="mono crumb-repo" id="crumb-repo"></span>
+    <span class="mono crumb-rev" id="crumb-rev"></span>
+    <span class="mono crumb-count" id="crumb-count"></span>
+    <span class="mono cache-chip" id="cache-state"></span>
+  </div>
+  <div class="appbar-right" id="appbar-right" hidden>
+    <button class="icon-btn" id="search-btn" title="Search the graph (/)" aria-label="Search the graph">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.2"/><path d="M10.2 10.2 L14 14"/></svg>
+    </button>
+    <button class="text-btn" id="layers-btn" aria-expanded="false">Layers</button>
+    <a class="text-btn mono" id="open-source" href="#" target="_blank" rel="noreferrer noopener">GitHub ↗</a>
   </div>
 </header>
 
+<div class="searchbar" id="searchbar" hidden>
+  <svg viewBox="0 0 16 16" aria-hidden="true" class="search-icon"><circle cx="7" cy="7" r="4.2"/><path d="M10.2 10.2 L14 14"/></svg>
+  <input id="search-input" placeholder="Search nodes and relationships" spellcheck="false" autocomplete="off" />
+  <span class="mono search-count" id="search-count"></span>
+  <button class="icon-btn" id="search-close" aria-label="Close search">✕</button>
+</div>
+
+<div class="layers-pop" id="layers-pop" hidden>
+  <p class="pop-head mono">LAYERS</p>
+  <div id="layers-list"></div>
+  <p class="pop-note" id="layers-note"></p>
+</div>
+
 <main id="main">
+
+  <!-- ------------------------------------------------------------ landing -->
   <section id="landing" class="landing">
     <p class="eyebrow">EVIDENCE-BACKED REPOSITORY LINEAGE</p>
-    <h1>Repository to<br />lineage</h1>
-    <p class="lede">Where did this software come from, and what proves it?</p>
+    <h1>Where did this software<br />come from?</h1>
+    <p class="lede">Paste a GitHub repository. GitLineage traces its ancestry,
+      dependencies and declared attribution — and shows the evidence behind every
+      relationship it draws.</p>
+
     <form id="form" class="input-card" autocomplete="off">
       <div class="input-row">
+        <svg class="input-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5a6.5 6.5 0 0 0-3.9 11.7L2.5 15l1.9-1.4A6.5 6.5 0 1 0 8 1.5z"/></svg>
         <input id="repo-input" name="repo" placeholder="github.com/owner/repo" spellcheck="false" />
-        <button id="submit" type="submit">Trace</button>
+        <button id="submit" type="submit">Trace lineage</button>
       </div>
       <div class="sub-row">
         <span class="mono sub-label">Depth</span>
         <span class="seg" role="group" aria-label="Analysis depth">
-          <button type="button" class="seg-btn" data-depth="0">Metadata only</button>
+          <button type="button" class="seg-btn" data-depth="0">Metadata</button>
           <button type="button" class="seg-btn is-active" data-depth="200">Standard</button>
           <button type="button" class="seg-btn" data-depth="600">Deep</button>
         </span>
-        <label class="mono check"><input type="checkbox" id="sim-toggle" disabled /> similarity</label>
+        <label class="mono check is-disabled" title="No similarity detector ships in the V1 analyzer">
+          <input type="checkbox" disabled /> Token fingerprints
+        </label>
       </div>
     </form>
-    <p class="foot mono">Or replace &lsquo;github&rsquo; with &lsquo;gitlineage&rsquo; in any GitHub URL.</p>
-    <p class="samples mono">Try:
-      <a href="/nachocebey/is">nachocebey/is</a> &middot;
-      <a href="/grpc/grpc">grpc/grpc</a> &middot;
-      <a href="/vitest-dev/vitest">vitest-dev/vitest</a> &middot;
-      <a href="/octocat/Spoon-Knife">octocat/Spoon-Knife</a>
+
+    <p class="foot">
+      Or replace <code>github</code> with <code>gitlineage</code> in any GitHub URL —
+      <code>github.com/o/r</code> becomes <code>gitlineage.com/o/r</code>
     </p>
+
+    <p class="samples mono">Try
+      <a href="/nachocebey/is">nachocebey/is</a>
+      <span class="sample-tag">forked</span>
+      <a href="/grpc/grpc">grpc/grpc</a>
+      <span class="sample-tag">submodules</span>
+      <a href="/vitest-dev/vitest">vitest-dev/vitest</a>
+      <span class="sample-tag">declared</span>
+      <a href="/octocat/Spoon-Knife">octocat/Spoon-Knife</a>
+      <span class="sample-tag">no lineage</span>
+    </p>
+
+    <div class="trust">
+      <div class="trust-cell">
+        <p class="trust-head mono">NO LLM IN THE LOOP</p>
+        <p class="trust-body">Relationships come from Git objects, manifests and
+          documents. Nothing is inferred, nothing is guessed.</p>
+      </div>
+      <div class="trust-cell">
+        <p class="trust-head mono">EVERY EDGE IS CHECKABLE</p>
+        <p class="trust-body"><span class="mini-pill v">VERIFIED</span>
+          <span class="mini-pill d">DECLARED</span>
+          <span class="mini-pill t">DETECTED</span>
+          — each one opens the raw evidence.</p>
+      </div>
+      <div class="trust-cell">
+        <p class="trust-head mono">SIMILARITY IS NOT PROVENANCE</p>
+        <p class="trust-body">Token similarity never renders as a verified
+          lineage relationship. The graph makes that structurally true.</p>
+      </div>
+    </div>
   </section>
 
+  <!-- ----------------------------------------------------------- explorer -->
   <section id="explorer" class="explorer" hidden>
     <div class="status-line mono" id="status-line"></div>
-    <div class="explorer-body">
+
+    <div class="explorer-body" id="explorer-body">
       <div class="stage" id="stage">
-        <div class="loading" id="loading">
-          <div class="loading-bar"><span class="loading-fill" id="loading-fill"></span></div>
+        <div class="overlay loading" id="loading">
+          <div class="loading-bar"><span class="loading-fill"></span></div>
           <p class="mono loading-label" id="loading-label">Resolving repository</p>
-          <p class="mono loading-note">The canvas stays empty until a relationship has evidence behind it.</p>
+          <p class="mono loading-note" id="loading-note">The canvas stays empty until a relationship has evidence behind it.</p>
         </div>
-        <div class="empty" id="empty" hidden>
+
+        <div class="overlay empty" id="empty" hidden>
           <p class="empty-head">No evidence-backed lineage found.</p>
           <p class="mono empty-body" id="empty-body"></p>
         </div>
-        <div class="error" id="error" hidden>
-          <p class="error-head" id="error-head">Could not analyse this repository.</p>
-          <p class="mono error-body" id="error-body"></p>
+
+        <div class="overlay failure" id="failure" hidden>
+          <p class="failure-head" id="failure-head">Could not analyse this repository.</p>
+          <p class="mono failure-body" id="failure-body"></p>
         </div>
-        <svg id="canvas" class="canvas" role="img" aria-label="Lineage graph"></svg>
+
+        <svg id="canvas" class="canvas" role="img" aria-label="Repository lineage graph"></svg>
+
+        <div class="viewport-controls">
+          <button class="vp-btn" id="zoom-out" aria-label="Zoom out">−</button>
+          <button class="vp-btn" id="zoom-in" aria-label="Zoom in">+</button>
+          <button class="vp-btn vp-fit" id="zoom-fit" aria-label="Fit to view">⤢</button>
+        </div>
+
+        <div class="bundles" id="bundles" hidden></div>
+        <div class="legend" id="legend" hidden></div>
       </div>
+
       <aside class="drawer" id="drawer" hidden aria-live="polite">
         <div class="drawer-inner" id="drawer-inner"></div>
       </aside>
+      <button class="drawer-scrim" id="drawer-scrim" hidden aria-label="Close evidence drawer"></button>
     </div>
   </section>
 </main>
+
+<footer class="site-foot" id="site-foot">
+  <span class="mono">Deterministic analysis · public repositories · no repository code is ever executed</span>
+  <span class="foot-links mono">
+    <a href="/api/contract">Method</a>
+    <a href="/healthz">Status</a>
+  </span>
+</footer>
 
 <script type="module" src="/app.js"></script>
 </body>

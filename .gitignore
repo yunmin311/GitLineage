@@ -2,8 +2,13 @@ node_modules/
 dist/
 out/
 artifacts/
+# Analysis artifact caches. Content-addressed by revision and schema version,
+# so they are reproducible and never belong in git.
 .cache/
 .cache-live/
+.cache-web-live/
+.cache-web-live-phase2/
+.gitlineage-cache/
 live-out.txt
 gitconfig-absent
 *.log
@@ -11,4 +16,3 @@ gitconfig-absent
 Thumbs.db
 .env
 .env.*
-.cache-web-live/

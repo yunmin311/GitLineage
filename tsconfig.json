@@ -18,5 +18,9 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src/**/*.ts", "test/**/*.ts"]
+  // Browser-context scripts live in tsconfig.web-scripts.json: they need the DOM
+  // lib, and this config must stay DOM-free so server code cannot reach for
+  // browser globals by accident.
+  "include": ["src/**/*.ts", "test/**/*.ts"],
+  "exclude": ["test/web/**/*.ts"]
 }

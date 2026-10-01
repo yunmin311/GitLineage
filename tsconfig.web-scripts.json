@@ -1,0 +1,9 @@
+{
+  "//": "Browser-context scripts: they run in Node but their page.evaluate callbacks execute inside Chromium, so they need the DOM lib. Kept out of the main tsconfig, which must stay DOM-free so server code cannot reach for browser globals by accident. `exclude` is reset because it is inherited from the base config.",
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "lib": ["es2023", "dom", "dom.iterable"]
+  },
+  "include": ["test/web/**/*.ts"],
+  "exclude": []
+}

@@ -11,7 +11,18 @@ import { GitHubClient } from '../collectors/github/client.ts';
 import { HttpClient, resolveGitHubToken } from '../platform/http.ts';
 import { OUTBOUND_ALLOWLIST } from '../pipeline/analyze.ts';
 import { resolveRepositoryRef, UnsupportedRepositoryRefError } from '../platform/url.ts';
+import { loadConfig, publicConfig, type ServerConfig } from './config.ts';
 import type { LineageGraph, RepositoryRefLike } from './types.ts';
+
+export interface AnalyzeResultMeta {
+  graph: LineageGraph;
+  /** True when the artifact came from the version-keyed cache. */
+  cacheHit: boolean;
+  resolvedRevision: string;
+  resolvedRef: string | undefined;
+  defaultBranch: string | undefined;
+  elapsedMs: number;
+}
 
 export interface ServerOptions {
   port: number;
@@ -23,8 +34,13 @@ export interface ServerOptions {
   maxCandidates: number;
   enableGit: boolean;
   enableRegistry: boolean;
+  analysisTimeoutMs?: number;
+  /** Additional outbound hosts, from configuration only. */
+  extraAllowHosts?: string[];
   /** Test seam: injected instead of real network analysis. */
   analyzeOverride?: ((repository: string, options: AnalyzeOverride) => Promise<LineageGraph>) | undefined;
+  /** Reports the canonical graph for a repository without the view-model. */
+  graphOverride?: ((repository: string, options: AnalyzeOverride) => Promise<AnalyzeResultMeta>) | undefined;
 }
 
 export interface AnalyzeOverride {
@@ -50,10 +66,19 @@ export type Route =
   | { kind: 'client'; path: string }
   | { kind: 'not-found' };
 
-const ASSET = /^\/(app\.css|app\.js|favicon\.ico|robots\.txt)$/;
+/**
+ * Static assets.
+ *
+ * Covers both the unbundled client (`/app.js`) and the production build, which
+ * writes content-hashed bundles under `/assets/`. A request that is not an asset
+ * is the SPA shell, so this list decides which paths address a file at all.
+ * Directory containment is still enforced when the file is read.
+ */
+const ASSET_FILE = /^\/(?:[\w.-]+\/)*[\w.-]+\.(?:css|js|mjs|map|json|svg|ico|txt|webmanifest|woff2?)$/;
+const ASSET_EXACT = /^\/(?:favicon\.ico|robots\.txt)$/;
 
 function isAsset(pathname: string): boolean {
-  return ASSET.test(pathname);
+  return ASSET_FILE.test(pathname) || ASSET_EXACT.test(pathname);
 }
 
 const OWNER = /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/;
@@ -68,7 +93,8 @@ const NAME = /^[A-Za-z0-9._-]{1,100}$/;
  */
 export function parseRoute(pathname: string): Route {
   const clean = pathname.split('?')[0]!.replace(/\/+$/, '');
-  if (clean === '' || clean === '/') return { kind: 'not-found' };
+  // The root is the landing page, not a 404.
+  if (clean === '' || clean === '/') return { kind: 'client', path: '/index.html' };
   if (clean === '/healthz') return { kind: 'health' };
   if (clean === '/api/contract') return { kind: 'contract' };
   if (isAsset(clean)) return { kind: 'client', path: clean };
@@ -113,6 +139,23 @@ function fail(code: string, message: string, detail?: string): ApiEnvelope<never
   return { ok: false, error: { code, message, ...(detail ? { detail } : {}) } };
 }
 
+/**
+ * Revision and freshness facts every analysis endpoint returns.
+ *
+ * The client needs to know whether it is looking at a cached artifact and which
+ * revision that artifact represents, otherwise "reload gives the same result"
+ * is an unfalsifiable claim.
+ */
+function revisionMeta(result: AnalyzeResultMeta): Record<string, unknown> {
+  return {
+    cacheHit: result.cacheHit,
+    resolvedRevision: result.resolvedRevision,
+    resolvedRef: result.resolvedRef ?? null,
+    defaultBranch: result.defaultBranch ?? null,
+    elapsedMs: result.elapsedMs,
+  };
+}
+
 const MIME: Record<string, string> = {
   '.html': 'text/html; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
@@ -126,10 +169,17 @@ const MIME: Record<string, string> = {
 export class GitLineageServer {
   private readonly options: ServerOptions;
   private readonly cache: Cache;
+  private readonly config: ServerConfig;
 
-  constructor(options: ServerOptions) {
+  constructor(options: ServerOptions, config?: ServerConfig) {
     this.options = options;
     this.cache = new Cache(options.cacheRoot, 'public');
+    this.config = config ?? loadConfig();
+  }
+
+  /** Effective runtime configuration, for health and diagnostics endpoints. */
+  get runtimeConfig(): ServerConfig {
+    return this.config;
   }
 
   async handle(request: import('node:http').IncomingMessage, response: import('node:http').ServerResponse): Promise<void> {
@@ -138,7 +188,7 @@ export class GitLineageServer {
 
     switch (route.kind) {
       case 'health':
-        send(response, 200, ok({ status: 'ok', graphSchemaVersion: GRAPH_SCHEMA_VERSION, analyzerVersion: ANALYZER_VERSION }));
+        send(response, 200, ok({ status: 'ok', graphSchemaVersion: GRAPH_SCHEMA_VERSION, analyzerVersion: ANALYZER_VERSION, config: publicConfig(this.config) }));
         return;
       case 'contract':
         send(
@@ -187,14 +237,18 @@ export class GitLineageServer {
   private async serveGraph(repository: RepositoryRefLike, response: import('node:http').ServerResponse): Promise<void> {
     const target = `${repository.owner}/${repository.name}`;
     try {
-      const graph = await this.analyze(target);
+      const result = await this.analyze(target);
       // Defence in depth: never serve a graph that fails its own contract.
-      const validation = validateGraph(graph);
+      const validation = validateGraph(result.graph);
       if (!validation.valid) {
         send(response, 500, fail('contract_violation', 'The analyzed graph failed contract validation.', validation.errors.join('; ')));
         return;
       }
-      send(response, 200, ok(graph, { endpoint: 'canonical-graph', note: 'canonical LineageGraph, unmodified' }));
+      send(response, 200, ok(result.graph, {
+        endpoint: 'canonical-graph',
+        note: 'canonical LineageGraph, unmodified',
+        ...revisionMeta(result),
+      }));
     } catch (error) {
       const status = error instanceof UnsupportedRepositoryRefError ? 400 : 502;
       send(response, status, fail('analysis_failed', `Could not analyse ${target}.`, error instanceof Error ? error.message : String(error)));
@@ -205,35 +259,41 @@ export class GitLineageServer {
   private async serveView(repository: RepositoryRefLike, response: import('node:http').ServerResponse): Promise<void> {
     const target = `${repository.owner}/${repository.name}`;
     try {
-      const graph = await this.analyze(target);
-      const view = buildView(graph);
-      send(response, 200, ok(view, { endpoint: 'view-model', derivedFrom: 'api/graph', schemaVersion: graph.schemaVersion }));
+      const result = await this.analyze(target);
+      const view = buildView(result.graph);
+      send(response, 200, ok(view, {
+        endpoint: 'view-model',
+        derivedFrom: '/api/graph',
+        schemaVersion: result.graph.schemaVersion,
+        ...revisionMeta(result),
+      }));
     } catch (error) {
       const status = error instanceof UnsupportedRepositoryRefError ? 400 : 502;
       send(response, status, fail('analysis_failed', `Could not analyse ${target}.`, error instanceof Error ? error.message : String(error)));
     }
   }
 
-  private async analyze(target: string): Promise<LineageGraph> {
+  private async analyze(target: string): Promise<AnalyzeResultMeta> {
     // Fail fast on an unusable reference before any network work.
     resolveRepositoryRef(target);
 
+    const startedAt = Date.now();
+
+    if (this.options.graphOverride) {
+      return this.options.graphOverride(target, this.analysisOptions());
+    }
+
     if (this.options.analyzeOverride) {
-      return this.options.analyzeOverride(target, {
-        depth: this.options.analysisDepth,
-        maxCandidates: this.options.maxCandidates,
-        enableGit: this.options.enableGit,
-        enableRegistry: this.options.enableRegistry,
-        cacheRoot: this.options.cacheRoot,
-      });
+      const graph = await this.options.analyzeOverride(target, this.analysisOptions());
+      return this.describe(graph, false, startedAt);
     }
 
     this.cache.assertSupported();
     const token = await resolveGitHubToken();
-    const http = new HttpClient({ cache: this.cache, allowlist: OUTBOUND_ALLOWLIST, token });
+    const http = new HttpClient({ cache: this.cache, allowlist: this.allowlist(), token });
     const github = new GitHubClient(http);
 
-    return analyzeWithCache({
+    const outcome = await analyzeWithCache({
       target,
       cacheRoot: this.options.cacheRoot,
       depth: this.options.analysisDepth,
@@ -242,15 +302,51 @@ export class GitLineageServer {
       enableRegistry: this.options.enableRegistry,
       probeRevision: async (repository) => {
         try {
-          const meta = await github.getRepository({ provider: 'github', owner: repository.owner, name: repository.name });
-          return { commit: await github.getCommitSha({ provider: 'github', owner: repository.owner, name: repository.name }, meta.default_branch) };
+          const ref = { provider: 'github' as const, owner: repository.owner, name: repository.name };
+          const meta = await github.getRepository(ref);
+          return { commit: await github.getCommitSha(ref, meta.default_branch) };
         } catch {
           // Falling through to a full analysis is correct; the probe only
           // exists to find a cache hit.
           return { commit: null };
         }
       },
-    }).then((result) => result.graph);
+    });
+
+    return this.describe(outcome.graph, outcome.cacheHit, startedAt, outcome.graph.graph.revision.ref, outcome.graph.graph.revision.defaultBranch);
+  }
+
+  private describe(
+    graph: LineageGraph,
+    cacheHit: boolean,
+    startedAt: number,
+    ref?: string,
+    defaultBranch?: string,
+  ): AnalyzeResultMeta {
+    return {
+      graph,
+      cacheHit,
+      resolvedRevision: graph.graph.revision.commit,
+      resolvedRef: ref,
+      defaultBranch,
+      elapsedMs: Date.now() - startedAt,
+    };
+  }
+
+  private analysisOptions(): AnalyzeOverride {
+    return {
+      depth: this.options.analysisDepth,
+      maxCandidates: this.options.maxCandidates,
+      enableGit: this.options.enableGit,
+      enableRegistry: this.options.enableRegistry,
+      cacheRoot: this.options.cacheRoot,
+    };
+  }
+
+  private allowlist(): ReadonlySet<string> {
+    const hosts = new Set(OUTBOUND_ALLOWLIST);
+    for (const extra of (this.options.extraAllowHosts ?? [])) hosts.add(extra);
+    return hosts;
   }
 
   private async serveClient(pathname: string, response: import('node:http').ServerResponse): Promise<void> {
@@ -260,6 +356,9 @@ export class GitLineageServer {
     }
     const root = resolve(this.options.clientDir);
     // Asset requests address a file; every other client route is the SPA shell.
+    // `decodeURIComponent` is deliberately not applied to the path: the segments
+    // are validated by `isAsset` and then contained by the check below, so an
+    // encoded separator cannot be used to reach outside the client directory.
     const requested = isAsset(pathname) ? pathname.slice(1) : 'index.html';
     const target = resolve(join(root, requested));
     // Path containment: refuse anything that escapes the client directory.

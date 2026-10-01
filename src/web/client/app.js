@@ -1,616 +1,163 @@
 /**
- * GitLineage Explorer client.
+ * GitLineage Explorer application.
  *
- * Contract compliance notes, because these are the rules that must not drift:
+ * Contract notes, because these are the rules that must not drift:
  *
  * 1. The canonical graph from `/api/graph/:owner/:repo` is the source of truth.
- *    Nothing here mutates it, and no view field is written back into it.
- * 2. Layout and labels come from `/api/view/:owner/:repo`, the presentation
- *    layer. The client never decides family, slot, or arrow semantics itself.
- * 3. **Arrow direction is read from `viewEdge.directed` and `viewEdge.arrow`,
- *    both derived from `relationship.directed` by the server.** The client has
- *    no code path that infers direction from the focused node. See
- *    `edgeGeometry()` and the `ARROW_RULE` assertion.
- * 4. Evidence rendered in the drawer is the real `Evidence` record, including
- *    locator, observed text and data. There is no summarisation step.
+ *    Nothing here mutates it and no view field is written back into it.
+ * 2. Layout, labels, slots, visibility and counts come from
+ *    `/api/view/:owner/:repo`. This file does not decide family, slot or arrow
+ *    semantics.
+ * 3. **Arrow direction is read from `edge.directed` / `edge.arrow`, both derived
+ *    from `relationship.directed` by the server.** There is no code path here
+ *    that infers direction from the focused node. `edgeGeometry()` receives the
+ *    arrow and places it; it never decides it.
+ * 4. Evidence in the drawer is the real record, with locator, observed text and
+ *    data. Nothing is summarised.
  */
 
+import {
+  parseRepositoryPath,
+  resolveRepositoryInput,
+  repositoryPath,
+  readViewState,
+  writeViewState,
+  parseLayerState,
+  serializeLayerState,
+} from './lib/url-state.mjs';
+import {
+  layoutGraph,
+  edgeGeometry,
+  fanSlot,
+  nodeDegrees,
+  isCrowdedEdge,
+  fitViewBox,
+  zoomViewBox,
+  contentBounds,
+  NODE_W,
+  NODE_H,
+} from './lib/geometry.mjs';
+import {
+  allLayersOn,
+  searchNodes,
+  searchEdges,
+  edgesForNode,
+  layerCount,
+  visibleEdges,
+} from './lib/search.mjs';
+import { evidenceSourceUrl, SIMILARITY_DISCLAIMER } from './lib/evidence-links.mjs';
+
 const SVG_NS = 'http://www.w3.org/2000/svg';
+const ZOOM_STEP = 1.25;
+/**
+ * Above this many parallel relationships, a label is hidden until hover or
+ * selection. Dense fans put their labels within a few pixels of each other, and
+ * drawn on top of one another they become an unreadable smear. Nothing is lost:
+ * the Evidence Drawer always names the relationship type.
+ */
+const LABEL_FAN_LIMIT = 2;
+/** The same rule for node degree: a hub's labels all land near the hub. */
+const LABEL_DEGREE_LIMIT = 4;
 
 const state = {
   repository: null,
-  graph: null,
   view: null,
-  selectedRelationshipId: null,
-  selectedNodeId: null,
+  graph: null,
+  meta: null,
+  selectedEdgeId: '',
+  selectedNodeId: '',
+  layers: allLayersOn(),
+  expandedBundles: new Set(),
+  query: '',
   depth: 200,
+  phase: 'idle',
+  cacheHit: false,
+  resolvedRevision: '',
+  zoom: 1,
+  hasFitted: false,
 };
 
-/** Bundle keys the user has expanded. Defaults to collapsed for density. */
-const expandedBundleKeys = new Set();
+// -------------------------------------------------------------- dom helpers
 
-// ------------------------------------------------------------------ helpers
+const $ = (id) => document.getElementById(id);
 
 function el(tag, attrs = {}, children = []) {
   const node = document.createElement(tag);
   for (const [key, value] of Object.entries(attrs)) {
-    if (value === undefined || value === null) continue;
+    if (value === undefined || value === null || value === false) continue;
     if (key === 'class') node.className = value;
     else if (key === 'text') node.textContent = value;
+    else if (key === 'html') node.innerHTML = value;
     else if (key.startsWith('on')) node.addEventListener(key.slice(2).toLowerCase(), value);
     else node.setAttribute(key, String(value));
   }
-  for (const child of [].concat(children)) {
-    if (child) node.append(child);
-  }
+  for (const child of [].concat(children)) if (child) node.append(child);
   return node;
 }
 
-function svgEl(tag, attrs = {}) {
+/** SVG element with attributes and optional text children. */
+function svgEl(tag, attrs = {}, children = []) {
   const node = document.createElementNS(SVG_NS, tag);
   for (const [key, value] of Object.entries(attrs)) {
     if (value === undefined || value === null) continue;
     node.setAttribute(key, String(value));
   }
+  for (const child of [].concat(children)) {
+    if (child === undefined || child === null || child === '') continue;
+    node.append(child instanceof Node ? child : document.createTextNode(String(child)));
+  }
   return node;
 }
 
 function setHidden(node, hidden) {
+  if (!node) return;
   if (hidden) node.setAttribute('hidden', '');
   else node.removeAttribute('hidden');
 }
 
-// ------------------------------------------------------------------ routing
-
-function parseLocation() {
-  const segments = window.location.pathname.split('/').filter(Boolean);
-  if (segments.length !== 2) return null;
-  const [owner, name] = segments;
-  if (!/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(owner) || !/^[A-Za-z0-9._-]+$/.test(name)) return null;
-  return { owner, name };
-}
-
-function navigate(repository) {
-  const next = `/${repository.owner}/${repository.name}`;
-  if (window.location.pathname !== next) window.history.pushState({}, '', next);
-  void load(repository);
-}
-
-// ------------------------------------------------------------------- render
-
-const SLOT_POSITIONS = {
-  subject: { x: 0, y: 0 },
-  upstream: { x: 0, y: -1 },
-  downstream: { x: 0, y: 1 },
-  'shared-near': { x: 1, y: 0 },
-  'attribution-far': { x: 1, y: -0.55 },
-  dependency: { x: 0.72, y: 0.95 },
-  similarity: { x: -1, y: 0 },
-};
-
-const NODE_W = 168;
-const NODE_H = 52;
-const COL_GAP = 330;
-const ROW_GAP = 190;
-
-function layout(view, shownEdges) {
-  const edges = shownEdges || view.edges.filter((edge) => edge.visibility === 'primary');
-  const bySlot = new Map();
-  for (const node of view.nodes) {
-    const slot = node.slot || 'shared-near';
-    if (!bySlot.has(slot)) bySlot.set(slot, []);
-    bySlot.get(slot).push(node);
-  }
-  const positions = new Map();
-  const originX = 470;
-  const originY = 300;
-
-  positions.set(view.subject.id, { x: originX, y: originY });
-
-  // Nodes with no visible edge are not drawn, so drop them from the layout.
-  const connected = new Set([view.subject.id]);
-  for (const edge of edges) {
-    connected.add(edge.source);
-    connected.add(edge.target);
-  }
-
-  for (const [slot, nodes] of bySlot) {
-    if (slot === 'subject') continue;
-    const base = SLOT_POSITIONS[slot] || SLOT_POSITIONS['shared-near'];
-    const members = nodes.filter((node) => connected.has(node.id));
-    if (members.length === 0) continue;
-    if (base.y === 0) {
-      members.forEach((node, index) => {
-        const offset = (index - (members.length - 1) / 2) * 74;
-        positions.set(node.id, { x: originX + base.x * COL_GAP + offset * (base.x < 0 ? -1 : 1) * 0.9, y: originY });
-      });
-    } else if (base.x === 0) {
-      members.forEach((node, index) => {
-        const offset = (index - (members.length - 1) / 2) * (NODE_H + 26);
-        positions.set(node.id, { x: originX, y: originY + base.y * ROW_GAP + offset });
-      });
-    } else {
-      members.forEach((node, index) => {
-        const offset = (index - (members.length - 1) / 2) * (NODE_H + 22);
-        positions.set(node.id, { x: originX + base.x * COL_GAP, y: originY + base.y * ROW_GAP + offset });
-      });
-    }
-  }
-  return positions;
-}
-
-/**
- * Computes an edge's path, arrowhead and label anchor.
- *
- * `edge.arrow` arrives from the server, derived from `relationship.directed`.
- * The only branch on arrow is 'end' vs 'end-weak', i.e. stroke weight. There is
- * deliberately no logic here that inspects which node is selected.
- *
- * `fanIndex`/`fanCount` handle the case that real data produces constantly:
- * two repositories can be joined by several different relationships at once
- * (for example a fork that also shares history and identical content). Those
- * edges would otherwise be drawn on top of each other and their labels would
- * overprint, so they are bowed apart and their labels staggered.
- */
-function edgeGeometry(edge, positions, fanIndex = 0, fanCount = 1) {
-  const a = positions.get(edge.source);
-  const b = positions.get(edge.target);
-  if (!a || !b) return null;
-
-  const start = anchor(a, b);
-  const end = anchor(b, a);
-
-  // Bow offset: 0 for a single edge, symmetric spread for parallel edges.
-  const spread = fanCount > 1 ? (fanIndex - (fanCount - 1) / 2) * 34 : 0;
-
-  const dx = end.x - start.x;
-  const dy = end.y - start.y;
-  const length = Math.hypot(dx, dy) || 1;
-  // Perpendicular unit vector, so the bow is always visually parallel.
-  const px = (-dy / length) * spread;
-  const py = (dx / length) * spread;
-
-  const midX = (start.x + end.x) / 2 + px;
-  const midY = (start.y + end.y) / 2 + py;
-
-  const path = `M ${start.x} ${start.y} Q ${midX} ${midY} ${end.x} ${end.y}`;
-
-  // Parallel edges share their endpoints, so a label anchored at the midpoint
-  // would overprint its neighbours. Each edge in the group is labelled at its
-  // own position along the curve, which separates them both along and across it.
-  const t = fanCount > 1 ? 0.26 + (fanIndex * 0.48) / Math.max(fanCount - 1, 1) : 0.5;
-  const inv = 1 - t;
-  const labelPoint = {
-    x: inv * inv * start.x + 2 * inv * t * midX + t * t * end.x,
-    y: inv * inv * start.y + 2 * inv * t * midY + t * t * end.y,
-  };
-
-  if (edge.arrow === 'none') {
-    // Symmetric: a plain curve. No arrowhead is created anywhere on it.
-    return { start, end, mid: labelPoint, path, arrowAt: null, spread };
-  }
-  // Directional: the arrowhead sits at the canonical target, set by the server.
-  return { start, end, mid: labelPoint, path, arrowAt: end, spread };
-}
-
-/** Groups edges by endpoint pair so parallel edges can be bowed apart. */
-function fanIndexOf(edge, edges) {
-  const key = [edge.source, edge.target].sort().join('|');
-  const parallel = edges.filter((item) => [item.source, item.target].sort().join('|') === key);
-  return { fanIndex: parallel.indexOf(edge), fanCount: parallel.length };
-}
-
-function anchor(node, toward) {
-  const dx = toward.x - node.x;
-  const dy = toward.y - node.y;
-  const halfW = NODE_W / 2 + 6;
-  const halfH = NODE_H / 2 + 6;
-  if (dx === 0 && dy === 0) return { x: node.x, y: node.y };
-  const scaleX = dx === 0 ? Infinity : halfW / Math.abs(dx);
-  const scaleY = dy === 0 ? Infinity : halfH / Math.abs(dy);
-  const scale = Math.min(scaleX, scaleY);
-  return { x: node.x + dx * scale, y: node.y + dy * scale };
-}
-
-function statusClass(status) {
-  return `status-${status}`;
-}
-
-function familyClass(family) {
-  return `family-${family}`;
-}
-
-// ----------------------------------------------------------------- drawing
-
-function drawGraph(view) {
-  const canvas = document.getElementById('canvas');
-  canvas.replaceChildren();
-  if (!view || view.edges.length === 0) return;
-
-  // Bundled edges are collapsed by default; the header reports the count.
-  const visibleEdges = view.edges.filter((edge) => edge.visibility === 'primary');
-  const shown = expandedBundleKeys.size > 0
-    ? view.edges.filter((edge) => edge.visibility === 'primary' || expandedBundleKeys.has(edge.bundleKey))
-    : visibleEdges;
-
-  const positions = layout(view, shown);
-  let minX = Infinity;
-  let minY = Infinity;
-  let maxX = -Infinity;
-  let maxY = -Infinity;
-  for (const position of positions.values()) {
-    minX = Math.min(minX, position.x - NODE_W);
-    maxX = Math.max(maxX, position.x + NODE_W);
-    minY = Math.min(minY, position.y - NODE_H);
-    maxY = Math.max(maxY, position.y + NODE_H);
-  }
-  const padding = 90;
-  canvas.setAttribute('viewBox', `${minX - padding} ${minY - padding} ${maxX - minX + padding * 2} ${maxY - minY + padding * 2}`);
-
-  const defs = svgEl('defs');
-  for (const [id, className] of [
-    ['arrow-verified', 'status-VERIFIED'],
-    ['arrow-declared', 'status-DECLARED'],
-    ['arrow-detected', 'status-DETECTED'],
-  ]) {
-    const marker = svgEl('marker', {
-      id,
-      viewBox: '0 0 10 10',
-      refX: '9',
-      refY: '5',
-      markerWidth: '6',
-      markerHeight: '6',
-      orient: 'auto-start-reverse',
-    });
-    const shape = svgEl('path', { d: 'M 0 0 L 10 5 L 0 10 z', class: className });
-    shape.setAttribute('fill', 'currentColor');
-    marker.setAttribute('style', `color: var(--${id.replace('arrow-', '')})`);
-    marker.append(shape);
-    defs.append(marker);
-  }
-  canvas.append(defs);
-
-  const edgeLayer = svgEl('g', { class: 'edges' });
-  const nodeLayer = svgEl('g', { class: 'nodes' });
-
-  for (const edge of shown) {
-    const { fanIndex, fanCount } = fanIndexOf(edge, shown);
-    const geometry = edgeGeometry(edge, positions, fanIndex, fanCount);
-    if (!geometry) continue;
-    const group = svgEl('g', { class: `edge-group ${statusClass(edge.status)} ${familyClass(edge.family)}` });
-    group.dataset.relationshipId = edge.id;
-    if (state.selectedRelationshipId === edge.id) group.classList.add('is-selected');
-
-    const line = svgEl('path', {
-      d: geometry.path,
-      class: `edge-line ${familyClass(edge.family)} ${statusClass(edge.status)}`,
-      'marker-end': geometry.arrowAt ? `url(#arrow-${edge.status.toLowerCase()})` : null,
-    });
-    group.append(line);
-
-    const hit = svgEl('path', { d: geometry.path, class: 'edge-hit' });
-    hit.addEventListener('click', () => selectRelationship(edge.id));
-    group.append(hit);
-
-    // Label anchor: clear of the curve it belongs to. The bow already displaced the
-    // curve sideways, so the offset is measured from the bowed position.
-    const side = geometry.spread >= 0 ? 1 : -1;
-    const clearance = Math.abs(geometry.spread) / 2 + 16;
-    const labelX = geometry.mid.x + side * clearance;
-    const labelY = geometry.mid.y - 6;
-    const label = svgEl('text', { x: labelX, y: labelY, class: 'edge-label' });
-    label.textContent = edge.label;
-    group.append(label);
-
-    if (edge.badge) {
-      const badge = svgEl('text', { x: labelX, y: labelY + 14, class: 'edge-badge' });
-      badge.textContent = edge.badge;
-      group.append(badge);
-    }
-    edgeLayer.append(group);
-  }
-
-  for (const node of view.nodes) {
-    const position = positions.get(node.id);
-    if (!position) continue;
-    const group = svgEl('g', { class: `node ${node.isSubject ? 'is-subject' : ''} ${state.selectedNodeId === node.id ? 'is-selected' : ''}` });
-    group.dataset.nodeId = node.id;
-
-    const classes = ['node-box'];
-    if (node.isSubject) classes.push('subject');
-    if (node.isPackage) classes.push('package');
-
-    const box = svgEl('rect', {
-      x: position.x - NODE_W / 2,
-      y: position.y - NODE_H / 2,
-      width: NODE_W,
-      height: NODE_H,
-      rx: node.isPackage ? 3 : 6,
-      class: classes.join(' '),
-    });
-    group.append(box);
-
-    const label = svgEl('text', { x: position.x - NODE_W / 2 + 10, y: position.y - 4, class: 'node-label' });
-    label.textContent = truncate(node.label, 22);
-    group.append(label);
-
-    if (node.fact) {
-      const fact = svgEl('text', { x: position.x + NODE_W / 2 - 10, y: position.y + 14, class: 'node-fact', 'text-anchor': 'end' });
-      fact.textContent = truncate(node.fact, 22);
-      group.append(fact);
-    }
-    if (node.isSubject) {
-      const tag = svgEl('text', { x: position.x - NODE_W / 2 + 10, y: position.y + 14, class: 'subject-tag' });
-      tag.textContent = 'SUBJECT';
-      group.append(tag);
-    }
-
-    const hit = svgEl('rect', {
-      x: position.x - NODE_W / 2,
-      y: position.y - NODE_H / 2,
-      width: NODE_W,
-      height: NODE_H,
-      class: 'node-hit',
-    });
-    hit.addEventListener('click', () => selectNode(node.id));
-    group.append(hit);
-
-    nodeLayer.append(group);
-  }
-
-  canvas.append(edgeLayer, nodeLayer);
-  renderBundles(view);
-  renderLegend(view);
-}
-
-/**
- * Bundled secondary relationships.
- *
- * These are collapsed for density, not deleted. Each row carries the real
- * count and expands on click to draw its members, which keeps every edge
- * reachable without widening the default view.
- */
-function renderBundles(view) {
-  document.getElementById('bundles')?.remove();
-  if (!view.bundles || view.bundles.length === 0) return;
-  const stage = document.getElementById('stage');
-  const box = el('div', { class: 'bundles', id: 'bundles' });
-  box.append(el('p', { class: 'bundles-head mono', text: `BUNDLED (${view.bundledEdgeCount} of ${view.edgeCount} one-hop relationships)` }));
-  for (const bundle of view.bundles) {
-    const open = expandedBundleKeys.has(bundle.key);
-    const row = el('button', { class: `bundle-row ${open ? 'is-open' : ''} ${statusClass(bundle.status)}` });
-    row.append(el('span', { class: 'bundle-count mono', text: `×${bundle.count}` }));
-    row.append(el('span', { class: 'bundle-label', text: bundle.relationshipType.replace(/_/g, ' ') }));
-    row.append(el('span', { class: 'mono bundle-status', text: bundle.status }));
-    row.addEventListener('click', () => {
-      if (expandedBundleKeys.has(bundle.key)) expandedBundleKeys.delete(bundle.key);
-      else expandedBundleKeys.add(bundle.key);
-      redraw();
-    });
-    box.append(row);
-  }
-  stage.append(box);
-}
-
-function truncate(text, max) {
-  return text.length > max ? `${text.slice(0, max - 1)}…` : text;
-}
-
-function renderLegend(view) {
-  document.querySelector('.legend')?.remove();
-  const stage = document.getElementById('stage');
-  const legend = el('div', { class: 'legend' });
-  const families = [
-    ['ancestry', 'solid 2px', 'ancestry'],
-    ['dependency', 'solid 1.5px', 'dependency'],
-    ['attribution', 'dashed 1.5px', 'attribution'],
-    ['source-identity', 'solid 2px', 'identical'],
-    ['similarity', 'dotted 1px', 'similar'],
-  ];
-  for (const [family, stroke, label] of families) {
-    if (!view.familyCounts[family]) continue;
-    const swatch = el('span', { class: 'legend-swatch' });
-    swatch.style.borderTopStyle = stroke.includes('dashed') ? 'dashed' : stroke.includes('dotted') ? 'dotted' : 'solid';
-    swatch.style.borderTopWidth = stroke.split(' ')[0];
-    legend.append(el('span', { class: 'legend-item' }, [swatch, `${label} ${view.familyCounts[family]}`]));
-  }
-  if (view.directionContract.symmetric.includes('shares_exact_content_with')) {
-    legend.append(el('span', { class: 'legend-item legend-note', text: 'no arrow = symmetric' }));
-  }
-  stage.append(legend);
-}
-
-// ------------------------------------------------------------------ drawer
-
-function selectRelationship(relationshipId) {
-  state.selectedRelationshipId = state.selectedRelationshipId === relationshipId ? null : relationshipId;
-  updateUrl();
-  redraw();
-  renderDrawer();
-}
-
-function selectNode(nodeId) {
-  state.selectedNodeId = state.selectedNodeId === nodeId ? null : nodeId;
-  updateUrl();
-  redraw();
-  renderDrawer();
-}
-
-function redraw() {
-  drawGraph(state.view);
-}
-
-function clearSelection() {
-  state.selectedRelationshipId = null;
-  state.selectedNodeId = null;
-  updateUrl();
-  redraw();
-  renderDrawer();
-}
-
-function updateUrl() {
-  const params = new URLSearchParams();
-  if (state.selectedRelationshipId) params.set('edge', state.selectedRelationshipId);
-  if (state.selectedNodeId) params.set('node', state.selectedNodeId);
-  if (state.depth !== 200) params.set('depth', String(state.depth));
-  const query = params.toString();
-  const next = query ? `${window.location.pathname}?${query}` : window.location.pathname;
-  window.history.replaceState({}, '', next);
-}
-
-function renderDrawer() {
-  const drawer = document.getElementById('drawer');
-  const inner = document.getElementById('drawer-inner');
-  const body = document.querySelector('.explorer-body');
-  inner.replaceChildren();
-
-  if (!state.selectedRelationshipId) {
-    setHidden(drawer, true);
-    body.classList.remove('with-drawer');
-    return;
-  }
-  setHidden(drawer, false);
-  body.classList.add('with-drawer');
-
-  const view = state.view;
-  const edge = view.edges.find((item) => item.id === state.selectedRelationshipId);
-  if (!edge) return;
-
-  const nameOf = (id) => {
-    const node = view.nodes.find((item) => item.id === id);
-    return node ? node.label : id;
-  };
-
-  const wrap = el('div', { class: 'd-drawer' });
-  wrap.append(el('button', { class: 'd-close', text: 'Esc', onclick: clearSelection }));
-
-  // Section 1: the claim
-  const s1 = el('div', { class: 'd-section' });
-  s1.append(el('p', { class: 'd-head', text: capitalise(edge.label) }));
-  const pill = el('span', { class: `d-pill ${statusClass(edge.status)}` });
-  const sw = el('span', { class: 'd-pill-sw' });
-  sw.style.borderTopStyle = edge.family === 'attribution' ? 'dashed' : edge.family === 'similarity' ? 'dotted' : 'solid';
-  pill.append(sw, edge.status);
-  s1.append(el('p', { class: 'd-anchor-ok', text: `${nameOf(edge.source)} → ${nameOf(edge.target)}` }));
-  s1.append(pill);
-  s1.append(el('dl', { class: 'd-kv' }, [
-    el('dt', { text: 'direction' }),
-    el('dd', { text: edge.directed ? 'directional' : 'symmetric (no arrow)' }),
-    el('dt', { text: 'role' }),
-    el('dd', { text: edge.subjectRole }),
-  ]));
-  wrap.append(s1);
-
-  // Section 2: conditions
-  const s2 = el('div', { class: 'd-section' });
-  s2.append(el('dl', { class: 'd-kv' }, [
-    el('dt', { text: 'resolved at' }),
-    el('dd', { text: `${view.revision.ref || view.revision.defaultBranch || 'HEAD'} @ ${view.revision.shortCommit}` }),
-    el('dt', { text: 'analyzed' }),
-    el('dd', { text: view.revision.analyzedAt }),
-    el('dt', { text: 'analyzer' }),
-    el('dd', { text: `${view.analyzer.name} ${view.analyzer.version}` }),
-  ]));
-  wrap.append(s2);
-
-  // Section 3: the actual Evidence records
-  const evidence = view.evidenceByRelationship[edge.id] || [];
-  const s3 = el('div', { class: 'd-section' });
-  s3.append(el('p', { class: 'd-evidence-count', text: `EVIDENCE (${evidence.length})` }));
-  if (evidence.length === 0) {
-    s3.append(el('p', { class: 'mono', text: 'No evidence cards inlined for this relationship.' }));
-  }
-  for (const record of evidence) {
-    s3.append(evidenceCard(record));
-  }
-  if (edge.evidenceTruncated) {
-    s3.append(el('p', { class: 'mono', text: `showing ${evidence.length} of ${edge.evidenceCount} evidence records` }));
-  }
-  wrap.append(s3);
-
-  // Section 4: the verification anchor
-  const s4 = el('div', { class: 'd-section' });
-  s4.append(el('p', { class: 'd-verification', text: verificationSentence(edge, evidence) }));
-  wrap.append(s4);
-
-  inner.append(wrap);
-}
-
-function evidenceCard(record) {
-  const card = el('div', { class: 'd-card' });
-  const head = el('div', { class: 'd-card-head' }, [
-    el('span', { class: 'd-card-type', text: record.type.toUpperCase() }),
-    el('span', { class: `d-pill ${statusClass(record.status)}`, text: record.status }),
-  ]);
-  card.append(head);
-  if (record.locator) card.append(el('p', { class: 'd-card-loc', text: record.locator }));
-  if (record.observedText) card.append(el('blockquote', { class: 'd-quote', text: record.observedText }));
-
-  const dataList = el('dl', { class: 'd-data' });
-  for (const [key, value] of Object.entries(record.data)) {
-    if (value === null || value === undefined) continue;
-    if (key === 'relationship_semantics') continue;
-    const rendered = Array.isArray(value)
-      ? value.map((item) => (typeof item === 'string' && item.length > 12 ? `${item.slice(0, 12)}…` : String(item))).join(', ')
-      : typeof value === 'object'
-        ? JSON.stringify(value)
-        : String(value);
-    dataList.append(el('dt', { text: key }), el('dd', { text: truncate(rendered, 120) }));
-  }
-  card.append(dataList);
-
-  if (record.sourceUrl) {
-    const link = el('a', { class: 'd-src', href: record.sourceUrl, target: '_blank', rel: 'noreferrer noopener' });
-    link.textContent = 'View on GitHub ↗';
-    card.append(link);
-    if (record.locator && /:\d/.test(record.locator)) {
-      card.append(el('p', { class: 'mono', text: record.locator }));
-    }
-  }
-  return card;
-}
-
-function verificationSentence(edge, evidence) {
-  const first = evidence[0];
-  if (!first) return 'This relationship has no inlined evidence to cite.';
-  if (edge.relationshipType === 'shares_exact_content_with') {
-    return `Both repositories contain git blob ${first.data.first_blob ?? '—'}. Identical content establishes neither origin nor direction.`;
-  }
-  if (edge.relationshipType === 'shares_history_with') {
-    return `Both repositories contain commit ${(first.data.shared_commit_samples ?? [])[0] ?? '—'}. A shared ancestor establishes common history, not an order.`;
-  }
-  if (edge.relationshipType === 'similar_to') {
-    return 'Similarity does not establish provenance or direction of copying.';
-  }
-  if (edge.relationshipType === 'depends_on') {
-    return `Declared in ${first.locator ?? first.data.manifest_path ?? 'a manifest'}. A dependency is not an ancestor.`;
-  }
-  if (first.sourceUrl) {
-    return `Reviewable at ${first.sourceUrl}`;
-  }
-  return `Recorded by ${first.collector}/${first.extractor}.`;
-}
-
-function capitalise(text) {
-  return text.charAt(0).toUpperCase() + text.slice(1);
-}
-
-// -------------------------------------------------------------- status line
-
-function renderStatusLine(view) {
-  const line = document.getElementById('status-line');
-  line.replaceChildren();
-  const parts = [
-    `${view.revision.ref || view.revision.defaultBranch || 'HEAD'} @ ${view.revision.shortCommit}`,
-    `analyzed ${view.revision.analyzedAt}`,
-    `${view.analyzer.name} ${view.analyzer.version}`,
-    `${view.primaryEdgeCount} shown / ${view.edgeCount} one-hop / ${view.edgeCount + view.hiddenRelationshipCount} relationships`,
-    `(${view.statusCounts.VERIFIED} verified · ${view.statusCounts.DECLARED} declared · ${view.statusCounts.DETECTED} detected)`,
-  ];
-  parts.forEach((text, index) => {
-    if (index > 0) line.append(el('span', { class: 'sep', text: '·' }));
-    line.append(el('span', { text }));
+// -------------------------------------------------------------- url / state
+
+function syncUrl(replace = true) {
+  if (!state.repository) return;
+  const query = writeViewState({
+    edge: state.selectedEdgeId,
+    node: state.selectedNodeId,
+    layers: serializeLayerState(state.layers),
+    search: state.query,
+    bundles: [...state.expandedBundles].join(','),
+    depth: String(state.depth),
   });
+  const next = `${repositoryPath(state.repository)}${query}`;
+  if (window.location.pathname + window.location.search === next) return;
+  if (replace) window.history.replaceState({}, '', next);
+  else window.history.pushState({}, '', next);
+}
+
+function readUrlState() {
+  const urlState = readViewState(window.location.search);
+  state.selectedEdgeId = urlState.edge;
+  state.selectedNodeId = urlState.node;
+  state.query = urlState.search;
+  // An absent `layers` parameter means every layer is on. Parsing the empty
+  // string would mean the opposite, so the default is only replaced when the
+  // parameter is actually present.
+  state.layers = urlState.layers ? parseLayerState(urlState.layers) : allLayersOn();
+  state.expandedBundles = new Set(urlState.bundles ? urlState.bundles.split(',') : []);
+  if (urlState.depth) {
+    const depth = Number(urlState.depth);
+    if (Number.isFinite(depth)) state.depth = depth;
+  }
+}
+
+function navigate(repository, push = true) {
+  state.repository = repository;
+  state.selectedEdgeId = '';
+  state.selectedNodeId = '';
+  state.query = '';
+  state.expandedBundles = new Set();
+  const next = repositoryPath(repository);
+  if (push) window.history.pushState({}, '', next);
+  void load();
 }
 
 // ------------------------------------------------------------------ loading
@@ -625,118 +172,930 @@ const PHASES = [
 
 let phaseTimer = null;
 
+/** Switches to the explorer shell and shows the loading overlay. */
 function showLoading() {
-  setHidden(document.getElementById('loading'), false);
-  setHidden(document.getElementById('empty'), true);
-  setHidden(document.getElementById('error'), true);
-  document.getElementById('canvas').replaceChildren();
+  state.phase = 'resolving';
+  // The landing is left behind as soon as a repository route is resolved, so the
+  // loading frame is never stacked on top of the marketing page.
+  setHidden($('landing'), true);
+  setHidden($('explorer'), false);
+  setHidden($('empty'), true);
+  setHidden($('failure'), true);
+  setHidden($('drawer'), true);
+  setHidden($('drawer-scrim'), true);
+  $('explorer-body').classList.remove('with-drawer');
+  setHidden($('loading'), false);
+  setHidden($('legend'), true);
+  setHidden($('bundles'), true);
+  $('canvas').replaceChildren();
   let index = 0;
-  const label = document.getElementById('loading-label');
+  const label = $('loading-label');
   label.textContent = PHASES[0];
   if (phaseTimer) clearInterval(phaseTimer);
   phaseTimer = setInterval(() => {
+    state.phase = 'analyzing';
     index = Math.min(index + 1, PHASES.length - 1);
     label.textContent = PHASES[index];
   }, 1400);
-  setState('loading');
+  setChrome('resolving');
 }
 
 function hideLoading() {
   if (phaseTimer) clearInterval(phaseTimer);
-  setHidden(document.getElementById('loading'), true);
+  setHidden($('loading'), true);
 }
 
-function setState(text) {
-  document.getElementById('state').textContent = text;
+/**
+ * Phase label in the app bar.
+ *
+ * `cached` is stated explicitly whenever the artifact came from the cache, so
+ * "reload gives the same result" is visible rather than implied.
+ */
+function setChrome(label) {
+  const chip = $('cache-state');
+  if (!chip) return;
+  if (state.phase === 'cached') {
+    chip.textContent = `cached ${formatDuration(state.meta?.elapsedMs ?? 0)}`;
+    chip.className = 'mono cache-chip is-cached';
+  } else {
+    chip.textContent = label;
+    chip.className = 'mono cache-chip';
+  }
 }
 
-async function load(repository) {
-  state.repository = repository;
-  state.selectedRelationshipId = null;
-  state.selectedNodeId = null;
+// -------------------------------------------------------------- data loading
 
-  document.getElementById('crumb-repo').textContent = `${repository.owner}/${repository.name}`;
-  document.getElementById('landing').setAttribute('hidden', '');
-  setHidden(document.getElementById('explorer'), false);
-  document.getElementById('repo-input').value = `${repository.owner}/${repository.name}`;
-
-  const source = document.getElementById('open-source');
-  source.href = `https://github.com/${repository.owner}/${repository.name}`;
-  setHidden(source, false);
-
+async function load() {
+  if (!state.repository) return;
+  readUrlState();
   showLoading();
 
+  const repo = state.repository;
+  const base = `/api/view/${repo.owner}/${repo.name}`;
+  // `cache: 'no-store'` would defeat the whole point: the browser must be able to
+  // reuse its own cache, while the server decides what is fresh.
+  const fetchOptions = { headers: { accept: 'application/json' } };
+
+  let viewEnvelope;
   try {
-    const response = await fetch(`/api/view/${repository.owner}/${repository.name}?depth=${state.depth}`);
-    const envelope = await response.json();
-    if (!response.ok || !envelope.ok) {
-      throw Object.assign(new Error(envelope?.error?.message || 'analysis failed'), {
-        detail: envelope?.error?.detail,
+    const response = await fetch(`${base}?depth=${state.depth}`, fetchOptions);
+    viewEnvelope = await response.json();
+    if (!response.ok || !viewEnvelope.ok) {
+      throw Object.assign(new Error(viewEnvelope?.error?.message || 'analysis failed'), {
+        status: response.status,
+        detail: viewEnvelope?.error?.detail,
       });
     }
-    const view = envelope.data;
-
-    const graphResponse = await fetch(`/api/graph/${repository.owner}/${repository.name}?depth=${state.depth}`);
-    const graphEnvelope = await graphResponse.json();
-    if (graphResponse.ok && graphEnvelope.ok) state.graph = graphEnvelope.data;
-
-    state.view = view;
-    hideLoading();
-    renderStatusLine(view);
-    applyQueryState();
-
-    if (view.empty.isEmpty) {
-      setHidden(document.getElementById('empty'), false);
-      document.getElementById('empty-body').textContent = view.empty.reason;
-      setState('no lineage');
-      document.getElementById('canvas').replaceChildren();
-      renderDrawer();
-      return;
-    }
-
-    drawGraph(view);
-    renderDrawer();
-    setState(view.partial.isPartial ? 'partial result' : 'ready');
   } catch (error) {
     hideLoading();
-    setHidden(document.getElementById('error'), false);
-    document.getElementById('error-head').textContent =
-      error?.status === 404 ? 'Repository not found on GitHub.' : 'Could not analyse this repository.';
-    document.getElementById('error-body').textContent = error?.detail || error?.message || 'Unknown error.';
-    document.getElementById('canvas').replaceChildren();
-    setState('error');
+    showFailure(error);
+    return;
+  }
+
+  const view = viewEnvelope.data;
+  const meta = viewEnvelope.meta || {};
+
+  // Only the view endpoint is called. It is a projection of the same canonical
+  // graph `/api/graph` returns — the server states that in `meta.derivedFrom` —
+  // so a second request would double the analysis wait for a result the server
+  // has already produced. The canonical graph remains the source of truth; this
+  // file simply never reconstructs or edits it.
+  state.graph = null;
+
+  state.view = view;
+  state.meta = meta;
+  state.cacheHit = meta.cacheHit === true;
+  state.resolvedRevision = meta.resolvedRevision || view.revision.commit;
+  state.phase = state.cacheHit ? 'cached' : view.partial.isPartial ? 'partial' : 'complete';
+
+  hideLoading();
+  renderChrome(view);
+  renderStatusLine(view);
+
+  if (view.empty.isEmpty) {
+    setHidden($('empty'), false);
+    $('empty-body').textContent = view.empty.reason;
+    $('canvas').replaceChildren();
+    setHidden($('bundles'), true);
+    setHidden($('legend'), true);
+    state.phase = 'empty';
+    setChrome('no lineage');
+    return;
+  }
+
+  // The phase chip is the last thing set, so it can never report a stale label.
+  setChrome(state.phase === 'partial' ? 'partial' : 'analyzed');
+  draw();
+  // A shared link arrives with the selection already in the URL, so the drawer is
+  // restored from state rather than waiting for a click.
+  renderDrawer();
+}
+
+function showFailure(error) {
+  state.phase = 'failed';
+  setHidden($('failure'), false);
+  const status = error?.status;
+  $('failure-head').textContent =
+    status === 400
+      ? 'That does not look like a GitHub repository.'
+      : status === 502
+        ? 'GitHub analysis did not complete.'
+        : 'Could not analyse this repository.';
+  $('failure-body').textContent =
+    error?.detail || error?.message || 'The analyzer returned no result. Try again shortly.';
+  $('canvas').replaceChildren();
+  setHidden($('bundles'), true);
+  setHidden($('legend'), true);
+  setChrome('failed');
+  renderStatusLine(null);
+}
+
+// ------------------------------------------------------------------ chrome
+
+function renderChrome(view) {
+  setHidden($('landing'), true);
+  setHidden($('explorer'), false);
+  setHidden($('appbar-mid'), false);
+  setHidden($('appbar-right'), false);
+  const repo = state.repository;
+  $('crumb-repo').textContent = view.subject.owner && view.subject.name
+    ? `${view.subject.owner}/${view.subject.name}`
+    : `${repo.owner}/${repo.name}`;
+  $('crumb-rev').textContent = state.resolvedRevision.slice(0, 7);
+  $('crumb-count').textContent = view.bundledEdgeCount > 0
+    ? `${view.primaryEdgeCount} drawn · ${view.bundledEdgeCount} bundled`
+    : `${view.primaryEdgeCount} relationships`;
+  const open = $('open-source');
+  open.href = view.subject.url || `https://github.com/${repo.owner}/${repo.name}`;
+  $('repo-input').value = `${repo.owner}/${repo.name}`;
+}
+
+function renderStatusLine(view) {
+  const line = $('status-line');
+  line.replaceChildren();
+  if (!view) return;
+  const parts = [
+    `${view.revision.ref || view.revision.defaultBranch || 'HEAD'} @ ${view.revision.shortCommit}`,
+    `analyzed ${formatTime(view.revision.analyzedAt)}`,
+    `${view.analyzer.name} ${view.analyzer.version}`,
+    `${view.primaryEdgeCount} shown / ${view.edgeCount} one-hop / ${view.edgeCount + view.hiddenRelationshipCount} relationships`,
+    `(${view.statusCounts.VERIFIED} verified · ${view.statusCounts.DECLARED} declared · ${view.statusCounts.DETECTED} detected)`,
+  ];
+  parts.forEach((text, index) => {
+    if (index > 0) line.append(el('span', { class: 'sep', text: '·' }));
+    line.append(el('span', { text }));
+  });
+  if (state.cacheHit) {
+    line.append(el('span', { class: 'sep', text: '·' }));
+    line.append(el('span', { class: 'cache-hit', text: `cached · ${formatDuration(state.meta?.elapsedMs ?? 0)}` }));
   }
 }
 
-function applyQueryState() {
-  const params = new URLSearchParams(window.location.search);
-  state.selectedRelationshipId = params.get('edge');
-  state.selectedNodeId = params.get('node');
-  if (state.selectedRelationshipId || state.selectedNodeId) {
-    // Focusing a node never changes edge direction: redraw reads the same
-    // `directed` flags and only changes the dimming.
-    redraw();
-    renderDrawer();
+function formatTime(iso) {
+  if (!iso) return '';
+  return String(iso).replace('T', ' ').replace(/\..*$/, '').replace('Z', ' UTC');
+}
+
+function formatDuration(ms) {
+  if (!ms && ms !== 0) return '';
+  if (ms < 1000) return `${ms}ms`;
+  return `${(ms / 1000).toFixed(1)}s`;
+}
+
+// ------------------------------------------------------------------ drawing
+
+function currentEdges() {
+  return visibleEdges(state.view, { layers: state.layers, expandedBundles: state.expandedBundles });
+}
+
+function draw() {
+  const view = state.view;
+  const canvas = $('canvas');
+  canvas.replaceChildren();
+  if (!view) return;
+
+  const edges = currentEdges();
+  const positions = layoutGraph(view, edges);
+  const bounds = contentBounds(positions);
+  // Degree decides label thinning. Parallel-edge count does not: a hub with 20
+  // distinct peers has 20 fans of one, and their mid-line labels still collide.
+  const degrees = nodeDegrees(edges);
+
+  const viewport = { width: canvas.clientWidth || 1200, height: canvas.clientHeight || 700 };
+  if (!state.hasFitted) {
+    const fitted = fitViewBox(bounds, viewport);
+    canvas.setAttribute('viewBox', fitted.viewBox);
+    state.zoom = fitted.zoom;
+    state.hasFitted = true;
   }
+
+  const defs = svgEl('defs');
+  for (const [id, status, colour] of [
+    ['arw-verified', 'VERIFIED', 'var(--verified)'],
+    ['arw-declared', 'DECLARED', 'var(--declared)'],
+    ['arw-detected', 'DETECTED', 'var(--detected)'],
+  ]) {
+    const marker = svgEl('marker', {
+      id, viewBox: '0 0 10 10', refX: '9', refY: '5',
+      markerWidth: '6.5', markerHeight: '6.5', orient: 'auto-start-reverse',
+    });
+    marker.append(svgEl('path', { d: 'M 0 0 L 10 5 L 0 10 z', fill: colour }));
+    defs.append(marker);
+  }
+  canvas.append(defs);
+
+  const edgeLayer = svgEl('g', { class: 'edge-layer' });
+  const nodeLayer = svgEl('g', { class: 'node-layer' });
+
+  const query = state.query ? state.query.toLowerCase() : '';
+  const matchedNodes = new Set(searchNodes(view, query));
+  const matchedEdges = new Set(searchEdges(view, query));
+  const focusMode = query.length > 0 || Boolean(state.selectedNodeId);
+
+  for (const edge of edges) {
+    const { fanIndex, fanCount } = fanSlot(edge, edges);
+    const geometry = edgeGeometry(edge, positions, fanIndex, fanCount);
+    if (!geometry) continue;
+
+    const group = svgEl('g', {
+      class: [
+        'edge-group',
+        `fam-${edge.family}`,
+        `st-${edge.status}`,
+        state.selectedEdgeId === edge.id ? 'is-selected' : '',
+        focusMode && !matchedEdges.has(edge.id) && !isEdgeTouching(edge, matchedNodes) ? 'is-dim' : '',
+        matchedEdges.has(edge.id) ? 'is-match' : '',
+      ].filter(Boolean).join(' '),
+    });
+    group.dataset.relationshipId = edge.id;
+
+    group.append(
+      svgEl('path', {
+        d: geometry.path,
+        class: `edge-line fam-${edge.family} st-${edge.status}`,
+        // Marker comes from the contract. Never from focus.
+        'marker-end': geometry.arrowAt ? `url(#arw-${edge.status.toLowerCase()})` : null,
+      }),
+    );
+    const hit = svgEl('path', { d: geometry.path, class: 'edge-hit' });
+    hit.addEventListener('click', (event) => {
+      event.stopPropagation();
+      selectEdge(edge.id);
+    });
+    group.append(hit);
+
+    // A crowded edge keeps its label in the DOM but marks the group, so CSS reveals
+    // it on hover or selection. Redrawing on hover would rebuild the canvas under
+    // the pointer and re-fire the event.
+    const crowded = fanCount > LABEL_FAN_LIMIT || isCrowdedEdge(edge, degrees, LABEL_DEGREE_LIMIT);
+    if (crowded) group.classList.add('is-dense');
+    group.append(
+      svgEl('text', { x: geometry.label.x, y: geometry.label.y, class: 'edge-label' }, [edge.label]),
+    );
+    if (edge.badge) {
+      group.append(svgEl('text', { x: geometry.badge.x, y: geometry.badge.y, class: 'edge-badge' }, [edge.badge]));
+    }
+    if (state.selectedEdgeId === edge.id) {
+      group.append(
+        svgEl('text', { x: geometry.label.x, y: geometry.label.y + 11, class: 'edge-ontology' }, [
+          edge.relationshipType,
+        ]),
+      );
+    }
+    edgeLayer.append(group);
+  }
+
+  for (const node of view.nodes) {
+    const position = positions.get(node.id);
+    if (!position) continue;
+    const group = svgEl('g', {
+      class: [
+        'node',
+        node.isSubject ? 'is-subject' : '',
+        state.selectedNodeId === node.id ? 'is-selected' : '',
+        focusMode && !matchedNodes.has(node.id) ? 'is-dim' : '',
+      ].filter(Boolean).join(' '),
+    });
+    group.dataset.nodeId = node.id;
+
+    group.append(
+      svgEl('rect', {
+        x: position.x - NODE_W / 2,
+        y: position.y - NODE_H / 2,
+        width: NODE_W,
+        height: NODE_H,
+        rx: node.isPackage ? 3 : 4,
+        class: [
+          'node-box',
+          node.isSubject ? 'is-subject' : '',
+          node.isPackage ? 'is-package' : '',
+        ].filter(Boolean).join(' '),
+      }),
+    );
+    group.append(
+      svgEl('text', { x: position.x - NODE_W / 2 + 10, y: position.y - 3, class: 'node-label' }, [
+        truncate(node.label, 22),
+      ]),
+    );
+    if (node.fact) {
+      group.append(
+        svgEl('text', {
+          x: position.x + NODE_W / 2 - 10, y: position.y + 15, class: 'node-fact', 'text-anchor': 'end',
+        }, [truncate(node.fact, 22)]),
+      );
+    }
+    if (node.isSubject) {
+      // The tag sits above the box: inside it, it collides with the fact line on
+      // a node whose fact is long.
+      group.append(
+        svgEl('text', {
+          x: position.x - NODE_W / 2,
+          y: position.y - NODE_H / 2 - 7,
+          class: 'subject-tag',
+        }, ['SUBJECT']),
+      );
+    }
+    const hit = svgEl('rect', {
+      x: position.x - NODE_W / 2, y: position.y - NODE_H / 2, width: NODE_W, height: NODE_H, class: 'node-hit',
+    });
+    hit.addEventListener('click', (event) => {
+      event.stopPropagation();
+      selectNode(node.id);
+    });
+    group.append(hit);
+    nodeLayer.append(group);
+  }
+
+  canvas.append(edgeLayer, nodeLayer);
+  renderLegend();
+  renderBundles();
+  renderLayersPop();
+  updateSearchCount();
+}
+
+function isEdgeTouching(edge, nodeIds) {
+  return nodeIds.has(edge.source) || nodeIds.has(edge.target);
+}
+
+function truncate(text, max) {
+  return String(text).length > max ? `${String(text).slice(0, max - 1)}…` : String(text);
+}
+
+/**
+ * Line style per family, in one place so the legend, the popover, the drawer and
+ * the canvas cannot disagree. Style is presentation only; it never implies a
+ * direction — that comes from the relationship.
+ */
+const FAMILY_STYLE = {
+  ancestry: ['solid', '2px'],
+  dependency: ['solid', '1.5px'],
+  attribution: ['dashed', '1.5px'],
+  'source-identity': ['solid', '2px'],
+  similarity: ['dotted', '1px'],
+};
+
+function renderLegend() {
+  const legend = $('legend');
+  const view = state.view;
+  legend.replaceChildren();
+  const labels = {
+    ancestry: 'ancestry',
+    dependency: 'dependency',
+    attribution: 'attribution',
+    'source-identity': 'identical',
+    similarity: 'similar',
+  };
+  let shown = 0;
+  for (const [family, [style, width]] of Object.entries(FAMILY_STYLE)) {
+    const count = view.familyCounts[family] || 0;
+    if (!count) continue;
+    shown += 1;
+    const swatch = el('span', { class: 'layer-swatch' });
+    swatch.style.borderTopStyle = style;
+    swatch.style.borderTopWidth = width;
+    legend.append(el('span', { class: 'legend-item' }, [swatch, `${labels[family]} ${count}`]));
+  }
+  if (shown === 0) {
+    setHidden(legend, true);
+    return;
+  }
+  legend.append(el('span', { class: 'legend-item legend-note', text: 'no arrow = symmetric' }));
+  setHidden(legend, false);
+}
+
+// -------------------------------------------------------------------- layers
+
+function renderLayersPop() {
+  const list = $('layers-list');
+  const counts = layerCount(state.view, state.layers);
+
+  // Rows are built once and then updated in place. Replacing them would destroy
+  // the button the user just pressed mid-click, which also breaks the
+  // outside-click dismissal because the detached node has no ancestors left.
+  if (list.childElementCount !== Object.keys(FAMILY_STYLE).length) {
+    list.replaceChildren();
+    for (const family of Object.keys(FAMILY_STYLE)) {
+      const [style, width] = FAMILY_STYLE[family];
+      const row = el('button', { class: 'layer-row', type: 'button' });
+      row.dataset.family = family;
+      const swatch = el('span', { class: 'layer-swatch' });
+      swatch.style.borderTopStyle = style;
+      swatch.style.borderTopWidth = width;
+      row.append(swatch, el('span', { class: 'layer-name', text: family.replace('-', ' ') }), el('span', { class: 'layer-count mono' }));
+      list.append(row);
+    }
+  }
+
+  for (const row of list.children) {
+    const family = row.dataset.family;
+    if (!family) continue;
+    const on = state.layers[family] !== false;
+    row.classList.toggle('is-off', !on);
+    row.setAttribute('aria-pressed', String(on));
+    const count = row.querySelector('.layer-count');
+    if (count) count.textContent = String(counts[family] || 0);
+  }
+
+  $('layers-note').textContent =
+    `${state.view.primaryEdgeCount} of ${state.view.edgeCount} one-hop relationships are drawn. ` +
+    `${state.view.bundledEdgeCount} are collapsed into bundles below the canvas and stay openable. ` +
+    `Turning a layer off hides edges only; it never changes a relationship type, status or direction.`;
+}
+
+function toggleLayers(force) {
+  const pop = $('layers-pop');
+  const show = force === undefined ? pop.hasAttribute('hidden') : force;
+  setHidden(pop, !show);
+  $('layers-btn').classList.toggle('on', show);
+  $('layers-btn').setAttribute('aria-expanded', String(show));
+}
+
+// ------------------------------------------------------------------- bundles
+
+function renderBundles() {
+  const box = $('bundles');
+  const view = state.view;
+  box.replaceChildren();
+  if (!view.bundles || view.bundles.length === 0) {
+    setHidden(box, true);
+    return;
+  }
+  box.append(
+    el('p', { class: 'bundles-head mono', text: `BUNDLED (${view.bundledEdgeCount} of ${view.edgeCount} one-hop relationships)` }),
+  );
+  for (const bundle of view.bundles) {
+    const open = state.expandedBundles.has(bundle.key);
+    const row = el('button', { class: `bundle-row ${open ? 'is-open' : ''} st-${bundle.status}` });
+    row.append(
+      el('span', { class: 'bundle-count mono', text: `×${bundle.count}` }),
+      el('span', { class: 'bundle-label', text: bundle.relationshipType.replace(/_/g, ' ') }),
+      el('span', { class: 'bundle-status mono', text: bundle.status }),
+    );
+    row.addEventListener('click', () => {
+      if (state.expandedBundles.has(bundle.key)) state.expandedBundles.delete(bundle.key);
+      else state.expandedBundles.add(bundle.key);
+      syncUrl();
+      state.hasFitted = false;
+      draw();
+    });
+    box.append(row);
+  }
+  setHidden(box, false);
+}
+
+// ------------------------------------------------------------------ search
+
+function updateSearchCount() {
+  if (!state.query) {
+    $('search-count').textContent = '';
+    return;
+  }
+  const nodes = searchNodes(state.view, state.query).length;
+  const edges = searchEdges(state.view, state.query).length;
+  $('search-count').textContent = `${nodes} node${nodes === 1 ? '' : 's'} · ${edges} relationship${edges === 1 ? '' : 's'}`;
+}
+
+function toggleSearch(force) {
+  const bar = $('searchbar');
+  const show = force === undefined ? bar.hasAttribute('hidden') : force;
+  setHidden(bar, !show);
+  $('search-btn').classList.toggle('on', show);
+  $('search-btn').setAttribute('aria-expanded', String(show));
+  if (show) $('search-input').focus();
+  else clearSearch();
+}
+
+/** Closing search with a query active clears it, so dimming never survives. */
+function clearSearch() {
+  if (!state.query) {
+    $('search-input').value = '';
+    return;
+  }
+  state.query = '';
+  $('search-input').value = '';
+  syncUrl();
+  draw();
+}
+
+// ------------------------------------------------------------------ drawer
+
+function selectEdge(id) {
+  state.selectedEdgeId = state.selectedEdgeId === id ? '' : id;
+  state.selectedNodeId = '';
+  syncUrl();
+  draw();
+  renderDrawer();
+}
+
+function selectNode(id) {
+  state.selectedNodeId = state.selectedNodeId === id ? '' : id;
+  if (state.selectedNodeId) state.selectedEdgeId = '';
+  syncUrl();
+  draw();
+  renderDrawer();
+}
+
+function clearSelection() {
+  state.selectedEdgeId = '';
+  state.selectedNodeId = '';
+  syncUrl();
+  draw();
+  renderDrawer();
+}
+
+function closeDrawer() {
+  clearSelection();
+}
+
+function renderDrawer() {
+  const drawer = $('drawer');
+  const inner = $('drawer-inner');
+  const body = $('explorer-body');
+  const scrim = $('drawer-scrim');
+  inner.replaceChildren();
+
+  const view = state.view;
+  // A stale or hand-edited selection resolves to nothing. The URL is corrected
+  // instead of leaving an empty drawer open.
+  if (state.selectedEdgeId && !view.edges.some((edge) => edge.id === state.selectedEdgeId)) {
+    state.selectedEdgeId = '';
+  }
+  if (state.selectedNodeId && !view.nodes.some((node) => node.id === state.selectedNodeId)) {
+    state.selectedNodeId = '';
+  }
+
+  const open = Boolean(state.selectedEdgeId || state.selectedNodeId);
+  setHidden(drawer, !open);
+  setHidden(scrim, !open);
+  body.classList.toggle('with-drawer', open);
+  if (!open) {
+    // Only rewrite the URL if it actually named something that is gone.
+    if (window.location.search) syncUrl();
+    return;
+  }
+
+  const close = el('button', {
+    class: 'drawer-close',
+    type: 'button',
+    title: 'Close (Esc)',
+    'aria-label': 'Close evidence drawer',
+    text: 'Esc',
+    onclick: closeDrawer,
+  });
+  const block = el('div');
+
+  if (state.selectedEdgeId) {
+    const edge = view.edges.find((item) => item.id === state.selectedEdgeId);
+    if (edge) block.append(renderEdgeDrawer(edge));
+  } else {
+    block.append(renderNodeDrawer());
+  }
+
+  inner.append(close, block);
+}
+
+function nameOf(id) {
+  const node = state.view.nodes.find((item) => item.id === id);
+  return node ? node.label : id;
+}
+
+function renderEdgeDrawer(edge) {
+  const view = state.view;
+  const wrap = el('div');
+
+  wrap.append(el('p', { class: 'd-eyebrow', text: 'RELATIONSHIP' }));
+  wrap.append(el('p', { class: 'd-head', text: capitalise(edge.label) }));
+  wrap.append(
+    el('p', { class: 'd-sub' }, [
+      el('span', { class: 'mono', text: `ontology ${edge.relationshipType}` }),
+      document.createTextNode(' · '),
+      el('span', { class: 'mono', text: edge.directed ? 'directional' : 'symmetric · no arrowhead' }),
+    ]),
+  );
+
+  const pair = el('p', { class: 'd-pair' });
+  pair.append(
+    el('span', { text: nameOf(edge.source) }),
+    el('span', { class: 'd-arrow', text: edge.directed ? '→' : '⇄' }),
+    el('span', { text: nameOf(edge.target) }),
+  );
+  wrap.append(pair);
+
+  const pill = el('span', { class: `d-pill st-${edge.status}` });
+  const sw = el('span', { class: 'pill-sw' });
+  const [style, width] = FAMILY_STYLE[edge.family] ?? FAMILY_STYLE.ancestry;
+  sw.style.borderTopStyle = style;
+  sw.style.borderTopWidth = width;
+  pill.append(sw, edge.status);
+  wrap.append(pill);
+
+  // Conditions
+  const conditions = el('div', { class: 'd-block' });
+  conditions.append(el('p', { class: 'd-block-head', text: 'OBSERVED AT' }));
+  const kv = el('dl', { class: 'd-kv' });
+  const row = (k, v) => {
+    kv.append(el('dt', { text: k }), el('dd', { text: String(v) }));
+  };
+  row('Revision', `${view.revision.ref || view.revision.defaultBranch || 'HEAD'} @ ${view.revision.shortCommit}`);
+  row('Analyzed', formatTime(view.revision.analyzedAt));
+  row('Source', state.cacheHit ? `cached (${formatDuration(state.meta?.elapsedMs ?? 0)})` : 'fresh analysis');
+  row('Analyzer', `${view.analyzer.name} ${view.analyzer.version}`);
+  row('Evidence', `${edge.evidenceCount} record${edge.evidenceCount === 1 ? '' : 's'}`);
+  conditions.append(kv);
+  wrap.append(conditions);
+
+  // Evidence records
+  const records = view.evidenceByRelationship[edge.id] || [];
+  const evidenceBlock = el('div', { class: 'd-block' });
+  evidenceBlock.append(el('p', { class: 'd-block-head', text: `EVIDENCE (${records.length})` }));
+  if (records.length === 0) {
+    evidenceBlock.append(el('p', { class: 'mono', text: 'No evidence records inlined.' }));
+  }
+  for (const record of records) evidenceBlock.append(renderEvidenceCard(record, edge));
+  if (edge.evidenceTruncated) {
+    evidenceBlock.append(
+      el('p', { class: 'mono', text: `showing ${records.length} of ${edge.evidenceCount} evidence records` }),
+    );
+  }
+  wrap.append(evidenceBlock);
+
+  // Why, anchored to the raw record
+  const why = el('div', { class: 'd-block' });
+  why.append(el('p', { class: 'd-block-head', text: 'WHY THIS IS ' + edge.status }));
+  const whyText = verificationSentence(edge, records);
+  const whyBox = el('p', { class: `d-why st-${edge.status}` });
+  whyBox.textContent = whyText;
+  why.append(whyBox);
+  wrap.append(why);
+
+  const actions = el('div', { class: 'd-actions' });
+  const copy = el('button', { class: 'd-action', text: 'Copy link' });
+  copy.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      copy.textContent = 'Copied';
+    } catch {
+      copy.textContent = 'Copy failed';
+    }
+  });
+  const graphLink = el('a', {
+    class: 'd-action',
+    text: 'graph.json',
+    href: `/api/graph/${state.repository.owner}/${state.repository.name}?depth=${state.depth}`,
+  });
+  graphLink.target = '_blank';
+  graphLink.rel = 'noreferrer noopener';
+  actions.append(copy, graphLink);
+  wrap.append(actions);
+
+  return wrap;
+}
+
+function renderEvidenceCard(record, edge) {
+  const owner = state.repository.owner;
+  const name = state.repository.name;
+  const card = el('div', { class: 'd-card' });
+
+  const pill = el('span', { class: `d-pill st-${record.status}`, text: record.status });
+  card.append(
+    el('div', { class: 'd-card-head' }, [
+      el('span', { class: 'd-card-type', text: record.type.toUpperCase() }),
+      pill,
+    ]),
+  );
+  if (record.locator) card.append(el('p', { class: 'd-card-loc', text: record.locator }));
+  if (record.observedText) card.append(el('blockquote', { class: 'd-quote', text: record.observedText }));
+
+  const data = el('dl', { class: 'd-data' });
+  for (const [key, value] of Object.entries(record.data || {})) {
+    if (value === null || value === undefined || key === 'relationship_semantics') continue;
+    const rendered = Array.isArray(value)
+      ? value.map((item) => (typeof item === 'string' && item.length > 14 ? `${item.slice(0, 12)}…` : String(item))).join(', ')
+      : typeof value === 'object'
+        ? JSON.stringify(value)
+        : String(value);
+    data.append(el('dt', { text: key }), el('dd', { text: truncate(rendered, 140) }));
+  }
+  card.append(data);
+
+  // GitHub is secondary: the drawer is the primary destination, this is the
+  // explicit "open the original" affordance.
+  const source = evidenceSourceUrl(record, owner, name);
+  if (source) {
+    const link = el('a', { class: 'd-src', href: source, target: '_blank', rel: 'noreferrer noopener' });
+    link.textContent = 'View source on GitHub ↗';
+    card.append(link);
+    if (/\/blob\//.test(source) && record.locator && /:\d/.test(record.locator)) {
+      card.append(el('p', { class: 'mono', text: `anchor ${anchorOf(record.locator)}` }));
+    }
+  }
+  void edge;
+  return card;
+}
+
+function anchorOf(locator) {
+  const match = /:(\d+)(?:-(\d+))?$/.exec(locator);
+  if (!match) return '';
+  return match[2] ? `#L${match[1]}-L${match[2]}` : `#L${match[1]}`;
+}
+
+function verificationSentence(edge, records) {
+  const first = records[0];
+  if (edge.relationshipType === 'similar_to') return SIMILARITY_DISCLAIMER;
+  if (!first) return 'This relationship has no inlined evidence to cite.';
+  const d = first.data || {};
+  if (edge.relationshipType === 'shares_exact_content_with') {
+    return `Both repositories contain git blob ${d.first_blob || '—'}. Identical content establishes neither origin nor direction, which is why this edge carries no arrowhead.`;
+  }
+  if (edge.relationshipType === 'shares_history_with') {
+    const sample = (d.shared_commit_samples || [])[0] || '—';
+    const count = d.shared_commit_count !== undefined ? ` ${d.shared_commit_count} commits are shared.` : '';
+    return `Both histories contain commit ${sample}.${count} A shared ancestor cannot establish which repository is the ancestor of the other, which is why this edge carries no arrowhead.`;
+  }
+  if (edge.relationshipType === 'depends_on') {
+    return `Declared in ${first.locator || d.manifest_path || 'a manifest'}. A dependency is a composition statement, not lineage.`;
+  }
+  if (edge.relationshipType === 'uses_submodule') {
+    return `Pinned at ${d.pinned_commit || '—'} in ${d.path || '.gitmodules'}. The submodule URL points at this exact repository; the pin is read from the tree's gitlink entry.`;
+  }
+  if (first.sourceUrl) return `Reviewable at ${first.sourceUrl}`;
+  return `Recorded by ${first.collector}/${first.extractor}.`;
+}
+
+function renderNodeDrawer() {
+  const view = state.view;
+  const node = view.nodes.find((item) => item.id === state.selectedNodeId);
+  const wrap = el('div');
+  if (!node) return wrap;
+
+  wrap.append(el('p', { class: 'd-eyebrow', text: 'ENTITY' }));
+  wrap.append(el('p', { class: 'd-head', text: node.label }));
+  wrap.append(el('p', { class: 'd-sub' }, [el('span', { class: 'mono', text: node.id })]));
+
+  const facts = el('div', { class: 'd-block' });
+  facts.append(el('p', { class: 'd-block-head', text: 'FACTS' }));
+  const kv = el('dl', { class: 'd-kv' });
+  kv.append(el('dt', { text: 'type' }), el('dd', { text: node.type }));
+  if (node.fact) kv.append(el('dt', { text: 'detail' }), el('dd', { text: node.fact }));
+  kv.append(el('dt', { text: 'subject' }), el('dd', { text: node.isSubject ? 'yes (analysed repository)' : 'no' }));
+  facts.append(kv);
+  wrap.append(facts);
+
+  const related = edgesForNode(view, node.id);
+  const relBlock = el('div', { class: 'd-block' });
+  relBlock.append(el('p', { class: 'd-block-head', text: `RELATIONSHIPS (${related.length})` }));
+  if (related.length === 0) {
+    relBlock.append(el('p', { class: 'node-detail', text: 'No one-hop relationship in this view.' }));
+  }
+  for (const id of related) {
+    const edge = view.edges.find((item) => item.id === id);
+    if (!edge) continue;
+    const other = edge.source === node.id ? edge.target : edge.source;
+    const row = el('button', { class: 'bundle-row', text: `${edge.label} · ${nameOf(other)}` });
+    row.addEventListener('click', () => {
+      state.selectedNodeId = '';
+      selectEdge(edge.id);
+    });
+    relBlock.append(row);
+  }
+  wrap.append(relBlock);
+
+  if (node.url) {
+    const link = el('a', { class: 'd-action', href: node.url, target: '_blank', rel: 'noreferrer noopener', text: 'Open repository ↗' });
+    const actions = el('div', { class: 'd-actions' });
+    actions.append(link);
+    wrap.append(actions);
+  }
+  return wrap;
+}
+
+function capitalise(text) {
+  return String(text).charAt(0).toUpperCase() + String(text).slice(1);
+}
+
+// --------------------------------------------------------- pan / zoom / fit
+
+let panState = null;
+
+function setupViewport() {
+  const canvas = $('canvas');
+
+  // Node hover styling is pure CSS (`.node:hover`), deliberately not a redraw:
+  // rebuilding the canvas under the pointer would re-fire hover and loop.
+
+  canvas.addEventListener('wheel', (event) => {
+    event.preventDefault();
+    const rect = canvas.getBoundingClientRect();
+    const factor = event.deltaY < 0 ? ZOOM_STEP : 1 / ZOOM_STEP;
+    const focus = clientToGraph(canvas, event.clientX - rect.left, event.clientY - rect.top);
+    const current = canvas.getAttribute('viewBox');
+    const next = zoomViewBox(current, factor, focus, state.zoom);
+    canvas.setAttribute('viewBox', next.viewBox);
+    state.zoom = next.zoom;
+  }, { passive: false });
+
+  canvas.addEventListener('mousedown', (event) => {
+    if (event.button !== 0) return;
+    panState = { x: event.clientX, y: event.clientY, viewBox: canvas.getAttribute('viewBox') };
+    canvas.classList.add('is-panning');
+  });
+  window.addEventListener('mousemove', (event) => {
+    if (!panState) return;
+    const rect = canvas.getBoundingClientRect();
+    const parts = String(panState.viewBox).split(/\s+/).map(Number);
+    const [vx, vy, vw, vh] = parts;
+    const dx = ((event.clientX - panState.x) / rect.width) * vw;
+    const dy = ((event.clientY - panState.y) / rect.height) * vh;
+    canvas.setAttribute('viewBox', `${vx - dx} ${vy - dy} ${vw} ${vh}`);
+  });
+  window.addEventListener('mouseup', () => {
+    panState = null;
+    canvas.classList.remove('is-panning');
+  });
+
+  canvas.addEventListener('click', (event) => {
+    if (event.target === canvas) clearSelection();
+  });
+
+  $('zoom-in').addEventListener('click', () => zoomBy(ZOOM_STEP));
+  $('zoom-out').addEventListener('click', () => zoomBy(1 / ZOOM_STEP));
+  $('zoom-fit').addEventListener('click', () => fit());
+  window.addEventListener('resize', () => {
+    if (state.view) draw();
+  });
+}
+
+function clientToGraph(canvas, clientX, clientY) {
+  const viewBox = canvas.getAttribute('viewBox').split(/\s+/).map(Number);
+  const [vx, vy, vw, vh] = viewBox;
+  const rect = canvas.getBoundingClientRect();
+  return { x: vx + (clientX / rect.width) * vw, y: vy + (clientY / rect.height) * vh };
+}
+
+function zoomBy(factor) {
+  const canvas = $('canvas');
+  const next = zoomViewBox(canvas.getAttribute('viewBox'), factor, null, state.zoom);
+  canvas.setAttribute('viewBox', next.viewBox);
+  state.zoom = next.zoom;
+}
+
+function fit() {
+  if (!state.view) return;
+  const canvas = $('canvas');
+  const positions = layoutGraph(state.view, currentEdges());
+  const bounds = contentBounds(positions);
+  const fitted = fitViewBox(bounds, { width: canvas.clientWidth || 1200, height: canvas.clientHeight || 700 });
+  canvas.setAttribute('viewBox', fitted.viewBox);
+  state.zoom = fitted.zoom;
 }
 
 // --------------------------------------------------------------------- boot
 
+function showLanding() {
+  setHidden($('landing'), false);
+  setHidden($('explorer'), true);
+  setHidden($('appbar-mid'), true);
+  setHidden($('appbar-right'), true);
+  setHidden($('site-foot'), false);
+  setHidden($('searchbar'), true);
+  toggleLayers(false);
+}
+
 function boot() {
-  document.getElementById('form').addEventListener('submit', (event) => {
+  setupViewport();
+
+  $('form').addEventListener('submit', (event) => {
     event.preventDefault();
-    const value = document.getElementById('repo-input').value.trim();
-    const cleaned = value
-      .replace(/^https?:\/\/(www\.)?github\.com\//i, '')
-      .replace(/^github\.com\//i, '')
-      .replace(/\.git$/i, '')
-      .replace(/\/+$/, '');
-    const segments = cleaned.split('/').filter(Boolean);
-    if (segments.length < 2) {
-      setState('enter owner/repo');
+    const repository = resolveRepositoryInput($('repo-input').value);
+    if (!repository) {
+      $('repo-input').focus();
+      $('repo-input').style.outline = '2px solid var(--alert)';
+      setTimeout(() => {
+        $('repo-input').style.outline = '';
+      }, 1400);
       return;
     }
-    navigate({ owner: segments[0], name: segments[1] });
+    navigate(repository);
   });
 
   for (const button of document.querySelectorAll('.seg-btn')) {
@@ -744,30 +1103,72 @@ function boot() {
       for (const other of document.querySelectorAll('.seg-btn')) other.classList.remove('is-active');
       button.classList.add('is-active');
       state.depth = Number(button.dataset.depth);
-      if (state.repository) void load(state.repository);
+      state.hasFitted = false;
+      if (state.repository) void load();
     });
   }
 
+  $('layers-btn').addEventListener('click', () => toggleLayers());
+  $('search-btn').addEventListener('click', () => toggleSearch());
+  $('search-close').addEventListener('click', () => toggleSearch(false));
+  $('drawer-scrim').addEventListener('click', () => closeDrawer());
+
+  $('search-input').addEventListener('input', (event) => {
+    state.query = event.target.value;
+    syncUrl();
+    draw();
+  });
+
   document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') clearSelection();
+    if (event.key === 'Escape') {
+      if (!$('layers-pop').hasAttribute('hidden')) toggleLayers(false);
+      else if (!$('searchbar').hasAttribute('hidden')) toggleSearch(false);
+      else clearSelection();
+    }
+    if (event.key === '/' && document.activeElement !== $('search-input')) {
+      event.preventDefault();
+      toggleSearch(true);
+    }
+    if (event.key === 'f' && !event.metaKey && !event.ctrlKey) fit();
+  });
+
+  // One delegated handler for both popovers, so the rows keep working after a
+  // re-render and the dismissal test uses the composed path rather than
+  // `closest`, which cannot see through a detached node.
+  $('layers-list').addEventListener('click', (event) => {
+    const row = event.target.closest('.layer-row');
+    if (!row || !row.dataset.family) return;
+    const family = row.dataset.family;
+    state.layers[family] = state.layers[family] === false;
+    syncUrl();
+    draw();
+  });
+
+  document.addEventListener('click', (event) => {
+    const path = typeof event.composedPath === 'function' ? event.composedPath() : [];
+    const inside = (selector) => path.some((node) => node instanceof Element && node.matches?.(selector));
+    if (!inside('.layers-pop') && !inside('#layers-btn')) toggleLayers(false);
   });
 
   window.addEventListener('popstate', () => {
-    const repository = parseLocation();
-    if (repository) void load(repository);
-    else showLanding();
+    const repository = parseRepositoryPath(window.location.pathname);
+    if (repository) {
+      state.repository = repository;
+      state.hasFitted = false;
+      void load();
+    } else {
+      showLanding();
+    }
   });
 
-  const repository = parseLocation();
-  if (repository) void load(repository);
-  else showLanding();
-}
-
-function showLanding() {
-  setHidden(document.getElementById('explorer'), true);
-  document.getElementById('landing').removeAttribute('hidden');
-  setHidden(document.getElementById('open-source'), true);
-  setState('idle');
+  // Cold load of /owner/repo must work: the path is parsed before anything else.
+  const repository = parseRepositoryPath(window.location.pathname);
+  if (repository) {
+    state.repository = repository;
+    void load();
+  } else {
+    showLanding();
+  }
 }
 
 boot();

@@ -98,6 +98,11 @@ test('the /owner/repo route is recognised, so a domain swap needs no routing cha
   assert.deepEqual(parseRoute('/grpc/grpc/'), { kind: 'client', path: '/owner/repo' });
 });
 
+test('the root is the landing page, not a 404', () => {
+  assert.deepEqual(parseRoute('/'), { kind: 'client', path: '/index.html' });
+  assert.deepEqual(parseRoute(''), { kind: 'client', path: '/index.html' });
+});
+
 test('api routes are version-stable and explicit', () => {
   assert.deepEqual(parseRoute('/api/graph/octocat/Spoon-Knife'), {
     kind: 'graph',
@@ -109,7 +114,7 @@ test('api routes are version-stable and explicit', () => {
 });
 
 test('unknown and malformed routes are rejected', () => {
-  for (const path of ['/', '/owner', '/a/b/c', '/api/graph/only-one', '/api/unknown/a/b', '/api/graph/OWNER!/b', '/../../etc/passwd']) {
+  for (const path of ['/owner', '/a/b/c', '/api/graph/only-one', '/api/unknown/a/b', '/api/graph/OWNER!/b', '/../../etc/passwd']) {
     assert.equal(parseRoute(path).kind, 'not-found', `expected not-found for ${path}`);
   }
 });
