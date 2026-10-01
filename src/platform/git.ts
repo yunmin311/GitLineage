@@ -1,6 +1,6 @@
 import { execFile } from 'node:child_process';
 import { mkdir, rm, stat } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { Buffer } from 'node:buffer';
 import { promisify } from 'node:util';
 
@@ -136,6 +136,11 @@ export async function runGit(args: string[], options: RunGitOptions = {}): Promi
         'protocol.version=2',
         '-c',
         'advice.detachedHead=false',
+        // Never let git walk up into an enclosing repository. Without this,
+        // `rev-parse` inside a fresh cache directory discovers the *user's*
+        // repository, and subsequent fetch/remote calls would write to it.
+        '-c',
+        'safe.directory=*',
         ...args,
       ],
       {
@@ -179,13 +184,43 @@ export async function isGitAvailable(): Promise<boolean> {
   }
 }
 
+/**
+ * Reports whether `repoDir` is itself a git repository.
+ *
+ * `--show-toplevel` is compared against the requested directory, so an
+ * enclosing repository discovered by git's upward search is treated as "not a
+ * repository here". Without this check the analyser would adopt whatever
+ * repository happens to contain the cache directory and rewrite its remotes.
+ */
 async function isGitRepository(repoDir: string, sandboxHome: string): Promise<boolean> {
   try {
-    const out = await runGit(['rev-parse', '--git-dir'], { cwd: repoDir, sandboxHome });
-    return out.trim().length > 0;
+    const out = await runGit(['rev-parse', '--show-toplevel'], { cwd: repoDir, sandboxHome });
+    const toplevel = out.trim();
+    if (toplevel.length === 0) return false;
+    const resolved = resolve(repoDir);
+    const resolvedTop = resolve(toplevel);
+    // A bare repository has no work tree; compare the git dir in that case.
+    if (await directoryExists(join(resolvedTop, '.git')) || (await pathExists(join(resolvedTop, 'HEAD')))) {
+      return resolved === resolvedTop;
+    }
+    return true;
   } catch {
     return false;
   }
+}
+
+async function directoryExists(path: string): Promise<boolean> {
+  return stat(path).then(
+    (info) => info.isDirectory(),
+    () => false,
+  );
+}
+
+async function pathExists(path: string): Promise<boolean> {
+  return stat(path).then(
+    () => true,
+    () => false,
+  );
 }
 
 export interface ShallowHistory {
@@ -198,6 +233,20 @@ export interface ShallowHistory {
  * Creates or refreshes a bare repository containing only a bounded slice of
  * the remote history: no tags, shallow depth, blobs filtered out.
  */
+export const ALLOWED_GIT_REMOTE_PATTERN = /^https:\/\/github\.com\/[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+(\.git)?$/;
+
+/**
+ * Only plain https GitHub remotes may ever be fetched.
+ *
+ * `GIT_ALLOW_PROTOCOL=https` blocks most transports, but a URL can still smuggle
+ * a helper through `ext::` or `file://`, so the remote is validated here as well.
+ */
+export function assertAllowedRemote(remoteUrl: string): void {
+  if (!ALLOWED_GIT_REMOTE_PATTERN.test(remoteUrl)) {
+    throw new GitError(`refusing to fetch a non-GitHub-https remote: ${remoteUrl}`, '');
+  }
+}
+
 export async function fetchShallowHistory(options: {
   repoDir: string;
   remoteUrl: string;
@@ -207,6 +256,7 @@ export async function fetchShallowHistory(options: {
   timeoutMs?: number;
 }): Promise<ShallowHistory> {
   const { repoDir, remoteUrl, ref, depth, sandboxHome } = options;
+  assertAllowedRemote(remoteUrl);
   await mkdir(dirname(repoDir), { recursive: true });
   const fresh = await stat(repoDir).then(
     () => false,

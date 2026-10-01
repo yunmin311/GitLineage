@@ -60,6 +60,13 @@ mistaken for product requirements.
   directory stays readable across machines and working directories. A 304 whose
   cached body has gone triggers one unconditional refetch instead of an error.
   Found by live validation after mixing Windows and WSL cache directories.
+- Git repository detection compares `--show-toplevel` against the requested
+  directory, so a cache nested inside another repository can never adopt it.
+  Found the hard way: an analysis run rewrote this project's own `origin` to the
+  analysed repository and marked it shallow. See Deprecated.
+- Only plain `https://github.com/<owner>/<repo>` remotes are fetched, validated
+  before any filesystem access, so `file://` and `ext::` helper URLs cannot
+  reach git even with `GIT_ALLOW_PROTOCOL=https`.
 
 ## Proposal
 
@@ -92,6 +99,7 @@ Open, not implemented, not binding.
 | Running package managers to obtain metadata | Rejected | Repository code is untrusted data and is never executed. |
 | Similarity upgraded to provenance | Rejected | Similarity cannot establish direction, authorship or origin. |
 | Implicit `INFERRED` naming (`copied_from`, `stolen_from`) | Rejected | The analyzer has no standing to make that claim. |
+| `git rev-parse --git-dir` as an existence test | Replaced | Git searches upward, so a cache directory inside a repository adopted that repository: the analyser rewrote its `origin` remote and marked it shallow and blob-filtered. Now compares `--show-toplevel` with the target directory. Fixed after live validation damaged this project's own git config. |
 | `contains_exact_content_from` | Replaced | The V1 direction audit found that the name asserted provenance direction the evidence did not support. Replaced by the symmetric `shares_exact_content_with`, with symmetric endpoint canonicalisation and origin-free evidence field names. A regression test asserts the old name is not a valid relationship type. |
 | Unbounded full clone per repository | Rejected | Storage, bandwidth and latency blow up immediately. Bounded fetch plus the tree API covers the same signals. |
 | Framework-first implementation | Not started | The specification deliberately left the language open until the analyzer contract was proven. It is now fixed by the decision above; the choice is recorded rather than debated. |
@@ -102,12 +110,13 @@ Open, not implemented, not binding.
 | Check | Command | Status |
 | --- | --- | --- |
 | Types | `npm run typecheck` | passes |
-| Unit, contract, regression, schema, offline pipeline | `npm test` | 78 pass, 3 live tests skipped, 0 fail |
+| Unit, contract, regression, git isolation, schema, offline pipeline | `npm test` | 86 pass, 3 live tests skipped, 0 fail |
 | Live integration on real repositories | `npm run test:live` | 7 pass |
 | Artifact validation | `node src/cli/main.ts validate <graph.json>` | passes on every produced artifact |
 
-Recorded run after the direction audit: 81 tests (78 pass, 3 live skipped), 7
-live integration tests passing, artefacts valid against `validateGraph` and the
-JSON Schema. Verified on Node 24.13 and git 2.43.0 under WSL2.
+Recorded run after the direction audit and the git isolation fix: 89 tests (86
+pass, 3 live skipped), 7 live integration tests passing, artefacts valid against
+`validateGraph` and the JSON Schema. Verified on Node 24.13 and git 2.43.0 under
+WSL2.
 
 Details and recorded results: `docs/integration-validation.md`.
