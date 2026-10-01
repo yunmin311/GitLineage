@@ -15,8 +15,8 @@ import {
   type Relationship,
   type Revision,
 } from './model.ts';
-import { refToDisplayName, refToEntityType, refToId, relationshipId, relationshipKey, evidenceId } from './ids.ts';
-import { checkObservation, resolveRelationshipStatus } from './policy.ts';
+import { refToDisplayName, refToEntityType, refToId, relationshipId, evidenceId } from './ids.ts';
+import { canonicalEndpoints, checkObservation, isDirectional, resolveRelationshipStatus } from './policy.ts';
 import { LIMITS } from '../platform/limits.ts';
 
 export interface ResolveInput {
@@ -44,6 +44,9 @@ interface NormalizedObservation {
   observation: Observation;
   subjectId: EntityId;
   objectId: EntityId;
+  /** Canonical endpoints after applying the ontology's direction contract. */
+  sourceId?: EntityId;
+  targetId?: EntityId;
   evidence: Evidence;
   repositoryId?: EntityId;
   subjectRef?: EntityRef;
@@ -149,14 +152,16 @@ export function resolve(input: ResolveInput): ResolveResult {
     return keyA < keyB ? -1 : keyA > keyB ? 1 : 0;
   });
 
+  // Direction comes from the ontology, never from the observation. Endpoints are
+  // canonicalised so a symmetric relationship merges into one edge instead of two
+  // mirrored ones.
   const groups = new Map<string, NormalizedObservation[]>();
   for (const item of accepted) {
-    const key = relationshipKey(
-      item.observation.relationship,
-      item.subjectId,
-      item.objectId,
-      item.observation.directed,
-    );
+    const type = item.observation.relationship;
+    const { source, target } = canonicalEndpoints(type, item.subjectId, item.objectId);
+    item.sourceId = source;
+    item.targetId = target;
+    const key = `${type}|${source}|${target}`;
     const bucket = groups.get(key);
     if (bucket) bucket.push(item);
     else groups.set(key, [item]);
@@ -188,7 +193,7 @@ export function resolve(input: ResolveInput): ResolveResult {
         diagnostic(
           'no_admissible_evidence_status',
           'warning',
-          `relationship ${type} between ${first.subjectId} and ${first.objectId} has no admissible evidence status and was dropped`,
+          `relationship ${type} between ${first.sourceId} and ${first.targetId} has no admissible evidence status and was dropped`,
           { collector: first.observation.collector, context: { relationship: type } },
         ),
       );
@@ -210,11 +215,12 @@ export function resolve(input: ResolveInput): ResolveResult {
     }
 
     const relationship: Relationship = {
-      id: relationshipId(type, first.subjectId, first.objectId, first.observation.directed),
+      id: relationshipId(type, first.sourceId!, first.targetId!, isDirectional(type)),
       type,
-      source: first.subjectId,
-      target: first.objectId,
-      directed: first.observation.directed,
+      source: first.sourceId!,
+      target: first.targetId!,
+      // Authoritative, copied from the ontology rather than from a collector.
+      directed: isDirectional(type),
       status,
       evidenceIds: evidenceList.map((record) => record.id),
       attributes: {},

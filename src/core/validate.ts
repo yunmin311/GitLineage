@@ -84,8 +84,26 @@ export function validateGraph(graph: LineageGraph): ValidationResult {
     const spec = relationshipSpec(relationship.type);
     if (!entityIds.has(relationship.source)) errors.push(`relationship ${relationship.id} references unknown source ${relationship.source}`);
     if (!entityIds.has(relationship.target)) errors.push(`relationship ${relationship.id} references unknown target ${relationship.target}`);
+    // Direction is part of the ontology contract, so a graph that disagrees with
+    // it is invalid regardless of how the edge was produced.
     if (relationship.directed !== spec.directed) {
-      errors.push(`relationship ${relationship.id} of type ${relationship.type} must be ${spec.directed ? 'directed' : 'undirected'}`);
+      errors.push(
+        `relationship ${relationship.id} of type ${relationship.type} is ${spec.directed ? 'directional' : 'symmetric'} and must set directed=${spec.directed}`,
+      );
+    }
+    if (!spec.directed) {
+      const mirrored = graph.relationships.find(
+        (item) =>
+          item !== relationship &&
+          item.type === relationship.type &&
+          item.source === relationship.target &&
+          item.target === relationship.source,
+      );
+      if (mirrored) {
+        errors.push(
+          `relationship ${relationship.id} mirrors ${mirrored.id}; symmetric relationships must be stored once in canonical endpoint order`,
+        );
+      }
     }
     if (!spec.allowedStatuses.includes(relationship.status)) {
       errors.push(

@@ -43,19 +43,29 @@ Identifiers are content-derived and stable:
 ```json
 {
   "id": "rel_9f2c1d0b4a7e5c31",
-  "type": "contains_exact_content_from",
-  "source": "repo:github:owner/fork",
-  "target": "repo:github:owner/upstream",
-  "directed": true,
+  "type": "shares_exact_content_with",
+  "source": "repo:github:owner/a",
+  "target": "repo:github:owner/b",
+  "directed": false,
   "status": "VERIFIED",
   "evidenceIds": ["ev_1a2b3c4d5e6f7a8b"],
   "attributes": { "matched_blob_count": 19, "evidence_truncated": false }
 }
 ```
 
-Direction is a property of the relationship type, not of the collector. A
-collector that proposes `similar_to` as directed, or `shares_history_with` as
-directed, is rejected with `direction_mismatch`.
+Direction is a property of the relationship type, not of the collector and not of
+which endpoint was observed first. The resolver reads it from the ontology and
+writes it into the relationship; a collector that contradicts the contract is
+rejected with `direction_mismatch`. Symmetric types store their endpoints in
+canonical order, so a pair seen from both sides becomes one edge.
+
+| Direction | Types |
+| --- | --- |
+| Directional | `forked_from`, `derived_from`, `depends_on`, `uses_submodule`, `declared_inspiration`, `references`, `evolved_into` |
+| Symmetric | `shares_history_with`, `shares_exact_content_with`, `similar_to` |
+
+A renderer must read `directed` from the relationship. Inferring it from the
+currently focused node is the specific mistake this contract exists to prevent.
 
 `attributes` carry facts that belong to the relationship rather than to a single
 evidence record: aggregate counts, truncation flags, the submodule path, the
@@ -75,12 +85,13 @@ pinned commit. They are merged from every observation of that relationship.
   "locator": { "path": "src/parser.ts", "lineStart": 41, "lineEnd": 42, "field": "<blob sha>" },
   "observedText": "identical git blob 0a1b2c3d",
   "data": {
-    "source_blob": "0a1b2c3d",
-    "target_blob": "0a1b2c3d",
-    "source_path": "src/parser.ts",
-    "target_path": "lib/parser.ts",
-    "source_commit": "<commit>",
-    "target_commit": "<commit>"
+    "first_blob": "0a1b2c3d",
+    "second_blob": "0a1b2c3d",
+    "first_path": "src/parser.ts",
+    "second_path": "lib/parser.ts",
+    "first_commit": "<commit>",
+    "second_commit": "<commit>",
+    "direction": "symmetric: identical content establishes no order of origin"
   },
   "observedAt": "2026-09-30T04:14:22.440Z"
 }
@@ -113,7 +124,7 @@ which relationship:
 | --- | --- |
 | `git_shared_commits` | `shares_history_with` |
 | `git_history_containment` | `derived_from`, `evolved_into` |
-| `git_blob_identity` | `contains_exact_content_from` |
+| `git_blob_identity` | `shares_exact_content_with` |
 | `token_fingerprint` | `similar_to` |
 | `package_manifest`, `package_lockfile` | `depends_on` |
 | `git_submodule_entry` | `uses_submodule` |
@@ -134,7 +145,7 @@ and independently which status an evidence type may carry:
 | `uses_submodule` | `VERIFIED`, `DECLARED` | `VERIFIED`, `DECLARED` |
 | `declared_inspiration` | `DECLARED` only | `DECLARED` only |
 | `references` | `DECLARED`, `DETECTED` | `DECLARED` only |
-| `contains_exact_content_from` | `VERIFIED` only | `VERIFIED` only |
+| `shares_exact_content_with` | `VERIFIED` only | `VERIFIED` only |
 | `similar_to` | `DETECTED` only | `DETECTED` only |
 | `evolved_into` | `VERIFIED` only | `VERIFIED` only |
 

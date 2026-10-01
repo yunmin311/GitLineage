@@ -28,6 +28,7 @@ GitHub Repository
 | No AI dependency | The analyzer contains no model provider, no inference call, and no network dependency other than deterministic HTTP and `git`. |
 | Evidence before inference | A relationship without an evidence record cannot exist: `validateGraph` rejects it, and the JSON schema requires `minItems: 1` on `evidenceIds`. |
 | Similarity is not provenance | `similar_to` can only be `DETECTED` and only from `token_fingerprint` evidence. A detector cannot emit `derived_from`; the resolver drops the proposal with a diagnostic. |
+| Direction follows evidence | A relationship is directional only when the evidence establishes an order. Shared history, identical content and similarity are symmetric; the resolver stamps direction from the ontology so a renderer cannot get it wrong. |
 | Never execute repository code | The only spawned process is `git`, from a fixed subcommand allowlist, with a scrubbed environment, no shell, and no lifecycle hooks. No package manager is ever run. |
 | Repository as untrusted data | Every file, tree entry, document, manifest and gitmodules entry passes a size cap, a path check and a parser guard. |
 | Explicit relationship semantics | Each relationship type declares the evidence types and statuses it may ever carry. See `docs/relationship-ontology.md`. |
@@ -74,12 +75,29 @@ Useful flags: `--ref <branch|tag|sha>`, `--depth <n>`, `--max-candidates <n>`,
 | `derived_from` | `VERIFIED` only, and only with history containment plus temporal ordering | `git_history_containment` |
 | `shares_history_with` | `VERIFIED` from identical Git commit objects | `git_shared_commits` |
 | `uses_submodule` | `VERIFIED` with the pinned commit from the tree gitlink | `git_submodule_entry` |
-| `contains_exact_content_from` | `VERIFIED` from identical Git blob ids | `git_blob_identity` |
+| `shares_exact_content_with` | `VERIFIED` from identical Git blob ids | `git_blob_identity` |
 | `depends_on` | `DECLARED` only, never an ancestry claim | `package_manifest`, `package_lockfile` |
 | `declared_inspiration` | `DECLARED` only | `document_attribution` |
 | `references` | `DECLARED` | `document_reference`, `package_registry_metadata` |
 | `similar_to` | `DETECTED` only, undirected. Reserved: no detector ships in V1 | `token_fingerprint` |
 | `evolved_into` | Reserved: part of the ontology, not emitted in V1 | — |
+
+### Direction is part of the contract
+
+Edge direction is defined by the ontology and copied into every relationship, so
+a renderer must read it from the contract and never infer it from whichever
+node the user has focused.
+
+| Direction | Relationship types |
+| --- | --- |
+| Directional | `forked_from`, `derived_from`, `depends_on`, `uses_submodule`, `declared_inspiration`, `references`, `evolved_into` |
+| Symmetric | `shares_history_with`, `shares_exact_content_with`, `similar_to` |
+
+A symmetric relationship carries no direction: neither repository contains or
+derives from the other, and no edge orientation is meaningful. Its endpoints are
+stored in canonical order, so a pair observed from both sides merges into one
+edge instead of two mirrored ones. `validateGraph` rejects a graph in which a
+symmetric pair appears twice or claims `directed: true`.
 
 Ecosystems parsed in V1: npm (`package.json`, `package-lock.json`), Python
 (`pyproject.toml`, `requirements*.txt`), Rust (`Cargo.toml`), Go (`go.mod`).

@@ -6,6 +6,7 @@ import { join } from 'node:path';
 import { createRequire } from 'node:module';
 import { analyze } from '../src/pipeline/analyze.ts';
 import { validateGraph } from '../src/core/validate.ts';
+import { RELATIONSHIP_SPECS } from '../src/core/ontology.ts';
 import type { LineageGraph } from '../src/core/model.ts';
 
 // ajv and ajv-formats ship CommonJS only; loading them through createRequire
@@ -56,6 +57,19 @@ test('end to end: a URL produces a validated graph artifact', async () => {
     assert.equal(metadata.root, 'me/does-not-exist-offline');
     assert.ok(validateSchema(graphOnDisk), `graph.json violates the JSON schema: ${JSON.stringify(validateSchema.errors?.slice(0, 3))}`);
   }
+});
+
+test('the analyzer never emits a relationship type outside the ontology', () => {
+  // Guards the rename: no collector may still propose the removed type, and the
+  // symmetric partition must cover exactly the shared-state types.
+  const emitted = new Set<string>();
+  for (const spec of RELATIONSHIP_SPECS) emitted.add(spec.type);
+  assert.equal(emitted.has('contains_exact_content_from'), false);
+  assert.equal(emitted.size, RELATIONSHIP_SPECS.length);
+  assert.deepEqual(
+    RELATIONSHIP_SPECS.filter((spec) => !spec.directed).map((spec) => spec.type).sort(),
+    ['shares_exact_content_with', 'shares_history_with', 'similar_to'],
+  );
 });
 
 test('end to end: the JSON schema accepts a minimal graph and rejects broken ones', async () => {
@@ -129,6 +143,19 @@ test('end to end: the JSON schema accepts a minimal graph and rejects broken one
   const badType = structuredClone(base);
   (badType.relationships[0] as { type: string }).type = 'copied_from';
   assert.equal(validateSchema(badType), false, 'copied_from is not in the V1 ontology');
+
+  const removedType = structuredClone(base);
+  (removedType.relationships[0] as { type: string }).type = 'contains_exact_content_from';
+  assert.equal(validateSchema(removedType), false, 'the removed directional exact-content type must not validate');
+
+  const symmetricAsDirected = structuredClone(base);
+  symmetricAsDirected.relationships[0]!.type = 'shares_exact_content_with';
+  symmetricAsDirected.relationships[0]!.directed = true;
+  assert.equal(
+    validateSchema(symmetricAsDirected),
+    false,
+    'a symmetric relationship may not be serialised as directed',
+  );
 
   const badRevision = structuredClone(base);
   badRevision.graph.revision.commit = 'not-a-sha';

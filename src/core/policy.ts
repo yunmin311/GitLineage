@@ -1,6 +1,16 @@
 import type { EvidenceStatus, JsonValue, Observation, RelationshipType } from './model.ts';
-import { EVIDENCE_ALLOWED_STATUSES, EVIDENCE_REQUIRED_DATA_KEYS, STATUS_STRENGTH, relationshipSpec } from './ontology.ts';
+import {
+  EVIDENCE_ALLOWED_STATUSES,
+  EVIDENCE_REQUIRED_DATA_KEYS,
+  STATUS_STRENGTH,
+  canonicalEndpoints,
+  isDirectional,
+  isSymmetric,
+  relationshipSpec,
+} from './ontology.ts';
 import { refToId } from './ids.ts';
+
+export { canonicalEndpoints, isDirectional, isSymmetric };
 
 export interface PolicyRejection {
   code: string;
@@ -46,8 +56,12 @@ export function checkObservation(observation: Observation): PolicyResult {
       ok: false,
       rejection: {
         code: 'direction_mismatch',
-        message: `relationship ${spec.type} must be ${spec.directed ? 'directed' : 'undirected'}`,
-        context: { proposed_directed: observation.directed },
+        message: `relationship ${spec.type} is ${spec.directed ? 'directional' : 'symmetric'} and cannot be proposed as ${observation.directed ? 'directed' : 'symmetric'}`,
+        context: {
+          proposed_directed: observation.directed,
+          contract_direction: spec.directed ? 'directional' : 'symmetric',
+          note: 'direction is defined by the ontology, not by the collector',
+        },
       },
     };
   }

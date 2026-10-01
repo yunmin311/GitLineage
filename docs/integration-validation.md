@@ -14,7 +14,7 @@ Recorded run: 2026-09-30, Node 24.13, git 2.53.
 
 | Case | Repository | Assertions | Result |
 | --- | --- | --- | --- |
-| unmodified-fork | `nachocebey/is` | `forked_from` VERIFIED, `shares_history_with` VERIFIED, `contains_exact_content_from` VERIFIED, no `derived_from`, no `similar_to` | pass |
+| unmodified-fork | `nachocebey/is` | `forked_from` VERIFIED, `shares_history_with` VERIFIED and symmetric, `shares_exact_content_with` VERIFIED and symmetric, no mirrored duplicate edge, no `derived_from`, no `similar_to` | pass |
 | submodule-host | `grpc/grpc` | at least 10 `uses_submodule` VERIFIED, each with a pinned commit, no `similar_to` | pass |
 | declared-fork-in-readme | `vitest-dev/vitest` | `forked_from` DECLARED to `vitest-dev/istanbuljs`, no `similar_to` | pass |
 | unrelated-repositories | `octocat/Spoon-Knife` | no `forked_from`, `derived_from`, `shares_history_with`, `similar_to`, `declared_inspiration`; no evidence mentioning `octocat/hello-world` | pass |
@@ -31,7 +31,7 @@ Every analysed graph also passes `validateGraph` and the JSON Schema.
 | --- | --- | --- | --- |
 | `forked_from` | `VERIFIED` | `sindresorhus/is` | GitHub fork metadata |
 | `shares_history_with` | `VERIFIED` | `sindresorhus/is` | 200 shared commit objects |
-| `contains_exact_content_from` | `VERIFIED` | `sindresorhus/is` | 19 identical blob ids (`matched_blob_count: 19`) |
+| `shares_exact_content_with` | `VERIFIED` | `sindresorhus/is` | 19 identical blob ids (`matched_blob_count: 19`), `directed: false` |
 | `depends_on` | `DECLARED` | 8 npm packages | `package.json` |
 | `references` | `DECLARED` | 10 repositories | `readme.md` links |
 
@@ -42,6 +42,11 @@ history is identical to its upstream's, so containment carries no direction.
 The analyser reports shared history and exact content and refuses to guess a
 direction. An `evolved_into` or `derived_from` here would be a fabricated claim.
 
+Both shared-state edges are symmetric and appear exactly once per pair. The
+live suite asserts this: `directed: false` for `shares_history_with` and
+`shares_exact_content_with`, no mirrored duplicate edge, and endpoint order
+identical regardless of which repository was the subject.
+
 ### `grpc/grpc`
 
 | Relationship | Status | Count |
@@ -49,7 +54,7 @@ direction. An `evolved_into` or `derived_from` here would be a fabricated claim.
 | `uses_submodule` | `VERIFIED` | 20 |
 | `references` | `DECLARED` | 16 |
 | `depends_on` | `DECLARED` | 6 |
-| `contains_exact_content_from` | `VERIFIED` | 2 |
+| `shares_exact_content_with` | `VERIFIED` | 2 |
 
 43 entities, 45 evidence records, 30 diagnostics.
 

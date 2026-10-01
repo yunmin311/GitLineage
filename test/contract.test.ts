@@ -3,7 +3,18 @@ import assert from 'node:assert/strict';
 import { resolve } from '../src/core/resolver.ts';
 import { validateGraph } from '../src/core/validate.ts';
 import { checkObservation, resolveRelationshipStatus } from '../src/core/policy.ts';
-import { RELATIONSHIP_SPECS, EVIDENCE_ALLOWED_STATUSES, EVIDENCE_REQUIRED_DATA_KEYS } from '../src/core/ontology.ts';
+import {
+  RELATIONSHIP_SPECS,
+  EVIDENCE_ALLOWED_STATUSES,
+  EVIDENCE_REQUIRED_DATA_KEYS,
+  DIRECTIONAL_RELATIONSHIPS,
+  SYMMETRIC_RELATIONSHIPS,
+  canonicalEndpoints,
+  isDirectional,
+  isRelationshipType,
+  isSymmetric,
+  relationshipSpec,
+} from '../src/core/ontology.ts';
 import type { EntityRef, LineageGraph, Observation, RelationshipType } from '../src/core/model.ts';
 
 const ROOT: EntityRef = { kind: 'repository', provider: 'github', owner: 'me', name: 'project' };
@@ -26,7 +37,7 @@ function blobEvidence(overrides: Partial<Observation['evidence']> = {}): Observa
   return {
     type: 'git_blob_identity',
     status: 'VERIFIED',
-    data: { source_blob: 'b'.repeat(40), target_blob: 'b'.repeat(40), source_path: 'a.ts', target_path: 'b.ts' },
+    data: { first_blob: 'b'.repeat(40), second_blob: 'b'.repeat(40), first_path: 'a.ts', second_path: 'b.ts' },
     ...overrides,
   };
 }
@@ -142,6 +153,13 @@ test('package dependency != derived_from', () => {
   assert.equal(graph.relationships[0]?.status, 'DECLARED');
 });
 
+test('token_fingerprint evidence is symmetric-only, matching its relationship', () => {
+  // similar_to is symmetric, so the evidence keys are also origin-free.
+  const spec = relationshipSpec('similar_to');
+  assert.equal(spec.directed, false);
+  assert.deepEqual([...spec.allowedEvidenceTypes], ['token_fingerprint']);
+});
+
 test('similarity != provenance: a detector cannot claim derived_from', () => {
   const attempt: Observation = {
     collector: 'similarity',
@@ -196,8 +214,8 @@ test('detected evidence can never produce a verified relationship', () => {
       extractor: 'git-blob-identity@1',
       subject: ROOT,
       object: OTHER,
-      relationship: 'contains_exact_content_from',
-      directed: true,
+      relationship: 'shares_exact_content_with',
+      directed: false,
       evidence: blobEvidence({ status: 'DETECTED' }),
     },
   ]);
@@ -283,8 +301,134 @@ test('ontology invariants hold for every relationship type', () => {
       assert.ok(['VERIFIED', 'DECLARED', 'DETECTED'].includes(status));
     }
   }
-  const undirected: RelationshipType[] = RELATIONSHIP_SPECS.filter((spec) => !spec.directed).map((spec) => spec.type);
-  assert.deepEqual(undirected.sort(), ['shares_history_with', 'similar_to']);
+  assert.deepEqual([...DIRECTIONAL_RELATIONSHIPS].sort(), [
+    'declared_inspiration',
+    'depends_on',
+    'derived_from',
+    'evolved_into',
+    'forked_from',
+    'references',
+    'uses_submodule',
+  ]);
+  assert.deepEqual([...SYMMETRIC_RELATIONSHIPS].sort(), [
+    'shares_exact_content_with',
+    'shares_history_with',
+    'similar_to',
+  ]);
+  assert.equal(DIRECTIONAL_RELATIONSHIPS.length + SYMMETRIC_RELATIONSHIPS.length, RELATIONSHIP_SPECS.length);
+  for (const type of SYMMETRIC_RELATIONSHIPS) assert.equal(isSymmetric(type), true);
+  for (const type of DIRECTIONAL_RELATIONSHIPS) assert.equal(isDirectional(type), true);
+});
+
+test('the direction split is exactly the documented concept split', () => {
+  const documentedDirectional = [
+    'forked_from',
+    'derived_from',
+    'depends_on',
+    'uses_submodule',
+    'declared_inspiration',
+    'references',
+    'evolved_into',
+  ];
+  const documentedSymmetric = ['shares_history_with', 'shares_exact_content_with', 'similar_to'];
+  assert.deepEqual([...DIRECTIONAL_RELATIONSHIPS].sort(), [...documentedDirectional].sort());
+  assert.deepEqual([...SYMMETRIC_RELATIONSHIPS].sort(), [...documentedSymmetric].sort());
+});
+
+test('symmetric relationships normalise their endpoints into canonical order', () => {
+  const forward = canonicalEndpoints('shares_exact_content_with', 'repo:a', 'repo:b');
+  const reversed = canonicalEndpoints('shares_exact_content_with', 'repo:b', 'repo:a');
+  assert.deepEqual(forward, reversed, 'a symmetric edge must not depend on observation order');
+  assert.equal(forward.source <= forward.target, true);
+
+  assert.deepEqual(
+    canonicalEndpoints('shares_history_with', 'repo:z', 'repo:a'),
+    canonicalEndpoints('shares_history_with', 'repo:a', 'repo:z'),
+  );
+});
+
+test('directional relationships preserve endpoint order', () => {
+  const forward = canonicalEndpoints('forked_from', 'repo:fork', 'repo:upstream');
+  const reversed = canonicalEndpoints('forked_from', 'repo:upstream', 'repo:fork');
+  assert.deepEqual(forward, { source: 'repo:fork', target: 'repo:upstream' });
+  assert.notDeepEqual(forward, reversed, 'a directional edge must keep its meaning when reversed');
+});
+
+test('a symmetric relationship observed from both sides yields one edge, not two', () => {
+  const shared = 'a'.repeat(40);
+  const evidence = {
+    type: 'git_blob_identity' as const,
+    status: 'VERIFIED' as const,
+    data: { first_blob: shared, second_blob: shared, first_path: 'a.ts', second_path: 'b.ts' },
+  };
+  const graph = buildGraph([
+    {
+      collector: 'git-blob-analyzer',
+      extractor: 'git-blob-identity@1',
+      subject: ROOT,
+      object: OTHER,
+      relationship: 'shares_exact_content_with',
+      directed: false,
+      evidence,
+    },
+    {
+      collector: 'git-blob-analyzer',
+      extractor: 'git-blob-identity@2',
+      subject: OTHER,
+      object: ROOT,
+      relationship: 'shares_exact_content_with',
+      directed: false,
+      evidence: { ...evidence, data: { ...evidence.data, first_path: 'b.ts', second_path: 'a.ts' } },
+    },
+  ]);
+  assert.equal(graph.relationships.length, 1, 'mirrored observations must merge into a single symmetric edge');
+  assert.equal(graph.relationships[0]?.directed, false);
+  assert.equal(graph.relationships[0]?.evidenceIds.length, 2, 'both observations remain as evidence');
+  assert.ok(validateGraph(graph).valid);
+});
+
+test('the resolver stamps direction from the ontology, ignoring a collector claim', () => {
+  // A collector that wrongly claims direction is rejected outright.
+  const rejected = checkObservation({
+    collector: 'git-blob-analyzer',
+    extractor: 'git-blob-identity@1',
+    subject: ROOT,
+    object: OTHER,
+    relationship: 'shares_exact_content_with',
+    directed: true,
+    evidence: {
+      type: 'git_blob_identity',
+      status: 'VERIFIED',
+      data: { first_blob: 'a'.repeat(40), second_blob: 'a'.repeat(40), first_path: 'a.ts', second_path: 'b.ts' },
+    },
+  });
+  assert.equal(rejected.ok, false);
+  assert.equal(rejected.ok === false && rejected.rejection.code, 'direction_mismatch');
+
+  // And the graph it produces always carries the contract value.
+  const graph = buildGraph([
+    {
+      collector: 'git-blob-analyzer',
+      extractor: 'git-blob-identity@1',
+      subject: ROOT,
+      object: OTHER,
+      relationship: 'shares_exact_content_with',
+      directed: false,
+      evidence: {
+        type: 'git_blob_identity',
+        status: 'VERIFIED',
+        data: { first_blob: 'a'.repeat(40), second_blob: 'a'.repeat(40), first_path: 'a.ts', second_path: 'b.ts' },
+      },
+    },
+  ]);
+  assert.equal(graph.relationships[0]?.directed, isDirectional('shares_exact_content_with'));
+  assert.equal(graph.relationships[0]?.directed, false);
+});
+
+test('the removed directional exact-content type no longer exists', () => {
+  assert.equal(isRelationshipType('contains_exact_content_from'), false);
+  assert.equal(RELATIONSHIP_SPECS.some((spec) => spec.type.includes('contains')), false);
+  assert.throws(() => relationshipSpec('contains_exact_content_from' as never));
 });
 
 test('self relationships are rejected', () => {
@@ -325,9 +469,9 @@ test('evidence without its required reviewable data is rejected', () => {
     extractor: 'x@1',
     subject: ROOT,
     object: OTHER,
-    relationship: 'contains_exact_content_from',
-    directed: true,
-    evidence: { type: 'git_blob_identity', status: 'VERIFIED', data: { source_blob: 'b'.repeat(40) } },
+    relationship: 'shares_exact_content_with',
+    directed: false,
+    evidence: { type: 'git_blob_identity', status: 'VERIFIED', data: { first_blob: 'b'.repeat(40) } },
   });
   assert.equal(result.ok, false);
   assert.equal(result.ok === false && result.rejection.code, 'evidence_data_incomplete');
@@ -340,8 +484,8 @@ test('graph output is deterministic and stably ordered', () => {
       extractor: 'git-blob-identity@1',
       subject: ROOT,
       object: OTHER,
-      relationship: 'contains_exact_content_from',
-      directed: true,
+      relationship: 'shares_exact_content_with',
+      directed: false,
       evidence: blobEvidence(),
     },
     {
@@ -374,8 +518,8 @@ test('the validator catches a hand-written graph that breaks the contract', () =
       extractor: 'git-blob-identity@1',
       subject: ROOT,
       object: OTHER,
-      relationship: 'contains_exact_content_from',
-      directed: true,
+      relationship: 'shares_exact_content_with',
+      directed: false,
       evidence: blobEvidence(),
     },
   ]);
@@ -391,7 +535,12 @@ test('the validator catches a hand-written graph that breaks the contract', () =
   tamperedStatus.relationships[0]!.status = 'DECLARED';
   assert.equal(validateGraph(tamperedStatus).valid, false);
 
+  // A hand-written graph claiming the wrong direction for the type is rejected.
   const tamperedDirection = structuredClone(graph) as LineageGraph;
-  tamperedDirection.relationships[0]!.directed = false;
+  tamperedDirection.relationships[0]!.directed = true;
   assert.equal(validateGraph(tamperedDirection).valid, false);
+  assert.ok(
+    validateGraph(tamperedDirection).errors.some((error) => error.includes('symmetric')),
+    'the error must name the direction contract',
+  );
 });

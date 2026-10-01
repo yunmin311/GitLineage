@@ -75,9 +75,44 @@
         "type": "object",
         "required": ["id", "type", "source", "target", "directed", "status", "evidenceIds", "attributes"],
         "additionalProperties": false,
+        "allOf": [
+          {
+            "description": "Symmetric relationship types must never be serialised as directed.",
+            "if": {
+              "properties": { "type": { "enum": ["shares_history_with", "shares_exact_content_with", "similar_to"] } },
+              "required": ["type"]
+            },
+            "then": {
+              "properties": { "directed": { "const": false } }
+            }
+          },
+          {
+            "description": "Directional relationship types must always be serialised as directed.",
+            "if": {
+              "properties": {
+                "type": {
+                  "enum": [
+                    "forked_from",
+                    "derived_from",
+                    "depends_on",
+                    "uses_submodule",
+                    "declared_inspiration",
+                    "references",
+                    "evolved_into"
+                  ]
+                }
+              },
+              "required": ["type"]
+            },
+            "then": {
+              "properties": { "directed": { "const": true } }
+            }
+          }
+        ],
         "properties": {
           "id": { "type": "string", "pattern": "^rel_[0-9a-f]{16}$" },
           "type": {
+            "description": "For symmetric types (shares_history_with, shares_exact_content_with, similar_to) `directed` MUST be false: neither endpoint is the origin.",
             "enum": [
               "forked_from",
               "derived_from",
@@ -86,14 +121,17 @@
               "uses_submodule",
               "declared_inspiration",
               "references",
-              "contains_exact_content_from",
+              "shares_exact_content_with",
               "similar_to",
               "evolved_into"
             ]
           },
           "source": { "type": "string", "minLength": 1 },
           "target": { "type": "string", "minLength": 1 },
-          "directed": { "type": "boolean" },
+          "directed": {
+            "type": "boolean",
+            "description": "Copied from the ontology's direction contract, not from the observed endpoint order."
+          },
           "status": { "enum": ["VERIFIED", "DECLARED", "DETECTED"] },
           "evidenceIds": {
             "type": "array",

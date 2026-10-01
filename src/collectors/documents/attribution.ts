@@ -242,7 +242,7 @@ const STRENGTH: Record<RelationshipType, number> = {
   shares_history_with: 2,
   references: 1,
   depends_on: 1,
-  contains_exact_content_from: 1,
+  shares_exact_content_with: 1,
   similar_to: 1,
   evolved_into: 1,
 };

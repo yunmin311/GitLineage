@@ -55,7 +55,12 @@ export interface BlobComparisonInput {
 }
 
 /**
- * Emits `contains_exact_content_from` for every blob present in both trees.
+ * Emits `shares_exact_content_with` for every blob present in both trees.
+ *
+ * The relationship is symmetric. Identical content says nothing about which
+ * repository came first or whether either derived from the other, so the
+ * observation carries `directed: false` and the evidence names its two sides
+ * `first`/`second` rather than `source`/`target`.
  *
  * Only identical Git blob ids are used. There is no fuzzy matching, no
  * threshold and no similarity score: either the content is byte-identical or
@@ -79,39 +84,42 @@ export function compareBlobIndexes(input: BlobComparisonInput): BlobComparisonRe
   const truncated = totalShared > sample.length;
 
   for (const sha of sample) {
-    const sourcePath = rootIndex.paths.get(sha)!;
-    const targetPath = candidateIndex.paths.get(sha)!;
+    // Symmetric observation: "first" is simply the repository under analysis,
+    // not an origin. The relationship type carries no direction.
+    const firstPath = rootIndex.paths.get(sha)!;
+    const secondPath = candidateIndex.paths.get(sha)!;
     observations.push({
       collector: COLLECTOR_GIT_BLOBS,
       extractor: EXTRACTOR_BLOB_IDENTITY,
       subject: { kind: 'repository', provider: 'github', owner: input.root.owner, name: input.root.name },
       object: { kind: 'repository', provider: 'github', owner: input.candidate.owner, name: input.candidate.name },
-      relationship: 'contains_exact_content_from',
-      directed: true,
+      relationship: 'shares_exact_content_with',
+      directed: false,
       evidence: {
         type: 'git_blob_identity',
         status: 'VERIFIED',
         repository: { kind: 'repository', provider: 'github', owner: input.root.owner, name: input.root.name },
-        sourceUrl: `https://github.com/${input.root.owner}/${input.root.name}/blob/${input.rootCommit}/${sourcePath
+        sourceUrl: `https://github.com/${input.root.owner}/${input.root.name}/blob/${input.rootCommit}/${firstPath
           .split('/')
           .map(encodeURIComponent)
           .join('/')}`,
-        locator: { path: sourcePath, field: sha },
+        locator: { path: firstPath, field: sha },
         observedText: `identical git blob ${sha}`,
         data: {
-          source_blob: sha,
-          target_blob: sha,
-          source_path: sourcePath,
-          target_path: targetPath,
-          source_commit: input.rootCommit,
-          target_commit: input.candidateCommit,
+          first_blob: sha,
+          second_blob: sha,
+          first_path: firstPath,
+          second_path: secondPath,
+          first_commit: input.rootCommit,
+          second_commit: input.candidateCommit,
+          direction: 'symmetric: identical content establishes no order of origin',
         },
       },
       relationshipAttributes: {
         matched_blob_count: totalShared,
         evidence_truncated: truncated,
-        source_blob_count: rootIndex.blobCount,
-        target_blob_count: candidateIndex.blobCount,
+        first_blob_count: rootIndex.blobCount,
+        second_blob_count: candidateIndex.blobCount,
         candidate_index_truncated: candidateIndex.truncated || rootIndex.truncated,
       },
     });

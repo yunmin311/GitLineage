@@ -28,7 +28,7 @@ export type RelationshipType =
   | 'uses_submodule'
   | 'declared_inspiration'
   | 'references'
-  | 'contains_exact_content_from'
+  | 'shares_exact_content_with'
   | 'similar_to'
   | 'evolved_into';
 
@@ -40,7 +40,7 @@ export const RELATIONSHIP_TYPES: readonly RelationshipType[] = [
   'uses_submodule',
   'declared_inspiration',
   'references',
-  'contains_exact_content_from',
+  'shares_exact_content_with',
   'similar_to',
   'evolved_into',
 ] as const;

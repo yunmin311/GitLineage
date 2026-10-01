@@ -42,6 +42,7 @@ interface CacheEntry {
   url: string;
   accept: string;
   fetchedAt: string;
+  /** File name inside the cache's http directory, never an absolute path. */
   bodyFile: string;
 }
 
@@ -99,9 +100,12 @@ export class HttpClient {
   private async request(
     url: URL,
     accept: string,
+    allowConditional = true,
   ): Promise<{ status: number; location: string | null; response: HttpResponse }> {
     const key = this.cache.hashKey(`${url.toString()}|${accept}`);
     const entryPath = this.cache.path('http', `${key}.json`);
+    // Cache entries store only a file name, so a cache directory copied between
+    // machines, users or working directories stays readable.
     const cached = await this.cache.readJson<CacheEntry>(entryPath);
 
     const headers: Record<string, string> = {
@@ -109,8 +113,10 @@ export class HttpClient {
       'user-agent': this.userAgent,
     };
     if (this.token) headers.authorization = `Bearer ${this.token}`;
-    if (cached?.etag) headers['if-none-match'] = cached.etag;
-    if (cached?.lastModified) headers['if-modified-since'] = cached.lastModified;
+    if (allowConditional) {
+      if (cached?.etag) headers['if-none-match'] = cached.etag;
+      if (cached?.lastModified) headers['if-modified-since'] = cached.lastModified;
+    }
 
     let lastError: Error | null = null;
     for (let attempt = 0; attempt <= this.maxRetries; attempt += 1) {
@@ -133,7 +139,7 @@ export class HttpClient {
         }
 
         if (response.status === 304) {
-          const body = cached ? await this.cache.readBuffer(cached.bodyFile) : null;
+          const body = cached?.bodyFile ? await this.cache.readBuffer(this.cache.path('http', cached.bodyFile)) : null;
           if (body) {
             return {
               status: 200,
@@ -141,9 +147,9 @@ export class HttpClient {
               response: { status: 200, body, etag: cached?.etag ?? null, fromCache: true, url: url.toString() },
             };
           }
-          // The cache entry is unusable; fall through and refetch unconditionally.
-          delete headers['if-none-match'];
-          delete headers['if-modified-since'];
+          // The server confirmed an unchanged resource but the cached body is
+          // gone, so refetch once without conditional headers.
+          return this.request(url, accept, false);
         }
 
         if (response.status === 403 || response.status === 429) {
@@ -164,15 +170,15 @@ export class HttpClient {
         const body = await this.readBounded(response, url);
         const etag = response.headers.get('etag');
         const lastModified = response.headers.get('last-modified');
-        const bodyFile = this.cache.path('http', `${key}.bin`);
-        await this.cache.writeAtomic(bodyFile, body);
+        const bodyFileName = `${key}.bin`;
+        await this.cache.writeAtomic(this.cache.path('http', bodyFileName), body);
         await this.cache.writeJsonAtomic(entryPath, {
           etag,
           lastModified,
           url: url.toString(),
           accept,
           fetchedAt: new Date().toISOString(),
-          bodyFile,
+          bodyFile: bodyFileName,
         } satisfies CacheEntry);
 
         return {

@@ -12,12 +12,14 @@ Confirmed and implemented in this repository.
 | --- | --- |
 | Three separate object kinds | `Entity`, `Relationship` and `Evidence` are never merged. Evidence is first-class data in `graph.json`, not UI text. |
 | Three evidence statuses | `VERIFIED`, `DECLARED`, `DETECTED`. No generic `INFERRED`. |
-| Ten relationship types | `forked_from`, `derived_from`, `shares_history_with`, `depends_on`, `uses_submodule`, `declared_inspiration`, `references`, `contains_exact_content_from`, `similar_to`, `evolved_into`. `copied_from` and similar accusations do not exist. |
+| Ten relationship types | `forked_from`, `derived_from`, `shares_history_with`, `depends_on`, `uses_submodule`, `declared_inspiration`, `references`, `shares_exact_content_with`, `similar_to`, `evolved_into`. `copied_from` and similar accusations do not exist. |
+| | Direction is ontology-owned | Directional: `forked_from`, `derived_from`, `depends_on`, `uses_submodule`, `declared_inspiration`, `references`, `evolved_into`. Symmetric: `shares_history_with`, `shares_exact_content_with`, `similar_to`. The resolver stamps direction from the ontology and rejects contradicting observations. Symmetric endpoints are canonicalised so a pair yields one edge. A renderer must read `directed`, never infer it from the focused node. |
+| `shares_exact_content_with` replaces `contains_exact_content_from` | V1 direction audit. Identical blob content proves neither origin nor copying direction, so the type is symmetric and its evidence uses `first_*`/`second_*` keys instead of `source_*`/`target_*`. Core semantics changed, not only the display name. |
 | Two admission guards | Evidence type to relationship type, and status to both. A collector proposes, the resolver disposes. Rejections become diagnostics. |
 | Direction is fixed by the ontology | `shares_history_with` and `similar_to` are undirected; everything else is directed. |
 | Dependency is `DECLARED` only | A manifest is an author's statement. GitLineage never runs a package manager. |
 | `derived_from` needs containment plus ordering | Shared commits alone give `shares_history_with`, never a direction. Truncated windows can never prove containment. |
-| Exact content only, no similarity | `contains_exact_content_from` uses identical Git blob ids. No threshold, no score. `similar_to` exists in the ontology but no detector ships. |
+| Exact content only, no similarity | `shares_exact_content_with` uses identical Git blob ids, symmetric. No threshold, no score. `similar_to` exists in the ontology but no detector ships. |
 | Declarations require a resolvable repository | An attribution phrase without a repository URL in its window produces no relationship, only a diagnostic. Code blocks and indented code are not prose. |
 | `thanks to` is a reference | An acknowledgement is a link, not a claim of derivation. |
 | Collector boundary | Collectors observe and emit `Observation[]`. They never merge evidence, never choose a status, never touch the graph. |
@@ -46,7 +48,7 @@ mistaken for product requirements.
 - A repository URL yields at most one relationship per target, at the strongest
   declared meaning, so a URL covered by "inspired by" does not also appear as a
   bare `references` edge.
-- `contains_exact_content_from` is `VERIFIED`-only for now. Normalised-hash
+- `shares_exact_content_with` is `VERIFIED`-only and symmetric-only. Normalised-hash
   detection would need a new evidence type and an explicit ontology amendment.
 - Submodule identity is joined on `path` against the tree's gitlink entries
   rather than on the submodule name, because a name may contain dots.
@@ -54,6 +56,10 @@ mistaken for product requirements.
   a failed analysis and never a silent claim.
 - Redirects are followed manually up to three hops, each re-validated, so that
   renamed repositories keep working.
+- HTTP cache entries store a body file *name*, not an absolute path, so a cache
+  directory stays readable across machines and working directories. A 304 whose
+  cached body has gone triggers one unconditional refetch instead of an error.
+  Found by live validation after mixing Windows and WSL cache directories.
 
 ## Proposal
 
@@ -86,6 +92,7 @@ Open, not implemented, not binding.
 | Running package managers to obtain metadata | Rejected | Repository code is untrusted data and is never executed. |
 | Similarity upgraded to provenance | Rejected | Similarity cannot establish direction, authorship or origin. |
 | Implicit `INFERRED` naming (`copied_from`, `stolen_from`) | Rejected | The analyzer has no standing to make that claim. |
+| `contains_exact_content_from` | Replaced | The V1 direction audit found that the name asserted provenance direction the evidence did not support. Replaced by the symmetric `shares_exact_content_with`, with symmetric endpoint canonicalisation and origin-free evidence field names. A regression test asserts the old name is not a valid relationship type. |
 | Unbounded full clone per repository | Rejected | Storage, bandwidth and latency blow up immediately. Bounded fetch plus the tree API covers the same signals. |
 | Framework-first implementation | Not started | The specification deliberately left the language open until the analyzer contract was proven. It is now fixed by the decision above; the choice is recorded rather than debated. |
 | A monorepo with separate packages | Deferred | A single package with the proposed module layout proves the contract with less machinery. Revisit if the web layer needs independent deployables. |
@@ -95,8 +102,12 @@ Open, not implemented, not binding.
 | Check | Command | Status |
 | --- | --- | --- |
 | Types | `npm run typecheck` | passes |
-| Unit, contract, regression, schema, offline pipeline | `npm test` | 69 pass, 3 live tests skipped |
+| Unit, contract, regression, schema, offline pipeline | `npm test` | 78 pass, 3 live tests skipped, 0 fail |
 | Live integration on real repositories | `npm run test:live` | 7 pass |
 | Artifact validation | `node src/cli/main.ts validate <graph.json>` | passes on every produced artifact |
+
+Recorded run after the direction audit: 81 tests (78 pass, 3 live skipped), 7
+live integration tests passing, artefacts valid against `validateGraph` and the
+JSON Schema. Verified on Node 24.13 and git 2.43.0 under WSL2.
 
 Details and recorded results: `docs/integration-validation.md`.

@@ -12,6 +12,7 @@ interface Expectation {
   type: string;
   target: string;
   status: string;
+  directed?: boolean;
 }
 
 interface Case {
@@ -24,6 +25,8 @@ interface Case {
   expectAbsent?: string[];
   minimumSubmoduleCount?: number;
   expectNoCandidateEvidenceFor?: string;
+  expectDirection?: { type: string; directed: boolean };
+  expectNoMirroredEdge?: string;
 }
 
 const fixture = JSON.parse(
@@ -61,6 +64,33 @@ live('live integration: real repository families', async (t) => {
         );
         assert.equal(relationship.status, expectation.status);
         assert.ok(relationship.evidenceIds.length > 0, 'every relationship must carry evidence');
+        if (expectation.directed !== undefined) {
+          assert.equal(
+            relationship.directed,
+            expectation.directed,
+            `${expectation.type} direction must follow the ontology contract, not the endpoint order`,
+          );
+        }
+        // A symmetric relationship must never also exist as its own mirror.
+        if (relationship.directed === false) {
+          const mirror = result.graph.relationships.find(
+            (item) => item.type === relationship.type && item.source === relationship.target && item.target === relationship.source,
+          );
+          assert.equal(mirror, undefined, `${relationship.type} must not produce a mirrored duplicate edge`);
+        }
+      }
+
+      if (testCase.expectDirection) {
+        const relationship = result.graph.relationships.find((item) => item.type === testCase.expectDirection!.type);
+        assert.ok(relationship, `expected a ${testCase.expectDirection!.type} relationship`);
+        assert.equal(relationship.directed, testCase.expectDirection!.directed);
+      }
+
+      if (testCase.expectNoMirroredEdge) {
+        const mirrors = result.graph.relationships.filter(
+          (item) => item.type === testCase.expectNoMirroredEdge && item.source === result.graph.graph.rootEntityId,
+        );
+        assert.equal(mirrors.length, 1, `exactly one ${testCase.expectNoMirroredEdge} edge may originate from the root`);
       }
 
       if (testCase.minimumSubmoduleCount !== undefined) {

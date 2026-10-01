@@ -39,7 +39,8 @@ export const RELATIONSHIP_SPECS: readonly RelationshipSpec[] = [
     directed: false,
     allowedStatuses: ['VERIFIED', 'DECLARED'],
     allowedEvidenceTypes: ['git_shared_commits', 'document_attribution'],
-    description: 'Both repositories contain at least one identical Git commit object.',
+    description:
+      'Both repositories contain at least one identical Git commit object. Symmetric: a shared ancestor implies no copying direction.',
   },
   {
     type: 'depends_on',
@@ -70,18 +71,20 @@ export const RELATIONSHIP_SPECS: readonly RelationshipSpec[] = [
     description: 'The source explicitly links to the target. The weakest documented relationship.',
   },
   {
-    type: 'contains_exact_content_from',
-    directed: true,
+    type: 'shares_exact_content_with',
+    directed: false,
     allowedStatuses: ['VERIFIED'],
     allowedEvidenceTypes: ['git_blob_identity'],
-    description: 'The source repository contains files byte-identical to files in the target repository.',
+    description:
+      'The two repositories contain byte-identical source content. Symmetric: identical content establishes neither direction nor provenance.',
   },
   {
     type: 'similar_to',
     directed: false,
     allowedStatuses: ['DETECTED'],
     allowedEvidenceTypes: ['token_fingerprint'],
-    description: 'A deterministic algorithm found source similarity. Never provenance, never directional.',
+    description:
+      'A deterministic algorithm found source similarity. Symmetric: never provenance, never a direction of copying.',
   },
   {
     type: 'evolved_into',
@@ -106,13 +109,57 @@ export function isRelationshipType(value: string): value is RelationshipType {
   return RELATIONSHIP_SPEC_BY_TYPE.has(value as RelationshipType);
 }
 
+/**
+ * The authoritative direction split.
+ *
+ * A renderer must read edge direction from this contract, never from which
+ * entity happens to be the currently focused node. Symmetric relationship types
+ * carry no direction at all: neither repository contains the other, neither is
+ * derived from the other, and neither copied the other.
+ */
+export const DIRECTIONAL_RELATIONSHIPS: readonly RelationshipType[] = RELATIONSHIP_SPECS.filter(
+  (spec) => spec.directed,
+).map((spec) => spec.type);
+
+export const SYMMETRIC_RELATIONSHIPS: readonly RelationshipType[] = RELATIONSHIP_SPECS.filter(
+  (spec) => !spec.directed,
+).map((spec) => spec.type);
+
+export function isDirectional(type: RelationshipType): boolean {
+  return relationshipSpec(type).directed;
+}
+
+export function isSymmetric(type: RelationshipType): boolean {
+  return !relationshipSpec(type).directed;
+}
+
+/**
+ * Normalises the endpoints of a relationship into canonical order.
+ *
+ * For symmetric relationships the two endpoints are interchangeable, so the
+ * edge identity must not depend on which side happened to be observed first.
+ * This is what makes a symmetric relationship merge into a single edge instead
+ * of two mirrored ones.
+ */
+export function canonicalEndpoints(
+  type: RelationshipType,
+  left: string,
+  right: string,
+): { source: string; target: string } {
+  if (relationshipSpec(type).directed) return { source: left, target: right };
+  return left <= right ? { source: left, target: right } : { source: right, target: left };
+}
+
 /** Data keys every evidence record of a given type must carry to be reviewable. */
 export const EVIDENCE_REQUIRED_DATA_KEYS: Readonly<Record<EvidenceType, readonly string[]>> = {
   github_repository_identity: ['full_name', 'html_url'],
   github_fork_metadata: ['fork', 'source_full_name', 'source_url'],
   git_shared_commits: ['shared_commit_count', 'shared_commit_samples', 'sampled_commit_count'],
   git_history_containment: ['source_only_commit_count', 'target_only_commit_count', 'shared_commit_count'],
-  git_blob_identity: ['source_blob', 'target_blob', 'source_path', 'target_path'],
+  // Symmetric evidence: the two sides are named by observation order, never by
+  // origin. `source_*`/`target_*` keys would imply a direction the fact does not
+  // support.
+  git_blob_identity: ['first_blob', 'second_blob', 'first_path', 'second_path'],
   git_submodule_entry: ['submodule_name', 'path', 'url', 'pinned_commit'],
   package_manifest: ['ecosystem', 'package_name', 'range', 'manifest_path'],
   package_lockfile: ['ecosystem', 'package_name', 'resolved_version', 'manifest_path'],

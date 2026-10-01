@@ -14,9 +14,11 @@
         "status": "VERIFIED"
       },
       "expectAlsoPresent": [
-        { "type": "shares_history_with", "target": "repo:github:sindresorhus/is", "status": "VERIFIED" },
-        { "type": "contains_exact_content_from", "target": "repo:github:sindresorhus/is", "status": "VERIFIED" }
+        { "type": "shares_history_with", "target": "repo:github:sindresorhus/is", "status": "VERIFIED", "directed": false },
+        { "type": "shares_exact_content_with", "target": "repo:github:sindresorhus/is", "status": "VERIFIED", "directed": false }
       ],
+      "expectDirection": { "type": "shares_exact_content_with", "directed": false },
+      "expectNoMirroredEdge": "shares_exact_content_with",
       "expectAbsent": ["derived_from", "similar_to", "depends_on_to_repository"]
     },
     {

@@ -79,7 +79,7 @@ Access is layered so that expensive work is never on the default path.
 | C. Extended analysis | none in V1 | clone detection, similarity |
 
 Blob identity is obtained from the GitHub tree API rather than from a clone, so
-`contains_exact_content_from` costs one API call per candidate.
+`shares_exact_content_with` costs one API call per candidate.
 
 Every git fetch is bounded: `--depth`, `--no-tags`, `--filter=blob:none`,
 `--no-recurse-submodules`, a 120 s timeout, a 256 MiB post-fetch size check that

@@ -105,7 +105,7 @@ test('blob identity is built from identical git object ids, ignoring paths', () 
   assert.equal(index.paths.get('a'.repeat(40)), 'lib/a.ts', 'the lexicographically smallest path is recorded');
 });
 
-test('exact content match produces contains_exact_content_from with full evidence', () => {
+test('exact content match produces a symmetric shares_exact_content_with observation', () => {
   const shared = 'a'.repeat(40);
   const comparison = compareBlobIndexes({
     root: ROOT,
@@ -118,13 +118,31 @@ test('exact content match produces contains_exact_content_from with full evidenc
   assert.equal(comparison.sharedBlobCount, 1);
   assert.equal(comparison.observations.length, 1);
   const observation = comparison.observations[0]!;
-  assert.equal(observation.relationship, 'contains_exact_content_from');
+  assert.equal(observation.relationship, 'shares_exact_content_with');
+  assert.equal(observation.directed, false, 'identical content carries no direction');
   assert.equal(observation.evidence.status, 'VERIFIED');
   assert.equal(observation.evidence.type, 'git_blob_identity');
-  assert.equal(observation.evidence.data.source_path, 'src/parser.ts');
-  assert.equal(observation.evidence.data.target_path, 'internal/parser.ts');
-  assert.equal(observation.evidence.data.source_blob, shared);
+  assert.equal(observation.evidence.data.first_path, 'src/parser.ts');
+  assert.equal(observation.evidence.data.second_path, 'internal/parser.ts');
+  assert.equal(observation.evidence.data.first_blob, shared);
+  assert.match(String(observation.evidence.data.direction), /symmetric/);
   assert.match(String(observation.evidence.sourceUrl), /github\.com\/me\/project\/blob/);
+});
+
+test('exact content evidence never uses origin-implying source/target keys', () => {
+  const shared = 'a'.repeat(40);
+  const comparison = compareBlobIndexes({
+    root: ROOT,
+    rootIndex: buildBlobIndex([blob('a.ts', shared)]),
+    rootCommit: sha(1),
+    candidate: UPSTREAM,
+    candidateIndex: buildBlobIndex([blob('b.ts', shared)]),
+    candidateCommit: sha(2),
+  });
+  const keys = Object.keys(comparison.observations[0]!.evidence.data);
+  for (const forbidden of ['source_blob', 'target_blob', 'source_path', 'target_path', 'source_commit', 'target_commit']) {
+    assert.equal(keys.includes(forbidden), false, `symmetric evidence must not expose ${forbidden}`);
+  }
 });
 
 test('no identical blob means no exact content relationship', () => {

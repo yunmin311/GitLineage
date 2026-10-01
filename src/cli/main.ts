@@ -4,7 +4,13 @@ import { parseArgs } from 'node:util';
 import { analyze } from '../pipeline/analyze.ts';
 import { validateGraph } from '../core/validate.ts';
 import type { LineageGraph } from '../core/model.ts';
-import { relationshipSpec, RELATIONSHIP_SPECS, EVIDENCE_REQUIRED_DATA_KEYS } from '../core/ontology.ts';
+import {
+  relationshipSpec,
+  RELATIONSHIP_SPECS,
+  EVIDENCE_REQUIRED_DATA_KEYS,
+  DIRECTIONAL_RELATIONSHIPS,
+  SYMMETRIC_RELATIONSHIPS,
+} from '../core/ontology.ts';
 import { EVIDENCE_TYPES, GRAPH_SCHEMA_VERSION } from '../core/model.ts';
 
 const HELP = `gitlineage - evidence-backed repository lineage analyzer
@@ -147,6 +153,7 @@ function renderSummary(
       const spec = relationshipSpec(relationship.type);
       const source = graph.entities.find((entity) => entity.id === relationship.source);
       const target = graph.entities.find((entity) => entity.id === relationship.target);
+      // Arrow follows the ontology contract, not which side is the root.
       const arrow = relationship.directed ? '->' : '<->';
       lines.push(
         `  [${relationship.status.padEnd(8)}] ${(source?.display.fullName ?? source?.display.name ?? relationship.source).padEnd(38)} ${arrow} ${(target?.display.fullName ?? target?.display.name ?? relationship.target).padEnd(38)} ${relationship.type}`,
@@ -195,7 +202,7 @@ function renderInspection(graph: LineageGraph, relationshipId: string | undefine
 
   for (const relationship of relationships) {
     lines.push(`relationship ${relationship.id}`);
-    lines.push(`  type       ${relationship.type} (${relationship.directed ? 'directed' : 'undirected'})`);
+    lines.push(`  type       ${relationship.type} (${relationship.directed ? 'directional' : 'symmetric'})`);
     lines.push(`  source     ${name(relationship.source)}`);
     lines.push(`  target     ${name(relationship.target)}`);
     lines.push(`  status     ${relationship.status}`);
@@ -234,11 +241,17 @@ function ontologyReport(): unknown {
     schemaVersion: GRAPH_SCHEMA_VERSION,
     relationshipTypes: RELATIONSHIP_SPECS.map((spec) => ({
       type: spec.type,
+      direction: spec.directed ? 'directional' : 'symmetric',
       directed: spec.directed,
       allowedStatuses: spec.allowedStatuses,
       allowedEvidenceTypes: spec.allowedEvidenceTypes,
       description: spec.description,
     })),
+    directionContract: {
+      note: 'renderers must read directed from the relationship, never infer it from the focused node',
+      directional: DIRECTIONAL_RELATIONSHIPS,
+      symmetric: SYMMETRIC_RELATIONSHIPS,
+    },
     evidenceTypes: EVIDENCE_TYPES.map((type) => ({ type, requiredDataKeys: EVIDENCE_REQUIRED_DATA_KEYS[type] })),
   };
 }
