@@ -2,12 +2,20 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://gitlineage.dev/schemas/lineage-graph-1.0.0.json",
   "title": "GitLineage canonical lineage graph",
-  "description": "Machine-readable provenance graph. Entity, Relationship and Evidence are three separate object kinds and are never merged. Every relationship must reference at least one evidence record.",
+  "description": "Machine-readable provenance graph. Entity, Relationship and Evidence are three separate object kinds and are never merged. Every relationship must reference at least one evidence record. Schema 2.0.0 replaced contains_exact_content_from with the symmetric shares_exact_content_with and moved git_blob_identity keys from source_*/target_* to first_*/second_*; a 1.x artifact is not valid under this schema.",
+  "x-schema-migrations": {
+    "2.0.0": "Breaking: contains_exact_content_from removed (now shares_exact_content_with, symmetric); git_blob_identity evidence keys renamed source_blob/target_blob/source_path/target_path to first_blob/second_blob/first_path/second_path. Artifacts at schemaVersion 1.x are rejected and must be regenerated."
+  },
   "type": "object",
   "required": ["schemaVersion", "graph", "entities", "relationships", "evidence", "diagnostics"],
   "additionalProperties": false,
   "properties": {
-    "schemaVersion": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Must equal the schema version this build produces. A 1.x value is rejected so a pre-rename artifact can never be reused under the current contract.",
+      "const": "2.0.0"
+    },
     "graph": {
       "type": "object",
       "required": ["rootEntityId", "provider", "revision", "generatedAt", "analyzer"],

@@ -3,6 +3,7 @@ import {
   ENTITY_TYPES,
   EVIDENCE_TYPES,
   RELATIONSHIP_TYPES,
+  SUPPORTED_GRAPH_SCHEMA_VERSIONS,
   type EvidenceStatus,
   type LineageGraph,
 } from './model.ts';
@@ -28,8 +29,15 @@ export interface ValidationResult {
 export function validateGraph(graph: LineageGraph): ValidationResult {
   const errors: string[] = [];
 
+  // Version gate first. A 1.x artifact predates the shares_exact_content_with
+  // rename and carries source_*/target_* evidence keys; serving or reusing it
+  // would silently reintroduce a relationship type this build does not know.
   if (typeof graph.schemaVersion !== 'string' || graph.schemaVersion.length === 0) {
     errors.push('schemaVersion must be a non-empty string');
+  } else if (!SUPPORTED_GRAPH_SCHEMA_VERSIONS.includes(graph.schemaVersion)) {
+    errors.push(
+      `graph schemaVersion ${graph.schemaVersion} is not supported by this build (${SUPPORTED_GRAPH_SCHEMA_VERSIONS.join(', ')}); the artifact is stale and must be regenerated`,
+    );
   }
   if (!graph.graph || typeof graph.graph.rootEntityId !== 'string') {
     errors.push('graph.rootEntityId must be a string');

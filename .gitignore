@@ -11,3 +11,4 @@ gitconfig-absent
 Thumbs.db
 .env
 .env.*
+.cache-web-live/

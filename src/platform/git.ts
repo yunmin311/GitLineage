@@ -3,6 +3,9 @@ import { mkdir, rm, stat } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { Buffer } from 'node:buffer';
 import { promisify } from 'node:util';
+import type { Cache } from './cache.ts';
+import type { RepositoryRef } from './url.ts';
+import { GRAPH_SCHEMA_VERSION } from '../core/model.ts';
 
 /**
  * The only process GitLineage ever spawns is `git`, with a fixed argument
@@ -182,6 +185,31 @@ export async function isGitAvailable(): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+/**
+ * Canonical filesystem location for a repository's graph artifacts.
+ *
+ * The path includes the graph schema version and the analyzer version, so an
+ * artifact produced under an older contract can never be found, reused or
+ * served by a newer build. This is the cache-key guarantee the product
+ * specification asks for: repository identity + resolved revision + analysis
+ * schema version.
+ */
+export function graphArtifactPaths(cache: Cache, repository: RepositoryRef, commit: string, namespace: string): {
+  directory: string;
+  graph: string;
+  metadata: string;
+} {
+  const directory = cache.path(
+    'graphs',
+    namespace,
+    repository.provider,
+    repository.owner,
+    `${repository.name}@${commit.slice(0, 12)}`,
+    `v${GRAPH_SCHEMA_VERSION}`,
+  );
+  return { directory, graph: join(directory, 'graph.json'), metadata: join(directory, 'analysis-metadata.json') };
 }
 
 /**

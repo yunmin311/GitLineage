@@ -13,8 +13,23 @@
 
 export type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
 
-export const GRAPH_SCHEMA_VERSION = '1.0.0';
-export const ANALYZER_VERSION = '0.1.0';
+/**
+ * Version of the serialized LineageGraph contract.
+ *
+ * MAJOR is bumped for any breaking change: a removed or renamed relationship
+ * type, a removed evidence field, a changed status rule, or a changed direction.
+ *
+ * 2.0.0 — breaking: `contains_exact_content_from` was replaced by the symmetric
+ *         `shares_exact_content_with`, and `git_blob_identity` evidence keys
+ *         moved from `source_*`/`target_*` to `first_*`/`second_*`. A 1.x
+ *         artifact must never be served, cached or validated under 2.x.
+ */
+export const GRAPH_SCHEMA_VERSION = '2.0.0';
+
+/** Versions this build can read. Anything else must be treated as stale. */
+export const SUPPORTED_GRAPH_SCHEMA_VERSIONS: readonly string[] = [GRAPH_SCHEMA_VERSION];
+
+export const ANALYZER_VERSION = '0.2.0';
 
 export type EvidenceStatus = 'VERIFIED' | 'DECLARED' | 'DETECTED';
 

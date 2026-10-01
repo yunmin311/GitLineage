@@ -10,6 +10,8 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "node --test \"test/**/*.test.ts\"",
+    "serve": "node src/web/serve.ts",
+    "serve:api-only": "node src/web/serve.ts --no-client",
     "test:live": "node test/live/run-live-validation.ts",
     "analyze": "node src/cli/main.ts analyze",
     "check": "npm run typecheck && npm test"
@@ -21,6 +23,7 @@
     "@types/node": "^22.10.2",
     "ajv": "^8.20.0",
     "ajv-formats": "^3.0.1",
+    "playwright": "^1.63.0",
     "typescript": "^5.8.2"
   }
 }

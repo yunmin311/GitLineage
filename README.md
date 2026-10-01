@@ -73,14 +73,27 @@ Useful flags: `--ref <branch|tag|sha>`, `--depth <n>`, `--max-candidates <n>`,
 | --- | --- | --- |
 | `forked_from` | `VERIFIED` from platform metadata, `DECLARED` from a README | `github_fork_metadata`, `document_attribution` |
 | `derived_from` | `VERIFIED` only, and only with history containment plus temporal ordering | `git_history_containment` |
-| `shares_history_with` | `VERIFIED` from identical Git commit objects | `git_shared_commits` |
+| `shares_history_with` | `VERIFIED` from identical Git commit objects, symmetric | `git_shared_commits` |
 | `uses_submodule` | `VERIFIED` with the pinned commit from the tree gitlink | `git_submodule_entry` |
-| `shares_exact_content_with` | `VERIFIED` from identical Git blob ids | `git_blob_identity` |
+| `shares_exact_content_with` | `VERIFIED` from identical Git blob ids, symmetric | `git_blob_identity` |
 | `depends_on` | `DECLARED` only, never an ancestry claim | `package_manifest`, `package_lockfile` |
 | `declared_inspiration` | `DECLARED` only | `document_attribution` |
 | `references` | `DECLARED` | `document_reference`, `package_registry_metadata` |
-| `similar_to` | `DETECTED` only, undirected. Reserved: no detector ships in V1 | `token_fingerprint` |
+| `similar_to` | `DETECTED` only, symmetric. Reserved: no detector ships in V1 | `token_fingerprint` |
 | `evolved_into` | Reserved: part of the ontology, not emitted in V1 | — |
+
+## Web explorer
+
+```bash
+npm run serve
+open http://127.0.0.1:4317/nachocebey/is
+```
+
+`/<owner>/<repo>` is the primary route. The HTTP boundary exposes the canonical
+graph unchanged at `/api/graph/:owner/:repo` and a separate presentation
+view-model at `/api/view/:owner/:repo`. The R3.1 one-hop Explorer reads
+`relationship.directed` and never infers arrow direction from the focused node.
+See `docs/web-slice.md` and `docs/screenshots/`.
 
 ### Direction is part of the contract
 
@@ -110,6 +123,7 @@ Package registries consulted for source repositories: npm, PyPI.
 | `docs/architecture.md` | Data flow, module boundaries, collector/resolver contract, caching, cost model. |
 | `docs/evidence-model.md` | `Entity`, `Relationship`, `Evidence`, the status policy and the two admission guards. |
 | `docs/relationship-ontology.md` | Every relationship type with its evidence, statuses, direction and non-goals. |
+| `docs/web-slice.md` | HTTP boundary, view-model transformation, routes, screenshots, deviations from R3.1. |
 | `docs/security.md` | Threat model, SSRF defence, resource limits, "never execute" enforcement, cache namespace isolation. |
 | `docs/project-state.md` | Confirmed decisions, open proposals, deprecated options. |
 | `docs/integration-validation.md` | What was validated against real repositories, including negative cases. |

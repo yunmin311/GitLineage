@@ -32,7 +32,12 @@ Confirmed and implemented in this repository.
 | Blob identity from the tree API | Exact content costs one API call per candidate instead of a clone. |
 | Implementation language | TypeScript on Node >= 22.18, executed directly through Node's type stripping, with `tsc --noEmit` as the type gate and `node:test` as the test runner. |
 | Single package, not a monorepo | One `package.json`. Module boundaries under `src/` match the proposed layout so a later split is mechanical. |
-| Minimal dependencies | Runtime: `smol-toml` only. Dev: `typescript`, `@types/node`, `ajv`, `ajv-formats` for JSON Schema cross-checking. |
+| Minimal dependencies | Runtime: `smol-toml` only. Dev: `typescript`, `@types/node`, `ajv`, `ajv-formats`, `playwright` (screenshot capture only). |
+| Core contract frozen for the Web phase | Phase 1 of the Web slice changed no ontology, collector, evidence semantic, resolver behaviour or graph schema field for presentation convenience. Every visual problem found in real data was fixed in `src/web/view-model.ts` and the client layout. Deviations are listed in `docs/web-slice.md`. |
+| Graph schema 2.0.0 | Bumped for the breaking rename. `validateGraph` refuses any other version; artifact cache paths embed `v2.0.0`; the JSON Schema pins `const: "2.0.0"`. A 1.x artifact cannot be served, reused or validated. |
+| Two HTTP surfaces, not one | `/api/graph/:owner/:repo` returns the canonical graph unchanged; `/api/view/:owner/:repo` returns the presentation view-model. No renderer field ever enters the canonical graph. |
+| `/owner/repo` as the primary route | So a future domain replacement is a DNS change. Selection state lives in the query string for shareability. |
+| Bundling is presentation-only | `vitest-dev/vitest` yields 102 one-hop edges. Secondary relationships collapse into counted bundles; nothing is dropped and every member stays reachable in the Evidence drawer. |
 | CLI first, web later | `analyze` produces `graph.json`; the renderer consumes it and must not change the contract. |
 
 ### Implementation decisions taken during this work
@@ -74,7 +79,7 @@ Open, not implemented, not binding.
 
 | Proposal | Notes |
 | --- | --- |
-| Interactive explorer | Consume `graph.json` only. Needs a layout that separates ancestry, dependency, declaration, exact content and detection visually, and an evidence inspector per edge. |
+| Interactive explorer | **Shipped in Phase 1.** `src/web/` exposes the canonical graph and the view-model over HTTP, with the R3.1 one-hop Explorer as a static client. Remaining: zoom/pan controls, fork-family cluster toggle, path focus on selection, timeline attributes, compare view, multi-hop views. |
 | Timeline / evolution view | First observed, last observed, introduced in commit, removed in commit. |
 | Similarity detector | Token fingerprints and candidate retrieval, `DETECTED` only, never allowed near the verified layer. |
 | Normalised content hashing | Would need a new evidence type and an ontology amendment before any code. |
@@ -100,6 +105,7 @@ Open, not implemented, not binding.
 | Similarity upgraded to provenance | Rejected | Similarity cannot establish direction, authorship or origin. |
 | Implicit `INFERRED` naming (`copied_from`, `stolen_from`) | Rejected | The analyzer has no standing to make that claim. |
 | `git rev-parse --git-dir` as an existence test | Replaced | Git searches upward, so a cache directory inside a repository adopted that repository: the analyser rewrote its `origin` remote and marked it shallow and blob-filtered. Now compares `--show-toplevel` with the target directory. Fixed after live validation damaged this project's own git config. |
+| Graph schema 1.0.0 | Superseded by 2.0.0 | The `contains_exact_content_from` rename and the `source_*` → `first_*` evidence key change are breaking. 1.x artifacts are rejected by `validateGraph`, refused by the cache path, and rejected by the JSON Schema. |
 | `contains_exact_content_from` | Replaced | The V1 direction audit found that the name asserted provenance direction the evidence did not support. Replaced by the symmetric `shares_exact_content_with`, with symmetric endpoint canonicalisation and origin-free evidence field names. A regression test asserts the old name is not a valid relationship type. |
 | Unbounded full clone per repository | Rejected | Storage, bandwidth and latency blow up immediately. Bounded fetch plus the tree API covers the same signals. |
 | Framework-first implementation | Not started | The specification deliberately left the language open until the analyzer contract was proven. It is now fixed by the decision above; the choice is recorded rather than debated. |
@@ -109,14 +115,17 @@ Open, not implemented, not binding.
 
 | Check | Command | Status |
 | --- | --- | --- |
-| Types | `npm run typecheck` | passes |
-| Unit, contract, regression, git isolation, schema, offline pipeline | `npm test` | 86 pass, 3 live tests skipped, 0 fail |
+| Types | `npm run typecheck` | passes, 0 errors |
+| Unit, contract, regression, view-model, HTTP, schema, offline pipeline | `npm test` | 130 tests, 127 pass, 3 live skipped, 0 fail |
 | Live integration on real repositories | `npm run test:live` | 7 pass |
+| Live Web boundary on the four real families | `node test/web/live-web-validation.ts` | all checks pass |
+| Screenshots of real repositories | `node test/web/screenshots.ts` | 5 PNGs, no console errors, no horizontal overflow |
 | Artifact validation | `node src/cli/main.ts validate <graph.json>` | passes on every produced artifact |
 
-Recorded run after the direction audit and the git isolation fix: 89 tests (86
-pass, 3 live skipped), 7 live integration tests passing, artefacts valid against
-`validateGraph` and the JSON Schema. Verified on Node 24.13 and git 2.43.0 under
-WSL2.
+Recorded run for the Web slice: graph schema 2.0.0, analyzer 0.2.0, Node 24.21,
+git 2.43.0, WSL2.
+
+Superseded run note: 89 tests at the direction-audit commit. The Web slice run
+is recorded in the verification table above.
 
 Details and recorded results: `docs/integration-validation.md`.

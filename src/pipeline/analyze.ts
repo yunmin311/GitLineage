@@ -35,6 +35,11 @@ const LINEAGE_RELATIONSHIPS: ReadonlySet<string> = new Set([
 export interface AnalyzeOptions {
   target: string;
   ref?: string | undefined;
+  /**
+   * Optional cheap resolver for the revision, used to look up a cached
+   * artifact before doing the full analysis. Omit it to always analyse.
+   */
+  probeRevision?: ((repository: RepositoryRef) => Promise<{ commit: string | null }>) | undefined;
   depth?: number | undefined;
   cacheRoot: string;
   namespace?: CacheNamespace;

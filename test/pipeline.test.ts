@@ -8,6 +8,7 @@ import { analyze } from '../src/pipeline/analyze.ts';
 import { validateGraph } from '../src/core/validate.ts';
 import { RELATIONSHIP_SPECS } from '../src/core/ontology.ts';
 import type { LineageGraph } from '../src/core/model.ts';
+import { ANALYZER_VERSION, GRAPH_SCHEMA_VERSION } from '../src/core/model.ts';
 
 // ajv and ajv-formats ship CommonJS only; loading them through createRequire
 // keeps the interop explicit and type-safe.
@@ -74,7 +75,7 @@ test('the analyzer never emits a relationship type outside the ontology', () => 
 
 test('end to end: the JSON schema accepts a minimal graph and rejects broken ones', async () => {
   const base: LineageGraph = {
-    schemaVersion: '1.0.0',
+    schemaVersion: GRAPH_SCHEMA_VERSION,
     graph: {
       rootEntityId: 'repo:github:a/b',
       provider: 'github',
@@ -82,8 +83,8 @@ test('end to end: the JSON schema accepts a minimal graph and rejects broken one
       generatedAt: '2026-01-01T00:00:00.000Z',
       analyzer: {
         name: 'gitlineage-analyzer',
-        version: '0.1.0',
-        schemaVersion: '1.0.0',
+        version: ANALYZER_VERSION,
+        schemaVersion: GRAPH_SCHEMA_VERSION,
         namespace: 'public',
         extractors: [],
         adapters: [],
@@ -164,6 +165,16 @@ test('end to end: the JSON schema accepts a minimal graph and rejects broken one
   const extraField = structuredClone(base) as unknown as Record<string, unknown>;
   extraField.inferred_relationships = [];
   assert.equal(validateSchema(extraField), false, 'unknown top-level fields must be rejected');
+
+  // A pre-rename artifact must not validate against the current schema.
+  const staleVersion = structuredClone(base);
+  staleVersion.schemaVersion = '1.0.0';
+  staleVersion.graph.analyzer.schemaVersion = '1.0.0';
+  assert.equal(
+    validateSchema(staleVersion),
+    false,
+    'a 1.x artifact carrying contains_exact_content_from must not validate under schema 2.x',
+  );
 });
 
 test('end to end: analysis refuses a private cache namespace in V1', async () => {

@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>GitLineage</title>
+<link rel="stylesheet" href="/app.css" />
+</head>
+<body>
+<header class="bar" id="bar">
+  <nav class="crumb"><a href="/" class="brand">GitLineage</a><span class="sep">/</span><span id="crumb-repo" class="mono crumb-repo">owner/repo</span></nav>
+  <div class="bar-right">
+    <span id="state" class="mono state">idle</span>
+    <a id="open-source" class="mono link" href="#" target="_blank" rel="noreferrer noopener" hidden>open source &#8599;</a>
+  </div>
+</header>
+
+<main id="main">
+  <section id="landing" class="landing">
+    <p class="eyebrow">EVIDENCE-BACKED REPOSITORY LINEAGE</p>
+    <h1>Repository to<br />lineage</h1>
+    <p class="lede">Where did this software come from, and what proves it?</p>
+    <form id="form" class="input-card" autocomplete="off">
+      <div class="input-row">
+        <input id="repo-input" name="repo" placeholder="github.com/owner/repo" spellcheck="false" />
+        <button id="submit" type="submit">Trace</button>
+      </div>
+      <div class="sub-row">
+        <span class="mono sub-label">Depth</span>
+        <span class="seg" role="group" aria-label="Analysis depth">
+          <button type="button" class="seg-btn" data-depth="0">Metadata only</button>
+          <button type="button" class="seg-btn is-active" data-depth="200">Standard</button>
+          <button type="button" class="seg-btn" data-depth="600">Deep</button>
+        </span>
+        <label class="mono check"><input type="checkbox" id="sim-toggle" disabled /> similarity</label>
+      </div>
+    </form>
+    <p class="foot mono">Or replace &lsquo;github&rsquo; with &lsquo;gitlineage&rsquo; in any GitHub URL.</p>
+    <p class="samples mono">Try:
+      <a href="/nachocebey/is">nachocebey/is</a> &middot;
+      <a href="/grpc/grpc">grpc/grpc</a> &middot;
+      <a href="/vitest-dev/vitest">vitest-dev/vitest</a> &middot;
+      <a href="/octocat/Spoon-Knife">octocat/Spoon-Knife</a>
+    </p>
+  </section>
+
+  <section id="explorer" class="explorer" hidden>
+    <div class="status-line mono" id="status-line"></div>
+    <div class="explorer-body">
+      <div class="stage" id="stage">
+        <div class="loading" id="loading">
+          <div class="loading-bar"><span class="loading-fill" id="loading-fill"></span></div>
+          <p class="mono loading-label" id="loading-label">Resolving repository</p>
+          <p class="mono loading-note">The canvas stays empty until a relationship has evidence behind it.</p>
+        </div>
+        <div class="empty" id="empty" hidden>
+          <p class="empty-head">No evidence-backed lineage found.</p>
+          <p class="mono empty-body" id="empty-body"></p>
+        </div>
+        <div class="error" id="error" hidden>
+          <p class="error-head" id="error-head">Could not analyse this repository.</p>
+          <p class="mono error-body" id="error-body"></p>
+        </div>
+        <svg id="canvas" class="canvas" role="img" aria-label="Lineage graph"></svg>
+      </div>
+      <aside class="drawer" id="drawer" hidden aria-live="polite">
+        <div class="drawer-inner" id="drawer-inner"></div>
+      </aside>
+    </div>
+  </section>
+</main>
+
+<script type="module" src="/app.js"></script>
+</body>
+</html>
