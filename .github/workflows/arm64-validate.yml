@@ -1,0 +1,119 @@
+name: arm64-validate
+
+# Native ARM64 validation on real Ampere hardware, not emulation.
+#
+# The target host is an Oracle OCI Always Free Ampere A1 VM, so "it works on my
+# laptop" is not the question -- "does the production build and the live suite
+# run on arm64" is. ubuntu-24.04-arm is a native ARM64 runner, and it is free
+# for public repositories, so this costs nothing.
+#
+# Every step is the same command used locally. Nothing here is a reduced or
+# simulated variant of the real thing.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: arm64-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  arm64:
+    name: build and live suite on arm64
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Record the machine we are actually on
+        run: |
+          echo "arch   : $(uname -m)"
+          echo "kernel : $(uname -r)"
+          echo "cpu    : $(grep -m1 'model name' /proc/cpuinfo | cut -d: -f2- | sed 's/^ *//')"
+          # A wrong arch here would invalidate every result below, so it is a
+          # hard gate rather than a log line.
+          test "$(uname -m)" = "aarch64" || { echo "expected aarch64"; exit 1; }
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Git is a hard runtime dependency
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq git
+          git --version
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Native dependency report
+        run: |
+          echo "node : $(node -p 'process.arch + " " + process.version')"
+          # esbuild is the only native binary in the build path. If its arm64
+          # binary were missing, the install would have failed above.
+          node -e '
+            const p = require.resolve("esbuild");
+            console.log("esbuild entry : " + p);
+          '
+          ls node_modules/@esbuild/ 2>/dev/null | sed "s/^/esbuild platform pkg : /"
+          node -e '
+            const { execFileSync } = require("child_process");
+            const bin = require("esbuild").version;
+            console.log("esbuild js api version : " + bin);
+          '
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Production build
+        run: |
+          npm run build
+          echo "--- bundle:"
+          ls -l dist/web/assets/
+          # A build that silently produced nothing would still exit 0.
+          test -s dist/web/index.html || { echo "no index.html produced"; exit 1; }
+          test -s dist/web/assets/app.js || { echo "no app.js produced"; exit 1; }
+
+      - name: Offline test suite
+        run: npm test
+
+      - name: Live analysis suite against real repositories
+        env:
+          # The pipeline reads a token through `gh auth token`; GITHUB_TOKEN
+          # keeps the unauthenticated API rate limit from ending the run early.
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: npm run test:live
+
+      - name: Serve the built bundle and exercise the API
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ github.token }}
+          GITLINEAGE_JOB_STORE: ${{ runner.temp }}/jobs
+          GITLINEAGE_TRUSTED_PROXY_HEADER: ""
+        run: |
+          # The job store has no CLI flag; it is configured through the
+          # environment, which is how it is set on a real host too.
+          node src/web/serve.ts --client dist/web --cache "$RUNNER_TEMP/cache" &
+          SERVER_PID=$!
+          for _ in $(seq 1 60); do
+            curl -fsS http://127.0.0.1:8080/healthz >/dev/null 2>&1 && break
+            sleep 1
+          done
+          curl -fsS http://127.0.0.1:8080/healthz
+          echo
+          curl -fsS http://127.0.0.1:8080/api/contract | head -c 200
+          echo
+          # Confirms the arm64 build actually performs a real analysis end to end.
+          curl -fsS -X POST http://127.0.0.1:8080/api/analysis/octocat/spoon-knife | head -c 300
+          echo
+          kill $SERVER_PID 2>/dev/null || true
+          wait $SERVER_PID 2>/dev/null || true
