@@ -19,7 +19,7 @@ presentation and layout layer, and the deviations are listed at the end.
 ## Running it
 
 ```bash
-npm run serve                      # dev, unbundled client, http://127.0.0.1:4317
+npm run serve                      # dev, unbundled client, http://127.0.0.1:8080
 npm run build                      # production bundle → dist/web
 npm start                          # build, then serve the bundle
 npm run serve:api-only             # API without a client at all
@@ -416,7 +416,7 @@ points at a hard-coded host.
 | Variable | Default | Meaning |
 | --- | --- | --- |
 | `GITLINEAGE_HOST` | `127.0.0.1` | bind address |
-| `GITLINEAGE_PORT` / `PORT` | `4317` | port |
+| `GITLINEAGE_PORT`, then `PORT` | `8080` | port. The project-specific variable wins, so a stray `PORT` from a platform cannot redirect the service. |
 | `GITLINEAGE_CACHE` | `.cache` | artifact cache root |
 | `GITLINEAGE_CLIENT_DIR` | `src/web/client` | static client root |
 | `GITLINEAGE_NO_CLIENT` | off | API-only mode |

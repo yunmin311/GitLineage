@@ -46,12 +46,29 @@ export async function serve(
   env: NodeJS.ProcessEnv = process.env,
   overrides: Partial<ServerConfig> = {},
 ): Promise<{ server: Server; url: string; app: GitLineageServer }> {
-  const config: ServerConfig = { ...loadConfig(env), ...overrides };
-  const host = options.host ?? config.host;
-  const port = options.port ?? config.port;
-  const cacheRoot = options.cacheRoot ?? config.cacheRoot;
-  const clientDir = options.clientDir === undefined ? config.clientDir : options.clientDir;
-  const jobStoreRoot = options.jobStoreRoot ?? config.jobStoreRoot;
+  // One effective configuration, resolved once.
+  //
+  // This used to keep two: `loadConfig(env)` for the server and a separate
+  // merge of the CLI flags for everything the server actually used. The second
+  // was the truth and the first was what /healthz, /api/contract and the startup
+  // log reported, so a server started with `--cache /srv/gitlineage/cache`
+  // announced `.cache`. An operator debugging persistence would be told the
+  // wrong path by the one endpoint whose job is to tell the truth.
+  const loaded: ServerConfig = { ...loadConfig(env), ...overrides };
+  const config: ServerConfig = {
+    ...loaded,
+    host: options.host ?? loaded.host,
+    port: options.port ?? loaded.port,
+    cacheRoot: options.cacheRoot ?? loaded.cacheRoot,
+    clientDir: options.clientDir === undefined ? loaded.clientDir : options.clientDir,
+    jobStoreRoot: options.jobStoreRoot ?? loaded.jobStoreRoot,
+    analysisDepth: options.depth ?? loaded.analysisDepth,
+    maxCandidates: options.maxCandidates ?? loaded.maxCandidates,
+    enableGit: options.enableGit ?? loaded.enableGit,
+    enableRegistry: options.enableRegistry ?? loaded.enableRegistry,
+    analysisTimeoutMs: options.analysisTimeoutMs ?? loaded.analysisTimeoutMs,
+  };
+  const { host, port, cacheRoot, clientDir } = config;
 
   const app = new GitLineageServer(
     {
@@ -59,11 +76,11 @@ export async function serve(
       host,
       cacheRoot,
       clientDir: clientDir ?? undefined,
-      analysisDepth: options.depth ?? config.analysisDepth,
-      maxCandidates: options.maxCandidates ?? config.maxCandidates,
-      enableGit: options.enableGit ?? config.enableGit,
-      enableRegistry: options.enableRegistry ?? config.enableRegistry,
-      analysisTimeoutMs: options.analysisTimeoutMs ?? config.analysisTimeoutMs,
+      analysisDepth: config.analysisDepth,
+      maxCandidates: config.maxCandidates,
+      enableGit: config.enableGit,
+      enableRegistry: config.enableRegistry,
+      analysisTimeoutMs: config.analysisTimeoutMs,
       extraAllowHosts: config.extraAllowHosts,
       analyzeOverride: options.analyzeOverride,
       schedulerAnalyzeOverride: options.schedulerAnalyzeOverride,

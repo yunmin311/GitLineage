@@ -70,7 +70,15 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ServerConfig {
   return {
     // Bind to loopback by default so a dev machine is not exposed by accident.
     host: env.GITLINEAGE_HOST ?? '127.0.0.1',
-    port: int(env, 'PORT', int(env, 'GITLINEAGE_PORT', 4317)),
+    // GITLINEAGE_PORT is checked first on purpose. `PORT` is a generic name that
+    // plenty of platforms and process supervisors set for their own purposes, so
+    // letting it win would silently move the service to a port nobody configured
+    // for it. The project-specific name must be the one that counts.
+    //
+    // 4317 was the old default and it was a bad one: that is the OpenTelemetry
+    // collector's gRPC port, which is commonly already bound on a real host. A
+    // default that collides with standard telemetry is a bad way to meet a host.
+    port: int(env, 'GITLINEAGE_PORT', int(env, 'PORT', 8080)),
     cacheRoot: env.GITLINEAGE_CACHE ?? '.cache',
     clientDir: bool(env, 'GITLINEAGE_NO_CLIENT', false) ? null : resolve(clientDir),
     analysisDepth: int(env, 'GITLINEAGE_DEPTH', 200),

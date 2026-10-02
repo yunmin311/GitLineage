@@ -86,7 +86,7 @@ Useful flags: `--ref <branch|tag|sha>`, `--depth <n>`, `--max-candidates <n>`,
 
 ```bash
 npm run serve
-open http://127.0.0.1:4317/nachocebey/is
+open http://127.0.0.1:8080/nachocebey/is
 ```
 
 `/<owner>/<repo>` is the primary route. The HTTP boundary exposes the canonical

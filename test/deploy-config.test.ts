@@ -8,10 +8,12 @@
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
 import { loadConfig, publicConfig } from '../src/web/config.ts';
+import { serve } from '../src/web/serve.ts';
 
 const root = resolve(import.meta.dirname, '..');
 
@@ -115,5 +117,76 @@ test('a default config is complete and typed', () => {
     } else {
       assert.notEqual(value, null, `${key} is not null`);
     }
+  }
+});
+// ---------------------------------------------------------------------------
+// Precedence and the reported-configuration contract.
+// ---------------------------------------------------------------------------
+
+test('GITLINEAGE_PORT wins over the generic PORT variable', () => {
+  // A platform or supervisor that sets PORT for its own purposes must not be able
+  // to move the service to a port nobody configured for it.
+  const config = loadConfig({ GITLINEAGE_PORT: '9000', PORT: '1234' });
+  assert.equal(config.port, 9000, 'the project-specific variable decides');
+});
+
+test('PORT is still honoured when GITLINEAGE_PORT is absent', () => {
+  assert.equal(loadConfig({ PORT: '1234' }).port, 1234);
+});
+
+test('the default port is not the OpenTelemetry collector port', () => {
+  // 4317 is otelcol's gRPC listener and is routinely already bound on a host.
+  assert.equal(loadConfig({}).port, 8080);
+});
+
+test('the server reports the configuration it is actually using', async () => {
+  // The regression: runtimeConfig used to be the environment-resolved config
+  // while the CLI flags were merged in separately, so the startup line and
+  // /healthz named a cache directory the server was not reading.
+  const root = await mkdtemp(join(tmpdir(), 'gitlineage-report-'));
+  const cacheRoot = join(root, 'real-cache');
+  const jobStoreRoot = join(root, 'real-jobs');
+  const { server, app } = await serve({
+    // Port 0 asks the OS for a free port, so this cannot collide with anything.
+    port: 0,
+    cacheRoot,
+    jobStoreRoot,
+    clientDir: null,
+    enableGit: false,
+    enableRegistry: false,
+  });
+  try {
+    const reported = app.runtimeConfig;
+    assert.equal(reported.cacheRoot, cacheRoot, 'the reported cache is the cache in use');
+    assert.equal(reported.jobStoreRoot, jobStoreRoot, 'the reported job store is the one in use');
+    assert.equal(reported.clientDir, null, 'a disabled client is reported as disabled');
+    assert.equal(reported.enableGit, false, 'a disabled subsystem is reported as disabled');
+
+    // And the same values must come back over HTTP, not only in-process.
+    const address = server.address();
+    const port = typeof address === 'object' && address !== null ? address.port : 0;
+    const body = (await fetch(`http://127.0.0.1:${port}/healthz`).then((r) => r.json())) as {
+      ok: boolean;
+      data: { config: { analysis: { trustedProxyHeader: string | null } } };
+    };
+    assert.equal(body.ok, true);
+    assert.equal(body.data.config.analysis.trustedProxyHeader, null);
+  } finally {
+    await new Promise<void>((done) => server.close(() => done()));
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('a CLI flag beats the environment for the same setting', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'gitlineage-flag-'));
+  const { server, app } = await serve(
+    { port: 0, cacheRoot: join(root, 'from-flag'), clientDir: null, enableGit: false, enableRegistry: false },
+    { GITLINEAGE_CACHE: join(root, 'from-env') },
+  );
+  try {
+    assert.equal(app.runtimeConfig.cacheRoot, join(root, 'from-flag'));
+  } finally {
+    await new Promise<void>((done) => server.close(() => done()));
+    await rm(root, { recursive: true, force: true });
   }
 });

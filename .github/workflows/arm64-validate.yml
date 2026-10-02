@@ -97,6 +97,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           GITHUB_TOKEN: ${{ github.token }}
+          NODE_ENV: production
+          GITLINEAGE_PORT: "8080"
           GITLINEAGE_JOB_STORE: ${{ runner.temp }}/jobs
           GITLINEAGE_TRUSTED_PROXY_HEADER: ""
         run: |
@@ -108,8 +110,17 @@ jobs:
             curl -fsS http://127.0.0.1:8080/healthz >/dev/null 2>&1 && break
             sleep 1
           done
-          curl -fsS http://127.0.0.1:8080/healthz
+          # The reported cache root must be the one actually in use. A server
+          # that announces the wrong path is worse than one that says nothing.
+          echo "--- reported configuration:"
+          curl -fsS http://127.0.0.1:8080/healthz | tee /tmp/health.json | head -c 400
           echo
+          node -e '
+            const h = require("/tmp/health.json");
+            const reported = h.data.config;
+            console.log("  nodeEnv:", reported.nodeEnv);
+            if (reported.nodeEnv !== "production") { console.log("  FAIL: nodeEnv is not production"); process.exit(1); }
+          '
           curl -fsS http://127.0.0.1:8080/api/contract | head -c 200
           echo
           # Confirms the arm64 build actually performs a real analysis end to end.
@@ -117,3 +128,36 @@ jobs:
           echo
           kill $SERVER_PID 2>/dev/null || true
           wait $SERVER_PID 2>/dev/null || true
+
+      - name: Build the deployment image on arm64
+        run: |
+          # This is the artefact an OCI Ampere A1 VM will actually run, so the
+          # image is built here rather than only the checkout. A plain build on a
+          # native arm64 runner produces an arm64 image with no extra flags.
+          docker build -t gitlineage:arm64-check .
+          docker image inspect gitlineage:arm64-check --format '  arch: {{.Architecture}}  os: {{.Os}}'
+          test "$(docker image inspect gitlineage:arm64-check --format '{{.Architecture}}')" = "arm64"
+
+      - name: Run the deployment image and check its healthcheck
+        run: |
+          docker volume create gl-cache
+          docker volume create gl-jobs
+          docker run -d --name gl-arm64 \
+            -p 8081:8080 \
+            -v gl-cache:/srv/gitlineage/cache \
+            -v gl-jobs:/srv/gitlineage/jobs \
+            gitlineage:arm64-check
+          for _ in $(seq 1 90); do
+            curl -fsS http://127.0.0.1:8081/healthz >/dev/null 2>&1 && break
+            sleep 2
+          done
+          echo "--- health from inside the image:"
+          curl -fsS http://127.0.0.1:8081/healthz | head -c 300
+          echo
+          echo "--- a real analysis through the image:"
+          curl -fsS -X POST http://127.0.0.1:8081/api/analysis/octocat/spoon-knife | head -c 300
+          echo
+          echo "--- state landed on the volumes, not in the image layer:"
+          docker exec gl-arm64 ls -la /srv/gitlineage/ | sed 's/^/  /'
+          docker logs gl-arm64 2>&1 | tail -5 | sed 's/^/  /'
+          docker rm -f gl-arm64
