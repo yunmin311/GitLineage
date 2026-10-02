@@ -248,37 +248,47 @@ export class HttpClient {
               );
               continue;
             }
-            // Waiting would cost more than the request is worth. Fail now, typed,
-            // carrying when the limit clears so the caller can defer the work.
+            // Waiting would cost more than the request is worth. Give up now, with
+            // a typed error the caller can defer on. The loop is exited with
+            // `break` rather than `throw`, so this decision is not re-examined by
+            // the catch below: that block retries what is transient, and this is
+            // a decision already taken, not an accident.
             const resetsIn = signal.waitMs > 0 ? `retry in ${Math.ceil(signal.waitMs / 1000)}s` : 'retry later';
-            throw new HttpError(
+            lastError = new HttpError(
               `upstream rate limit reached (${signal.source}); ${resetsIn}`,
               response.status,
               url.toString(),
               { code: 'upstream_rate_limited', retryAfterMs: signal.waitMs, retryable: true },
             );
+            break;
           }
           // A 403 with budget remaining is an authorization failure: the token is
           // wrong, lacks access, or the resource is forbidden. Retrying cannot
           // change that, so it fails immediately and says so.
-          throw new HttpError(
+          lastError = new HttpError(
             `upstream refused the request with ${response.status}`,
             response.status,
             url.toString(),
             { code: response.status === 403 ? 'upstream_forbidden' : 'upstream_rate_limited', retryable: false },
           );
+          break;
         }
 
         if (!response.ok) {
           // 5xx and other transient statuses keep their retry budget; everything
           // else is a permanent answer from the upstream.
           const transient = response.status >= 500 && response.status < 600;
-          throw new HttpError(
+          const permanent = new HttpError(
             `unexpected status ${response.status} for ${url.toString()}`,
             response.status,
             url.toString(),
             { code: `upstream_http_${response.status}`, retryable: transient },
           );
+          if (!transient) {
+            lastError = permanent;
+            break;
+          }
+          throw permanent;
         }
 
         const body = await this.readBounded(response, url);
@@ -301,16 +311,26 @@ export class HttpClient {
           response: { status: response.status, body, etag, fromCache: false, url: url.toString() },
         };
       } catch (error) {
-          // 403 and 429 have already been classified above: either they were
-          // retried after a short wait, or they threw a typed non-retryable or
-          // rate-limit error. Letting them fall through to the generic retry
-          // path is what spent minutes on failures that cannot improve.
-          if (error instanceof HttpError && (error.status === 403 || error.status === 429)) throw error;
-          const cause = error instanceof Error ? (error.cause instanceof Error ? ` (${error.cause.message})` : '') : '';
-          lastError = error instanceof Error ? new Error(`${error.message}${cause} [${url.toString()}]`) : new Error(String(error));
-          if (attempt < this.maxRetries) {
-            await this.sleep(500 * (attempt + 1));
-            continue;
+          if (error instanceof HttpError) {
+            // A typed answer from the upstream. Only what is genuinely transient
+            // earns another attempt: a 404, a refusal, an oversized response and
+            // a malformed body are all final, and retrying them just delays the
+            // failure and wastes quota.
+            if (!error.retryable) throw error;
+            lastError = error;
+            if (attempt < this.maxRetries) {
+              await this.sleep(500 * (attempt + 1));
+              continue;
+            }
+          } else {
+            // A transport-level failure: no answer at all, so retrying is the
+            // only way to find out whether it was transient.
+            const cause = error instanceof Error ? (error.cause instanceof Error ? ` (${error.cause.message})` : '') : '';
+            lastError = error instanceof Error ? new Error(`${error.message}${cause} [${url.toString()}]`) : new Error(String(error));
+            if (attempt < this.maxRetries) {
+              await this.sleep(500 * (attempt + 1));
+              continue;
+            }
           }
         } finally {
         clearTimeout(timer);

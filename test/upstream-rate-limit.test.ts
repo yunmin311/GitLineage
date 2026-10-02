@@ -9,11 +9,15 @@
  * and wrong for an hour-long primary limit.
  */
 import assert from 'node:assert/strict';
-import { test } from 'node:test';
+import test, { type TestContext } from 'node:test';
+import { mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
-import { classifyRateLimit, HttpError } from '../src/platform/http.ts';
+import { classifyRateLimit, HttpClient, HttpError } from '../src/platform/http.ts';
 import type { HttpClientOptions } from '../src/platform/http.ts';
 import { LIMITS } from '../src/platform/limits.ts';
+import { Cache } from '../src/platform/cache.ts';
 
 /** Builds a minimal response-like object with the headers a test cares about. */
 function reply(status: number, headers: Record<string, string>): {
@@ -112,4 +116,167 @@ test('a client can override the ceiling without editing the code', () => {
   // Deployments that would rather never wait need a way to say so.
   const options: HttpClientOptions = { cache: null as never, allowlist: new Set<string>(), maxRateLimitWaitMs: 0 };
   assert.equal(options.maxRateLimitWaitMs, 0);
+});
+
+// ---------------------------------------------------------------------------
+// Retry behaviour, observed by counting the requests actually made.
+// ---------------------------------------------------------------------------
+
+/**
+ * Replaces global fetch with a stub and counts attempts.
+ *
+ * The classification tests above prove how a response is read; these prove what
+ * the client then *does*, which is the part that cost four minutes in
+ * production. Counting attempts is the only honest way to assert it.
+ */
+function withStubbedFetch(handler: () => Response, run: (calls: () => number) => Promise<void>) {
+  const original = globalThis.fetch;
+  let calls = 0;
+  globalThis.fetch = (async () => {
+    calls += 1;
+    return handler();
+  }) as typeof fetch;
+  return run(() => calls).finally(() => {
+    globalThis.fetch = original;
+  });
+}
+
+async function clientFor(t: TestContext, sleeps: number[]): Promise<HttpClient> {
+  const root = await mkdtemp(join(tmpdir(), 'gitlineage-http-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  return new HttpClient({
+    cache: new Cache(root, 'public'),
+    allowlist: new Set(['api.github.com']),
+    maxRetries: 2,
+    maxRateLimitWaitMs: 5_000,
+    // Recorded instead of slept, so the test does not take real seconds.
+    sleep: async (ms: number) => {
+      sleeps.push(ms);
+    },
+  });
+}
+
+test('a 404 is not retried: it is a final answer', async (t) => {
+  const sleeps: number[] = [];
+  const client = await clientFor(t, sleeps);
+  let calls = 0;
+  await withStubbedFetch(
+    () => new Response('{"message":"Not Found"}', { status: 404 }),
+    async (count) => {
+      await assert.rejects(
+        () => client.fetchAllowlisted(new URL('https://api.github.com/repos/o/r'), 'application/json'),
+        (error: unknown) => {
+          assert.ok(error instanceof HttpError);
+          assert.equal(error.code, 'upstream_http_404');
+          assert.equal(error.retryable, false);
+          return true;
+        },
+      );
+      calls = count();
+    },
+  );
+  assert.equal(calls, 1, 'exactly one attempt');
+  assert.deepEqual(sleeps, [], 'and no backoff was taken');
+});
+
+test('a 403 refusal is not retried, and says it is a refusal', async (t) => {
+  const sleeps: number[] = [];
+  const client = await clientFor(t, sleeps);
+  let calls = 0;
+  await withStubbedFetch(
+    () =>
+      new Response('{"message":"Forbidden"}', {
+        status: 403,
+        headers: { 'x-ratelimit-remaining': '4999', 'x-ratelimit-limit': '5000' },
+      }),
+    async (count) => {
+      await assert.rejects(
+        () => client.fetchAllowlisted(new URL('https://api.github.com/repos/o/r'), 'application/json'),
+        (error: unknown) => {
+          assert.ok(error instanceof HttpError);
+          assert.equal(error.code, 'upstream_forbidden', 'a 403 with budget left is not a rate limit');
+          assert.equal(error.retryable, false);
+          return true;
+        },
+      );
+      calls = count();
+    },
+  );
+  assert.equal(calls, 1, 'exactly one attempt');
+  assert.deepEqual(sleeps, []);
+});
+
+test('a primary rate limit fails immediately instead of sleeping for the reset', async (t) => {
+  const sleeps: number[] = [];
+  const client = await clientFor(t, sleeps);
+  // Resets in 45 minutes, the case that used to burn the whole retry budget.
+  const reset = String(Math.floor(Date.now() / 1000) + 2700);
+  let calls = 0;
+  await withStubbedFetch(
+    () =>
+      new Response('{"message":"API rate limit exceeded"}', {
+        status: 403,
+        headers: { 'x-ratelimit-remaining': '0', 'x-ratelimit-reset': reset },
+      }),
+    async (count) => {
+      await assert.rejects(
+        () => client.fetchAllowlisted(new URL('https://api.github.com/repos/o/r'), 'application/json'),
+        (error: unknown) => {
+          assert.ok(error instanceof HttpError);
+          assert.equal(error.code, 'upstream_rate_limited');
+          assert.equal(error.retryable, true, 'the caller may defer and retry later');
+          assert.ok((error.retryAfterMs ?? 0) > 60_000, 'carries when the limit clears');
+          return true;
+        },
+      );
+      calls = count();
+    },
+  );
+  assert.equal(calls, 1, 'one attempt, not three');
+  assert.deepEqual(sleeps, [], 'and it did not sit through the wait');
+});
+
+test('a short secondary limit is waited out once, exactly as Retry-After says', async (t) => {
+  const sleeps: number[] = [];
+  const client = await clientFor(t, sleeps);
+  let responses = 0;
+  let calls = 0;
+  await withStubbedFetch(
+    () => {
+      responses += 1;
+      // First attempt limited for two seconds, second succeeds.
+      if (responses === 1) {
+        return new Response('{}', { status: 429, headers: { 'retry-after': '2' } });
+      }
+      return new Response('{"ok":true}', { status: 200, headers: { 'content-type': 'application/json' } });
+    },
+    async (count) => {
+      const response = await client.fetchAllowlisted(new URL('https://api.github.com/repos/o/r'), 'application/json');
+      assert.equal(response.status, 200);
+      calls = count();
+    },
+  );
+  assert.deepEqual(sleeps, [2000], 'waited exactly the stated 2 seconds, once');
+  assert.equal(calls, 2, 'two attempts: the limited one and the successful retry');
+});
+
+test('a 5xx is retried, because it is genuinely transient', async (t) => {
+  const sleeps: number[] = [];
+  const client = await clientFor(t, sleeps);
+  let responses = 0;
+  let calls = 0;
+  await withStubbedFetch(
+    () => {
+      responses += 1;
+      if (responses < 3) return new Response('upstream exploded', { status: 503 });
+      return new Response('{"ok":true}', { status: 200 });
+    },
+    async (count) => {
+      const response = await client.fetchAllowlisted(new URL('https://api.github.com/repos/o/r'), 'application/json');
+      assert.equal(response.status, 200);
+      calls = count();
+    },
+  );
+  assert.equal(calls, 3, 'two failures then a success');
+  assert.deepEqual(sleeps, [500, 1000], 'linear backoff between attempts');
 });
