@@ -11,6 +11,14 @@ export const LIMITS = {
     maxResponseBytes: 8_388_608,
     maxRedirects: 0,
     maxRetries: 2,
+    /**
+     * The longest upstream rate-limit wait worth sitting through. A secondary
+     * limit clears in seconds and is worth waiting for; a primary limit resets
+     * on the hour and is not, because the analysis would time out long before
+     * it resumed and would then be reported as a timeout rather than as the rate
+     * limit it actually was.
+     */
+    maxRateLimitWaitMs: 5_000,
   },
   repository: {
     maxFullNameLength: 120,

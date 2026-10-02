@@ -219,6 +219,7 @@ only *new expensive work* is counted.
 | Concurrent analyses (global) | `GITLINEAGE_MAX_CONCURRENT_ANALYSES` | 2 |
 | Bounded queue depth | `GITLINEAGE_MAX_QUEUE_DEPTH` | 20 |
 | Trusted proxy header | `GITLINEAGE_TRUSTED_PROXY_HEADER` | none |
+| Peers allowed to set it | `GITLINEAGE_TRUSTED_PROXY_PEERS` | none |
 | Metering off switch | `GITLINEAGE_RATE_LIMIT_ENABLED` | 1 |
 | Revision probe ceiling | `GITLINEAGE_PROBE_TIMEOUT_MS` | 8000 |
 
@@ -615,10 +616,52 @@ ones — the trusted-proxy header defaults to unset.
 
 ### Client IP
 
-The server trusts the socket address unless a proxy header is **explicitly
-declared** trusted. Trusting a forwarding header unconditionally would let any
-caller forge an identity and bypass the per-address budget, so the safe default
-is the one that ships.
+The server trusts the socket address unless **both** a forwarding header and the
+peers allowed to set it are declared:
+
+| Setting | Meaning |
+| --- | --- |
+| `GITLINEAGE_TRUSTED_PROXY_HEADER` | unset | the header a proxy sets, e.g. `x-forwarded-for` |
+| `GITLINEAGE_TRUSTED_PROXY_PEERS` | socket addresses or CIDRs allowed to speak for a client |
+
+Both are required, and the second is what makes the first safe. A forwarding
+header is attacker-controlled: if the socket peer is not checked, any caller can
+claim another address and spend that address's budget. Declaring a header with no
+peers leaves it **inert**, which costs per-client accuracy but never costs
+security.
+
+Note the third state, which is easy to reach by accident. With a reverse proxy in
+front and the header disabled, every visitor arrives from the proxy's own
+loopback address, so the whole site shares **one** budget. That is why the OCI
+deployment declares both `x-forwarded-for` and `127.0.0.1/32`.
+
+### Upstream rate limits
+
+A 403 from GitHub has two completely different meanings, and conflating them is
+what made a production failure take four minutes and say nothing useful:
+
+| Response | Meaning | Action |
+| --- | --- | --- |
+| `403`, `x-ratelimit-remaining > 0` | authorization refused | fail immediately, `upstream_forbidden`, not retryable |
+| `403`/`429`, `remaining: 0` | primary rate limit | fail immediately with the reset time, `upstream_rate_limited`, retryable |
+| `429` with `Retry-After` | secondary rate limit | wait the stated time if it is short, then retry once |
+
+`Retry-After` is honoured in both its numeric and HTTP-date forms. The longest
+wait worth sitting through is `LIMITS.http.maxRateLimitWaitMs` (5s): a secondary
+limit clears in seconds and is worth waiting for, while a primary limit resets
+on the hour, and sleeping through it would hold a worker until the analysis timed
+out and then be reported as a timeout rather than as the rate limit it was.
+
+Failures reach the browser as typed codes, and the job record persists the code
+rather than flattening everything to `analysis_failed`:
+
+| Code | Browser says | Retry offered |
+| --- | --- | --- |
+| `upstream_rate_limited` | GitHub is rate limiting this server | yes |
+| `upstream_forbidden` | This server may not read that repository | no |
+| `analysis_rate_limited` | Too many analyses from this address | yes |
+| `analysis_overloaded` | The analysis queue is full | yes |
+| `analysis_timeout`, `interrupted_by_restart` | The analysis did not finish | yes |
 
 ### Observability
 

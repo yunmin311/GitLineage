@@ -43,6 +43,11 @@ export interface ServerConfig {
    * forged.
    */
   trustedProxyHeader: string | null;
+  /**
+   * Socket addresses, or CIDR blocks, allowed to set {@link trustedProxyHeader}.
+   * Empty means the header is ignored even when it is declared.
+   */
+  trustedProxyPeers: string[];
   /** Set to 0 to disable analysis metering entirely. */
   rateLimitEnabled: boolean;
   /**
@@ -100,6 +105,12 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ServerConfig {
     maxConcurrentAnalyses: int(env, 'GITLINEAGE_MAX_CONCURRENT_ANALYSES', 2),
     maxQueueDepth: int(env, 'GITLINEAGE_MAX_QUEUE_DEPTH', 20),
     trustedProxyHeader: env.GITLINEAGE_TRUSTED_PROXY_HEADER ?? null,
+    // Both halves are required before a forwarding header is honoured, so the
+    // peers are parsed alongside it rather than separately by each call site.
+    trustedProxyPeers: (env.GITLINEAGE_TRUSTED_PROXY_PEERS ?? '')
+      .split(',')
+      .map((entry) => entry.trim().toLowerCase())
+      .filter((entry) => entry.length > 0),
     rateLimitEnabled: int(env, 'GITLINEAGE_RATE_LIMIT_ENABLED', 1) !== 0,
     analysisProbeTimeoutMs: int(env, 'GITLINEAGE_PROBE_TIMEOUT_MS', 8_000),
   };
@@ -124,6 +135,9 @@ export function publicConfig(config: ServerConfig): Record<string, unknown> {
       rateLimitWindowMs: config.rateLimitWindowMs,
       // Whether a declared proxy header is honoured. Never the header value.
       trustedProxyHeader: config.trustedProxyHeader,
+      // Whether the socket peer is checked before that header is believed. The
+      // peer list itself is a deployment detail and is not published.
+      proxyPeerTrust: config.trustedProxyPeers.length > 0,
     },
   };
 }

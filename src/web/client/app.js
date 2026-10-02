@@ -479,13 +479,21 @@ function showFailure(error) {
         ? 'Too many analyses from this address.'
         : code === 'analysis_overloaded'
           ? 'The analysis queue is full.'
-          : code === 'analysis_timeout' || code === 'interrupted_by_restart'
-            ? 'The analysis did not finish.'
-            : 'Could not analyse this repository.';
+          : code === 'upstream_rate_limited'
+            ? 'GitHub is rate limiting this server.'
+            : code === 'upstream_forbidden'
+              ? 'This server may not read that repository.'
+              : code === 'analysis_timeout' || code === 'interrupted_by_restart'
+                ? 'The analysis did not finish.'
+                : 'Could not analyse this repository.';
   $('failure-body').textContent =
     error?.detail || error?.message || 'The analyzer returned no result. Try again shortly.';
-  // A retryable failure offers a retry rather than a dead end.
-  setHidden($('retry-analysis'), error?.retryable !== true);
+  // A retryable failure offers a retry rather than a dead end. An upstream rate
+  // limit clears by itself, so retrying is reasonable; a refusal will not clear
+  // without changing the deployment, so offering a retry would be a dead end.
+  const retryable =
+    error?.retryable === true || (error?.code === 'upstream_rate_limited' ? true : error?.retryable);
+  setHidden($('retry-analysis'), error?.code === 'upstream_forbidden' || retryable !== true);
   $('canvas').replaceChildren();
   setHidden($('bundles'), true);
   setHidden($('legend'), true);

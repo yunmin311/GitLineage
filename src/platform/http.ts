@@ -7,13 +7,80 @@ import { LIMITS } from './limits.ts';
 export class HttpError extends Error {
   readonly status: number;
   readonly url: string;
+  /**
+   * A stable, machine-readable reason. The web layer maps this onto a job
+   * failure code, so a caller can distinguish "GitHub is rate limiting us" from
+   * "this repository does not exist" without parsing prose.
+   */
+  readonly code: string;
+  /** Set when the failure carries a usable `Retry-After` hint, in milliseconds. */
+  readonly retryAfterMs: number | null;
+  /** Whether retrying the same request later could plausibly succeed. */
+  readonly retryable: boolean;
 
-  constructor(message: string, status: number, url: string) {
+  constructor(
+    message: string,
+    status: number,
+    url: string,
+    options: { code?: string; retryAfterMs?: number | null; retryable?: boolean } = {},
+  ) {
     super(message);
     this.name = 'HttpError';
     this.status = status;
     this.url = url;
+    this.code = options.code ?? `upstream_http_${status}`;
+    this.retryAfterMs = options.retryAfterMs ?? null;
+    this.retryable = options.retryable ?? false;
   }
+}
+
+/**
+ * What the upstream said about a 403 or 429, or null when the response is not a
+ * rate limit at all.
+ *
+ * The distinction matters more than it looks. GitHub answers a *primary* rate
+ * limit with `x-ratelimit-remaining: 0` and a reset up to an hour away, and
+ * answers a genuine authorization failure with an ordinary 403. Treating both as
+ * "rate limited, sleep and retry" made the analyser hold a worker for minutes
+ * before failing with a message that said nothing useful.
+ */
+export interface RateLimitSignal {
+  /** How long until the limit clears, or 0 when the upstream gave no usable hint. */
+  waitMs: number;
+  /** Where the number came from, for the log and the failure detail. */
+  source: 'retry-after' | 'x-ratelimit-reset' | 'status-only' | 'no-hint';
+}
+
+export function classifyRateLimit(response: {
+  status: number;
+  headers: { get(name: string): string | null };
+}): RateLimitSignal | null {
+  const { status } = response;
+  if (status !== 403 && status !== 429) return null;
+
+  // `Retry-After` is authoritative: the upstream is telling us exactly how long.
+  const retryAfter = response.headers.get('retry-after');
+  if (retryAfter !== null) {
+    const trimmed = retryAfter.trim();
+    if (/^\d+$/.test(trimmed)) return { waitMs: Number(trimmed) * 1000, source: 'retry-after' };
+    const at = Date.parse(trimmed);
+    if (!Number.isNaN(at)) return { waitMs: Math.max(at - Date.now(), 0), source: 'retry-after' };
+  }
+
+  const remaining = response.headers.get('x-ratelimit-remaining');
+  const resetRaw = response.headers.get('x-ratelimit-reset');
+  if (remaining !== null && remaining.trim() === '0') {
+    const reset = Number(resetRaw ?? '');
+    if (Number.isFinite(reset) && reset > 0) {
+      return { waitMs: Math.max(reset * 1000 - Date.now(), 0), source: 'x-ratelimit-reset' };
+    }
+    return { waitMs: 0, source: 'no-hint' };
+  }
+
+  // 429 is a limit by definition even without headers. A 403 with budget left is
+  // an authorization failure and must not be retried at all.
+  if (status === 429) return { waitMs: 0, source: 'status-only' };
+  return null;
 }
 
 export interface HttpResponse {
@@ -33,6 +100,16 @@ export interface HttpClientOptions {
   maxBytes?: number;
   maxRetries?: number;
   maxRedirects?: number;
+  /**
+   * The longest upstream rate-limit wait this client will sit through before
+   * giving up on the request.
+   *
+   * A short secondary limit resolves in a second or two and is worth waiting
+   * for. A primary limit resets on the hour, and sleeping through it would hold
+   * a worker and end in a failure that looks like a timeout rather than the rate
+   * limit it is. The default leaves the choice explicit.
+   */
+  maxRateLimitWaitMs?: number;
   sleep?: (ms: number) => Promise<void>;
 }
 
@@ -62,6 +139,7 @@ export class HttpClient {
   private readonly maxBytes: number;
   private readonly maxRetries: number;
   private readonly maxRedirects: number;
+  private readonly maxRateLimitWaitMs: number;
   private readonly sleep: (ms: number) => Promise<void>;
 
   constructor(options: HttpClientOptions) {
@@ -73,6 +151,7 @@ export class HttpClient {
     this.maxBytes = options.maxBytes ?? LIMITS.http.maxResponseBytes;
     this.maxRetries = options.maxRetries ?? LIMITS.http.maxRetries;
     this.maxRedirects = options.maxRedirects ?? 3;
+    this.maxRateLimitWaitMs = options.maxRateLimitWaitMs ?? LIMITS.http.maxRateLimitWaitMs;
     this.sleep = options.sleep ?? ((ms: number) => delay(ms));
   }
 
@@ -153,18 +232,53 @@ export class HttpClient {
         }
 
         if (response.status === 403 || response.status === 429) {
-          const remaining = response.headers.get('x-ratelimit-remaining');
-          const reset = Number(response.headers.get('x-ratelimit-reset') ?? '0');
-          if (remaining === '0' && reset > 0 && attempt < this.maxRetries) {
-            const waitMs = Math.min(Math.max(reset * 1000 - Date.now(), 1000), 60_000);
-            await this.sleep(waitMs);
-            lastError = new HttpError('rate limited', response.status, url.toString());
-            continue;
+          const signal = classifyRateLimit(response);
+          if (signal) {
+            const waitable = signal.waitMs > 0 && signal.waitMs <= this.maxRateLimitWaitMs;
+            if (waitable && attempt < this.maxRetries) {
+              // Honour Retry-After (or the reset hint) for a short limit, then
+              // try once more. Capped so a hostile or mistaken upstream cannot
+              // park this worker indefinitely.
+              await this.sleep(signal.waitMs);
+              lastError = new HttpError(
+                `rate limited by upstream (${signal.source})`,
+                response.status,
+                url.toString(),
+                { code: 'upstream_rate_limited', retryAfterMs: signal.waitMs, retryable: true },
+              );
+              continue;
+            }
+            // Waiting would cost more than the request is worth. Fail now, typed,
+            // carrying when the limit clears so the caller can defer the work.
+            const resetsIn = signal.waitMs > 0 ? `retry in ${Math.ceil(signal.waitMs / 1000)}s` : 'retry later';
+            throw new HttpError(
+              `upstream rate limit reached (${signal.source}); ${resetsIn}`,
+              response.status,
+              url.toString(),
+              { code: 'upstream_rate_limited', retryAfterMs: signal.waitMs, retryable: true },
+            );
           }
+          // A 403 with budget remaining is an authorization failure: the token is
+          // wrong, lacks access, or the resource is forbidden. Retrying cannot
+          // change that, so it fails immediately and says so.
+          throw new HttpError(
+            `upstream refused the request with ${response.status}`,
+            response.status,
+            url.toString(),
+            { code: response.status === 403 ? 'upstream_forbidden' : 'upstream_rate_limited', retryable: false },
+          );
         }
 
         if (!response.ok) {
-          throw new HttpError(`unexpected status ${response.status} for ${url.toString()}`, response.status, url.toString());
+          // 5xx and other transient statuses keep their retry budget; everything
+          // else is a permanent answer from the upstream.
+          const transient = response.status >= 500 && response.status < 600;
+          throw new HttpError(
+            `unexpected status ${response.status} for ${url.toString()}`,
+            response.status,
+            url.toString(),
+            { code: `upstream_http_${response.status}`, retryable: transient },
+          );
         }
 
         const body = await this.readBounded(response, url);
@@ -187,14 +301,18 @@ export class HttpClient {
           response: { status: response.status, body, etag, fromCache: false, url: url.toString() },
         };
       } catch (error) {
-        if (error instanceof HttpError && error.status !== 403 && error.status !== 429) throw error;
-        const cause = error instanceof Error ? (error.cause instanceof Error ? ` (${error.cause.message})` : '') : '';
-        lastError = error instanceof Error ? new Error(`${error.message}${cause} [${url.toString()}]`) : new Error(String(error));
-        if (attempt < this.maxRetries) {
-          await this.sleep(500 * (attempt + 1));
-          continue;
-        }
-      } finally {
+          // 403 and 429 have already been classified above: either they were
+          // retried after a short wait, or they threw a typed non-retryable or
+          // rate-limit error. Letting them fall through to the generic retry
+          // path is what spent minutes on failures that cannot improve.
+          if (error instanceof HttpError && (error.status === 403 || error.status === 429)) throw error;
+          const cause = error instanceof Error ? (error.cause instanceof Error ? ` (${error.cause.message})` : '') : '';
+          lastError = error instanceof Error ? new Error(`${error.message}${cause} [${url.toString()}]`) : new Error(String(error));
+          if (attempt < this.maxRetries) {
+            await this.sleep(500 * (attempt + 1));
+            continue;
+          }
+        } finally {
         clearTimeout(timer);
       }
     }

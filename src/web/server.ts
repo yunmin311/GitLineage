@@ -371,7 +371,7 @@ export class GitLineageServer {
       }
     }
 
-    const address = clientIp(request, this.config.trustedProxyHeader);
+    const address = clientIp(request, this.config.trustedProxyHeader, this.config.trustedProxyPeers);
     const outcome = await this.scheduler.request(
       { provider: 'github', owner: repository.owner, name: repository.name },
       address,
@@ -441,7 +441,7 @@ export class GitLineageServer {
     }
     await this.ensureSchedulerReady();
 
-    const address = clientIp(request, this.config.trustedProxyHeader);
+    const address = clientIp(request, this.config.trustedProxyHeader, this.config.trustedProxyPeers);
     const outcome = await this.scheduler.request(
       { provider: 'github', owner: repository.owner, name: repository.name },
       address,

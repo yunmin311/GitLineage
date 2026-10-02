@@ -607,15 +607,29 @@ test('client identity comes from the socket unless a proxy is trusted', () => {
   // No declared proxy: the socket wins, so nothing a caller sends can move it.
   assert.equal(clientIp(request, null), socketAddress);
 
-  // A declared proxy header is honoured, and only its first hop — the address the
-  // trusted proxy itself observed.
-  assert.equal(clientIp(request, 'cf-connecting-ip'), '198.51.100.4');
-  assert.equal(clientIp(request, 'x-forwarded-for'), '203.0.113.9');
+  // A header with no declared peer list is inert. This changed deliberately: it
+  // used to be honoured on the strength of its name alone, which any direct
+  // caller could exploit to spend another address's budget.
+  assert.equal(clientIp(request, 'cf-connecting-ip'), socketAddress);
+  assert.equal(clientIp(request, 'x-forwarded-for'), socketAddress);
+
+  // Declared header *and* a peer the socket actually matches: honoured, and only
+  // its first hop -- the address the trusted proxy itself observed.
+  const peers = [`${socketAddress}/32`];
+  assert.equal(clientIp(request, 'cf-connecting-ip', peers), '198.51.100.4');
+  assert.equal(clientIp(request, 'x-forwarded-for', peers), '203.0.113.9');
+
+  // The same headers from a peer that was never declared stay untrusted.
+  const elsewhere = { socket: { remoteAddress: '192.0.2.55' }, headers: request.headers } as any;
+  assert.equal(clientIp(elsewhere, 'cf-connecting-ip', peers), '192.0.2.55');
 
   // A trusted header that is absent falls back to the socket rather than
   // collapsing every such client into one shared identity.
-  assert.equal(clientIp({ ...request, headers: {} } as any, 'cf-connecting-ip'), socketAddress);
-  assert.equal(clientIp({ ...request, headers: { 'cf-connecting-ip': '  ' } } as any, 'cf-connecting-ip'), socketAddress);
+  assert.equal(clientIp({ ...request, headers: {} } as any, 'cf-connecting-ip', peers), socketAddress);
+  assert.equal(
+    clientIp({ ...request, headers: { 'cf-connecting-ip': '  ' } } as any, 'cf-connecting-ip', peers),
+    socketAddress,
+  );
 
   // A request with no socket address still gets a stable identity.
   assert.equal(clientIp({ socket: {}, headers: {} } as any, null), 'unknown');

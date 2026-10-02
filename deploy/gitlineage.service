@@ -15,6 +15,10 @@ Documentation=https://github.com/yunmin311/GitLineage
 # A cold analysis needs outbound HTTPS to GitHub, npm and PyPI.
 After=network-online.target
 Wants=network-online.target
+# Never give up restarting. This belongs to [Unit], not [Service]: systemd
+# rejected it in [Service] and silently ignored it, which left the unit with the
+# default 5-restarts-in-10s burst limit -- so a crash loop could not recover.
+StartLimitIntervalSec=0
 
 [Service]
 Type=simple
@@ -40,8 +44,6 @@ TimeoutStopSec=45
 # costs work but never leaves a job permanently "running".
 Restart=always
 RestartSec=3
-# Do not give up: a transient upstream failure must not take the service down.
-StartLimitIntervalSec=0
 
 # --- hardening -------------------------------------------------------------
 # The process needs to read its own tree and write only to the configured state

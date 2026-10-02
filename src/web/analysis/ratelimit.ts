@@ -33,6 +33,19 @@ export interface RateLimitConfig {
    * null, the socket address is used.
    */
   trustedProxyHeader: string | null;
+  /**
+   * Socket addresses, or CIDR blocks, of the proxies allowed to speak for a
+   * client via {@link trustedProxyHeader}.
+   *
+   * Naming the header alone is not enough. Behind a reverse proxy every
+   * connection arrives from the proxy's own address, so the header is the only
+   * way to tell clients apart -- but a forwarding header is attacker-controlled
+   * unless the peer is checked first. Both halves are therefore required: the
+   * header is honoured only when the socket peer is one of these. With an empty
+   * list the header is ignored entirely, which falls back to the socket address
+   * and therefore to one shared budget rather than to a forged identity.
+   */
+  trustedProxyPeers: readonly string[];
   /** Set false to disable metering entirely (single-user or trusted deployment). */
   enabled: boolean;
 }
@@ -43,6 +56,7 @@ export const DEFAULT_RATE_LIMIT: RateLimitConfig = {
   maxConcurrent: 2,
   maxQueueDepth: 20,
   trustedProxyHeader: null,
+  trustedProxyPeers: [],
   enabled: true,
 };
 
@@ -57,16 +71,74 @@ export interface RateDecision {
 }
 
 /**
+ * Parses an address into 4 or 16 bytes, tolerating the `::ffff:` prefix Node
+ * puts in front of IPv4 socket addresses.
+ */
+function toBytes(address: string): Uint8Array | null {
+  let text = address.trim().toLowerCase();
+  if (text.startsWith('::ffff:') && text.includes('.')) text = text.slice(7);
+  const v4 = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(text);
+  if (v4) {
+    const parts = v4.slice(1, 5).map(Number);
+    if (parts.some((n) => n > 255)) return null;
+    return Uint8Array.from(parts);
+  }
+  if (!text.includes(':')) return null;
+  // A full IPv6 expansion; the two forms GitLineage can actually see are the
+  // loopback address and the IPv4-mapped loopback.
+  if (text === '::1') return Uint8Array.from([...Array(15).fill(0), 1]);
+  return null;
+}
+
+/** Whether `address` falls inside `cidr`, which may be a plain address. */
+export function addressMatches(address: string, cidr: string): boolean {
+  const slash = cidr.lastIndexOf('/');
+  if (slash === -1) return addressMatches(address, `${cidr}/32`);
+  const base = toBytes(cidr.slice(0, slash));
+  const candidate = toBytes(address);
+  if (!base || !candidate || base.length !== candidate.length) return false;
+  const prefix = Number(cidr.slice(slash + 1));
+  if (!Number.isInteger(prefix) || prefix < 0 || prefix > base.length * 8) return false;
+  const fullBytes = Math.floor(prefix / 8);
+  for (let i = 0; i < fullBytes; i += 1) {
+    if (base[i] !== candidate[i]) return false;
+  }
+  const spareBits = prefix % 8;
+  if (spareBits === 0) return true;
+  const mask = (0xff << (8 - spareBits)) & 0xff;
+  return (base[fullBytes]! & mask) === (candidate[fullBytes]! & mask);
+}
+
+/** Parses the comma-separated `GITLINEAGE_TRUSTED_PROXY_PEERS` value. */
+export function parseTrustedPeers(raw: string | undefined): string[] {
+  if (!raw) return [];
+  return raw
+    .split(',')
+    .map((entry) => entry.trim().toLowerCase())
+    .filter((entry) => entry.length > 0);
+}
+
+/**
  * The client address.
  *
- * Prefers the socket, which cannot be forged. A proxy header is consulted only
- * when the deployment has declared that header trustworthy, and then only its
- * first hop, because that is the address the trusted proxy actually observed.
+ * Prefers the socket, which cannot be forged. A forwarding header is consulted
+ * only when the deployment declares that header trustworthy **and** the socket
+ * peer is one of the declared proxies; only then is the header's first hop used,
+ * because that is the address the trusted proxy actually observed.
+ *
+ * Declaring a header without declaring peers leaves the header inert, which
+ * costs per-client accuracy but never costs security.
  */
-export function clientIp(request: IncomingMessage, trustedProxyHeader: string | null): string {
+export function clientIp(
+  request: IncomingMessage,
+  trustedProxyHeader: string | null,
+  trustedProxyPeers: readonly string[] = [],
+): string {
   const socket = (request.socket as { remoteAddress?: string } | undefined)?.remoteAddress;
   const base = socket && socket.length > 0 ? socket : 'unknown';
   if (!trustedProxyHeader) return base;
+  if (trustedProxyPeers.length === 0 || base === 'unknown') return base;
+  if (!trustedProxyPeers.some((peer) => addressMatches(base, peer))) return base;
   const raw = request.headers[trustedProxyHeader.toLowerCase()];
   const header = Array.isArray(raw) ? raw[0] : raw;
   if (typeof header !== 'string' || header.trim().length === 0) return base;

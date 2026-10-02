@@ -21,6 +21,28 @@ import { dedupKey } from './dedup.ts';
 import { canAdvance, canTransition, isTerminal, type AnalysisPhase, type JobRecord } from './types.ts';
 import { logEvent } from './logging.ts';
 import type { LogEvent } from './logging.ts';
+import { HttpError } from '../../platform/http.ts';
+
+/**
+ * The job failure code for an analysis that threw.
+ *
+ * Read structurally from the error rather than with an `instanceof` chain, so
+ * the platform layer can classify its own failures without the web layer
+ * enumerating them, and so a wrapped error still carries its reason.
+ */
+function failureCode(error: unknown): string {
+  if (error instanceof Error && error.name === 'AbortError') return 'analysis_aborted';
+  const code = (error as { code?: unknown } | null | undefined)?.code;
+  if (typeof code === 'string' && code.startsWith('upstream_')) return code;
+  return 'analysis_failed';
+}
+
+/** A sentence the browser can show without knowing anything about HTTP. */
+function describeUpstreamFailure(error: HttpError): string | undefined {
+  if (error.code !== 'upstream_rate_limited' || error.retryAfterMs === null) return undefined;
+  const seconds = Math.max(1, Math.ceil(error.retryAfterMs / 1000));
+  return `GitHub is rate limiting this server. The limit resets in about ${seconds}s; the analysis can be retried after that.`;
+}
 
 /** Options handed to the analyzer. `onPhase` is how the state machine advances. */
 export type AnalyzeInvocation = AnalyzeOptions & {
@@ -449,10 +471,17 @@ export class AnalysisScheduler {
     } catch (error) {
       const current = store.get(jobId);
       if (current && !isTerminal(current.phase)) {
-        const code = error instanceof Error && error.name === 'AbortError' ? 'analysis_aborted' : 'analysis_failed';
+        // The code used to be computed and then thrown away: `markFailed` was
+        // hardcoded to 'analysis_failed' while the computed value only reached
+        // the log. A rate-limited upstream and a broken analyser were therefore
+        // indistinguishable to the client. It is persisted now.
+        const code = failureCode(error);
         await store.markFailed(jobId, {
-          code: 'analysis_failed',
+          code,
           message: error instanceof Error ? error.message : String(error),
+          // A rate limit clears on its own, so the client may offer a retry.
+          // A refusal will not clear without changing the deployment.
+          detail: error instanceof HttpError ? describeUpstreamFailure(error) : undefined,
         });
         logEvent('analysis.failed', {
           jobId,
