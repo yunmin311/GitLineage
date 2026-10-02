@@ -1,6 +1,6 @@
-import type { EvidenceLocator, JsonValue, Observation, RelationshipType } from '../../core/model.ts';
+import type { EntityRef, EvidenceLocator, JsonValue, Observation, RelationshipType } from '../../core/model.ts';
 import { refToId } from '../../core/ids.ts';
-import { resolveRepositoryRef, type RepositoryRef } from '../../platform/url.ts';
+import { isGitHubReservedRoute, resolveRepositoryRef, type RepositoryRef } from '../../platform/url.ts';
 import { LIMITS } from '../../platform/limits.ts';
 
 export const COLLECTOR_DOCUMENTS = 'documents';
@@ -24,8 +24,30 @@ export const ATTRIBUTION_PHRASES: readonly { pattern: RegExp; label: string; rel
   { pattern: /\bthanks\s+to\b/i, label: 'thanks to', relationship: 'references' },
 ] as const;
 
-/** Matches GitHub repository URLs in prose and markdown links. */
+/** Matches GitHub URLs that look like `owner/name` in prose and markdown links. */
 const REPO_URL = /(?:\bhttps?:\/\/github\.com\/|\bgithub\.com\/|git@github\.com:)([A-Za-z0-9][A-Za-z0-9._-]*\/[A-Za-z0-9._-]+?)(?=[)\s"'`#,;:]|$|\.git\b)/gi;
+
+/**
+ * The entity a linked GitHub path refers to.
+ *
+ * A github.com path of exactly `owner/name` is a repository. A path whose first
+ * segment is one of GitHub's own site routes -- `settings/profile`,
+ * `sponsors/sindresorhus`, `topics/...` -- is a page on the site rather than a
+ * repository, and it used to be emitted as a `Repository` with no URL at all,
+ * because nothing in the URL distinguished the two shapes.
+ *
+ * The link itself is real and worth keeping, so such a page becomes an
+ * `ExternalProject` and keeps its `references` edge and evidence. Only the
+ * classification changes; nothing is dropped from the graph.
+ */
+function classifyLinkedPath(path: string): EntityRef {
+  const [owner, name] = path.split('/');
+  if (owner && name && isGitHubReservedRoute(owner)) {
+    return { kind: 'external_project', slug: path.toLowerCase() };
+  }
+  const ref = resolveRepositoryRef(path);
+  return { kind: 'repository', provider: 'github', owner: ref.owner, name: ref.name };
+}
 
 export interface DocumentScanInput {
   path: string;
@@ -63,7 +85,11 @@ export function scanDocument(input: DocumentScanInput): DocumentScanResult {
 
   interface Candidate {
     relationship: RelationshipType;
-    ref: RepositoryRef;
+    /**
+     * The entity the link points at. Either a repository, or an external project
+     * when the path is one of GitHub's own site routes rather than owner/name.
+     */
+    object: EntityRef;
     lineIndex: number;
     lineEnd: number;
     phrase: string;
@@ -136,7 +162,7 @@ export function scanDocument(input: DocumentScanInput): DocumentScanResult {
     if (!existing || isStronger(strongest, existing.relationship)) {
       candidates.set(targetId, {
         relationship: strongest,
-        ref: target,
+        object: { kind: 'repository', provider: 'github', owner: target.owner, name: target.name },
         lineIndex: index,
         lineEnd: matchLine,
         phrase: phrases[0]?.label ?? strongest,
@@ -163,14 +189,24 @@ export function scanDocument(input: DocumentScanInput): DocumentScanResult {
       if (candidates.size >= LIMITS.document.maxUrlMatchesPerFile) break;
       if (referenceCount >= LIMITS.document.maxReferenceRelationships) break;
       const full = match[0] ?? '';
-      const target = safeResolve(full);
-      if (!target) continue;
-      const targetId = refToId({ kind: 'repository', provider: 'github', owner: target.owner, name: target.name });
+      // match[1] is the `owner/name` capture, but the lazy quantifier can leave a
+      // trailing sentence period inside it: in `github.com/a/b.` the capture is
+      // `a/b.`, because `.` is a legal repository-name character and the
+      // delimiter lookahead is only satisfied at end of line. Strip it before
+      // classifying, exactly as the previous full-URL path did.
+      const segment = (match[1] ?? '').replace(/[),.;]+$/, '');
+      let object: EntityRef;
+      try {
+        object = classifyLinkedPath(segment);
+      } catch {
+        continue;
+      }
+      const targetId = refToId(object);
       if (targetId === rootId) continue;
       if (candidates.has(targetId)) continue;
       candidates.set(targetId, {
         relationship: 'references',
-        ref: target,
+        object,
         lineIndex: index,
         lineEnd: index,
         phrase: 'link',
@@ -224,7 +260,7 @@ export function scanDocument(input: DocumentScanInput): DocumentScanResult {
       collector: COLLECTOR_DOCUMENTS,
       extractor: isAttribution ? EXTRACTOR_ATTRIBUTION : EXTRACTOR_REFERENCE,
       subject: { kind: 'repository', provider: 'github', owner: rootRef.owner, name: rootRef.name },
-      object: { kind: 'repository', provider: 'github', owner: candidate.ref.owner, name: candidate.ref.name },
+      object: candidate.object,
       relationship: candidate.relationship,
       directed: true,
       evidence,

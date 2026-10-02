@@ -16,6 +16,43 @@ const OWNER = /^[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?$/;
 const NAME = /^[A-Za-z0-9._-]+$/;
 const GITHUB_HOSTS = new Set(['github.com', 'www.github.com', 'raw.githubusercontent.com', 'api.github.com']);
 
+/**
+ * GitHub's own top-level routes, which are therefore never user accounts.
+ *
+ * A GitHub repository URL is structurally two segments after the host, and so is
+ * `github.com/settings/profile` or `github.com/sponsors/sindresorhus`. Nothing in
+ * the URL distinguishes them, which is why two-segment github.com paths used to be
+ * accepted as repositories: `settings/profile` became an owner called `settings`
+ * and a repository called `profile`, was attempted as a candidate, 404ed, and was
+ * emitted into the graph as a `Repository` entity with no URL at all.
+ *
+ * This is a category check rather than a blacklist of the two observed strings.
+ * GitHub reserves these names, so no account can hold them, and any github.com
+ * page under one of them is a site route. A caller whose repository genuinely
+ * lived under such a path could not exist on GitHub, so rejecting it loses
+ * nothing real and prevents the misclassification from recurring for the next
+ * route nobody has seen yet.
+ */
+const GITHUB_RESERVED_ROUTES: ReadonlySet<string> = new Set([
+  'about', 'account', 'admin', 'apps', 'applications', 'assets', 'blog', 'business',
+  'careers', 'cases', 'codespaces', 'collections', 'contact', 'customer-stories',
+  'dashboard', 'developer', 'discussions', 'docs', 'downloads', 'education',
+  'enterprise', 'events', 'explore', 'features', 'gist', 'github', 'issues', 'join',
+  'login', 'logout', 'marketplace', 'new', 'notifications', 'organizations', 'orgs',
+  'plans', 'pricing', 'pulls', 'readme', 'search', 'security', 'sessions', 'settings',
+  'signup', 'site', 'sponsors', 'stars', 'topics', 'trending', 'users', 'watching',
+]);
+
+/**
+ * Whether a first path segment names a GitHub site route rather than an account.
+ *
+ * Exported so the entity classifier and the reference parser agree, instead of
+ * each keeping its own idea of what a repository URL looks like.
+ */
+export function isGitHubReservedRoute(segment: string): boolean {
+  return GITHUB_RESERVED_ROUTES.has(segment.trim().toLowerCase());
+}
+
 export class UnsupportedRepositoryRefError extends Error {
   constructor(message: string) {
     super(message);
@@ -79,6 +116,12 @@ export function resolveRepositoryRef(input: string): RepositoryRef {
   const name = segments[1]!.replace(/\.git$/i, '');
 
   if (!OWNER.test(owner)) throw new UnsupportedRepositoryRefError(`invalid repository owner: ${owner}`);
+  if (isGitHubReservedRoute(owner)) {
+    // `settings/profile` is not a repository. Treating the first segment as an
+    // owner produced Repository entities for GitHub's own pages, and spent
+    // candidate slots on requests that could only ever 404.
+    throw new UnsupportedRepositoryRefError(`"${owner}" is a GitHub site route, not a repository owner`);
+  }
   if (!NAME.test(name) || name.length > 100) throw new UnsupportedRepositoryRefError(`invalid repository name: ${name}`);
 
   return { provider: 'github', owner: owner.toLowerCase(), name: name.toLowerCase() };
