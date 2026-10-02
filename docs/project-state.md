@@ -127,14 +127,17 @@ Open, not implemented, not binding.
 | Check | Command | Status |
 | --- | --- | --- |
 | Types | `npm run typecheck` | passes, 0 errors (server config and browser-script config) |
-| Unit, contract, regression, view-model, HTTP, schema, offline pipeline | `npm test` | 209 tests, 206 pass, 3 live skipped, 0 fail |
+| Unit, contract, regression, view-model, HTTP, schema, offline pipeline | `npm test` | 230 tests, 227 pass, 3 live skipped, 0 fail |
 | Analysis jobs, dedup, restart, rate limits | `test/web-jobs.test.ts` | 26 tests covering the async lifecycle |
 | Client async parsing and bundle representatives | `test/web-analysis-client.test.ts` | 19 tests |
+| Deployment configuration and secure defaults | `test/deploy-config.test.ts` | 8 tests; template and code cannot drift apart |
+| Structured log contract and redaction | `test/analysis-logging.test.ts` | 13 tests, including a nested-credential leak |
 | Live integration on real repositories | `npm run test:live` | 7 pass |
 | Production build and its served artefact | `npm run build` + `test/web-build.test.ts` | passes; bundle served over HTTP with no hard-coded host |
 | Live client behaviour on real repositories | `npm run test:web` | 26/26 checks pass |
 | Live async lifecycle through a public tunnel | `test/web/live-async-validation.ts` | 25/25 checks pass |
 | Cold analysis past the proxy deadline | cold-proxy harness | `grpc/grpc` 311s and `vitest-dev/vitest` 190s both returned 202 immediately and completed |
+| Graceful restart with persistent state | restart harness | `SIGTERM` drains, the interrupted job is recovered as `interrupted_by_restart`, the completed artifact and the canonical graph are byte-identical afterwards, and a retry gets a fresh job |
 | Screenshots of real repositories | `npm run shots` | 20 PNGs across landing, explorer, drawer, search, layers and phone, no console errors, no horizontal overflow |
 | Artifact validation | `node src/cli/main.ts validate <graph.json>` | passes on every produced artifact |
 
@@ -142,6 +145,28 @@ Recorded run for Web Phase 2: graph schema 2.0.0, analyzer 0.2.0, Node 24.21,
 git 2.43.0, WSL2, Chromium from the WSL Playwright cache.
 
 Superseded run note: 89 tests at the direction-audit commit, 130 at the Phase 1
-commit. The current run is recorded in the verification table above.
+commit, 209 at the async-jobs commit. The current run is recorded in the
+verification table above.
 
 Details and recorded results: `docs/integration-validation.md`.
+
+## Hosting status
+
+The service is verified and packaged for a stable single-node deployment but is
+**not yet hosted anywhere permanent**. That is the one outstanding gap, and it is
+blocked on access rather than on code:
+
+- No cloud provider account, VPS, container platform or SSH target is available
+  in this environment, and no payment instrument can be supplied.
+- A Cloudflare Quick Tunnel was used for the live validation above. It worked and
+  then failed repeatedly for reasons outside the application (TLS handshake
+  resets mid-run, a new hostname on every restart). Those interruptions are why
+  one earlier 17-minute reading was wrong: the client could not poll, while the
+  server's own record showed 71 seconds. **Client-side timing is not evidence of
+  analysis duration**; `test/job-timing.ts` reads the persisted record instead.
+
+Everything needed to finish the move is committed: `Dockerfile`,
+`gitlineage.env.example`, `deploy/gitlineage.service` and `deploy/RUNBOOK.md`.
+Given a host, the remaining steps are provisioning, attaching a volume, deploying
+the pinned revision, and re-running the cold, restart and browser suites against
+the real hostname.

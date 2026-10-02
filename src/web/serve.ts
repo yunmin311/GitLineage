@@ -2,6 +2,7 @@ import { createServer, type Server } from 'node:http';
 import { GitLineageServer } from './server.ts';
 import { loadConfig, type ServerConfig } from './config.ts';
 import type { AnalyzeInvocation } from './analysis/scheduler.ts';
+import { logEvent, logStartup } from './analysis/logging.ts';
 import type { LineageGraph } from './types.ts';
 
 export interface ServeOptions {
@@ -71,12 +72,38 @@ export async function serve(
     config,
   );
 
-  const server = createServer((request, response) => {
-    void app.handle(request, response).catch(() => {
-      if (!response.headersSent) response.writeHead(500, { 'content-type': 'application/json' });
-      response.end('{"ok":false,"error":{"code":"internal","message":"unhandled server error"}}\n');
+const server = createServer((request, response) => {
+      const startedAt = Date.now();
+      const method = request.method ?? 'GET';
+      // The path is recorded without its query string: view state is already
+      // public, but the log does not need it, and dropping it keeps any
+      // hand-typed parameter out of the log entirely.
+      const path = (request.url ?? '/').split('?')[0] ?? '/';
+      response.on('finish', () => {
+        // Static assets are frequent and uninteresting; they are counted but
+        // not logged individually.
+        if (path.startsWith('/assets/') || path === '/app.css' || path === '/app.js') return;
+        logEvent('http.request', {
+          method,
+          path,
+          status: response.statusCode,
+          requestMs: Date.now() - startedAt,
+          queued: app.analysis.queuedCount,
+          running: app.analysis.runningCount,
+          queueDepth: app.analysis.queuedCount,
+        });
+      });
+      void app.handle(request, response).catch((error: unknown) => {
+        logEvent('analysis.failed', {
+          code: 'internal_error',
+          path,
+          method,
+          message: error instanceof Error ? error.message : String(error),
+        });
+        if (!response.headersSent) response.writeHead(500, { 'content-type': 'application/json' });
+        response.end('{"ok":false,"error":{"code":"internal","message":"unhandled server error"}}\n');
+      });
     });
-  });
 
   await new Promise<void>((resolve) => server.listen(port, host, resolve));
   // Report the port the OS actually bound, which matters when port 0 was asked for.
@@ -137,9 +164,42 @@ function cliOverrides(argv: string[]): ServeOptions {
 const isMain = process.argv[1] !== undefined && process.argv[1].endsWith('serve.ts');
 if (isMain) {
   const overrides = cliOverrides(process.argv.slice(2));
-  const { url } = await serve(overrides);
-  process.stdout.write(`gitlineage web listening on ${url}\n`);
-  process.stdout.write(`  graph  ${url}/api/graph/<owner>/<repo>\n`);
-  process.stdout.write(`  view   ${url}/api/view/<owner>/<repo>\n`);
-  process.stdout.write(`  page   ${url}/<owner>/<repo>\n`);
+  const { server, url, app } = await serve(overrides);
+  logStartup({
+    url,
+    nodeEnv: app.runtimeConfig.nodeEnv,
+    cacheRoot: app.runtimeConfig.cacheRoot,
+    jobStoreRoot: app.runtimeConfig.jobStoreRoot,
+    analysisDepth: app.runtimeConfig.analysisDepth,
+    maxConcurrentAnalyses: app.runtimeConfig.maxConcurrentAnalyses,
+    maxQueueDepth: app.runtimeConfig.maxQueueDepth,
+    rateLimitEnabled: app.runtimeConfig.rateLimitEnabled,
+    analysesPerIp: app.runtimeConfig.rateLimitAnalysesPerIp,
+    // The header name is safe to log; its value never appears in any log line.
+    trustedProxyHeader: app.runtimeConfig.trustedProxyHeader,
+  });
+
+  // Graceful shutdown: stop accepting connections, let in-flight requests and
+  // analyses finish, and report that this happened rather than dying silently.
+  let shuttingDown = false;
+  const shutdown = (signal: string) => {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    logEvent('http.request', { code: 'shutdown_started', message: signal });
+    const force = setTimeout(() => {
+      logEvent('analysis.failed', { code: 'shutdown_forced', message: 'did not drain in time' });
+      process.exit(1);
+    }, 30_000);
+    force.unref();
+    server.close(() => {
+      clearTimeout(force);
+      app.analysis.shutdown();
+      logEvent('http.request', { code: 'shutdown_complete' });
+      process.exit(0);
+    });
+    // Existing connections are told to stop; new ones are refused immediately.
+    server.closeIdleConnections?.();
+  };
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
 }

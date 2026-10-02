@@ -16,3 +16,7 @@ gitconfig-absent
 Thumbs.db
 .env
 .env.*
+# Deployment environment. The runbook tells operators to copy
+# gitlineage.env.example to gitlineage.env on the host; that file holds real
+# values and must never be committed. Only the .example is tracked.
+gitlineage.env

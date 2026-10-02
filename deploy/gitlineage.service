@@ -1,0 +1,64 @@
+# GitLineage — production process supervision.
+#
+# systemd rather than a bare `node` invocation, because the requirement is a
+# process that restarts, drains cleanly, and keeps its state.
+#
+#   install -d -m 0750 /srv/gitlineage/{cache,jobs,tmp,logs}
+#   install -m 0640 gitlineage.env.example /srv/gitlineage/gitlineage.env
+#   install -m 0644 deploy/gitlineage.service /etc/systemd/system/
+#   $EDITOR /srv/gitlineage/gitlineage.env
+#   systemctl daemon-reload && systemctl enable --now gitlineage
+
+[Unit]
+Description=GitLineage provenance web service
+Documentation=https://github.com/yunmin311/GitLineage
+# A cold analysis needs outbound HTTPS to GitHub, npm and PyPI.
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=gitlineage
+Group=gitlineage
+
+# Secrets and configuration, 0640 and owned by root:gitlineage.
+EnvironmentFile=/srv/gitlineage/gitlineage.env
+
+WorkingDirectory=/srv/gitlineage/app
+
+# The long-running process. `--client` is explicit so the production bundle is
+# served rather than the source tree.
+ExecStart=/usr/bin/node src/web/serve.ts --client /srv/gitlineage/app/dist/web
+
+# SIGTERM triggers the graceful drain in serve.ts: stop accepting, let in-flight
+# requests finish, then exit. Allow it to complete before SIGKILL.
+KillSignal=SIGTERM
+TimeoutStopSec=45
+
+# Restart on any exit. An interrupted analysis is failed with
+# `interrupted_by_restart` on the next start and is safely retryable, so a crash
+# costs work but never leaves a job permanently "running".
+Restart=always
+RestartSec=3
+# Do not give up: a transient upstream failure must not take the service down.
+StartLimitIntervalSec=0
+
+# --- hardening -------------------------------------------------------------
+# The process needs to read its own tree and write only to the configured state
+# directories. Everything else is closed off.
+NoNewPrivileges=yes
+PrivateTmp=no
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/srv/gitlineage
+# git needs to run; nothing else does.
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+MemoryDenyWriteExecute=no
+
+# Structured JSON goes to stdout and is captured by the journal.
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=gitlineage
+
+[Install]
+WantedBy=multi-user.target

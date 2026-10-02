@@ -19,6 +19,8 @@ import { JobStore } from './store.ts';
 import { AnalysisRateLimiter, type RateDecision } from './ratelimit.ts';
 import { dedupKey } from './dedup.ts';
 import { canAdvance, canTransition, isTerminal, type AnalysisPhase, type JobRecord } from './types.ts';
+import { logEvent } from './logging.ts';
+import type { LogEvent } from './logging.ts';
 
 /** Options handed to the analyzer. `onPhase` is how the state machine advances. */
 export type AnalyzeInvocation = AnalyzeOptions & {
@@ -101,7 +103,17 @@ export class AnalysisScheduler {
   ready(): Promise<JobRecord[]> {
     this.readyPromise ??= (async () => {
       await this.options.store.init();
-      return this.options.store.recoverInterrupted();
+      const recovered = await this.options.store.recoverInterrupted();
+      // Recovery is itself an operational event: it proves what a restart did
+      // to in-flight work, which is otherwise invisible.
+      for (const record of recovered) {
+        logEvent('job.recovered', {
+          jobId: record.jobId,
+          repository: `${record.owner}/${record.name}`,
+          code: record.error?.code ?? 'interrupted_by_restart',
+        });
+      }
+      return recovered;
     })();
     return this.readyPromise;
   }
@@ -144,6 +156,7 @@ export class AnalysisScheduler {
     // Restart recovery must be complete before any decision is made, so a job
     // orphaned by a previous process can never be mistaken for active work.
     await this.ready();
+    const startedAt = Date.now();
 
     // The probe is bounded: an accepted request must not inherit a slow
     // network. If it does not answer in time we proceed without a revision,
@@ -172,6 +185,11 @@ export class AnalysisScheduler {
     for (const revision of candidateRevisions) {
       const artifact = await this.readArtifact(repository, revision);
       if (artifact) {
+        logEvent('analysis.cacheHit', {
+          repository: `${repository.owner}/${repository.name}`,
+          resolvedRevision: revision,
+          durationMs: Date.now() - startedAt,
+        });
         return {
           kind: 'complete',
           graph: artifact.graph,
@@ -195,6 +213,13 @@ export class AnalysisScheduler {
     const existing = this.options.store.findActive(key);
     if (existing) {
       // Joining is not new work, so it costs no rate-limit token.
+      logEvent('analysis.joined', {
+        jobId: existing.jobId,
+        repository: `${repository.owner}/${repository.name}`,
+        phase: existing.phase,
+        queued: this.queuedCount,
+        running: this.runningCount,
+      });
       return { kind: 'accepted', job: existing, joined: true, retryAfterMs: this.retryAfterMs() };
     }
 
@@ -204,11 +229,25 @@ export class AnalysisScheduler {
     const inFlight = this.creating.get(key);
     if (inFlight) {
       const job = await inFlight;
+      logEvent('analysis.joined', {
+        jobId: job.jobId,
+        repository: `${repository.owner}/${repository.name}`,
+        phase: job.phase,
+        queued: this.queuedCount,
+        running: this.runningCount,
+      });
       return { kind: 'accepted', job, joined: true, retryAfterMs: this.retryAfterMs() };
     }
 
     const decision: RateDecision = this.options.limiter.charge(address);
     if (!decision.allowed) {
+      logEvent('analysis.refused', {
+        repository: `${repository.owner}/${repository.name}`,
+        code: 'analysis_rate_limited',
+        retryAfterSeconds: decision.retryAfterSeconds,
+        queueDepth: this.queue.length,
+        running: this.running,
+      });
       return {
         kind: 'rate_limited',
         retryAfterSeconds: decision.retryAfterSeconds ?? 60,
@@ -218,6 +257,12 @@ export class AnalysisScheduler {
 
     const limits = this.options.limiter.settings;
     if (this.queue.length >= limits.maxQueueDepth) {
+      logEvent('analysis.refused', {
+        repository: `${repository.owner}/${repository.name}`,
+        code: 'analysis_overloaded',
+        queueDepth: this.queue.length,
+        running: this.running,
+      });
       return {
         kind: 'overloaded',
         retryAfterSeconds: 30,
@@ -240,6 +285,15 @@ export class AnalysisScheduler {
       this.creating.delete(key);
     }
     this.queue.push(job.jobId);
+    logEvent('analysis.accepted', {
+      jobId: job.jobId,
+      repository: `${repository.owner}/${repository.name}`,
+      dedupKey: job.dedupKey,
+      resolvedRevision,
+      queueDepth: this.queue.length,
+      running: this.running,
+      durationMs: Date.now() - startedAt,
+    });
     this.pump();
     return { kind: 'accepted', job, joined: false, retryAfterMs: this.retryAfterMs() };
   }
@@ -296,6 +350,14 @@ export class AnalysisScheduler {
           code: 'analysis_timeout',
           message: `analysis exceeded ${this.options.timeoutMs}ms`,
         });
+        logEvent('analysis.failed', {
+          jobId,
+          repository: `${current.owner}/${current.name}`,
+          code: 'analysis_timeout',
+          durationMs: Date.now() - new Date(current.createdAt).getTime(),
+          queueDepth: this.queue.length,
+          running: this.running,
+        });
       }
     }, this.options.timeoutMs);
     this.timers.add(timeout);
@@ -303,6 +365,13 @@ export class AnalysisScheduler {
     try {
       record = await store.markStarted(jobId);
       const target = `${record.owner}/${record.name}`;
+      logEvent('analysis.started', {
+        jobId,
+        repository: target,
+        resolvedRevision: record.resolvedRevision,
+        queueDepth: this.queue.length,
+        running: this.running,
+      });
 
       // Phases come from the analyzer itself, not from a timer, so a reported
       // phase has genuinely been reached.
@@ -315,6 +384,13 @@ export class AnalysisScheduler {
         if (!canAdvance(current.phase, phase)) return;
         if (current.phase === phase) return;
         void store.markPhase(jobId, phase);
+        logEvent('analysis.phase', {
+          jobId,
+          repository: `${current.owner}/${current.name}`,
+          phase,
+          queueDepth: this.queue.length,
+          running: this.running,
+        });
       };
 
       const repository = { provider: 'github' as const, owner: record.owner, name: record.name };
@@ -359,13 +435,33 @@ export class AnalysisScheduler {
       if (beforePublish && canTransition(beforePublish.phase, 'publishing')) {
         await store.markPhase(jobId, 'publishing');
       }
-      await store.markComplete(jobId, result.graph.graph.revision.commit);
+      const completed = await store.markComplete(jobId, result.graph.graph.revision.commit);
+      logEvent('analysis.completed', {
+        jobId,
+        repository: `${record.owner}/${record.name}`,
+        resolvedRevision: completed.resolvedRevision,
+        cacheHit: result.cacheHit === true,
+        // Server-measured, so it is trustworthy even if every poll was delayed.
+        durationMs: new Date(completed.finishedAt ?? Date.now()).getTime() - new Date(record.createdAt).getTime(),
+        queueDepth: this.queue.length,
+        running: this.running,
+      });
     } catch (error) {
       const current = store.get(jobId);
       if (current && !isTerminal(current.phase)) {
+        const code = error instanceof Error && error.name === 'AbortError' ? 'analysis_aborted' : 'analysis_failed';
         await store.markFailed(jobId, {
           code: 'analysis_failed',
           message: error instanceof Error ? error.message : String(error),
+        });
+        logEvent('analysis.failed', {
+          jobId,
+          repository: `${current.owner}/${current.name}`,
+          code,
+          message: error instanceof Error ? error.message : String(error),
+          durationMs: Date.now() - new Date(current.createdAt).getTime(),
+          queueDepth: this.queue.length,
+          running: this.running,
         });
       }
     } finally {

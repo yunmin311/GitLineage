@@ -584,6 +584,76 @@ rather than asserting on the source.
 | A fast analysis showed no progress at all | the progress view was only revealed on the first poll, which for a quick job was already `complete` |
 | A second browser re-running a cached repository got `202` | without a known revision the dedup key could not find the artifact; a completed run's revision is now used |
 
+## Deployment
+
+The service is deployed as **one long-running Node process on one node**, not as
+a serverless function: a cold analysis is minutes of real work and has no request
+or process lifetime limit.
+
+| Artifact | Purpose |
+| --- | --- |
+| `Dockerfile` | Two-stage image: builds the client bundle, prunes dev dependencies, installs `git`, runs unprivileged with a healthcheck |
+| `gitlineage.env.example` | Every setting, with the secure default stated and the reason |
+| `deploy/gitlineage.service` | systemd unit: graceful `SIGTERM` drain, always-restart, hardened filesystem |
+| `deploy/RUNBOOK.md` | Host selection, install, safe-redeploy rule, and what survives what |
+
+State lives on explicit persistent paths that are never inside the checkout:
+
+| Path | Contents | Survives redeploy |
+| --- | --- | --- |
+| `GITLINEAGE_CACHE` | revision-aware graph artifacts | yes |
+| `GITLINEAGE_JOB_STORE` | durable job records | yes |
+| `TMPDIR` | disposable git scratch | no, by design |
+
+`deploy/RUNBOOK.md` states the persistence matrix explicitly, because "did the
+deploy delete my cache" is the question that actually gets asked.
+
+`test/deploy-config.test.ts` asserts that every variable the env template
+documents is read by the code, that the four settings the code reads but the
+template might omit stay documented, and that the secure defaults are the secure
+ones — the trusted-proxy header defaults to unset.
+
+### Client IP
+
+The server trusts the socket address unless a proxy header is **explicitly
+declared** trusted. Trusting a forwarding header unconditionally would let any
+caller forge an identity and bypass the per-address budget, so the safe default
+is the one that ships.
+
+### Observability
+
+Line-delimited JSON on stdout, captured by the journal. Deliberately small: no
+metrics stack, no exporter, no new dependency.
+
+| Event | Records |
+| --- | --- |
+| `server.started` | URL, effective configuration, persistent paths |
+| `http.request` | method, path, status, duration, queue depth, running count |
+| `analysis.accepted` / `analysis.joined` | job id, repository, dedup key, queue depth |
+| `analysis.cacheHit` | served from cache, no work started |
+| `analysis.started` / `analysis.phase` | real pipeline phases |
+| `analysis.completed` | **server-measured** duration, resolved revision, cache hit |
+| `analysis.failed` | error code, duration |
+| `analysis.refused` | `analysis_rate_limited` or `analysis_overloaded` |
+| `job.recovered` | a job failed as `interrupted_by_restart` |
+
+Job duration is logged from the persisted record's own timestamps rather than
+from wall-clock around the request, because a poll delayed by a slow tunnel
+would otherwise be reported as analysis time. That mistake was made once during
+validation and corrected; `test/job-timing.ts` exists to keep it corrected.
+
+Every string that reaches a log line is passed through a redactor first. That is
+not belt-and-braces: the first version of this module promised in a comment that
+no credential could be logged, and a test immediately proved the promise false by
+putting a token-shaped string in an error message. The only realistic route is an
+upstream error echoing a header, but "unreachable in practice" is how leaks
+happen. GitHub, AWS, Slack and JWT shapes are matched, along with
+`Authorization` headers and URL userinfo, so `https://[redacted]@github.com/o/r`
+keeps the host an operator needs and drops the password.
+
+No credential, token or cookie reaches a log line. That is enforced by
+`test/analysis-logging.test.ts`, not asserted in a comment.
+
 ## Not built, deliberately
 
 No dashboard, no workspace, no auth, no project manager, no search index, no
