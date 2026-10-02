@@ -132,6 +132,7 @@ Open, not implemented, not binding.
 | Client async parsing and bundle representatives | `test/web-analysis-client.test.ts` | 19 tests |
 | Deployment configuration and secure defaults | `test/deploy-config.test.ts` | 8 tests; template and code cannot drift apart |
 | Structured log contract and redaction | `test/analysis-logging.test.ts` | 13 tests, including a nested-credential leak |
+| Reported configuration matches the configuration in use | `test/deploy-config.test.ts` | the cache and job store reported by `/healthz` are the ones actually served from |
 | Live integration on real repositories | `npm run test:live` | 7 pass |
 | Production build and its served artefact | `npm run build` + `test/web-build.test.ts` | passes; bundle served over HTTP with no hard-coded host |
 | Live client behaviour on real repositories | `npm run test:web` | 26/26 checks pass |
@@ -152,21 +153,49 @@ Details and recorded results: `docs/integration-validation.md`.
 
 ## Hosting status
 
-The service is verified and packaged for a stable single-node deployment but is
-**not yet hosted anywhere permanent**. That is the one outstanding gap, and it is
-blocked on access rather than on code:
+The intended host is a single-node Oracle OCI **Always Free Ampere A1** VM.
+Because Ampere A1 is `aarch64`, "it builds on an x86 laptop" answers the wrong
+question, so `.github/workflows/arm64-validate.yml` runs the whole thing on a
+**native** ARM64 runner rather than under emulation. Emulation hides precisely
+the failure worth catching: a native binary that was never published for the
+target architecture. The runner is free on a public repository.
 
-- No cloud provider account, VPS, container platform or SSH target is available
-  in this environment, and no payment instrument can be supplied.
-- A Cloudflare Quick Tunnel was used for the live validation above. It worked and
-  then failed repeatedly for reasons outside the application (TLS handshake
-  resets mid-run, a new hostname on every restart). Those interruptions are why
-  one earlier 17-minute reading was wrong: the client could not poll, while the
-  server's own record showed 71 seconds. **Client-side timing is not evidence of
-  analysis duration**; `test/job-timing.ts` reads the persisted record instead.
+Recorded on `aarch64`, Node 24 arm64, `esbuild` resolving to `@esbuild/linux-arm64`:
+
+| Step | Result |
+| --- | --- |
+| Dependency install | succeeds, native binary present for arm64 |
+| `npm run typecheck` | 0 errors |
+| `npm run build` | bundle produced |
+| `npm test` | 235 tests, 232 pass, 3 live skipped, 0 fail |
+| `npm run test:live` | 7 pass against real repositories |
+| Serve and analyse | `/healthz` reports `nodeEnv: production`; `octocat/spoon-knife` accepted as `202` |
+| `docker build` | image architecture reported as `arm64` |
+| Container run | accepts an analysis, and cache plus jobs land on the mounted volumes rather than in the image layer |
+
+The first run of this workflow failed, and the reason was worth the run: the
+server bound port 4317 while announcing a cache directory it was not using.
+Neither was an ARM64 fault. Three latent deployment bugs came out of it, all now
+fixed and covered — the generic `PORT` outranking `GITLINEAGE_PORT`, a default
+port that collides with the OpenTelemetry collector, and `/healthz` reporting a
+different cache root from the one in use.
+
+**Not yet provisioned.** No OCI CLI, no `~/.oci` config, no API key, no tenancy
+or compartment OCID, and no SSH key for an instance. The OCI API is reachable
+from here and answers `401`, so this is missing credentials and not a network
+problem. The Always Free entitlement also caps A1 at four OCPU and 24 GB, which
+is comfortable for this workload; the risk to plan for is **capacity** in a given
+region, since Always Free A1 shapes are frequently out of stock.
+
+The live validation above was driven through a Cloudflare Quick Tunnel, which
+worked and then failed repeatedly for reasons outside the application: TLS
+handshake resets mid-run, and a new hostname on every restart. That is why one
+earlier 17-minute reading was wrong — the client could not poll while the server
+finished in 71 seconds. **Client-side timing is not evidence of analysis
+duration**; `test/job-timing.ts` reads the server's own timestamps instead.
 
 Everything needed to finish the move is committed: `Dockerfile`,
 `gitlineage.env.example`, `deploy/gitlineage.service` and `deploy/RUNBOOK.md`.
-Given a host, the remaining steps are provisioning, attaching a volume, deploying
-the pinned revision, and re-running the cold, restart and browser suites against
-the real hostname.
+Given a tenancy, the remaining steps are creating the instance, attaching a
+volume, deploying the pinned revision, and re-running the cold, restart and
+browser suites against the real hostname.
