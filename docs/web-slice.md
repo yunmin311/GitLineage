@@ -1,13 +1,20 @@
-# Web slice — Phase 2
+# Web slice — Phase 2 and Phase 3
 
 A production-shaped HTTP boundary over the analyzer, a separate presentation
 layer, and the R3.1 subject-centric one-hop Explorer rendered from real analyzer
-output. URL-first, cache-aware, responsive, and buildable.
+output. URL-first, cache-aware, responsive, buildable, and — since Phase 3 —
+asynchronous.
 
-The core provenance contract is **frozen**. This phase changed no ontology,
+The core provenance contract is **frozen**. Neither phase changed any ontology,
 collector, evidence semantic, resolver behaviour or graph schema field to make
 the UI easier. Every visual problem found in real data was fixed in the
 presentation and layout layer, and the deviations are listed at the end.
+
+- **Phase 2** built the production bundle, deployment configuration, revision
+  metadata and the Explorer interactions.
+- **Phase 3** decoupled analysis from request lifetime, after the public
+  deployment exposed a real blocker: a cold analysis of a large repository takes
+  minutes, which outlives any reverse-proxy or CDN request deadline.
 
 ## Running it
 
@@ -57,6 +64,228 @@ The client calls **only** `/api/view`. It does not also fetch `/api/graph`,
 because that would double the analysis wait for a result the server has already
 produced. `/api/graph` remains the contract surface and is still served.
 
+## Async analysis (Phase 3)
+
+### The blocker this solves
+
+A cold analysis is minutes of real work, and a reverse proxy or CDN will not hold
+a request open that long. Measured through a real Cloudflare tunnel on the public
+deployment:
+
+| Repository | Cold analysis | Old behaviour |
+| --- | --- | --- |
+| `grpc/grpc` | 121–311s | initiating request died with `524` |
+| `vitest-dev/vitest` | 121–223s | initiating request died with `524` |
+
+The analysis itself always completed; only the connection was cut. Raising a
+timeout would not fix it, and pre-warming a cache only moves the problem. So
+analysis became a job that owns its own lifecycle.
+
+### Job API
+
+`POST /api/analysis/<owner>/<repo>`
+
+Starts or joins an analysis and returns immediately. It never holds the
+connection for the duration of the work.
+
+A valid revision-aware artifact already existed:
+
+```json
+200 OK
+{
+  "status": "complete",
+  "cacheHit": true,
+  "resolvedRevision": "e9c026c611c1…",
+  "repository": "octocat/spoon-knife",
+  "graphUrl": "/api/graph/octocat/spoon-knife",
+  "viewUrl": "/api/view/octocat/spoon-knife"
+}
+```
+
+Analysis is required:
+
+```json
+202 Accepted
+{
+  "status": "queued",
+  "jobId": "c1d0231c-3024-47b0-91c0-09a3b042ec61",
+  "repository": "grpc/grpc",
+  "statusUrl": "/api/analysis/jobs/c1d0231c-3024-47b0-91c0-09a3b042ec61",
+  "retryAfterMs": 1500,
+  "joined": false
+}
+```
+
+`joined: true` means this request attached to a job that was already running
+rather than starting one. `Retry-After` is sent as a header too.
+
+`GET /api/analysis/jobs/<jobId>`
+
+```json
+{
+  "ok": true,
+  "data": {
+    "jobId": "c1d0231c-…",
+    "status": "collecting",
+    "repository": "grpc/grpc",
+    "resolvedRevision": "d04df218e898…",
+    "schemaVersion": "2.0.0",
+    "analyzerVersion": "0.2.0",
+    "error": null
+  },
+  "meta": { "phases": ["queued", "…", "complete", "failed"], "retryAfterMs": 1500 }
+}
+```
+
+### State machine
+
+```
+queued → resolving → collecting → resolving_relationships
+       → validating → publishing → complete
+```
+
+or, from any non-terminal phase, `failed`.
+
+Transitions are enforced, not documented: an out-of-order phase report throws
+rather than becoming a state a client can observe. Terminal is terminal.
+
+Every phase is emitted by the analyzer itself at an existing pipeline stage
+boundary, through an optional `onPhase` hook. Nothing is interpolated and there
+is **no percentage anywhere** — between two stages there is nothing honest to
+show. The client's step list is asserted equal to the server's list by
+`test/web-analysis-client.test.ts`.
+
+### Deduplication
+
+Job identity derives from the work, not the request:
+
+```
+owner + repo + resolved revision + graph schema version + analyzer version
+  → sha256, truncated
+  → one active computation
+```
+
+Two visitors asking for the same repository at the same revision under the same
+contract join one job instead of launching a second clone and a second pass over
+the GitHub API. When the revision cannot be resolved the key uses `*`, which is
+deliberately coarser and therefore safe: it can only ever join requests that
+share an owner, a name and a contract version, never split one.
+
+Creating a job is asynchronous, so two *simultaneous* requests would both see
+"no active job". The scheduler therefore claims the dedup key synchronously, in
+the same turn as the active-job check, before any `await`.
+
+The revision-aware artifact cache still does the real caching. Deduplication
+only stops duplicate *work*.
+
+### Surviving disconnects
+
+The job owns the analyzer promise. Closing the browser, a proxy timing out, or
+the edge dropping a connection cannot stop it, because none of them own the
+promise. A completed artifact remains available for subsequent requests.
+
+### Restart semantics
+
+Job state is one JSON file per job, written atomically, in a directory **outside
+the Git working tree**. This is deliberately not Redis: single-node deployment,
+and the expensive work is already deduplicated by the artifact cache, so the
+registry only has to survive a restart well enough to know what was in flight.
+
+- **Completed work derives truth from the artifact cache, not the registry.** A
+  `complete` record is a reporting convenience; the server re-probes the cache on
+  every request, so a lost registry cannot lose a result and a stale registry
+  cannot invent one.
+- **A job that was in flight when the process died is not left running.** It is
+  failed with `interrupted_by_restart`, which is retryable.
+- **Recovery runs at startup, not on the first request.** Calling it from request
+  handlers alone is not enough: a server that starts and is then asked nothing
+  would leave an orphaned job marked in-flight forever. That was a real bug found
+  by the restart test, and `test/web-jobs.test.ts` now covers it.
+- **A corrupt or truncated job file is discarded, never trusted.** A `.tmp`
+  leftover from an interrupted write is never read.
+- **Job ids are server-generated UUIDs.** Anything else is a `404`, so a crafted
+  id cannot traverse out of the job directory.
+
+### Abuse protection
+
+A public endpoint will happily start unbounded cold analyses, each costing
+GitHub API quota and local compute. Cached reads are cheap and stay unmetered;
+only *new expensive work* is counted.
+
+| Control | Config | Default |
+| --- | --- | --- |
+| Analyses per client address | `GITLINEAGE_RATE_LIMIT_PER_IP` | 5 |
+| Window | `GITLINEAGE_RATE_LIMIT_WINDOW_MS` | 60000 |
+| Concurrent analyses (global) | `GITLINEAGE_MAX_CONCURRENT_ANALYSES` | 2 |
+| Bounded queue depth | `GITLINEAGE_MAX_QUEUE_DEPTH` | 20 |
+| Trusted proxy header | `GITLINEAGE_TRUSTED_PROXY_HEADER` | none |
+| Metering off switch | `GITLINEAGE_RATE_LIMIT_ENABLED` | 1 |
+| Revision probe ceiling | `GITLINEAGE_PROBE_TIMEOUT_MS` | 8000 |
+
+Order matters, and is the whole design:
+
+1. an artifact is checked first — free, no token spent;
+2. then an existing job — free, no token spent, the caller joins it;
+3. only then is a rate-limit token spent on genuinely new work.
+
+Joining an in-flight job is therefore never punished, even with the budget
+exhausted. That is the abuse-relevant case: a visitor reloading the page must
+not be refused because of a job that is already running for them.
+
+Refusals are typed and carry `Retry-After` as both header and body field:
+
+| Situation | Status | `error.code` |
+| --- | --- | --- |
+| Per-address budget spent | 429 | `analysis_rate_limited` |
+| Queue full | 503 | `analysis_overloaded` |
+| Analysis not finished yet | 202 | `analysis_pending` |
+
+Client identity comes from the socket, which cannot be forged. A proxy header is
+consulted **only** when the deployment declares that header trustworthy, and then
+only its first hop. Trusting `X-Forwarded-For` unconditionally would let any
+caller forge an identity and bypass the per-IP budget entirely.
+
+No accounts, billing or authentication are built.
+
+### The result endpoints stayed canonical
+
+`/api/graph` and `/api/view` remain completed-result endpoints. Their successful
+representation is unchanged: a v2 canonical graph or its view-model. When no
+artifact exists they return the typed `analysis_pending` response rather than
+blocking, which is what actually removes the `524`.
+
+```json
+202 Accepted
+{
+  "ok": false,
+  "error": { "code": "analysis_pending", "message": "analysis is not finished…; poll the job it names" },
+  "meta": {
+    "jobId": "c1d0231c-…",
+    "status": "queued",
+    "statusUrl": "/api/analysis/jobs/c1d0231c-…",
+    "retryAfterMs": 1500,
+    "joined": false
+  }
+}
+```
+
+The canonical graph is never turned into a job representation.
+
+### Client lifecycle
+
+```
+landing → paste → navigate immediately to /owner/repo
+        → real server phases → Explorer when ready
+```
+
+- The route is shareable throughout, and a second browser opening the same URL
+  attaches to the existing job.
+- Progress shows the real phases, never a fake percentage.
+- Polling is the whole transport. No WebSocket, no SSE; neither materially
+  simplified anything, and polling is enough.
+- Poll delay backs off gently and is bounded at 5s, and polling stops on any
+  phase the client does not recognise, so it cannot spin forever.
+
 ## Client structure
 
 The browser code is split so the behaviour that must not drift is testable
@@ -67,7 +296,8 @@ in Node; `app.js` is the only file that touches the document.
 | --- | --- |
 | `lib/url-state.mjs` | `/owner/repo` parsing, repository input normalisation, shareable query state |
 | `lib/geometry.mjs` | slot layout, hub wrapping, parallel-edge bowing, label anchors, fit/zoom |
-| `lib/search.mjs` | node and relationship search, layer filtering, bundle expansion |
+| `lib/search.mjs` | node and relationship search, layer filtering, bundle expansion, orphan-bundle detection |
+| `lib/analysis.mjs` | job start/status parsing, phase text, poll cadence, refusal wording |
 | `lib/evidence-links.mjs` | real GitHub URLs with line anchors, and the similarity disclaimer |
 | `app.js` | the only DOM-aware file: render, interaction, routing |
 
@@ -129,8 +359,9 @@ them.
 Status plus schema and analyzer versions and the public configuration.
 
 Errors use one envelope shape: `{ ok: false, error: { code, message, detail } }`
-with `400` for an unusable repository reference, `502` when analysis fails, and
-`500` for a contract violation.
+with `400` for an unusable repository reference, `202 analysis_pending` when no
+artifact exists yet, `429` when the analysis budget is spent, `503` when the
+queue is full, `502` when analysis fails, and `500` for a contract violation.
 
 ## Canonical graph → view-model
 
@@ -308,6 +539,31 @@ Resolution: labels are thinned by node degree. An edge touching a node above
 hover or selection. Redrawing on hover was tried first and rejected: rebuilding
 the canvas under the pointer re-fires the event in a loop.
 
+**6. An all-bundled graph is visually indistinguishable from an empty one.**
+`expressjs/express` has 48 real one-hop relationships — 44 `depends_on` and 4
+`references` — and every one of them belongs to a bulk family that is always
+bundled. The default view therefore drew *nothing*: a lone subject node, which is
+exactly how a repository with no lineage looks. 48 real relationships and zero
+real relationships rendered the same way.
+
+Resolution: when nothing else would be drawn, each orphan bundle gets a
+lightweight representative card on the canvas, connected to the subject by an
+arrowless elbow:
+
+```
+expressjs/express
+        │
+        ├──── Dependencies ×44
+        └──── References ×4
+```
+
+The card is deliberately not a node: dashed outline, a count, and a connector with
+no arrowhead, because a bundle is a count of several relationships and has no
+direction. Clicking it expands the real relationships, and the expansion is
+recorded in the URL, so a shared link restores it. Only orphan bundles get a card,
+so a graph that already draws something is unaffected, and the canonical graph is
+untouched — this is layout only.
+
 ## Bugs found by the live validation
 
 Each of these was a real defect, found because the checks drive the real browser
@@ -323,6 +579,10 @@ rather than asserting on the source.
 | Clicks on a relationship stopped working | hidden labels still hit-tested, swallowing clicks meant for the line |
 | A shared link opened no drawer | the drawer was only rendered from a click, never restored from URL state |
 | Hovering a relationship froze the page | hover triggered `draw()`, which rebuilt the DOM under the pointer |
+| A restart left an orphaned job marked in-flight forever | recovery ran only on the first request, so a server asked nothing never recovered |
+| Two simultaneous cold requests started two analyses | creating a job is async, so both saw "no active job" before either had registered |
+| A fast analysis showed no progress at all | the progress view was only revealed on the first poll, which for a quick job was already `complete` |
+| A second browser re-running a cached repository got `202` | without a known revision the dedup key could not find the artifact; a completed run's revision is now used |
 
 ## Not built, deliberately
 

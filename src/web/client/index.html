@@ -121,20 +121,28 @@
 
     <div class="explorer-body" id="explorer-body">
       <div class="stage" id="stage">
-        <div class="overlay loading" id="loading">
-          <div class="loading-bar"><span class="loading-fill"></span></div>
-          <p class="mono loading-label" id="loading-label">Resolving repository</p>
-          <p class="mono loading-note" id="loading-note">The canvas stays empty until a relationship has evidence behind it.</p>
-        </div>
-
         <div class="overlay empty" id="empty" hidden>
           <p class="empty-head">No evidence-backed lineage found.</p>
           <p class="mono empty-body" id="empty-body"></p>
         </div>
 
+        <!--
+          Analysis progress. Steps are real server-reported phases, never a
+          percentage: the server only reports a phase it has actually reached.
+        -->
+        <div class="overlay progress" id="progress" hidden>
+          <ol class="phases" id="phases"></ol>
+          <p class="mono progress-label" id="progress-label"></p>
+          <p class="mono progress-note" id="progress-note">
+            This page stays shareable while the analysis runs.
+          </p>
+          <p class="mono progress-job" id="progress-job"></p>
+        </div>
+
         <div class="overlay failure" id="failure" hidden>
           <p class="failure-head" id="failure-head">Could not analyse this repository.</p>
           <p class="mono failure-body" id="failure-body"></p>
+          <button class="d-action" id="retry-analysis" type="button" hidden>Try again</button>
         </div>
 
         <svg id="canvas" class="canvas" role="img" aria-label="Repository lineage graph"></svg>

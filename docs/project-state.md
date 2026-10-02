@@ -33,7 +33,12 @@ Confirmed and implemented in this repository.
 | Implementation language | TypeScript on Node >= 22.18, executed directly through Node's type stripping, with `tsc --noEmit` as the type gate and `node:test` as the test runner. |
 | Single package, not a monorepo | One `package.json`. Module boundaries under `src/` match the proposed layout so a later split is mechanical. |
 | Minimal dependencies | Runtime: `smol-toml` only. Dev: `typescript`, `@types/node`, `ajv`, `ajv-formats`, `playwright` (screenshot capture only). |
-| Core contract frozen for the Web phase | Phases 1 and 2 of the Web slice changed no ontology, collector, evidence semantic, resolver behaviour or graph schema field for presentation convenience. Every visual problem found in real data was fixed in `src/web/view-model.ts` and the client layout. Deviations are listed in `docs/web-slice.md`. |
+| Core contract frozen for the Web phase | Phases 1 to 3 of the Web slice changed no ontology, collector, evidence semantic, resolver behaviour or graph schema field for presentation convenience. The one addition to the pipeline is an optional `onPhase` observer at existing stage boundaries, which is instrumentation and changes no behaviour. Every visual problem found in real data was fixed in `src/web/view-model.ts` and the client layout. Deviations are listed in `docs/web-slice.md`. |
+| Analysis is a job, not a request | The public deployment proved that a cold analysis (measured up to 311s) outlives any reverse-proxy deadline, so the initiating request was being cut off with `524` while the analysis completed anyway. Analysis is now an idempotent job with its own lifecycle: `POST /api/analysis/:owner/:repo` returns immediately, `GET /api/analysis/jobs/:jobId` observes real phases, and the result endpoints answer `analysis_pending` instead of blocking. Raising a timeout or pre-warming a cache would only move the problem. |
+| Job identity is the work, not the request | owner + repo + resolved revision + schema version + analyzer version. Two visitors asking for the same repository join one analysis instead of launching a second clone and a second pass over the GitHub API. The revision-aware artifact cache still does the real caching; deduplication only stops duplicate work. |
+| Restart must not strand a job | Completed work derives truth from the artifact cache, not the job registry. A job in flight when the process died is failed with `interrupted_by_restart` and is retryable. Recovery runs at startup, not on the first request — calling it only from request handlers leaves an orphan looking permanently running on a server that is asked nothing. That was a real bug, now covered by a test. |
+| Meter new work, not reads | Cached reads and result endpoints are unmetered. A per-address budget, a global concurrency cap and a bounded queue guard new analyses, with typed 429 and 503 plus `Retry-After`. Joining an in-flight job is free, because it costs no work. Client identity comes from the socket unless a proxy header is explicitly declared trusted. |
+| An all-bundled graph must not look empty | `expressjs/express` has 48 real relationships, all bundled, so the canvas drew nothing and was indistinguishable from a repository with no lineage. Orphan bundles now get lightweight representative cards, visibly distinct from entities, expandable, and recorded in the URL. |
 | Graph schema 2.0.0 | Bumped for the breaking rename. `validateGraph` refuses any other version; artifact cache paths embed `v2.0.0`; the JSON Schema pins `const: "2.0.0"`. A 1.x artifact cannot be served, reused or validated. |
 | Two HTTP surfaces, not one | `/api/graph/:owner/:repo` returns the canonical graph unchanged; `/api/view/:owner/:repo` returns the presentation view-model. No renderer field ever enters the canonical graph. The client calls only `/api/view`, since fetching both would double the analysis wait for one result. |
 | `/owner/repo` as the primary route | So a future domain replacement is a DNS change. The whole frame lives in the query string (`edge`, `node`, `layers`, `q`, `bundles`, `depth`), so a shared link reproduces it exactly. `/` is the landing page. |
@@ -122,10 +127,14 @@ Open, not implemented, not binding.
 | Check | Command | Status |
 | --- | --- | --- |
 | Types | `npm run typecheck` | passes, 0 errors (server config and browser-script config) |
-| Unit, contract, regression, view-model, HTTP, schema, offline pipeline | `npm test` | 163 tests, 160 pass, 3 live skipped, 0 fail |
+| Unit, contract, regression, view-model, HTTP, schema, offline pipeline | `npm test` | 209 tests, 206 pass, 3 live skipped, 0 fail |
+| Analysis jobs, dedup, restart, rate limits | `test/web-jobs.test.ts` | 26 tests covering the async lifecycle |
+| Client async parsing and bundle representatives | `test/web-analysis-client.test.ts` | 19 tests |
 | Live integration on real repositories | `npm run test:live` | 7 pass |
 | Production build and its served artefact | `npm run build` + `test/web-build.test.ts` | passes; bundle served over HTTP with no hard-coded host |
 | Live client behaviour on real repositories | `npm run test:web` | 26/26 checks pass |
+| Live async lifecycle through a public tunnel | `test/web/live-async-validation.ts` | 25/25 checks pass |
+| Cold analysis past the proxy deadline | cold-proxy harness | `grpc/grpc` 311s and `vitest-dev/vitest` 190s both returned 202 immediately and completed |
 | Screenshots of real repositories | `npm run shots` | 20 PNGs across landing, explorer, drawer, search, layers and phone, no console errors, no horizontal overflow |
 | Artifact validation | `node src/cli/main.ts validate <graph.json>` | passes on every produced artifact |
 

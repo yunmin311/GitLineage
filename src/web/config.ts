@@ -25,6 +25,31 @@ export interface ServerConfig {
   /** Public base URL used only for documentation and link building. */
   publicOrigin: string | null;
   nodeEnv: string;
+  /**
+   * Directory for the durable analysis job registry. Must live outside the Git
+   * working tree so job state can never be committed.
+   */
+  jobStoreRoot: string;
+  /** Analysis creations allowed per client address per window. */
+  rateLimitAnalysesPerIp: number;
+  rateLimitWindowMs: number;
+  /** Analyses allowed to run at the same time. */
+  maxConcurrentAnalyses: number;
+  /** Jobs allowed to wait behind the concurrency cap. */
+  maxQueueDepth: number;
+  /**
+   * Header carrying the real client address, trusted only when a reverse proxy
+   * is known to set it. `null` means the socket address is used, which cannot be
+   * forged.
+   */
+  trustedProxyHeader: string | null;
+  /** Set to 0 to disable analysis metering entirely. */
+  rateLimitEnabled: boolean;
+  /**
+   * Ceiling on the cheap revision probe every accepted request performs. Keeps
+   * a slow network from delaying a 202.
+   */
+  analysisProbeTimeoutMs: number;
 }
 
 function int(env: NodeJS.ProcessEnv, key: string, fallback: number): number {
@@ -59,6 +84,16 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ServerConfig {
     analysisTimeoutMs: int(env, 'GITLINEAGE_ANALYSIS_TIMEOUT_MS', 15 * 60_000),
     publicOrigin: env.GITLINEAGE_PUBLIC_ORIGIN ?? null,
     nodeEnv: env.NODE_ENV ?? 'development',
+    // Default beside the artifact cache, which is already required to be outside
+    // the working tree in a deployment.
+    jobStoreRoot: resolve(env.GITLINEAGE_JOB_STORE ?? resolve(env.GITLINEAGE_CACHE ?? '.cache', 'jobs')),
+    rateLimitAnalysesPerIp: int(env, 'GITLINEAGE_RATE_LIMIT_PER_IP', 5),
+    rateLimitWindowMs: int(env, 'GITLINEAGE_RATE_LIMIT_WINDOW_MS', 60_000),
+    maxConcurrentAnalyses: int(env, 'GITLINEAGE_MAX_CONCURRENT_ANALYSES', 2),
+    maxQueueDepth: int(env, 'GITLINEAGE_MAX_QUEUE_DEPTH', 20),
+    trustedProxyHeader: env.GITLINEAGE_TRUSTED_PROXY_HEADER ?? null,
+    rateLimitEnabled: int(env, 'GITLINEAGE_RATE_LIMIT_ENABLED', 1) !== 0,
+    analysisProbeTimeoutMs: int(env, 'GITLINEAGE_PROBE_TIMEOUT_MS', 8_000),
   };
 }
 
@@ -72,5 +107,15 @@ export function publicConfig(config: ServerConfig): Record<string, unknown> {
     registryEnabled: config.enableRegistry,
     clientServed: config.clientDir !== null,
     analysisTimeoutMs: config.analysisTimeoutMs,
+    analysis: {
+      jobs: 'async',
+      maxConcurrent: config.maxConcurrentAnalyses,
+      maxQueueDepth: config.maxQueueDepth,
+      rateLimitEnabled: config.rateLimitEnabled,
+      analysesPerIp: config.rateLimitAnalysesPerIp,
+      rateLimitWindowMs: config.rateLimitWindowMs,
+      // Whether a declared proxy header is honoured. Never the header value.
+      trustedProxyHeader: config.trustedProxyHeader,
+    },
   };
 }

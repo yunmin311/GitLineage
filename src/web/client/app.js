@@ -34,8 +34,10 @@ import {
   fitViewBox,
   zoomViewBox,
   contentBounds,
+  nodeAnchor,
   NODE_W,
   NODE_H,
+  COL_GAP,
 } from './lib/geometry.mjs';
 import {
   allLayersOn,
@@ -44,7 +46,18 @@ import {
   edgesForNode,
   layerCount,
   visibleEdges,
+  orphanBundles,
 } from './lib/search.mjs';
+import {
+  parseStart,
+  parseJob,
+  shouldPoll,
+  nextDelayMs,
+  phaseIndex,
+  refusalText,
+  VISIBLE_PHASES,
+  PHASE_TEXT,
+} from './lib/analysis.mjs';
 import { evidenceSourceUrl, SIMILARITY_DISCLAIMER } from './lib/evidence-links.mjs';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -75,6 +88,13 @@ const state = {
   resolvedRevision: '',
   zoom: 1,
   hasFitted: false,
+  /** True when the canvas is showing standalone bundle cards. */
+  standaloneBundles: false,
+  /** Job being observed, when an analysis is in flight. */
+  job: null,
+  pollTimer: null,
+  /** Guards against a stale poll resolving after a newer request started. */
+  loadToken: 0,
 };
 
 // -------------------------------------------------------------- dom helpers
@@ -162,21 +182,16 @@ function navigate(repository, push = true) {
 
 // ------------------------------------------------------------------ loading
 
-const PHASES = [
-  'Resolving repository',
-  'Reading repository metadata and fork records',
-  'Reading manifests and documents',
-  'Comparing bounded git history',
-  'Drawing the lineage map',
-];
-
-let phaseTimer = null;
-
-/** Switches to the explorer shell and shows the loading overlay. */
-function showLoading() {
-  state.phase = 'resolving';
+/**
+ * Switches to the explorer shell and shows the working state.
+ *
+ * The old implementation advanced a label on a timer, which made a fake
+ * progress claim. Progress is now rendered from the job the server reports, and
+ * this only prepares the frame.
+ */
+function showWorking() {
   // The landing is left behind as soon as a repository route is resolved, so the
-  // loading frame is never stacked on top of the marketing page.
+  // working frame is never stacked on top of the marketing page.
   setHidden($('landing'), true);
   setHidden($('explorer'), false);
   setHidden($('empty'), true);
@@ -184,25 +199,44 @@ function showLoading() {
   setHidden($('drawer'), true);
   setHidden($('drawer-scrim'), true);
   $('explorer-body').classList.remove('with-drawer');
-  setHidden($('loading'), false);
   setHidden($('legend'), true);
   setHidden($('bundles'), true);
   $('canvas').replaceChildren();
-  let index = 0;
-  const label = $('loading-label');
-  label.textContent = PHASES[0];
-  if (phaseTimer) clearInterval(phaseTimer);
-  phaseTimer = setInterval(() => {
-    state.phase = 'analyzing';
-    index = Math.min(index + 1, PHASES.length - 1);
-    label.textContent = PHASES[index];
-  }, 1400);
-  setChrome('resolving');
+  setChrome('analysing');
 }
 
-function hideLoading() {
-  if (phaseTimer) clearInterval(phaseTimer);
-  setHidden($('loading'), true);
+/**
+ * Renders the real job phases.
+ *
+ * Every step shown is one the server has reported reaching. There is no
+ * percentage and no interpolation: between two stages there is nothing honest to
+ * show, so nothing is shown.
+ */
+function renderPhases(status, jobId) {
+  const list = $('phases');
+  list.replaceChildren();
+  const current = phaseIndex(status);
+  for (const phase of VISIBLE_PHASES) {
+    const reached = VISIBLE_PHASES.indexOf(phase) <= current;
+    const item = el('li', {
+      class: `phase${phase === status ? ' is-current' : ''}${reached ? ' is-done' : ''}`,
+    });
+    item.append(el('span', { class: 'phase-dot', 'aria-hidden': 'true' }));
+    item.append(el('span', { class: 'phase-text', text: PHASE_TEXT[phase] }));
+    list.append(item);
+  }
+  $('progress-label').textContent = PHASE_TEXT[status] ?? '';
+  $('progress-job').textContent = jobId ? `job ${jobId.slice(0, 8)}` : '';
+  setHidden($('progress'), false);
+}
+
+function hideWorking() {
+  if (state.pollTimer) {
+    clearTimeout(state.pollTimer);
+    state.pollTimer = null;
+  }
+  state.job = null;
+  setHidden($('progress'), true);
 }
 
 /**
@@ -225,41 +259,183 @@ function setChrome(label) {
 
 // -------------------------------------------------------------- data loading
 
+/**
+ * Loads a repository, starting or joining an analysis job if one is needed.
+ *
+ * The request that asks for analysis returns as soon as the job is registered,
+ * so this never blocks on the analysis itself. It observes the job by polling,
+ * and a second browser opening the same URL joins the same job because the server
+ * deduplicates on the analysis target rather than on the request.
+ */
 async function load() {
   if (!state.repository) return;
   readUrlState();
-  showLoading();
+  showWorking();
+  state.phase = 'starting';
+
+  // A newer load invalidates any poll still in flight from a previous one.
+  const token = (state.loadToken += 1);
+  const stale = () => token !== state.loadToken;
 
   const repo = state.repository;
-  const base = `/api/view/${repo.owner}/${repo.name}`;
-  // `cache: 'no-store'` would defeat the whole point: the browser must be able to
-  // reuse its own cache, while the server decides what is fresh.
   const fetchOptions = { headers: { accept: 'application/json' } };
 
+  // Step 1: ask for the analysis. Cheap when it is already cached.
+  let start;
+  try {
+    const response = await fetch(`/api/analysis/${repo.owner}/${repo.name}`, {
+      method: 'POST',
+      ...fetchOptions,
+    });
+    start = parseStart(await response.json(), response.headers);
+  } catch (error) {
+    if (stale()) return;
+    hideWorking();
+    showFailure({ message: error instanceof Error ? error.message : String(error) });
+    return;
+  }
+  if (stale()) return;
+
+  if (start.kind === 'invalid') {
+    hideWorking();
+    showFailure({ message: start.message });
+    return;
+  }
+  if (start.kind === 'refused') {
+    hideWorking();
+    showFailure({ status: 429, message: refusalText(start), retryable: true });
+    return;
+  }
+
+  // Step 2: a completed artifact needs no waiting at all.
+  if (start.kind === 'complete') {
+    await fetchView(token);
+    return;
+  }
+
+  // Step 3: show the phase the server just reported. An accepted job is
+  // `queued`, and rendering that immediately is what makes a fast analysis
+  // legible rather than a flash of an empty canvas. The server's own state is
+  // used, never a guess: it is `queued` unless it said otherwise.
+  renderPhases(start.status, start.jobId);
+  state.job = { jobId: start.jobId, statusUrl: start.statusUrl };
+
+  // Step 4: observe the job. Polling is the whole transport; no stream is held.
+  await pollJob(start, 0, stale);
+}
+
+const VIEW_RETRY_DELAY_MS = 1500;
+
+/** Fetches the completed view-model for the current repository. */
+async function fetchView(token) {
+  if (token !== state.loadToken || !state.repository) return;
+  const repo = state.repository;
   let viewEnvelope;
   try {
-    const response = await fetch(`${base}?depth=${state.depth}`, fetchOptions);
+    const response = await fetch(`/api/view/${repo.owner}/${repo.name}?depth=${state.depth}`, {
+      headers: { accept: 'application/json' },
+    });
     viewEnvelope = await response.json();
     if (!response.ok || !viewEnvelope.ok) {
+      const pending = viewEnvelope?.error?.code === 'analysis_pending';
       throw Object.assign(new Error(viewEnvelope?.error?.message || 'analysis failed'), {
         status: response.status,
         detail: viewEnvelope?.error?.detail,
+        pending,
+        retryAfterMs: viewEnvelope?.meta?.retryAfterMs,
       });
     }
   } catch (error) {
-    hideLoading();
+    if (token !== state.loadToken) return;
+    // The job said complete but the artifact is not readable yet: a short
+    // retry, not a failure.
+    if (error?.pending || error?.status === 202) {
+      await sleep(error?.retryAfterMs ?? VIEW_RETRY_DELAY_MS);
+      if (token === state.loadToken) await fetchView(token);
+      return;
+    }
+    hideWorking();
     showFailure(error);
     return;
   }
+  applyView(viewEnvelope);
+}
+
+/**
+ * Polls a job until it reaches a terminal phase, then loads the result.
+ *
+ * Backoff is bounded by `nextDelayMs`, and polling stops on any phase this client
+ * does not recognise, so it cannot spin forever.
+ */
+async function pollJob(job, elapsed, stale) {
+  if (stale()) return;
+  const { jobId, statusUrl, retryAfterMs } = job;
+  state.job = { jobId, statusUrl };
+
+  let status;
+  try {
+    const response = await fetch(statusUrl, { headers: { accept: 'application/json' } });
+    if (response.status === 404) {
+      hideWorking();
+      showFailure({ message: 'the analysis job is no longer known to the server', retryable: true });
+      return;
+    }
+    status = parseJob(await response.json());
+  } catch (error) {
+    if (stale()) return;
+    // A transient poll failure is retried rather than surfaced.
+    const wait = nextDelayMs(retryAfterMs, elapsed);
+    await sleep(wait);
+    if (!stale()) await pollJob(job, elapsed + wait, stale);
+    return;
+  }
+
+  // An unrecognised shape stops the loop: better a clear error than an endless poll.
+  if (!status) {
+    hideWorking();
+    showFailure({ message: 'the server reported an analysis state this page does not understand', retryable: true });
+    return;
+  }
+
+  if (status.status === 'complete') {
+    hideWorking();
+    await fetchView(state.loadToken);
+    return;
+  }
+  if (status.status === 'failed') {
+    hideWorking();
+    showFailure({
+      message: status.error?.message ?? 'the analysis failed',
+      code: status.error?.code,
+      retryable: true,
+    });
+    return;
+  }
+
+  renderPhases(status.status, jobId);
+  const wait = nextDelayMs(retryAfterMs, elapsed);
+  await sleep(wait);
+  if (!stale()) await pollJob(job, elapsed + wait, stale);
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => {
+    const timer = setTimeout(resolve, Math.max(0, ms));
+    timer.unref?.();
+  });
+}
+
+/** Renders a completed view-model. */
+function applyView(viewEnvelope) {
 
   const view = viewEnvelope.data;
   const meta = viewEnvelope.meta || {};
 
-  // Only the view endpoint is called. It is a projection of the same canonical
+  // Only the view endpoint is read. It is a projection of the same canonical
   // graph `/api/graph` returns — the server states that in `meta.derivedFrom` —
-  // so a second request would double the analysis wait for a result the server
-  // has already produced. The canonical graph remains the source of truth; this
-  // file simply never reconstructs or edits it.
+  // so a second request would duplicate work for a result the server already
+  // holds. The canonical graph remains the source of truth; this file never
+  // reconstructs or edits it.
   state.graph = null;
 
   state.view = view;
@@ -268,7 +444,7 @@ async function load() {
   state.resolvedRevision = meta.resolvedRevision || view.revision.commit;
   state.phase = state.cacheHit ? 'cached' : view.partial.isPartial ? 'partial' : 'complete';
 
-  hideLoading();
+  setHidden($('progress'), true);
   renderChrome(view);
   renderStatusLine(view);
 
@@ -295,14 +471,21 @@ function showFailure(error) {
   state.phase = 'failed';
   setHidden($('failure'), false);
   const status = error?.status;
+  const code = error?.code;
   $('failure-head').textContent =
     status === 400
       ? 'That does not look like a GitHub repository.'
-      : status === 502
-        ? 'GitHub analysis did not complete.'
-        : 'Could not analyse this repository.';
+      : code === 'analysis_rate_limited'
+        ? 'Too many analyses from this address.'
+        : code === 'analysis_overloaded'
+          ? 'The analysis queue is full.'
+          : code === 'analysis_timeout' || code === 'interrupted_by_restart'
+            ? 'The analysis did not finish.'
+            : 'Could not analyse this repository.';
   $('failure-body').textContent =
     error?.detail || error?.message || 'The analyzer returned no result. Try again shortly.';
+  // A retryable failure offers a retry rather than a dead end.
+  setHidden($('retry-analysis'), error?.retryable !== true);
   $('canvas').replaceChildren();
   setHidden($('bundles'), true);
   setHidden($('legend'), true);
@@ -368,6 +551,29 @@ function currentEdges() {
   return visibleEdges(state.view, { layers: state.layers, expandedBundles: state.expandedBundles });
 }
 
+/** Pseudo-id for a bundle representative card. Never an entity id. */
+const BUNDLE_ID_PREFIX = 'bundle:';
+
+/**
+ * Positions for bundle representative cards.
+ *
+ * Deliberately a layout-only concept: these are cards standing in for grouped
+ * relationships, not entities. They are fanned to the right of the subject and
+ * are only ever created when nothing else would be drawn.
+ */
+function bundleAnchorPositions(bundles, positions) {
+  const subject = positions.get(state.view.subject.id);
+  const originX = subject ? subject.x + COL_GAP * 0.62 : 700;
+  const originY = subject ? subject.y : 300;
+  return bundles.map((bundle, index) => [
+    `${BUNDLE_ID_PREFIX}${bundle.key}`,
+    {
+      x: originX,
+      y: originY + (index - (bundles.length - 1) / 2) * 118,
+    },
+  ]);
+}
+
 function draw() {
   const view = state.view;
   const canvas = $('canvas');
@@ -376,11 +582,23 @@ function draw() {
 
   const edges = currentEdges();
   const positions = layoutGraph(view, edges);
-  const bounds = contentBounds(positions);
   // Degree decides label thinning. Parallel-edge count does not: a hub with 20
   // distinct peers has 20 fans of one, and their mid-line labels still collide.
   const degrees = nodeDegrees(edges);
 
+  // Bundles with nothing drawn of their own. `expressjs/express` lands here: 48
+  // real relationships, all bundled, so the canvas would otherwise show a lone
+  // subject and read exactly like a repository with no lineage.
+  const orphans = orphanBundles(view, { layers: state.layers, expandedBundles: state.expandedBundles });
+  const standaloneBundles = orphans.length > 0 && edges.length === 0;
+  state.standaloneBundles = standaloneBundles;
+  if (standaloneBundles) {
+    for (const [id, position] of bundleAnchorPositions(orphans, positions)) {
+      positions.set(id, position);
+    }
+  }
+
+  const bounds = contentBounds(positions);
   const viewport = { width: canvas.clientWidth || 1200, height: canvas.clientHeight || 700 };
   if (!state.hasFitted) {
     const fitted = fitViewBox(bounds, viewport);
@@ -465,6 +683,66 @@ function draw() {
     edgeLayer.append(group);
   }
 
+  // Bundle representative cards: drawn only when nothing else would be drawn, so
+  // a graph with many hidden relationships never looks like an empty one. The
+  // connector carries no arrowhead, because a bundle is not a relationship with a
+  // direction: it is a count of several.
+  if (standaloneBundles) {
+    const subject = positions.get(view.subject.id);
+    for (const bundle of orphans) {
+      const id = `${BUNDLE_ID_PREFIX}${bundle.key}`;
+      const position = positions.get(id);
+      if (!position || !subject) continue;
+
+      const from = nodeAnchor(subject, position);
+      const to = nodeAnchor(position, subject);
+      const midX = (from.x + to.x) / 2;
+      edgeLayer.append(
+        svgEl('path', {
+          d: `M ${from.x} ${from.y} L ${midX} ${from.y} L ${midX} ${to.y} L ${to.x} ${to.y}`,
+          class: 'bundle-link',
+        }),
+      );
+
+      const group = svgEl('g', {
+        class: `bundle-card st-${bundle.status}${state.expandedBundles.has(bundle.key) ? ' is-open' : ''}`,
+        role: 'button',
+        tabindex: '0',
+        'aria-label': `${bundle.count} ${bundle.relationshipType.replace(/_/g, ' ')} relationships, grouped`,
+      });
+      group.dataset.bundleKey = bundle.key;
+      group.append(
+        svgEl('rect', {
+          x: position.x - 92,
+          y: position.y - 30,
+          width: 184,
+          height: 60,
+          rx: 4,
+          class: 'bundle-card-box',
+        }),
+      );
+      group.append(
+        svgEl('text', { x: position.x - 80, y: position.y - 6, class: 'bundle-card-count' }, [
+          `×${bundle.count}`,
+        ]),
+      );
+      group.append(
+        svgEl('text', { x: position.x - 80, y: position.y + 15, class: 'bundle-card-label' }, [
+          truncate(bundle.relationshipType.replace(/_/g, ' '), 24),
+        ]),
+      );
+      const activate = (event) => {
+        event.stopPropagation();
+        toggleBundle(bundle.key);
+      };
+      group.addEventListener('click', activate);
+      group.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') activate(event);
+      });
+      nodeLayer.append(group);
+    }
+  }
+
   for (const node of view.nodes) {
     const position = positions.get(node.id);
     if (!position) continue;
@@ -535,6 +813,15 @@ function draw() {
 
 function isEdgeTouching(edge, nodeIds) {
   return nodeIds.has(edge.source) || nodeIds.has(edge.target);
+}
+
+/** Expands or collapses a bundle, recording the state in the URL. */
+function toggleBundle(key) {
+  if (state.expandedBundles.has(key)) state.expandedBundles.delete(key);
+  else state.expandedBundles.add(key);
+  syncUrl();
+  state.hasFitted = false;
+  draw();
 }
 
 function truncate(text, max) {
@@ -641,23 +928,29 @@ function renderBundles() {
     return;
   }
   box.append(
-    el('p', { class: 'bundles-head mono', text: `BUNDLED (${view.bundledEdgeCount} of ${view.edgeCount} one-hop relationships)` }),
+    el('p', {
+      class: 'bundles-head mono',
+      text: `BUNDLED (${view.bundledEdgeCount} of ${view.edgeCount} one-hop relationships)`,
+    }),
   );
+  if (state.standaloneBundles) {
+    box.append(
+      el('p', {
+        class: 'bundles-note',
+        text: 'These groups are also drawn on the canvas. Click one to expand the real relationships.',
+      }),
+    );
+  }
   for (const bundle of view.bundles) {
     const open = state.expandedBundles.has(bundle.key);
-    const row = el('button', { class: `bundle-row ${open ? 'is-open' : ''} st-${bundle.status}` });
+    const row = el('button', { class: `bundle-row ${open ? 'is-open' : ''} st-${bundle.status}`, type: 'button' });
+    row.dataset.bundleKey = bundle.key;
     row.append(
       el('span', { class: 'bundle-count mono', text: `×${bundle.count}` }),
       el('span', { class: 'bundle-label', text: bundle.relationshipType.replace(/_/g, ' ') }),
       el('span', { class: 'bundle-status mono', text: bundle.status }),
     );
-    row.addEventListener('click', () => {
-      if (state.expandedBundles.has(bundle.key)) state.expandedBundles.delete(bundle.key);
-      else state.expandedBundles.add(bundle.key);
-      syncUrl();
-      state.hasFitted = false;
-      draw();
-    });
+    row.addEventListener('click', () => toggleBundle(bundle.key));
     box.append(row);
   }
   setHidden(box, false);
@@ -1107,6 +1400,13 @@ function boot() {
       if (state.repository) void load();
     });
   }
+
+  // A retryable failure re-requests analysis from scratch. The previous job is
+  // abandoned; the load token makes its poll inert.
+  $('retry-analysis').addEventListener('click', () => {
+    setHidden($('failure'), true);
+    void load();
+  });
 
   $('layers-btn').addEventListener('click', () => toggleLayers());
   $('search-btn').addEventListener('click', () => toggleSearch());

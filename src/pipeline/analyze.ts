@@ -40,6 +40,15 @@ export interface AnalyzeOptions {
    * artifact before doing the full analysis. Omit it to always analyse.
    */
   probeRevision?: ((repository: RepositoryRef) => Promise<{ commit: string | null }>) | undefined;
+  /**
+   * Optional progress observer, called once as each pipeline stage is entered.
+   *
+   * Purely additive instrumentation: it reports what the function is about to do
+   * at the existing stage boundaries and changes no behaviour, no evidence and no
+   * graph content. The web job runner uses it so a reported phase has genuinely
+   * been reached, rather than being interpolated from a timer.
+   */
+  onPhase?: ((phase: AnalysisPhase) => void) | undefined;
   depth?: number | undefined;
   cacheRoot: string;
   namespace?: CacheNamespace;
@@ -63,6 +72,19 @@ export interface AnalyzeResult {
   candidates: string[];
   artifacts: { graph: string; metadata: string } | null;
 }
+
+/**
+ * The pipeline stages, in order.
+ *
+ * Re-declared here rather than imported from the web layer so the core pipeline
+ * keeps no dependency on the server. The web job runner uses the same names.
+ */
+export type AnalysisPhase =
+  | 'resolving'
+  | 'collecting'
+  | 'resolving_relationships'
+  | 'validating'
+  | 'publishing';
 
 interface Candidate {
   ref: RepositoryRef;
@@ -97,6 +119,8 @@ const MANIFEST_CANDIDATES: readonly RegExp[] = [
 export async function analyze(options: AnalyzeOptions): Promise<AnalyzeResult> {
   const startedAt = (options.now ?? (() => new Date()))();
   const observedAt = startedAt.toISOString();
+  const phase = options.onPhase;
+  phase?.('resolving');
   const rootRef = resolveRepositoryRef(options.target);
 
   const cache = new Cache(options.cacheRoot, options.namespace ?? 'public');
@@ -131,6 +155,7 @@ export async function analyze(options: AnalyzeOptions): Promise<AnalyzeResult> {
   };
 
   const repository = await github.getRepository(rootRef);
+  phase?.('collecting');
   const metadata = collectRepositoryMetadata({ repository, ref: rootRef });
   observations.push(...metadata.observations);
   entityDrafts.push(metadata.draft);
@@ -390,6 +415,7 @@ export async function analyze(options: AnalyzeOptions): Promise<AnalyzeResult> {
     }
   }
 
+  phase?.('resolving_relationships');
   const { graph, diagnostics: resolveDiagnostics } = resolve({
     root: entityRepository(rootRef),
     observations,
@@ -420,6 +446,7 @@ export async function analyze(options: AnalyzeOptions): Promise<AnalyzeResult> {
 
   diagnostics.push(...resolveDiagnostics);
 
+  phase?.('validating');
   const validation = validateGraph(graph);
   if (!validation.valid) {
     throw new Error(`internal contract violation: produced graph failed validation:\n${validation.errors.join('\n')}`);
@@ -427,6 +454,7 @@ export async function analyze(options: AnalyzeOptions): Promise<AnalyzeResult> {
 
   let artifacts: AnalyzeResult['artifacts'] = null;
   if (options.outDir) {
+    phase?.('publishing');
     const graphPath = join(options.outDir, 'graph.json');
     const metadataPath = join(options.outDir, 'analysis-metadata.json');
     await cache.writeJsonAtomic(graphPath, graph);

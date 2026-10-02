@@ -6,12 +6,18 @@ import { buildView, type ViewGraph } from './view-model.ts';
 import { validateGraph } from '../core/validate.ts';
 import { DIRECTIONAL_RELATIONSHIPS, SYMMETRIC_RELATIONSHIPS } from '../core/ontology.ts';
 import { GRAPH_SCHEMA_VERSION, ANALYZER_VERSION } from '../core/model.ts';
+import type { AnalysisPhase, AnalyzeOptions } from '../pipeline/analyze.ts';
 import { Cache } from '../platform/cache.ts';
 import { GitHubClient } from '../collectors/github/client.ts';
 import { HttpClient, resolveGitHubToken } from '../platform/http.ts';
 import { OUTBOUND_ALLOWLIST } from '../pipeline/analyze.ts';
 import { resolveRepositoryRef, UnsupportedRepositoryRefError } from '../platform/url.ts';
 import { loadConfig, publicConfig, type ServerConfig } from './config.ts';
+import { AnalysisScheduler, type AnalyzeInvocation } from './analysis/scheduler.ts';
+import { JobStore } from './analysis/store.ts';
+import { AnalysisRateLimiter, clientIp } from './analysis/ratelimit.ts';
+import { ANALYSIS_PHASES, isTerminal, toStatus, type JobRecord } from './analysis/types.ts';
+import type { AnalysisPhase as JobPhase } from './analysis/types.ts';
 import type { LineageGraph, RepositoryRefLike } from './types.ts';
 
 export interface AnalyzeResultMeta {
@@ -35,12 +41,23 @@ export interface ServerOptions {
   enableGit: boolean;
   enableRegistry: boolean;
   analysisTimeoutMs?: number;
+  /**
+   * Test seam for the cheap revision probe. When set, job lifecycle tests do not
+   * depend on GitHub reachability.
+   */
+  probeRevisionOverride?: ((repository: { owner: string; name: string }) => Promise<{ commit: string | null }>) | undefined;
   /** Additional outbound hosts, from configuration only. */
   extraAllowHosts?: string[];
   /** Test seam: injected instead of real network analysis. */
   analyzeOverride?: ((repository: string, options: AnalyzeOverride) => Promise<LineageGraph>) | undefined;
   /** Reports the canonical graph for a repository without the view-model. */
   graphOverride?: ((repository: string, options: AnalyzeOverride) => Promise<AnalyzeResultMeta>) | undefined;
+  /**
+   * Test seam for the async scheduler. When set, jobs resolve through this
+   * instead of the real analyzer, so job lifecycle can be tested without
+   * GitHub. It must honour `onPhase` for the state machine to be observable.
+   */
+  schedulerAnalyzeOverride?: ((options: AnalyzeInvocation) => Promise<{ graph: LineageGraph; cacheHit: boolean }>) | undefined;
 }
 
 export interface AnalyzeOverride {
@@ -63,6 +80,8 @@ export type Route =
   | { kind: 'contract' }
   | { kind: 'graph'; repository: RepositoryRefLike }
   | { kind: 'view'; repository: RepositoryRefLike }
+  | { kind: 'analysis'; repository: RepositoryRefLike }
+  | { kind: 'analysis-job'; jobId: string }
   | { kind: 'client'; path: string }
   | { kind: 'not-found' };
 
@@ -83,6 +102,8 @@ function isAsset(pathname: string): boolean {
 
 const OWNER = /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/;
 const NAME = /^[A-Za-z0-9._-]{1,100}$/;
+/** Job ids are server-generated UUIDs; nothing else is addressable. */
+const JOB_ID = /^[0-9a-f-]{36}$/;
 
 /**
  * Parses `/owner/repo` and `/owner/repo/...` into a validated repository
@@ -102,8 +123,17 @@ export function parseRoute(pathname: string): Route {
   const segments = clean.split('/').filter((segment) => segment.length > 0);
 
   if (segments[0] === 'api') {
+    // Job status is a single-segment route: /api/analysis/jobs/<jobId>
+    if (segments.length === 4 && segments[1] === 'analysis' && segments[2] === 'jobs') {
+      const jobId = segments[3]!;
+      return JOB_ID.test(jobId) ? { kind: 'analysis-job', jobId } : { kind: 'not-found' };
+    }
     if (segments.length !== 4) return { kind: 'not-found' };
     const [, , owner, name] = segments as [string, string, string, string];
+    if (segments[1] === 'analysis') {
+      if (!OWNER.test(owner) || !NAME.test(name)) return { kind: 'not-found' };
+      return { kind: 'analysis', repository: { owner: owner.toLowerCase(), name: name.toLowerCase() } };
+    }
     if (segments[1] !== 'graph' && segments[1] !== 'view') return { kind: 'not-found' };
     if (!OWNER.test(owner) || !NAME.test(name)) return { kind: 'not-found' };
     return segments[1] === 'graph'
@@ -170,16 +200,70 @@ export class GitLineageServer {
   private readonly options: ServerOptions;
   private readonly cache: Cache;
   private readonly config: ServerConfig;
+  /** Owns every analysis. Requests observe jobs; they never hold one open. */
+  private readonly scheduler: AnalysisScheduler;
+  private readonly limiter: AnalysisRateLimiter;
+  private schedulerReady: Promise<JobRecord[]> | null = null;
 
   constructor(options: ServerOptions, config?: ServerConfig) {
     this.options = options;
     this.cache = new Cache(options.cacheRoot, 'public');
     this.config = config ?? loadConfig();
+    this.limiter = new AnalysisRateLimiter({
+      analysesPerIp: this.config.rateLimitAnalysesPerIp,
+      windowMs: this.config.rateLimitWindowMs,
+      maxConcurrent: this.config.maxConcurrentAnalyses,
+      maxQueueDepth: this.config.maxQueueDepth,
+      trustedProxyHeader: this.config.trustedProxyHeader,
+      enabled: this.config.rateLimitEnabled,
+    });
+    this.scheduler = new AnalysisScheduler({
+      store: new JobStore({
+        root: this.config.jobStoreRoot,
+        schemaVersion: GRAPH_SCHEMA_VERSION,
+        analyzerVersion: ANALYZER_VERSION,
+      }),
+      limiter: this.limiter,
+      cacheRoot: this.options.cacheRoot,
+      depth: this.options.analysisDepth,
+      maxCandidates: this.options.maxCandidates,
+      enableGit: this.options.enableGit,
+      enableRegistry: this.options.enableRegistry,
+      schemaVersion: GRAPH_SCHEMA_VERSION,
+      analyzerVersion: ANALYZER_VERSION,
+      probeRevision: (repository) => this.probeRevision(repository),
+      probeTimeoutMs: this.config.analysisProbeTimeoutMs,
+      timeoutMs: this.options.analysisTimeoutMs ?? 15 * 60_000,
+      analyzeOverride: options.schedulerAnalyzeOverride,
+    });
+    // Recovery starts with the process, not with the first request: a server
+    // that starts and is then asked nothing must still fix orphaned jobs.
+    this.scheduler.recoverInBackground();
   }
 
   /** Effective runtime configuration, for health and diagnostics endpoints. */
   get runtimeConfig(): ServerConfig {
     return this.config;
+  }
+
+  /** Exposed for tests and diagnostics: what the scheduler is doing now. */
+  get analysis(): AnalysisScheduler {
+    return this.scheduler;
+  }
+
+  get rateLimiter(): AnalysisRateLimiter {
+    return this.limiter;
+  }
+
+  /**
+   * Runs restart recovery exactly once.
+   *
+   * A job that was mid-flight when the process stopped is failed here rather
+   * than being left to look permanently running.
+   */
+  private async ensureSchedulerReady(): Promise<void> {
+    this.schedulerReady ??= this.scheduler.ready();
+    await this.schedulerReady;
   }
 
   async handle(request: import('node:http').IncomingMessage, response: import('node:http').ServerResponse): Promise<void> {
@@ -211,10 +295,16 @@ export class GitLineageServer {
         );
         return;
       case 'graph':
-        await this.serveGraph(route.repository, response);
+        await this.serveGraph(route.repository, request, response);
         return;
       case 'view':
-        await this.serveView(route.repository, response);
+        await this.serveView(route.repository, request, response);
+        return;
+      case 'analysis':
+        await this.serveAnalysisStart(route.repository, request, response);
+        return;
+      case 'analysis-job':
+        this.serveAnalysisJob(route.jobId, response);
         return;
       case 'client':
         await this.serveClient(url.pathname, response);
@@ -228,49 +318,272 @@ export class GitLineageServer {
   }
 
   /**
+   * Resolves the revision cheaply.
+   *
+   * Used to find an existing artifact and to key a job on the exact revision.
+   * A failure here is not fatal: it only costs the cache lookup and makes the
+   * dedup key coarser, never wrong.
+   */
+  private async probeRevision(repository: { owner: string; name: string }): Promise<{ commit: string | null }> {
+    if (this.options.probeRevisionOverride) return this.options.probeRevisionOverride(repository);
+    try {
+      const token = await resolveGitHubToken();
+      const http = new HttpClient({ cache: this.cache, allowlist: this.allowlist(), token });
+      const github = new GitHubClient(http);
+      const ref = { provider: 'github' as const, owner: repository.owner, name: repository.name };
+      const meta = await github.getRepository(ref);
+      return { commit: await github.getCommitSha(ref, meta.default_branch) };
+    } catch {
+      return { commit: null };
+    }
+  }
+
+  /**
+   * Resolves a completed artifact, or explains that analysis is pending.
+   *
+   * The result endpoints never block on a cold analysis. A cold repository takes
+   * minutes, which outlives any proxy deadline, so a caller that has no
+   * completed artifact is told so, with a job to observe. The *successful*
+   * representation is unchanged: a v2 canonical graph or its view-model.
+   */
+  private async completedArtifact(
+    repository: RepositoryRefLike,
+    request: import('node:http').IncomingMessage,
+    response: import('node:http').ServerResponse,
+  ): Promise<AnalyzeResultMeta | null> {
+    const startedAt = Date.now();
+    try {
+      resolveRepositoryRef(`${repository.owner}/${repository.name}`);
+    } catch (error) {
+      send(response, 400, fail('invalid_repository', 'That is not a usable repository reference.', error instanceof Error ? error.message : String(error)));
+      return null;
+    }
+
+    await this.ensureSchedulerReady();
+
+    // A pinned override is a test seam and stays synchronous.
+    if (this.options.graphOverride || this.options.analyzeOverride) {
+      try {
+        return await this.analyze(`${repository.owner}/${repository.name}`);
+      } catch (error) {
+        send(response, 502, fail('analysis_failed', 'Could not analyse the requested repository.', error instanceof Error ? error.message : String(error)));
+        return null;
+      }
+    }
+
+    const address = clientIp(request, this.config.trustedProxyHeader);
+    const outcome = await this.scheduler.request(
+      { provider: 'github', owner: repository.owner, name: repository.name },
+      address,
+    );
+
+    if (outcome.kind === 'complete') {
+      return this.describe(outcome.graph, true, startedAt, undefined, undefined);
+    }
+    if (outcome.kind === 'rate_limited') {
+      this.sendWithRetryAfter(response, 429, fail(outcome.message ? 'analysis_rate_limited' : 'analysis_rate_limited', outcome.message, undefined), outcome.retryAfterSeconds);
+      return null;
+    }
+    if (outcome.kind === 'overloaded') {
+      this.sendWithRetryAfter(response, 503, fail('analysis_overloaded', outcome.message), outcome.retryAfterSeconds);
+      return null;
+    }
+
+    // Accepted: the caller gets a typed, actionable refusal rather than a hang.
+    send(
+      response,
+      202,
+      {
+        ok: false,
+        error: {
+          code: 'analysis_pending',
+          message: 'analysis is not finished for this repository yet; poll the job it names',
+        },
+        meta: {
+          jobId: outcome.job.jobId,
+          status: outcome.job.phase,
+          statusUrl: `/api/analysis/jobs/${outcome.job.jobId}`,
+          retryAfterMs: outcome.retryAfterMs,
+          joined: outcome.joined,
+          ...(outcome.job.resolvedRevision ? { resolvedRevision: outcome.job.resolvedRevision } : {}),
+        },
+      },
+    );
+    return null;
+  }
+
+  private sendWithRetryAfter(
+    response: import('node:http').ServerResponse,
+    status: number,
+    body: unknown,
+    retryAfterSeconds: number,
+  ): void {
+    send(response, status, body, { 'retry-after': String(retryAfterSeconds) });
+  }
+
+  /**
+   * `POST /api/analysis/:owner/:repo`
+   *
+   * Starts or joins an analysis and returns immediately. Never holds the
+   * connection for the duration of the work.
+   */
+  private async serveAnalysisStart(
+    repository: RepositoryRefLike,
+    request: import('node:http').IncomingMessage,
+    response: import('node:http').ServerResponse,
+  ): Promise<void> {
+    const target = `${repository.owner}/${repository.name}`;
+    try {
+      resolveRepositoryRef(target);
+    } catch (error) {
+      send(response, 400, fail('invalid_repository', 'That is not a usable repository reference.', error instanceof Error ? error.message : String(error)));
+      return;
+    }
+    await this.ensureSchedulerReady();
+
+    const address = clientIp(request, this.config.trustedProxyHeader);
+    const outcome = await this.scheduler.request(
+      { provider: 'github', owner: repository.owner, name: repository.name },
+      address,
+    );
+
+    if (outcome.kind === 'complete') {
+      send(
+        response,
+        200,
+        {
+          status: 'complete',
+          cacheHit: true,
+          resolvedRevision: outcome.resolvedRevision,
+          repository: target,
+          graphUrl: `/api/graph/${target}`,
+          viewUrl: `/api/view/${target}`,
+        },
+      );
+      return;
+    }
+    if (outcome.kind === 'rate_limited') {
+      this.sendWithRetryAfter(
+        response,
+        429,
+        {
+          ok: false,
+          error: { code: 'analysis_rate_limited', message: outcome.message },
+          // `Retry-After` appears both as a header and in the body, so a client
+          // that only parses JSON still gets the hint.
+          retryAfterSeconds: outcome.retryAfterSeconds,
+          meta: { limit: this.config.rateLimitAnalysesPerIp, windowMs: this.config.rateLimitWindowMs },
+        },
+        outcome.retryAfterSeconds,
+      );
+      return;
+    }
+    if (outcome.kind === 'overloaded') {
+      this.sendWithRetryAfter(
+        response,
+        503,
+        {
+          ok: false,
+          error: { code: 'analysis_overloaded', message: outcome.message },
+          retryAfterSeconds: outcome.retryAfterSeconds,
+          meta: {
+            running: this.scheduler.runningCount,
+            queued: this.scheduler.queuedCount,
+            maxConcurrent: this.config.maxConcurrentAnalyses,
+            maxQueueDepth: this.config.maxQueueDepth,
+          },
+        },
+        outcome.retryAfterSeconds,
+      );
+      return;
+    }
+
+    send(
+      response,
+      202,
+      {
+        status: outcome.job.phase,
+        jobId: outcome.job.jobId,
+        repository: target,
+        statusUrl: `/api/analysis/jobs/${outcome.job.jobId}`,
+        retryAfterMs: outcome.retryAfterMs,
+        joined: outcome.joined,
+        ...(outcome.job.resolvedRevision ? { resolvedRevision: outcome.job.resolvedRevision } : {}),
+      },
+      { 'retry-after': String(Math.ceil(outcome.retryAfterMs / 1000)) },
+    );
+  }
+
+  /** `GET /api/analysis/jobs/:jobId` — the observable state machine. */
+  private serveAnalysisJob(jobId: string, response: import('node:http').ServerResponse): void {
+    const record = this.scheduler.status(jobId);
+    if (!record) {
+      send(response, 404, fail('unknown_job', 'No such analysis job.', `jobId: ${jobId}`));
+      return;
+    }
+    const status = toStatus(record);
+    const terminal = isTerminal(record.phase);
+    send(
+      response,
+      200,
+      ok(status, {
+        phases: ANALYSIS_PHASES,
+        // A terminal job is done; a running one is worth retrying after the hint.
+        ...(terminal ? {} : { retryAfterMs: this.scheduler.retryAfterMs() }),
+      }),
+      terminal ? {} : { 'retry-after': String(Math.ceil(this.scheduler.retryAfterMs() / 1000)) },
+    );
+  }
+
+  /**
    * Returns the canonical LineageGraph **unchanged**.
    *
    * This endpoint is the source of truth for the product. It adds no view
    * fields, renames nothing, and re-serialises the object exactly as the
-   * analyzer produced it.
+   * analyzer produced it. It is a completed-result endpoint: when no artifact
+   * exists yet it returns the typed `analysis_pending` response rather than
+   * blocking the connection on a multi-minute analysis.
    */
-  private async serveGraph(repository: RepositoryRefLike, response: import('node:http').ServerResponse): Promise<void> {
-    const target = `${repository.owner}/${repository.name}`;
-    try {
-      const result = await this.analyze(target);
-      // Defence in depth: never serve a graph that fails its own contract.
-      const validation = validateGraph(result.graph);
-      if (!validation.valid) {
-        send(response, 500, fail('contract_violation', 'The analyzed graph failed contract validation.', validation.errors.join('; ')));
-        return;
-      }
-      send(response, 200, ok(result.graph, {
-        endpoint: 'canonical-graph',
-        note: 'canonical LineageGraph, unmodified',
-        ...revisionMeta(result),
-      }));
-    } catch (error) {
-      const status = error instanceof UnsupportedRepositoryRefError ? 400 : 502;
-      send(response, status, fail('analysis_failed', `Could not analyse ${target}.`, error instanceof Error ? error.message : String(error)));
+  private async serveGraph(
+    repository: RepositoryRefLike,
+    request: import('node:http').IncomingMessage,
+    response: import('node:http').ServerResponse,
+  ): Promise<void> {
+    const result = await this.completedArtifact(repository, request, response);
+    if (!result) return;
+    // Defence in depth: never serve a graph that fails its own contract.
+    const validation = validateGraph(result.graph);
+    if (!validation.valid) {
+      send(response, 500, fail('contract_violation', 'The analyzed graph failed contract validation.', validation.errors.join('; ')));
+      return;
     }
+    send(response, 200, ok(result.graph, {
+      endpoint: 'canonical-graph',
+      note: 'canonical LineageGraph, unmodified',
+      ...revisionMeta(result),
+    }));
   }
 
-  /** Returns the presentation view-model derived from the canonical graph. */
-  private async serveView(repository: RepositoryRefLike, response: import('node:http').ServerResponse): Promise<void> {
-    const target = `${repository.owner}/${repository.name}`;
-    try {
-      const result = await this.analyze(target);
-      const view = buildView(result.graph);
-      send(response, 200, ok(view, {
-        endpoint: 'view-model',
-        derivedFrom: '/api/graph',
-        schemaVersion: result.graph.schemaVersion,
-        ...revisionMeta(result),
-      }));
-    } catch (error) {
-      const status = error instanceof UnsupportedRepositoryRefError ? 400 : 502;
-      send(response, status, fail('analysis_failed', `Could not analyse ${target}.`, error instanceof Error ? error.message : String(error)));
-    }
+  /**
+   * Returns the presentation view-model derived from the canonical graph.
+   *
+   * Also a completed-result endpoint: it answers from a valid artifact or with
+   * the typed `analysis_pending` response, never by holding the request open.
+   */
+  private async serveView(
+    repository: RepositoryRefLike,
+    request: import('node:http').IncomingMessage,
+    response: import('node:http').ServerResponse,
+  ): Promise<void> {
+    const result = await this.completedArtifact(repository, request, response);
+    if (!result) return;
+    const view = buildView(result.graph);
+    send(response, 200, ok(view, {
+      endpoint: 'view-model',
+      derivedFrom: '/api/graph',
+      schemaVersion: result.graph.schemaVersion,
+      ...revisionMeta(result),
+    }));
   }
 
   private async analyze(target: string): Promise<AnalyzeResultMeta> {

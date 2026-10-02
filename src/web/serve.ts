@@ -1,6 +1,7 @@
 import { createServer, type Server } from 'node:http';
 import { GitLineageServer } from './server.ts';
-import { loadConfig } from './config.ts';
+import { loadConfig, type ServerConfig } from './config.ts';
+import type { AnalyzeInvocation } from './analysis/scheduler.ts';
 import type { LineageGraph } from './types.ts';
 
 export interface ServeOptions {
@@ -8,6 +9,11 @@ export interface ServeOptions {
   host?: string;
   cacheRoot?: string;
   clientDir?: string | null;
+  /**
+   * Durable job registry directory. Defaults beside the artifact cache. Must be
+   * outside the Git working tree so job state can never be committed.
+   */
+  jobStoreRoot?: string;
   depth?: number;
   maxCandidates?: number;
   enableGit?: boolean;
@@ -21,14 +27,30 @@ export interface ServeOptions {
     repository: string,
     options: { depth: number; maxCandidates: number; enableGit: boolean; enableRegistry: boolean; cacheRoot: string },
   ) => Promise<LineageGraph>;
+  /**
+   * Test seam for the async job scheduler. When set, jobs resolve through this
+   * instead of the real analyzer, so the job lifecycle can be tested without
+   * GitHub. It should call `onPhase` for the state machine to be observable.
+   */
+  schedulerAnalyzeOverride?: ((options: AnalyzeInvocation) => Promise<{ graph: LineageGraph; cacheHit: boolean }>) | undefined;
+  /**
+   * Test seam for the cheap revision probe, so job lifecycle tests do not depend
+   * on GitHub reachability.
+   */
+  probeRevisionOverride?: ((repository: { owner: string; name: string }) => Promise<{ commit: string | null }>) | undefined;
 }
 
-export async function serve(options: ServeOptions = {}, env: NodeJS.ProcessEnv = process.env): Promise<{ server: Server; url: string; app: GitLineageServer }> {
-  const config = loadConfig(env);
+export async function serve(
+  options: ServeOptions = {},
+  env: NodeJS.ProcessEnv = process.env,
+  overrides: Partial<ServerConfig> = {},
+): Promise<{ server: Server; url: string; app: GitLineageServer }> {
+  const config: ServerConfig = { ...loadConfig(env), ...overrides };
   const host = options.host ?? config.host;
   const port = options.port ?? config.port;
   const cacheRoot = options.cacheRoot ?? config.cacheRoot;
   const clientDir = options.clientDir === undefined ? config.clientDir : options.clientDir;
+  const jobStoreRoot = options.jobStoreRoot ?? config.jobStoreRoot;
 
   const app = new GitLineageServer(
     {
@@ -43,6 +65,8 @@ export async function serve(options: ServeOptions = {}, env: NodeJS.ProcessEnv =
       analysisTimeoutMs: options.analysisTimeoutMs ?? config.analysisTimeoutMs,
       extraAllowHosts: config.extraAllowHosts,
       analyzeOverride: options.analyzeOverride,
+      schedulerAnalyzeOverride: options.schedulerAnalyzeOverride,
+      probeRevisionOverride: options.probeRevisionOverride,
     },
     config,
   );
