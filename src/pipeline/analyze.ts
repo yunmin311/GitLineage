@@ -15,6 +15,7 @@ import { collectPackageDependencies, type ManifestFile } from '../collectors/pac
 import { PackageRegistryResolver } from '../collectors/packages/registry.ts';
 import { isScannableDocument, scanDocument } from '../collectors/documents/attribution.ts';
 import { compareHistories, type HistorySample } from '../collectors/git/history.ts';
+import type { SharedHistoryDiagnosticSink } from '../platform/shared-history-diagnostics.ts';
 import { buildBlobIndex, compareBlobIndexes } from '../collectors/git/blobs.ts';
 
 export const OUTBOUND_ALLOWLIST: ReadonlySet<string> = new Set([
@@ -63,6 +64,15 @@ export interface AnalyzeOptions {
   maxManifests?: number;
   token?: string | undefined;
   now?: () => Date;
+  /**
+   * Optional sidecar sink for shared-history probe diagnostics.
+   *
+   * Purely observational: it receives records and never influences the graph.
+   * Omit it and nothing is recorded anywhere, which is the default.
+   */
+  diagnostics?: SharedHistoryDiagnosticSink | undefined;
+  /** Identity for correlating diagnostics; defaults to the resolved revision. */
+  analysisId?: string | undefined;
 }
 
 export interface AnalyzeResult {
@@ -332,6 +342,14 @@ export async function analyze(options: AnalyzeOptions): Promise<AnalyzeResult> {
           truncated: history.truncated,
           createdAt: repositoryMetadata.created_at,
           htmlUrl: repositoryMetadata.html_url,
+          // Recorded for the diagnostics sidecar only; never read by the comparison.
+          fetch: {
+            depth: history.fetchDepth,
+            refspec: history.fetchRefspec,
+            blobFilter: history.blobFilter,
+            isShallow: history.isShallow,
+            shallowBoundary: history.shallowBoundary,
+          },
         });
         if (options.enableBlobs !== false) {
           try {
@@ -364,8 +382,20 @@ export async function analyze(options: AnalyzeOptions): Promise<AnalyzeResult> {
           truncated: rootHistory.truncated,
           createdAt: repository.created_at,
           htmlUrl: repository.html_url,
+          fetch: {
+            depth: rootHistory.fetchDepth,
+            refspec: rootHistory.fetchRefspec,
+            blobFilter: rootHistory.blobFilter,
+            isShallow: rootHistory.isShallow,
+            shallowBoundary: rootHistory.shallowBoundary,
+          },
         },
         candidates: candidateSamples,
+        diagnostics: options.diagnostics,
+        analysisId: options.analysisId ?? commit,
+        resolvedRevision: commit,
+        analyzerVersion: ANALYZER_VERSION,
+        schemaVersion: GRAPH_SCHEMA_VERSION,
       });
       observations.push(...comparison.observations);
       addDiagnostics(comparison.diagnostics);

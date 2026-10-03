@@ -51,6 +51,14 @@ export interface ServerConfig {
   /** Set to 0 to disable analysis metering entirely. */
   rateLimitEnabled: boolean;
   /**
+   * Directory for the shared-history diagnostic sidecar, or empty for disabled.
+   *
+   * The sidecar records what a probe saw so an intermittent signal can be
+   * diagnosed after the fact. It is written outside the canonical artifact and
+   * never influences the graph. Empty means nothing is recorded.
+   */
+  diagnosticsDir: string;
+  /**
    * Ceiling on the cheap revision probe every accepted request performs. Keeps
    * a slow network from delaying a 202.
    */
@@ -112,6 +120,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ServerConfig {
       .map((entry) => entry.trim().toLowerCase())
       .filter((entry) => entry.length > 0),
     rateLimitEnabled: int(env, 'GITLINEAGE_RATE_LIMIT_ENABLED', 1) !== 0,
+    diagnosticsDir: (env.GITLINEAGE_DIAGNOSTICS_DIR ?? '').trim(),
     analysisProbeTimeoutMs: int(env, 'GITLINEAGE_PROBE_TIMEOUT_MS', 8_000),
   };
 }

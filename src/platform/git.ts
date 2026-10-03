@@ -1,5 +1,5 @@
 import { execFile } from 'node:child_process';
-import { mkdir, rm, stat } from 'node:fs/promises';
+import { mkdir, readFile, rm, stat } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { Buffer } from 'node:buffer';
 import { promisify } from 'node:util';
@@ -255,6 +255,20 @@ export interface ShallowHistory {
   commits: string[];
   truncated: boolean;
   head: string;
+  /**
+   * Fetch facts as actually used, for the shared-history diagnostics sidecar.
+   *
+   * Additive and observational: nothing here participates in the analysis, and
+   * the values are recorded rather than enforced. `isShallow` and
+   * `shallowBoundary` exist because a bounded fetch can land its shallow
+   * boundary differently between runs, which is the plausible mechanism behind a
+   * `shares_history_with` signal that appeared once and never again.
+   */
+  fetchDepth?: number;
+  fetchRefspec?: string;
+  blobFilter?: string | null;
+  isShallow?: boolean;
+  shallowBoundary?: string[];
 }
 
 /**
@@ -304,6 +318,7 @@ export async function fetchShallowHistory(options: {
   }
 
   const boundedDepth = Math.max(1, Math.min(options.depth, 2_000));
+  const refspec = ref ?? 'HEAD';
   const fetchArgs = [
     'fetch',
     '--no-tags',
@@ -311,13 +326,17 @@ export async function fetchShallowHistory(options: {
     '--no-recurse-submodules',
     `--depth=${boundedDepth}`,
     'origin',
-    ...(ref ? [ref] : ['HEAD']),
+    refspec,
   ];
+  // Recorded for the diagnostics sidecar: which of the two fetch forms ran.
+  let blobFilter: string | null = null;
   try {
     await runGit([...fetchArgs, '--filter=blob:none'], { cwd: repoDir, sandboxHome, timeoutMs: options.timeoutMs });
+    blobFilter = 'blob:none';
   } catch {
     // Servers without partial-clone support still work with a shallow fetch.
     await runGit(fetchArgs, { cwd: repoDir, sandboxHome, timeoutMs: options.timeoutMs });
+    blobFilter = null;
   }
 
   const size = await directorySize(repoDir);
@@ -337,7 +356,32 @@ export async function fetchShallowHistory(options: {
   });
   const commits = listed.split('\n').map((line) => line.trim()).filter((line) => /^[0-9a-f]{40}$/.test(line));
 
-  return { commits, truncated: commits.length >= requested, head };
+  // Shallow state, read rather than inferred. `git rev-parse
+  // --is-shallow-repository` is authoritative; the boundary file then lists the
+  // exact commits whose parents are unknown. Best effort: a failure here must not
+  // fail a fetch, so it degrades to "unknown" rather than throwing.
+  let isShallow: boolean | undefined;
+  let shallowBoundary: string[] | undefined;
+  try {
+    isShallow = (await runGit(['rev-parse', '--is-shallow-repository'], { cwd: repoDir, sandboxHome })).trim() === 'true';
+    const shallowFile = join(repoDir, 'shallow');
+    const raw = await readFile(shallowFile, 'utf8').catch(() => '');
+    shallowBoundary = raw.split('\n').map((l) => l.trim()).filter((l) => /^[0-9a-f]{40}$/.test(l));
+    if (shallowBoundary.length === 0) shallowBoundary = isShallow ? [] : undefined;
+  } catch {
+    // Left undefined: the sidecar records "unknown" rather than a wrong answer.
+  }
+
+  return {
+    commits,
+    truncated: commits.length >= requested,
+    head,
+    fetchDepth: boundedDepth,
+    fetchRefspec: refspec,
+    blobFilter,
+    isShallow,
+    shallowBoundary,
+  };
 }
 
 export async function directorySize(path: string): Promise<number> {

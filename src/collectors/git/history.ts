@@ -1,6 +1,12 @@
 import type { EntityRef, JsonValue, Observation } from '../../core/model.ts';
 import type { RepositoryRef } from '../../platform/url.ts';
 import { LIMITS } from '../../platform/limits.ts';
+import type {
+  AnalysisDiagnosticHeader,
+  SharedHistoryDiagnosticSink,
+  SharedHistoryProbeRecord,
+  WindowFacts,
+} from '../../platform/shared-history-diagnostics.ts';
 
 export const COLLECTOR_GIT = 'git-analyzer';
 export const EXTRACTOR_SHARED_COMMITS = 'git-shared-commits@1';
@@ -14,12 +20,30 @@ export interface HistorySample {
   truncated: boolean;
   createdAt: string;
   htmlUrl: string;
+  /**
+   * Fetch facts, recorded for the diagnostics sidecar only. Absent when the
+   * caller did not collect them, and never consulted by the comparison itself.
+   */
+  fetch?: {
+    depth?: number;
+    refspec?: string;
+    blobFilter?: string | null;
+    isShallow?: boolean;
+    shallowBoundary?: readonly string[];
+  };
 }
 
 export interface HistoryComparisonInput {
   root: RepositoryRef;
   rootSample: HistorySample;
   candidates: readonly HistorySample[];
+  /** Identity of the analysis, for correlating diagnostics. */
+  analysisId?: string;
+  resolvedRevision?: string;
+  analyzerVersion?: string;
+  schemaVersion?: string;
+  /** Disabled by default; when absent nothing is recorded anywhere. */
+  diagnostics?: SharedHistoryDiagnosticSink | undefined;
 }
 
 export interface HistoryComparisonResult {
@@ -50,11 +74,35 @@ export function compareHistories(input: HistoryComparisonInput): HistoryComparis
   const rootSample = input.rootSample;
   const rootCommits = new Set(rootSample.commits);
   const rootRefEntity: EntityRef = { kind: 'repository', provider: 'github', owner: root.owner, name: root.name };
+  const sink = input.diagnostics;
+
+  // The per-analysis header, written once, before any probe. Failures are
+  // swallowed by the sink, and a missing sink is not an error.
+  void Promise.resolve(sink?.header({
+    analysisId: input.analysisId ?? 'unknown',
+    repository: `${root.owner}/${root.name}`,
+    resolvedRevision: input.resolvedRevision ?? 'unknown',
+    analyzerVersion: input.analyzerVersion ?? 'unknown',
+    schemaVersion: input.schemaVersion ?? 'unknown',
+    startedAt: new Date().toISOString(),
+    depthRequested: rootSample.fetch?.depth ?? 0,
+    maxCandidates: input.candidates.length,
+  } satisfies AnalysisDiagnosticHeader)).catch(() => {
+    // Observability must never fail an analysis.
+  });
 
   for (const candidate of input.candidates) {
     if (candidate.commits.length === 0) continue;
     const candidateCommits = new Set(candidate.commits);
     const shared = intersect(rootCommits, candidateCommits);
+
+    if (sink) {
+      // Not awaited: compareHistories is synchronous, and the sink is
+      // best-effort by contract. The promise is internally guarded, so a rejected
+      // write cannot become an unhandled rejection.
+      void recordProbe(input, rootSample, candidate, candidateCommits, shared);
+    }
+
     if (shared.length === 0) continue;
 
     const samples = shared.slice(0, LIMITS.history.maxSharedCommitSamples);
@@ -147,4 +195,82 @@ export function compareHistories(input: HistoryComparisonInput): HistoryComparis
   }
 
   return { observations, diagnostics };
+}
+
+/**
+ * Records one probe to the sidecar.
+ *
+ * "Required commits" are the shas the root window contributes and the candidate
+ * is asked about. For each, `presentLocally` records whether the candidate's
+ * own bounded clone actually contains the object. That is the fact that
+ * distinguishes a genuine absence from a shallow boundary that happened to land
+ * differently -- the plausible mechanism behind a `shares_history_with` signal
+ * that appeared once and never again. Recording it as always-true would have
+ * been worse than recording nothing.
+ *
+ * The entire body is inside a try/catch: a diagnostic failure cannot fail an
+ * analysis, and cannot change its result.
+ */
+async function recordProbe(
+  input: HistoryComparisonInput,
+  rootSample: HistorySample,
+  candidate: HistorySample,
+  candidateCommits: ReadonlySet<string>,
+  shared: readonly string[],
+): Promise<void> {
+  try {
+    const sink = input.diagnostics;
+    if (!sink) return;
+
+    const toWindow = (sample: HistorySample): WindowFacts => {
+      const boundary = new Set(sample.fetch?.shallowBoundary ?? []);
+      return {
+        requestedDepth: sample.fetch?.depth ?? 0,
+        effectiveDepth: sample.fetch?.depth ?? 0,
+        refspec: sample.fetch?.refspec ?? 'unknown',
+        blobFilter: sample.fetch?.blobFilter ?? null,
+        isShallow: sample.fetch?.isShallow ?? false,
+        shallowBoundaryCount: boundary.size,
+        boundaryTruncated: [...boundary].some((sha) => sample.commits.includes(sha)),
+        commitCount: sample.commits.length,
+        truncated: sample.truncated,
+      };
+    };
+
+    // Bounded: a repository with a deep window must not produce an unbounded file.
+    const cap = LIMITS.history.maxSharedCommitSamples + 16;
+    const required = rootSample.commits.slice(0, cap).map((sha) => ({
+      sha,
+      presentLocally: candidateCommits.has(sha),
+    }));
+    const missing = required.filter((r) => !r.presentLocally).length;
+
+    const record: SharedHistoryProbeRecord = {
+      analysisId: input.analysisId ?? 'unknown',
+      repository: `${input.root.owner}/${input.root.name}`,
+      candidate: `${candidate.ref.owner}/${candidate.ref.name}`,
+      resolvedRevision: input.resolvedRevision ?? 'unknown',
+      analyzerVersion: input.analyzerVersion ?? 'unknown',
+      schemaVersion: input.schemaVersion ?? 'unknown',
+      rootWindow: toWindow(rootSample),
+      candidateWindow: toWindow(candidate),
+      requiredCommits: required,
+      requiredCommitsMissingLocally: missing,
+      requiredCommitsTruncatedByCap: rootSample.commits.length > cap,
+      probe: {
+        method: 'commit-set-intersection',
+        rootCommitCount: rootSample.commits.length,
+        candidateCommitCount: candidate.commits.length,
+        requiredCount: required.length,
+        sharedCount: shared.length,
+        sharedSample: shared.slice(0, LIMITS.history.maxSharedCommitSamples),
+      },
+      emitted: shared.length > 0,
+      subjectEntityId: `repo:github:${input.root.owner}/${input.root.name}`,
+      objectEntityId: `repo:github:${candidate.ref.owner}/${candidate.ref.name}`,
+    };
+    await sink.probe(record);
+  } catch {
+    // Intentionally empty. Observability must never fail an analysis.
+  }
 }
