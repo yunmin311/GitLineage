@@ -12,6 +12,7 @@
  * duplicate *work*.
  */
 import { AnalysisCache, analyzeWithCache } from '../../pipeline/cached-analyze.ts';
+import { createDiagnosticSink, type SharedHistoryDiagnosticSink } from '../../platform/shared-history-diagnostics.ts';
 import type { AnalyzeOptions, AnalysisPhase as PipelinePhase } from '../../pipeline/analyze.ts';
 import type { LineageGraph } from '../../core/model.ts';
 import type { RepositoryRef } from '../../platform/url.ts';
@@ -55,6 +56,13 @@ export interface SchedulerOptions {
   limiter: AnalysisRateLimiter;
   cacheRoot: string;
   depth: number;
+  /**
+   * Directory for the shared-history diagnostic sidecar, or empty for disabled.
+   *
+   * The scheduler builds the sink and passes the job id, so records can be
+   * correlated to the job that produced them.
+   */
+  diagnosticsDir?: string | undefined;
   maxCandidates: number;
   enableGit: boolean;
   enableRegistry: boolean;
@@ -418,6 +426,13 @@ export class AnalysisScheduler {
       const repository = { provider: 'github' as const, owner: record.owner, name: record.name };
       let result: { graph: LineageGraph; cacheHit: boolean };
 
+      // One sink per analysis, keyed by the job id that owns it. Disabled when
+      // the directory is unset, in which case this is the no-op sink and nothing
+      // is written anywhere.
+      const diagnostics: SharedHistoryDiagnosticSink | undefined = this.options.diagnosticsDir
+        ? createDiagnosticSink(this.options.diagnosticsDir)
+        : undefined;
+
       if (this.options.analyzeOverride) {
         const produced = await this.options.analyzeOverride({
           target,
@@ -428,6 +443,8 @@ export class AnalysisScheduler {
           enableRegistry: this.options.enableRegistry,
           probeRevision: this.options.probeRevision,
           onPhase,
+          diagnostics,
+          analysisId: jobId,
         });
         // An injected analyzer bypasses the cache writer, so the artifact is
         // stored here. Without this a test or alternate pipeline would complete
@@ -447,6 +464,8 @@ export class AnalysisScheduler {
           enableRegistry: this.options.enableRegistry,
           probeRevision: this.options.probeRevision,
           onPhase,
+          diagnostics,
+          analysisId: jobId,
         });
       }
 

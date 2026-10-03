@@ -226,6 +226,9 @@ export class GitLineageServer {
       limiter: this.limiter,
       cacheRoot: this.options.cacheRoot,
       depth: this.options.analysisDepth,
+      // Optional: when set, shared-history probe diagnostics are written to a
+      // sidecar outside the graph artifact. Unset means the sidecar is disabled.
+      diagnosticsDir: this.config.diagnosticsDir || undefined,
       maxCandidates: this.options.maxCandidates,
       enableGit: this.options.enableGit,
       enableRegistry: this.options.enableRegistry,
