@@ -344,7 +344,11 @@ test('a token cannot reach the sidecar even when a caller hands it one', async (
   // a realistic token as a literal, and GitHub's push protection rejected the
   // commit -- which is the correct outcome and rather the point: a repository
   // should not be able to contain one, not even in a test that scrubs for them.
-  const live = ['github', 'pat', '11BRYXOEY0Ydc0FHjV5lpr', '0frZsF5NPfSxuSCpCZRNPOAI6yAooU1VUdOBgJSxj5W4GXTEVQGowcf6iLu'].join('_')
+  // Synthetic, and built from filler so the shape is exercised without any real
+  // secret entering the repository. A real token is deliberately not used here:
+  // once push protection has seen one, its value is rejected everywhere,
+  // including inside a test. That is the correct outcome, not an obstacle.
+  const live = ['github', 'pat', 'F'.repeat(60)].join('_');
   try {
     // Every plausible place a caller might leak it.
     await writeSidecar({ directory: dir, retention: 5, maxBytes: 256 * 1024 }, 'a.json',
