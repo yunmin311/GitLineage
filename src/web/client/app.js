@@ -59,7 +59,7 @@ import {
   PHASE_TEXT,
 } from './lib/analysis.mjs';
 import { evidenceSourceUrl, SIMILARITY_DISCLAIMER } from './lib/evidence-links.mjs';
-import { nodePrimitive, nodePrimitiveRadius } from './lib/primitives.mjs';
+import { nodePrimitive, nodePrimitiveRadius, depthTier, depthClass, depthOffset, depthShadowClass } from './lib/primitives.mjs';
 import { RefitTrigger, shouldRefit } from './lib/camera.mjs';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -735,6 +735,22 @@ function draw() {
         'aria-label': `${bundle.count} ${bundle.relationshipType.replace(/_/g, ' ')} relationships, grouped`,
       });
       group.dataset.bundleKey = bundle.key;
+      // A plate is a directly connected part of the topology, so it carries the
+      // plate depth tier. The rows inside it stay flat: they are its content.
+      const plateTier = depthTier({ isSelected: state.selectedEdgeId.startsWith(bundle.key) });
+      if (depthOffset(plateTier) > 0) {
+        group.append(
+          svgEl('rect', {
+            x: position.x - 92 + depthOffset(plateTier),
+            y: position.y - 30 + depthOffset(plateTier),
+            width: 184,
+            height: 60,
+            rx: 4,
+            class: depthShadowClass(plateTier),
+            'aria-hidden': 'true',
+          }),
+        );
+      }
       group.append(
         svgEl('rect', {
           x: position.x - 92,
@@ -742,7 +758,7 @@ function draw() {
           width: 184,
           height: 60,
           rx: 4,
-          class: 'bundle-card-box',
+          class: ['bundle-card-box', depthClass(plateTier)].filter(Boolean).join(' '),
         }),
       );
       group.append(
@@ -785,6 +801,28 @@ function draw() {
     // type the design has no primitive for yet still gets its own marker instead
     // of being drawn as a repository.
     const primitive = nodePrimitive(node.type);
+    // Depth says how far this object participates in the topology. The subject
+    // outranks a selected node, so selection never reads as a change of anchor.
+    const tier = depthTier({ isSubject: node.isSubject, isSelected: state.selectedNodeId === node.id });
+    const depth = depthClass(tier);
+    const offset = depthOffset(tier);
+    const radius = nodePrimitiveRadius(node.type);
+
+    // The hard offset is a real shape, not a box-shadow: box-shadow computes on
+    // an SVG rect but paints nothing, so a CSS-only ladder would be invisible.
+    if (offset > 0) {
+      group.append(
+        svgEl('rect', {
+          x: position.x - NODE_W / 2 + offset,
+          y: position.y - NODE_H / 2 + offset,
+          width: NODE_W,
+          height: NODE_H,
+          rx: radius,
+          class: depthShadowClass(tier),
+          'aria-hidden': 'true',
+        }),
+      );
+    }
 
     group.append(
       svgEl('rect', {
@@ -792,11 +830,12 @@ function draw() {
         y: position.y - NODE_H / 2,
         width: NODE_W,
         height: NODE_H,
-        rx: nodePrimitiveRadius(node.type),
+        rx: radius,
         class: [
           'node-box',
           node.isSubject ? 'is-subject' : '',
           primitive,
+          depth,
         ].filter(Boolean).join(' '),
       }),
     );

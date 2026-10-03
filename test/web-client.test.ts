@@ -51,6 +51,11 @@ import {
   isCanonicalEntityType,
   nodePrimitive,
   nodePrimitiveRadius,
+  depthTier,
+  depthClass,
+  depthOffset,
+  depthShadowClass,
+  DEPTH_OFFSET,
 } from '../src/web/client/lib/primitives.mjs';
 import {
   RefitTrigger,
@@ -779,9 +784,152 @@ test('Package keeps the exact plate it has always had', () => {
   for (const type of CANONICAL_ENTITY_TYPES.filter((t) => t !== 'Package')) {
     assert.equal(nodePrimitiveRadius(type), 4, `${type} must keep the default radius`);
   }
-  // The pre-slice behaviour, stated directly: radius followed isPackage.
-  for (const type of CANONICAL_ENTITY_TYPES) {
-    assert.equal(nodePrimitiveRadius(type), type === 'Package' ? 3 : 4);
+});
+
+// ------------------------------------------------- topological depth ladder
+
+test('the subject is the strongest depth tier and outranks selection', () => {
+  // The whole point of the ladder: a selection must never make the composition
+  // read as though the anchor had changed.
+  assert.equal(depthTier({ isSubject: true }), 'subject');
+  assert.equal(depthTier({ isSubject: true, isSelected: true }), 'subject');
+  assert.equal(depthTier({ isSelected: true }), 'selected');
+  assert.equal(depthTier({}), 'plate');
+
+  // Ordered, strongest first.
+  const order = ['subject', 'selected', 'plate', 'flat'];
+  const tier = (input: Parameters<typeof depthTier>[0]) => order.indexOf(depthTier(input));
+  assert.ok(tier({ isSubject: true, isSelected: true }) < tier({ isSelected: true }), 'subject outranks selected');
+  assert.ok(tier({ isSelected: true }) < tier({}), 'selected outranks plate');
+});
+
+test('a row inside a plate stays flat even when it is the selected thing', () => {
+  // Selection raises the plate that owns the row, never the row itself.
+  assert.equal(depthTier({ isRow: true, isSelected: true }), 'flat');
+  assert.equal(depthTier({ isRow: true }), 'flat');
+  assert.equal(depthClass('flat'), '', 'the flat tier must have no class to override');
+});
+
+test('depth classes exist for exactly the three shadowed tiers', () => {
+  assert.equal(depthClass('subject'), 'depth-subject');
+  assert.equal(depthClass('selected'), 'depth-selected');
+  assert.equal(depthClass('plate'), 'depth-plate');
+  const shadowed = ['subject', 'selected', 'plate'].map(depthClass);
+  assert.equal(new Set(shadowed).size, 3);
+});
+
+// --------------------------------------------------------- depth ladder CSS
+
+const APP_CSS = readFileSync(resolve(import.meta.dirname, '..', 'src/web/client/app.css'), 'utf8');
+
+/** The rule block for a selector, with comments removed. */
+function cssRule(selector: string): string {
+  const pattern = new RegExp(`(^|[,}])\\s*${selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*(,[^{]*)?\\{([^}]*)\\}`, 'm');
+  const match = pattern.exec(code(APP_CSS));
+  assert.ok(match, `${selector} must have a rule in app.css`);
+  return match[3] ?? '';
+}
+
+test('the frozen depth ladder has the exact hard offsets', () => {
+  // Geometry, in px. Subject is the strongest tier, selection sits between the
+  // subject and the plate, and a flat surface throws nothing.
+  assert.equal(DEPTH_OFFSET.subject, 6);
+  assert.equal(DEPTH_OFFSET.selected, 5);
+  assert.equal(DEPTH_OFFSET.plate, 4);
+  assert.equal(DEPTH_OFFSET.flat, 0);
+  assert.equal(depthOffset('subject'), 6);
+  assert.equal(depthOffset('flat'), 0);
+  assert.equal(depthOffset('nonsense'), 0, 'an unknown tier must throw no shadow');
+
+  // Strictly decreasing strength: subject > selected > plate.
+  assert.ok(DEPTH_OFFSET.subject > DEPTH_OFFSET.selected);
+  assert.ok(DEPTH_OFFSET.selected > DEPTH_OFFSET.plate);
+  assert.ok(DEPTH_OFFSET.plate > DEPTH_OFFSET.flat);
+});
+
+test('the ladder is drawn as geometry, because box-shadow cannot paint an SVG rect', () => {
+  // box-shadow computes on an SVG rect and paints nothing. Measured in Chromium:
+  // the computed value resolves and every offset pixel is bare paper. So the
+  // offset must be a real shape, and the tier class must name it.
+  assert.equal(depthShadowClass('subject'), 'depth-shadow depth-shadow-subject');
+  assert.equal(depthShadowClass('selected'), 'depth-shadow depth-shadow-selected');
+  assert.equal(depthShadowClass('plate'), 'depth-shadow depth-shadow-plate');
+  assert.equal(depthShadowClass('flat'), '', 'a flat surface must have no offset shape');
+
+  // No tier may be expressed as a box-shadow anywhere in the stylesheet. The one
+  // remaining declaration is the phase dot's inset paper ring, which paints on an
+  // HTML element and is a fill rather than elevation.
+  const shadows = [...APP_CSS.matchAll(/box-shadow:\s*([^;]+);/g)].map((m) => m[1]!);
+  for (const value of shadows) {
+    assert.match(value, /inset/, `only an inset fill may remain, not elevation: ${value}`);
+  }
+
+  // The renderer must actually emit the offset shape, not merely describe it.
+  const draw = code(functionBody('draw'));
+  assert.match(draw, /depthShadowClass\(/, 'draw must emit the offset shape');
+  assert.match(draw, /depthOffset\(/, 'draw must offset the shape by the ladder amount');
+});
+
+test('each depth tier has an offset shape that carries the right shadow colour', () => {
+  assert.match(cssRule('.depth-shadow-subject'), /fill:\s*var\(--rule-2\)/);
+  assert.match(cssRule('.depth-shadow-selected'), /fill:\s*var\(--rule-2\)/);
+  assert.match(cssRule('.depth-shadow-plate'), /fill:\s*var\(--rule\)/);
+  assert.match(cssRule('.depth-shadow'), /stroke:\s*none/, 'the offset shape must not be outlined');
+});
+
+test('the depth ladder uses no blur, glow, gradient or diffuse shadow', () => {
+  assert.equal(/filter:\s*blur/.test(APP_CSS), false, 'no blur anywhere in the client stylesheet');
+  assert.equal(/backdrop-filter/.test(APP_CSS), false, 'no backdrop blur');
+  assert.equal(/gradient/.test(APP_CSS), false, 'no gradient anywhere in the client stylesheet');
+});
+
+test('flat surfaces carry no topology shadow', () => {
+  // The surfaces the frozen design holds flat. Each is asserted to have no
+  // shadow, so none of them can quietly acquire elevation.
+  for (const selector of [
+    '.drawer', '.drawer-inner', '.legend', '.bundles', '.status-line',
+    '.phases', '.bundle-row', '.layer-row', '.d-card', '.d-why', '.d-actions',
+    '.input-card', '.layers-pop',
+  ]) {
+    const rule = cssRule(selector);
+    assert.equal(/box-shadow/.test(rule), false, `${selector} must stay flat`);
+  }
+});
+
+test('no generic card elevation is left in the client stylesheet', () => {
+  // The pre-slice stylesheet carried `3px 3px 0 rgba(23,21,15,0.10)` on two
+  // panels. That is decoration, not topology, and it is gone. The scrim keeps
+  // its rgba, which is a background and not an elevation.
+  const shadows = [...APP_CSS.matchAll(/box-shadow:\s*([^;]+);/g)].map((m) => m[1]!);
+  for (const value of shadows) {
+    assert.equal(/rgba\(23,21,15/.test(value), false, `no rgba ink shadow may remain: ${value}`);
+  }
+});
+
+test('each canonical type maps to exactly one explicit primitive class', () => {
+  const classes = CANONICAL_ENTITY_TYPES.map((type) => nodePrimitive(type));
+  assert.equal(new Set(classes).size, CANONICAL_ENTITY_TYPES.length, 'no two types may share a primitive');
+  for (const className of classes) {
+    // Every primitive must actually be styled, or the type would be indistinguishable.
+    assert.match(
+      cssRule(`.node-box.${className}`),
+      /stroke|fill/,
+      `${className} must be styled in app.css`,
+    );
+  }
+  assert.equal(cssRule(`.node-box.${UNKNOWN_PRIMITIVE}`) !== undefined, true, 'the unknown marker is styled too');
+});
+
+test('the primary three carry the visual weight and the rest stay subordinate', () => {
+  // No new semantic colour family: the secondary primitives use only existing
+  // surface and rule tokens.
+  for (const type of ['Commit', 'Release', 'SourceArtifact']) {
+    const rule = cssRule(`.node-box.${nodePrimitive(type)}`);
+    const colours = rule.match(/#[0-9A-Fa-f]{3,8}|var\(--[a-z0-9-]+\)/g) || [];
+    const allowed = /var\(--(surface|surface-hi|surface-sunk|rule|rule-2|ink|ink-2|ink-3|ink-4|alert)\)/;
+    for (const colour of colours) {
+      assert.match(colour, allowed, `${type} must not introduce a new colour: ${colour}`);
+    }
   }
 });
 

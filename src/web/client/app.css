@@ -109,7 +109,7 @@ a { color: inherit; }
 .layers-pop {
   position: absolute; right: 18px; top: calc(var(--bar-h) + 8px); width: 268px; z-index: 50;
   background: var(--surface-hi); border: 1px solid var(--rule-2); border-radius: 5px;
-  box-shadow: 3px 3px 0 rgba(23,21,15,0.10); padding: 11px 12px 10px;
+  padding: 11px 12px 10px;
 }
 .pop-head { font-size: 9px; font-weight: 800; letter-spacing: 0.08em; color: var(--ink-3); margin: 0 0 8px; }
 .layer-row { display: flex; align-items: center; gap: 9px; padding: 5px 0; font-size: 12px; color: var(--ink-2); width: 100%; background: transparent; border: 0; text-align: left; }
@@ -128,7 +128,7 @@ a { color: inherit; }
 .landing h1 { font-size: clamp(38px, 6.2vw, 64px); line-height: 1.0; letter-spacing: -0.045em; font-weight: 700; margin: 0 0 20px; }
 .lede { font-size: 18px; line-height: 1.5; color: var(--ink-2); margin: 0 0 34px; max-width: 46ch; }
 
-.input-card { background: var(--surface); border: 1px solid var(--rule-2); border-radius: 6px; padding: 14px; box-shadow: 3px 3px 0 rgba(23,21,15,0.10); }
+.input-card { background: var(--surface); border: 1px solid var(--rule-2); border-radius: 6px; padding: 14px; }
 .input-row { display: flex; gap: 10px; align-items: stretch; }
 .input-icon { width: 15px; height: 15px; align-self: center; margin-left: 12px; fill: var(--ink-4); flex: none; }
 #repo-input { flex: 1; min-width: 0; font-family: var(--mono); font-size: 14px; padding: 13px 12px; border: 1px solid var(--rule-2); border-radius: 4px; background: var(--surface-hi); color: var(--ink); }
@@ -263,15 +263,65 @@ a { color: inherit; }
 
 /* ------------------------------------------------------------------ graph */
 
+/*
+ * Topological depth ladder.
+ *
+ * Depth communicates one thing: participation in the graph's topology. It is not
+ * decoration and not generic card elevation.
+ *
+ * The offsets are geometry and live in `primitives.mjs` (subject 6, selected 5,
+ * plate 4). They are drawn as a real shape behind each plate rather than declared
+ * as `box-shadow`, because box-shadow computes on an SVG rect and then paints
+ * nothing: the declaration resolves and the shadow is invisible. CSS supplies the
+ * shadow colour only, and it is a rule token rather than an rgba ink, so the
+ * offset reads as paper stacked on paper.
+ *
+ * A surface with no topological part gets no tier at all, and therefore has no
+ * rule to override: rows, the context rail, census, legend, naming rules, the
+ * camera key, the analysis strip and the Drawer are all flat.
+ */
+.depth-shadow { stroke: none; }
+.depth-shadow-subject { fill: var(--rule-2); }
+.depth-shadow-selected { fill: var(--rule-2); }
+.depth-shadow-plate { fill: var(--rule); }
+
 .node-box { fill: var(--surface); stroke: var(--rule-2); stroke-width: 1; }
 .node-box.is-subject { fill: var(--surface-hi); stroke: var(--ink); stroke-width: 2; }
+
+/*
+ * Entity primitives.
+ *
+ * The three the frozen design validates carry the visual weight. The remaining
+ * canonical types are represented honestly but quietly, using only existing
+ * surface and rule tokens: no new colour family, and nothing that outranks the
+ * repository primitive it sits beside.
+ */
+
+/* Primary: Repository, Package, ExternalProject. */
+.node-box.is-repository { fill: var(--surface-hi); stroke: var(--ink-3); stroke-width: 1.5; }
 .node-box.is-package { fill: var(--surface-sunk); stroke: none; }
+.node-box.is-external-project { fill: var(--surface); stroke: var(--ink-4); stroke-width: 1.5; stroke-dasharray: 4 2; }
+
+/* Secondary: structurally distinct, visually subordinate. */
+.node-box.is-commit { fill: var(--surface); stroke: var(--rule-2); stroke-width: 1; rx: 2; }
+.node-box.is-release { fill: var(--surface); stroke: var(--ink-4); stroke-width: 1; rx: 2; stroke-dasharray: 1 2; }
+.node-box.is-source-artifact { fill: var(--surface-sunk); stroke: var(--rule-2); stroke-width: 1; rx: 1; }
+/* Not in the canonical union. Deliberately marked so it cannot pass for one. */
+.node-box.is-unknown-entity-type { fill: var(--surface); stroke: var(--alert); stroke-width: 1; stroke-dasharray: 2 2; }
+
 .node-label { font-family: var(--mono); font-size: 12px; font-weight: 650; fill: var(--ink); }
 .node-fact { font-family: var(--mono); font-size: 10px; fill: var(--ink-4); }
 .subject-tag { font-family: var(--mono); font-size: 9px; font-weight: 800; letter-spacing: 0.08em; fill: var(--ink-3); }
 .node-hit { fill: transparent; cursor: pointer; }
 .node.is-selected .node-box { stroke: var(--ink); stroke-width: 2; }
 .node.is-dim { opacity: 0.16; }
+
+/*
+ * Aggregate plates are a directly connected part of the topology, so they carry a
+ * depth tier. The rows drawn inside a plate are its content and stay flat.
+ */
+.bundle-card-box.depth-plate { fill: var(--surface-hi); }
+.bundle-card-box.depth-selected { fill: var(--surface-hi); }
 
 .edge-line { fill: none; stroke: var(--verified); }
 .edge-line.fam-ancestry { stroke-width: 2; }
@@ -380,7 +430,7 @@ a { color: inherit; }
   .explorer-body.with-drawer { grid-template-columns: minmax(0, 1fr); }
   .drawer {
     position: fixed; inset: var(--bar-h) 0 0 auto; width: min(420px, 100%); height: auto;
-    z-index: 60; box-shadow: -3px 0 0 rgba(23,21,15,0.08);
+    z-index: 60;
   }
   .drawer-scrim { display: block; position: fixed; inset: 0; background: rgba(23,21,15,0.18); border: 0; z-index: 55; }
   .drawer-scrim[hidden] { display: none; }
