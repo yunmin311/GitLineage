@@ -61,6 +61,9 @@ import { evidenceSourceUrl, SIMILARITY_DISCLAIMER } from './lib/evidence-links.m
 import { nodePrimitive, nodePrimitiveRadius, depthTier, depthClass, depthOffset, depthShadowClass } from './lib/primitives.mjs';
 import { RefitTrigger, shouldRefit } from './lib/camera.mjs';
 import { buildComposition, plateRows } from './lib/aggregate.mjs';
+import {
+  FRAME, ZONES, subjectPosition, dataZonePositions, loosePositions, initialViewBox,
+} from './lib/compose.mjs';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const ZOOM_STEP = 1.25;
@@ -99,6 +102,8 @@ const state = {
   refitPending: false,
   /** True when the canvas is showing standalone bundle cards. */
   standaloneBundles: false,
+  /** Peers the authored field could not hold, so the count is never silently lost. */
+  placementOverflow: 0,
   /** Job being observed, when an analysis is in flight. */
   job: null,
   pollTimer: null,
@@ -595,19 +600,6 @@ const BUNDLE_ID_PREFIX = 'bundle:';
  * relationships, not entities. They are fanned to the right of the subject and
  * are only ever created when nothing else would be drawn.
  */
-function bundleAnchorPositions(bundles, positions) {
-  const subject = positions.get(state.view.subject.id);
-  const originX = subject ? subject.x + COL_GAP * 0.62 : 700;
-  const originY = subject ? subject.y : 300;
-  return bundles.map((bundle, index) => [
-    `${BUNDLE_ID_PREFIX}${bundle.key}`,
-    {
-      x: originX,
-      y: originY + (index - (bundles.length - 1) / 2) * 118,
-    },
-  ]);
-}
-
 const PLATE_W = 184;
 /**
  * An expanded plate is wider because each row carries a label and the file that
@@ -631,18 +623,77 @@ function plateHeight(rowCount) {
  * stack is measured rather than pitched on a fixed interval, so an expanded plate
  * grows into the space below it and never overlaps its neighbour.
  */
-function aggregateAnchorPositions(plates, positions) {
-  const subject = positions.get(state.view.subject.id);
-  const originX = subject ? subject.x + COL_GAP * 0.62 : 700;
-  const originY = subject ? subject.y : 300;
-  let cursor = 0;
-  return plates.map((plate) => {
-    const rows = plate.expanded ? plateRows(plate).length : 0;
-    const height = plateHeight(rows);
-    const y = originY + cursor + height / 2;
-    cursor += height + 34;
-    return [`${BUNDLE_ID_PREFIX}${plate.key}`, { x: originX, y }];
+/**
+ * Places everything on the authored frame.
+ *
+ * The subject is fixed. Plates stack down the right-hand data zone from its
+ * authored top, so every subject-to-plate tie is short and near-horizontal
+ * instead of fanning into long diagonals. Loose relationships are placed on a
+ * downward-opening arc around the subject, so a small graph reads as a
+ * constellation rather than as mechanical columns, and nothing lands in the empty
+ * upper field.
+ */
+function authoredPositions(view, edges, composition) {
+  const positions = new Map();
+  const subject = subjectPosition();
+  positions.set(view.subject.id, subject);
+
+  // Plates first: their heights decide where the loose arc has room to sit.
+  const plateEntries = composition.plates.map((plate) => {
+    const rows = plate.expanded ? plateRows(plate) : [];
+    return { height: plateHeight(rows.length) };
   });
+  const plateSlots = dataZonePositions(plateEntries);
+  composition.plates.forEach((plate, index) => {
+    const slot = plateSlots[index];
+    positions.set(`${BUNDLE_ID_PREFIX}${plate.key}`, {
+      x: slot.x,
+      y: slot.y + slot.height / 2,
+      height: slot.height,
+    });
+  });
+
+  // Loose relationships: the endpoints of the relationships actually drawn.
+  const looseEdges = edges;
+  const nodeIds = [];
+  for (const edge of looseEdges) {
+    for (const id of [edge.source, edge.target]) {
+      if (id !== view.subject.id && !nodeIds.includes(id)) nodeIds.push(id);
+    }
+  }
+  const slots = nodeIds.map((id) => (view.nodes.find((n) => n.id === id) || {}).slot || 'dependency');
+  // Plates are handed to the placement as obstacles, so a loose node can never
+  // land on top of one. Measured overlap was 1 before this was passed.
+  // The plate's real drawn extent, not a worst case. Reserving the expanded width
+  // for every plate blocked the right-hand column of the field and silently halved
+  // how many peers the scene could show.
+  const obstacles = composition.plates.map((plate, index) => {
+    const rows = plate.expanded ? plateRows(plate) : [];
+    const slot = plateSlots[index];
+    const left = slot.x - PLATE_W / 2;
+    const width = rows.length > 0 ? PLATE_W_EXPANDED : PLATE_W;
+    return {
+      x: left + width / 2,
+      y: slot.y + slot.height / 2,
+      hw: width / 2,
+      hh: slot.height / 2,
+    };
+  });
+  const placement = loosePositions(nodeIds.length, slots, [subject], obstacles);
+  // Every peer must be placed. If the authored field cannot hold them, the scene
+  // would show fewer entities than there are relationships, which reads as a
+  // wrong graph rather than a crowded one.
+  if (placement.overflowed > 0) {
+    state.placementOverflow = placement.overflowed;
+  } else {
+    state.placementOverflow = 0;
+  }
+  nodeIds.forEach((id, index) => {
+    const at = placement.positions[index];
+    if (at) positions.set(id, at);
+  });
+
+  return positions;
 }
 
 /**
@@ -678,15 +729,15 @@ function draw() {
   state.composition = composition;
   const loose = new Set(composition.looseEdgeIds);
   const edges = visibleCandidates(view).filter((edge) => loose.has(edge.id));
-  const positions = layoutGraph(view, edges);
+  // Authored composition, not a content fit. The subject sits where the design
+  // puts it, the data mass stacks down the right zone, and loose relationships
+  // are placed on an arc around the anchor rather than in a slot grid.
+  const positions = authoredPositions(view, edges, composition);
   // Degree decides label thinning. Parallel-edge count does not: a hub with 20
   // distinct peers has 20 fans of one, and their mid-line labels still collide.
   const degrees = nodeDegrees(edges);
 
   state.standaloneBundles = composition.looseEdgeIds.length === 0 && composition.plates.length > 0;
-  for (const [id, position] of aggregateAnchorPositions(composition.plates, positions)) {
-    positions.set(id, position);
-  }
 
   // Expansion must not refit the camera, so an expanded plate has to fit inside
   // the framing the first paint chose. The space a plate will need when open is
@@ -703,9 +754,13 @@ function draw() {
   // move the camera: the refit gate is a single condition so "expanding an
   // aggregate recentres the scene" cannot come back unnoticed.
   if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : RefitTrigger.Local)) {
-    const fitted = fitViewBox(bounds, viewport);
-    canvas.setAttribute('viewBox', fitted.viewBox);
-    state.zoom = fitted.zoom;
+    // The authored frame, not a fit to the content. Fitting is what produced the
+    // bottom-heavy scene with a large inactive upper area, because a small graph
+    // is tiny beside the page and ends up centred in it. The design's frame is a
+    // composition decision and does not move with the content.
+    const framed = initialViewBox(viewport);
+    canvas.setAttribute('viewBox', framed.viewBox);
+    state.zoom = framed.zoom;
     state.hasFitted = true;
     state.refitPending = false;
   }
@@ -813,10 +868,10 @@ function draw() {
     const from = nodeAnchor(subjectPosition, position);
     // The tie arrives on the plate's left edge, which is where the plate always is.
     const to = { x: left, y: position.y };
-    const midX = (from.x + to.x) / 2;
+    const midX = from.x + (to.x - from.x) * 0.55;
     edgeLayer.append(
       svgEl('path', {
-        d: `M ${from.x} ${from.y} L ${midX} ${from.y} L ${midX} ${to.y} L ${to.x} ${to.y}`,
+        d: `M ${from.x} ${from.y} C ${midX} ${from.y} ${midX} ${to.y} ${to.x} ${to.y}`,
         class: 'bundle-link',
       }),
     );
