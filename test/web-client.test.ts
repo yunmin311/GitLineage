@@ -43,6 +43,13 @@ import {
   layerCount,
 } from '../src/web/client/lib/search.mjs';
 import { evidenceSourceUrl, SIMILARITY_DISCLAIMER } from '../src/web/client/lib/evidence-links.mjs';
+import {
+  CANONICAL_ENTITY_TYPES,
+  UNKNOWN_PRIMITIVE,
+  isCanonicalEntityType,
+  nodePrimitive,
+  nodePrimitiveRadius,
+} from '../src/web/client/lib/primitives.mjs';
 import type { ViewEdge, ViewGraph, ViewNode } from '../src/web/view-model.ts';
 
 /** Fails loudly instead of yielding `undefined` and failing three lines later. */
@@ -719,4 +726,51 @@ test('evidenceSourceUrl refuses to invent a URL the analyzer never recorded', ()
     'https://github.com/o/r/blob/main/docs/x.md#L4-L9',
   );
   assert.equal(SIMILARITY_DISCLAIMER.includes('not'), true);
+});
+
+// --------------------------------------------------------- entity primitives
+
+/*
+ * Node identity must come from the canonical `entity.type`, never from the
+ * lossy `isPackage` boolean. These tests pin that selector.
+ */
+
+test('every canonical entity type selects its own primitive', () => {
+  // The union is larger than the three primitives the frozen design draws, so
+  // this asserts one marker per type: no type may fall through to another's.
+  const selected = CANONICAL_ENTITY_TYPES.map((type) => nodePrimitive(type));
+  assert.equal(new Set(selected).size, CANONICAL_ENTITY_TYPES.length);
+  for (const type of CANONICAL_ENTITY_TYPES) {
+    assert.equal(isCanonicalEntityType(type), true, `${type} must be canonical`);
+    assert.notEqual(nodePrimitive(type), UNKNOWN_PRIMITIVE, `${type} must not be unknown`);
+  }
+  assert.deepEqual([...CANONICAL_ENTITY_TYPES], ['Repository', 'Package', 'Commit', 'Release', 'SourceArtifact', 'ExternalProject']);
+});
+
+test('the three designed primitives are the ones the design names', () => {
+  assert.equal(nodePrimitive('Repository'), 'is-repository');
+  assert.equal(nodePrimitive('Package'), 'is-package');
+  assert.equal(nodePrimitive('ExternalProject'), 'is-external-project');
+});
+
+test('an unknown type is marked rather than drawn as a repository', () => {
+  // The whole point of selecting on the full union: an ontology addition must
+  // never silently inherit Repository's primitive.
+  assert.equal(nodePrimitive('Submodule'), UNKNOWN_PRIMITIVE);
+  assert.equal(isCanonicalEntityType('Submodule'), false);
+  assert.equal(nodePrimitive(undefined as unknown as string), UNKNOWN_PRIMITIVE);
+});
+
+test('Package keeps the exact plate it has always had', () => {
+  // Switching the selector off `isPackage` must be a no-op on screen: Package
+  // keeps its tighter radius and its own marker, everything else keeps the
+  // default radius it had before.
+  assert.equal(nodePrimitiveRadius('Package'), 3);
+  for (const type of CANONICAL_ENTITY_TYPES.filter((t) => t !== 'Package')) {
+    assert.equal(nodePrimitiveRadius(type), 4, `${type} must keep the default radius`);
+  }
+  // The pre-slice behaviour, stated directly: radius followed isPackage.
+  for (const type of CANONICAL_ENTITY_TYPES) {
+    assert.equal(nodePrimitiveRadius(type), type === 'Package' ? 3 : 4);
+  }
 });

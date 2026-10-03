@@ -59,6 +59,7 @@ import {
   PHASE_TEXT,
 } from './lib/analysis.mjs';
 import { evidenceSourceUrl, SIMILARITY_DISCLAIMER } from './lib/evidence-links.mjs';
+import { nodePrimitive, nodePrimitiveRadius } from './lib/primitives.mjs';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const ZOOM_STEP = 1.25;
@@ -764,17 +765,23 @@ function draw() {
     });
     group.dataset.nodeId = node.id;
 
+    // Identity comes from the canonical `entity.type` on the view node, never
+    // from `isPackage`. `nodePrimitive` covers the whole canonical union, so a
+    // type the design has no primitive for yet still gets its own marker instead
+    // of being drawn as a repository.
+    const primitive = nodePrimitive(node.type);
+
     group.append(
       svgEl('rect', {
         x: position.x - NODE_W / 2,
         y: position.y - NODE_H / 2,
         width: NODE_W,
         height: NODE_H,
-        rx: node.isPackage ? 3 : 4,
+        rx: nodePrimitiveRadius(node.type),
         class: [
           'node-box',
           node.isSubject ? 'is-subject' : '',
-          node.isPackage ? 'is-package' : '',
+          primitive,
         ].filter(Boolean).join(' '),
       }),
     );

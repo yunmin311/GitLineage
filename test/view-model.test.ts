@@ -384,3 +384,84 @@ test('the view carries the direction contract for the renderer', () => {
 test('the view propagates the canonical schema version', () => {
   assert.equal(buildView(graphOf([])).schemaVersion, GRAPH_SCHEMA_VERSION);
 });
+
+// ---------------------------------------------------- entity type authority
+
+/*
+ * `node.type` is the client's only authoritative source of entity identity, so
+ * it must be the canonical type and nothing else. `isPackage` is retained on the
+ * payload for compatibility; if the two ever disagree, the renderer's primitive
+ * selection becomes ambiguous, so that is treated as a contract failure here.
+ */
+
+test('every view node reports the canonical entity type', () => {
+  const observations: Observation[] = [
+    {
+      collector: 'packages',
+      extractor: 'manifest-dependency@1',
+      subject: SUBJECT,
+      object: { kind: 'package', ecosystem: 'npm', name: 'express' },
+      relationship: 'depends_on',
+      directed: true,
+      evidence: { type: 'package_manifest', status: 'DECLARED', data: { ecosystem: 'npm', package_name: 'express', range: '^4.18.0', manifest_path: 'package.json' } },
+    },
+    {
+      collector: 'document-attribution',
+      extractor: 'document-attribution@1',
+      subject: SUBJECT,
+      object: { kind: 'external_project', slug: 'github/settings/profile' },
+      relationship: 'references',
+      directed: true,
+      evidence: {
+        type: 'document_attribution',
+        status: 'DECLARED',
+        data: { phrase: 'inspired by', matched_text: 'Inspired by insp/ration', path: 'README.md' },
+      },
+    },
+  ];
+  const graph = graphOf(observations);
+  const view = buildView(graph);
+  assert.ok(view.nodes.length > 0, 'the fixture must produce nodes');
+
+  // The canonical side, read from the graph the view was built from.
+  const entityById = new Map(graph.entities.map((entity) => [entity.id, entity.type]));
+  assert.ok(entityById.size > 0);
+
+  for (const node of view.nodes) {
+    const fromGraph = entityById.get(node.id);
+    if (fromGraph === undefined) continue; // a placeholder for a missing entity
+    assert.equal(node.type, fromGraph, `${node.id} must report its canonical entity type`);
+  }
+
+  // The three primitives the frozen design names are all covered here.
+  const types = new Set(view.nodes.map((node) => node.type));
+  assert.equal(types.has('Repository'), true, 'fixture must include a Repository');
+  assert.equal(types.has('Package'), true, 'fixture must include a Package');
+  assert.equal(types.has('ExternalProject'), true, 'fixture must include an ExternalProject');
+});
+
+test('isPackage stays on the payload and always agrees with type', () => {
+  const view = buildView(graphOf([
+    {
+      collector: 'packages',
+      extractor: 'manifest-dependency@1',
+      subject: SUBJECT,
+      object: { kind: 'package', ecosystem: 'npm', name: 'express' },
+      relationship: 'depends_on',
+      directed: true,
+      evidence: { type: 'package_manifest', status: 'DECLARED', data: { ecosystem: 'npm', package_name: 'express', range: '^4.18.0', manifest_path: 'package.json' } },
+    },
+  ]));
+
+  for (const node of view.nodes) {
+    assert.equal('isPackage' in node, true, `${node.id} must keep isPackage for compatibility`);
+    assert.equal(
+      node.isPackage,
+      node.type === 'Package',
+      `${node.id}: isPackage must equal (type === 'Package')`,
+    );
+  }
+  // Guard against the invariant passing only because no Package was present.
+  assert.equal(view.nodes.some((node) => node.isPackage === true), true, 'fixture must include a Package');
+  assert.equal(view.nodes.some((node) => node.isPackage === false), true, 'fixture must include a non-Package');
+});
