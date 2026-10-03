@@ -280,3 +280,26 @@ test('aggregation never drops or invents a relationship', () => {
     assert.deepEqual(seen, edges.map((e) => e.id).sort(), `${slug}: every visible relationship accounted for`);
   }
 });
+
+// The renderer must offer the composition every one-hop relationship.
+test('the renderer does not pre-filter the composition input', () => {
+  // Regression found in Chromium, not by these tests: `draw()` passed the
+  // primary-only edge set, so a repository whose relationships were all `bundled`
+  // reached the canvas as a lone subject with no plate at all. The unit tests
+  // passed because they handed the composition `view.edges` directly.
+  const source = readFileSync(resolve(import.meta.dirname, '..', 'src/web/client/app.js'), 'utf8');
+  assert.equal(
+    /buildComposition\(\s*\w+\s*,\s*\{\s*edges:\s*currentEdges\(\)/.test(source),
+    false,
+    'the composition must never receive the primary-only edge set',
+  );
+  // It starts from every one-hop relationship, with layers applied first.
+  assert.match(source, /function visibleCandidates\(/, 'the candidate set must be one named helper');
+  const helper = source.slice(source.indexOf('function visibleCandidates('), source.indexOf('function currentComposition('));
+  assert.match(helper, /view\.edges\.filter/, 'candidates come from every one-hop edge');
+  assert.match(helper, /state\.layers\[edge\.family\]/, 'layers are applied first');
+  // And draw() must use that helper, not an undefined local.
+  const draw = source.slice(source.indexOf('function draw()'), source.indexOf('const bounds = contentBounds'));
+  assert.match(draw, /visibleCandidates\(view\)/, 'draw must take its edges from the shared helper');
+  assert.equal(/const edges = candidates\.filter/.test(draw), false, 'draw must not read a stale local');
+});

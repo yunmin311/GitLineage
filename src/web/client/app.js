@@ -46,7 +46,6 @@ import {
   edgesForNode,
   layerCount,
   visibleEdges,
-  orphanBundles,
 } from './lib/search.mjs';
 import {
   parseStart,
@@ -61,6 +60,7 @@ import {
 import { evidenceSourceUrl, SIMILARITY_DISCLAIMER } from './lib/evidence-links.mjs';
 import { nodePrimitive, nodePrimitiveRadius, depthTier, depthClass, depthOffset, depthShadowClass } from './lib/primitives.mjs';
 import { RefitTrigger, shouldRefit } from './lib/camera.mjs';
+import { buildComposition, plateRows } from './lib/aggregate.mjs';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const ZOOM_STEP = 1.25;
@@ -537,11 +537,25 @@ function renderStatusLine(view) {
   const line = $('status-line');
   line.replaceChildren();
   if (!view) return;
+  // "shown" has to mean what the reader can actually see. With aggregation a
+  // repository can have fourteen one-hop relationships and still draw nothing
+  // loose, because they live inside a plate. Reporting "0 shown" while a plate is
+  // on the canvas reads as an empty result and is worse than saying nothing.
+  const composition = state.composition || currentComposition(view);
+  const looseCount = composition ? composition.looseEdgeIds.length : view.primaryEdgeCount;
+  const plateCount = composition ? composition.plates.length : 0;
+  const grouped = composition
+    ? composition.plates.reduce((sum, plate) => sum + plate.count, 0)
+    : view.bundledEdgeCount;
+  const shownParts = [`${looseCount} drawn`];
+  if (plateCount > 0) {
+    shownParts.push(`${plateCount} plate${plateCount === 1 ? '' : 's'} grouping ${grouped}`);
+  }
   const parts = [
     `${view.revision.ref || view.revision.defaultBranch || 'HEAD'} @ ${view.revision.shortCommit}`,
     `analyzed ${formatTime(view.revision.analyzedAt)}`,
     `${view.analyzer.name} ${view.analyzer.version}`,
-    `${view.primaryEdgeCount} shown / ${view.edgeCount} one-hop / ${view.edgeCount + view.hiddenRelationshipCount} relationships`,
+    `${shownParts.join(' \u00b7 ')} / ${view.edgeCount} one-hop / ${view.edgeCount + view.hiddenRelationshipCount} relationships`,
     `(${view.statusCounts.VERIFIED} verified · ${view.statusCounts.DECLARED} declared · ${view.statusCounts.DETECTED} detected)`,
   ];
   parts.forEach((text, index) => {
@@ -594,31 +608,96 @@ function bundleAnchorPositions(bundles, positions) {
   ]);
 }
 
+const PLATE_W = 184;
+/**
+ * An expanded plate is wider because each row carries a label and the file that
+ * declares it. At the collapsed width the two overprinted each other and neither
+ * could be read, which a DOM measurement cannot see because both elements exist.
+ */
+const PLATE_W_EXPANDED = 344;
+const PLATE_HEADER = 34;
+const PLATE_ROW = 26;
+
+/** A collapsed plate is a header; an expanded one grows by a row per group. */
+function plateHeight(rowCount) {
+  return PLATE_HEADER + rowCount * PLATE_ROW + 12;
+}
+
+/**
+ * Plates stand in the data zone to the right of the subject.
+ *
+ * They are stacked downward from the subject's own line so the tie from subject to
+ * plate stays short and readable instead of fanning into long diagonals. The
+ * stack is measured rather than pitched on a fixed interval, so an expanded plate
+ * grows into the space below it and never overlaps its neighbour.
+ */
+function aggregateAnchorPositions(plates, positions) {
+  const subject = positions.get(state.view.subject.id);
+  const originX = subject ? subject.x + COL_GAP * 0.62 : 700;
+  const originY = subject ? subject.y : 300;
+  let cursor = 0;
+  return plates.map((plate) => {
+    const rows = plate.expanded ? plateRows(plate).length : 0;
+    const height = plateHeight(rows);
+    const y = originY + cursor + height / 2;
+    cursor += height + 34;
+    return [`${BUNDLE_ID_PREFIX}${plate.key}`, { x: originX, y }];
+  });
+}
+
+/**
+ * Relationships the reader has chosen to see: every one-hop relationship, minus
+ * whatever a switched-off layer hides.
+ *
+ * Every one-hop relationship is offered onward, not just the ones the view-model
+ * marked `primary`. That split was the old mechanism for controlling density; the
+ * composition now makes that decision itself, and filtering to `primary` first
+ * would hand it an empty canvas for exactly the repositories that most need
+ * aggregating.
+ */
+function visibleCandidates(view) {
+  return view.edges.filter((edge) => state.layers[edge.family] !== false);
+}
+
+/** The composition for the current view. One source of truth for canvas and status line. */
+function currentComposition(view) {
+  const target = view || state.view;
+  if (!target) return null;
+  return buildComposition(target, { edges: visibleCandidates(target), expandedAggregates: state.expandedBundles });
+}
+
 function draw() {
   const view = state.view;
   const canvas = $('canvas');
   canvas.replaceChildren();
   if (!view) return;
 
-  const edges = currentEdges();
+  // The composition decides what is drawn individually and what collapses into a
+  // plate. A 14-way fan-out reaches the canvas as one plate, not fourteen spokes.
+  const composition = currentComposition(view);
+  state.composition = composition;
+  const loose = new Set(composition.looseEdgeIds);
+  const edges = visibleCandidates(view).filter((edge) => loose.has(edge.id));
   const positions = layoutGraph(view, edges);
   // Degree decides label thinning. Parallel-edge count does not: a hub with 20
   // distinct peers has 20 fans of one, and their mid-line labels still collide.
   const degrees = nodeDegrees(edges);
 
-  // Bundles with nothing drawn of their own. `expressjs/express` lands here: 48
-  // real relationships, all bundled, so the canvas would otherwise show a lone
-  // subject and read exactly like a repository with no lineage.
-  const orphans = orphanBundles(view, { layers: state.layers, expandedBundles: state.expandedBundles });
-  const standaloneBundles = orphans.length > 0 && edges.length === 0;
-  state.standaloneBundles = standaloneBundles;
-  if (standaloneBundles) {
-    for (const [id, position] of bundleAnchorPositions(orphans, positions)) {
-      positions.set(id, position);
-    }
+  state.standaloneBundles = composition.looseEdgeIds.length === 0 && composition.plates.length > 0;
+  for (const [id, position] of aggregateAnchorPositions(composition.plates, positions)) {
+    positions.set(id, position);
   }
 
+  // Expansion must not refit the camera, so an expanded plate has to fit inside
+  // the framing the first paint chose. The space a plate will need when open is
+  // therefore reserved now, while the composition is being authored, instead of
+  // being discovered as an overflow when the reader opens it.
   const bounds = contentBounds(positions);
+  for (const [id, position] of positions) {
+    if (!id.startsWith(BUNDLE_ID_PREFIX)) continue;
+    bounds.x = Math.min(bounds.x, position.x - PLATE_W / 2);
+    bounds.width = Math.max(bounds.width, position.x - PLATE_W / 2 + PLATE_W_EXPANDED - bounds.x);
+  }
   const viewport = { width: canvas.clientWidth || 1200, height: canvas.clientHeight || 700 };
   // First paint always frames the content. After that, only a dataset change may
   // move the camera: the refit gate is a single condition so "expanding an
@@ -707,83 +786,126 @@ function draw() {
     edgeLayer.append(group);
   }
 
-  // Bundle representative cards: drawn only when nothing else would be drawn, so
-  // a graph with many hidden relationships never looks like an empty one. The
-  // connector carries no arrowhead, because a bundle is not a relationship with a
-  // direction: it is a count of several.
-  if (standaloneBundles) {
-    const subject = positions.get(view.subject.id);
-    for (const bundle of orphans) {
-      const id = `${BUNDLE_ID_PREFIX}${bundle.key}`;
-      const position = positions.get(id);
-      if (!position || !subject) continue;
+  /*
+   * Aggregate plates.
+   *
+   * A plate stands in for several relationships. Its connector carries no
+   * arrowhead, because a plate is not a relationship and has no direction: it is a
+   * count of several. Expanding one reveals evidence-supported rows *inside* the
+   * plate, so a fan-out never turns back into subject spokes.
+   */
+  const subjectPosition = positions.get(view.subject.id);
+  for (const plate of composition.plates) {
+    const position = positions.get(`${BUNDLE_ID_PREFIX}${plate.key}`);
+    if (!position || !subjectPosition) continue;
 
-      const from = nodeAnchor(subject, position);
-      const to = nodeAnchor(position, subject);
-      const midX = (from.x + to.x) / 2;
-      edgeLayer.append(
-        svgEl('path', {
-          d: `M ${from.x} ${from.y} L ${midX} ${from.y} L ${midX} ${to.y} L ${to.x} ${to.y}`,
-          class: 'bundle-link',
+    const rows = plate.expanded ? plateRows(plate) : [];
+    const height = plateHeight(rows.length);
+    // Widening grows to the right of the subject's tie, so the connection stays
+    // anchored and the plate does not jump when it opens.
+    const width = rows.length > 0 ? PLATE_W_EXPANDED : PLATE_W;
+    // The left edge is fixed and the plate widens rightward, away from the subject.
+    // Anchoring the left edge to the tie point keeps subject -> plate short and
+    // stops an opening plate from growing back over the subject it belongs to.
+    const left = position.x - PLATE_W / 2;
+    const top = position.y - height / 2;
+
+    const from = nodeAnchor(subjectPosition, position);
+    // The tie arrives on the plate's left edge, which is where the plate always is.
+    const to = { x: left, y: position.y };
+    const midX = (from.x + to.x) / 2;
+    edgeLayer.append(
+      svgEl('path', {
+        d: `M ${from.x} ${from.y} L ${midX} ${from.y} L ${midX} ${to.y} L ${to.x} ${to.y}`,
+        class: 'bundle-link',
+      }),
+    );
+
+    // Selection raises the plate that owns the selection, never a row inside it.
+    const ownsSelection = plate.memberEdgeIds.includes(state.selectedEdgeId);
+    const plateTier = depthTier({ isSelected: ownsSelection });
+    const group = svgEl('g', {
+      class: `bundle-card st-${plate.status}${plate.expanded ? ' is-open' : ''}${ownsSelection ? ' is-selected' : ''}`,
+      role: 'button',
+      tabindex: '0',
+      'aria-label': `${plate.count} ${plate.relationshipType.replace(/_/g, ' ')} relationships, grouped`,
+      'aria-expanded': plate.expanded ? 'true' : 'false',
+    });
+    group.dataset.bundleKey = plate.key;
+
+    if (depthOffset(plateTier) > 0) {
+      const d = depthOffset(plateTier);
+      group.append(
+        svgEl('rect', {
+          x: left + d, y: top + d, width, height, rx: 4,
+          class: depthShadowClass(plateTier), 'aria-hidden': 'true',
         }),
       );
+    }
+    group.append(
+      svgEl('rect', {
+        x: left, y: top, width, height, rx: 4,
+        class: ['bundle-card-box', depthClass(plateTier)].filter(Boolean).join(' '),
+      }),
+    );
+    group.append(
+      svgEl('text', { x: left + 12, y: top + 22, class: 'bundle-card-count' }, [plate.label]),
+    );
 
-      const group = svgEl('g', {
-        class: `bundle-card st-${bundle.status}${state.expandedBundles.has(bundle.key) ? ' is-open' : ''}`,
-        role: 'button',
-        tabindex: '0',
-        'aria-label': `${bundle.count} ${bundle.relationshipType.replace(/_/g, ' ')} relationships, grouped`,
-      });
-      group.dataset.bundleKey = bundle.key;
-      // A plate is a directly connected part of the topology, so it carries the
-      // plate depth tier. The rows inside it stay flat: they are its content.
-      const plateTier = depthTier({ isSelected: state.selectedEdgeId.startsWith(bundle.key) });
-      if (depthOffset(plateTier) > 0) {
+    // Rows are content of the plate. They stay flat: no depth, no shadow, and a
+    // selected row is marked by its own solid ink rule rather than by rising.
+    // Mono at 11px advances about 6.6px, at 10px about 6.0px. Measuring the meta
+    // first lets the label take exactly the room that is left, instead of both
+    // being truncated independently and overprinting in the middle.
+    const META_CHARS = 16;
+    const metaWidth = rows.some((r) => r.meta) ? META_CHARS * 6.0 + 14 : 0;
+    const labelRoom = Math.max(8, Math.floor((width - 24 - metaWidth) / 6.6));
+
+    rows.forEach((row, index) => {
+      const rowY = top + PLATE_HEADER + index * PLATE_ROW;
+      const rowSelected = row.memberEdgeIds.includes(state.selectedEdgeId);
+      if (rowSelected) {
         group.append(
           svgEl('rect', {
-            x: position.x - 92 + depthOffset(plateTier),
-            y: position.y - 30 + depthOffset(plateTier),
-            width: 184,
-            height: 60,
-            rx: 4,
-            class: depthShadowClass(plateTier),
-            'aria-hidden': 'true',
+            x: left + 6, y: rowY + 4, width: width - 12, height: PLATE_ROW - 6,
+            class: 'plate-row-marker', 'aria-hidden': 'true',
           }),
         );
       }
       group.append(
-        svgEl('rect', {
-          x: position.x - 92,
-          y: position.y - 30,
-          width: 184,
-          height: 60,
-          rx: 4,
-          class: ['bundle-card-box', depthClass(plateTier)].filter(Boolean).join(' '),
-        }),
+        svgEl('text', { x: left + 12, y: rowY + 18, class: 'plate-row-label' }, [truncate(row.label, labelRoom)]),
       );
-      group.append(
-        svgEl('text', { x: position.x - 80, y: position.y - 6, class: 'bundle-card-count' }, [
-          `×${bundle.count}`,
-        ]),
-      );
-      group.append(
-        svgEl('text', { x: position.x - 80, y: position.y + 15, class: 'bundle-card-label' }, [
-          truncate(bundle.relationshipType.replace(/_/g, ' '), 24),
-        ]),
-      );
-      const activate = (event) => {
-        event.stopPropagation();
-        toggleBundle(bundle.key);
-      };
-      group.addEventListener('click', activate);
-      group.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter' || event.key === ' ') activate(event);
-      });
-      nodeLayer.append(group);
-    }
+      if (row.meta) {
+        group.append(
+          svgEl('text', { x: left + width - 12, y: rowY + 18, class: 'plate-row-meta', 'text-anchor': 'end' }, [
+            truncate(row.meta, META_CHARS),
+          ]),
+        );
+      }
+    });
+
+    const activate = (event) => {
+      event.stopPropagation();
+      toggleBundle(plate.key);
+    };
+    group.addEventListener('click', activate);
+    group.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') activate(event);
+    });
+    nodeLayer.append(group);
+  }
+
+  // Only nodes that take part in what is drawn are drawn. An entity reachable only
+  // through a plate is listed as a row inside that plate, so it cannot appear as a
+  // disconnected island with no relationship attached.
+  const drawnNodeIds = new Set([view.subject.id]);
+  for (const edge of edges) {
+    drawnNodeIds.add(edge.source);
+    drawnNodeIds.add(edge.target);
   }
 
   for (const node of view.nodes) {
+    if (!drawnNodeIds.has(node.id)) continue;
     const position = positions.get(node.id);
     if (!position) continue;
     const group = svgEl('g', {
@@ -839,9 +961,13 @@ function draw() {
         ].filter(Boolean).join(' '),
       }),
     );
+    // A repository name is its identity. It is truncated only as far as the plate
+    // allows, and the full value is always reachable as a tooltip rather than
+    // being shortened further to make room.
     group.append(
+      svgEl('title', {}, [node.label]),
       svgEl('text', { x: position.x - NODE_W / 2 + 10, y: position.y - 3, class: 'node-label' }, [
-        truncate(node.label, 22),
+        truncate(node.label, Math.floor((NODE_W - 20) / 7.2)),
       ]),
     );
     if (node.fact) {

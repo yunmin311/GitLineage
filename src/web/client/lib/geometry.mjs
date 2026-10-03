@@ -25,7 +25,10 @@ export const SLOT_POSITIONS = {
   similarity: { x: -1, y: 0, side: 'horizontal' },
 };
 
-export const NODE_W = 168;
+// Wide enough for a real `owner/repository` name at the label size. A repository
+// name is its identity, and shortening it to fit a narrower plate would throw
+// away the one string a reader is actually looking for.
+export const NODE_W = 216;
 export const NODE_H = 52;
 export const COL_GAP = 330;
 export const ROW_GAP = 190;

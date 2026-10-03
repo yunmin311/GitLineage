@@ -258,6 +258,19 @@ a { color: inherit; }
 .bundle-card-count { font-family: var(--mono); font-size: 13px; font-weight: 700; fill: var(--ink); }
 .bundle-card-label { font-family: var(--mono); font-size: 10px; fill: var(--ink-4); }
 .bundles-note { font-size: 10px; color: var(--ink-4); margin: 6px 2px 4px; }
+
+/*
+ * Rows inside an aggregate plate.
+ *
+ * A row is content of its plate, not a participant in the topology, so it stays
+ * flat: no depth tier, no shadow, no offset. A selected row is marked by a solid
+ * ink rule rather than by rising, because raising a row would claim it outranks
+ * the plate that owns it.
+ */
+.plate-row-label { font-family: var(--mono); font-size: 11px; fill: var(--ink-2); }
+.plate-row-meta { font-family: var(--mono); font-size: 10px; fill: var(--ink-4); }
+.plate-row-marker { fill: var(--surface-hi); stroke: var(--ink); stroke-width: 1; }
+.bundle-card.is-selected .bundle-card-label { fill: var(--ink); }
 .legend-item { display: inline-flex; align-items: center; gap: 5px; }
 .legend-note { color: var(--ink-4); }
 

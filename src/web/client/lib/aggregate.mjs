@@ -64,6 +64,27 @@ export function declarationForm(card) {
   return DeclarationForm.Prose;
 }
 
+/**
+ * A qualifier for a table group, taken from the file that declares it.
+ *
+ * `docs/plugins.md` declares the plugin table, so the group is the plugin table.
+ * The word is derived from the declaring file rather than hard-coded, so a future
+ * table in another document names itself honestly instead of inheriting a label
+ * that was fitted to one repository.
+ *
+ * Returns null when there is no single declaring file, and the caller then falls
+ * back to a neutral label rather than overclaiming.
+ */
+export function tableQualifier(path) {
+  if (!path) return null;
+  const base = path.split('/').pop() || '';
+  const stem = base.replace(/\.[^.]+$/, '');
+  const words = stem.replace(/[-_]+/g, ' ').trim();
+  if (!words) return null;
+  const singular = /s$/i.test(words) && words.length > 3 ? words.replace(/s$/i, '') : words;
+  return singular.charAt(0).toUpperCase() + singular.slice(1);
+}
+
 /** The repository-relative file a claim was written in, from its locator. */
 export function declaringPath(card) {
   const locator = typeof (card && card.locator) === 'string' ? card.locator : '';
@@ -106,17 +127,22 @@ export function evidenceSubgroups(members) {
   return list
     .map((group) => {
       const paths = [...group.paths].filter(Boolean).sort();
+      // The label names where the claim was written, and only that. A table in a
+      // single known document is named after that document; anything vaguer stays
+      // neutral rather than guessing.
+      const qualifier =
+        group.form === DeclarationForm.TableRow && paths.length === 1 ? tableQualifier(paths[0]) : null;
       return {
-      form: group.form,
-      // One declaring file names the place. Several are summarised rather than
-      // listed, because a row's job is to say where the claim was made, not to
-      // become a file index.
-      meta: paths.length === 1 ? paths[0] : `${paths.length} files`,
-      label:
-        group.form === DeclarationForm.TableRow
-          ? `Table references ×${group.memberEdgeIds.length}`
-          : `Prose references ×${group.memberEdgeIds.length}`,
-      memberEdgeIds: [...group.memberEdgeIds].sort(),
+        form: group.form,
+        // One declaring file names the place. Several are summarised rather than
+        // listed, because a row's job is to say where the claim was made, not to
+        // become a file index.
+        meta: paths.length === 1 ? paths[0] : `${paths.length} files`,
+        label:
+          group.form === DeclarationForm.TableRow
+            ? `${qualifier ? `${qualifier}-table` : 'Table'} references ×${group.memberEdgeIds.length}`
+            : `Prose references ×${group.memberEdgeIds.length}`,
+        memberEdgeIds: [...group.memberEdgeIds].sort(),
       };
     })
     // Deterministic under reordered input: by form, then label.
