@@ -64,6 +64,15 @@ export interface Composition {
   subjectId: string | undefined;
   /** Relationships drawn individually rather than inside a plate. */
   looseEdgeIds: string[];
+  /** Promoted relationships: drawn directly and exempt from the budget. */
+  promotedEdgeIds: string[];
+  /**
+   * Everything the canvas draws: loose, promoted and plate members.
+   *
+   * Promoted relationships used to be drawn while appearing in none of the other
+   * lists, so the composition could not prove it had lost nothing.
+   */
+  drawnEdgeIds: string[];
   plates: AggregatePlate[];
   budget: number;
   empty: boolean;
@@ -73,6 +82,23 @@ export interface AggregateOptions {
   budget?: number;
   edges?: ViewEdge[];
   expandedAggregates?: Set<string>;
+  /**
+   * Relationships the regime promoted to direct presence.
+   *
+   * Always drawn, and counted against the budget: a promoted relationship occupies
+   * the field exactly as a loose one does. Treating promotion as free meant it added
+   * to the direct count rather than trading against it, and the fan-out it was meant
+   * to relieve came back as spokes.
+   */
+  directEdgeIds?: string[];
+  /**
+   * Relationships that must be aggregated regardless of the budget.
+   *
+   * A homogeneous fan is not a direct-topology candidate: no peer earns its own
+   * place, so it collapses whether or not it would fit. Left to the budget it drew
+   * as loose edges, because the question of room is the wrong one.
+   */
+  aggregateEdgeIds?: string[];
 }
 
 /**

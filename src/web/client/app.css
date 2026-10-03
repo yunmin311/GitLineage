@@ -224,7 +224,20 @@ a { color: inherit; }
 .vp-btn:hover { border-color: var(--ink-4); color: var(--ink); }
 .vp-fit { font-size: 12px; }
 
-.bundles { position: absolute; left: 16px; bottom: 16px; max-width: 260px; background: var(--paper); border: 1px solid var(--rule); border-radius: 4px; padding: 8px 9px; z-index: 6; }
+/*
+ * The bundles panel is superseded by the authored composition: the census in the
+ * context column and the plates themselves carry the same information. It used to
+ * sit bottom-left, on top of the band's edge-treatment key. Rather than move it,
+ * it is retired -- a second control listing what the canvas already shows was the
+ * dashboard feel the frozen design rejects.
+ */
+/*
+ * Retired. The authored composition carries this information in the context column
+ * and in the plates, and the panel used to sit on top of the band's edge key. It is
+ * removed from the layout entirely rather than hidden by a `display` rule that a
+ * later media query can override.
+ */
+.bundles, .bundles[hidden] { display: none !important; }
 .bundles[hidden] { display: none; }
 .bundles-head { font-size: 9px; font-weight: 800; letter-spacing: 0.07em; color: var(--ink-3); margin: 0 0 6px; }
 .bundle-row { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; background: transparent; border: 0; border-top: 1px solid var(--rule); padding: 5px 2px; font-size: 11px; color: var(--ink-2); }
@@ -277,6 +290,84 @@ a { color: inherit; }
 /* ------------------------------------------------------------------ graph */
 
 /*
+ * L : the context column.
+ *
+ * Flat by construction. It carries contextual and reference information, not
+ * topology, so it takes no depth tier and no shadow: a rule and a surface, the
+ * same as the census in the frozen design.
+ */
+.lcol {
+  position: absolute; left: 46px; top: 128px; width: 496px; z-index: 4;
+  pointer-events: none;
+}
+.lcol[hidden] { display: none; }
+.lblk { margin-bottom: 22px; }
+.lblk h6 {
+  font-size: 9px; letter-spacing: 0.11em; text-transform: uppercase;
+  color: var(--ink-4); font-weight: 600; margin: 0 0 8px;
+}
+.statline { display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; color: var(--ink-2); line-height: 1.45; }
+.statline b { font-weight: 650; color: var(--ink); }
+.statline .k { font-family: var(--mono); font-size: 10.5px; color: var(--ink-4); }
+.rule-note { font-size: 10.5px; line-height: 1.5; color: var(--ink-3); margin: 0; }
+
+/* Census: a count per family. Flat, and never a second diagram. */
+/* The rule is the column's own, so it never runs beneath a node. */
+.census { display: flex; gap: 1px; width: 100%; }
+.cc { flex: 1; border-top: 2px solid var(--rule-2); padding: 7px 8px 0 0; }
+.cc .k { font-family: var(--mono); font-size: 9px; color: var(--ink-4); display: block; }
+.cc .v { font-family: var(--mono); font-size: 15px; font-weight: 600; color: var(--ink-2); line-height: 1; margin-top: 4px; display: block; }
+
+/* Entity key: the canonical primitives actually present in this graph. */
+.tkey { display: flex; flex-direction: column; gap: 7px; }
+.tk-row { display: flex; align-items: center; gap: 10px; font-size: 11.5px; color: var(--ink-2); }
+.tk-row .gl { flex: 0 0 11px; height: 11px; display: flex; align-items: center; justify-content: center; }
+.tk-row .gl i { display: block; width: 9px; height: 9px; border-radius: 2px; }
+/* The key's glyphs mirror the canvas primitives, at key scale. */
+.tk-row .gl i.is-repository { background: var(--surface-hi); border: 1.5px solid var(--ink-3); }
+.tk-row .gl i.is-package { background: var(--surface-sunk); border: 1px solid var(--rule-2); }
+.tk-row .gl i.is-external-project { background: var(--surface); border: 1.5px dashed var(--ink-4); }
+.tk-row .gl i.is-commit { background: var(--surface); border: 1px solid var(--rule-2); }
+.tk-row .gl i.is-release { background: var(--surface); border: 1px dashed var(--ink-4); }
+.tk-row .gl i.is-source-artifact { background: var(--surface-sunk); border: 1px solid var(--rule-2); }
+.tk-row .k { font-family: var(--mono); font-size: 10px; color: var(--ink-4); margin-left: auto; }
+
+/*
+ * The bottom band.
+ *
+ * Edge-treatment key plus a plain statement of how the scene is composed. Flat:
+ * a rule above it and nothing else. No camera coordinates -- those are test
+ * instrumentation, and printing them here would be decoration pretending to be a
+ * readout.
+ */
+.band {
+  position: absolute; left: 46px; top: 876px; width: 1456px; z-index: 4;
+  display: flex; align-items: center; gap: 26px; flex-wrap: wrap;
+  border-top: 1px solid var(--rule); padding-top: 12px;
+}
+.band[hidden] { display: none; }
+.band .key { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+.band .ki { display: flex; align-items: center; gap: 8px; font-size: 10px; color: var(--ink-3); }
+.band .ki-mark { display: block; width: 22px; height: 0; border-top-width: 2px; border-top-style: solid; }
+/* The three edge treatments, drawn as they appear on the canvas. */
+.band .ki-directed { border-top-color: var(--ink-3); position: relative; }
+.band .ki-directed::after {
+  content: ""; position: absolute; right: -1px; top: -3px;
+  border-left: 5px solid var(--ink-3); border-top: 3px solid transparent; border-bottom: 3px solid transparent;
+}
+.band .ki-symmetric { border-top-color: var(--rule-2); }
+.band .ki-aggregate { border-top-color: var(--rule-2); border-top-style: dashed; }
+.band-note { font-family: var(--mono); font-size: 10px; color: var(--ink-4); margin-left: auto; }
+
+/* A narrow viewport drops the authored columns rather than letting them collide. */
+@media (max-width: 1280px) {
+  .lcol { width: 340px; }
+  .band { width: calc(100% - 92px); }
+}
+@media (max-width: 900px) {
+  .lcol { display: none; }
+}
+/*
  * Topological depth ladder.
  *
  * Depth communicates one thing: participation in the graph's topology. It is not
@@ -312,7 +403,11 @@ a { color: inherit; }
 
 /* Primary: Repository, Package, ExternalProject. */
 .node-box.is-repository { fill: var(--surface-hi); stroke: var(--ink-3); stroke-width: 1.5; }
-.node-box.is-package { fill: var(--surface-sunk); stroke: none; }
+.node-box.is-package {
+  /* The quietest primitive, but still readable: a hairline rule rather than no
+     border at all, which left the label sitting on a flat sunken field. */
+  fill: var(--surface-sunk); stroke: var(--rule-2); stroke-width: 1;
+}
 .node-box.is-external-project { fill: var(--surface); stroke: var(--ink-4); stroke-width: 1.5; stroke-dasharray: 4 2; }
 
 /* Secondary: structurally distinct, visually subordinate. */

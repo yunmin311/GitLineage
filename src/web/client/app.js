@@ -61,9 +61,11 @@ import { evidenceSourceUrl, SIMILARITY_DISCLAIMER } from './lib/evidence-links.m
 import { nodePrimitive, nodePrimitiveRadius, depthTier, depthClass, depthOffset, depthShadowClass } from './lib/primitives.mjs';
 import { RefitTrigger, shouldRefit } from './lib/camera.mjs';
 import { buildComposition, plateRows } from './lib/aggregate.mjs';
+import { Regime, regimeFor, partitionPeers, isHomogeneousFan } from './lib/regime.mjs';
 import {
   FRAME, ZONES, subjectPosition, dataZonePositions, loosePositions, initialViewBox,
 } from './lib/compose.mjs';
+import { DRAWABLE_CAPACITY } from './lib/regime.mjs';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const ZOOM_STEP = 1.25;
@@ -610,9 +612,15 @@ const PLATE_W_EXPANDED = 344;
 const PLATE_HEADER = 34;
 const PLATE_ROW = 26;
 
-/** A collapsed plate is a header; an expanded one grows by a row per group. */
+/**
+ * Plate height.
+ *
+ * A collapsed plate is its header plus the open affordance. An expanded one adds a
+ * row per evidence-supported group. The collapsed height is deliberately larger than
+ * a bare header so the plate reads as something you can open.
+ */
 function plateHeight(rowCount) {
-  return PLATE_HEADER + rowCount * PLATE_ROW + 12;
+  return PLATE_HEADER + (rowCount > 0 ? rowCount * PLATE_ROW : 14) + 12;
 }
 
 /**
@@ -653,10 +661,10 @@ function authoredPositions(view, edges, composition) {
     });
   });
 
-  // Loose relationships: the endpoints of the relationships actually drawn.
-  const looseEdges = edges;
+  // Loose relationships: the endpoints of the relationships actually drawn, in the
+  // regime's ranked order, so slot position never decides visual importance.
   const nodeIds = [];
-  for (const edge of looseEdges) {
+  for (const edge of edges) {
     for (const id of [edge.source, edge.target]) {
       if (id !== view.subject.id && !nodeIds.includes(id)) nodeIds.push(id);
     }
@@ -680,14 +688,10 @@ function authoredPositions(view, edges, composition) {
     };
   });
   const placement = loosePositions(nodeIds.length, slots, [subject], obstacles);
-  // Every peer must be placed. If the authored field cannot hold them, the scene
-  // would show fewer entities than there are relationships, which reads as a
-  // wrong graph rather than a crowded one.
-  if (placement.overflowed > 0) {
-    state.placementOverflow = placement.overflowed;
-  } else {
-    state.placementOverflow = 0;
-  }
+  // The regime sizes the direct set to what the field holds, so this is expected to
+  // be zero. It is still tracked rather than assumed, because a mismatch would mean
+  // relationships are missing from the scene, and that must be visible in review.
+  state.placementOverflow = placement.overflowed;
   nodeIds.forEach((id, index) => {
     const at = placement.positions[index];
     if (at) positions.set(id, at);
@@ -710,11 +714,225 @@ function visibleCandidates(view) {
   return view.edges.filter((edge) => state.layers[edge.family] !== false);
 }
 
-/** The composition for the current view. One source of truth for canvas and status line. */
+/*
+ * L : the context column.
+ *
+ * Contextual and reference information, not topology, so it is flat: no depth
+ * tier, no shadow, no offset. Everything is read from the view model, so a block
+ * can only show what the analysis actually established. Where the frozen design
+ * has a block and the data has no honest equivalent, the block is omitted rather
+ * than filled with an invented number.
+ */
+function renderContextColumn(view) {
+  const column = $('lcol');
+  if (!column) return;
+  column.replaceChildren();
+
+  const block = (heading, body) => {
+    const section = el('div', { class: 'lblk' });
+    section.append(el('h6', { text: heading }));
+    for (const child of body) section.append(child);
+    column.append(section);
+  };
+
+  // Provenance: what was analysed, and by what. Real revision, real analyzer.
+  const provenance = el('div', { class: 'statline' });
+  provenance.append(el('b', { text: view.subject?.label ?? '' }));
+  provenance.append(el('span', {
+    class: 'k',
+    text: `${view.revision.ref || view.revision.defaultBranch || 'HEAD'} @ ${view.revision.shortCommit}`,
+  }));
+  provenance.append(el('span', {
+    class: 'k',
+    text: `analysed ${formatTime(view.revision.analyzedAt)} \u00b7 ${view.analyzer.name} ${view.analyzer.version} \u00b7 schema ${view.schemaVersion}`,
+  }));
+  block('provenance', [provenance]);
+
+  // Status: the real counts, with no interpretation added to them.
+  const status = el('div', { class: 'statline' });
+  status.append(el('span', {
+    class: 'k',
+    text: `${view.statusCounts.VERIFIED} verified \u00b7 ${view.statusCounts.DECLARED} declared \u00b7 ${view.statusCounts.DETECTED} detected`,
+  }));
+  status.append(el('span', {
+    class: 'k',
+    text: `${view.edgeCount} one-hop of ${view.edgeCount + view.hiddenRelationshipCount} relationships`,
+  }));
+  block('status', [status]);
+
+  // Census: a count per family. Lightweight and flat -- reference information
+  // about the shape of the graph, not a second diagram competing with the canvas.
+  const families = Object.entries(view.familyCounts || {}).filter(([, count]) => count > 0);
+  if (families.length > 0) {
+    const census = el('div', { class: 'census' });
+    for (const [family, count] of families) {
+      const cell = el('div', { class: 'cc' });
+      cell.append(el('span', { class: 'k', text: family.replace('-', ' ') }));
+      cell.append(el('span', { class: 'v', text: String(count) }));
+      census.append(cell);
+    }
+    block('relationship census', [census]);
+  }
+
+  // Entity key: only the canonical types this graph actually contains, so the key
+  // cannot advertise a primitive that is not on screen.
+  const typeCounts = new Map();
+  for (const node of view.nodes) typeCounts.set(node.type, (typeCounts.get(node.type) || 0) + 1);
+  if (typeCounts.size > 0) {
+    const key = el('div', { class: 'tkey' });
+    for (const [type, count] of [...typeCounts].sort()) {
+      const row = el('div', { class: 'tk-row' });
+      const glyph = el('span', { class: 'gl' });
+      glyph.append(el('i', { class: nodePrimitive(type) }));
+      row.append(glyph);
+      row.append(el('span', { text: type }));
+      row.append(el('span', { class: 'k', text: `\u00d7${count}` }));
+      key.append(row);
+    }
+    block('entities', [key]);
+  }
+
+  // The naming rule, stated only when a label really was shortened. The client
+  // truncates to fit the plate and nothing else, so this describes what happened
+  // rather than announcing a policy.
+  const shortened = view.nodes.filter((node) => node.label && node.label.length > 22);
+  if (shortened.length > 0) {
+    block('reading names', [
+      el('p', {
+        class: 'rule-note',
+        text: `${shortened.length} name${shortened.length === 1 ? '' : 's'} shortened to fit the plate; the full name is in the tooltip and the drawer.`,
+      }),
+    ]);
+  }
+
+  column.hidden = false;
+}
+
+/*
+ * The bottom band.
+ *
+ * It carries the edge-treatment key, which a reader genuinely needs in order to
+ * interpret the canvas. It deliberately does not carry camera coordinates: pan,
+ * zoom, centre and world focal are test instrumentation, and printing them to fill
+ * a reserved area would be decoration dressed as a readout.
+ */
+function renderBottomBand(view) {
+  const band = $('band');
+  if (!band) return;
+  band.replaceChildren();
+
+  const key = el('div', { class: 'key' });
+  for (const [kind, text] of [
+    ['directed', 'arrow at the target'],
+    ['symmetric', 'no arrow, the claim is mutual'],
+    ['aggregate', 'a count, not one relationship'],
+  ]) {
+    const item = el('div', { class: 'ki' });
+    item.append(el('span', { class: `ki-mark ki-${kind}`, 'aria-hidden': 'true' }));
+    item.append(el('span', { text }));
+    key.append(item);
+  }
+  band.append(key);
+
+  // How this scene is composed, in words, derived from the composition itself so
+  // it cannot claim a centrality the analysis did not establish.
+  const composition = state.composition;
+  if (composition && composition.regime) {
+    const grouped = composition.plates.reduce((sum, plate) => sum + plate.count, 0);
+    const plateNote = composition.plates.length > 0
+      ? ` \u00b7 ${composition.plates.length} plate${composition.plates.length === 1 ? '' : 's'} grouping ${grouped}`
+      : '';
+    band.append(el('span', {
+      class: 'band-note',
+      text: `${composition.regime} composition \u00b7 ${composition.direct.length} shown directly${plateNote}`,
+    }));
+  }
+
+  band.hidden = false;
+}
+
+/**
+ * The peers a composition would have to place, with the evidence behind each.
+ *
+ * Pressure is counted per peer rather than per relationship: several relationships
+ * to one peer is one thing to draw, and treating it as several is precisely the
+ * fan-out the plates exist to absorb.
+ */
+function peersOf(view, edges) {
+  const byPeer = new Map();
+  for (const edge of edges) {
+    const peerId = edge.source === view.subject.id ? edge.target : edge.source;
+    if (peerId === view.subject.id) continue;
+    const peer = byPeer.get(peerId) || { id: peerId, relationshipCount: 0, verified: 0 };
+    peer.relationshipCount += 1;
+    if (edge.status === 'VERIFIED') peer.verified += 1;
+    byPeer.get(peerId) === undefined && byPeer.set(peerId, peer);
+    if (!byPeer.has(peerId)) byPeer.set(peerId, peer);
+  }
+  return [...byPeer.values()];
+}
+
+/**
+ * Which relationships earn direct spatial presence, and which are represented.
+ *
+ * Ranking is by verified evidence then relationship count then id, so it never
+ * depends on array order. That is what stops an arbitrary slot from acquiring
+ * visual centrality, which was the defect in the two-column arrangement.
+ */
+function promotedEdges(view, edges) {
+  const peers = peersOf(view, edges);
+  const regime = regimeFor(peers.length);
+  const { direct } = partitionPeers(peers, regime);
+
+  const directIds = new Set(direct.map((peer) => peer.id));
+  const promoted = [];
+  for (const edge of edges) {
+    const peerId = edge.source === view.subject.id ? edge.target : edge.source;
+    if (directIds.has(peerId)) promoted.push(edge.id);
+  }
+  /*
+   * Promotion is capped at what the field can hold. Without the cap, a regime that
+   * said "six direct" could promote every relationship of a fan the peers belonged
+   * to, leaving the remainder too small to aggregate and turning the plate back into
+   * spokes. The cap is the field's capacity, so a fan always has enough left over to
+   * become a plate.
+   */
+  const capped = promoted.slice(0, DRAWABLE_CAPACITY);
+
+  // A homogeneous fan is aggregated in full: no peer earns a place on the canvas,
+  // so the composition names the group rather than choosing between equals.
+  const aggregateEdgeIds = isHomogeneousFan(peers)
+    ? edges.map((edge) => edge.id)
+    : [];
+
+  return { regime, peers, direct, directEdgeIds: capped, aggregateEdgeIds };
+}
+
+/**
+ * The composition for the current view. One source of truth for canvas and
+ * status line.
+ *
+ * The visible-object budget is the authored field's real capacity, and the regime
+ * decides how much of the topology may be exposed directly within it. Whatever
+ * does not fit becomes a plate rather than an overflow report, so every
+ * relationship is accounted for and none is dropped.
+ */
 function currentComposition(view) {
   const target = view || state.view;
   if (!target) return null;
-  return buildComposition(target, { edges: visibleCandidates(target), expandedAggregates: state.expandedBundles });
+  const candidates = visibleCandidates(target);
+  const { regime, peers, direct, directEdgeIds, aggregateEdgeIds } = promotedEdges(target, candidates);
+  const composition = buildComposition(target, {
+    edges: candidates,
+    expandedAggregates: state.expandedBundles,
+    directEdgeIds,
+    aggregateEdgeIds,
+    budget: DRAWABLE_CAPACITY,
+  });
+  composition.regime = regime;
+  composition.peers = peers;
+  composition.direct = direct;
+  return composition;
 }
 
 function draw() {
@@ -854,8 +1072,26 @@ function draw() {
     const position = positions.get(`${BUNDLE_ID_PREFIX}${plate.key}`);
     if (!position || !subjectPosition) continue;
 
+    // A plate with no members is not a plate. This happened when a forced aggregate
+    // lost its members and the plate drew as an empty box while its relationships
+    // reappeared as loose edges.
+    if (plate.count < 1) continue;
+
     const rows = plate.expanded ? plateRows(plate) : [];
-    const height = plateHeight(rows.length);
+    /*
+     * Rows only ever appear on an expanded plate.
+     *
+     * The fallback row exists for a plate the evidence cannot subdivide, so opening
+     * it shows what it holds rather than an empty box. It must not be drawn when
+     * collapsed, or the header is immediately followed by a line repeating its own
+     * text -- which is what the first screenshot showed.
+     */
+    const shownRows = !plate.expanded
+      ? []
+      : rows.length > 0
+        ? rows
+        : [{ label: plate.label, meta: '', memberEdgeIds: plate.memberEdgeIds }];
+    const height = plateHeight(shownRows.length);
     // Widening grows to the right of the subject's tie, so the connection stays
     // anchored and the plate does not jump when it opens.
     const width = rows.length > 0 ? PLATE_W_EXPANDED : PLATE_W;
@@ -916,7 +1152,7 @@ function draw() {
     const metaWidth = rows.some((r) => r.meta) ? META_CHARS * 6.0 + 14 : 0;
     const labelRoom = Math.max(8, Math.floor((width - 24 - metaWidth) / 6.6));
 
-    rows.forEach((row, index) => {
+    shownRows.forEach((row, index) => {
       const rowY = top + PLATE_HEADER + index * PLATE_ROW;
       const rowSelected = row.memberEdgeIds.includes(state.selectedEdgeId);
       if (rowSelected) {
@@ -1058,6 +1294,8 @@ function draw() {
   renderLegend();
   renderBundles();
   renderLayersPop();
+  renderContextColumn(view);
+  renderBottomBand(view);
   updateSearchCount();
 }
 

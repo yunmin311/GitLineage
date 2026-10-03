@@ -56,6 +56,14 @@ export const DeclarationForm = Object.freeze({
  * rather than an assumption, and an unknown form is never used to name a group.
  */
 export function declarationForm(card) {
+  // Only a document reference is *written down* somewhere. A manifest dependency or
+  // a submodule edge has no declaration form, and labelling one "Prose" because its
+  // evidence record happened to carry text would be a fabricated claim about where
+  // the relationship came from.
+  const type = card && typeof card.type === 'string' ? card.type : '';
+  if (type && type !== 'document_reference' && type !== 'document_attribution') {
+    return DeclarationForm.Unknown;
+  }
   const text = typeof (card && card.observedText) === 'string' ? card.observedText.trim() : '';
   if (!text) return DeclarationForm.Unknown;
   // A table row begins with a cell delimiter. This is the observed line itself,
@@ -149,6 +157,31 @@ export function evidenceSubgroups(members) {
     .sort((a, b) => (a.form === b.form ? (a.label < b.label ? -1 : a.label > b.label ? 1 : 0) : a.form < b.form ? -1 : 1));
 }
 
+/**
+ * Turns a set of relationships into a neutral plate.
+ *
+ * Subgroups are named only where the evidence supports it, and the plate's own label
+ * says nothing beyond the relation and the count. A single member is never plated:
+ * one is not a group.
+ */
+function aggregateFan(fan, memberIds, evidence, expanded, plates) {
+  const members = [...memberIds].sort().map((edgeId) => ({
+    edgeId,
+    card: (evidence[edgeId] || [])[0],
+  }));
+  plates.push({
+    key: fan.key,
+    relationshipType: fan.relationshipType,
+    family: fan.family,
+    status: fan.status,
+    label: `${fan.relationLabel} ×${memberIds.length}`,
+    count: memberIds.length,
+    memberEdgeIds: [...memberIds].sort(),
+    subgroups: evidenceSubgroups(members),
+    expanded: expanded.has(fan.key),
+  });
+}
+
 /** One fan: the visible relationships sharing a relation type and status. */
 function fanOf(edges) {
   const map = new Map();
@@ -177,10 +210,34 @@ function fanOf(edges) {
  */
 export function buildComposition(view, options = {}) {
   const budget = Number.isFinite(options.budget) ? options.budget : VISIBLE_OBJECT_BUDGET;
+  /*
+   * Relationships the regime has promoted to direct presence.
+   *
+   * The budget decides how much of a *fan* is drawn individually. It must not be
+   * able to aggregate away a relationship the composition has deliberately chosen
+   * to show: a promoted edge is drawn, and the budget applies to what is left.
+   */
+  const promoted = new Set(options.directEdgeIds || []);
+  /*
+   * Relationships that must be aggregated whatever the budget says.
+   *
+   * A homogeneous fan is not a direct-topology candidate at all: every peer carries
+   * one identical relationship, so there is no peer that earns its own place on the
+   * canvas. Left to the budget it appeared as fourteen loose edges, because the fan
+   * happened to fit exactly. Room is the wrong question for this decision.
+   */
+  const forceAggregate = new Set(options.aggregateEdgeIds || []);
   const edges = (options.edges || []).slice();
   const evidence = view.evidenceByRelationship || {};
   const expanded = options.expandedAggregates || new Set();
 
+  /*
+   * A fan is the whole group of relationships sharing a relation and status.
+   *
+   * Promoted relationships leave the fan's remainder, and the remainder aggregates
+   * on its own -- but the plate it produces is still about that relation, so a fan
+   * of fourteen with six promoted yields one plate of eight, not two half-fans.
+   */
   const fans = fanOf(edges).sort((a, b) => {
     if (b.edgeIds.length !== a.edgeIds.length) return b.edgeIds.length - a.edgeIds.length;
     return a.key < b.key ? -1 : a.key > b.key ? 1 : 0;
@@ -188,41 +245,61 @@ export function buildComposition(view, options = {}) {
 
   const looseEdgeIds = [];
   const plates = [];
-  let remaining = budget;
+  /*
+   * One allowance, shared.
+   *
+   * Promoted relationships are drawn directly, but they occupy the field just as a
+   * loose relationship does. They were previously free, which meant promotion
+   * *increased* the number of direct relationships instead of trading against the
+   * budget: `yunmin311/obsidian-config` promoted six and then drew the remaining
+   * eight loose as well, so fourteen spokes appeared and no plate was ever made.
+   */
+  let remaining = Math.max(0, budget - promoted.size);
 
   for (const fan of fans) {
-    if (fan.edgeIds.length < MIN_PLATE_SIZE || fan.edgeIds.length <= remaining) {
-      looseEdgeIds.push(...fan.edgeIds);
-      remaining -= fan.edgeIds.length;
+    const remainder = fan.edgeIds.filter((id) => !promoted.has(id));
+    const forced = remainder.filter((id) => forceAggregate.has(id));
+
+    if (forced.length > 0) {
+      // Aggregate what was forced, and let the rest of the fan fall through to the
+      // budget: a fan can be part homogeneous and part varied.
+      if (forced.length >= MIN_PLATE_SIZE) {
+        aggregateFan(fan, forced, evidence, expanded, plates);
+        continue;
+      }
+      looseEdgeIds.push(...forced);
+      remaining -= forced.length;
+    }
+
+    const rest = remainder.filter((id) => !forceAggregate.has(id));
+    if (rest.length < MIN_PLATE_SIZE || rest.length <= remaining) {
+      looseEdgeIds.push(...rest);
+      remaining -= rest.length;
       continue;
     }
 
-    // Over budget, so it becomes a plate. Members are the relationships that
-    // carry evidence cards; a relationship without one is still a member, it
-    // simply cannot contribute to a named subgroup.
-    const members = [...fan.edgeIds].sort().map((edgeId) => {
-      const cards = evidence[edgeId] || [];
-      return { edgeId, card: cards[0] };
-    });
-    const subgroups = evidenceSubgroups(members);
-
-    plates.push({
-      key: fan.key,
-      relationshipType: fan.relationshipType,
-      family: fan.family,
-      status: fan.status,
-      // The neutral label claims nothing beyond the relation and the count.
-      label: `${fan.relationLabel} ×${fan.edgeIds.length}`,
-      count: fan.edgeIds.length,
-      memberEdgeIds: [...fan.edgeIds].sort(),
-      subgroups,
-      expanded: expanded.has(fan.key),
-    });
+    aggregateFan(fan, rest, evidence, expanded, plates);
   }
+
+  /*
+   * Accounting.
+   *
+   * `drawnEdgeIds` is what the canvas actually shows: the loose relationships, the
+   * promoted ones, and every plate member. It exists because a promoted relationship
+   * was previously drawn but appeared in none of the other lists, so the composition
+   * could not prove it had lost nothing -- which is exactly the check that matters
+   * when the budget moves relationships around.
+   */
+  const plateMembers = plates.flatMap((plate) => plate.memberEdgeIds);
+  const drawnEdgeIds = [...new Set([...looseEdgeIds, ...promoted, ...plateMembers])].sort();
 
   return {
     subjectId: view.subject && view.subject.id,
     looseEdgeIds: looseEdgeIds.sort(),
+    /** Promoted relationships, kept out of the budget but still drawn. */
+    promotedEdgeIds: [...promoted].sort(),
+    /** Everything the canvas draws, for the accounting check. */
+    drawnEdgeIds,
     plates: plates.sort((a, b) => (a.key < b.key ? -1 : a.key > b.key ? 1 : 0)),
     budget,
     /** True when nothing at all would be drawn without plates. */

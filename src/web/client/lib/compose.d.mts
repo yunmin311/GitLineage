@@ -23,6 +23,13 @@ export declare const ZONES: Readonly<{
   contextTop: number;
   contextWidth: number;
   subject: { x: number; y: number };
+  /**
+   * Left edge of the data zone.
+   *
+   * Derived from the field requirement rather than hand-tuned: the field needs
+   * `NODE_W + slotPitch` for two columns, and the zone is that far from the
+   * context column plus a plate's width. It was a constant and it was short twice.
+   */
   dataLeft: number;
   dataTop: number;
   dataWidth: number;
@@ -32,6 +39,32 @@ export declare const ZONES: Readonly<{
   gutterLeft: number;
   gutterWidth: number;
 }>;
+
+/**
+ * The drawable field, derived once from the zones.
+ *
+ * Derived rather than restated, because three independent copies of this arithmetic
+ * disagreed three times and the capacity figure followed whichever ran.
+ */
+export interface FieldGeometry {
+  HALF_W: number;
+  HALF_H: number;
+  GAP: number;
+  leftWall: number;
+  rightWall: number;
+  bandWidth: number;
+  bandMid: number;
+  slotPitch: number;
+  maxPerRow: number;
+  floor: number;
+  ceiling: number;
+  capacity: number;
+}
+
+export declare function fieldGeometry(): FieldGeometry;
+
+/** How many peers the authored field holds without overlap. */
+export declare function capacity(): number;
 
 export interface ComposedPosition {
   x: number;

@@ -30,6 +30,48 @@ const NODE_H = 52;
 const PLATE_W = 184;
 
 /**
+ * The drawable field, derived once.
+ *
+ * The field runs from the context column's right edge to a plate's left edge, less
+ * one node's half-width and the clearance. This was computed inline in three
+ * places and each copy disagreed: 474, then 226, then 448 for the same field, and
+ * the capacity figure followed whichever copy ran. It is derived here so the walls,
+ * the pitch and the capacity cannot disagree.
+ */
+/**
+ * The field's capacity: how many peers it can hold without overlap.
+ *
+ * Derived from the zones, and the single number the composition budget spends, so
+ * the two cannot disagree.
+ */
+export function capacity() {
+  return fieldGeometry().capacity;
+}
+
+export function fieldGeometry() {
+  const HALF_W = NODE_W / 2;
+  const HALF_H = NODE_H / 2;
+  const GAP = FIELD_GAP;
+  const leftWall = FIELD_LEFT;
+  const rightWall = ZONES.dataLeft - PLATE_W / 2 - GAP;
+  const bandWidth = rightWall - leftWall;
+  const slotPitch = NODE_W + GAP * 2;
+  const maxPerRow = Math.max(1, Math.floor((bandWidth - NODE_W) / slotPitch) + 1);
+  const floor = ZONES.bandTop - HALF_H - GAP;
+  const ceiling = ZONES.dataTop - HALF_H - GAP;
+  const rowsBelow = Math.max(0, Math.floor((floor - (ZONES.subject.y + 104)) / (NODE_H + 22)) + 1);
+  const rowsAbove = Math.max(0, Math.floor((ZONES.subject.y - 104 - ceiling) / (NODE_H + 22)) + 1);
+  return {
+    HALF_W, HALF_H, GAP,
+    leftWall, rightWall, bandWidth,
+    bandMid: (leftWall + rightWall) / 2,
+    slotPitch, maxPerRow,
+    floor, ceiling,
+    capacity: maxPerRow * (rowsBelow + rowsAbove),
+  };
+}
+
+/**
  * Distinct peers the authored field holds before anything overflows.
  *
  * Three columns by the number of rows between the subject's line and the bottom
@@ -42,15 +84,62 @@ const PLATE_W = 184;
 // not a layout.
 export const DRAWABLE_COLUMNS = 2;
 
+
+
+/** Node plate metrics, shared with the renderer so placement cannot drift from drawing. */
+/** Collapsed plate width, used to keep loose nodes clear of the data zone. */
+/** Clearance between neighbouring objects. */
+const FIELD_GAP = 16;
+
+/** Where the drawable field begins: the context column's right edge, plus clearance. */
+const FIELD_LEFT = 46 + 496 + NODE_W / 2 + FIELD_GAP;
+
+/**
+ * How wide the field has to be for two columns.
+ *
+ * Two 216-unit nodes on a 248 pitch span 216 + 248. This was a hand-tuned constant
+ * and it was six units short twice, which silently reduced the field to one column
+ * and halved capacity. It is derived from the node metrics so it cannot drift.
+ */
+const FIELD_BAND = NODE_W + (NODE_W + FIELD_GAP * 2);
+
 /** Zone anchors, taken from the frozen design. */
 export const ZONES = Object.freeze({
   contextLeft: 46,
   contextTop: 128,
   contextWidth: 496,
-  subject: { x: 730, y: 478 },
-  dataLeft: 1016,
+  /*
+   * The subject's x is derived from the field's midpoint, so the columns straddle it
+   * and both sets of ties stay short. It was a literal and drifted 8 units when the
+   * walls moved. The y is authored outright and never moves with the content: an
+   * anchor that drifts with its graph is not an anchor.
+   */
+  /*
+   * The subject's y sits below the frame's midpoint, between the context column and
+   * the bottom band.
+   *
+   * It was at 478 in a 940-tall frame, which put the mass on the upper half and left
+   * the lower half empty. The context column occupies the top-left, so the
+   * composition's mass belongs lower: the band is at 876, and this leaves room below
+   * the subject for the rows that widen away from it without crowding the band.
+   */
+  subject: { x: (FIELD_LEFT + FIELD_LEFT + FIELD_BAND) / 2, y: 560 },
+  /*
+   * The data zone, placed so the field between it and the context column holds two
+   * columns. See `fieldGeometry()`, which derives the walls from these zones; this
+   * is the input, not a second copy of the answer.
+   *
+   * A plate is 184 wide from its left edge, so the field's right wall is
+   * `dataLeft - 92 - 16`. The field's left wall is the context column's right edge
+   * plus a half-width and clearance, 666. Two 216-unit nodes need 248 of pitch, so
+   * the band must be 464 and `dataLeft` is 1222.
+   *
+   * The zone ends at 1402, well before the reserved gutter at 1548, so the Drawer
+   * still never moves anything.
+   */
+  dataLeft: FIELD_LEFT + FIELD_BAND + PLATE_W / 2 + FIELD_GAP,
   dataTop: 236,
-  dataWidth: 486,
+  dataWidth: 180,
   bandTop: 876,
   bandLeft: 46,
   bandWidth: 1456,
@@ -86,10 +175,10 @@ export function dataZonePositions(entries) {
   // the authored top.
   const total = entries.reduce((sum, entry) => sum + entry.height + 26, -26);
   const subject = subjectPosition();
-  // Centre the stack on the subject's line whenever it fits above the bottom band.
-  // Letting it start at the authored top instead is what left the dense graph
-  // sitting low with a large dead field above it.
-  const fitsBeside = subject.y - total / 2 >= ZONES.dataTop - 60 && subject.y + total / 2 <= ZONES.bandTop - 40;
+  // A stack that fits beside the subject is centred on the subject's line, so the
+  // ties stay short and the mass reads as one group rather than as a plate hanging
+  // in the corner. Only a genuinely tall stack starts at the authored zone top.
+  const fitsBeside = subject.y - total / 2 >= ZONES.dataTop - 80;
   let cursor = fitsBeside ? Math.round(subject.y - total / 2) : ZONES.dataTop;
 
   for (const entry of entries) {
@@ -113,9 +202,8 @@ export function dataZonePositions(entries) {
  */
 export function loosePositions(count, slots, existing, reserved = []) {
   const subject = subjectPosition();
-  const HALF_W = NODE_W / 2;
-  const HALF_H = NODE_H / 2;
-  const GAP = 16;
+  const G = fieldGeometry();
+  const { HALF_W, HALF_H, GAP, leftWall, rightWall, floor, ceiling } = G;
 
   // Occupied rectangles, kept as real boxes rather than centre points. A
   // centre-point test with summed half-extents double-counts the clearance and
@@ -157,13 +245,10 @@ export function loosePositions(count, slots, existing, reserved = []) {
   // the data zone. The subject sits at 730, so this band is off-centre: it reaches
   // further right of the subject than left of it. Rows are therefore centred on the
   // subject and clipped by these walls, which is what gives the mass its shape.
-  const leftWall = ZONES.contextLeft + ZONES.contextWidth / 2 + HALF_W + GAP;
-  const rightWall = ZONES.dataLeft - HALF_W - GAP;
-  const floor = ZONES.bandTop - HALF_H - GAP;
-  // The upper allowance reaches the authored data-zone top rather than a fixed
-  // distance above the subject: eleven peers did not fit in the lower field
-  // alone, and dropping the eleventh would have hidden a real relationship.
-  const ceiling = ZONES.dataTop - HALF_H - GAP;
+  // The context column occupies 46..542, so a node centred at 531 sat *inside* it
+  // and the census ran underneath the node. The wall clears the column's full
+  // right edge, not its midpoint.
+
 
   const positions = [];
 
@@ -202,17 +287,11 @@ export function loosePositions(count, slots, existing, reserved = []) {
    * right-hand slot outside the band, where the wall check rejected it and each
    * row silently held a single node.
    */
-  const bandWidth = rightWall - leftWall;
-  const bandMid = (leftWall + rightWall) / 2;
   // Centre-to-centre distance that actually clears a neighbour. This must be the
   // same arithmetic the collision test uses -- `NODE_W + GAP` is 232 while a node
   // needs 248, so the old pitch left adjacent slots overlapping by one gap and the
   // row could never hold more than one node.
-  const slotPitch = NODE_W + GAP * 2;
-  // A row of n slots spans NODE_W + (n - 1) * slotPitch, so the count that fits is
-  // derived by solving for n rather than by dividing the band by the pitch, which
-  // ignores the node's own width and undercounts by one.
-  const maxPerRow = Math.max(1, Math.floor((bandWidth - NODE_W) / slotPitch) + 1);
+  const { slotPitch, maxPerRow, bandWidth, bandMid } = G;
   for (let index = 0; index < distances.length; index += 1) {
     const t = distances.length === 1 ? 0 : index / (distances.length - 1);
     // Nearest rows hold one peer; outer rows fill to what the band allows.
