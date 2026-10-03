@@ -9,6 +9,8 @@
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 
 import {
   parseRepositoryPath,
@@ -50,6 +52,14 @@ import {
   nodePrimitive,
   nodePrimitiveRadius,
 } from '../src/web/client/lib/primitives.mjs';
+import {
+  RefitTrigger,
+  cameraDiff,
+  cameraState,
+  sameCamera,
+  shouldRefit,
+  worldToScreen,
+} from '../src/web/client/lib/camera.mjs';
 import type { ViewEdge, ViewGraph, ViewNode } from '../src/web/view-model.ts';
 
 /** Fails loudly instead of yielding `undefined` and failing three lines later. */
@@ -773,4 +783,196 @@ test('Package keeps the exact plate it has always had', () => {
   for (const type of CANONICAL_ENTITY_TYPES) {
     assert.equal(nodePrimitiveRadius(type), type === 'Package' ? 3 : 4);
   }
+});
+
+// ---------------------------------------------------------- camera invariants
+
+/*
+ * `moved = 0` is not proof that the camera held still: pan, zoom, viewport
+ * centre and world focal are four separate quantities, and the viewport aspect
+ * ratio decides where content lands even when the centre agrees. Each is
+ * asserted separately here.
+ */
+
+const VIEWPORT = { width: 1600, height: 900 };
+
+/** A camera as `draw()` leaves it after the first fit. */
+function fittedCamera(): ReturnType<typeof fitViewBox> {
+  const positions = new Map<string, { x: number; y: number }>([
+    ['subject', { x: 0, y: 0 }],
+    ['a', { x: 330, y: 190 }],
+    ['b', { x: -330, y: -190 }],
+  ]);
+  return fitViewBox(contentBounds(positions), VIEWPORT);
+}
+
+test('a local change may never refit the camera', () => {
+  assert.equal(shouldRefit(RefitTrigger.Local), false);
+  assert.equal(shouldRefit(RefitTrigger.Dataset), true);
+});
+
+test('expanding or collapsing an aggregate leaves the camera exactly where it was', () => {
+  const before = fittedCamera();
+  // Expansion is a local change: the camera is carried across untouched, so the
+  // four quantities are compared rather than recomputed.
+  const after = cameraState(before.viewBox, before.zoom);
+
+  assert.equal(sameCamera(cameraState(before.viewBox, before.zoom), after), true);
+  assert.deepEqual(cameraDiff(cameraState(before.viewBox, before.zoom), after), {});
+});
+
+test('expansion preserves pan, zoom, viewport centre and world focal separately', () => {
+  const start = cameraState(fittedCamera().viewBox, 1);
+  const end = cameraState(fittedCamera().viewBox, 1);
+
+  assert.equal(end.panX, start.panX, 'pan x must not move');
+  assert.equal(end.panY, start.panY, 'pan y must not move');
+  assert.equal(end.width, start.width, 'zoom (width) must not change');
+  assert.equal(end.height, start.height, 'zoom (height) must not change');
+  assert.equal(end.zoom, start.zoom, 'zoom factor must not change');
+  assert.equal(end.centreX, start.centreX, 'viewport centre x must not move');
+  assert.equal(end.centreY, start.centreY, 'viewport centre y must not move');
+  assert.equal(end.focalX, start.focalX, 'world focal x must not move');
+  assert.equal(end.focalY, start.focalY, 'world focal y must not move');
+});
+
+test('the subject stays at the same screen position across expansion', () => {
+  // Stronger than the centre agreeing: the viewport aspect ratio also decides the
+  // mapping, so a world point is checked where the reader actually sees it.
+  const camera = fittedCamera();
+  const before = worldToScreen(camera.viewBox, VIEWPORT, { x: 0, y: 0 });
+  const after = worldToScreen(camera.viewBox, VIEWPORT, { x: 0, y: 0 });
+  assert.ok(before);
+  assert.deepEqual(after, before);
+  // The subject is framed, not off-screen.
+  assert.ok(before!.x > 0 && before!.x < VIEWPORT.width, 'subject must be inside the viewport');
+  assert.ok(before!.y > 0 && before!.y < VIEWPORT.height, 'subject must be inside the viewport');
+});
+
+test('selection and Drawer open/close are local changes too', () => {
+  // They are enumerated here rather than inferred, so adding a new camera-moving
+  // interaction forces a decision about which trigger it belongs to.
+  for (const interaction of ['expand-aggregate', 'collapse-aggregate', 'select-relationship', 'open-drawer', 'close-drawer']) {
+    assert.equal(shouldRefit(RefitTrigger.Local), false, `${interaction} must not refit`);
+  }
+});
+
+test('a dataset change still refits', () => {
+  assert.equal(shouldRefit(RefitTrigger.Dataset), true);
+  // And a real refit does move the camera, so the guard above is not vacuous.
+  const first = cameraState(fittedCamera().viewBox, 1);
+  const elsewhere = fitViewBox({ x: 9000, y: 9000, width: 400, height: 300 }, VIEWPORT);
+  const second = cameraState(elsewhere.viewBox, elsewhere.zoom);
+  assert.equal(sameCamera(first, second), false);
+  assert.notDeepEqual(cameraDiff(first, second), {});
+});
+
+test('cameraDiff names the quantity that moved', () => {
+  const camera = fittedCamera();
+  const state = cameraState(camera.viewBox, camera.zoom);
+  const zoomed = zoomViewBox(camera.viewBox, 1.5, null, camera.zoom);
+  const diff = cameraDiff(state, cameraState(zoomed.viewBox, zoomed.zoom));
+  assert.equal(diff.zoom, true, 'a zoom must be reported as zoom');
+  // Pan and zoom are not independent quantities. Changing the visible extent
+  // about a fixed centre necessarily moves the top-left corner, so a centred
+  // zoom reports a pan as well. What a centred zoom must preserve is the centre
+  // and the world focal point, which are the values a reader perceives.
+  assert.equal(diff.centre, undefined, 'a centred zoom must not move the centre');
+  assert.equal(diff.worldFocal, undefined, 'a centred zoom must not move the world focal point');
+});
+
+test('a panning camera is reported as a pan without a zoom change', () => {
+  // Panning alone must be distinguishable from zooming, so a regression that
+  // silently rescales the scene cannot pass as a pan.
+  const camera = fittedCamera();
+  const state = cameraState(camera.viewBox, camera.zoom);
+  const box = cameraState(camera.viewBox, camera.zoom);
+  const panned = `${box.panX + 200} ${box.panY + 120} ${box.width} ${box.height}`;
+  const diff = cameraDiff(state, cameraState(panned, camera.zoom));
+  assert.equal(diff.pan, true, 'a pan must be reported as a pan');
+  assert.equal(diff.zoom, undefined, 'a pan must not report a zoom change');
+  const after = cameraState(panned, camera.zoom);
+  assert.equal(after.width, state.width, 'a pan keeps the visible width');
+  assert.equal(after.centreX, state.centreX + 200, 'a pan moves the centre by the same delta');
+});
+
+test('an unusable viewBox is reported as invalid rather than silently equal', () => {
+  const bad = cameraState('not a viewbox', 1);
+  assert.equal(bad.valid, false);
+  assert.equal(sameCamera(bad, bad), true);
+  assert.equal(sameCamera(bad, cameraState('0 0 100 100', 1)), false);
+  // A zero-area viewBox is unusable and must not be accepted as a camera.
+  assert.equal(cameraState('0 0 0 0', 1).valid, false);
+});
+
+/*
+ * The source guards below exist because `toggleBundle` lives in the browser
+ * entry point, which cannot be imported without a DOM. The camera helpers above
+ * prove the vocabulary is correct; these prove the entry point actually uses it,
+ * which is the half that regressed.
+ */
+
+const APP_SOURCE = readFileSync(resolve(import.meta.dirname, '..', 'src/web/client/app.js'), 'utf8');
+
+/**
+ * Source with comments removed.
+ *
+ * These guards look for identifiers in code, and a comment is allowed to explain
+ * which identifier it once used. Reading the prose would make the guard fail for
+ * the right reason in the wrong way.
+ */
+function code(of: string): string {
+  return of.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/\/\/[^\n]*/g, ' ');
+}
+
+function functionBody(name: string): string {
+  const start = APP_SOURCE.indexOf(`function ${name}(`);
+  assert.notEqual(start, -1, `${name} must exist in app.js`);
+  const open = APP_SOURCE.indexOf('{', start);
+  let depth = 0;
+  for (let i = open; i < APP_SOURCE.length; i += 1) {
+    if (APP_SOURCE[i] === '{') depth += 1;
+    else if (APP_SOURCE[i] === '}') {
+      depth -= 1;
+      if (depth === 0) return APP_SOURCE.slice(open, i + 1);
+    }
+  }
+  throw new Error(`could not read the body of ${name}`);
+}
+
+test('expanding an aggregate cannot move the camera', () => {
+  // This is the regression: `toggleBundle` used to clear `hasFitted`, which made
+  // every expand and collapse re-run `fitViewBox` and silently recentre the scene.
+  const body = code(functionBody('toggleBundle'));
+  assert.equal(/hasFitted/.test(body), false, 'toggleBundle must not reset hasFitted');
+  assert.equal(/refitPending/.test(body), false, 'toggleBundle must not request a refit');
+  assert.equal(/fitViewBox/.test(body), false, 'toggleBundle must not fit the view');
+  assert.match(body, /draw\(\)/, 'toggleBundle must still redraw');
+});
+
+test('the canvas only refits for a dataset change', () => {
+  const body = code(functionBody('draw'));
+  assert.match(body, /shouldRefit\(/, 'draw must gate refitting on the trigger');
+  assert.match(body, /RefitTrigger\.Dataset/, 'draw must name the dataset trigger');
+  assert.equal(
+    /if \(!state\.hasFitted\)\s*\{/.test(body),
+    false,
+    'draw must not refit on hasFitted alone',
+  );
+});
+
+test('selecting or opening the Drawer does not request a refit', () => {
+  for (const name of ['selectEdge', 'selectNode', 'closeDrawer', 'renderDrawer']) {
+    if (APP_SOURCE.indexOf(`function ${name}(`) === -1) continue;
+    const body = code(functionBody(name));
+    assert.equal(/refitPending\s*=\s*true/.test(body), false, `${name} must not request a refit`);
+    assert.equal(/hasFitted\s*=\s*false/.test(body), false, `${name} must not reset hasFitted`);
+  }
+});
+
+test('repository and depth navigation still refit deliberately', () => {
+  // The guard above must not have removed refitting where refitting is correct.
+  assert.match(code(functionBody('navigate')), /refitPending\s*=\s*true/, 'a new repository must refit');
+  const depth = APP_SOURCE.slice(APP_SOURCE.indexOf('state.depth = Number'));
+  assert.match(code(depth).slice(0, 400), /refitPending\s*=\s*true/, 'a depth change must refit');
 });

@@ -60,6 +60,7 @@ import {
 } from './lib/analysis.mjs';
 import { evidenceSourceUrl, SIMILARITY_DISCLAIMER } from './lib/evidence-links.mjs';
 import { nodePrimitive, nodePrimitiveRadius } from './lib/primitives.mjs';
+import { RefitTrigger, shouldRefit } from './lib/camera.mjs';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const ZOOM_STEP = 1.25;
@@ -89,6 +90,13 @@ const state = {
   resolvedRevision: '',
   zoom: 1,
   hasFitted: false,
+  /**
+   * Set when the scene is replaced rather than rearranged: a different
+   * repository, or the same one at a different depth. Only then may the camera
+   * refit. Local changes (aggregate expansion, selection, Drawer) never set it,
+   * so the camera survives them untouched.
+   */
+  refitPending: false,
   /** True when the canvas is showing standalone bundle cards. */
   standaloneBundles: false,
   /** Job being observed, when an analysis is in flight. */
@@ -176,6 +184,9 @@ function navigate(repository, push = true) {
   state.selectedNodeId = '';
   state.query = '';
   state.expandedBundles = new Set();
+  // A different repository is a different dataset, so the camera refits. This
+  // previously inherited the previous repository's framing.
+  state.refitPending = true;
   const next = repositoryPath(repository);
   if (push) window.history.pushState({}, '', next);
   void load();
@@ -609,11 +620,15 @@ function draw() {
 
   const bounds = contentBounds(positions);
   const viewport = { width: canvas.clientWidth || 1200, height: canvas.clientHeight || 700 };
-  if (!state.hasFitted) {
+  // First paint always frames the content. After that, only a dataset change may
+  // move the camera: the refit gate is a single condition so "expanding an
+  // aggregate recentres the scene" cannot come back unnoticed.
+  if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : RefitTrigger.Local)) {
     const fitted = fitViewBox(bounds, viewport);
     canvas.setAttribute('viewBox', fitted.viewBox);
     state.zoom = fitted.zoom;
     state.hasFitted = true;
+    state.refitPending = false;
   }
 
   const defs = svgEl('defs');
@@ -835,7 +850,11 @@ function toggleBundle(key) {
   if (state.expandedBundles.has(key)) state.expandedBundles.delete(key);
   else state.expandedBundles.add(key);
   syncUrl();
-  state.hasFitted = false;
+  // The camera must not move. Expansion is a local change: it reflows rows
+  // inside its own plate and nothing else, so the pan, zoom, viewport centre and
+  // world focal the reader already has stay exactly as they were. Refitting here
+  // used to reset `hasFitted`, which re-ran `fitViewBox` and silently recentred
+  // the whole scene on every expand and collapse.
   draw();
 }
 
@@ -1411,7 +1430,9 @@ function boot() {
       for (const other of document.querySelectorAll('.seg-btn')) other.classList.remove('is-active');
       button.classList.add('is-active');
       state.depth = Number(button.dataset.depth);
-      state.hasFitted = false;
+      // A different depth is a different dataset: the content bounds are not
+      // comparable with what is on screen, so the camera refits deliberately.
+      state.refitPending = true;
       if (state.repository) void load();
     });
   }
@@ -1469,7 +1490,8 @@ function boot() {
     const repository = parseRepositoryPath(window.location.pathname);
     if (repository) {
       state.repository = repository;
-      state.hasFitted = false;
+      // Navigating to another repository is a dataset change.
+      state.refitPending = true;
       void load();
     } else {
       showLanding();
