@@ -21,7 +21,7 @@ import {
   partitionPeers,
 } from '../src/web/client/lib/regime.mjs';
 import { buildComposition } from '../src/web/client/lib/aggregate.mjs';
-import { fieldGeometry, capacity } from '../src/web/client/lib/compose.mjs';
+import { fieldGeometry, capacity, subjectPosition, ZONES } from '../src/web/client/lib/compose.mjs';
 
 const FIXTURES = resolve(import.meta.dirname, '..', 'artifacts/acceptance');
 const viewOf = (slug: string) => {
@@ -203,6 +203,38 @@ test('subgroup vocabulary is only used where document evidence supports it', () 
     if (plate.relationshipType === 'references') continue;
     assert.deepEqual(plate.subgroups, [], `${plate.relationshipType} must not carry document subgroups`);
   }
+});
+
+test('the field geometry derives its numbers rather than restating them', () => {
+  // The walls, pitch, column count and capacity were each computed inline more than
+  // once and the copies disagreed -- 474, 226 and 448 for the same field. There is
+  // now one derivation, and the subject's x is derived from it too.
+  const geometry = fieldGeometry();
+  assert.equal(geometry.maxPerRow, 2, 'two columns: the band holds two, not three');
+  assert.ok(geometry.bandWidth >= 216 + 248, 'the band must clear two nodes at pitch');
+  assert.ok(geometry.capacity > 0);
+  assert.ok(geometry.capacity >= geometry.maxPerRow, 'capacity counts rows times columns');
+
+  // The subject sits at the band's midpoint, so the columns straddle it.
+  assert.equal(Math.abs(geometry.bandMid - subjectPosition().x) < 2, true, 'subject centred on the field');
+
+  /*
+   * The zone is derived from the field's requirement, and the arithmetic is spelled
+   * out here rather than restated, so this asserts the relationship rather than a
+   * tuned constant:
+   *
+   *   dataLeft = contextRight + halfNode + clearance   (the field's left wall)
+   *            + NODE_W + slotPitch                   (the band's required width)
+   *            + PLATE_W/2 + clearance                 (the field's right wall)
+   */
+  const contextRight = ZONES.contextLeft + ZONES.contextWidth;
+  const fieldLeft = contextRight + 216 / 2 + 16;
+  const fieldRight = ZONES.dataLeft - 184 / 2 - 16;
+  assert.equal(fieldLeft, geometry.leftWall, 'left wall clears the context column');
+  assert.equal(fieldRight, geometry.rightWall, 'right wall clears the plates');
+  assert.equal(fieldRight - fieldLeft, geometry.bandWidth, 'band width is consistent');
+  // And that band is wide enough for two columns at pitch, which is why it is two.
+  assert.ok(geometry.bandWidth >= 216 + geometry.slotPitch, 'the band holds two columns');
 });
 
 test('the geometry has two columns and a real capacity', () => {

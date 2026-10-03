@@ -1113,7 +1113,17 @@ function draw() {
     );
 
     // Selection raises the plate that owns the selection, never a row inside it.
-    const ownsSelection = plate.memberEdgeIds.includes(state.selectedEdgeId);
+    /*
+     * Explicit ownership: a plate owns the selection when the selected relationship
+     * is one of its members, or one of the rows it is showing. The earlier
+     * `selectedEdgeId.startsWith(bundle.key)` test worked only because a plate's key
+     * happened to be a prefix of its members' bundle keys -- an accident of naming.
+     */
+    const rowMembers = shownRows.flatMap((row) => row.memberEdgeIds);
+    const ownsSelection =
+      plate.memberEdgeIds.includes(state.selectedEdgeId) ||
+      rowMembers.includes(state.selectedEdgeId);
+    // Selection raises the plate that owns it, never a row inside it.
     const plateTier = depthTier({ isSelected: ownsSelection });
     const group = svgEl('g', {
       class: `bundle-card st-${plate.status}${plate.expanded ? ' is-open' : ''}${ownsSelection ? ' is-selected' : ''}`,
@@ -1166,6 +1176,25 @@ function draw() {
       group.append(
         svgEl('text', { x: left + 12, y: rowY + 18, class: 'plate-row-label' }, [truncate(row.label, labelRoom)]),
       );
+      /*
+       * A row is selectable.
+       *
+       * It had no hit target, so clicking one did nothing: the frozen design's
+       * selected row cannot exist if a row cannot be selected. The row stays flat --
+       * the marker beside it shows selection and the plate above rises, so the row
+       * itself never gains depth.
+       */
+      const rowHit = svgEl('rect', {
+        x: left, y: rowY + 2, width, height: PLATE_ROW - 4,
+        class: 'plate-row-hit', 'aria-hidden': 'true',
+      });
+      rowHit.addEventListener('click', (event) => {
+        event.stopPropagation();
+        const first = row.memberEdgeIds[0];
+        if (!first) return;
+        selectEdge(first);
+      });
+      group.append(rowHit);
       if (row.meta) {
         group.append(
           svgEl('text', { x: left + width - 12, y: rowY + 18, class: 'plate-row-meta', 'text-anchor': 'end' }, [
@@ -1177,6 +1206,8 @@ function draw() {
 
     const activate = (event) => {
       event.stopPropagation();
+      // A click on a row selects that row; only the plate's own surface toggles.
+      if (event.target && event.target.classList.contains('plate-row-hit')) return;
       toggleBundle(plate.key);
     };
     group.addEventListener('click', activate);
@@ -1594,9 +1625,16 @@ function renderEdgeDrawer(edge) {
   pill.append(sw, edge.status);
   wrap.append(pill);
 
-  // Conditions
-  const conditions = el('div', { class: 'd-block' });
-  conditions.append(el('p', { class: 'd-block-head', text: 'OBSERVED AT' }));
+  /*
+   * Provenance metadata.
+   *
+   * Built here but appended *after* the evidence: it is context for the record, not
+   * a substitute for it. The extractor name is kept out entirely -- it is an
+   * implementation detail of the analysis pipeline and the frozen design subordinates
+   * exactly this kind of thing below the evidence.
+   */
+  const provenance = el('div', { class: 'd-block' });
+  provenance.append(el('p', { class: 'd-block-head is-provenance', text: 'PROVENANCE' }));
   const kv = el('dl', { class: 'd-kv' });
   const row = (k, v) => {
     kv.append(el('dt', { text: k }), el('dd', { text: String(v) }));
@@ -1604,15 +1642,13 @@ function renderEdgeDrawer(edge) {
   row('Revision', `${view.revision.ref || view.revision.defaultBranch || 'HEAD'} @ ${view.revision.shortCommit}`);
   row('Analyzed', formatTime(view.revision.analyzedAt));
   row('Source', state.cacheHit ? `cached (${formatDuration(state.meta?.elapsedMs ?? 0)})` : 'fresh analysis');
-  row('Analyzer', `${view.analyzer.name} ${view.analyzer.version}`);
   row('Evidence', `${edge.evidenceCount} record${edge.evidenceCount === 1 ? '' : 's'}`);
-  conditions.append(kv);
-  wrap.append(conditions);
+  provenance.append(kv);
 
   // Evidence records
   const records = view.evidenceByRelationship[edge.id] || [];
   const evidenceBlock = el('div', { class: 'd-block' });
-  evidenceBlock.append(el('p', { class: 'd-block-head', text: `EVIDENCE (${records.length})` }));
+  evidenceBlock.append(el('p', { class: 'd-block-head is-evidence', text: `EVIDENCE (${records.length})` }));
   if (records.length === 0) {
     evidenceBlock.append(el('p', { class: 'mono', text: 'No evidence records inlined.' }));
   }
@@ -1622,7 +1658,9 @@ function renderEdgeDrawer(edge) {
       el('p', { class: 'mono', text: `showing ${records.length} of ${edge.evidenceCount} evidence records` }),
     );
   }
+  // Evidence first, then provenance: the record is what the reader came for.
   wrap.append(evidenceBlock);
+  wrap.append(provenance);
 
   // Why, anchored to the raw record
   const why = el('div', { class: 'd-block' });
@@ -1690,8 +1728,19 @@ function renderEvidenceCard(record, edge) {
     const link = el('a', { class: 'd-src', href: source, target: '_blank', rel: 'noreferrer noopener' });
     link.textContent = 'View source on GitHub ↗';
     card.append(link);
-    if (/\/blob\//.test(source) && record.locator && /:\d/.test(record.locator)) {
-      card.append(el('p', { class: 'mono', text: `anchor ${anchorOf(record.locator)}` }));
+    /*
+     * The line anchor becomes part of the link rather than a bare token beside it.
+     *
+     * It read as `anchor #L21` under a locator that already said `docs/plugins.md:21`,
+     * which is leaked debug output: a label nobody defined, restating a fact shown
+     * directly above it. As part of the link text it is an affordance instead, and
+     * the fragment is only offered when the source really is a line-addressable blob.
+     */
+    const fragment = anchorOf(record.locator);
+    if (/\/blob\//.test(source) && record.locator && /:\d/.test(record.locator) && fragment) {
+      link.href = `${source}${fragment}`;
+      link.textContent = `View ${fragment} on GitHub \u2197`;
+      card.replaceChild(link, link);
     }
   }
   void edge;
