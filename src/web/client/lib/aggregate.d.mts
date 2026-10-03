@@ -1,0 +1,87 @@
+/**
+ * Types for the presentation-aggregation module. See `url-state.d.mts` for why
+ * these are declared rather than compiled.
+ */
+import type { ViewGraph, ViewEdge, RelationFamily, RelationshipType, EvidenceStatus } from '../../../web/view-model.ts';
+
+/** How a claim was written down, as far as its evidence shows. */
+export declare const DeclarationForm: Readonly<{
+  TableRow: 'table-row';
+  Prose: 'prose';
+  Unknown: 'unknown';
+}>;
+
+/** Canvas visible-object budget. A presentation limit, not a semantic threshold. */
+export declare const VISIBLE_OBJECT_BUDGET: number;
+
+/** Smallest fan worth putting on a plate; a single relationship always stays loose. */
+export declare const MIN_PLATE_SIZE: number;
+
+export declare function declarationForm(card: unknown): 'table-row' | 'prose' | 'unknown';
+
+/** Repository-relative file a claim was written in, from its evidence locator. */
+export declare function declaringPath(card: unknown): string;
+
+export interface SubgroupMember {
+  edgeId: string;
+  card: unknown;
+}
+
+/**
+ * Evidence-supported groups inside one fan, or `[]` when the evidence does not
+ * support any grouping. Conservative: a partially understood fan stays neutral.
+ */
+export declare function evidenceSubgroups(members: SubgroupMember[]): AggregateSubgroup[];
+
+/**
+ * An evidence-supported group inside a fan.
+ *
+ * Emitted only when the evidence supports it; `[]` otherwise.
+ */
+export interface AggregateSubgroup {
+  form: 'table-row' | 'prose';
+  /** The declaring file, shown as secondary text on the row. */
+  meta: string;
+  label: string;
+  memberEdgeIds: string[];
+}
+
+/** A neutral aggregate plate. Its label claims nothing beyond relation and count. */
+export interface AggregatePlate {
+  key: string;
+  relationshipType: RelationshipType;
+  family: RelationFamily;
+  status: EvidenceStatus;
+  label: string;
+  count: number;
+  memberEdgeIds: string[];
+  /** Empty unless the evidence supports naming groups. */
+  subgroups: AggregateSubgroup[];
+  expanded: boolean;
+}
+
+export interface Composition {
+  subjectId: string | undefined;
+  /** Relationships drawn individually rather than inside a plate. */
+  looseEdgeIds: string[];
+  plates: AggregatePlate[];
+  budget: number;
+  empty: boolean;
+}
+
+export interface AggregateOptions {
+  budget?: number;
+  edges?: ViewEdge[];
+  expandedAggregates?: Set<string>;
+}
+
+/**
+ * The composition the canvas draws.
+ *
+ * Deterministic under reordered input: fans are ranked by size then key, and
+ * every emitted list is sorted.
+ */
+export declare function buildComposition(view: ViewGraph, options?: AggregateOptions): Composition;
+
+/** The rows a plate shows when expanded, one per evidence-supported subgroup. */
+export declare function plateRows(plate: AggregatePlate): Array<{ label: string; meta: string; memberEdgeIds: string[] }>;
