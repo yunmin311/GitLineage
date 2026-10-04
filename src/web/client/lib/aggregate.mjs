@@ -39,6 +39,15 @@ export const VISIBLE_OBJECT_BUDGET = 12;
  */
 export const MIN_PLATE_SIZE = 2;
 
+/**
+ * Member rows a plate lists before it states how many it is holding back.
+ *
+ * Six, because that is what the frozen design's own plate lists before offering to
+ * expand. The number is a readability budget, not a semantic one: the plate's count
+ * is always the full count and every member stays reachable.
+ */
+export const PLATE_MEMBER_ROWS = 6;
+
 /** How a claim was written down, as far as the evidence shows. */
 export const DeclarationForm = Object.freeze({
   /** A row of a table, e.g. a markdown pipe row. */
@@ -158,26 +167,93 @@ export function evidenceSubgroups(members) {
 }
 
 /**
- * Turns a set of relationships into a neutral plate.
+ * Turns a set of relationships into a plate.
  *
  * Subgroups are named only where the evidence supports it, and the plate's own label
  * says nothing beyond the relation and the count. A single member is never plated:
  * one is not a group.
  */
-function aggregateFan(fan, memberIds, evidence, expanded, plates) {
+function aggregateFan(fan, memberIds, evidence, expanded, plates, describe) {
   const members = [...memberIds].sort().map((edgeId) => ({
     edgeId,
     card: (evidence[edgeId] || [])[0],
   }));
-  plates.push({
-    key: fan.key,
+  const subgroups = evidenceSubgroups(members);
+  const base = {
     relationshipType: fan.relationshipType,
     family: fan.family,
     status: fan.status,
-    label: `${fan.relationLabel} ×${memberIds.length}`,
     count: memberIds.length,
     memberEdgeIds: [...memberIds].sort(),
-    subgroups: evidenceSubgroups(members),
+  };
+
+  /*
+   * One tie per group.
+   *
+   * The frozen design's own key says an aggregate is "one tie per group", so a fan
+   * the evidence genuinely splits into two groups is two aggregates, not one
+   * aggregate with two lines of text inside it. That is also what makes the default
+   * paint composed: a single collapsed card in a data zone authored for real mass
+   * read as an empty page, while two plates carry the evidence into the space the
+   * design reserved for them.
+   *
+   * This is still presentation-only. The grouping key is where and how the claim was
+   * written down, never the relationship's type, family, status or direction, and a
+   * fan whose evidence does not support a split stays one neutral plate below.
+   */
+  if (subgroups.length > 1) {
+    for (const group of subgroups) {
+      if (group.memberEdgeIds.length < MIN_PLATE_SIZE) continue;
+      const key = `${fan.key}::${group.form}`;
+      plates.push({
+        ...base,
+        key,
+        label: group.label,
+        count: group.memberEdgeIds.length,
+        memberEdgeIds: [...group.memberEdgeIds].sort(),
+        members: [...group.memberEdgeIds].sort().map(describe),
+        meta: group.meta,
+        form: group.form,
+        // A group plate is already named for its evidence, so it does not carry a
+        // nested set of the same groups again.
+        subgroups: [],
+        // Open by default, so the first paint carries the claims rather than a bare
+        // count. Still capped: `expanded` is the reader asking for the rest.
+        open: true,
+        expanded: expanded.has(key),
+      });
+    }
+    // A group too small to be a plate of its own stays reachable as a neutral plate,
+    // so no member is left without a way in.
+    const grouped = new Set(subgroups.flatMap((group) => group.memberEdgeIds));
+    const leftover = [...memberIds].filter((id) => !grouped.has(id)).sort();
+    if (leftover.length >= MIN_PLATE_SIZE) {
+      plates.push({
+        ...base,
+        key: fan.key,
+        label: `${fan.relationLabel} ×${leftover.length}`,
+        count: leftover.length,
+        memberEdgeIds: leftover,
+        members: leftover.map(describe),
+        meta: '',
+        form: null,
+        subgroups: [],
+        open: true,
+        expanded: expanded.has(fan.key),
+      });
+    }
+    return;
+  }
+
+  plates.push({
+    ...base,
+    key: fan.key,
+    label: `${fan.relationLabel} ×${memberIds.length}`,
+    members: [...memberIds].sort().map(describe),
+    meta: subgroups.length === 1 ? subgroups[0].meta : '',
+    form: subgroups.length === 1 ? subgroups[0].form : null,
+    subgroups,
+    open: true,
     expanded: expanded.has(fan.key),
   });
 }
@@ -256,6 +332,33 @@ export function buildComposition(view, options = {}) {
    */
   let remaining = Math.max(0, budget - promoted.size);
 
+  /*
+   * How a member is named in a plate row.
+   *
+   * The peer entity's own label, with the evidence locator beside it, so a row says
+   * which claim it is rather than repeating the plate's count. The locator is the
+   * evidence's, verbatim: it is the reader's way back to the line that made the
+   * claim, so it must not be reformatted into something vaguer.
+   */
+  const subjectId = view.subject && view.subject.id;
+  const edgeById = new Map((options.edges || []).map((edge) => [edge.id, edge]));
+  const labelOf = new Map((view.nodes || []).map((node) => [node.id, node.label]));
+  const describe = (edgeId) => {
+    const edge = edgeById.get(edgeId);
+    const peerId = edge ? (edge.source === subjectId ? edge.target : edge.source) : subjectId;
+    const card = (evidence[edgeId] || [])[0];
+    return {
+      edgeId,
+      label: (peerId && labelOf.get(peerId)) || (edge && edge.label) || edgeId,
+      meta: (card && typeof card.locator === 'string' && card.locator) || '',
+      // The member's own evidence status, so a row states its own strength instead of
+      // inheriting the plate's. Read from the relationship, never inferred.
+      status: edge ? edge.status : 'DECLARED',
+      // Canonical direction, carried through so a renderer never has to infer it.
+      directed: edge ? edge.directed : false,
+    };
+  };
+
   for (const fan of fans) {
     const remainder = fan.edgeIds.filter((id) => !promoted.has(id));
     const forced = remainder.filter((id) => forceAggregate.has(id));
@@ -264,7 +367,7 @@ export function buildComposition(view, options = {}) {
       // Aggregate what was forced, and let the rest of the fan fall through to the
       // budget: a fan can be part homogeneous and part varied.
       if (forced.length >= MIN_PLATE_SIZE) {
-        aggregateFan(fan, forced, evidence, expanded, plates);
+        aggregateFan(fan, forced, evidence, expanded, plates, describe);
         continue;
       }
       looseEdgeIds.push(...forced);
@@ -278,7 +381,7 @@ export function buildComposition(view, options = {}) {
       continue;
     }
 
-    aggregateFan(fan, rest, evidence, expanded, plates);
+    aggregateFan(fan, rest, evidence, expanded, plates, describe);
   }
 
   /*
@@ -308,18 +411,43 @@ export function buildComposition(view, options = {}) {
 }
 
 /**
- * The rows a plate shows when expanded.
+ * The rows a plate shows: one per member relationship, each individually
+ * selectable.
  *
- * Rows are content of their plate: they are not re-drawn as spokes from the
+ * Rows are content of their plate. They are never re-drawn as spokes from the
  * subject, which is what would turn one aggregate back into fourteen long lines.
+ *
+ * The member's own name and locator are shown rather than a group summary,
+ * because a group summary is not a way in: with subgroups as rows, only the first
+ * member of each group was reachable and the other twelve could not be selected at
+ * all. Naming the members is what makes every one of them checkable.
+ *
+ * A plate shows a bounded number of rows and states how many it is holding back,
+ * rather than growing without limit: an uncapped list is how a plate becomes the
+ * thing the design was avoiding.
  */
 export function plateRows(plate) {
-  if (!plate.subgroups.length) {
-    return [{ label: plate.label, meta: '', memberEdgeIds: plate.memberEdgeIds }];
-  }
-  return plate.subgroups.map((group) => ({
-    label: group.label,
-    meta: group.meta,
-    memberEdgeIds: group.memberEdgeIds,
+  if (plate.open === false) return [];
+  const members = plate.members && plate.members.length
+    ? plate.members
+    : plate.memberEdgeIds.map((edgeId) => ({ edgeId, label: '', meta: '' }));
+  const shown = plate.expanded ? members : members.slice(0, PLATE_MEMBER_ROWS);
+  return shown.map((member) => ({
+    edgeId: member.edgeId,
+    label: member.label,
+    meta: member.meta || '',
+    status: member.status,
+    directed: member.directed,
+    // A row is exactly one relationship, so the row carries one id. That is what
+    // lets a reader select a specific claim rather than a group.
+    memberEdgeIds: [member.edgeId],
   }));
+}
+
+/** How many member rows a plate is holding back, so the plate can say so. */
+export function plateHiddenRows(plate) {
+  if (plate.open === false) return 0;
+  const total = plate.members && plate.members.length ? plate.members.length : plate.memberEdgeIds.length;
+  if (plate.expanded) return 0;
+  return Math.max(0, total - PLATE_MEMBER_ROWS);
 }

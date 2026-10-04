@@ -24,7 +24,11 @@
   --sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --drawer-w: 384px;
   --bar-h: 52px;
-  --status-h: 34px;
+  /*
+   * The Drawer's width is no longer a column: it is derived from the reserved gutter
+   * at the current frame scale and published as `--gutter-w` by the renderer, so the
+   * Drawer occupies exactly the space the frame held open for it.
+   */
 }
 
 * { box-sizing: border-box; }
@@ -160,33 +164,84 @@ a { color: inherit; }
 
 /* --------------------------------------------------------------- explorer */
 
+/*
+ * The explorer is a column that fills what is left of the viewport.
+ *
+ * The stage used to be `calc(100vh - --bar-h - --status-h)` with the status height
+ * written down as a constant. The status line is a wrapping flex row of real counts,
+ * so at a narrower viewport it became two lines, outgrew the constant, and pushed the
+ * bottom of the stage past the fold: a scrollbar on a canvas that is not supposed to
+ * scroll, with the bottom band below it. Laying the three regions out as a flex
+ * column makes the stage take the remainder, so the status line can wrap and the band
+ * stays on screen whatever the counts say.
+ */
+#explorer {
+  display: flex; flex-direction: column;
+  height: calc(100vh - var(--bar-h));
+  min-height: 0;
+}
+
 .status-line {
   display: flex; gap: 12px; flex-wrap: wrap; align-items: baseline;
+  flex: 0 0 auto;
   font-size: 11px; color: var(--ink-2); padding: 8px 18px;
   border-bottom: 1px solid var(--rule); background: var(--paper);
 }
 .status-line .sep { color: var(--rule-2); }
 .status-line .cache-hit { color: var(--verified); font-weight: 700; }
 
-.explorer-body { display: grid; grid-template-columns: minmax(0, 1fr) 0; }
-.explorer-body.with-drawer { grid-template-columns: minmax(0, 1fr) var(--drawer-w); }
+.explorer-body { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; position: relative; }
 
 /*
- * The right-hand side has exactly one owner.
+ * The Drawer does not take a column.
  *
- * The grid column is not enough on its own: `.legend` and `.layers-pop` are
- * absolutely positioned inside `.stage` and keep painting underneath the Drawer, so
- * the rail showed both at once. They switch out while the Drawer is open rather than
- * stacking beneath it.
+ * It used to, and the cost was invisible until the reader used it: opening it
+ * removed the context column and the bottom band from the page and narrowed the
+ * stage by its own width, so the SVG rescaled and the subject changed size and
+ * position at the exact moment someone chose to read a relationship. The camera
+ * invariants are about the scene not moving under the reader, and a layout that
+ * moves the scene is a camera change however the viewBox is spelled.
  */
 .explorer-body.with-drawer .legend,
 .explorer-body.with-drawer .layers-pop,
 .explorer-body.with-drawer .bundles,
-.explorer-body.with-drawer .lcol,
-.explorer-body.with-drawer .band { display: none !important; }
+.explorer-body.with-drawer .gutter { display: none !important; }
 
-.stage { position: relative; height: calc(100vh - var(--bar-h) - var(--status-h)); overflow: hidden; }
+/*
+ * The right-hand side has exactly one owner.
+ *
+ * `.legend` and `.layers-pop` are absolutely positioned and would keep painting
+ * underneath the Drawer, so the gutter showed both at once. They switch out while
+ * the Drawer is open rather than stacking beneath it, and the gutter rail does too:
+ * it is the other thing that lives in the Drawer's space, and two things claiming
+ * one column is how a reader ends up unsure which one they are reading. The context
+ * column and the bottom band deliberately stay -- they are the frame's own zones,
+ * not the right rail, and the frozen design keeps both while a relationship is read.
+ */
+.stage { position: relative; flex: 1 1 auto; min-height: 0; overflow: hidden; }
 .canvas { display: block; width: 100%; height: 100%; cursor: grab; }
+
+/*
+ * The authored frame's HTML layer.
+ *
+ * Sized and positioned in the frame's own world units, then transformed by exactly
+ * the scale and offset the SVG's `viewBox` applies, so an overlay lands on the same
+ * world coordinate as the geometry it annotates at every viewport. `--frame-scale`,
+ * `--frame-x` and `--frame-y` are written by the renderer from `frameTransform()`.
+ *
+ * `pointer-events: none` because this layer spans the whole frame: it must never
+ * intercept a click meant for the canvas underneath it. The controls that live in it
+ * opt back in.
+ */
+.frame {
+  position: absolute; left: 0; top: 0;
+  width: 1864px; height: 940px;
+  transform-origin: 0 0;
+  transform: translate(var(--frame-x, 0px), var(--frame-y, 0px)) scale(var(--frame-scale, 1));
+  pointer-events: none;
+  z-index: 4;
+}
+.frame > * { pointer-events: none; }
 
 /*
  * The `hidden` attribute is the client's only state signal for panels, and the
@@ -371,8 +426,26 @@ a { color: inherit; }
 .bundle-label { flex: 1; }
 .bundle-status { font-size: 9px; letter-spacing: 0.05em; color: var(--ink-4); }
 
-.legend { position: absolute; left: 16px; top: 16px; display: flex; gap: 13px; flex-wrap: wrap; font-family: var(--mono); font-size: 10px; color: var(--ink-3); background: var(--paper); padding: 5px 8px; border: 1px solid var(--rule); border-radius: 4px; z-index: 6; max-width: 60%; }
+.legend { position: absolute; left: 16px; top: 16px; display: flex; gap: 13px; flex-wrap: wrap; font-family: var(--mono); font-size: 10px; color: var(--ink-3); background: var(--paper); padding: 5px 8px; border: 1px solid var(--rule); border-radius: 4px; max-width: 60%; }
 .legend[hidden] { display: none; }
+
+/*
+ * The reserved right gutter.
+ *
+ * It exists so the Drawer has somewhere to go that is not the canvas. Left empty it
+ * was 316 units of nothing at the right edge of a frame whose whole argument is a
+ * composed three-zone surface, and the data zone read as unfinished rather than
+ * deliberate. What goes here is the honest negative: which lineage families this
+ * graph has none of, and why that is a fact about the data.
+ *
+ * One owner at a time. The Drawer replaces this rail rather than stacking on it.
+ */
+.gutter { position: absolute; left: 1548px; top: 128px; width: 316px; }
+.gutter[hidden] { display: none; }
+.gutter h6 { font-size: 9px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--ink-4); font-weight: 600; margin: 0 0 9px; }
+.gutter p { font-size: 10.5px; color: var(--ink-3); line-height: 1.6; margin: 0 0 10px; }
+.gutter .g-empty { display: flex; flex-wrap: wrap; gap: 4px 6px; margin-bottom: 12px; }
+.gutter .g-chip { font-family: var(--mono); font-size: 9.5px; color: var(--ink-4); border: 1px solid var(--rule-2); border-radius: 2px; padding: 2px 6px; }
 
 /*
  * Bundle representative cards.
@@ -394,6 +467,8 @@ a { color: inherit; }
 .bundle-card.is-open .bundle-card-box { stroke: var(--ink); stroke-width: 1.6; stroke-dasharray: none; }
 .bundle-card-count { font-family: var(--mono); font-size: 13px; font-weight: 700; fill: var(--ink); }
 .bundle-card-label { font-family: var(--mono); font-size: 10px; fill: var(--ink-4); }
+/* Why this plate is a group at all: the file the claims were written in. */
+.plate-subtitle { font-family: var(--mono); font-size: 9.5px; fill: var(--ink-4); }
 .bundles-note { font-size: 10px; color: var(--ink-4); margin: 6px 2px 4px; }
 
 /*
@@ -406,6 +481,22 @@ a { color: inherit; }
  */
 .plate-row-label { font-family: var(--mono); font-size: 11px; fill: var(--ink-2); }
 .plate-row-meta { font-family: var(--mono); font-size: 10px; fill: var(--ink-4); }
+/* The remainder is stated in words, not implied by a shorter list. */
+.plate-row-more { font-family: var(--mono); font-size: 10px; fill: var(--ink-4); }
+.plate-row-expand { font-family: var(--mono); font-size: 10px; fill: var(--ink-3); text-decoration: underline; text-underline-offset: 2px; }
+.bundle-card:hover .plate-row-expand { fill: var(--ink); }
+/*
+ * A row's own evidence strength, and its canonical direction.
+ *
+ * A plate groups by relation, so one fan can hold a VERIFIED claim and a DECLARED
+ * one. The mark lets a row be read on its own terms instead of borrowing the plate's
+ * status, and the arrow is drawn only for a directed relationship.
+ */
+.plate-row-status { fill: var(--ink-4); }
+.plate-row-status.st-VERIFIED { fill: var(--verified); }
+.plate-row-status.st-DECLARED { fill: var(--declared); }
+.plate-row-status.st-DETECTED { fill: var(--detected); }
+.plate-row-dir { fill: none; stroke: var(--ink-4); stroke-width: 1.2; }
 .plate-row-marker { fill: var(--surface-hi); stroke: var(--ink); stroke-width: 1; }
 /* Transparent and beneath the row's own text, so selecting a row never changes how
    the row looks. */
@@ -425,7 +516,7 @@ a { color: inherit; }
  * same as the census in the frozen design.
  */
 .lcol {
-  position: absolute; left: 46px; top: 128px; width: 496px; z-index: 4;
+  position: absolute; left: 46px; top: 128px; width: 496px;
   pointer-events: none;
 }
 .lcol[hidden] { display: none; }
@@ -469,7 +560,7 @@ a { color: inherit; }
  * readout.
  */
 .band {
-  position: absolute; left: 46px; top: 876px; width: 1456px; z-index: 4;
+  position: absolute; left: 46px; top: 876px; width: 1456px;
   display: flex; align-items: center; gap: 26px; flex-wrap: wrap;
   border-top: 1px solid var(--rule); padding-top: 12px;
 }
@@ -597,7 +688,26 @@ a { color: inherit; }
 
 /* ----------------------------------------------------------------- drawer */
 
-.drawer { border-left: 2px solid var(--ink); background: var(--surface); overflow-y: auto; height: calc(100vh - var(--bar-h) - var(--status-h)); }
+/*
+ * The Drawer: an overlay over the gutter the frame already reserved.
+ *
+ * Absolutely positioned inside `.stage` rather than a grid column, so opening it
+ * cannot resize the stage and therefore cannot rescale the canvas. It is sized in
+ * screen pixels, not world units, because its 10px type has to stay readable at a
+ * 1280 viewport where the frame itself has scaled to 0.69; scaling the Drawer with
+ * the frame would shrink the evidence the reader came for.
+ *
+ * `--gutter-w` is written by the renderer: the reserved gutter expressed in screen
+ * pixels at the current scale. Below the sheet breakpoint the Drawer becomes a
+ * full-width sheet instead, because there is no gutter left to occupy.
+ */
+.drawer {
+  position: absolute; right: 0; top: 0; bottom: 0;
+  width: var(--gutter-w, 372px);
+  min-width: 300px; max-width: 46vw;
+  border-left: 2px solid var(--ink); background: var(--surface);
+  overflow-y: auto; z-index: 20;
+}
 .drawer[hidden] { display: none; }
 .drawer-inner { padding: 16px 18px 40px; position: relative; }
 .drawer-close { position: absolute; top: 12px; right: 14px; font-family: var(--mono); font-size: 11px; color: var(--ink-4); background: transparent; border: 1px solid var(--rule-2); border-radius: 3px; padding: 2px 8px; }
@@ -687,14 +797,14 @@ a { color: inherit; }
   :root { --drawer-w: 100%; }
   .appbar-mid { flex-wrap: wrap; }
   .crumb-count { display: none; }
-  .explorer-body.with-drawer { grid-template-columns: minmax(0, 1fr); }
+  /* No gutter left to occupy: the Drawer becomes a sheet over the stage. */
   .drawer {
     position: fixed; inset: var(--bar-h) 0 0 auto; width: min(420px, 100%); height: auto;
-    z-index: 60;
+    max-width: none; min-width: 0; z-index: 60;
   }
   .drawer-scrim { display: block; position: fixed; inset: 0; background: rgba(23,21,15,0.18); border: 0; z-index: 55; }
   .drawer-scrim[hidden] { display: none; }
-  .stage { height: calc(100vh - var(--bar-h) - var(--status-h)); }
+  .stage { flex: 1 1 auto; min-height: 0; }
   .landing { padding: 44px 18px 40px; }
   .lede { font-size: 16px; }
   .bundles { max-width: calc(100% - 32px); }

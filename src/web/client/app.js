@@ -64,10 +64,10 @@ import {
   PHASES, SETTLED_PHASE, phaseAngle, phaseLabel, phaseTransition, isSettled,
   phaseIndex as dialPhaseIndex,
 } from './lib/phases.mjs';
-import { buildComposition, plateRows } from './lib/aggregate.mjs';
+import { buildComposition, plateRows, plateHiddenRows, PLATE_MEMBER_ROWS } from './lib/aggregate.mjs';
 import { Regime, regimeFor, partitionPeers, isHomogeneousFan } from './lib/regime.mjs';
 import {
-  FRAME, ZONES, subjectPosition, dataZonePositions, loosePositions, initialViewBox,
+  FRAME, ZONES, subjectPosition, dataZonePositions, loosePositions, initialViewBox, frameTransform,
 } from './lib/compose.mjs';
 import { DRAWABLE_CAPACITY } from './lib/regime.mjs';
 
@@ -618,9 +618,16 @@ function renderChrome(view) {
     ? `${view.subject.owner}/${view.subject.name}`
     : `${repo.owner}/${repo.name}`;
   $('crumb-rev').textContent = state.resolvedRevision.slice(0, 7);
-  $('crumb-count').textContent = view.bundledEdgeCount > 0
-    ? `${view.primaryEdgeCount} drawn · ${view.bundledEdgeCount} bundled`
-    : `${view.primaryEdgeCount} relationships`;
+  /*
+   * The app bar states the size of the graph, not the composition's internal split.
+   *
+   * It used to read `0 drawn · 14 bundled`, which is true of the view model's
+   * primary/bundled bookkeeping and useless to a reader: the canvas plainly shows
+   * eight named relationships, so "0 drawn" read as "nothing is here". The honest
+   * summary is the frozen design's own — how many relationships, how many verified.
+   */
+  $('crumb-count').textContent =
+    `${view.edgeCount} one-hop · ${view.statusCounts.VERIFIED} verified`;
   const open = $('open-source');
   open.href = view.subject.url || `https://github.com/${repo.owner}/${repo.name}`;
   $('repo-input').value = `${repo.owner}/${repo.name}`;
@@ -696,17 +703,67 @@ const PLATE_W = 184;
  */
 const PLATE_W_EXPANDED = 344;
 const PLATE_HEADER = 34;
+/** The line under a plate's title that names where the claim was written down. */
+const PLATE_SUBTITLE = 22;
 const PLATE_ROW = 26;
+
+/**
+ * Room for a row's evidence mark and its direction arrow, before the label starts.
+ *
+ * Measured, not guessed: the mark is 7 wide at a 12 inset and the arrow ends 4 past
+ * its own origin, so a 16-unit allowance put the label's first glyph underneath the
+ * arrow. Every row in the plate overprinted its own name, and the damage is
+ * invisible to a DOM check because both elements are present and correctly placed.
+ */
+const ROW_MARK_W = 26;
 
 /**
  * Plate height.
  *
- * A collapsed plate is its header plus the open affordance. An expanded one adds a
- * row per evidence-supported group. The collapsed height is deliberately larger than
- * a bare header so the plate reads as something you can open.
+ * A shut plate is its header plus the open affordance. An open one adds a row per
+ * listed member, plus a line when it is holding some back. A plate that knows which
+ * file declares it carries that as a subtitle, which costs a line and is the only
+ * place the reader is told that the grouping is about *where* the claim was written
+ * rather than what it claims.
+ *
+ * Every caller derives the height from this one function, so the reserved space and
+ * the drawn box cannot disagree -- which is what previously let a plate's rows sit
+ * outside its own border.
  */
-function plateHeight(rowCount) {
-  return PLATE_HEADER + (rowCount > 0 ? rowCount * PLATE_ROW : 14) + 12;
+function plateHeader(plate) {
+  return PLATE_HEADER + (plate.meta ? PLATE_SUBTITLE : 0);
+}
+
+function plateHeight(rowCount, hiddenRows = 0, hasSubtitle = false) {
+  const header = PLATE_HEADER + (hasSubtitle ? PLATE_SUBTITLE : 0);
+  const rows = rowCount + (hiddenRows > 0 ? 1 : 0);
+  return header + (rows > 0 ? rows * PLATE_ROW : 14) + 12;
+}
+
+/**
+ * Puts the frame's HTML layer through the SVG's own transform.
+ *
+ * The context column, the bottom band and the reserved gutter are authored in world
+ * units, exactly as the canvas geometry is. The browser scales the SVG to the viewport
+ * on its own; nothing scaled the overlays with it, so they were only ever correct at
+ * the one viewport whose scale happened to be about one. At 1280 wide the frame
+ * scaled to 0.69 and the band sat 180px below the fold with the legend beside it,
+ * which is a scrollbar the design never asked for.
+ *
+ * Also publishes the reserved gutter's width in screen pixels, because that is the
+ * space the Drawer is allowed to occupy. Sizing the Drawer from the same number is
+ * what keeps "the Drawer never moves anything" true at every viewport rather than
+ * only where the two happen to coincide.
+ */
+function applyFrameTransform(viewport) {
+  const stage = $('stage');
+  if (!stage) return;
+  const t = frameTransform(viewport);
+  stage.style.setProperty('--frame-scale', String(t.scale));
+  stage.style.setProperty('--frame-x', `${t.x}px`);
+  stage.style.setProperty('--frame-y', `${t.y}px`);
+  // The gutter is authored 316 units wide; that is how many screen pixels it is here.
+  stage.style.setProperty('--gutter-w', `${Math.round(ZONES.gutterWidth * t.scale)}px`);
 }
 
 /**
@@ -734,8 +791,8 @@ function authoredPositions(view, edges, composition) {
 
   // Plates first: their heights decide where the loose arc has room to sit.
   const plateEntries = composition.plates.map((plate) => {
-    const rows = plate.expanded ? plateRows(plate) : [];
-    return { height: plateHeight(rows.length) };
+    const rows = plateRows(plate);
+    return { height: plateHeight(rows.length, plateHiddenRows(plate), !!plate.meta) };
   });
   const plateSlots = dataZonePositions(plateEntries);
   composition.plates.forEach((plate, index) => {
@@ -762,7 +819,7 @@ function authoredPositions(view, edges, composition) {
   // for every plate blocked the right-hand column of the field and silently halved
   // how many peers the scene could show.
   const obstacles = composition.plates.map((plate, index) => {
-    const rows = plate.expanded ? plateRows(plate) : [];
+    const rows = plateRows(plate);
     const slot = plateSlots[index];
     const left = slot.x - PLATE_W / 2;
     const width = rows.length > 0 ? PLATE_W_EXPANDED : PLATE_W;
@@ -895,6 +952,60 @@ function renderContextColumn(view) {
 }
 
 /*
+ * The reserved right gutter.
+ *
+ * It says which lineage families this graph has none of, and why. That is the
+ * honest negative for the data zone: the frame reserves this space for a reason, and
+ * an empty column beside a real composition reads as something unfinished rather
+ * than as a considered edge. It states a fact about the data and never a gap in the
+ * analysis, and it is the one thing the Drawer replaces.
+ */
+function renderGutterRail(view) {
+  const gutter = $('gutter');
+  if (!gutter) return;
+  gutter.replaceChildren();
+
+  const present = new Set((view.edges || []).map((edge) => edge.family));
+  const expected = ['lineage', 'dependency', 'attribution', 'source-identity'];
+  const absent = expected.filter((family) => !present.has(family));
+
+  const heading = el('h6', { text: 'not on the canvas' });
+  gutter.append(heading);
+
+  if (absent.length > 0) {
+    const chips = el('div', { class: 'g-empty' });
+    for (const family of absent) {
+      chips.append(el('span', { class: 'g-chip', text: family.replace('-', ' ') }));
+    }
+    gutter.append(chips);
+    gutter.append(
+      el('p', {
+        text: `This repository declares none of these. That is a fact about the data, not a gap in the analysis.`,
+      }),
+    );
+  } else {
+    gutter.append(
+      el('p', {
+        text: 'Every lineage family this ontology knows about is present in the graph above.',
+      }),
+    );
+  }
+
+  // The naming rule, restated only when it is actually in force, so the gutter
+  // carries the same caveat the context column does rather than repeating it.
+  const shortened = view.nodes.filter((node) => node.label && node.label.length > 22).length;
+  if (shortened > 0) {
+    gutter.append(
+      el('p', {
+        text: `Identity is never dropped: ${shortened} shortened name${shortened === 1 ? '' : 's'} ${shortened === 1 ? 'is' : 'are'} in full in the tooltip and the Drawer.`,
+      }),
+    );
+  }
+
+  gutter.hidden = false;
+}
+
+/*
  * The bottom band.
  *
  * It carries the edge-treatment key, which a reader genuinely needs in order to
@@ -922,15 +1033,21 @@ function renderBottomBand(view) {
 
   // How this scene is composed, in words, derived from the composition itself so
   // it cannot claim a centrality the analysis did not establish.
+  //
+  // The counts, and only the counts. The regime's name used to lead this note, and it
+  // read "dense composition" on `nachocebey/is` -- a graph the eye reads as sparse --
+  // because the regime counts fan-out pressure rather than visible mass. A label that
+  // contradicts what is on screen is worse than no label, and the two numbers beside
+  // it already say everything the regime was standing in for.
   const composition = state.composition;
   if (composition && composition.regime) {
     const grouped = composition.plates.reduce((sum, plate) => sum + plate.count, 0);
     const plateNote = composition.plates.length > 0
-      ? ` \u00b7 ${composition.plates.length} plate${composition.plates.length === 1 ? '' : 's'} grouping ${grouped}`
+      ? ` · ${composition.plates.length} plate${composition.plates.length === 1 ? '' : 's'} grouping ${grouped}`
       : '';
     band.append(el('span', {
       class: 'band-note',
-      text: `${composition.regime} composition \u00b7 ${composition.direct.length} shown directly${plateNote}`,
+      text: `${composition.direct.length} shown directly${plateNote}`,
     }));
   }
 
@@ -1054,6 +1171,9 @@ function draw() {
     bounds.width = Math.max(bounds.width, position.x - PLATE_W / 2 + PLATE_W_EXPANDED - bounds.x);
   }
   const viewport = { width: canvas.clientWidth || 1200, height: canvas.clientHeight || 700 };
+  // The HTML overlays are authored in the frame's world units, so they are put
+  // through the same transform the SVG's viewBox applies. See `applyFrameTransform`.
+  applyFrameTransform(viewport);
   // First paint always frames the content. After that, only a dataset change may
   // move the camera: the refit gate is a single condition so "expanding an
   // aggregate recentres the scene" cannot come back unnoticed.
@@ -1163,21 +1283,19 @@ function draw() {
     // reappeared as loose edges.
     if (plate.count < 1) continue;
 
-    const rows = plate.expanded ? plateRows(plate) : [];
     /*
-     * Rows only ever appear on an expanded plate.
+     * Rows list the plate's members, one relationship each.
      *
-     * The fallback row exists for a plate the evidence cannot subdivide, so opening
-     * it shows what it holds rather than an empty box. It must not be drawn when
-     * collapsed, or the header is immediately followed by a line repeating its own
-     * text -- which is what the first screenshot showed.
+     * A group plate -- one whose evidence named it -- is open by default, so the
+     * default paint carries the real claims into the data zone rather than a bare
+     * count. A neutral plate stays shut until the reader opens it. Either way the
+     * list is capped and the plate states what it is holding back.
      */
-    const shownRows = !plate.expanded
-      ? []
-      : rows.length > 0
-        ? rows
-        : [{ label: plate.label, meta: '', memberEdgeIds: plate.memberEdgeIds }];
-    const height = plateHeight(shownRows.length);
+    const rows = plateRows(plate);
+    const hiddenRows = plateHiddenRows(plate);
+    const shownRows = rows;
+    const header = plateHeader(plate);
+    const height = plateHeight(shownRows.length, hiddenRows, !!plate.meta);
     // Widening grows to the right of the subject's tie, so the connection stays
     // anchored and the plate does not jump when it opens.
     const width = rows.length > 0 ? PLATE_W_EXPANDED : PLATE_W;
@@ -1211,8 +1329,15 @@ function draw() {
       rowMembers.includes(state.selectedEdgeId);
     // Selection raises the plate that owns it, never a row inside it.
     const plateTier = depthTier({ isSelected: ownsSelection });
+    /*
+     * `is-open` means "this plate is showing its rows", which is not the same as
+     * "this plate is showing every row". A plate capped at six says so and offers the
+     * rest; it is still open, and drawing it as a shut card would contradict the rows
+     * directly beneath its own header.
+     */
+    const isOpen = shownRows.length > 0;
     const group = svgEl('g', {
-      class: `bundle-card st-${plate.status}${plate.expanded ? ' is-open' : ''}${ownsSelection ? ' is-selected' : ''}`,
+      class: `bundle-card st-${plate.status}${isOpen ? ' is-open' : ''}${ownsSelection ? ' is-selected' : ''}`,
       role: 'button',
       tabindex: '0',
       'aria-label': `${plate.count} ${plate.relationshipType.replace(/_/g, ' ')} relationships, grouped`,
@@ -1238,30 +1363,83 @@ function draw() {
     group.append(
       svgEl('text', { x: left + 12, y: top + 22, class: 'bundle-card-count' }, [plate.label]),
     );
+    /*
+     * Where the claim was written down.
+     *
+     * A plate grouped by declaration form is making a claim about *evidence*, not
+     * about the relationship, and that is the one claim on this canvas a reader
+     * cannot infer from the shape. Naming the declaring file makes the grouping
+     * checkable at a glance, and it is the reason the group is allowed to exist.
+     *
+     * Only ever a place, never a category: "declared in" says where a claim was
+     * written, which is what the evidence supports. It never says what the claim
+     * means, so a reference cannot be read here as a dependency.
+     */
+    if (plate.meta) {
+      group.append(
+        svgEl('text', { x: left + 12, y: top + 40, class: 'plate-subtitle' }, [
+          truncate(`declared in: ${plate.meta}`, 54),
+        ]),
+      );
+    }
 
     // Rows are content of the plate. They stay flat: no depth, no shadow, and a
     // selected row is marked by its own solid ink rule rather than by rising.
     // Mono at 11px advances about 6.6px, at 10px about 6.0px. Measuring the meta
     // first lets the label take exactly the room that is left, instead of both
     // being truncated independently and overprinting in the middle.
-    const META_CHARS = 16;
+    const META_CHARS = 21;
     const metaWidth = rows.some((r) => r.meta) ? META_CHARS * 6.0 + 14 : 0;
-    const labelRoom = Math.max(8, Math.floor((width - 24 - metaWidth) / 6.6));
+    // The status mark, its direction arrow and their gap are measured rather than
+    // assumed, so a label can never start underneath them.
+    const MARK_W = ROW_MARK_W;
+    const labelRoom = Math.max(8, Math.floor((width - 24 - metaWidth - MARK_W) / 6.6));
 
     shownRows.forEach((row, index) => {
-      const rowY = top + PLATE_HEADER + index * PLATE_ROW;
+      const rowY = top + header + index * PLATE_ROW;
       const rowSelected = row.memberEdgeIds.includes(state.selectedEdgeId);
+      /*
+       * One `<g>` per row, so the row's own accessible name lives on the row rather
+       * than inside a `<text>`. A `<title>` nested in `<text>` becomes part of that
+       * element's text content, which put the full name and the full locator into the
+       * rendered string.
+       */
+      const item = svgEl('g', { class: 'plate-row', 'aria-hidden': 'true' });
+      item.append(svgEl('title', {}, [`${row.label}${row.meta ? ` \u00b7 ${row.meta}` : ''}`]));
       if (rowSelected) {
-        group.append(
+        item.append(
           svgEl('rect', {
             x: left + 6, y: rowY + 4, width: width - 12, height: PLATE_ROW - 6,
             class: 'plate-row-marker', 'aria-hidden': 'true',
           }),
         );
       }
-      group.append(
-        svgEl('text', { x: left + 12, y: rowY + 18, class: 'plate-row-label' }, [truncate(row.label, labelRoom)]),
+      /*
+       * The member's own evidence strength.
+       *
+       * A row that inherits its plate's status cannot be trusted on its own: a plate
+       * groups by relation, and one `references` fan can hold both a VERIFIED claim
+       * and a DECLARED one. The mark is read from the relationship, and the direction
+       * beside it is canonical, so a symmetric relationship shows no arrowhead.
+       */
+      const markX = left + 12;
+      item.append(
+        svgEl('rect', {
+          x: markX, y: rowY + 9, width: 7, height: 7,
+          class: `plate-row-status st-${row.status || plate.status}`, 'aria-hidden': 'true',
+        }),
       );
+      if (row.directed) {
+        item.append(
+          svgEl('path', {
+            d: `M ${markX + 14} ${rowY + 9.5} l 4 2.5 l -4 2.5`,
+            class: 'plate-row-dir', 'aria-hidden': 'true',
+          }),
+        );
+      }
+      const labelX = markX + MARK_W;
+      const label = svgEl('text', { x: labelX, y: rowY + 18, class: 'plate-row-label' }, [truncate(row.label, labelRoom)]);
+      item.append(label);
       /*
        * A row is selectable.
        *
@@ -1280,23 +1458,54 @@ function draw() {
         if (!first) return;
         selectEdge(first);
       });
-      group.append(rowHit);
+      item.append(rowHit);
       if (row.meta) {
-        group.append(
+        item.append(
           svgEl('text', { x: left + width - 12, y: rowY + 18, class: 'plate-row-meta', 'text-anchor': 'end' }, [
-            truncate(row.meta, META_CHARS),
+            truncate(compactLocator(row.meta), META_CHARS),
           ]),
         );
       }
+      group.append(item);
     });
+
+    /*
+     * What the plate is holding back, said out loud.
+     *
+     * A bounded list with a silent remainder is how relationships go missing: the
+     * plate claimed a count, showed fewer rows, and never said so. This states the
+     * remainder and offers the one action that reveals it, so the count and what is
+     * on screen can always be reconciled.
+     */
+    if (hiddenRows > 0) {
+      const moreY = top + header + shownRows.length * PLATE_ROW;
+      group.append(
+        svgEl('text', { x: left + 12, y: moreY + 18, class: 'plate-row-more' }, [
+          `${hiddenRows} more row${hiddenRows === 1 ? '' : 's'} in this plate`,
+        ]),
+      );
+      group.append(
+        svgEl('text', { x: left + width - 12, y: moreY + 18, class: 'plate-row-expand', 'text-anchor': 'end' }, [
+          'expand',
+        ]),
+      );
+      const moreHit = svgEl('rect', {
+        x: left, y: moreY + 2, width, height: PLATE_ROW - 4,
+        class: 'plate-row-hit', 'aria-hidden': 'true',
+      });
+      moreHit.addEventListener('click', (event) => {
+        event.stopPropagation();
+        toggleBundle(plate.key);
+      });
+      group.append(moreHit);
+    }
 
     const activate = (event) => {
       event.stopPropagation();
       // A click on a row selects that row; only the plate's own surface toggles.
       if (event.target && event.target.classList.contains('plate-row-hit')) return;
       toggleBundle(plate.key);
-    };
-    group.addEventListener('click', activate);
+    };    group.addEventListener('click', activate);
     group.addEventListener('keydown', (event) => {
       if (event.key === 'Enter' || event.key === ' ') activate(event);
     });
@@ -1412,6 +1621,7 @@ function draw() {
   renderBundles();
   renderLayersPop();
   renderContextColumn(view);
+  renderGutterRail(view);
   renderBottomBand(view);
   updateSearchCount();
 }
@@ -1435,6 +1645,35 @@ function toggleBundle(key) {
 
 function truncate(text, max) {
   return String(text).length > max ? `${String(text).slice(0, max - 1)}…` : String(text);
+}
+
+/**
+ * An evidence locator in the room a plate row actually has.
+ *
+ * Two shortenings, both of which throw away something the row does not need:
+ *
+ *   - `docs/plugins.md:20` becomes `plugins.md:20`. Truncated to sixteen characters
+ *     the original reads `docs/plugins.md…`, which throws away the line number -- the
+ *     only part that identifies the claim, and the part a reader needs in order to
+ *     check it. The directory goes before the line does.
+ *   - `.gitmodules -> submodule.boringssl.path` becomes `submodule.boringssl.path`.
+ *     Every row of a submodule plate carried the same prefix and the same truncated
+ *     tail, so sixteen rows of one plate all read `.gitmodules -> submod...` and none
+ *     of them said which submodule it was.
+ *
+ * Display only. The full locator stays on the row's tooltip and in the Drawer, so
+ * nothing is lost; this is about what fits, not about what exists.
+ */
+function compactLocator(locator) {
+  const text = String(locator || '');
+  const arrow = text.indexOf('→');
+  if (arrow >= 0) return text.slice(arrow + 1).trim();
+  const cut = text.lastIndexOf(':');
+  if (cut <= 0) return text;
+  const path = text.slice(0, cut);
+  const line = text.slice(cut + 1);
+  const slash = path.lastIndexOf('/');
+  return slash >= 0 ? `${path.slice(slash + 1)}:${line}` : text;
 }
 
 /**

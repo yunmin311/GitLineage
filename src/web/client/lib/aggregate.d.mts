@@ -17,6 +17,14 @@ export declare const VISIBLE_OBJECT_BUDGET: number;
 /** Smallest fan worth putting on a plate; a single relationship always stays loose. */
 export declare const MIN_PLATE_SIZE: number;
 
+/**
+ * Member rows a plate lists before it states how many it is holding back.
+ *
+ * A readability budget, never a semantic one: the plate's count is always the full
+ * count and every member stays selectable.
+ */
+export declare const PLATE_MEMBER_ROWS: number;
+
 export declare function declarationForm(card: unknown): 'table-row' | 'prose' | 'unknown';
 
 /** Repository-relative file a claim was written in, from its evidence locator. */
@@ -46,7 +54,20 @@ export interface AggregateSubgroup {
   memberEdgeIds: string[];
 }
 
-/** A neutral aggregate plate. Its label claims nothing beyond relation and count. */
+/** One member relationship as a plate row names it. */
+export interface PlateMember {
+  edgeId: string;
+  /** The peer entity's own label. */
+  label: string;
+  /** The evidence locator verbatim, e.g. `docs/plugins.md:20`. */
+  meta: string;
+  /** The member's own evidence status, read from the relationship. */
+  status: EvidenceStatus;
+  /** Canonical direction, carried through so no renderer has to infer it. */
+  directed: boolean;
+}
+
+/** A plate standing in for several relationships. Presentation-only, with a real count. */
 export interface AggregatePlate {
   key: string;
   relationshipType: RelationshipType;
@@ -55,8 +76,22 @@ export interface AggregatePlate {
   label: string;
   count: number;
   memberEdgeIds: string[];
-  /** Empty unless the evidence supports naming groups. */
+  /** Every member, named, so each one is individually reachable as a row. */
+  members: PlateMember[];
+  /** Declaring file or file count, when the evidence names one place. */
+  meta?: string;
+  /** The evidence form this plate was named for, or `null` for a neutral plate. */
+  form?: 'table-row' | 'prose' | null;
+  /** Empty unless the evidence supports naming groups inside this fan. */
   subgroups: AggregateSubgroup[];
+  /**
+   * Whether the plate lists its rows at all.
+   *
+   * A neutral plate starts shut and opens on request; a plate the evidence named
+   * starts open, so the first paint carries real claims rather than a bare count.
+   */
+  open: boolean;
+  /** Whether the plate lists every member rather than a capped few. */
   expanded: boolean;
 }
 
@@ -109,5 +144,19 @@ export interface AggregateOptions {
  */
 export declare function buildComposition(view: ViewGraph, options?: AggregateOptions): Composition;
 
-/** The rows a plate shows when expanded, one per evidence-supported subgroup. */
-export declare function plateRows(plate: AggregatePlate): Array<{ label: string; meta: string; memberEdgeIds: string[] }>;
+/**
+ * The rows a plate shows: one per member relationship, capped unless the plate is
+ * expanded, so each individual relationship is selectable rather than only the first
+ * member of each group.
+ */
+export declare function plateRows(plate: AggregatePlate): Array<{
+  edgeId: string;
+  label: string;
+  meta: string;
+  status: EvidenceStatus;
+  directed: boolean;
+  memberEdgeIds: string[];
+}>;
+
+/** How many member rows a plate is holding back, so the plate can state it. */
+export declare function plateHiddenRows(plate: AggregatePlate): number;

@@ -366,3 +366,37 @@ export function initialViewBox(viewport) {
     zoom,
   };
 }
+
+/**
+ * Where the authored frame lands inside a viewport.
+ *
+ * The canvas is an SVG carrying the frame as its `viewBox`, so the browser scales
+ * it with the default `xMidYMid meet`: one uniform factor, then the leftover
+ * space split evenly. This returns exactly that, so the HTML overlays can be put
+ * through the identical transform.
+ *
+ * It has to be the identical transform. The overlays -- the context column, the
+ * bottom band, the reserved gutter -- are authored in the same world units as the
+ * canvas geometry, and while they were positioned in raw pixels they silently
+ * assumed a scale of about one. At 1920 the assumption happened to hold and the
+ * frame looked composed; at 1280 the SVG shrank to 0.69 and the overlays did not,
+ * so the band fell 180px below the fold, the legend went with it, and the page
+ * gained a vertical scrollbar. Deriving both from one function is what keeps the
+ * authored composition intact at every viewport instead of only the one it was
+ * designed at.
+ */
+export function frameTransform(viewport) {
+  const vw = (viewport && viewport.width) || FRAME.width;
+  const vh = (viewport && viewport.height) || FRAME.height;
+  const scale = Math.min(vw / FRAME.width, vh / FRAME.height);
+  const safe = scale > 0 && Number.isFinite(scale) ? scale : 1;
+  return {
+    scale: safe,
+    // The centred remainder, matching `meet`. Negative only if the viewport is
+    // degenerate, and `Math.max(0, ...)` keeps a transform off a negative origin.
+    x: Math.max(0, (vw - FRAME.width * safe) / 2),
+    y: Math.max(0, (vh - FRAME.height * safe) / 2),
+    width: FRAME.width * safe,
+    height: FRAME.height * safe,
+  };
+}

@@ -101,3 +101,15 @@ export declare function loosePositions(
 
 /** The authored frame as a viewBox, scaled to the viewport. Not a content fit. */
 export declare function initialViewBox(viewport: { width: number; height: number }): { viewBox: string; zoom: number };
+
+/**
+ * Where the authored frame lands inside a viewport: the uniform scale the SVG's
+ * default `meet` behaviour applies, plus the centred remainder.
+ *
+ * The HTML overlays are put through this so they keep their authored positions at
+ * every viewport instead of only at the one whose scale happens to be about one.
+ */
+export declare function frameTransform(viewport: {
+  width: number;
+  height: number;
+}): { scale: number; x: number; y: number; width: number; height: number };

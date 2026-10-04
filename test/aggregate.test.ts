@@ -23,6 +23,8 @@ import {
   evidenceSubgroups,
   buildComposition,
   plateRows,
+  plateHiddenRows,
+  PLATE_MEMBER_ROWS,
 } from '../src/web/client/lib/aggregate.mjs';
 
 const FIXTURES = resolve(import.meta.dirname, '..', 'artifacts/acceptance');
@@ -88,44 +90,75 @@ test('a fan whose members are all singletons stays neutral', () => {
 
 // ------------------------------------------------- the real regression case
 
-test('obsidian-config: 14 references become one neutral plate, never 14 spokes', () => {
+test('obsidian-config: 14 references become grouped plates, never 14 spokes', () => {
   const view = viewOf(OBSIDIAN);
   const composition = buildComposition(view as never, { edges: visible(view as never) as never });
 
   assert.equal(composition.looseEdgeIds.length, 0, 'no reference may be drawn as its own spoke');
-  assert.equal(composition.plates.length, 1, 'the fan is one plate');
+  /*
+   * Two plates, not one.
+   *
+   * The frozen design's key calls an aggregate "one tie per group", and its own first
+   * paint for this repository shows the plugin table and the prose references as two
+   * separate group plates. A single plate whose rows were group *summaries* read as
+   * one undifferentiated block on the canvas and left twelve of the fourteen
+   * relationships unreachable, because a summary row can only ever select the first
+   * member it stands for.
+   */
+  assert.equal(composition.plates.length, 2, 'one tie per evidence-supported group');
+  assert.equal(composition.plates.reduce((n, p) => n + p.count, 0), 14, 'all fourteen are still on the canvas');
 
-  const plate = composition.plates[0]!;
-  assert.equal(plate.count, 14);
-  assert.equal(plate.relationshipType, 'references');
-  assert.equal(plate.memberEdgeIds.length, 14);
-  // The label states the relation and the count, and claims nothing else.
-  assert.equal(plate.label, 'references ×14');
-  for (const forbidden of ['DECLARED', 'plugin', 'prose', 'table', 'declared by', 'depends']) {
-    assert.equal(plate.label.includes(forbidden), false, `a neutral label must not claim "${forbidden}"`);
+  for (const plate of composition.plates) {
+    assert.equal(plate.relationshipType, 'references');
+    // Every member is named, with the real locator behind it.
+    assert.equal(plate.members.length, plate.count);
+    assert.ok(plate.members.every((m) => m.label.length > 0));
+    /*
+     * A *neutral* label claims only relation and count. A label the evidence named
+     * says where the claim was written, which is the whole point of it, so the
+     * vocabulary check applies to the neutral ones only -- otherwise it would forbid
+     * the honest answer.
+     */
+    if (plate.form !== null) {
+      assert.ok((plate.meta ?? '').length > 0, 'a named group must say where it was written');
+      continue;
+    }
+    for (const forbidden of ['DECLARED', 'plugin', 'prose', 'table', 'declared by', 'depends']) {
+      assert.equal(plate.label.includes(forbidden), false, `a neutral label must not claim "${forbidden}"`);
+    }
+    assert.match(plate.label, /references ×\d+$/);
+  }
+  // Neither label may escalate a reference into a dependency claim.
+  for (const plate of composition.plates) {
+    assert.doesNotMatch(plate.label, /depend/i, `${plate.label} must not read as a dependency`);
   }
 });
 
 test('obsidian-config: the 12/2 split comes from real evidence, not from the rule', () => {
   const view = viewOf(OBSIDIAN);
   const composition = buildComposition(view as never, { edges: visible(view as never) as never });
-  const plate = composition.plates[0]!;
 
   // The frozen design's groups, derived only from where each claim was written.
-  assert.equal(plate.subgroups.length, 2);
-  const table = plate.subgroups.find((g) => g.form === 'table-row')!;
-  const prose = plate.subgroups.find((g) => g.form === 'prose')!;
+  const table = composition.plates.find((p) => p.form === 'table-row')!;
+  const prose = composition.plates.find((p) => p.form === 'prose')!;
+  assert.ok(table && prose, 'both evidence forms are found');
+  assert.equal(table.label, 'Plugin-table references ×12');
+  assert.equal(prose.label, 'Prose references ×2');
   assert.equal(table.memberEdgeIds.length, 12);
   assert.equal(prose.memberEdgeIds.length, 2);
   assert.equal(table.meta, 'docs/plugins.md');
+  assert.equal(prose.meta, '2 files');
+  // Every member belongs to exactly one plate: the split partitions the fan.
   assert.deepEqual(
-    [...plate.subgroups.flatMap((g) => g.memberEdgeIds)].sort(),
-    [...plate.memberEdgeIds],
-    'every member belongs to exactly one subgroup',
+    [...composition.plates.flatMap((p) => p.memberEdgeIds)].sort(),
+    [...composition.drawnEdgeIds].filter((id) => composition.plates.some((p) => p.memberEdgeIds.includes(id))).sort(),
+    'the groups partition the fan with nothing dropped and nothing doubled',
   );
-  // The split is 12 in the plugin table and 2 written as prose, which is what
-  // the frozen design recorded.
-  assert.deepEqual([table.memberEdgeIds.length, prose.memberEdgeIds.length], [12, 2]);
+  assert.deepEqual(
+    [...table.memberEdgeIds, ...prose.memberEdgeIds].sort(),
+    composition.plates.reduce<string[]>((all, p) => all.concat(p.memberEdgeIds), []).sort(),
+    'every member is claimed once',
+  );
 });
 
 test('obsidian-config: every table subgroup member really is a table row', () => {
@@ -133,35 +166,63 @@ test('obsidian-config: every table subgroup member really is a table row', () =>
   const view = viewOf(OBSIDIAN);
   const evidence = view.evidenceByRelationship as Record<string, Array<Record<string, unknown>>>;
   const composition = buildComposition(view as never, { edges: visible(view as never) as never });
-  const table = composition.plates[0]!.subgroups.find((g) => g.form === 'table-row')!;
+  const table = composition.plates.find((p) => p.form === 'table-row')!;
+  const prose = composition.plates.find((p) => p.form === 'prose')!;
 
   for (const edgeId of table.memberEdgeIds) {
     const card = evidence[edgeId]![0]!;
     assert.match(String(card.observedText), /^\s*\|/, `${edgeId} is not a table row`);
     assert.equal(declaringPath(card), 'docs/plugins.md');
   }
-  for (const edgeId of composition.plates[0]!.subgroups.find((g) => g.form === 'prose')!.memberEdgeIds) {
+  for (const edgeId of prose.memberEdgeIds) {
     const card = evidence[edgeId]![0]!;
     assert.doesNotMatch(String(card.observedText), /^\s*\|/, `${edgeId} is not prose`);
   }
 });
 
-test('obsidian-config: expanding shows two rows, not fourteen spokes', () => {
+test('obsidian-config: a plate lists named members, bounded, and never re-spokes them', () => {
   const view = viewOf(OBSIDIAN);
   const edges = visible(view as never);
   const composition = buildComposition(view as never, { edges: edges as never });
-  const rows = plateRows(composition.plates[0]!);
-  assert.equal(rows.length, 2, 'expansion groups into evidence-supported rows');
-  for (const row of rows) {
-    assert.match(row.label, /references ×\d+$/);
+  const table = composition.plates.find((p) => p.form === 'table-row')!;
+
+  /*
+   * Rows are relationships, not group summaries.
+   *
+   * This is the whole point of the change. A summary row cannot be checked: it can
+   * only select the first member it stands for, so twelve of the fourteen claims in
+   * this graph had no way to be opened at all.
+   */
+  const capped = plateRows(table);
+  assert.equal(capped.length, PLATE_MEMBER_ROWS, 'a bounded list');
+  assert.equal(plateHiddenRows(table), 12 - PLATE_MEMBER_ROWS, 'and the remainder is stated out loud');
+  for (const row of capped) {
+    assert.equal(row.memberEdgeIds.length, 1, 'one relationship per row');
+    assert.ok(row.label.length > 0, 'the row names the peer');
+    assert.ok(table.memberEdgeIds.includes(row.edgeId));
   }
-  // Expanding changes what the plate shows, never the relationship set.
+  // Every locator is the real one, so any row can be checked against its source line.
+  assert.ok(
+    table.members.every((m) => /^docs\/plugins\.md:\d+$/.test(m.meta)),
+    'locators are the observed ones',
+  );
+
+  // Expanding lists every member and changes nothing about which relationships exist.
   const expanded = buildComposition(view as never, {
     edges: edges as never,
-    expandedAggregates: new Set([composition.plates[0]!.key]),
+    expandedAggregates: new Set([table.key]),
   });
-  assert.deepEqual(expanded.plates[0]!.memberEdgeIds, composition.plates[0]!.memberEdgeIds);
+  const expandedTable = expanded.plates.find((p) => p.key === table.key)!;
+  const full = plateRows(expandedTable);
+  assert.equal(full.length, 12, 'all twelve listed');
+  assert.equal(plateHiddenRows(expandedTable), 0);
+  // The Templater claim is the one the frozen design shows selected, so it has to be
+  // reachable by name and by line.
+  assert.ok(full.some((r) => r.label === 'SilentVoid13/Templater'), 'Templater is listed by name');
+  assert.ok(full.some((r) => r.meta === 'docs/plugins.md:20'), 'and its line is addressable');
+  assert.deepEqual(expandedTable.memberEdgeIds, table.memberEdgeIds);
   assert.equal(expanded.looseEdgeIds.length, 0, 'expansion must not re-spoke members');
+  assert.deepEqual(expanded.drawnEdgeIds, composition.drawnEdgeIds, 'the relationship set is unchanged');
 });
 
 test('obsidian-config: expansion does not move the camera or the composition', () => {

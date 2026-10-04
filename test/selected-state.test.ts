@@ -58,17 +58,35 @@ test('rows are selectable, which is what makes a selected row possible', () => {
   assert.match(body, /classList\.contains\('plate-row-hit'\)/);
 });
 
-test('a selected plate draws the selected tier, and a collapsed plate has no rows', () => {
+test('a selected plate draws the selected tier, and a shut plate has no rows', () => {
   const body = code(APP);
-  // Rows appear only on an expanded plate. The earlier version drew the header and
-  // then repeated the same text as its only row, so the first paint read
-  // `references x14` twice.
-  assert.match(body, /shownRows\s*=\s*!plate\.expanded/, 'rows only on an expanded plate');
-  assert.match(body, /const rows = plate\.expanded \? plateRows\(plate\) : \[\]/);
-  // Height follows the rows actually shown, not the requested ones.
-  assert.match(body, /plateHeight\(shownRows\.length\)/);
+  /*
+   * Rows come from `plateRows`, which returns nothing for a plate that is shut, and a
+   * plate with no members is not drawn at all.
+   *
+   * The height must follow the rows actually shown, the held-back line included. An
+   * earlier version measured only the listed rows, so a plate holding six back was
+   * drawn too short and its "N more rows" line sat outside its own border.
+   */
+  assert.match(body, /const rows = plateRows\(plate\)/);
+  assert.match(body, /const hiddenRows = plateHiddenRows\(plate\)/);
+  assert.match(body, /plateHeight\(shownRows\.length, hiddenRows, !!plate\.meta\)/);
   // A plate with no members is not drawn at all.
   assert.match(body, /if \(plate\.count < 1\) continue;/);
+  // And the plate says what it is holding back rather than implying a shorter list.
+  assert.match(body, /plate-row-more/);
+  assert.match(body, /more row\$\{/);
+  assert.match(body, /in this plate/);
+});
+
+test('a plate states where its claims were written, and only when it knows', () => {
+  const body = code(APP);
+  // The subtitle is the only place the reader is told the grouping is about evidence
+  // rather than about the relationship, so it is rendered from the plate's own meta.
+  assert.match(body, /if \(plate\.meta\) \{/);
+  assert.match(body, /declared in: \$\{plate\.meta\}/);
+  // "Declared in" is a place, never a category: it must not name what the claim means.
+  assert.doesNotMatch(body, /declared in: \$\{[^}]*relationshipType/);
 });
 
 // ------------------------------------------------------------ drawer order
@@ -147,14 +165,55 @@ test('no selection or Drawer path requests a camera change', () => {
   }
 });
 
-test('the rail has a single owner: the drawer replaces the summary, never stacks', () => {
+test('the rail has a single owner: the drawer replaces the gutter, never stacks', () => {
   const body = code(APP);
-  // The grid gains a column rather than overlaying a second panel.
-  assert.match(CSS, /\.explorer-body\.with-drawer\s*\{[^}]*grid-template-columns/);
-  // And the summary overlays are hidden while the drawer is open, so nothing shows
-  // through underneath it.
+  /*
+   * The Drawer overlays the gutter the frame already reserved.
+   *
+   * It used to be a grid column, and the cost was invisible until the reader used it:
+   * opening it deleted the context column and the bottom band and narrowed the stage
+   * by its own width, so the SVG rescaled and the subject changed size and position
+   * at the exact moment someone chose to read a relationship. A layout that moves the
+   * scene is a camera change however the viewBox is spelled, so the column is gone and
+   * the Drawer is positioned instead.
+   */
+  assert.doesNotMatch(CSS, /\.explorer-body\.with-drawer\s*\{[^}]*grid-template-columns/);
+  assert.match(CSS, /\.drawer\s*\{[^}]*position:\s*absolute/);
+  // Its width comes from the reserved gutter at the current frame scale, which is
+  // what makes "the Drawer never moves anything" true at every viewport.
+  assert.match(CSS, /\.drawer\s*\{[^}]*width:\s*var\(--gutter-w/);
+  assert.match(body, /--gutter-w/);
+  /*
+   * And the things that live in the Drawer's space switch out while it is open. The
+   * gutter rail is the one that matters: two things claiming one column is how a
+   * reader ends up unsure which one they are reading.
+   */
+  assert.match(CSS, /\.explorer-body\.with-drawer \.gutter/);
   assert.match(CSS, /\.explorer-body\.with-drawer \.legend/);
-  assert.match(CSS, /\.explorer-body\.with-drawer \.lcol/);
+  /*
+   * The context column and the bottom band deliberately stay. They are the frame's own
+   * zones rather than the right rail, and the frozen design keeps both while a
+   * relationship is being read -- so hiding them would be the regression.
+   */
+  assert.doesNotMatch(CSS, /\.explorer-body\.with-drawer[^{]*\.lcol/);
+  assert.doesNotMatch(CSS, /\.explorer-body\.with-drawer[^{]*\.band/);
+});
+
+test('the frame layer carries the overlays through the canvas own transform', () => {
+  // The context column, the band and the gutter are authored in world units, so they
+  // are put through the same scale and offset the SVG's viewBox applies. Positioned in
+  // raw pixels they were correct only at a viewport whose scale happened to be about
+  // one: at 1280 the canvas scaled to 0.69, the band stayed at world y 876, and it
+  // landed below the fold with a scrollbar on a canvas that must not scroll.
+  assert.match(CSS, /\.frame\s*\{[^}]*transform:\s*translate\(var\(--frame-x[^{]*scale\(var\(--frame-scale/);
+  assert.match(CSS, /\.frame\s*\{[^}]*width:\s*1864px/);
+  // It spans the whole frame, so it must never intercept a click meant for the canvas.
+  assert.match(CSS, /\.frame\s*\{[^}]*pointer-events:\s*none/);
+  const app = code(APP);
+  assert.match(app, /function applyFrameTransform\(/);
+  assert.match(app, /--frame-scale/);
+  assert.match(app, /--frame-x/);
+  assert.match(app, /--frame-y/);
 });
 
 test('long content is contained rather than overflowing the drawer', () => {

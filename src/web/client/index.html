@@ -113,6 +113,23 @@
           lineage relationship. The graph makes that structurally true.</p>
       </div>
     </div>
+
+    <!--
+      Landing footer.
+
+      It belongs to the landing, not to the shell. As a body-level sibling it also
+      sat below a full-viewport canvas, where its only effect was a scrollbar that
+      scrolled the canvas out of sight and a strip of marketing copy under a
+      provenance graph. The assurance it carries still matters, so it stays on the
+      page that makes the promise.
+    -->
+    <footer class="site-foot" id="site-foot">
+      <span class="mono">Deterministic analysis · public repositories · no repository code is ever executed</span>
+      <span class="foot-links mono">
+        <a href="/api/contract">Method</a>
+        <a href="/healthz">Status</a>
+      </span>
+    </footer>
   </section>
 
   <!-- ----------------------------------------------------------- explorer -->
@@ -153,11 +170,28 @@
 
         <svg id="canvas" class="canvas" role="img" aria-label="Repository lineage graph"></svg>
 
-        <!-- L: context column. Reference information, flat, never topology. -->
-        <div class="lcol" id="lcol" hidden></div>
+        <!--
+          The authored frame's HTML layer.
 
-        <!-- Bottom band: edge-treatment key. Deliberately no camera readout. -->
-        <div class="band" id="band" hidden></div>
+          The context column, the bottom band and the reserved right gutter are
+          authored in the same world units as the canvas geometry, so they are put
+          through the identical transform the SVG's viewBox applies. While they were
+          positioned in raw pixels they silently assumed a scale of about one, which
+          held at 1920 and failed everywhere else: at 1280 the band fell below the
+          fold and the page grew a scrollbar.
+        -->
+        <div class="frame" id="frame">
+          <!-- L: context column. Reference information, flat, never topology. -->
+          <div class="lcol" id="lcol" hidden></div>
+
+          <!-- Right gutter. Reserved, so the Drawer never has to move anything. -->
+          <div class="gutter" id="gutter" hidden></div>
+
+          <!-- Bottom band: edge-treatment key. Deliberately no camera readout. -->
+          <div class="band" id="band" hidden></div>
+
+          <div class="legend" id="legend" hidden></div>
+        </div>
 
         <div class="viewport-controls">
           <button class="vp-btn" id="zoom-out" aria-label="Zoom out">−</button>
@@ -166,24 +200,24 @@
         </div>
 
         <div class="bundles" id="bundles" hidden></div>
-        <div class="legend" id="legend" hidden></div>
-      </div>
 
-      <aside class="drawer" id="drawer" hidden aria-live="polite">
-        <div class="drawer-inner" id="drawer-inner"></div>
-      </aside>
-      <button class="drawer-scrim" id="drawer-scrim" hidden aria-label="Close evidence drawer"></button>
+        <!--
+          The Drawer, inside the stage and over the reserved gutter.
+
+          It used to be a grid column, which meant opening it deleted the context
+          column and the bottom band and shrank the canvas by its own width -- so the
+          subject changed size and position on screen at the moment the reader chose
+          to read something. Overlaying the gutter it was reserved for keeps the
+          canvas, and therefore the camera, untouched.
+        -->
+        <aside class="drawer" id="drawer" hidden aria-live="polite">
+          <div class="drawer-inner" id="drawer-inner"></div>
+        </aside>
+        <button class="drawer-scrim" id="drawer-scrim" hidden aria-label="Close evidence drawer"></button>
+      </div>
     </div>
   </section>
 </main>
-
-<footer class="site-foot" id="site-foot">
-  <span class="mono">Deterministic analysis · public repositories · no repository code is ever executed</span>
-  <span class="foot-links mono">
-    <a href="/api/contract">Method</a>
-    <a href="/healthz">Status</a>
-  </span>
-</footer>
 
 <script type="module" src="/app.js"></script>
 </body>
