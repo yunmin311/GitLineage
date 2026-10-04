@@ -16,6 +16,7 @@
     "start": "node build.mjs && node src/web/serve.ts --client dist/web",
     "test:live": "node test/live/run-live-validation.ts",
     "test:web": "node test/web/live-phase2-validation.ts",
+    "test:canvas": "node test/web/canvas-acceptance.ts",
     "shots": "node build.mjs && node test/web/screenshots.ts",
     "analyze": "node src/cli/main.ts analyze",
     "check": "npm run typecheck && npm test"
