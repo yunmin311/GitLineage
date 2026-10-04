@@ -23,6 +23,21 @@
 /** The authored world frame. Width includes the reserved right gutter. */
 export const FRAME = Object.freeze({ x: 0, y: 0, width: 1864, height: 940 });
 
+/*
+ * THE WORLD IS A FIXED SPATIAL COORDINATE SYSTEM.
+ *
+ * 1920 x 1720, never re-laid-out and never re-scaled to fit the viewport. The shell
+ * is what adapts; this is what it adapts around. A world point means the same place
+ * at every window size, and only the window over it moves -- which is the whole
+ * reason a narrower viewport can be a shell change rather than a second design.
+ *
+ * It replaced a 1864 x 940 frame that was *fitted* to the viewport. Fitting meant the
+ * world itself changed size with the window, so the same layout was a different
+ * composition at every width, and any screen-coordinate comparison between two
+ * viewports was really comparing two different worlds.
+ */
+export const WORLD = Object.freeze({ width: 1920, height: 1720 });
+
 /** Node plate metrics, shared with the renderer so placement cannot drift from drawing. */
 const NODE_W = 216;
 const NODE_H = 52;
@@ -32,21 +47,17 @@ const PLATE_W = 184;
 /**
  * The drawable field, derived once.
  *
- * The field runs from the context column's right edge to a plate's left edge, less
- * one node's half-width and the clearance. This was computed inline in three
- * places and each copy disagreed: 474, then 226, then 448 for the same field, and
- * the capacity figure followed whichever copy ran. It is derived here so the walls,
- * the pitch and the capacity cannot disagree.
+ * The field runs from the world's left composition margin to a plate's left edge,
+ * less one node's half-width and the clearance. It was computed inline in three
+ * places and each copy disagreed: 474, then 226, then 448 for the same field, and the
+ * capacity figure followed whichever copy ran. It is derived here so the walls, the
+ * pitch and the capacity cannot disagree.
  */
-/**
- * The field's capacity: how many peers it can hold without overlap.
- *
- * Derived from the zones, and the single number the composition budget spends, so
- * the two cannot disagree.
- */
-export function capacity() {
-  return fieldGeometry().capacity;
-}
+/** Clearance between neighbouring objects. */
+const FIELD_GAP = 16;
+
+/** Where the drawable field begins: the world's left margin, plus half a node and clearance. */
+const FIELD_LEFT = 48 + NODE_W / 2 + FIELD_GAP;
 
 export function fieldGeometry() {
   const HALF_W = NODE_W / 2;
@@ -59,92 +70,104 @@ export function fieldGeometry() {
   const maxPerRow = Math.max(1, Math.floor((bandWidth - NODE_W) / slotPitch) + 1);
   const floor = ZONES.bandTop - HALF_H - GAP;
   const ceiling = ZONES.dataTop - HALF_H - GAP;
-  const rowsBelow = Math.max(0, Math.floor((floor - (ZONES.subject.y + 104)) / (NODE_H + 22)) + 1);
-  const rowsAbove = Math.max(0, Math.floor((ZONES.subject.y - 104 - ceiling) / (NODE_H + 22)) + 1);
+  const pitch = NODE_H + 22;
+  // Rows are a real derivation, not a multiplication. `maxPerRow * (rowsAbove +
+  // rowsBelow)` was the capacity the budget spent while the placement filled rows
+  // outwards from the subject -- and those are different numbers, because the nearest
+  // row holds one peer rather than a full row. The budget said eighteen and the field
+  // held fourteen, so four real relationships were aggregated for no reason at all.
+  const distances = [];
+  for (let step = 1; distances.length < 16; step += 1) {
+    const below = ZONES.subject.y + 104 + (step - 1) * pitch;
+    if (below + HALF_H + GAP > floor) break;
+    distances.push(below);
+  }
+  for (let step = 1; distances.length < 16; step += 1) {
+    const above = ZONES.subject.y - 104 - (step - 1) * pitch;
+    if (above - HALF_H - GAP < ceiling) break;
+    distances.push(above);
+  }
+  distances.sort((a, b) => Math.abs(a - ZONES.subject.y) - Math.abs(b - ZONES.subject.y));
+  // Row widths grow with distance: a narrow row beside the subject, the full band
+  // further out. The mass widens away from the anchor instead of forming a rectangle.
+  const perRow = distances.map((_, index) => {
+    const t = distances.length === 1 ? 0 : index / (distances.length - 1);
+    return Math.max(1, Math.min(maxPerRow, 1 + Math.round(t * maxPerRow)));
+  });
   return {
     HALF_W, HALF_H, GAP,
     leftWall, rightWall, bandWidth,
     bandMid: (leftWall + rightWall) / 2,
     slotPitch, maxPerRow,
-    floor, ceiling,
-    capacity: maxPerRow * (rowsBelow + rowsAbove),
+    floor, ceiling, pitch,
+    distances, perRow,
+    capacity: perRow.reduce((sum, n) => sum + n, 0),
   };
 }
 
 /**
- * Distinct peers the authored field holds before anything overflows.
+ * Columns the authored field supports.
  *
- * Three columns by the number of rows between the subject's line and the bottom
- * band, plus a small allowance above. `grpc/grpc` draws eleven loose peers, and
- * this is derived from the geometry rather than guessed, because a wrong figure
- * here would let a real relationship be dropped without anyone noticing.
+ * Derived from the geometry rather than asserted beside it. It was a literal `2`, and
+ * it stayed 2 through a commit where `dataLeft` drifted right and the band quietly grew
+ * to three columns -- so the constant and the geometry disagreed and nothing said so.
+ *
+ * A function, not a module-level const: the geometry reads `ZONES`, and a const would
+ * evaluate it before `ZONES` is initialised.
  */
-// Two columns, because the band supports two: 474 units wide, and two 216-unit
-// nodes need 248 of pitch. A third would overlap, and a layout that overlaps is
-// not a layout.
-export const DRAWABLE_COLUMNS = 2;
+export function drawableColumns() {
+  return fieldGeometry().maxPerRow;
+}
 
-
+/**
+ * The field's capacity: how many peers it can hold without overlap.
+ *
+ * Derived from the zones, and the single number the composition budget spends, so
+ * the two cannot disagree.
+ */
+export function capacity() {
+  return fieldGeometry().capacity;
+}
 
 /** Node plate metrics, shared with the renderer so placement cannot drift from drawing. */
 /** Collapsed plate width, used to keep loose nodes clear of the data zone. */
-/** Clearance between neighbouring objects. */
-const FIELD_GAP = 16;
 
-/** Where the drawable field begins: the context column's right edge, plus clearance. */
-const FIELD_LEFT = 46 + 496 + NODE_W / 2 + FIELD_GAP;
-
-/**
- * How wide the field has to be for two columns.
- *
- * Two 216-unit nodes on a 248 pitch span 216 + 248. This was a hand-tuned constant
- * and it was six units short twice, which silently reduced the field to one column
- * and halved capacity. It is derived from the node metrics so it cannot drift.
- */
-const FIELD_BAND = NODE_W + (NODE_W + FIELD_GAP * 2);
-
-/** Zone anchors, taken from the frozen design. */
+/** Zone anchors, in world units, measured off the frozen design. */
 export const ZONES = Object.freeze({
-  contextLeft: 46,
-  contextTop: 128,
-  contextWidth: 496,
-  /*
-   * The subject's x is derived from the field's midpoint, so the columns straddle it
-   * and both sets of ties stay short. It was a literal and drifted 8 units when the
-   * walls moved. The y is authored outright and never moves with the content: an
-   * anchor that drifts with its graph is not an anchor.
-   */
-  /*
-   * The subject's y sits below the frame's midpoint, between the context column and
-   * the bottom band.
+  /**
+   * The subject is the only mass with weight, and it never moves with the data.
    *
-   * It was at 478 in a 940-tall frame, which put the mass on the upper half and left
-   * the lower half empty. The context column occupies the top-left, so the
-   * composition's mass belongs lower: the band is at 876, and this leaves room below
-   * the subject for the rows that widen away from it without crowding the band.
+   * Measured, not chosen: it is where the design puts it, left of centre, so the data
+   * mass reads as arriving *at* something rather than as a second column. It was a
+   * literal at 700 while `dataLeft` was 1050, which put the field at three columns and
+   * silently changed the composition's capacity.
    */
-  subject: { x: (FIELD_LEFT + FIELD_LEFT + FIELD_BAND) / 2, y: 560 },
-  /*
-   * The data zone, placed so the field between it and the context column holds two
-   * columns. See `fieldGeometry()`, which derives the walls from these zones; this
-   * is the input, not a second copy of the answer.
+  subject: { x: 530, y: 560 },
+  /**
+   * The data zone. Derived from the field's requirement rather than hand-tuned, so
+   * the walls, the pitch and the capacity cannot disagree.
    *
-   * A plate is 184 wide from its left edge, so the field's right wall is
-   * `dataLeft - 92 - 16`. The field's left wall is the context column's right edge
-   * plus a half-width and clearance, 666. Two 216-unit nodes need 248 of pitch, so
-   * the band must be 464 and `dataLeft` is 1222.
-   *
-   * The zone ends at 1402, well before the reserved gutter at 1548, so the Drawer
-   * still never moves anything.
+   * 786 is the design's own data-zone left edge. It is also what keeps the field at
+   * two columns: the field runs from the world's left margin to a plate's left edge,
+   * and a third 216-unit node on a 248 pitch would need 712 units where 506 exist.
    */
-  dataLeft: FIELD_LEFT + FIELD_BAND + PLATE_W / 2 + FIELD_GAP,
-  dataTop: 236,
-  dataWidth: 180,
-  bandTop: 876,
-  bandLeft: 46,
-  bandWidth: 1456,
+  dataLeft: 786,
+  dataTop: 200,
+  dataWidth: 480,
+  /**
+   * The bottom band, and the edge key that lives on it.
+   *
+   * At the bottom of the *authored composition*, not at the bottom of the world. The
+   * world is 1720 tall and the composition occupies the top of it, which is the
+   * headroom a reader pans into; putting the key 1600 units down would mean the one
+   * thing a reader needs in order to read the canvas is only findable by panning.
+   */
+  bandTop: 980,
+  bandLeft: 48,
+  bandWidth: 1400,
+  /** Where the Drawer's overlay is anchored. Never drawn on, never a placement target. */
   gutterLeft: 1548,
-  gutterWidth: 316,
+  gutterWidth: 372,
 });
 
 /**
@@ -239,15 +262,14 @@ export function loosePositions(count, slots, existing, reserved = []) {
   // The horizontal slide below therefore cannot move a node into a neighbouring
   // row, which is what keeps the count of overlaps at zero.
 
-  // The drawable field: between the context column and the data zone, and between
-  // the subject's upper allowance and the bottom band.
-  // The field runs from the right edge of the context column to the left edge of
-  // the data zone. The subject sits at 730, so this band is off-centre: it reaches
-  // further right of the subject than left of it. Rows are therefore centred on the
-  // subject and clipped by these walls, which is what gives the mass its shape.
-  // The context column occupies 46..542, so a node centred at 531 sat *inside* it
-  // and the census ran underneath the node. The wall clears the column's full
-  // right edge, not its midpoint.
+  // The drawable field: between the world's left margin and the data zone, and
+  // between the subject's upper allowance and the bottom band.
+  //
+  // The band runs 172..678 and the subject sits at 530, so it reaches further right
+  // of the subject than left of it: 148 units against 358. Rows are therefore centred
+  // on the *band* and clipped by its walls, which is what gives the mass its shape --
+  // centring them on the subject instead pushed every row's right-hand slot past the
+  // wall, where it was rejected, and each row silently held a single node.
 
 
   const positions = [];
@@ -261,42 +283,16 @@ export function loosePositions(count, slots, existing, reserved = []) {
    * are centred on the subject's x. The mass then reads as a constellation that
    * widens away from the anchor rather than as a table.
    */
-  const pitch = NODE_H + 22;
-  const perRow = [];
-  // Distances from the subject, nearest first. Below the subject's line comes
-  // first because that is where the eye goes; the allowance above is used last.
-  const distances = [];
-  for (let step = 1; step <= 8; step += 1) {
-    const below = subject.y + 104 + (step - 1) * pitch;
-    if (below + HALF_H + GAP <= floor) distances.push(below);
-  }
-  for (let step = 1; step <= 8; step += 1) {
-    const above = subject.y - 104 - (step - 1) * pitch;
-    if (above - HALF_H - GAP >= ceiling) distances.push(above);
-  }
-  // Nearest first, so the fill order is the reading order.
-  distances.sort((a, b) => Math.abs(a - subject.y) - Math.abs(b - subject.y));
-
   /*
-   * Row widths grow with distance: a narrow row beside the subject, the full band
-   * further out. The mass then widens away from the anchor instead of forming a
-   * rectangle.
+   * The row plan, taken from the geometry rather than recomputed here.
    *
-   * Rows are centred on the *band*, not on the subject. The subject sits at 730
-   * and the band runs 418..892, so centring on the subject pushed every row's
-   * right-hand slot outside the band, where the wall check rejected it and each
-   * row silently held a single node.
+   * This function used to build its own `distances` and `perRow`, and `fieldGeometry`
+   * used to build its own row count. Two derivations of the same shape meant the
+   * budget and the placement could disagree, and they did: the budget promised
+   * eighteen peers and the field placed fourteen. One plan, one answer.
    */
-  // Centre-to-centre distance that actually clears a neighbour. This must be the
-  // same arithmetic the collision test uses -- `NODE_W + GAP` is 232 while a node
-  // needs 248, so the old pitch left adjacent slots overlapping by one gap and the
-  // row could never hold more than one node.
-  const { slotPitch, maxPerRow, bandWidth, bandMid } = G;
-  for (let index = 0; index < distances.length; index += 1) {
-    const t = distances.length === 1 ? 0 : index / (distances.length - 1);
-    // Nearest rows hold one peer; outer rows fill to what the band allows.
-    perRow.push(Math.max(1, Math.min(maxPerRow, 1 + Math.round(t * maxPerRow))));
-  }
+  const { distances, perRow } = G;
+  const { slotPitch, bandMid } = G;
 
   const capacity = perRow.reduce((sum, n) => sum + n, 0);
   let overflowed = 0;
@@ -327,10 +323,10 @@ export function loosePositions(count, slots, existing, reserved = []) {
       /*
        * The authored field is full.
        *
-       * This is a composition limit, not a bug: the band is 474 units wide and two
-       * 216-unit nodes need 248 of pitch, and the usable height leaves five rows.
-       * That is a capacity of ten, so an eleven-peer graph is genuinely over the
-       * field's budget.
+       * This is a composition limit, not a bug, and it is a stated one: the band runs
+       * 172..678 at a 248 pitch, so a row holds two 216-unit nodes, and the rows widen
+       * with distance -- the nearest holds one peer and the outer rows hold two. That
+       * plan is `fieldGeometry().perRow` and its sum is `capacity()`.
        *
        * The node is not drawn loose. It is reported, so the caller can aggregate it
        * into a plate instead -- which is the mechanism that already exists and is
@@ -349,54 +345,89 @@ export function loosePositions(count, slots, existing, reserved = []) {
 }
 
 /**
- * The initial viewBox.
+ * The initial viewBox: the whole world, seen through a window of the viewport's size.
  *
- * The authored frame, not a fit. Fitting is what produced the bottom-heavy scene
- * with a large inactive upper area, because a two-object graph is tiny next to the
- * page and gets centred in it.
+ * The world is never scaled to fit. At zoom 1 one world unit is one CSS pixel, so a
+ * narrow viewport shows *less of the world* rather than a shrunken copy of all of it --
+ * which is what makes world coordinates comparable across window sizes at all. Fitting
+ * (the previous behaviour) meant the world itself changed size with the window, so the
+ * same layout was a different composition at every width.
+ *
+ * The window is centred on the world's horizontal midpoint and on the subject's own
+ * line, then clamped so it can never show past the world's edge. Panning and zooming
+ * are the reader's; nothing here is a content fit.
  */
 export function initialViewBox(viewport) {
-  const scale = Math.min(
-    (viewport.width || FRAME.width) / FRAME.width,
-    (viewport.height || FRAME.height) / FRAME.height,
-  );
-  const zoom = scale > 0 && Number.isFinite(scale) ? scale : 1;
+  const vw = Math.max(1, (viewport && viewport.width) || WORLD.width);
+  const vh = Math.max(1, (viewport && viewport.height) || WORLD.height);
+  // At zoom 1 the window is the viewport's own size in world units.
+  const width = Math.min(WORLD.width, vw);
+  const height = Math.min(WORLD.height, vh);
+  const centreX = WORLD.width / 2;
+  const centreY = ZONES.subject.y;
   return {
-    viewBox: `${FRAME.x} ${FRAME.y} ${FRAME.width} ${FRAME.height}`,
-    zoom,
+    viewBox: `${clamp(centreX - width / 2, 0, WORLD.width - width)} ${clamp(centreY - height / 2, 0, WORLD.height - height)} ${width} ${height}`,
+    zoom: 1,
+    world: WORLD,
   };
 }
 
+/** Keeps a value inside [min, max], so a window can never leave the world. */
+function clamp(value, min, max) {
+  if (!Number.isFinite(value)) return min;
+  if (max < min) return min;
+  return Math.min(Math.max(value, min), max);
+}
+
 /**
- * Where the authored frame lands inside a viewport.
+ * The viewBox for a camera position and zoom.
  *
- * The canvas is an SVG carrying the frame as its `viewBox`, so the browser scales
- * it with the default `xMidYMid meet`: one uniform factor, then the leftover
- * space split evenly. This returns exactly that, so the HTML overlays can be put
- * through the identical transform.
- *
- * It has to be the identical transform. The overlays -- the context column, the
- * bottom band, the reserved gutter -- are authored in the same world units as the
- * canvas geometry, and while they were positioned in raw pixels they silently
- * assumed a scale of about one. At 1920 the assumption happened to hold and the
- * frame looked composed; at 1280 the SVG shrank to 0.69 and the overlays did not,
- * so the band fell 180px below the fold, the legend went with it, and the page
- * gained a vertical scrollbar. Deriving both from one function is what keeps the
- * authored composition intact at every viewport instead of only the one it was
- * designed at.
+ * The window is the viewport's size divided by the zoom, which is the only definition
+ * that keeps a world unit the same physical size at every zoom level. It is then
+ * clamped inside the world, so "the reader cannot pan into nothing" is structural
+ * rather than a check somebody has to remember.
  */
-export function frameTransform(viewport) {
-  const vw = (viewport && viewport.width) || FRAME.width;
-  const vh = (viewport && viewport.height) || FRAME.height;
-  const scale = Math.min(vw / FRAME.width, vh / FRAME.height);
-  const safe = scale > 0 && Number.isFinite(scale) ? scale : 1;
+export function viewBoxFor(viewport, pan, zoom) {
+  const vw = Math.max(1, (viewport && viewport.width) || WORLD.width);
+  const vh = Math.max(1, (viewport && viewport.height) || WORLD.height);
+  const z = Number.isFinite(zoom) && zoom > 0 ? zoom : 1;
+  const width = Math.min(WORLD.width, vw / z);
+  const height = Math.min(WORLD.height, vh / z);
+  const x = clamp((pan && Number.isFinite(pan.x) ? pan.x : WORLD.width / 2) - width / 2, 0, WORLD.width - width);
+  const y = clamp((pan && Number.isFinite(pan.y) ? pan.y : ZONES.subject.y) - height / 2, 0, WORLD.height - height);
+  return { viewBox: `${x} ${y} ${width} ${height}`, x, y, width, height, zoom: z };
+}
+
+/** The world point currently at the centre of a window. */
+export function cameraCentre(viewBox) {
+  const parts = String(viewBox || '').split(/\s+/).map(Number);
+  if (parts.length < 4 || parts.some((n) => !Number.isFinite(n))) return null;
+  return { x: parts[0] + parts[2] / 2, y: parts[1] + parts[3] / 2 };
+}
+
+/**
+ * Where the world's HTML layer lands inside a viewport.
+ *
+ * The overlays are authored in world units and go through the identical transform the
+ * camera applies to the canvas, so an overlay always sits on the world coordinate it
+ * annotates. This is the same derivation `viewBoxFor` performs, expressed as a
+ * transform, because the overlays are HTML and the canvas is SVG.
+ */
+export function frameTransform(viewport, viewBox) {
+  const parts = String(viewBox || '').split(/\s+/).map(Number);
+  const vw = (viewport && viewport.width) || WORLD.width;
+  const vh = (viewport && viewport.height) || WORLD.height;
+  if (parts.length < 4 || parts.some((n) => !Number.isFinite(n)) || parts[2] <= 0) {
+    return { scale: 1, x: 0, y: 0, width: WORLD.width, height: WORLD.height };
+  }
+  const scale = vw / parts[2];
   return {
-    scale: safe,
-    // The centred remainder, matching `meet`. Negative only if the viewport is
-    // degenerate, and `Math.max(0, ...)` keeps a transform off a negative origin.
-    x: Math.max(0, (vw - FRAME.width * safe) / 2),
-    y: Math.max(0, (vh - FRAME.height * safe) / 2),
-    width: FRAME.width * safe,
-    height: FRAME.height * safe,
+    scale,
+    // The world's origin sits at world x of the window's left edge, on screen.
+    x: -parts[0] * scale,
+    y: -parts[1] * scale,
+    width: WORLD.width * scale,
+    height: WORLD.height * scale,
   };
 }
+

@@ -17,22 +17,24 @@
 
 <header class="appbar" id="appbar">
   <a class="brand" href="/">
-    <svg class="brand-mark" viewBox="0 0 16 16" aria-hidden="true"><circle cx="4" cy="12" r="2.2"/><circle cx="12" cy="4" r="2.2" class="mark-pig"/><path d="M4 12 L12 4"/></svg>
+    <span class="brand-mark" aria-hidden="true"></span>
     <span>GitLineage</span>
   </a>
+  <button class="rail-toggle" id="rail-toggle" aria-expanded="false" aria-controls="rail">Context</button>
   <div class="appbar-mid" id="appbar-mid" hidden>
-    <span class="crumb-sep">|</span>
-    <span class="mono crumb-repo" id="crumb-repo"></span>
-    <span class="mono crumb-rev" id="crumb-rev"></span>
-    <span class="mono crumb-count" id="crumb-count"></span>
-    <span class="mono cache-chip" id="cache-state"></span>
+    <span class="crumb-repo" id="crumb-repo"></span>
+    <span class="crumb-sep">/</span>
+    <span class="crumb-ctx" id="crumb-ctx">Focused constellation</span>
+    <span class="crumb-rev r-meta" id="crumb-rev"></span>
+    <span class="cache-chip r-meta" id="cache-state"></span>
   </div>
   <div class="appbar-right" id="appbar-right" hidden>
+    <span class="crumb-count r-meta opt" id="crumb-count"></span>
     <button class="icon-btn" id="search-btn" title="Search the graph (/)" aria-label="Search the graph">
       <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.2"/><path d="M10.2 10.2 L14 14"/></svg>
     </button>
     <button class="text-btn" id="layers-btn" aria-expanded="false">Layers</button>
-    <a class="text-btn mono" id="open-source" href="#" target="_blank" rel="noreferrer noopener">GitHub ↗</a>
+    <a class="text-btn" id="open-source" href="#" target="_blank" rel="noreferrer noopener">GitHub</a>
   </div>
 </header>
 
@@ -134,63 +136,60 @@
 
   <!-- ----------------------------------------------------------- explorer -->
   <section id="explorer" class="explorer" hidden>
-    <div class="status-line mono" id="status-line"></div>
+    <!--
+      The analysis instrument.
+
+      A strip, not a clock. Seven real server-reported phases on one line beside an
+      open arc: the arc is a partial trace with one segment per phase, and the
+      tracer sits on the segment the analysis has actually reached. There is no
+      closed dial, no sweeping hand and no percentage, because between two stages
+      there is nothing honest to interpolate.
+    -->
+    <div class="strip" id="strip" hidden>
+      <svg class="tracer" id="tracer" width="46" height="22" viewBox="0 0 46 22" role="img">
+        <g class="tracer-arc" id="tracer-arc"></g>
+        <circle class="tracer-dot" id="tracer-dot" r="3" />
+      </svg>
+      <div class="phases" id="phases"></div>
+    </div>
 
     <div class="explorer-body" id="explorer-body">
+      <!--
+        The context rail. A real grid column, not an overlay: an overlay can only
+        ever sit on top of the graph, so the graph has to be kept clear of it, and
+        at a narrow viewport there is nothing left to keep it clear of. As a column
+        the graph simply starts after it, and the legend lives here rather than
+        floating across the canvas.
+      -->
+      <aside class="rail" id="rail" aria-label="Context"></aside>
+
       <div class="stage" id="stage">
         <div class="overlay empty" id="empty" hidden>
           <p class="empty-head">No evidence-backed lineage found.</p>
-          <p class="mono empty-body" id="empty-body"></p>
-        </div>
-
-        <!--
-          Analysis progress. Steps are real server-reported phases, never a
-          percentage: the server only reports a phase it has actually reached.
-        -->
-        <div class="overlay progress" id="progress" hidden>
-          <div class="dial" id="dial" aria-hidden="true">
-            <div class="dial-face"></div>
-            <div class="dial-notches" aria-hidden="true"></div>
-            <div class="dial-arm"></div>
-            <div class="dial-hub"></div>
-          </div>
-          <ol class="phases" id="phases"></ol>
-          <p class="mono progress-label" id="progress-label"></p>
-          <p class="mono progress-note" id="progress-note">
-            This page stays shareable while the analysis runs.
-          </p>
-          <p class="mono progress-job" id="progress-job"></p>
+          <p class="r-meta empty-body" id="empty-body"></p>
         </div>
 
         <div class="overlay failure" id="failure" hidden>
           <p class="failure-head" id="failure-head">Could not analyse this repository.</p>
-          <p class="mono failure-body" id="failure-body"></p>
+          <p class="r-meta failure-body" id="failure-body"></p>
           <button class="d-action" id="retry-analysis" type="button" hidden>Try again</button>
         </div>
 
         <svg id="canvas" class="canvas" role="img" aria-label="Repository lineage graph"></svg>
 
         <!--
-          The authored frame's HTML layer.
+          The world's HTML layer.
 
-          The context column, the bottom band and the reserved right gutter are
-          authored in the same world units as the canvas geometry, so they are put
-          through the identical transform the SVG's viewBox applies. While they were
-          positioned in raw pixels they silently assumed a scale of about one, which
-          held at 1920 and failed everywhere else: at 1280 the band fell below the
-          fold and the page grew a scrollbar.
+          Authored in the same world units as the canvas geometry and put through
+          the identical transform the camera applies, so an overlay lands on the
+          world coordinate it annotates at every zoom.
         -->
         <div class="frame" id="frame">
-          <!-- L: context column. Reference information, flat, never topology. -->
-          <div class="lcol" id="lcol" hidden></div>
-
-          <!-- Right gutter. Reserved, so the Drawer never has to move anything. -->
-          <div class="gutter" id="gutter" hidden></div>
-
-          <!-- Bottom band: edge-treatment key. Deliberately no camera readout. -->
+          <!--
+            Bottom band: the edge key, on the world rather than in the shell, so it
+            sits with the composition instead of colliding with a rail at some width.
+          -->
           <div class="band" id="band" hidden></div>
-
-          <div class="legend" id="legend" hidden></div>
         </div>
 
         <div class="viewport-controls">
@@ -200,21 +199,19 @@
         </div>
 
         <div class="bundles" id="bundles" hidden></div>
-
-        <!--
-          The Drawer, inside the stage and over the reserved gutter.
-
-          It used to be a grid column, which meant opening it deleted the context
-          column and the bottom band and shrank the canvas by its own width -- so the
-          subject changed size and position on screen at the moment the reader chose
-          to read something. Overlaying the gutter it was reserved for keeps the
-          canvas, and therefore the camera, untouched.
-        -->
-        <aside class="drawer" id="drawer" hidden aria-live="polite">
-          <div class="drawer-inner" id="drawer-inner"></div>
-        </aside>
-        <button class="drawer-scrim" id="drawer-scrim" hidden aria-label="Close evidence drawer"></button>
       </div>
+
+      <!--
+        The Drawer: the third column of the shell.
+
+        It shares one rail with the graph's reserved gutter, and at the frozen
+        breakpoint it becomes an overlay on that same gutter. Either way the world
+        never moves, so reading a relationship cannot relocate the scene.
+      -->
+      <aside class="drawer" id="drawer" hidden aria-live="polite">
+        <div class="drawer-inner" id="drawer-inner"></div>
+      </aside>
+      <button class="drawer-scrim" id="drawer-scrim" hidden aria-label="Close evidence drawer"></button>
     </div>
   </section>
 </main>

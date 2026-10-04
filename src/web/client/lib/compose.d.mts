@@ -4,31 +4,30 @@
  */
 import type { ViewGraph, LayoutSlot } from '../../../web/view-model.ts';
 
-/** The authored world frame, in world units. Includes the reserved right gutter. */
 /**
- * Columns the authored band supports.
- *
- * Two, and that is a geometric limit rather than a preference: the band between the
- * context column and the data zone is 474 units wide and two 216-unit nodes need
- * 248 of centre-to-centre pitch, so three would not fit. Extra capacity is taken
- * from height instead.
+ * The retired authored frame. Kept only so a diagnostic can name what it replaced;
+ * nothing places geometry against it and no viewport scales to it any more.
  */
-export declare const DRAWABLE_COLUMNS: number;
-
 export declare const FRAME: Readonly<{ x: number; y: number; width: number; height: number }>;
 
-/** Zone anchors, taken from the frozen design. */
+/**
+ * The world: a fixed spatial coordinate system.
+ *
+ * Never re-laid-out and never re-scaled to fit. A world point means the same place at
+ * every window size; only the window over it moves. The shell adapts around this.
+ */
+export declare const WORLD: Readonly<{ width: number; height: number }>;
+
+
+/** Zone anchors, in world units. The rail and Drawer are shell columns and reserve none. */
 export declare const ZONES: Readonly<{
-  contextLeft: number;
-  contextTop: number;
-  contextWidth: number;
   subject: { x: number; y: number };
   /**
    * Left edge of the data zone.
    *
    * Derived from the field requirement rather than hand-tuned: the field needs
-   * `NODE_W + slotPitch` for two columns, and the zone is that far from the
-   * context column plus a plate's width. It was a constant and it was short twice.
+   * `NODE_W + slotPitch` for two columns, and the zone is that far from the world's
+   * left margin plus a plate's width. It was a constant and it was short twice.
    */
   dataLeft: number;
   dataTop: number;
@@ -58,8 +57,18 @@ export interface FieldGeometry {
   maxPerRow: number;
   floor: number;
   ceiling: number;
+  /** Row-to-row pitch between placement rows. */
+  pitch: number;
+  /** Row centres from the subject, nearest first: the fill order. */
+  distances: number[];
+  /** How many peers each of those rows holds, widening with distance. */
+  perRow: number[];
+  /** `perRow` summed. The one number the composition budget spends. */
   capacity: number;
 }
+
+/** Columns the field supports, derived from its own geometry. */
+export declare function drawableColumns(): number;
 
 export declare function fieldGeometry(): FieldGeometry;
 
@@ -99,17 +108,36 @@ export declare function loosePositions(
   reserved?: Array<{ x: number; y: number; hw?: number; hh?: number }>,
 ): PlacementResult;
 
-/** The authored frame as a viewBox, scaled to the viewport. Not a content fit. */
-export declare function initialViewBox(viewport: { width: number; height: number }): { viewBox: string; zoom: number };
-
 /**
- * Where the authored frame lands inside a viewport: the uniform scale the SVG's
- * default `meet` behaviour applies, plus the centred remainder.
+ * The opening window onto the world: a viewport-sized window at zoom 1, centred on the
+ * world's midpoint and the subject's line, then clamped inside the world.
  *
- * The HTML overlays are put through this so they keep their authored positions at
- * every viewport instead of only at the one whose scale happens to be about one.
+ * The world is never scaled to fit. A narrow viewport shows less of the world rather
+ * than a shrunken copy of all of it.
  */
-export declare function frameTransform(viewport: {
+export declare function initialViewBox(viewport: {
   width: number;
   height: number;
-}): { scale: number; x: number; y: number; width: number; height: number };
+}): { viewBox: string; zoom: number; world: Readonly<{ width: number; height: number }> };
+
+/** The window for a camera centre and zoom, clamped so it cannot leave the world. */
+export declare function viewBoxFor(
+  viewport: { width: number; height: number },
+  pan: { x: number; y: number } | undefined,
+  zoom: number | undefined,
+): { viewBox: string; x: number; y: number; width: number; height: number; zoom: number };
+
+/** The world point at the centre of a window, or null if the viewBox is unusable. */
+export declare function cameraCentre(viewBox: string | null | undefined): { x: number; y: number } | null;
+
+/**
+ * Where the world's HTML layer lands inside a viewport.
+ *
+ * The same mapping the SVG's `viewBox` performs, expressed as a transform, because the
+ * overlays are HTML and the canvas is SVG. Both are put through this one derivation so
+ * an overlay always sits on the world coordinate it annotates.
+ */
+export declare function frameTransform(
+  viewport: { width: number; height: number },
+  viewBox: string | null | undefined,
+): { scale: number; x: number; y: number; width: number; height: number };

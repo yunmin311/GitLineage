@@ -1,12 +1,12 @@
 /**
- * The analysis dial.
+ * The analysis tracer.
  *
- * The dial is the one place in the client that reports work in progress, so it is
- * held to three rules: it names only phases the analyser really reaches, it moves
- * to a notch and stops, and it says nothing it cannot show. These tests pin the
- * phase vocabulary, the arm's geometry -- which is what decides whether the arm
- * rests *on* a notch or swings past it -- and the absence of the decorative
- * treatments the frozen design rejects.
+ * The tracer is the one place in the client that reports work in progress, so it is
+ * held to four rules: it names only phases the analyser really reaches, it rests *on*
+ * the segment for the current phase, its shape cannot be read as a clock, and it says
+ * nothing it cannot show. These tests pin the phase vocabulary, the arc geometry --
+ * which is what decides whether the tracer lands on a segment or between two of them --
+ * and the absence of the decorative treatments the frozen design rejects.
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -16,9 +16,14 @@ import { resolve } from 'node:path';
 import {
   PHASES,
   SETTLED_PHASE,
-  DIAL_SWEEP_DEG,
-  ARM_EASE_MS,
-  phaseAngle,
+  TRACER_SWEEP_DEG,
+  TRACER_STEP_DEG,
+  TRACER_ARC,
+  TRACER_EASE_MS,
+  phaseStartAngle,
+  phaseEndAngle,
+  arcSegment,
+  tracerPoint,
   phaseIndex,
   phaseLabel,
   phaseTransition,
@@ -64,15 +69,15 @@ function functionBody(name: string): string {
 
 // ------------------------------------------------------------ phase vocabulary
 
-test('the dial names the phases the analyser reaches, plus the settled one', () => {
-  assert.deepEqual([...PHASES], [...VISIBLE_PHASES, 'complete'], 'the dial reads the canonical order');
-  assert.equal(PHASES[PHASES.length - 1], SETTLED_PHASE, 'the arm must have somewhere to rest');
-  // A failed analysis is an outcome, not a point on a progress dial.
-  assert.equal(PHASES.includes('failed'), false, 'failure is reported in words, not as a notch');
+test('the tracer names the phases the analyser reaches, plus the settled one', () => {
+  assert.deepEqual([...PHASES], [...VISIBLE_PHASES, 'complete'], 'the tracer reads the canonical order');
+  assert.equal(PHASES[PHASES.length - 1], SETTLED_PHASE, 'the tracer must have somewhere to rest');
+  // A failed analysis is an outcome, not a point on a progress tracer.
+  assert.equal(PHASES.includes('failed'), false, 'failure is reported in words, not as a segment');
   assert.equal(VISIBLE_PHASES.includes('complete'), false, 'the server does not report completion as a step');
 });
 
-test('every notch has a plain-language label and no phase is unlabelled', () => {
+test('every segment has a plain-language label and no phase is unlabelled', () => {
   for (const phase of PHASES) {
     assert.equal(typeof phaseLabel(phase), 'string', `${phase} is labelled`);
     assert.ok(phaseLabel(phase).length > 0, `${phase} has a label`);
@@ -95,98 +100,138 @@ test('an unrecognised phase reads as the start, never as finished', () => {
   assert.equal(isSettled('complete'), true);
 });
 
-// ------------------------------------------------------------------ arm motion
+// --------------------------------------------------------------- tracer motion
 
-test('the arm sweeps a fixed arc with one notch per phase', () => {
-  assert.equal(DIAL_SWEEP_DEG, 150, 'the sweep is a half turn, not a gauge');
-  assert.equal(phaseAngle(0), -DIAL_SWEEP_DEG / 2, 'the first phase starts the sweep');
-  assert.equal(phaseAngle(PHASES.length - 1), DIAL_SWEEP_DEG / 2, 'the settled phase ends it');
+test('the tracer sweeps a fixed open arc with one segment per phase', () => {
+  assert.equal(TRACER_SWEEP_DEG, 110, 'the sweep is open by construction, not a closed dial');
+  assert.equal(TRACER_SWEEP_DEG < 360, true, 'the arc must not close into a ring');
+  assert.equal(TRACER_STEP_DEG, TRACER_SWEEP_DEG / PHASES.length, 'one segment per phase, derived');
 
-  const angles = PHASES.map((_, at) => phaseAngle(at));
-  assert.equal(new Set(angles).size, angles.length, 'every phase has its own notch');
-  for (let i = 1; i < angles.length; i += 1) {
-    assert.ok(angles[i]! > angles[i - 1]!, 'the arm only ever moves forward through the analysis');
+  const starts = PHASES.map((_, at) => phaseStartAngle(at));
+  assert.equal(new Set(starts).size, starts.length, 'every phase has its own segment');
+  for (let i = 1; i < starts.length; i += 1) {
+    assert.ok(starts[i]! > starts[i - 1]!, 'the tracer only ever moves forward through the analysis');
   }
-  // Indices outside the dial clamp to the ends rather than throwing mid-render.
-  assert.equal(phaseAngle(-3), -DIAL_SWEEP_DEG / 2);
-  assert.equal(phaseAngle(99), DIAL_SWEEP_DEG / 2);
+  // The arc's bulge belongs at the bottom, so the middle of the sweep is 90 degrees in
+  // SVG space (y grows downward).
+  assert.ok(Math.abs(90 - (starts[0]! + starts[starts.length - 1]! + TRACER_STEP_DEG) / 2) < 1e-9,
+    'the sweep is centred on the bottom of the arc');
+
+  // Indices outside the arc clamp to the ends rather than throwing mid-render.
+  assert.equal(phaseStartAngle(-3), phaseStartAngle(0));
+  assert.equal(phaseStartAngle(99), phaseStartAngle(PHASES.length - 1));
+});
+
+test('segments are adjacent arcs, so no phase owns a gap', () => {
+  for (let at = 0; at < PHASES.length - 1; at += 1) {
+    // Within a rounding step: the two are the same angle computed from different
+    // expressions, and demanding bit equality would pin the arithmetic rather than
+    // the geometry.
+    assert.ok(Math.abs(phaseEndAngle(at) - phaseStartAngle(at + 1)) < 1e-9,
+      `segment ${at} ends where segment ${at + 1} begins`);
+  }
+  const first = arcSegment(0);
+  const last = arcSegment(PHASES.length - 1);
+  assert.match(first, /^M [\d.]+ [\d.]+ A /, 'each segment is a real elliptical arc, not a polyline');
+  assert.match(last, /^M [\d.]+ [\d.]+ A /);
+  // The two ends differ: a closed dial would render these as the same point.
+  const ends = PHASES.map((_, at) => {
+    const d = arcSegment(at);
+    const [, x, y] = /A [\d.]+ [\d.]+ 0 0 1 ([\d.]+) ([\d.]+)$/.exec(d) ?? [];
+    return `${x},${y}`;
+  });
+  assert.notEqual(ends[0], ends[ends.length - 1], 'the arc is open: its ends are not joined');
+  assert.equal(new Set(ends).size, ends.length, 'each segment ends on its own point');
+});
+
+test('the tracer rests on the segment it reports, not on a seam', () => {
+  for (let at = 0; at < PHASES.length; at += 1) {
+    const point = tracerPoint(at);
+    const mid = (phaseStartAngle(at) + phaseEndAngle(at)) / 2;
+    const rad = (mid * Math.PI) / 180;
+    const expectedX = TRACER_ARC.cx + TRACER_ARC.r * Math.cos(rad);
+    const expectedY = TRACER_ARC.cy + TRACER_ARC.r * Math.sin(rad);
+    assert.ok(Math.abs(point.x - expectedX) < 1e-6, `phase ${at} x is the arc's own radius`);
+    assert.ok(Math.abs(point.y - expectedY) < 1e-6, `phase ${at} y is the arc's own radius`);
+    // The midpoint angle strictly inside the segment, which is the whole difference
+    // between resting on a mark and resting on the boundary between two.
+    assert.ok(mid > phaseStartAngle(at) && mid < phaseEndAngle(at), `phase ${at} is inside its own segment`);
+  }
+  // Consecutive tracers are distinct positions, so progress is visible as travel.
+  const points = PHASES.map((_, at) => JSON.stringify(tracerPoint(at)));
+  assert.equal(new Set(points).size, points.length);
 });
 
 test('a re-render at the same phase produces no transition', () => {
-  // The client polls repeatedly; restarting the easing on every poll would make
-  // the arm twitch, which reads as instability rather than as progress.
+  // The client polls repeatedly; restarting the animation on every poll would make the
+  // tracer twitch, which reads as instability rather than as progress.
   assert.equal(phaseTransition('collecting', 'collecting'), null);
   assert.equal(phaseTransition('complete', 'complete'), null);
   assert.equal(phaseTransition(undefined, undefined), null);
 
   const move = phaseTransition('queued', 'resolving');
   assert.ok(move, 'a real phase change must transition');
-  assert.equal(move.ms, ARM_EASE_MS);
+  assert.equal(move.ms, TRACER_EASE_MS);
   assert.equal(move.from, phaseIndex('queued'));
   assert.equal(move.to, phaseIndex('resolving'));
 });
 
 // -------------------------------------------------------------------- geometry
 
-test('the arm pivots on the hub, so it lands on a notch instead of swinging past it', () => {
-  const arm = cssRule('.dial-arm');
-  // `transform-origin: 50% 100%` is the arm's own lower edge. Anchoring the arm
-  // with `top: 50%` puts that edge 29.5px above the dial's centre, so the origin
-  // falls on the arm's middle and the arm swings through the centre like a clock
-  // hand -- seen in Chromium resting at the lower right of the ring, its tip past
-  // the notch it was meant to stop on. Anchoring it with `bottom: 50%` is what
-  // makes the origin the hub, and the tip then lands on the notch every time.
-  assert.match(arm, /bottom:\s*50%/, 'the arm hangs from the hub');
-  assert.equal(/\btop:\s*50%/.test(arm), false, 'the arm must not be anchored by its top');
-  assert.match(arm, /transform-origin:\s*50% 100%/, 'the pivot is the arm\'s lower edge');
-  // The arm reaches exactly as far as the notch ring, so its tip meets a dot.
-  assert.match(arm, /height:\s*var\(--notch-r\)/, 'the arm stops where the notches sit');
-  assert.match(cssRule('.dial'), /--notch-r:\s*calc\(var\(--dial-size\)/, 'the ring radius is one value');
+test('the renderer places every segment and the tracer from the arc\'s own geometry', () => {
+  const body = functionBody('renderTracer');
+  assert.match(body, /host\.childElementCount !== PHASES\.length/, 'one segment per phase, rebuilt only if needed');
+  assert.match(body, /arcSegment\(at\)/, 'a segment is drawn from the shared geometry');
+  assert.match(body, /tracerPoint\(index\)/, 'the tracer rests on the shared geometry');
+  assert.match(body, /classList\.toggle\('is-done'/, 'passed segments are marked');
 
-  const notches = cssRule('.dial-notch');
-  assert.match(notches, /rotate\(var\(--notch-a\)\)\s*translateY\(/,
-    'a notch orbits the centre at the arm\'s own angle');
-  assert.match(notches, /translateY\(calc\(-1 \* var\(--notch-r\)\)\)/, 'and at the arm\'s own reach');
-  // The dot is centred on the dial's centre before it is pushed out, so the
-  // rotation turns about the pivot rather than about the dot itself.
-  assert.match(notches, /margin:\s*-3px 0 0 -3px/);
+  // renderPhases drives it, so the arc cannot quietly go stale.
+  assert.match(functionBody('renderPhases'), /renderTracer\(tracer, index\)/);
+  assert.match(SHELL, /class="tracer-arc"/, 'the shell carries the segment host');
+  assert.match(SHELL, /class="tracer-dot"/, 'and the tracer itself');
 });
 
-test('the renderer builds one notch per phase from the arm\'s own angles', () => {
-  const body = functionBody('renderNotches');
-  assert.match(body, /host\.childElementCount !== PHASES\.length/, 'one dot per phase, rebuilt only if needed');
-  assert.match(body, /phaseAngle\(at\)/, 'a notch and the arm that stops on it share one angle');
-  assert.match(body, /is-done|classList\.toggle/, 'passed notches are marked');
-
-  // renderPhases drives it, so the notches cannot quietly go stale.
-  assert.match(functionBody('renderPhases'), /renderNotches\(dial, index\)/);
-  assert.match(SHELL, /class="dial-notches"/, 'the shell carries the notch host');
-  assert.match(SHELL, /class="dial-face"/, 'the ring the notches sit on');
-  assert.match(SHELL, /class="dial-arm"/, 'the arm');
-  assert.match(SHELL, /class="dial-hub"/, 'the pivot the arm turns about');
+test('the phases sit on one row beside the arc, not stacked over the canvas', () => {
+  const strip = cssRule('.strip');
+  assert.match(strip, /display:\s*flex/, 'the instrument is a row');
+  assert.match(strip, /min-height:\s*var\(--strip-h\)/, 'and its height is one token');
+  const phases = cssRule('.phases');
+  assert.match(phases, /display:\s*flex/, 'the phases are a row');
+  assert.match(phases, /flex:\s*1/, 'which shares the strip rather than floating above it');
+  // A list would put the seven phases in a column, which is what pushed them over the
+  // canvas before.
+  assert.equal(/display:\s*list-item/.test(code(APP_CSS)), false, 'the phases are not list items');
 });
 
-// ----------------------------------------------------------- decorative guards
+test('the shell carries no dial: no face, no arm, no hub', () => {
+  // Comments are stripped first: the shell's own commentary explains why the clock was
+  // retired, and a test that failed on its own explanation would be a bad test.
+  const markup = SHELL.replace(/<!--[\s\S]*?-->/g, '');
+  assert.equal(/dial/i.test(markup), false, 'the clock is gone from the shell');
+  assert.equal(/dial-/.test(code(APP_CSS)), false, 'and from the stylesheet');
+  assert.equal(/installDialTestStepper/.test(APP_SOURCE), false, 'and so is the dial test hook');
+  assert.match(APP_SOURCE, /tracer-test/, 'the tracer keeps a test hook under its own name');
+});
 
-test('the dial uses no gradient, blur, glow or looping animation', () => {
+test('the tracer uses no gradient, blur, glow or looping animation', () => {
   const declared = code(APP_CSS);
   assert.equal(/(^|[;{\s])(repeating-)?(linear|radial|conic)-gradient\(/.test(declared), false,
     'no gradient may be declared in the client stylesheet');
   assert.equal(/filter:\s*blur/.test(declared), false, 'no blur');
-  assert.equal(/@keyframes/.test(declared), false, 'nothing in the client loops');
-  assert.equal(/animation:\s*[^;]+;/.test(declared), false, 'no looping or fake-progress animation');
-
-  // The only easing on the dial is the arm's, and it stops when the phase does.
-  assert.match(cssRule(".dial[data-moving='true'] .dial-arm"), /transition:\s*transform 420ms/);
+  // The only animation is the tracer's single arrival pulse, which is declared once and
+  // applied by a class rather than by a keyframe on a moving part.
+  const animations = declared.match(/@keyframes\s+([\w-]+)/g) ?? [];
+  assert.deepEqual(animations, ['@keyframes tracer-arrive'], 'the only keyframe is the tracer arriving');
+  assert.equal(/animation:\s*[^;]*infinite/.test(declared), false, 'nothing loops');
+  assert.match(cssRule('.tracer-dot'), /fill:\s*var\(--accent\)/, 'the tracer is the one accent mark');
   assert.match(code(APP_CSS), /@media \(prefers-reduced-motion: reduce\)/,
-    'reduced motion is honoured, so the arm arrives at once');
-  // Under reduced motion the arm still moves to the notch; only the travel is cut.
+    'reduced motion is honoured, so the tracer arrives at once');
   assert.match(code(APP_CSS.replace(/\s+/g, ' ')),
-    /@media \(prefers-reduced-motion: reduce\) \{\s*\.dial\[data-moving='true'\] \.dial-arm \{ transition: none;/,
+    /\.tracer-dot\.is-moving \{ animation: none;/,
     'the phase must stay readable without motion');
 });
 
-test('the dial says phases, never percentages', () => {
+test('the tracer says phases, never percentages', () => {
   const body = functionBody('renderPhases');
   assert.equal(/%/.test(body.replace(/\s+/g, ' ')), false,
     'the renderer must not compute or print a percentage');

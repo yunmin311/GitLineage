@@ -61,13 +61,14 @@ import { evidenceSourceUrl, SIMILARITY_DISCLAIMER } from './lib/evidence-links.m
 import { nodePrimitive, nodePrimitiveRadius, depthTier, depthClass, depthOffset, depthShadowClass } from './lib/primitives.mjs';
 import { RefitTrigger, shouldRefit } from './lib/camera.mjs';
 import {
-  PHASES, SETTLED_PHASE, phaseAngle, phaseLabel, phaseTransition, isSettled,
-  phaseIndex as dialPhaseIndex,
+  PHASES, SETTLED_PHASE, arcSegment, tracerPoint, phaseLabel, phaseTransition, isSettled,
+  phaseIndex as tracerPhaseIndex,
 } from './lib/phases.mjs';
 import { buildComposition, plateRows, plateHiddenRows, PLATE_MEMBER_ROWS } from './lib/aggregate.mjs';
 import { Regime, regimeFor, partitionPeers, isHomogeneousFan } from './lib/regime.mjs';
 import {
-  FRAME, ZONES, subjectPosition, dataZonePositions, loosePositions, initialViewBox, frameTransform,
+  WORLD, ZONES, subjectPosition, dataZonePositions, loosePositions, initialViewBox, viewBoxFor,
+  frameTransform,
 } from './lib/compose.mjs';
 import { DRAWABLE_CAPACITY } from './lib/regime.mjs';
 
@@ -222,66 +223,69 @@ function showWorking() {
   setHidden($('drawer'), true);
   setHidden($('drawer-scrim'), true);
   $('explorer-body').classList.remove('with-drawer');
-  setHidden($('legend'), true);
   setHidden($('bundles'), true);
   $('canvas').replaceChildren();
   setChrome('analysing');
 }
 
-/**
- * The dial's notches: one dot per phase, sitting at the angle the arm stops on.
+/*
+ * The tracer: seven segments on an open arc, and one dot.
  *
- * Built once and reclassed after that, because the geometry cannot change while an
- * analysis runs and rebuilding it on every poll would throw away the state a reader
- * is tracking. Each dot carries `phaseAngle(i)` -- the same value the arm is given
- * -- so a notch and the arm that rests on it cannot drift apart. That shared angle
- * is the whole point of the placement: a mark anywhere else on the ring is one the
- * arm never reaches, and a reader watching it stop somewhere else is being told
- * something the analyser did not do.
+ * Every mark is placed from `arcSegment()` and the dot from `tracerPoint()`, both of
+ * which read the same angle table. That shared geometry is the whole point: a mark
+ * anywhere the dot never reaches would be telling the reader about work the analyser
+ * did not do, and a dot that rested on a seam between two segments would be
+ * reporting a phase that does not exist.
  */
-function renderNotches(dial, index) {
-  const host = dial.querySelector('.dial-notches');
+function renderTracer(tracer, index) {
+  const host = tracer.querySelector('.tracer-arc');
   if (!host) return;
   if (host.childElementCount !== PHASES.length) {
-    host.replaceChildren(...PHASES.map((_, at) => {
-      const notch = el('i', { class: 'dial-notch', 'aria-hidden': 'true', 'data-at': String(at) });
-      notch.style.setProperty('--notch-a', `${phaseAngle(at)}deg`);
-      return notch;
-    }));
+    host.replaceChildren(...PHASES.map((_, at) => svgEl('path', {
+      class: 'tracer-seg',
+      'data-at': String(at),
+      d: arcSegment(at),
+    })));
   }
-  for (const notch of host.children) {
-    const at = Number(notch.dataset.at);
-    notch.classList.toggle('is-done', at < index);
-    notch.classList.toggle('is-current', at === index);
+  for (const seg of host.children) {
+    const at = Number(seg.dataset.at);
+    seg.classList.toggle('is-done', at < index);
+    seg.classList.toggle('is-current', at === index);
+  }
+  const dot = tracer.querySelector('.tracer-dot');
+  if (dot) {
+    const at = tracerPoint(index);
+    dot.setAttribute('cx', String(at.x));
+    dot.setAttribute('cy', String(at.y));
   }
 }
 
 /**
- * The analysis dial.
+ * The analysis tracer and the phase strip.
  *
- * An arm that eases to the phase the analyser has actually reported and stops
- * there. There is no percentage anywhere: the server reports a phase only once it
- * has reached it, and between two stages there is nothing honest to interpolate. A
- * re-render at the same phase does not restart the easing, because the client polls
- * repeatedly while an analysis runs and a twitching arm would read as instability.
+ * The tracer eases to the phase the analyser has actually reported and stops there.
+ * There is no percentage anywhere: the server reports a phase only once it has reached
+ * it, and between two phases there is nothing honest to interpolate. A re-render at
+ * the same phase does not restart the animation, because the client polls repeatedly
+ * while an analysis runs and a twitching dot would read as instability.
  *
- * Under `prefers-reduced-motion` the arm moves to the notch immediately. It still
- * shows the phase, so the information does not depend on the animation.
+ * Under `prefers-reduced-motion` the tracer arrives immediately. It still shows the
+ * phase, so the information never depends on the animation.
  */
 function renderPhases(status, jobId) {
-  const dial = $('dial');
+  const tracer = $('tracer');
   const list = $('phases');
-  const label = $('progress-label');
-  if (!dial || !list) return;
+  const strip = $('strip');
+  if (!tracer || !list) return;
 
-  const index = dialPhaseIndex(status);
+  const index = tracerPhaseIndex(status);
   const settled = isSettled(status);
   const moving = phaseTransition(state.phase, status);
 
   list.replaceChildren();
   for (const phase of PHASES) {
     const at = PHASES.indexOf(phase);
-    const item = el('li', {
+    const item = el('div', {
       class: [
         'phase',
         phase === status ? 'is-current' : '',
@@ -290,48 +294,48 @@ function renderPhases(status, jobId) {
       ].filter(Boolean).join(' '),
       'data-phase': phase,
     });
-    item.append(el('span', { class: 'phase-dot', 'aria-hidden': 'true' }));
-    item.append(el('span', { class: 'phase-text', text: phaseLabel(phase) }));
+    item.append(el('i', { class: 'pm', 'aria-hidden': 'true' }));
+    // The ordinal is mono because it is a number in a technical list, and it is the
+    // part that survives the narrowest breakpoint when the names are dropped.
+    item.append(el('span', { class: 'phase-n', text: String(at + 1).padStart(2, '0') }));
+    item.append(el('span', { class: 'phase-name', text: phaseLabel(phase) }));
+    if (jobId) item.append(el('span', { class: 'phase-ev', text: jobId.slice(0, 8) }));
     list.append(item);
   }
 
-  renderNotches(dial, index);
+  renderTracer(tracer, index);
 
   const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const angle = phaseAngle(index);
   // One transition per phase change, never per render.
-  dial.style.setProperty('--dial-angle', `${angle}deg`);
-  dial.dataset.phase = String(index);
-  dial.dataset.settled = settled ? 'true' : 'false';
-  dial.dataset.moving = moving && !reduced ? 'true' : 'false';
-  dial.setAttribute('role', 'img');
-  dial.setAttribute('aria-label', `${phaseLabel(status)}, ${index + 1} of ${PHASES.length}`);
+  tracer.dataset.phase = String(index);
+  tracer.dataset.settled = settled ? 'true' : 'false';
+  tracer.dataset.moving = moving && !reduced ? 'true' : 'false';
+  tracer.setAttribute('role', 'img');
+  tracer.setAttribute('aria-label', `${phaseLabel(status)}, ${index + 1} of ${PHASES.length}`);
 
-  if (label) label.textContent = phaseLabel(status);
-  const job = $('progress-job');
-  if (job) job.textContent = jobId ? `job ${jobId.slice(0, 8)}` : '';
-  setHidden($('progress'), false);
+  if (strip) strip.hidden = false;
+  setHidden($('stages'), false);
 
   state.phase = status;
 }
 
 /**
- * Test-only stepper for the analysis dial.
+ * Test-only stepper for the analysis tracer.
  *
- * The dial is driven by whatever phase the server last reported, so verifying its
+ * The tracer is driven by whatever phase the server last reported, so verifying its
  * motion in a browser means driving it through the real phase sequence rather than
  * waiting for an analysis to happen to be slow at the right moment. This is only
- * reachable when the page is opened with `?dial-test`, and it calls the same
+ * reachable when the page is opened with `?tracer-test`, and it calls the same
  * `renderPhases` the polling loop does, so what is measured is the shipped code path
  * and not a stand-in for it.
  */
-function installDialTestStepper() {
+function installTracerTestStepper() {
   if (typeof window === 'undefined') return;
   const params = new URLSearchParams(window.location.search);
-  if (params.get('dial-test') !== '1') return;
+  if (params.get('tracer-test') !== '1') return;
   window.__setPhaseForTest = (phase) => {
     state.phase = state.phase ?? 'queued';
-    renderPhases(phase, 'dial-test');
+    renderPhases(phase, 'tracer-test');
   };
 }
 
@@ -341,7 +345,7 @@ function hideWorking() {
     state.pollTimer = null;
   }
   state.job = null;
-  setHidden($('progress'), true);
+  setHidden($('strip'), true);
 }
 
 /**
@@ -549,17 +553,15 @@ function applyView(viewEnvelope) {
   state.resolvedRevision = meta.resolvedRevision || view.revision.commit;
   state.phase = state.cacheHit ? 'cached' : view.partial.isPartial ? 'partial' : 'complete';
 
-  setHidden($('progress'), true);
+  setHidden($('strip'), true);
   renderChrome(view);
-  renderStatusLine(view);
 
   if (view.empty.isEmpty) {
     setHidden($('empty'), false);
     $('empty-body').textContent = view.empty.reason;
     $('canvas').replaceChildren();
     setHidden($('bundles'), true);
-    setHidden($('legend'), true);
-    state.phase = 'empty';
+      state.phase = 'empty';
     setChrome('no lineage');
     return;
   }
@@ -601,9 +603,7 @@ function showFailure(error) {
   setHidden($('retry-analysis'), error?.code === 'upstream_forbidden' || retryable !== true);
   $('canvas').replaceChildren();
   setHidden($('bundles'), true);
-  setHidden($('legend'), true);
   setChrome('failed');
-  renderStatusLine(null);
 }
 
 // ------------------------------------------------------------------ chrome
@@ -633,40 +633,6 @@ function renderChrome(view) {
   $('repo-input').value = `${repo.owner}/${repo.name}`;
 }
 
-function renderStatusLine(view) {
-  const line = $('status-line');
-  line.replaceChildren();
-  if (!view) return;
-  // "shown" has to mean what the reader can actually see. With aggregation a
-  // repository can have fourteen one-hop relationships and still draw nothing
-  // loose, because they live inside a plate. Reporting "0 shown" while a plate is
-  // on the canvas reads as an empty result and is worse than saying nothing.
-  const composition = state.composition || currentComposition(view);
-  const looseCount = composition ? composition.looseEdgeIds.length : view.primaryEdgeCount;
-  const plateCount = composition ? composition.plates.length : 0;
-  const grouped = composition
-    ? composition.plates.reduce((sum, plate) => sum + plate.count, 0)
-    : view.bundledEdgeCount;
-  const shownParts = [`${looseCount} drawn`];
-  if (plateCount > 0) {
-    shownParts.push(`${plateCount} plate${plateCount === 1 ? '' : 's'} grouping ${grouped}`);
-  }
-  const parts = [
-    `${view.revision.ref || view.revision.defaultBranch || 'HEAD'} @ ${view.revision.shortCommit}`,
-    `analyzed ${formatTime(view.revision.analyzedAt)}`,
-    `${view.analyzer.name} ${view.analyzer.version}`,
-    `${shownParts.join(' \u00b7 ')} / ${view.edgeCount} one-hop / ${view.edgeCount + view.hiddenRelationshipCount} relationships`,
-    `(${view.statusCounts.VERIFIED} verified · ${view.statusCounts.DECLARED} declared · ${view.statusCounts.DETECTED} detected)`,
-  ];
-  parts.forEach((text, index) => {
-    if (index > 0) line.append(el('span', { class: 'sep', text: '·' }));
-    line.append(el('span', { text }));
-  });
-  if (state.cacheHit) {
-    line.append(el('span', { class: 'sep', text: '·' }));
-    line.append(el('span', { class: 'cache-hit', text: `cached · ${formatDuration(state.meta?.elapsedMs ?? 0)}` }));
-  }
-}
 
 function formatTime(iso) {
   if (!iso) return '';
@@ -741,29 +707,27 @@ function plateHeight(rowCount, hiddenRows = 0, hasSubtitle = false) {
 }
 
 /**
- * Puts the frame's HTML layer through the SVG's own transform.
+ * Puts the world's HTML layer through the camera's own transform.
  *
- * The context column, the bottom band and the reserved gutter are authored in world
- * units, exactly as the canvas geometry is. The browser scales the SVG to the viewport
- * on its own; nothing scaled the overlays with it, so they were only ever correct at
- * the one viewport whose scale happened to be about one. At 1280 wide the frame
- * scaled to 0.69 and the band sat 180px below the fold with the legend beside it,
- * which is a scrollbar the design never asked for.
+ * The bottom band is authored in world units, exactly as the canvas geometry is. It is
+ * put through the identical mapping the SVG's `viewBox` performs, so it lands on the
+ * world coordinate it annotates at every zoom and every pan. Deriving both from one
+ * function is what keeps the authored composition intact everywhere instead of only at
+ * the viewport it happened to be designed at.
  *
- * Also publishes the reserved gutter's width in screen pixels, because that is the
- * space the Drawer is allowed to occupy. Sizing the Drawer from the same number is
- * what keeps "the Drawer never moves anything" true at every viewport rather than
- * only where the two happen to coincide.
+ * It takes the live `viewBox`, not just the viewport, because with a fixed world the
+ * camera is the window: panning moves the overlays too, and reading only the viewport
+ * would leave the band behind at the world's origin the first time a reader dragged.
  */
-function applyFrameTransform(viewport) {
+function applyFrameTransform(viewport, viewBox) {
   const stage = $('stage');
   if (!stage) return;
-  const t = frameTransform(viewport);
+  const t = frameTransform(viewport, viewBox);
   stage.style.setProperty('--frame-scale', String(t.scale));
   stage.style.setProperty('--frame-x', `${t.x}px`);
   stage.style.setProperty('--frame-y', `${t.y}px`);
-  // The gutter is authored 316 units wide; that is how many screen pixels it is here.
-  stage.style.setProperty('--gutter-w', `${Math.round(ZONES.gutterWidth * t.scale)}px`);
+  stage.style.setProperty('--world-w', `${WORLD.width}px`);
+  stage.style.setProperty('--world-h', `${WORLD.height}px`);
 }
 
 /**
@@ -858,7 +822,7 @@ function visibleCandidates(view) {
 }
 
 /*
- * L : the context column.
+ * L : the context rail.
  *
  * Contextual and reference information, not topology, so it is flat: no depth
  * tier, no shadow, no offset. Everything is read from the view model, so a block
@@ -866,16 +830,16 @@ function visibleCandidates(view) {
  * has a block and the data has no honest equivalent, the block is omitted rather
  * than filled with an invented number.
  */
-function renderContextColumn(view) {
-  const column = $('lcol');
-  if (!column) return;
-  column.replaceChildren();
+function renderRail(view) {
+  const rail = $('rail');
+  if (!rail) return;
+  rail.replaceChildren();
 
   const block = (heading, body) => {
     const section = el('div', { class: 'lblk' });
     section.append(el('h6', { text: heading }));
     for (const child of body) section.append(child);
-    column.append(section);
+    rail.append(section);
   };
 
   // Provenance: what was analysed, and by what. Real revision, real analyzer.
@@ -948,62 +912,43 @@ function renderContextColumn(view) {
     ]);
   }
 
-  column.hidden = false;
-}
-
-/*
- * The reserved right gutter.
- *
- * It says which lineage families this graph has none of, and why. That is the
- * honest negative for the data zone: the frame reserves this space for a reason, and
- * an empty column beside a real composition reads as something unfinished rather
- * than as a considered edge. It states a fact about the data and never a gap in the
- * analysis, and it is the one thing the Drawer replaces.
- */
-function renderGutterRail(view) {
-  const gutter = $('gutter');
-  if (!gutter) return;
-  gutter.replaceChildren();
-
+  // The lineage families this graph has none of, and why. That is the honest negative
+  // for the data zone: an empty column beside a real composition reads as something
+  // unfinished rather than as a considered edge. It states a fact about the data and
+  // never a gap in the analysis.
+  //
+  // This used to be a reserved right-hand gutter in the world, which meant the Drawer
+  // and this column were claiming the same space. It is a rail block now, because the
+  // Drawer is a real column and two things must not own one.
   const present = new Set((view.edges || []).map((edge) => edge.family));
-  const expected = ['lineage', 'dependency', 'attribution', 'source-identity'];
-  const absent = expected.filter((family) => !present.has(family));
-
-  const heading = el('h6', { text: 'not on the canvas' });
-  gutter.append(heading);
-
+  const absent = ['lineage', 'dependency', 'attribution', 'source-identity']
+    .filter((family) => !present.has(family));
+  const absentBlock = [];
   if (absent.length > 0) {
     const chips = el('div', { class: 'g-empty' });
-    for (const family of absent) {
-      chips.append(el('span', { class: 'g-chip', text: family.replace('-', ' ') }));
-    }
-    gutter.append(chips);
-    gutter.append(
-      el('p', {
-        text: `This repository declares none of these. That is a fact about the data, not a gap in the analysis.`,
-      }),
-    );
+    for (const family of absent) chips.append(el('span', { class: 'g-chip', text: family.replace('-', ' ') }));
+    absentBlock.push(chips);
+    absentBlock.push(el('p', {
+      class: 'rule-note',
+      text: 'This repository declares none of these. That is a fact about the data, not a gap in the analysis.',
+    }));
   } else {
-    gutter.append(
-      el('p', {
-        text: 'Every lineage family this ontology knows about is present in the graph above.',
-      }),
-    );
+    absentBlock.push(el('p', {
+      class: 'rule-note',
+      text: 'Every lineage family this ontology knows about is present in the graph.',
+    }));
   }
+  block('not on the canvas', absentBlock);
 
-  // The naming rule, restated only when it is actually in force, so the gutter
-  // carries the same caveat the context column does rather than repeating it.
-  const shortened = view.nodes.filter((node) => node.label && node.label.length > 22).length;
-  if (shortened > 0) {
-    gutter.append(
-      el('p', {
-        text: `Identity is never dropped: ${shortened} shortened name${shortened === 1 ? '' : 's'} ${shortened === 1 ? 'is' : 'are'} in full in the tooltip and the Drawer.`,
-      }),
-    );
-  }
+  // The lineage key: line style per family, counted. Only families with a real count
+  // appear, so it cannot advertise a style that is not drawn.
+  const keyHost = el('div', { class: 'tkey' });
+  block('relationships', [keyHost]);
+  renderFamilyKey(keyHost);
 
-  gutter.hidden = false;
+  rail.hidden = false;
 }
+
 
 /*
  * The bottom band.
@@ -1158,36 +1103,32 @@ function draw() {
   // distinct peers has 20 fans of one, and their mid-line labels still collide.
   const degrees = nodeDegrees(edges);
 
-  state.standaloneBundles = composition.looseEdgeIds.length === 0 && composition.plates.length > 0;
+state.standaloneBundles = composition.looseEdgeIds.length === 0 && composition.plates.length > 0;
 
-  // Expansion must not refit the camera, so an expanded plate has to fit inside
-  // the framing the first paint chose. The space a plate will need when open is
-  // therefore reserved now, while the composition is being authored, instead of
-  // being discovered as an overflow when the reader opens it.
-  const bounds = contentBounds(positions);
-  for (const [id, position] of positions) {
-    if (!id.startsWith(BUNDLE_ID_PREFIX)) continue;
-    bounds.x = Math.min(bounds.x, position.x - PLATE_W / 2);
-    bounds.width = Math.max(bounds.width, position.x - PLATE_W / 2 + PLATE_W_EXPANDED - bounds.x);
-  }
+  // How this scene is composed, for the bottom band. Derived from the composition that
+  // was actually authored, so the band cannot claim a centrality the layout did not
+  // establish -- and it is measured rather than reserved: the world is fixed, so
+  // nothing has to be kept in reserve for a later fit.
+  state.contentBounds = contentBounds(positions);
   const viewport = { width: canvas.clientWidth || 1200, height: canvas.clientHeight || 700 };
-  // The HTML overlays are authored in the frame's world units, so they are put
-  // through the same transform the SVG's viewBox applies. See `applyFrameTransform`.
-  applyFrameTransform(viewport);
-  // First paint always frames the content. After that, only a dataset change may
-  // move the camera: the refit gate is a single condition so "expanding an
-  // aggregate recentres the scene" cannot come back unnoticed.
-  if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : RefitTrigger.Local)) {
-    // The authored frame, not a fit to the content. Fitting is what produced the
-    // bottom-heavy scene with a large inactive upper area, because a small graph
-    // is tiny beside the page and ends up centred in it. The design's frame is a
-    // composition decision and does not move with the content.
-    const framed = initialViewBox(viewport);
-    canvas.setAttribute('viewBox', framed.viewBox);
-    state.zoom = framed.zoom;
+  // First paint always opens the window on the world's own coordinates. After that,
+  // only a dataset change may move the camera: the refit gate is a single condition
+  // so "expanding an aggregate recentres the scene" cannot come back unnoticed.
+if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : RefitTrigger.Local)) {
+    // The world is fixed and the window moves over it -- never the other way round.
+    // Fitting the frame to the viewport meant the world itself changed size with the
+    // window, so the same layout was a different composition at every width and no
+    // two viewports were comparable.
+    //
+    // It goes through `setCamera` like every other camera write, so the clamp and the
+    // world's HTML layer are remapped here too rather than only on interaction.
+    setCamera(canvas, initialViewBox(viewport).viewBox, 1);
     state.hasFitted = true;
     state.refitPending = false;
   }
+  // The band's world coordinates have to be mapped by the same window the canvas is
+  // showing, so this runs after the viewBox above is settled. See `applyFrameTransform`.
+  applyFrameTransform(viewport, canvas.getAttribute('viewBox'));
 
   const defs = svgEl('defs');
   for (const [id, status, colour] of [
@@ -1617,11 +1558,9 @@ function draw() {
   }
 
   canvas.append(edgeLayer, nodeLayer);
-  renderLegend();
   renderBundles();
   renderLayersPop();
-  renderContextColumn(view);
-  renderGutterRail(view);
+  renderRail(view);
   renderBottomBand(view);
   updateSearchCount();
 }
@@ -1677,7 +1616,7 @@ function compactLocator(locator) {
 }
 
 /**
- * Line style per family, in one place so the legend, the popover, the drawer and
+ * Line style per family, in one place so the rail key, the popover, the drawer and
  * the canvas cannot disagree. Style is presentation only; it never implies a
  * direction — that comes from the relationship.
  */
@@ -1689,33 +1628,45 @@ const FAMILY_STYLE = {
   similarity: ['dotted', '1px'],
 };
 
-function renderLegend() {
-  const legend = $('legend');
+const FAMILY_LABEL = {
+  ancestry: 'ancestry',
+  dependency: 'dependency',
+  attribution: 'attribution',
+  'source-identity': 'identical',
+  similarity: 'similar',
+};
+
+/**
+ * The lineage key: one row per family this graph actually contains.
+ *
+ * It used to float across the canvas as a legend, which meant it sat on top of the
+ * composition at every width and had to be hidden whenever anything else claimed the
+ * space. The rail owns it now. Only families with a nonzero count appear, so the key
+ * cannot advertise a line style that is not on the canvas.
+ */
+function renderFamilyKey(host) {
+  if (!host) return;
   const view = state.view;
-  legend.replaceChildren();
-  const labels = {
-    ancestry: 'ancestry',
-    dependency: 'dependency',
-    attribution: 'attribution',
-    'source-identity': 'identical',
-    similarity: 'similar',
-  };
+  host.replaceChildren();
   let shown = 0;
   for (const [family, [style, width]] of Object.entries(FAMILY_STYLE)) {
-    const count = view.familyCounts[family] || 0;
+    const count = (view.familyCounts && view.familyCounts[family]) || 0;
     if (!count) continue;
     shown += 1;
+    const row = el('div', { class: 'key-row' });
     const swatch = el('span', { class: 'layer-swatch' });
     swatch.style.borderTopStyle = style;
     swatch.style.borderTopWidth = width;
-    legend.append(el('span', { class: 'legend-item' }, [swatch, `${labels[family]} ${count}`]));
+    row.append(swatch);
+    row.append(el('span', { text: FAMILY_LABEL[family] }));
+    row.append(el('span', { class: 'k r-mono', text: String(count) }));
+    host.append(row);
   }
   if (shown === 0) {
-    setHidden(legend, true);
+    setHidden(host, true);
     return;
   }
-  legend.append(el('span', { class: 'legend-item legend-note', text: 'no arrow = symmetric' }));
-  setHidden(legend, false);
+  setHidden(host, false);
 }
 
 // -------------------------------------------------------------------- layers
@@ -2156,6 +2107,55 @@ function capitalise(text) {
 
 let panState = null;
 
+/**
+ * The single place a camera change is written.
+ *
+ * Every path that moves the window -- wheel, buttons, drag, fit -- goes through here,
+ * for two reasons that only hold if there is one path.
+ *
+ * First, the window is clamped inside the world. The world is fixed at 1920 x 1720, so
+ * a raw pan could drag it to empty space and leave the reader looking at nothing; the
+ * clamp is structural rather than a check somebody has to remember. Second, the world's
+ * HTML layer is remapped here too. It used to be remapped only inside `draw()`, which
+ * meant a drag left the band behind at the world's origin while the canvas moved --
+ * an overlay annotating a coordinate the canvas was no longer showing.
+ */
+function setCamera(canvas, viewBox, zoom) {
+  const viewport = { width: canvas.clientWidth || 1200, height: canvas.clientHeight || 700 };
+  const parts = String(viewBox || '').split(/\s+/).map(Number);
+  if (parts.length < 4 || parts.some((n) => !Number.isFinite(n))) return null;
+  const [x, y, width, height] = parts;
+  const centre = { x: x + width / 2, y: y + height / 2 };
+  const z = Number.isFinite(zoom) && zoom > 0 ? zoom : 1;
+  const window = viewBoxFor(viewport, centre, z);
+  canvas.setAttribute('viewBox', window.viewBox);
+  state.zoom = window.zoom;
+  applyFrameTransform(viewport, window.viewBox);
+  return window;
+}
+
+/**
+ * The rail disclosure.
+ *
+ * Above the breakpoint the rail is a permanent column and this button does not exist.
+ * Below it the rail collapses, because there is no longer room for prose and a census
+ * beside a 1920-wide world. Opening it adds a column to the shell -- it does not
+ * rescale the world, so nothing on the canvas moves and no relationship changes
+ * position. That is the whole difference between a disclosure and an overlay here.
+ */
+function toggleRail(force) {
+  const body = $('explorer-body');
+  const button = $('rail-toggle');
+  if (!body) return;
+  const open = force === undefined ? !body.classList.contains('rail-open') : force === true;
+  body.classList.toggle('rail-open', open);
+  if (button) button.setAttribute('aria-expanded', open ? 'true' : 'false');
+  // The stage's pixel width changed, so the canvas element is a different size. The
+  // camera does not follow it: the window stays where the reader left it, in world
+  // coordinates, and the world does not move.
+  if (state.view) draw();
+}
+
 function setupViewport() {
   const canvas = $('canvas');
 
@@ -2167,10 +2167,8 @@ function setupViewport() {
     const rect = canvas.getBoundingClientRect();
     const factor = event.deltaY < 0 ? ZOOM_STEP : 1 / ZOOM_STEP;
     const focus = clientToGraph(canvas, event.clientX - rect.left, event.clientY - rect.top);
-    const current = canvas.getAttribute('viewBox');
-    const next = zoomViewBox(current, factor, focus, state.zoom);
-    canvas.setAttribute('viewBox', next.viewBox);
-    state.zoom = next.zoom;
+    const next = zoomViewBox(canvas.getAttribute('viewBox'), factor, focus, state.zoom);
+    setCamera(canvas, next.viewBox, next.zoom);
   }, { passive: false });
 
   canvas.addEventListener('mousedown', (event) => {
@@ -2185,7 +2183,9 @@ function setupViewport() {
     const [vx, vy, vw, vh] = parts;
     const dx = ((event.clientX - panState.x) / rect.width) * vw;
     const dy = ((event.clientY - panState.y) / rect.height) * vh;
-    canvas.setAttribute('viewBox', `${vx - dx} ${vy - dy} ${vw} ${vh}`);
+    // The window follows the pointer's world delta, then the same clamp applies: a
+    // drag to the edge stops at the world's edge instead of leaving it.
+    setCamera(canvas, `${vx - dx} ${vy - dy} ${vw} ${vh}`, vw > 0 ? canvas.clientWidth / vw : state.zoom);
   });
   window.addEventListener('mouseup', () => {
     panState = null;
@@ -2214,18 +2214,21 @@ function clientToGraph(canvas, clientX, clientY) {
 function zoomBy(factor) {
   const canvas = $('canvas');
   const next = zoomViewBox(canvas.getAttribute('viewBox'), factor, null, state.zoom);
-  canvas.setAttribute('viewBox', next.viewBox);
-  state.zoom = next.zoom;
+  setCamera(canvas, next.viewBox, next.zoom);
 }
 
+/**
+ * Reopens the window on the authored world, not on the content.
+ *
+ * This used to fit the content bounds, which meant "fit" was a second composition
+ * rather than a way of looking at the first one -- and two of them disagreed at every
+ * window size. It now returns the window to the world's own coordinates.
+ */
 function fit() {
   if (!state.view) return;
   const canvas = $('canvas');
-  const positions = layoutGraph(state.view, currentEdges());
-  const bounds = contentBounds(positions);
-  const fitted = fitViewBox(bounds, { width: canvas.clientWidth || 1200, height: canvas.clientHeight || 700 });
-  canvas.setAttribute('viewBox', fitted.viewBox);
-  state.zoom = fitted.zoom;
+  const viewport = { width: canvas.clientWidth || 1200, height: canvas.clientHeight || 700 };
+  setCamera(canvas, initialViewBox(viewport).viewBox, 1);
 }
 
 // --------------------------------------------------------------------- boot
@@ -2276,10 +2279,11 @@ function boot() {
     void load();
   });
 
-  $('layers-btn').addEventListener('click', () => toggleLayers());
+$('layers-btn').addEventListener('click', () => toggleLayers());
   $('search-btn').addEventListener('click', () => toggleSearch());
   $('search-close').addEventListener('click', () => toggleSearch(false));
   $('drawer-scrim').addEventListener('click', () => closeDrawer());
+  $('rail-toggle').addEventListener('click', () => toggleRail());
 
   $('search-input').addEventListener('input', (event) => {
     state.query = event.target.value;
@@ -2340,5 +2344,5 @@ function boot() {
   }
 }
 
-installDialTestStepper();
+installTracerTestStepper();
 boot();

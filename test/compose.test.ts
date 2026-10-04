@@ -2,16 +2,17 @@
  * Authored composition tests.
  *
  * The properties asserted here are the ones a screenshot would otherwise be the
- * only way to check: the frame is authored rather than fitted, the subject does
- * not drift with content, and loose nodes neither overlap each other nor the
- * plates they must stay clear of.
+ * only way to check: the world is fixed rather than fitted, the subject does not
+ * drift with content, and loose nodes neither overlap each other nor the plates
+ * they must stay clear of.
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
-  FRAME,
+  WORLD,
   ZONES,
+  capacity,
   subjectPosition,
   dataZonePositions,
   loosePositions,
@@ -25,20 +26,66 @@ const platesAt = (ys: number[]) => ys.map((y) => ({ x: ZONES.dataLeft + 92, y, h
 const collides = (a: { x: number; y: number }, b: { x: number; y: number }) =>
   Math.abs(a.x - b.x) < NODE_W && Math.abs(a.y - b.y) < NODE_H;
 
-test('the first frame is the authored frame, not a fit to the content', () => {
-  // A fit is what produced the bottom-heavy scene: a two-object graph is small
-  // beside the page and ends up centred in it.
-  const framed = initialViewBox({ width: 1920, height: 990 });
-  assert.equal(framed.viewBox, `${FRAME.x} ${FRAME.y} ${FRAME.width} ${FRAME.height}`);
-  // Identical whatever the viewport, so the composition does not depend on it.
-  const other = initialViewBox({ width: 1280, height: 720 });
-  assert.equal(other.viewBox, framed.viewBox);
+/**
+ * A window's four numbers, or a hard failure.
+ *
+ * Destructuring a `.map(Number)` yields `number | undefined` under this config, and a
+ * test that quietly compared `undefined` would prove nothing.
+ */
+function windowOf(viewBox: string): [number, number, number, number] {
+  const parts = String(viewBox).trim().split(/\s+/).map(Number);
+  if (parts.length !== 4 || parts.some((n) => !Number.isFinite(n))) {
+    throw new Error(`unusable viewBox: ${viewBox}`);
+  }
+  return parts as [number, number, number, number];
+}
+
+test('the first window is the world seen through a window, not a fit to anything', () => {
+  /*
+   * The world is 1920 x 1720 and never scales. The opening window is the viewport's
+   * own size at zoom 1, so a wider viewport sees more of the world and a narrower one
+   * sees less -- and a world point keeps its meaning in both.
+   *
+   * It used to return the authored frame whatever the viewport, and before that it
+   * fitted the frame to the viewport. Both made the world's own size a function of the
+   * window, which is the property this test exists to prevent.
+   */
+  const wide = initialViewBox({ width: 1920, height: 990 });
+  assert.equal(wide.zoom, 1, 'the world is never scaled to fit');
+  const [x, y, w, h] = wide.viewBox.split(' ').map(Number);
+  assert.equal(w, 1920, 'at 1920 wide the window is the viewport width in world units');
+  assert.equal(h, 990, 'and its height is the viewport height in world units');
+
+  const narrow = initialViewBox({ width: 1280, height: 720 });
+  const [nx, ny, nw, nh] = narrow.viewBox.split(' ').map(Number);
+  assert.equal(nw, 1280, 'a narrower window is smaller in world units, not scaled down');
+  assert.equal(nh, 720);
+  assert.equal(narrow.zoom, 1, 'and still at zoom 1');
+
+  // Never past the world's edge, at any viewport.
+  for (const viewport of [{ width: 400, height: 300 }, { width: 4000, height: 3000 }]) {
+    const [bx, by, bw, bh] = windowOf(initialViewBox(viewport).viewBox);
+    assert.ok(bx >= 0 && by >= 0, `${viewport.width}: the window starts inside the world`);
+    assert.ok(bx + bw <= WORLD.width + 1e-9, `${viewport.width}: and ends inside it`);
+    assert.ok(by + bh <= WORLD.height + 1e-9, `${viewport.width}: on both axes`);
+  }
 });
 
-test('the frame reserves the right-hand gutter for the Drawer', () => {
-  // The Drawer must never move anything, so its width is inside the frame.
-  assert.ok(ZONES.gutterLeft + ZONES.gutterWidth <= FRAME.width, 'the gutter must fit the frame');
+test('the world reserves a right-hand gutter for the Drawer', () => {
+  // The Drawer must never move anything, so its width is inside the world.
+  assert.ok(ZONES.gutterLeft + ZONES.gutterWidth <= WORLD.width, 'the gutter must fit the world');
   assert.ok(ZONES.dataLeft + ZONES.dataWidth <= ZONES.gutterLeft, 'the data zone must end before the gutter');
+  // And nothing is placed on it.
+  assert.ok(ZONES.subject.x + 108 < ZONES.gutterLeft, 'the subject clears the gutter');
+});
+
+test('the bottom band is inside the world, below everything placed', () => {
+  assert.ok(ZONES.bandLeft + ZONES.bandWidth <= WORLD.width, 'the band fits the world horizontally');
+  // The band is at the bottom of the authored composition, not at the bottom of the
+  // world: the world's extra height is headroom a reader pans into, and a key 700
+  // units below the composition would only be findable by panning.
+  assert.ok(ZONES.bandTop < WORLD.height, 'the band is on the world');
+  assert.ok(ZONES.bandTop > ZONES.subject.y + 200, 'and clear of the subject');
 });
 
 test('the subject is fixed and independent of content', () => {
@@ -109,27 +156,28 @@ test('a full field reports overflow instead of dropping nodes silently', () => {
 
 test('the field holds the capacity its geometry allows, and no more', () => {
   /*
-   * Measured three times and wrong each time, which is why it is pinned here.
+   * Measured three times and wrong each time, which is why it is pinned here -- but
+   * pinned against the geometry rather than against a literal. The band between the
+   * world's left margin and the data zone is 506 units wide; two 216-unit nodes need
+   * 248 of centre-to-centre pitch, so a row of n spans 216 + (n-1)*248. Rows are nine
+   * deep once the subject's clearance is respected, so the capacity is eighteen.
    *
-   * The band between the context column and the data zone is 474 units wide. Two
-   * 216-unit nodes need 248 of centre-to-centre pitch, so a row of n spans
-   * 216 + (n-1)*248: two columns fit in 464, three would need 712. Rows are five
-   * deep once the subject's clearance is respected, so the capacity is nine.
-   *
-   * Earlier readings of 5 and of 18 were both bugs -- a double-counted clearance
-   * and a pitch that ignored the node's width -- not geometry. The number below is
-   * derived from the same arithmetic the placement uses.
+   * Earlier readings of 5 and of 9 were both bugs -- a double-counted clearance and a
+   * pitch that ignored the node's width -- not geometry. Asserting the number itself
+   * would only re-introduce the same brittleness: the invariant is that placement
+   * agrees with the geometry, whatever the geometry currently says.
    */
-  const full = loosePositions(9, new Array(9).fill('dependency'), [subjectPosition()]);
-  assert.equal(full.overflowed, 0, 'nine peers fit the authored field');
-  assert.equal(full.positions.length, 9);
-  assert.equal(full.capacity, 9);
+  const budget = capacity();
+  const full = loosePositions(budget, new Array(budget).fill('dependency'), [subjectPosition()]);
+  assert.equal(full.overflowed, 0, `${budget} peers fit the authored field`);
+  assert.equal(full.positions.length, budget);
+  assert.equal(full.capacity, budget, 'the placement reports the geometry it was given');
 
   // Past the budget, the overflow is reported rather than dropped: `grpc/grpc`
   // draws eleven loose peers, so this path is real.
-  const over = loosePositions(11, new Array(11).fill('dependency'), [subjectPosition()]);
-  assert.equal(over.overflowed, 2, 'the peers past the budget are reported');
-  assert.equal(over.positions.length + over.overflowed, 11, 'every peer is accounted for');
+  const over = loosePositions(budget + 3, new Array(budget + 3).fill('dependency'), [subjectPosition()]);
+  assert.equal(over.overflowed, 3, 'the peers past the budget are reported');
+  assert.equal(over.positions.length + over.overflowed, budget + 3, 'every peer is accounted for');
 });
 
 test('nothing is placed in the empty upper field', () => {

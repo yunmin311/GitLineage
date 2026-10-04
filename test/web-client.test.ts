@@ -889,9 +889,13 @@ test('the depth ladder uses no blur, glow, gradient or diffuse shadow', () => {
 test('flat surfaces carry no topology shadow', () => {
   // The surfaces the frozen design holds flat. Each is asserted to have no
   // shadow, so none of them can quietly acquire elevation.
+  //
+  // `.legend` and `.status-line` are gone from this list because both are gone from
+  // the shell: the key moved into the rail and the status line into it as well. A
+  // flat-surface check on a selector that no longer exists would pass vacuously.
   for (const selector of [
-    '.drawer', '.drawer-inner', '.legend', '.bundles', '.status-line',
-    '.phases', '.bundle-row', '.layer-row', '.d-card', '.d-why', '.d-actions',
+    '.drawer', '.drawer-inner', '.rail', '.rail-toggle', '.strip', '.bundles',
+    '.key-row', '.phase', '.bundle-row', '.layer-row', '.d-card', '.d-why', '.d-actions',
     '.input-card', '.layers-pop',
   ]) {
     const rule = cssRule(selector);

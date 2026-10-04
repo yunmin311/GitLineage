@@ -1,34 +1,226 @@
-/* GitLineage — direction B "Specimen".
-   Warm bone paper, near-black ink, one muted mineral pigment. Hard offsets,
-   zero blur. Hue is reserved for evidence status; relationship family is encoded
-   by line family and space, never by colour. */
+/* ===========================================================================
+   GitLineage - Visual System v2, over Direction A "Focused Constellation".
+
+   Warm bone paper, near-black ink, one muted accent. Hard offsets, zero blur.
+   Hue is reserved for evidence status and for the current analysis phase;
+   relationship family is encoded by line family and space, never by colour.
+
+   This file implements the frozen visual system: semantic type roles rather than a
+   size ramp, a 4px spacing base with named roles, one interaction-state ladder in
+   which selection outranks hover, and restrained hard-offset depth for topology
+   only. The token values are the frozen ones, not a local approximation.
+   ========================================================================= */
 
 :root {
-  --paper: #F2F1EB;
-  --paper-deep: #E9E8E0;
-  --surface: #F8F7F2;
-  --surface-hi: #FDFCFA;
-  --surface-sunk: #E3E2DD;
-  --ink: #17150F;
-  --ink-2: #525048;
-  --ink-3: #6B6961;
-  --ink-4: #8D8C86;
-  --rule: #D5D4CE;
-  --rule-2: #BCBBB4;
-  --brand: #33485A;
-  --verified: #486884;
-  --declared: #806151;
-  --detected: #6B7177;
-  --alert: #83564F;
-  --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Mono", Menlo, Consolas, monospace;
-  --sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --drawer-w: 384px;
-  --bar-h: 52px;
+  /* ---------------------------------------------------------- surface & ink
+     Monochrome plus exactly one accent. The accent marks the phase an analysis
+     is in and nothing else, so "what is it doing right now" is the only thing
+     that is ever coloured. */
+  --paper: #F7F5F0;
+  --surface: #FCFBF8;
+  --surface-hi: #FFFFFF;
+  --surface-sunk: #F2F0EA;
+  --ink: #14130F;
+  --ink-2: #4A4842;
+  --ink-3: #7C7970;
+  --ink-4: #A8A49A;
+  --ink-5: #C4C0B6;
+  --rule: #E2DFD6;
+  --rule-2: #CFCBC0;
+  --rule-3: #B4AFA2;
+  --accent: #1F5C4D;
+
+  /* Evidence status. Kept as a separate, muted mineral family so a status is
+     never confused with the accent, and never carries meaning on its own: the
+     word is always present beside the mark. */
+  --verified: #48687F;
+  --declared: #8A6A54;
+  --detected: #6E7379;
+  --alert: #8A5450;
+
+  --mono: "Geist Mono", ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+  --sans: "Geist", "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+/* ------------------------------------------------------------- type scale
+     role                     size  wt   lh     tracking
+     Optical compensation scales with size: tight at display, easing to zero by
+     the row role. Tracking is computed, not decorated, and every level gets
+     its variation from weight and colour inside the role -- never from a new
+     invented size. */
+  --t-display-size: 44px;   --t-display-wt: 600; --t-display-lh: 1.04;  --t-display-track: -0.035em;
+  --t-title-size: 25px;     --t-title-wt: 590;   --t-title-lh: 1.12;    --t-title-track: -0.028em;
+  --t-subject-size: 25px;   --t-subject-wt: 600; --t-subject-lh: 1.14;   --t-subject-track: -0.030em;
+  --t-drawer-size: 21px;    --t-drawer-wt: 600;  --t-drawer-lh: 1.18;   --t-drawer-track: -0.026em;
+  --t-plate-size: 13.5px;   --t-plate-wt: 590;   --t-plate-lh: 1.25;    --t-plate-track: -0.016em;
+  --t-row-size: 12.5px;     --t-row-wt: 500;     --t-row-lh: 1.30;      --t-row-track: -0.008em;
+  --t-body-size: 12.5px;    --t-body-wt: 400;    --t-body-lh: 1.60;
+  --t-secondary-size: 11px; --t-secondary-wt: 400; --t-secondary-lh: 1.50;
+  --t-meta-size: 10px;      --t-meta-wt: 400;    --t-meta-lh: 1.45;     --t-meta-track: -0.005em;
+  --t-section-size: 9px;    --t-section-wt: 600; --t-section-lh: 1;      --t-section-track: 0.10em;
+  --t-micro-size: 9px;      --t-micro-wt: 500;   --t-micro-lh: 1;        --t-micro-track: 0.08em;
+
+/* ------------------------------------------------------ spacing scale, 4px base
+     Named roles, so a gap is a decision somebody made rather than a raw number. */
+  --sp-micro: 4px;
+  --sp-tight: 8px;
+  --sp-snug: 12px;
+  --sp-base: 16px;
+  --sp-loose: 20px;
+  --sp-section: 24px;
+  --sp-block: 32px;
+  --sp-band: 40px;
+  --sp-region: 48px;
+  --sp-field: 64px;
+  --sp-void: 96px;
+
+/* ------------------------------------------------------- rule hierarchy */
+  --rule-hair: 1px;
+  --rule-firm: 1px solid var(--rule);
+  --rule-heavy: 1px solid var(--ink);
+  --rule-key: 3px solid var(--ink);
+
+/* ------------------------------------------------------- topological depth
+     Never generic elevation. Applied to the Subject, the selected plate and a
+     connected plate, and to nothing else in the product. */
+  --depth-connected: 4px;
+  --depth-selected: 5px;
+  --depth-subject: 6px;
+
+/* ---------------------------------------------------------------- motion
+     Two durations for state and relocation, one for the analysis tracer. Anything
+     else is decoration. */
+  --dur-fast: 120ms;
+  --dur-move: 280ms;
+  --dur-trace: 620ms;
+  --ease-out: cubic-bezier(.22, .61, .36, 1);
+  --ease-inout: cubic-bezier(.4, 0, .2, 1);
+
+/* ------------------------------------------------------------ shell tokens
+     The shell is the only part of the product that responds to the viewport. The
+     graph world is a fixed spatial coordinate system and these do not describe it. */
+  --rail-w: 264px;
+  --bar-h: 44px;
+  --strip-h: 46px;
+}
+
+/* --------------------------------------------------------- type role classes
+   Roles are named for what the text IS. Sans carries hierarchy and interface;
+   mono is reserved for technical data -- a hash, a path, a version, a count, a
+   scope, a relationship type -- and never for a label or a sentence. That
+   separation is the single largest correction in this pass: the previous build
+   used mono for headings and data alike, so every level collapsed into the same
+   texture. */
+.r-display {
+  font-size: var(--t-display-size); font-weight: var(--t-display-wt);
+  line-height: var(--t-display-lh); letter-spacing: var(--t-display-track);
+}
+.r-title {
+  font-size: var(--t-title-size); font-weight: var(--t-title-wt);
+  line-height: var(--t-title-lh); letter-spacing: var(--t-title-track);
+}
+.r-subject {
+  font-size: var(--t-subject-size); font-weight: var(--t-subject-wt);
+  line-height: var(--t-subject-lh); letter-spacing: var(--t-subject-track);
+}
+.r-drawer {
+  font-size: var(--t-drawer-size); font-weight: var(--t-drawer-wt);
+  line-height: var(--t-drawer-lh); letter-spacing: var(--t-drawer-track);
+}
+.r-plate {
+  font-size: var(--t-plate-size); font-weight: var(--t-plate-wt);
+  line-height: var(--t-plate-lh); letter-spacing: var(--t-plate-track);
+}
+.r-row {
+  font-size: var(--t-row-size); font-weight: var(--t-row-wt);
+  line-height: var(--t-row-lh); letter-spacing: var(--t-row-track);
+}
+.r-body {
+  font-size: var(--t-body-size); font-weight: var(--t-body-wt);
+  line-height: var(--t-body-lh);
+}
+.r-secondary {
+  font-size: var(--t-secondary-size); font-weight: var(--t-secondary-wt);
+  line-height: var(--t-secondary-lh);
+}
+/* Technical data: the only sanctioned mono. */
+.r-meta {
+  font-family: var(--mono); font-size: var(--t-meta-size);
+  font-weight: var(--t-meta-wt); line-height: var(--t-meta-lh);
+  letter-spacing: var(--t-meta-track); font-variant-numeric: tabular-nums;
+}
+/* Section heading: sans, uppercase. Never mono -- this is what separates a
+   heading from a hash at a glance. */
+.r-section {
+  font-size: var(--t-section-size); font-weight: var(--t-section-wt);
+  line-height: var(--t-section-lh); letter-spacing: var(--t-section-track);
+  text-transform: uppercase; color: var(--ink-4);
+}
+.r-micro {
+  font-size: var(--t-micro-size); font-weight: var(--t-micro-wt);
+  line-height: var(--t-micro-lh); letter-spacing: var(--t-micro-track);
+  text-transform: uppercase; color: var(--ink-4);
+}
+/* ------------------------------------------------------------------ state ladder */
+/*
+   One ladder, applied to rows, plates, actions and keys.
+   SELECTION ALWAYS OUTRANKS HOVER. A selected row can never lose its marker, its
+   contrast or its identity to a hover state: hover is a pointer accident and
+   selection is a decision.
+   Priority: disabled < rest < hover < focus-visible < selected < selected+hover
+ */
+[data-state] {
+  transition: background var(--dur-fast) var(--ease-out),
+              box-shadow var(--dur-fast) var(--ease-out),
+              color var(--dur-fast) var(--ease-out);
+}
+[data-state="rest"] { background: var(--surface-hi); }
+/* Hover is a 2% step, never a wash toward white. It was the cause of the reported
+   defect: a selected row painted white on hover and lost its marker. */
+[data-state="rest"]:hover,
+[data-state="unselected"]:hover {
+  background: #F1EFE8;
+  box-shadow: inset 0 0 0 1px var(--rule-2);
+}
+/* Focus-visible is a ring OUTSIDE, so it can never cover the selection bar. */
+[data-state]:focus-visible {
+  outline: 2px solid var(--ink); outline-offset: 1px; border-radius: 2px;
+}
+[data-state="selected"], .sel {
+  background: var(--surface-hi);
+  box-shadow: inset 3px 0 0 var(--ink);
+  position: relative; z-index: 2;
+}
+/* selected + hover deepens the ground and keeps both the bar and the ring. */
+[data-state="selected"]:hover, .sel:hover {
+  background: #EFEEE6;
+  box-shadow: inset 3px 0 0 var(--ink), inset 0 0 0 1px var(--rule-2);
+}
+[data-state="selected"]:focus-visible, .sel:focus-visible {
+  outline: 2px solid var(--ink); outline-offset: 1px;
+  box-shadow: inset 3px 0 0 var(--ink);
+}
+[data-state="disabled"] {
+  opacity: .4; cursor: not-allowed; pointer-events: none; filter: saturate(.5);
+}
+
+/* ------------------------------------------------------------ motion principles
+   1. Nothing decorative loops. The tracer moves because a phase advanced.
+   2. Anything that relocates uses --dur-move and the same easing, so the
+      composition reads as one material rather than several animations.
+   3. Reduced motion removes travel and keeps state legible. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
   /*
-   * The Drawer's width is no longer a column: it is derived from the reserved gutter
-   * at the current frame scale and published as `--gutter-w` by the renderer, so the
-   * Drawer occupies exactly the space the frame held open for it.
+   * The tracer arrives with no animation at all. It still moves to the phase the
+   * analyser reported, so the information is identical; only the travel is cut. The
+   * generic duration override above would leave a 0.001ms animation that still fires,
+   * which is a flash rather than an absence of motion.
    */
+  .tracer-dot.is-moving { animation: none; }
 }
 
 * { box-sizing: border-box; }
@@ -61,25 +253,37 @@ a { color: inherit; }
   position: sticky; top: 0; z-index: 40;
 }
 .brand { display: inline-flex; align-items: center; gap: 7px; font-weight: 650; font-size: 15px; letter-spacing: -0.01em; text-decoration: none; }
-.brand-mark { width: 15px; height: 15px; fill: var(--ink); stroke: var(--ink); stroke-width: 1.2; }
-.brand-mark .mark-pig { fill: var(--verified); stroke: var(--verified); }
-.appbar-mid { display: flex; align-items: baseline; gap: 10px; min-width: 0; flex: 1; }
-.crumb-sep { color: var(--rule-2); }
-.crumb-repo { font-size: 13px; font-weight: 650; white-space: nowrap; }
-.crumb-rev, .crumb-count { font-size: 11px; color: var(--ink-4); white-space: nowrap; }
+/* A solid 9px square. The mark used to be a two-node graph glyph in two colours,
+   which read as a product logo rather than as part of the type system. */
+.brand-mark { width: 9px; height: 9px; background: var(--ink); flex: none; }
+.appbar-mid { display: flex; align-items: baseline; gap: var(--sp-snug); min-width: 0; flex: 1; }
+.crumb-sep { color: var(--ink-5); }
+.crumb-repo {
+  font-size: var(--t-title-size); font-weight: var(--t-title-wt);
+  line-height: var(--t-title-lh); letter-spacing: var(--t-title-track);
+  white-space: nowrap;
+}
+.crumb-ctx { font-size: var(--t-secondary-size); color: var(--ink-3); white-space: nowrap; }
+.crumb-rev, .crumb-count { color: var(--ink-4); white-space: nowrap; }
+/* The rail disclosure. Only exists below the breakpoint that hides the rail. */
+.rail-toggle {
+  display: none; align-items: center; gap: 6px;
+  font-size: var(--t-micro-size); font-weight: var(--t-micro-wt);
+  letter-spacing: var(--t-micro-track); text-transform: uppercase;
+  padding: 5px var(--sp-snug); border: 1px solid var(--rule-2); border-radius: 2px;
+  background: var(--surface-hi); color: var(--ink-2); cursor: pointer;
+}
+.rail-toggle:hover { border-color: var(--rule-3); color: var(--ink); }
+.rail-toggle[aria-expanded='true'] { background: var(--ink); border-color: var(--ink); color: var(--surface); }
 
 /* Phase / cache chip. Cached is always spelled out, never implied. */
 .cache-chip {
-  font-size: 10px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-4);
-  border: 1px solid var(--rule-2);
-  padding: 1px 6px 0;
-  white-space: nowrap;
+  font-family: var(--mono); font-size: var(--t-meta-size);
+  color: var(--ink-3); border: 1px solid var(--rule-2); border-radius: 2px;
+  padding: 1px 5px; letter-spacing: var(--t-meta-track); white-space: nowrap;
 }
 .cache-chip.is-cached { color: var(--verified); border-color: color-mix(in srgb, var(--verified) 40%, var(--rule-2)); }
-.appbar-right { display: flex; align-items: center; gap: 4px; }
+.appbar-right { display: flex; align-items: center; gap: var(--sp-tight); }
 
 .icon-btn {
   display: inline-flex; align-items: center; justify-content: center;
@@ -136,7 +340,7 @@ a { color: inherit; }
 .input-row { display: flex; gap: 10px; align-items: stretch; }
 .input-icon { width: 15px; height: 15px; align-self: center; margin-left: 12px; fill: var(--ink-4); flex: none; }
 #repo-input { flex: 1; min-width: 0; font-family: var(--mono); font-size: 14px; padding: 13px 12px; border: 1px solid var(--rule-2); border-radius: 4px; background: var(--surface-hi); color: var(--ink); }
-#repo-input:focus { outline: 2px solid var(--brand); outline-offset: -1px; }
+#repo-input:focus { outline: 2px solid var(--ink-2); outline-offset: -1px; }
 #submit { font-size: 14px; font-weight: 650; padding: 13px 22px; border: 1px solid var(--ink); border-radius: 4px; background: var(--ink); color: var(--paper); white-space: nowrap; }
 #submit:hover { background: #000; }
 
@@ -151,8 +355,8 @@ a { color: inherit; }
 
 .foot { font-size: 12px; color: var(--ink-3); margin: 16px 2px 0; }
 .samples { font-size: 11px; color: var(--ink-3); margin: 26px 2px 0; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
-.samples a { color: var(--brand); text-decoration: none; border: 1px solid var(--rule-2); border-radius: 4px; padding: 5px 9px; background: var(--surface-hi); }
-.samples a:hover { border-color: var(--brand); }
+.samples a { color: var(--ink-2); text-decoration: none; border: 1px solid var(--rule-2); border-radius: 4px; padding: 5px 9px; background: var(--surface-hi); }
+.samples a:hover { border-color: var(--ink-2); }
 .sample-tag { font-size: 10px; color: var(--ink-4); margin-right: 8px; }
 
 .trust { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--rule); border: 1px solid var(--rule); margin-top: 40px; }
@@ -168,12 +372,17 @@ a { color: inherit; }
  * The explorer is a column that fills what is left of the viewport.
  *
  * The stage used to be `calc(100vh - --bar-h - --status-h)` with the status height
- * written down as a constant. The status line is a wrapping flex row of real counts,
+ * written down as a constant. The status line was a wrapping flex row of real counts,
  * so at a narrower viewport it became two lines, outgrew the constant, and pushed the
  * bottom of the stage past the fold: a scrollbar on a canvas that is not supposed to
- * scroll, with the bottom band below it. Laying the three regions out as a flex
- * column makes the stage take the remainder, so the status line can wrap and the band
- * stays on screen whatever the counts say.
+ * scroll, with the bottom band below it. The strip is now one fixed-height row that
+ * collapses to nothing when no analysis is running, so the body simply takes the
+ * remainder.
+ */
+/*
+ * THE SHELL: header, analysis strip, and a body of rail / graph / drawer.
+ *
+ * The only part of the product that responds to the viewport.
  */
 #explorer {
   display: flex; flex-direction: column;
@@ -181,45 +390,54 @@ a { color: inherit; }
   min-height: 0;
 }
 
-.status-line {
-  display: flex; gap: 12px; flex-wrap: wrap; align-items: baseline;
-  flex: 0 0 auto;
-  font-size: 11px; color: var(--ink-2); padding: 8px 18px;
-  border-bottom: 1px solid var(--rule); background: var(--paper);
+
+.explorer-body {
+  display: grid;
+  grid-template-columns: var(--rail-w) minmax(0, 1fr) 0;
+  flex: 1 1 auto; min-height: 0; position: relative;
 }
-.status-line .sep { color: var(--rule-2); }
-.status-line .cache-hit { color: var(--verified); font-weight: 700; }
+.explorer-body.with-drawer { grid-template-columns: var(--rail-w) minmax(0, 1fr) var(--drawer-w); }
 
-.explorer-body { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; position: relative; }
+/* One owner on the right. The floating panels would otherwise keep painting
+   underneath the Drawer, so two things would claim one column. */
+.explorer-body.with-drawer .layers-pop { display: none !important; }
 
-/*
- * The Drawer does not take a column.
- *
- * It used to, and the cost was invisible until the reader used it: opening it
- * removed the context column and the bottom band from the page and narrowed the
- * stage by its own width, so the SVG rescaled and the subject changed size and
- * position at the exact moment someone chose to read a relationship. The camera
- * invariants are about the scene not moving under the reader, and a layout that
- * moves the scene is a camera change however the viewBox is spelled.
- */
-.explorer-body.with-drawer .legend,
-.explorer-body.with-drawer .layers-pop,
-.explorer-body.with-drawer .bundles,
-.explorer-body.with-drawer .gutter { display: none !important; }
+/* --------------------------------------------------------------- context rail
+   A grid column, not an overlay. An overlay can only sit on top of the graph, so
+   the graph has to be kept clear of it -- and at a narrow viewport there is nothing
+   left to keep it clear of. As a column the graph simply begins after it. */
+.rail {
+  grid-column: 1; grid-row: 1;
+  border-right: var(--rule-firm); background: var(--surface);
+  padding: var(--sp-base); overflow-y: auto; overflow-x: hidden;
+  display: flex; flex-direction: column; gap: var(--sp-base);
+  min-width: 0;
+}
+.rail[hidden] { display: none; }
+.railsec { display: block; }
+.rs-t {
+  font-size: var(--t-section-size); font-weight: var(--t-section-wt);
+  letter-spacing: var(--t-section-track); text-transform: uppercase;
+  color: var(--ink-4); padding-bottom: var(--sp-tight);
+  border-bottom: var(--rule-hair) solid var(--rule); margin-bottom: var(--sp-tight);
+}
+.kv { display: flex; gap: var(--sp-tight); padding: 3px 0; border-bottom: var(--rule-hair) solid var(--rule); }
+.kv .k { font-family: var(--mono); font-size: var(--t-meta-size); color: var(--ink-3); flex: none; }
+.kv .v {
+  font-size: var(--t-secondary-size); color: var(--ink-2); margin-left: auto;
+  text-align: right; overflow-wrap: anywhere; min-width: 0;
+}
+.cen { display: flex; align-items: center; gap: var(--sp-tight); padding: 2px 0; }
+.cen .k { font-family: var(--mono); font-size: var(--t-meta-size); color: var(--ink-2); min-width: 0; overflow-wrap: anywhere; }
+.cen .n { font-family: var(--mono); font-size: var(--t-meta-size); color: var(--ink-3); margin-left: auto; padding-left: var(--sp-tight); }
+.rail-note { font-size: var(--t-secondary-size); color: var(--ink-3); line-height: 1.6; margin: 0; }
 
-/*
- * The right-hand side has exactly one owner.
- *
- * `.legend` and `.layers-pop` are absolutely positioned and would keep painting
- * underneath the Drawer, so the gutter showed both at once. They switch out while
- * the Drawer is open rather than stacking beneath it, and the gutter rail does too:
- * it is the other thing that lives in the Drawer's space, and two things claiming
- * one column is how a reader ends up unsure which one they are reading. The context
- * column and the bottom band deliberately stay -- they are the frame's own zones,
- * not the right rail, and the frozen design keeps both while a relationship is read.
- */
-.stage { position: relative; flex: 1 1 auto; min-height: 0; overflow: hidden; }
+/* ------------------------------------------------------------ graph viewport
+   A window onto the fixed world. The world never reflows and never re-scales to
+   fit; the window moves over it. */
+.stage { grid-column: 2; grid-row: 1; position: relative; min-width: 0; min-height: 0; overflow: hidden; }
 .canvas { display: block; width: 100%; height: 100%; cursor: grab; }
+.canvas.is-panning { cursor: grabbing; }
 
 /*
  * The authored frame's HTML layer.
@@ -235,7 +453,8 @@ a { color: inherit; }
  */
 .frame {
   position: absolute; left: 0; top: 0;
-  width: 1864px; height: 940px;
+  /* The world, not the window: 1920 x 1720 at every viewport and every zoom. */
+  width: var(--world-w, 1920px); height: var(--world-h, 1720px);
   transform-origin: 0 0;
   transform: translate(var(--frame-x, 0px), var(--frame-y, 0px)) scale(var(--frame-scale, 1));
   pointer-events: none;
@@ -257,140 +476,78 @@ a { color: inherit; }
   align-items: center; justify-content: center; gap: 10px; text-align: center;
   padding: 32px; background: var(--paper); z-index: 5;
 }
-.overlay[hidden] { display: none; }
-/*
- * The analysis dial.
- *
- * Flat, hard-edged and in the same paper/ink vocabulary as everything else. No
- * glow, no gradient, no blur: the arm's motion and the notch it rests on carry the
- * state, and any soft treatment would read as decoration rather than as a reading of
- * the analyser's progress.
- *
- * The arm rotates to `--dial-angle`, which the renderer sets once per phase change.
- * `data-moving` is only true for the duration of a transition, so a re-render at the
- * same phase does not restart the easing -- the client polls repeatedly, and a
- * twitching arm would read as instability rather than as progress.
- */
-.dial {
-  --dial-angle: 0deg;
-  --dial-size: 132px;
-  /* Just inside the ring, so a notch sits on the line the arm's tip travels. */
-  --notch-r: calc(var(--dial-size) / 2 - 7px);
-  position: relative;
-  width: var(--dial-size);
-  height: var(--dial-size);
-  margin: 0 auto 18px;
-}
-.dial-face {
-  position: absolute;
-  inset: 0;
-  border: 1.5px solid var(--rule-2);
-  border-radius: 50%;
-}
-/* The notch host fills the ring, so a dot's 50% is the dial's centre. */
-.dial-notches { position: absolute; inset: 0; }
-/*
- * One notch per phase, flat and hard-edged: a dot, not a gradient and not a tick
- * painted by a pseudo-element.
- *
- * The frozen design puts a real dot on the ring for each phase the analyser
- * reports and stops the arm on it, and this is that. Each dot carries
- * `--notch-a`, which is `phaseAngle(i)` -- the angle the arm is given -- so a
- * notch and the arm that rests on it cannot drift apart.
- *
- * The placement is doing the work, not just the paint: a tick at the top of the
- * face and one at the bottom would never be touched, because the sweep runs from
- * -75 to +75 degrees and reaches neither end of the ring.
- */
-.dial-notch {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 6px;
-  height: 6px;
-  margin: -3px 0 0 -3px;
-  border-radius: 50%;
-  background: var(--rule-2);
-  /*
-   * The notch orbits the dial's centre. The dot is centred on that centre, so the
-   * rotation turns about it and the push outward lands the dot on the ring at the
-   * arm's own angle -- `--notch-a` is `phaseAngle(i)`, the angle the arm rests on.
-   */
-  transform: rotate(var(--notch-a)) translateY(calc(-1 * var(--notch-r)));
-}
-/* Passed: the analyser has been here and moved on. */
-.dial-notch.is-done { background: var(--verified); }
-/* Current: the notch the arm is resting on, large enough to be caught by an eye. */
-.dial-notch.is-current {
-  width: 10px;
-  height: 10px;
-  margin: -5px 0 0 -5px;
-  background: var(--ink);
-}
-.dial-arm {
-  /*
-   * The arm hangs from the hub and points outward.
-   *
-   * `bottom: 50%` puts the arm's lower end on the dial's centre, which is the only
-   * position in which `transform-origin: 50% 100%` means the centre. Anchoring the
-   * arm with `top: 50%` instead puts that origin on the arm's own middle, and the
-   * arm then swings through the centre like a clock hand, coming to rest at the
-   * lower right of the ring with its tip nowhere near the notch it should sit on.
-   */
-  position: absolute;
-  left: 50%;
-  bottom: 50%;
-  width: 2px;
-  /* The arm reaches exactly as far as the notch ring, so its tip lands on a dot. */
-  height: var(--notch-r);
-  margin-left: -1px;
-  background: var(--ink);
-  transform-origin: 50% 100%;
-  transform: rotate(var(--dial-angle));
-}
-.dial-hub {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 9px;
-  height: 9px;
-  margin: -4.5px 0 0 -4.5px;
-  background: var(--ink);
-  border-radius: 50%;
-}
-/* The eased transition, applied only while the phase is actually moving. */
-.dial[data-moving='true'] .dial-arm {
-  transition: transform 420ms cubic-bezier(0.22, 0.61, 0.36, 1);
-}
-/*
- * Reduced motion: the arm still moves, and still lands on the notch, so the phase
- * stays readable. It simply arrives at once instead of travelling.
- */
-@media (prefers-reduced-motion: reduce) {
-  .dial[data-moving='true'] .dial-arm { transition: none; }
-}
-/* Settled: the dial rests on the last notch and the face closes. */
-.dial[data-settled='true'] .dial-face { border-color: var(--ink-3); }
-.dial[data-settled='true'] .dial-hub { background: var(--verified); }
+/* ------------------------------------------------------ the analysis instrument
+   A strip, not a clock.
 
-/* The phase list stays as the textual reading of the same state. */
-.phases { list-style: none; margin: 0 0 16px; padding: 0; text-align: left; min-width: 320px; }
-/*
- * Analysis progress.
- *
- * A stepped list of real phases, not a bar. There is no percentage anywhere: the
- * server reports a phase only once it has reached it, and between two stages there
- * is nothing honest to interpolate.
+   The previous instrument was a closed dial with a hand. It read as a clock, it
+   needed a 132px disc plus a seven-row list, and seven rows do not fit the strip --
+   so the phase list was pushed over the canvas and the thing that matters most
+   during an analysis was the least visible part of the screen.
+
+   What replaces it is an OPEN ARC: one segment per real phase, a tracer resting on
+   the segment the analyser has actually reached, and the seven phase names on one
+   line beside it. There is no dial face, no sweeping hand and no percentage. The
+   tracer moves when a phase advances and not otherwise, which is the only honest
+   thing a progress instrument can do.
  */
-.phase { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--ink-4); padding: 3px 0; }
-.phase-dot { width: 7px; height: 7px; border: 1px solid var(--rule-2); border-radius: 50%; flex: none; background: transparent; }
+.strip {
+  display: flex; align-items: center; gap: var(--sp-base);
+  padding: 0 var(--sp-region); flex: 0 0 auto;
+  min-height: var(--strip-h);
+  border-bottom: var(--rule-firm); background: var(--surface-sunk);
+  z-index: 29;
+}
+.strip[hidden] { display: none; }
+
+/* The arc itself. Geometry lives in lib/phases.mjs; this only supplies colour. */
+.tracer { display: block; flex: none; margin-right: var(--sp-tight); overflow: visible; }
+.tracer-seg { fill: none; stroke: var(--rule-2); stroke-width: 2.5; stroke-linecap: butt; }
+.tracer-seg.is-done { stroke: var(--ink-3); }
+.tracer-seg.is-current { stroke: var(--ink); }
+/* The tracer. Restrained: it pulses once per arrival and then rests. */
+.tracer-dot { fill: var(--accent); }
+.tracer-dot.is-moving { animation: tracer-arrive var(--dur-trace) var(--ease-inout); }
+@keyframes tracer-arrive {
+  0%   { opacity: .35; }
+  100% { opacity: 1; }
+}
+
+/* One row, seven cells, equal weight. The current phase is the only coloured thing
+   on the instrument. */
+.phases {
+  display: flex; flex: 1; min-width: 0;
+  border-left: var(--rule-hair) solid var(--rule-2);
+}
+.phase {
+  flex: 1; min-width: 0;
+  display: flex; align-items: center; gap: var(--sp-tight);
+  padding: 0 var(--sp-snug); color: var(--ink-5);
+  border-right: var(--rule-hair) solid var(--rule);
+  transition: color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
+}
+.phase:last-child { border-right: 0; }
+/* The mark is a 5px square, not a dot: a dot at this size reads as a bullet list
+   item, and a square reads as a state. */
+.pm { width: 5px; height: 5px; flex: none; border: 1px solid var(--rule-3); }
+.phase-n { font-family: var(--mono); font-size: var(--t-meta-size); flex: none; }
+.phase-name {
+  font-size: var(--t-micro-size); font-weight: var(--t-micro-wt);
+  letter-spacing: var(--t-micro-track); text-transform: uppercase;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+/* The evidence count each phase actually produced. Mono, because it is a count. */
+.phase-ev {
+  font-family: var(--mono); font-size: var(--t-meta-size); color: var(--ink-4);
+  margin-left: auto; padding-left: var(--sp-micro); flex: none;
+  font-variant-numeric: tabular-nums;
+}
 .phase.is-done { color: var(--ink-3); }
-.phase.is-done .phase-dot { background: var(--verified); border-color: var(--verified); }
-.phase.is-current { color: var(--ink); font-weight: 650; }
-.phase.is-current .phase-dot { background: var(--paper); border-color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--paper); }
-.progress-label { font-size: 12px; color: var(--ink-2); margin: 0; }
-.progress-note { font-size: 10px; color: var(--ink-4); margin: 8px 0 0; }
-.progress-job { font-size: 10px; color: var(--ink-4); margin: 4px 0 0; }
+.phase.is-done .pm { background: var(--ink-3); border-color: var(--ink-3); }
+.phase.is-current { color: var(--ink); background: rgba(255, 255, 255, .7); }
+.phase.is-current .phase-name { font-weight: 590; }
+.phase.is-current .phase-n { color: var(--accent); }
+.phase.is-current .pm { background: var(--accent); border-color: var(--accent); }
+.phase.is-settled .phase-name { font-weight: 590; }
 .empty-head, .failure-head { font-size: 18px; font-weight: 650; margin: 0; }
 .failure-head { color: var(--alert); }
 .empty-body, .failure-body { font-size: 12px; color: var(--ink-3); margin: 0; max-width: 56ch; line-height: 1.55; }
@@ -426,26 +583,7 @@ a { color: inherit; }
 .bundle-label { flex: 1; }
 .bundle-status { font-size: 9px; letter-spacing: 0.05em; color: var(--ink-4); }
 
-.legend { position: absolute; left: 16px; top: 16px; display: flex; gap: 13px; flex-wrap: wrap; font-family: var(--mono); font-size: 10px; color: var(--ink-3); background: var(--paper); padding: 5px 8px; border: 1px solid var(--rule); border-radius: 4px; max-width: 60%; }
-.legend[hidden] { display: none; }
 
-/*
- * The reserved right gutter.
- *
- * It exists so the Drawer has somewhere to go that is not the canvas. Left empty it
- * was 316 units of nothing at the right edge of a frame whose whole argument is a
- * composed three-zone surface, and the data zone read as unfinished rather than
- * deliberate. What goes here is the honest negative: which lineage families this
- * graph has none of, and why that is a fact about the data.
- *
- * One owner at a time. The Drawer replaces this rail rather than stacking on it.
- */
-.gutter { position: absolute; left: 1548px; top: 128px; width: 316px; }
-.gutter[hidden] { display: none; }
-.gutter h6 { font-size: 9px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--ink-4); font-weight: 600; margin: 0 0 9px; }
-.gutter p { font-size: 10.5px; color: var(--ink-3); line-height: 1.6; margin: 0 0 10px; }
-.gutter .g-empty { display: flex; flex-wrap: wrap; gap: 4px 6px; margin-bottom: 12px; }
-.gutter .g-chip { font-family: var(--mono); font-size: 9.5px; color: var(--ink-4); border: 1px solid var(--rule-2); border-radius: 2px; padding: 2px 6px; }
 
 /*
  * Bundle representative cards.
@@ -462,6 +600,31 @@ a { color: inherit; }
   stroke: var(--ink-4);
   stroke-width: 1.2;
   stroke-dasharray: 5 3;
+/*
+ * The honest negative.
+ *
+ * Which lineage families this graph has none of. It used to occupy a reserved right
+ * gutter inside the world, which meant the Drawer and this column were both claiming
+ * one space -- and it sat on the canvas at a width where the composition had no room
+ * to spare. It is a rail block now: the same fact, in the place that is allowed to
+ * hold prose.
+ */
+.g-empty { display: flex; flex-wrap: wrap; gap: var(--sp-micro) var(--sp-tight); }
+.g-chip {
+  font-family: var(--mono); font-size: var(--t-meta-size); color: var(--ink-4);
+  border: 1px solid var(--rule-2); border-radius: 2px; padding: 2px 6px;
+}
+
+/*
+ * The lineage key.
+ *
+ * A row per family with a real count, using the same FAMILY_STYLE swatches the layers
+ * popover draws. It used to be a legend floating over the canvas, which meant it sat on
+ * top of the composition at every width and had to be hidden whenever anything else
+ * claimed the space. The rail owns it now.
+ */
+.key-row { display: flex; align-items: center; gap: var(--sp-snug); font-size: var(--t-row-size); color: var(--ink-2); padding: 3px 0; }
+.key-row .k { margin-left: auto; color: var(--ink-4); }
 }
 .bundle-card:hover .bundle-card-box, .bundle-card:focus .bundle-card-box { stroke: var(--ink); stroke-dasharray: none; }
 .bundle-card.is-open .bundle-card-box { stroke: var(--ink); stroke-width: 1.6; stroke-dasharray: none; }
@@ -503,8 +666,6 @@ a { color: inherit; }
 .plate-row-hit { fill: transparent; cursor: pointer; }
 .plate-row-hit:hover { fill: var(--surface-hi); }
 .bundle-card.is-selected .bundle-card-label { fill: var(--ink); }
-.legend-item { display: inline-flex; align-items: center; gap: 5px; }
-.legend-note { color: var(--ink-4); }
 
 /* ------------------------------------------------------------------ graph */
 
@@ -674,7 +835,7 @@ a { color: inherit; }
 .node:hover .node-box { stroke: var(--ink-3); }
 /*
  * Labels are decoration, not hit targets. Without this they swallow clicks on
- * the line beneath — including when they are hidden with `opacity: 0`, which
+ * the line beneath it including when they are hidden with `opacity: 0`, which
  * still hit-tests. Pointer events go to `.edge-hit` only.
  */
 .edge-label, .edge-badge, .edge-ontology, .node-label, .node-fact, .subject-tag { pointer-events: none; }
@@ -692,26 +853,36 @@ a { color: inherit; }
  * The Drawer: an overlay over the gutter the frame already reserved.
  *
  * Absolutely positioned inside `.stage` rather than a grid column, so opening it
- * cannot resize the stage and therefore cannot rescale the canvas. It is sized in
- * screen pixels, not world units, because its 10px type has to stay readable at a
- * 1280 viewport where the frame itself has scaled to 0.69; scaling the Drawer with
- * the frame would shrink the evidence the reader came for.
+/*
+ * The Drawer: the third column of the shell.
  *
- * `--gutter-w` is written by the renderer: the reserved gutter expressed in screen
- * pixels at the current scale. Below the sheet breakpoint the Drawer becomes a
- * full-width sheet instead, because there is no gutter left to occupy.
+ * It is a real column rather than an overlay over the graph, because a column cannot
+ * move the world. An overlay that pushes the canvas would rescale it, and a canvas
+ * that rescales when a reader opens a relationship has moved the scene under them --
+ * which is a camera change however the viewBox is spelled. As a column the graph's
+ * width changes but its world coordinates, and therefore its camera, do not.
+ *
+ * At the frozen breakpoint it becomes an overlay over the same gutter, because by
+ * then there is no room for a third column and the gutter is the only space that was
+ * ever reserved for it.
  */
 .drawer {
-  position: absolute; right: 0; top: 0; bottom: 0;
-  width: var(--gutter-w, 372px);
-  min-width: 300px; max-width: 46vw;
-  border-left: 2px solid var(--ink); background: var(--surface);
-  overflow-y: auto; z-index: 20;
+  grid-column: 3; grid-row: 1;
+  border-left: var(--rule-firm); background: var(--surface);
+  overflow: hidden; display: flex; flex-direction: column; min-width: 0;
 }
 .drawer[hidden] { display: none; }
-.drawer-inner { padding: 16px 18px 40px; position: relative; }
-.drawer-close { position: absolute; top: 12px; right: 14px; font-family: var(--mono); font-size: 11px; color: var(--ink-4); background: transparent; border: 1px solid var(--rule-2); border-radius: 3px; padding: 2px 8px; }
-.drawer-close:hover { color: var(--ink); border-color: var(--ink-4); }
+.drawer-inner {
+  flex: 1; overflow-y: auto;
+  padding: var(--sp-section) var(--sp-band) var(--sp-base); position: relative;
+}
+.drawer-close {
+  position: absolute; top: var(--sp-snug); right: var(--sp-base);
+  font-family: var(--mono); font-size: var(--t-meta-size); color: var(--ink-4);
+  background: transparent; border: 1px solid var(--rule-2); border-radius: 2px;
+  padding: 2px 6px;
+}
+.drawer-close:hover { color: var(--ink); border-color: var(--rule-3); }
 
 .d-eyebrow { font-family: var(--mono); font-size: 9px; letter-spacing: 0.08em; color: var(--ink-4); margin: 0 0 6px; }
 .d-head { font-size: 17px; font-weight: 650; margin: 0 0 6px; padding-right: 52px; }
@@ -759,8 +930,8 @@ a { color: inherit; }
 .d-data { font-family: var(--mono); font-size: 10px; color: var(--ink-3); display: grid; grid-template-columns: auto 1fr; gap: 2px 8px; margin: 6px 0 0; }
 .d-data dt { color: var(--ink-4); }
 .d-data dd { margin: 0; word-break: break-all; }
-.d-src { font-family: var(--mono); font-size: 10px; color: var(--brand); text-decoration: none; border-bottom: 1px solid var(--rule-2); display: inline-block; margin-top: 4px; }
-.d-src:hover { border-bottom-color: var(--brand); }
+.d-src { font-family: var(--mono); font-size: 10px; color: var(--ink-2); text-decoration: none; border-bottom: 1px solid var(--rule-2); display: inline-block; margin-top: 4px; }
+.d-src:hover { border-bottom-color: var(--ink-2); }
 
 .d-why {
   border: 1px solid var(--rule); border-left: 3px solid var(--verified);
@@ -785,30 +956,73 @@ a { color: inherit; }
 .foot-links a { color: var(--ink-3); text-decoration: none; }
 .foot-links a:hover { color: var(--ink); text-decoration: underline; }
 
-/* ------------------------------------------------------------- responsive */
-
+/* ================================================================ RESPONSIVE ===
+   SHELL ONLY. The graph world is a fixed spatial coordinate system: 1920 x 1720,
+   never re-laid-out and never re-scaled to fit. Only what follows adapts, so this is
+   one design at two widths rather than two designs.
+   =========================================================================== */
 .drawer-scrim { display: none; }
+
+/*
+ * <= 1500px - the context rail collapses to a disclosure.
+ *
+ * The rail holds prose, a census and the key. Below this width there is no longer
+ * room for it beside a 1920-wide world, so it becomes something the reader opens.
+ * Nothing about the graph changes: the world is still 1920 x 1720 and the same
+ * coordinates land in the same places, the window over them is simply narrower.
+ */
+@media (max-width: 1500px) {
+  .explorer-body,
+  .explorer-body.with-drawer { grid-template-columns: 0 minmax(0, 1fr) var(--drawer-w); }
+  .rail { display: none; }
+  .explorer-body.rail-open { grid-template-columns: var(--rail-w) minmax(0, 1fr) var(--drawer-w); }
+  .explorer-body.rail-open .rail { display: flex; }
+  .rail-toggle { display: inline-flex; }
+  .crumb-count { display: none; }
+}
+
+/*
+ * <= 1340px - the Drawer becomes an overlay on the gutter, and the phase strip
+ * sheds its per-phase evidence counts.
+ *
+ * There is no third column left at this width, and the gutter the world reserved is
+ * the only space that was ever meant for it. The overlay is anchored to the shell,
+ * not to the graph, so opening it still cannot move the world.
+ */
+@media (max-width: 1340px) {
+  .explorer-body,
+  .explorer-body.rail-open,
+  .explorer-body.with-drawer { grid-template-columns: 0 minmax(0, 1fr) 0; }
+  .explorer-body.rail-open { grid-template-columns: var(--rail-w) minmax(0, 1fr) 0; }
+  .drawer {
+    position: absolute; right: 0; top: 0; bottom: 0; width: var(--drawer-w);
+    z-index: 25; border-left: var(--rule-firm);
+  }
+  .phase-ev { display: none; }
+  .drawer-scrim {
+    display: block; position: absolute; inset: 0;
+    background: rgba(20, 19, 15, .10); border: 0; z-index: 24;
+  }
+  .drawer-scrim[hidden] { display: none; }
+}
 
 @media (max-width: 1100px) {
   .trust { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 860px) {
-  :root { --drawer-w: 100%; }
+  :root { --drawer-w: 320px; }
   .appbar-mid { flex-wrap: wrap; }
-  .crumb-count { display: none; }
-  /* No gutter left to occupy: the Drawer becomes a sheet over the stage. */
-  .drawer {
-    position: fixed; inset: var(--bar-h) 0 0 auto; width: min(420px, 100%); height: auto;
-    max-width: none; min-width: 0; z-index: 60;
-  }
-  .drawer-scrim { display: block; position: fixed; inset: 0; background: rgba(23,21,15,0.18); border: 0; z-index: 55; }
-  .drawer-scrim[hidden] { display: none; }
-  .stage { flex: 1 1 auto; min-height: 0; }
+  .crumb-ctx { display: none; }
+  .strip { padding: 0 var(--sp-base); gap: var(--sp-tight); }
+  .phase { padding: 0 var(--sp-tight); }
+  .phase-name { display: none; }
+  .phase-n { margin: 0 auto; }
   .landing { padding: 44px 18px 40px; }
   .lede { font-size: 16px; }
   .bundles { max-width: calc(100% - 32px); }
   .site-foot { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .viewport-controls { right: var(--sp-tight); bottom: var(--sp-tight); }
 }
 
 @media (max-width: 560px) {
@@ -817,3 +1031,4 @@ a { color: inherit; }
   .trust { margin-top: 28px; }
   .layers-pop { right: 10px; left: 10px; width: auto; }
 }
+

@@ -38,11 +38,13 @@ import { serve } from '../../src/web/serve.ts';
 const SUBJECT_REPO = 'yunmin311/obsidian-config';
 const SPARSE_REPO = 'nachocebey/is';
 const DENSE_REPO = 'grpc/grpc';
+/** The densest evidence set the real corpus has: 98 entities, 137 package_manifest records. */
+const EVIDENCE_REPO = 'Kuddev/pebrel';
 
 /** A member that exists in `SUBJECT_REPO`'s plugin table, named as a reader sees it. */
 const MEMBER_NAME = 'Templater';
 
-const OUT = resolve('artifacts/shots/slice7');
+const OUT = resolve('artifacts/shots/v2');
 const ROOT = resolve('.');
 const DESKTOP = { width: 1920, height: 1080 };
 const SMALL = { width: 1280, height: 800 };
@@ -66,10 +68,17 @@ interface Camera {
   viewBox: string | null;
   /** CSS pixels per world unit, measured from the rendered canvas. */
   scale: number | null;
+  /** World-space. These four must not move when the shell changes. */
   centre: [number, number] | null;
   worldFocal: [number, number] | null;
+  /** Screen-space. Shell-dependent by design: a column appearing moves it. */
   subjectScreen: { x: number; y: number; w: number; h: number } | null;
 }
+
+/** The camera's world-space half: the part a shell change may not touch. */
+const worldCamera = (c: Camera) => JSON.stringify({
+  viewBox: c.viewBox, centre: c.centre, worldFocal: c.worldFocal,
+});
 
 interface PlateProbe {
   label: string;
@@ -87,7 +96,8 @@ interface PlateProbe {
 interface Frame {
   camera: Camera;
   plates: PlateProbe[];
-  rails: Record<string, string>;
+  rails: Record<string, string | boolean>;
+  tracer: Record<string, unknown>;
   drawerSections: string[];
   counts: {
     nodes: number;
@@ -99,6 +109,7 @@ interface Frame {
   overlaps: string[];
   outsideFrame: string[];
   search: string;
+  keyRows: number;
 }
 
 /** Everything about the scene that a reader would notice, read from the DOM. */
@@ -198,12 +209,70 @@ const READ_FRAME = () => {
     },
     plates,
     rails: {
-      lcol: visible('.lcol'),
+      rail: visible('.rail'),
+      railOpen: document.querySelector('#explorer-body')?.classList.contains('rail-open') ?? false,
+      railToggleShown: visible('#rail-toggle'),
+      strip: visible('#strip'),
       band: visible('.band'),
-      legend: visible('.legend'),
-      gutter: visible('.gutter'),
       drawer: visible('.drawer'),
     },
+    tracer: (() => {
+      const tracer = document.querySelector('#tracer');
+      const segs = [...document.querySelectorAll('.tracer-seg')];
+      const dot = document.querySelector('.tracer-dot') as SVGCircleElement | null;
+      const dotBox = dot?.getBoundingClientRect() ?? null;
+      // Which segment the dot actually sits on, measured from the rendered geometry
+      // rather than read from a class. A dot that reported one phase while resting on
+      // another would be a lie about work, and only geometry catches that.
+      //
+      // Each segment's own midpoint, via `getPointAtLength` on its path: a bounding
+      // box cannot be used here, because seven shallow arcs have overlapping boxes and
+      // "which box is the dot inside" is then a question about z-order.
+      let restingOn = -1;
+      let best = Infinity;
+      if (dotBox) {
+        const dx = dotBox.x + dotBox.width / 2;
+        const dy = dotBox.y + dotBox.height / 2;
+        segs.forEach((seg, index) => {
+          const path = seg as SVGPathElement;
+          if (typeof path.getPointAtLength !== 'function' || !path.getTotalLength) return;
+          const total = path.getTotalLength();
+          if (!(total > 0)) return;
+          const at = path.getPointAtLength(total / 2);
+          const box = path.getBoundingClientRect();
+          const scale = box.width > 0 ? box.width / path.getBBox().width : 1;
+          // getPointAtLength is in the path's own user space; map it to screen with the
+          // rendered box so the comparison is in the same units as the dot.
+          const origin = path.getBBox();
+          const px = box.left + (at.x - origin.x) * scale;
+          const py = box.top + (at.y - origin.y) * scale;
+          const d = Math.hypot(px - dx, py - dy);
+          if (d < best) { best = d; restingOn = index; }
+        });
+      }
+      return {
+        segments: segs.length,
+        done: segs.filter((s) => s.classList.contains('is-done')).length,
+        currentCount: segs.filter((s) => s.classList.contains('is-current')).length,
+        // The index of the segment the renderer claims is current, as opposed to how
+        // many claim it. Exactly one must claim it -- and it must be the one the dot
+        // is resting on.
+        current: segs.findIndex((s) => s.classList.contains('is-current')),
+        settled: tracer?.getAttribute('data-settled') ?? null,
+        moving: tracer?.getAttribute('data-moving') ?? null,
+        dotCx: dot?.getAttribute('cx') ?? null,
+        dotCy: dot?.getAttribute('cy') ?? null,
+        restingOn,
+        // A percentage would be a fabricated claim; the tracer must not carry one.
+        hasPercent: (tracer?.closest('#strip')?.textContent ?? '').includes('%'),
+        phases: [...document.querySelectorAll('#phases .phase')].map((p) => ({
+          text: p.querySelector('.phase-name')?.textContent ?? '',
+          ordinal: p.querySelector('.phase-n')?.textContent ?? '',
+          state: p.classList.contains('is-current') ? 'current'
+            : p.classList.contains('is-done') ? 'done' : 'upcoming',
+        })),
+      };
+    })(),
     drawerSections: [...document.querySelectorAll('.drawer .d-block-head')].map((e) => e.textContent?.trim() ?? ''),
     counts: {
       nodes: document.querySelectorAll('svg .node-box').length,
@@ -215,6 +284,7 @@ const READ_FRAME = () => {
     overlaps,
     outsideFrame,
     search: location.search,
+    keyRows: document.querySelectorAll('.rail .key-row').length,
   };
 };
 
@@ -377,8 +447,14 @@ async function main(): Promise<void> {
     check('01 nothing overlaps and nothing leaves the frame',
       fDefault.overlaps.length === 0 && fDefault.outsideFrame.length === 0,
       `overlaps=${fDefault.overlaps.length} outside=${fDefault.outsideFrame.length}`);
-    check('01 the reserved right gutter is used',
-      fDefault.rails.gutter === 'shown');
+    check('01 the context rail is shown, not a floating legend or a world gutter',
+      fDefault.rails.rail === 'shown',
+      `rail ${fDefault.rails.rail}, key rows ${fDefault.keyRows}`);
+    check('01 the rail carries the lineage key, so nothing floats over the canvas',
+      fDefault.keyRows > 0, `${fDefault.keyRows} keyed families`);
+    check('01 the analysis strip is gone once the analysis has finished',
+      fDefault.rails.strip === 'hidden' || fDefault.rails.strip === 'display:none',
+      `strip ${fDefault.rails.strip}`);
 
     // ============================================ 02 · expanded to every member
     const more = await affordancePoint(page, '.plate-row-more');
@@ -398,9 +474,9 @@ async function main(): Promise<void> {
       fExpanded.counts.rows > rowsBefore, `${rowsBefore} rows -> ${fExpanded.counts.rows} rows`);
     check('02 every relationship is individually reachable',
       fExpanded.counts.rows === 14, `${fExpanded.counts.rows} selectable rows for 14 relationships`);
-    check('02 expanding moves nothing on screen',
-      JSON.stringify(fExpanded.camera) === JSON.stringify(fDefault.camera),
-      'camera and subject position identical');
+    check('02 expanding moves nothing in the world',
+      worldCamera(fExpanded.camera) === worldCamera(fDefault.camera),
+      'viewBox, centre and world focal identical');
 
     // ============================== 03 · a real member selected, with the Drawer
     const member = await rowPoint(page, new RegExp(MEMBER_NAME));
@@ -461,14 +537,15 @@ async function main(): Promise<void> {
       `shadow offset ${selectedPlate?.shadow?.dx}/${selectedPlate?.shadow?.dy}`);
     check('03 the selected row stays flat and is marked',
       selectedPlate?.markers === 1, `${selectedPlate?.markers} row markers`);
-    check('03 the context column and the bottom band survive the Drawer',
-      fSelected.rails.lcol === 'shown' && fSelected.rails.band === 'shown');
-    check('03 the Drawer switches the right rail out',
-      fSelected.rails.gutter === 'display:none' || fSelected.rails.gutter === 'hidden',
-      `gutter ${fSelected.rails.gutter}`);
-    check('03 selecting a member moves nothing on screen',
-      JSON.stringify(fSelected.camera) === JSON.stringify(fDefault.camera),
-      'camera and subject position identical');
+    check('03 the rail and the bottom band survive the Drawer',
+      fSelected.rails.rail === 'shown' && fSelected.rails.band === 'shown',
+      `rail ${fSelected.rails.rail}, band ${fSelected.rails.band}`);
+    check('03 the Drawer is its own column, so nothing is switched out to make room',
+      fSelected.rails.drawer === 'shown' && fDefault.rails.rail === 'shown',
+      'the rail was already the left column and stays it');
+    check('03 selecting a member moves nothing in the world',
+      worldCamera(fSelected.camera) === worldCamera(fDefault.camera),
+      'viewBox, centre and world focal identical');
 
     // ================================ 12 · camera stability across the whole arc
     const closeDrawer = await page.evaluate(() => {
@@ -480,9 +557,9 @@ async function main(): Promise<void> {
     await page.waitForTimeout(600);
     const fClosed = await readFrame(page);
     report['12-camera-after-close'] = fClosed;
-    check('12 closing the Drawer restores the frame without a refit',
-      closeDrawer && JSON.stringify(fClosed.camera) === JSON.stringify(fDefault.camera),
-      'camera identical after open and close');
+    check('12 closing the Drawer restores the shell without a refit',
+      closeDrawer && worldCamera(fClosed.camera) === worldCamera(fDefault.camera),
+      'the window is where it was before the Drawer opened');
 
     // ================================================= 04 · sparse real lineage
     await open(page, url, `/${SPARSE_REPO}`);
@@ -569,59 +646,65 @@ async function main(): Promise<void> {
     await page.locator('.tkey').screenshot({ path: `${OUT}/06-entity-primitives.png` }).catch(() => undefined);
 
     // ================================== 07..09 · the analysis dial, phase by phase
-    await open(page, url, `/${SUBJECT_REPO}?dial-test=1`);
-    const dialProbe = async (phase: string): Promise<Record<string, unknown>> =>
-      page.evaluate((p) => {
+    await open(page, url, `/${SUBJECT_REPO}?tracer-test=1`);
+    const tracerProbe = async (phase: string): Promise<void> => {
+      await page.evaluate((p) => {
         const api = (window as unknown as { __setPhaseForTest?: (x: string) => void }).__setPhaseForTest;
-        const progress = document.querySelector('#progress');
-        if (progress) progress.removeAttribute('hidden');
+        const strip = document.querySelector('#strip');
+        if (strip) strip.removeAttribute('hidden');
         api?.(p);
-        const dial = document.querySelector('.dial');
-        const arm = document.querySelector('.dial-arm');
-        const notches = [...document.querySelectorAll('.dial-notch')];
-        const hub = dial?.getBoundingClientRect();
-        const armBox = arm?.getBoundingClientRect();
-        return {
-          phase: p,
-          notches: notches.length,
-          done: notches.filter((n) => n.classList.contains('is-done')).length,
-          current: notches.filter((n) => n.classList.contains('is-current')).length,
-          settled: dial?.getAttribute('data-settled') ?? null,
-          moving: dial?.getAttribute('data-moving') ?? null,
-          angle: dial instanceof HTMLElement ? dial.style.getPropertyValue('--dial-angle') : null,
-          // The arm's tip against the current notch, in screen pixels.
-          tipGap: hub && armBox ? Math.round((armBox.bottom - hub.bottom) * 100) / 100 : null,
-          // A percentage would be a fabricated claim; the dial must not carry one.
-          hasPercent: (dial?.textContent ?? '').includes('%'),
-        };
       }, phase);
+    };
 
     for (const [index, phase] of (['collecting', 'publishing', 'complete'] as const).entries()) {
       /*
-       * Set the phase, let the arm finish moving, and only then read it.
+       * Set the phase, let the tracer arrive, and only then read it.
        *
        * `data-moving` describes the transition currently in flight, so sampling it in
-       * the same tick as the phase change reads the arm mid-swing. The earlier pass
-       * did exactly that and reported a settled dial that was still moving -- a defect
-       * in the measurement, not in the dial.
+       * the same tick as the phase change reads the tracer mid-arc. The earlier pass
+       * did exactly that and reported a settled tracer that was still moving -- a
+       * defect in the measurement, not in the tracer.
        */
-      await dialProbe(phase);
+      await tracerProbe(phase);
       await page.waitForTimeout(900);
-      const dial = await dialProbe(phase);
-      report[`0${7 + index}-dial-${phase}`] = dial;
+      /*
+       * Probe again before reading. `data-moving` describes the transition currently
+       * in flight, so reading it right after the change reports the arrival rather
+       * than the resting state. The second call is idempotent -- the phase is already
+       * set, so `phaseTransition` returns null and nothing restarts. This is exactly
+       * what the client itself does on every poll, which is why a polling client can
+       * never flicker.
+       */
+      await tracerProbe(phase);
+      await page.waitForTimeout(900);
+      const frame = await readFrame(page);
+      const tracer = frame.tracer;
+      report[`0${7 + index}-tracer-${phase}`] = tracer;
       const file = ['07-analysis-early.png', '08-analysis-late.png', '09-analysis-settled.png'][index]!;
       await page.screenshot({ path: `${OUT}/${file}` });
-      check(`0${7 + index} the dial reports the phase it was given`,
-        dial.notches === 7 && dial.hasPercent === false,
-        `${dial.notches} notches, percent=${dial.hasPercent}`);
+      check(`0${7 + index} the tracer reports the phase it was given`,
+        tracer.segments === 7 && tracer.hasPercent === false,
+        `${tracer.segments} segments, percent=${tracer.hasPercent}`);
+      check(`0${7 + index} the tracer rests on the segment it claims`,
+        tracer.restingOn === tracer.current && tracer.currentCount === 1,
+        `resting on ${tracer.restingOn}, marked current ${tracer.current}, claimed by ${tracer.currentCount}`);
+      check(`0${7 + index} the phases are one row beside the arc, all seven named`,
+        (tracer.phases as Array<{ text: string }>).length === 7
+          && (tracer.phases as Array<{ text: string }>).every((p) => p.text.trim().length > 0),
+        (tracer.phases as Array<{ text: string }>).map((p) => p.text).join(' / '));
     }
-    const settled = report['09-dial-complete'] as Record<string, unknown>;
-    check('09 the dial settles on its final notch',
+    const settled = report['09-tracer-complete'] as Record<string, unknown>;
+    check('09 the tracer settles on its final segment',
       settled.settled === 'true' && settled.moving === 'false',
       `settled=${settled.settled} moving=${settled.moving}`);
-    check('09 every earlier notch is marked done at the settled phase',
-      settled.done === 6 && settled.current === 1,
-      `done=${settled.done} current=${settled.current}`);
+    check('09 every earlier segment is marked done at the settled phase',
+      settled.done === 6 && settled.currentCount === 1 && settled.current === 6,
+      `done=${settled.done} current index=${settled.current} claimed by ${settled.currentCount}`);
+    check('09 the tracer is an open arc, not a closed dial',
+      Array.isArray(settled.phases) && (await page.evaluate(
+        () => document.querySelectorAll('.dial, .dial-arm, .dial-face, .dial-notch').length,
+      )) === 0,
+      'no clock geometry anywhere in the shell');
 
     // ================================================= 10 · the complete shell
     await page.goto(`${url}/`, { waitUntil: 'domcontentloaded' });
@@ -654,22 +737,29 @@ async function main(): Promise<void> {
         const b = el.getBoundingClientRect();
         return { x: Math.round(b.x), y: Math.round(b.y), w: Math.round(b.width), h: Math.round(b.height) };
       };
-      const zones = { lcol: rect('.lcol'), band: rect('.band'), gutter: rect('.gutter'), controls: rect('.viewport-controls') };
+      const zones = { rail: rect('.rail'), band: rect('.band'), strip: rect('#strip'), controls: rect('.viewport-controls') };
       const clipped: string[] = [];
+      /*
+       * Only shell elements are checked for clipping. The band is a world object now,
+       * so "band right > viewport" is not a defect -- it is a coordinate the reader
+       * pans to. What would be a defect is a *shell* element pushed out of the shell,
+       * or the document growing a scrollbar the canvas is not supposed to have.
+       */
       for (const [name, b] of Object.entries(zones)) {
-        if (!b) continue;
+        if (!b || name === 'band') continue;
         if (b.y + b.h > window.innerHeight + 1) clipped.push(`${name} bottom ${b.y + b.h} > ${window.innerHeight}`);
         if (b.y < -1) clipped.push(`${name} top ${b.y} < 0`);
         if (b.x + b.w > window.innerWidth + 1) clipped.push(`${name} right ${b.x + b.w} > ${window.innerWidth}`);
       }
-      // Does the context column stand over anything the reader has to click?
+      // Does anything in the shell stand over something the reader has to click?
       const covered: string[] = [];
-      const lcol = zones.lcol;
-      if (lcol) {
+      for (const name of ['rail', 'strip'] as const) {
+        const shellBox = zones[name];
+        if (!shellBox || shellBox.w === 0) continue;
         for (const el of document.querySelectorAll('svg .node-box, svg .bundle-card-box, .plate-row-hit')) {
           const b = el.getBoundingClientRect();
-          if (b.left < lcol.x + lcol.w && lcol.x < b.right && b.top < lcol.y + lcol.h && lcol.y < b.bottom) {
-            covered.push(el.getAttribute('class') ?? el.tagName);
+          if (b.left < shellBox.x + shellBox.w && shellBox.x < b.right && b.top < shellBox.y + shellBox.h && shellBox.y < b.bottom) {
+            covered.push(`${name}:${el.getAttribute('class') ?? el.tagName}`);
           }
         }
       }
@@ -687,19 +777,61 @@ async function main(): Promise<void> {
         verticalOverflow: document.documentElement.scrollHeight > window.innerHeight,
         docHeight: document.documentElement.scrollHeight,
         innerHeight: window.innerHeight,
+        // The frozen breakpoints, read from the rendered shell rather than the source.
+        railCollapsed: getComputedStyle(document.querySelector('.rail') as Element).display === 'none',
+        railToggleShown: getComputedStyle(document.querySelector('#rail-toggle') as Element).display !== 'none',
+        stripHeight: (zones.strip?.h ?? 0) > 0,
       };
     });
     report['11-responsive'] = responsive;
     await small.screenshot({ path: `${OUT}/11-responsive-1280x800.png` });
-    check('11 no authored zone is clipped at 1280x800',
+    check('11 no shell zone is clipped at 1280x800',
       responsive.clipped.length === 0, responsive.clipped.join('; '));
-    check('11 the context column covers nothing interactive',
+    check('11 nothing in the shell covers something interactive',
       responsive.covered.length === 0, `${responsive.covered.length} covered`);
     check('11 the zoom controls are still clickable',
       responsive.controlsHittable);
     check('11 the canvas owns the viewport with no scrollbar',
       !responsive.horizontalOverflow && !responsive.verticalOverflow,
       `doc ${responsive.docHeight} vs ${responsive.innerHeight}`);
+    check('11 the rail collapses to a disclosure at 1280, as the design freezes it',
+      responsive.railCollapsed && responsive.railToggleShown,
+      `rail collapsed=${responsive.railCollapsed}, toggle shown=${responsive.railToggleShown}`);
+
+    // ================================== 11b · the same graph at 1280, drawer open
+    const smallMember = await rowPoint(small, new RegExp(MEMBER_NAME))
+      ?? await (async () => {
+        const m = await affordancePoint(small, '.plate-row-more');
+        if (m) await small.mouse.click(m.x, m.y);
+        await small.waitForTimeout(700);
+        return rowPoint(small, new RegExp(MEMBER_NAME));
+      })();
+    if (smallMember) {
+      await small.mouse.click(smallMember.x, smallMember.y);
+      await small.waitForTimeout(800);
+    }
+    await small.screenshot({ path: `${OUT}/11b-1280x800-drawer.png` });
+    const smallDrawer = await small.evaluate(() => {
+      const drawer = document.querySelector('.drawer') as HTMLElement | null;
+      const style = drawer ? getComputedStyle(drawer) : null;
+      const stage = document.querySelector('#stage')?.getBoundingClientRect() ?? null;
+      const box = drawer?.getBoundingClientRect() ?? null;
+      return {
+        drawerShown: !!drawer && !drawer.hasAttribute('hidden'),
+        // At 1340 and below the frozen design makes the Drawer an overlay. It must
+        // still be inside the shell and must not have pushed the stage.
+        position: style?.position ?? null,
+        insideViewport: !!box && box.left >= -1 && box.right <= window.innerWidth + 1,
+        stageWidth: stage?.width ?? null,
+        horizontalOverflow: document.documentElement.scrollWidth > window.innerWidth,
+      };
+    });
+    report['11b-1280-drawer'] = smallDrawer;
+    check('11b the Drawer is an overlay at 1280 and stays inside the viewport',
+      smallDrawer.drawerShown && smallDrawer.position === 'absolute' && smallDrawer.insideViewport,
+      `position=${smallDrawer.position}, inside=${smallDrawer.insideViewport}`);
+    check('11b opening it adds no scrollbar',
+      !smallDrawer.horizontalOverflow);
     await small.close();
 
     // ===================================== 12 · camera stability, proof capture
@@ -720,9 +852,19 @@ async function main(): Promise<void> {
     await page.screenshot({ path: `${OUT}/12b-camera-selected-drawer.png` });
     const camSelected = await readFrame(page);
     report['12-camera-proof'] = { default: camDefault.camera, selected: camSelected.camera };
-    check('12 the camera is identical before and after reading a relationship',
-      JSON.stringify(camDefault.camera) === JSON.stringify(camSelected.camera),
-      `${JSON.stringify(camDefault.camera)} vs ${JSON.stringify(camSelected.camera)}`);
+    check('12 the window is identical before and after reading a relationship',
+      worldCamera(camDefault.camera) === worldCamera(camSelected.camera),
+      `${worldCamera(camDefault.camera)} vs ${worldCamera(camSelected.camera)}`);
+    /*
+     * The subject's *screen* box may differ here, and that is the new design working:
+     * the Drawer is a shell column, so the stage got narrower and the window over the
+     * same world got narrower with it. What must not change is where the subject is in
+     * the world. Asserting the screen box instead is what forced the old Drawer to be
+     * an overlay -- the check was protecting the symptom, not the invariant.
+     */
+    check('12 the subject keeps its world position while the shell changes',
+      JSON.stringify(camDefault.camera.worldFocal) === JSON.stringify(camSelected.camera.worldFocal),
+      `world focal ${JSON.stringify(camSelected.camera.worldFocal)}`);
 
     // ==================================== 13 · hierarchy without any text at all
     await open(page, url, `/${DENSE_REPO}`);
@@ -755,6 +897,90 @@ async function main(): Promise<void> {
     check('13 hierarchy survives with every glyph removed',
       masked.textTransparent === true && masked.boxesKept > 0 && masked.depthShapesKept > 0 && masked.marksKept > 0,
       `boxes=${masked.boxesKept} depth=${masked.depthShapesKept} marks=${masked.marksKept}`);
+
+    // ============================ 15..18 · the densest real evidence set (pebrel)
+    /*
+     * `Kuddev/pebrel` is the only repository in the corpus dense enough to exercise
+     * the browse path: 98 entities, 137 `package_manifest` records, and a serde entry
+     * with eight of them. Every count below is read off the shipped page, never
+     * asserted against a fixture -- the point is what the real data does.
+     */
+    const evidence = await browser.newPage({ viewport: DESKTOP });
+    evidence.on('pageerror', (e) => errors.push(`[pebrel] pageerror: ${e.message}`));
+    evidence.on('console', (m) => {
+      if (m.type() === 'error') errors.push(`[pebrel] ${m.text()}`);
+    });
+    await open(evidence, url, `/${EVIDENCE_REPO}`);
+    const fEvidence = await readFrame(evidence);
+    report['15-evidence-default'] = fEvidence;
+    await evidence.screenshot({ path: `${OUT}/15-pebrel-default.png` });
+    check('15 the densest real graph aggregates rather than listing 98 boxes',
+      fEvidence.counts.plates > 0 && fEvidence.counts.loose < 20,
+      `${fEvidence.counts.loose} loose, ${fEvidence.counts.plates} plates, ${fEvidence.counts.rows} rows`);
+    check('15 every plate row sits inside its own plate',
+      fEvidence.plates.every((p) => p.rowsInsideBox));
+    check('15 the dense evidence composes without overlap',
+      fEvidence.overlaps.length === 0 && fEvidence.outsideFrame.length === 0,
+      `overlaps=${fEvidence.overlaps.length} outside=${fEvidence.outsideFrame.length}`);
+    check('15 the rail key states the families this graph really has',
+      fEvidence.keyRows > 0, `${fEvidence.keyRows} keyed families`);
+
+    const evidenceMore = await affordancePoint(evidence, '.plate-row-more');
+    if (evidenceMore) {
+      await evidence.mouse.click(evidenceMore.x, evidenceMore.y);
+      await evidence.waitForTimeout(800);
+    }
+    const fEvidenceExpanded = await readFrame(evidence);
+    report['16-evidence-expanded'] = fEvidenceExpanded;
+    await evidence.screenshot({ path: `${OUT}/16-pebrel-expanded.png` });
+    check('16 expanding the dense plate reveals held-back evidence',
+      fEvidenceExpanded.counts.rows > fEvidence.counts.rows,
+      `${fEvidence.counts.rows} rows -> ${fEvidenceExpanded.counts.rows} rows`);
+    check('16 expanding does not move the world',
+      worldCamera(fEvidenceExpanded.camera) === worldCamera(fEvidence.camera));
+
+    const evidenceMember = await rowPoint(evidence, /serde/) ?? await rowPoint(evidence, /./);
+    if (evidenceMember) {
+      await evidence.mouse.click(evidenceMember.x, evidenceMember.y);
+      await evidence.waitForTimeout(800);
+    }
+    const fEvidenceSelected = await readFrame(evidence);
+    report['17-evidence-selected'] = fEvidenceSelected;
+    await evidence.screenshot({ path: `${OUT}/17-pebrel-selected.png` });
+    const evidenceDrawer = await evidence.evaluate(
+      () => document.querySelector('.drawer')?.textContent?.replace(/\s+/g, ' ') ?? '',
+    );
+    check('17 selecting real evidence opens the Drawer with its manifest record',
+      fEvidenceSelected.rails.drawer === 'shown' && /package\.json|manifest|Cargo\.toml/i.test(evidenceDrawer),
+      fEvidenceSelected.drawerSections.join(' / '));
+    check('17 selecting evidence does not move the world',
+      worldCamera(fEvidenceSelected.camera) === worldCamera(fEvidence.camera));
+
+    // Selected + hover: the state the ladder exists to protect.
+    const evidenceRow = await rowPoint(evidence, /./);
+    if (evidenceRow) {
+      await evidence.mouse.move(evidenceRow.x, evidenceRow.y);
+      await evidence.waitForTimeout(400);
+    }
+    await evidence.screenshot({ path: `${OUT}/18-pebrel-selected-hover.png` });
+    const hoverKept = await evidence.evaluate(() => {
+      const plate = document.querySelector('.bundle-card.is-selected');
+      const row = document.querySelector('.plate-row');
+      return {
+        plateSelected: !!plate,
+        // A selected row must keep its marker on hover. It used to paint white on
+        // hover and lose it, which is the exact failure the ladder forbids.
+        markers: row ? row.querySelectorAll('.plate-row-marker').length : 0,
+        rowStates: [...document.querySelectorAll('.plate-row')].map(
+          (r) => r.getAttribute('data-state') ?? r.className,
+        ),
+      };
+    });
+    report['18-selected-hover'] = hoverKept;
+    check('18 a selected row keeps its marker on hover',
+      hoverKept.plateSelected && hoverKept.markers > 0,
+      `${hoverKept.markers} markers across ${hoverKept.rowStates.length} rows, states ${[...new Set(hoverKept.rowStates)].join(' | ')}`);
+    await evidence.close();
 
     // ================================ 14 · the depth ladder, in painted pixels
     /*
@@ -819,16 +1045,17 @@ async function main(): Promise<void> {
         const rows = [...document.querySelectorAll('.plate-row')];
         const shapes = rows.map((r) => r.querySelectorAll('.depth-shadow').length);
         const band = document.querySelector('.band');
-        const col = document.querySelector('.lcol');
+        const rail = document.querySelector('.rail');
         return {
           rowShadowCount: shapes,
           bandShadow: band ? band.querySelectorAll('.depth-shadow').length : -1,
-          lcolShadow: col ? col.querySelectorAll('.depth-shadow').length : -1,
+          railShadow: rail ? rail.querySelectorAll('.depth-shadow').length : -1,
         };
       });
       depthPixels['flat'] = flat;
       check('14 flat surfaces throw no depth shadow',
-        flat.rowShadowCount.every((n) => n === 0),
+        flat.rowShadowCount.every((n) => n === 0)
+          && flat.bandShadow === 0 && flat.railShadow === 0,
         `${flat.rowShadowCount.length} rows, ${flat.rowShadowCount.reduce((a, b) => a + b, 0)} shadows`);
     }
     report['14-depth'] = depthPixels;
