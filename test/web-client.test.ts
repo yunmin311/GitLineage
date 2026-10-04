@@ -880,7 +880,10 @@ test('each depth tier has an offset shape that carries the right shadow colour',
 test('the depth ladder uses no blur, glow, gradient or diffuse shadow', () => {
   assert.equal(/filter:\s*blur/.test(APP_CSS), false, 'no blur anywhere in the client stylesheet');
   assert.equal(/backdrop-filter/.test(APP_CSS), false, 'no backdrop blur');
-  assert.equal(/gradient/.test(APP_CSS), false, 'no gradient anywhere in the client stylesheet');
+  // Comments may discuss gradients; no declaration may use one.
+  const declared = APP_CSS.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/\/\/[^\n]*/g, ' ');
+  assert.equal(/(^|[;{\s])(repeating-)?(linear|radial|conic)-gradient\(/.test(declared), false,
+    'no gradient may be declared in the client stylesheet');
 });
 
 test('flat surfaces carry no topology shadow', () => {

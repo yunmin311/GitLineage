@@ -204,13 +204,129 @@ a { color: inherit; }
 }
 .overlay[hidden] { display: none; }
 /*
+ * The analysis dial.
+ *
+ * Flat, hard-edged and in the same paper/ink vocabulary as everything else. No
+ * glow, no gradient, no blur: the arm's motion and the notch it rests on carry the
+ * state, and any soft treatment would read as decoration rather than as a reading of
+ * the analyser's progress.
+ *
+ * The arm rotates to `--dial-angle`, which the renderer sets once per phase change.
+ * `data-moving` is only true for the duration of a transition, so a re-render at the
+ * same phase does not restart the easing -- the client polls repeatedly, and a
+ * twitching arm would read as instability rather than as progress.
+ */
+.dial {
+  --dial-angle: 0deg;
+  --dial-size: 132px;
+  /* Just inside the ring, so a notch sits on the line the arm's tip travels. */
+  --notch-r: calc(var(--dial-size) / 2 - 7px);
+  position: relative;
+  width: var(--dial-size);
+  height: var(--dial-size);
+  margin: 0 auto 18px;
+}
+.dial-face {
+  position: absolute;
+  inset: 0;
+  border: 1.5px solid var(--rule-2);
+  border-radius: 50%;
+}
+/* The notch host fills the ring, so a dot's 50% is the dial's centre. */
+.dial-notches { position: absolute; inset: 0; }
+/*
+ * One notch per phase, flat and hard-edged: a dot, not a gradient and not a tick
+ * painted by a pseudo-element.
+ *
+ * The frozen design puts a real dot on the ring for each phase the analyser
+ * reports and stops the arm on it, and this is that. Each dot carries
+ * `--notch-a`, which is `phaseAngle(i)` -- the angle the arm is given -- so a
+ * notch and the arm that rests on it cannot drift apart.
+ *
+ * The placement is doing the work, not just the paint: a tick at the top of the
+ * face and one at the bottom would never be touched, because the sweep runs from
+ * -75 to +75 degrees and reaches neither end of the ring.
+ */
+.dial-notch {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  border-radius: 50%;
+  background: var(--rule-2);
+  /*
+   * The notch orbits the dial's centre. The dot is centred on that centre, so the
+   * rotation turns about it and the push outward lands the dot on the ring at the
+   * arm's own angle -- `--notch-a` is `phaseAngle(i)`, the angle the arm rests on.
+   */
+  transform: rotate(var(--notch-a)) translateY(calc(-1 * var(--notch-r)));
+}
+/* Passed: the analyser has been here and moved on. */
+.dial-notch.is-done { background: var(--verified); }
+/* Current: the notch the arm is resting on, large enough to be caught by an eye. */
+.dial-notch.is-current {
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  background: var(--ink);
+}
+.dial-arm {
+  /*
+   * The arm hangs from the hub and points outward.
+   *
+   * `bottom: 50%` puts the arm's lower end on the dial's centre, which is the only
+   * position in which `transform-origin: 50% 100%` means the centre. Anchoring the
+   * arm with `top: 50%` instead puts that origin on the arm's own middle, and the
+   * arm then swings through the centre like a clock hand, coming to rest at the
+   * lower right of the ring with its tip nowhere near the notch it should sit on.
+   */
+  position: absolute;
+  left: 50%;
+  bottom: 50%;
+  width: 2px;
+  /* The arm reaches exactly as far as the notch ring, so its tip lands on a dot. */
+  height: var(--notch-r);
+  margin-left: -1px;
+  background: var(--ink);
+  transform-origin: 50% 100%;
+  transform: rotate(var(--dial-angle));
+}
+.dial-hub {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 9px;
+  height: 9px;
+  margin: -4.5px 0 0 -4.5px;
+  background: var(--ink);
+  border-radius: 50%;
+}
+/* The eased transition, applied only while the phase is actually moving. */
+.dial[data-moving='true'] .dial-arm {
+  transition: transform 420ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+/*
+ * Reduced motion: the arm still moves, and still lands on the notch, so the phase
+ * stays readable. It simply arrives at once instead of travelling.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .dial[data-moving='true'] .dial-arm { transition: none; }
+}
+/* Settled: the dial rests on the last notch and the face closes. */
+.dial[data-settled='true'] .dial-face { border-color: var(--ink-3); }
+.dial[data-settled='true'] .dial-hub { background: var(--verified); }
+
+/* The phase list stays as the textual reading of the same state. */
+.phases { list-style: none; margin: 0 0 16px; padding: 0; text-align: left; min-width: 320px; }
+/*
  * Analysis progress.
  *
  * A stepped list of real phases, not a bar. There is no percentage anywhere: the
- * server reports a phase only once it has reached it, and between two stages
- * there is nothing honest to interpolate.
+ * server reports a phase only once it has reached it, and between two stages there
+ * is nothing honest to interpolate.
  */
-.phases { list-style: none; margin: 0 0 16px; padding: 0; text-align: left; min-width: 320px; }
 .phase { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--ink-4); padding: 3px 0; }
 .phase-dot { width: 7px; height: 7px; border: 1px solid var(--rule-2); border-radius: 50%; flex: none; background: transparent; }
 .phase.is-done { color: var(--ink-3); }
@@ -220,12 +336,6 @@ a { color: inherit; }
 .progress-label { font-size: 12px; color: var(--ink-2); margin: 0; }
 .progress-note { font-size: 10px; color: var(--ink-4); margin: 8px 0 0; }
 .progress-job { font-size: 10px; color: var(--ink-4); margin: 4px 0 0; }
-
-.loading-bar { width: 280px; height: 3px; background: var(--surface-sunk); border-radius: 2px; overflow: hidden; }
-.loading-fill { display: block; height: 100%; width: 14%; background: var(--verified); animation: sweep 1.6s linear infinite; }
-@keyframes sweep { 0% { transform: translateX(-110%); } 100% { transform: translateX(760%); } }
-.loading-label { font-size: 12px; color: var(--ink-2); margin: 0; }
-.loading-note { font-size: 11px; color: var(--ink-4); margin: 0; max-width: 44ch; }
 .empty-head, .failure-head { font-size: 18px; font-weight: 650; margin: 0; }
 .failure-head { color: var(--alert); }
 .empty-body, .failure-body { font-size: 12px; color: var(--ink-3); margin: 0; max-width: 56ch; line-height: 1.55; }

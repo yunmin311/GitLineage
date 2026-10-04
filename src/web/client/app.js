@@ -60,6 +60,10 @@ import {
 import { evidenceSourceUrl, SIMILARITY_DISCLAIMER } from './lib/evidence-links.mjs';
 import { nodePrimitive, nodePrimitiveRadius, depthTier, depthClass, depthOffset, depthShadowClass } from './lib/primitives.mjs';
 import { RefitTrigger, shouldRefit } from './lib/camera.mjs';
+import {
+  PHASES, SETTLED_PHASE, phaseAngle, phaseLabel, phaseTransition, isSettled,
+  phaseIndex as dialPhaseIndex,
+} from './lib/phases.mjs';
 import { buildComposition, plateRows } from './lib/aggregate.mjs';
 import { Regime, regimeFor, partitionPeers, isHomogeneousFan } from './lib/regime.mjs';
 import {
@@ -225,28 +229,110 @@ function showWorking() {
 }
 
 /**
- * Renders the real job phases.
+ * The dial's notches: one dot per phase, sitting at the angle the arm stops on.
  *
- * Every step shown is one the server has reported reaching. There is no
- * percentage and no interpolation: between two stages there is nothing honest to
- * show, so nothing is shown.
+ * Built once and reclassed after that, because the geometry cannot change while an
+ * analysis runs and rebuilding it on every poll would throw away the state a reader
+ * is tracking. Each dot carries `phaseAngle(i)` -- the same value the arm is given
+ * -- so a notch and the arm that rests on it cannot drift apart. That shared angle
+ * is the whole point of the placement: a mark anywhere else on the ring is one the
+ * arm never reaches, and a reader watching it stop somewhere else is being told
+ * something the analyser did not do.
+ */
+function renderNotches(dial, index) {
+  const host = dial.querySelector('.dial-notches');
+  if (!host) return;
+  if (host.childElementCount !== PHASES.length) {
+    host.replaceChildren(...PHASES.map((_, at) => {
+      const notch = el('i', { class: 'dial-notch', 'aria-hidden': 'true', 'data-at': String(at) });
+      notch.style.setProperty('--notch-a', `${phaseAngle(at)}deg`);
+      return notch;
+    }));
+  }
+  for (const notch of host.children) {
+    const at = Number(notch.dataset.at);
+    notch.classList.toggle('is-done', at < index);
+    notch.classList.toggle('is-current', at === index);
+  }
+}
+
+/**
+ * The analysis dial.
+ *
+ * An arm that eases to the phase the analyser has actually reported and stops
+ * there. There is no percentage anywhere: the server reports a phase only once it
+ * has reached it, and between two stages there is nothing honest to interpolate. A
+ * re-render at the same phase does not restart the easing, because the client polls
+ * repeatedly while an analysis runs and a twitching arm would read as instability.
+ *
+ * Under `prefers-reduced-motion` the arm moves to the notch immediately. It still
+ * shows the phase, so the information does not depend on the animation.
  */
 function renderPhases(status, jobId) {
+  const dial = $('dial');
   const list = $('phases');
+  const label = $('progress-label');
+  if (!dial || !list) return;
+
+  const index = dialPhaseIndex(status);
+  const settled = isSettled(status);
+  const moving = phaseTransition(state.phase, status);
+
   list.replaceChildren();
-  const current = phaseIndex(status);
-  for (const phase of VISIBLE_PHASES) {
-    const reached = VISIBLE_PHASES.indexOf(phase) <= current;
+  for (const phase of PHASES) {
+    const at = PHASES.indexOf(phase);
     const item = el('li', {
-      class: `phase${phase === status ? ' is-current' : ''}${reached ? ' is-done' : ''}`,
+      class: [
+        'phase',
+        phase === status ? 'is-current' : '',
+        at < index || settled ? 'is-done' : '',
+        phase === SETTLED_PHASE && settled ? 'is-settled' : '',
+      ].filter(Boolean).join(' '),
+      'data-phase': phase,
     });
     item.append(el('span', { class: 'phase-dot', 'aria-hidden': 'true' }));
-    item.append(el('span', { class: 'phase-text', text: PHASE_TEXT[phase] }));
+    item.append(el('span', { class: 'phase-text', text: phaseLabel(phase) }));
     list.append(item);
   }
-  $('progress-label').textContent = PHASE_TEXT[status] ?? '';
-  $('progress-job').textContent = jobId ? `job ${jobId.slice(0, 8)}` : '';
+
+  renderNotches(dial, index);
+
+  const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const angle = phaseAngle(index);
+  // One transition per phase change, never per render.
+  dial.style.setProperty('--dial-angle', `${angle}deg`);
+  dial.dataset.phase = String(index);
+  dial.dataset.settled = settled ? 'true' : 'false';
+  dial.dataset.moving = moving && !reduced ? 'true' : 'false';
+  dial.setAttribute('role', 'img');
+  dial.setAttribute('aria-label', `${phaseLabel(status)}, ${index + 1} of ${PHASES.length}`);
+
+  if (label) label.textContent = phaseLabel(status);
+  const job = $('progress-job');
+  if (job) job.textContent = jobId ? `job ${jobId.slice(0, 8)}` : '';
   setHidden($('progress'), false);
+
+  state.phase = status;
+}
+
+/**
+ * Test-only stepper for the analysis dial.
+ *
+ * The dial is driven by whatever phase the server last reported, so verifying its
+ * motion in a browser means driving it through the real phase sequence rather than
+ * waiting for an analysis to happen to be slow at the right moment. This is only
+ * reachable when the page is opened with `?dial-test`, and it calls the same
+ * `renderPhases` the polling loop does, so what is measured is the shipped code path
+ * and not a stand-in for it.
+ */
+function installDialTestStepper() {
+  if (typeof window === 'undefined') return;
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('dial-test') !== '1') return;
+  window.__setPhaseForTest = (phase) => {
+    state.phase = state.phase ?? 'queued';
+    renderPhases(phase, 'dial-test');
+  };
 }
 
 function hideWorking() {
@@ -2015,4 +2101,5 @@ function boot() {
   }
 }
 
+installDialTestStepper();
 boot();

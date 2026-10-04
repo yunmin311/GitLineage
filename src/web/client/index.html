@@ -131,6 +131,12 @@
           percentage: the server only reports a phase it has actually reached.
         -->
         <div class="overlay progress" id="progress" hidden>
+          <div class="dial" id="dial" aria-hidden="true">
+            <div class="dial-face"></div>
+            <div class="dial-notches" aria-hidden="true"></div>
+            <div class="dial-arm"></div>
+            <div class="dial-hub"></div>
+          </div>
           <ol class="phases" id="phases"></ol>
           <p class="mono progress-label" id="progress-label"></p>
           <p class="mono progress-note" id="progress-note">
