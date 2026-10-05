@@ -1394,6 +1394,24 @@ async function main(): Promise<void> {
     {
       const scroller = await browser.newPage({ viewport: DESKTOP });
       scroller.on('pageerror', (e) => errors.push(`[scroll] pageerror: ${e.message}`));
+
+      /*
+       * Keep the view payload the page actually received.
+       *
+       * The group counts below are checked against this, so that the grouping is proved
+       * against the same bytes the app drew from rather than against a checked-in
+       * fixture that drifts out of date the next time the corpus is re-analysed.
+       */
+      let pebrelPayload: { data?: Record<string, unknown> } | null = null;
+      scroller.on('response', (response) => {
+        if (!/\/api\/view\/kuddev\/pebrel/i.test(response.url())) return;
+        void response.json().then((body) => { pebrelPayload = body as { data?: Record<string, unknown> }; })
+          .catch(() => { /* a non-JSON body is the app's problem to report, not this listener's */ });
+      });
+      const capturedView = async () => {
+        for (let i = 0; i < 60 && !pebrelPayload; i++) await scroller.waitForTimeout(100);
+        return (pebrelPayload as { data?: Record<string, unknown> } | null)?.data ?? null;
+      };
       await open(scroller, url, `/${EVIDENCE_REPO}`);
       await scroller.click('svg .node.is-subject .node-hit');
       await scroller.waitForTimeout(900);
@@ -1402,6 +1420,89 @@ async function main(): Promise<void> {
       check('19 the dense Drawer really scrolls',
         drawerScroll.scrollable && drawerScroll.rows > 50,
         `${drawerScroll.rows} rows, ${drawerScroll.scrollable ? 'scrollable' : 'not scrollable'}`);
+
+      /*
+       * The dense Drawer must not be a flat list of ninety-seven.
+       *
+       * `Kuddev/pebrel`'s subject has 97 one-hop dependency relationships, and listing
+       * them as 97 undifferentiated rows restates the count rather than answering
+       * anything. What the evidence says is that they are *declared* by a handful of
+       * manifests -- a dozen-odd `Cargo.toml` and `package.json` files -- so the Drawer
+       * groups by the file that declares each relationship, names each group in mono,
+       * counts it, and holds that heading still while its members scroll under it.
+       *
+       * The counts are recounted here from the payload the page actually received and
+       * compared against the DOM, rather than being asserted as literals.
+       *
+       * That is not fussiness about how to write a test. `pebrel` moves: a re-analysis
+       * shifts which manifest declares what, and this corpus is re-analysed as the
+       * product changes. A literal `nebula_app = 51` would have kept passing for a
+       * fixture nobody had refreshed and started failing the day the cache was rebuilt,
+       * with the grouping itself perfectly correct both times. The invariants below --
+       * every group named by a real file, the counts partitioning the total, the order
+       * being the same total order the app promises, and the DOM agreeing with an
+       * independent recount of the payload -- are what the grouping actually promises,
+       * and they hold at every revision.
+       */
+      const pebrelView = await capturedView();
+      const recount = new Map<string, number>();
+      const payloadEvidence = (pebrelView?.evidenceByRelationship ?? {}) as Record<
+        string, Array<{ data?: { data?: unknown; manifest_path?: string } & Record<string, unknown> }>>;
+      for (const records of Object.values(payloadEvidence)) {
+        const first = records?.[0];
+        const payload = first?.data ?? null;
+        const manifest = payload ? (payload.data as { manifest_path?: string } | undefined)?.manifest_path
+          ?? (payload as { manifest_path?: string }).manifest_path : undefined;
+        recount.set(manifest ?? '(none)', (recount.get(manifest ?? '(none)') ?? 0) + 1);
+      }
+      const expected = [...recount.entries()]
+        .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+        .map(([name, count]) => `${name}=${count}`).join(', ');
+      report['19-dense-groups-expected'] = expected;
+
+      const groups = await scroller.evaluate(`(() => {
+        const heads = [...document.querySelectorAll('.drawer-inner .d-group-head')];
+        const blockHead = [...document.querySelectorAll('.drawer-inner .d-block-head')]
+          .find((h) => /RELATIONSHIPS/.test(h.textContent));
+        return {
+          block: blockHead?.textContent?.trim() ?? '',
+          blockSticky: blockHead ? getComputedStyle(blockHead).position : null,
+          groups: heads.map((h) => ({
+            name: h.querySelector('.mono')?.textContent?.trim() ?? '',
+            count: Number(h.querySelector('.d-group-count')?.textContent ?? '0'),
+            sticky: getComputedStyle(h).position,
+          })),
+          rows: document.querySelectorAll('.drawer-inner .bundle-row').length,
+        };
+      })()`) as {
+        block: string; blockSticky: string | null;
+        groups: Array<{ name: string; count: number; sticky: string }>;
+        rows: number;
+      };
+      report['19-dense-groups'] = groups;
+      await scroller.screenshot({ path: `${OUT}/19-pebrel-dense-drawer.png` });
+      const named = groups.groups.filter((g) => /\.(toml|json)$/.test(g.name));
+      const summed = groups.groups.reduce((sum, g) => sum + g.count, 0);
+      const ordered = [...groups.groups].sort((a, b) =>
+        b.count - a.count || a.name.localeCompare(b.name));
+      const rendered = groups.groups.map((g) => `${g.name}=${g.count}`).join(', ');
+      check('19 the dense Drawer is grouped by the manifest that declares each relationship',
+        groups.groups.length >= 5 && named.length === groups.groups.length,
+        `${groups.groups.length} groups, ${named.length} named by file: ${rendered}`);
+      check('19 the rendered groups are exactly the payload recounted independently',
+        rendered === expected, `rendered ${rendered} | recounted ${expected}`);
+      check('19 every member is reachable and counted exactly once',
+        groups.rows === summed && summed === Object.keys(payloadEvidence).length,
+        `${groups.rows} rows, counts sum ${summed}, ${Object.keys(payloadEvidence).length} relationships`);
+      check('19 the block heading states the same total and file count',
+        new RegExp(`^RELATIONSHIPS \\(${summed} in ${groups.groups.length} files\\)$`).test(groups.block),
+        `heading "${groups.block}" against ${summed} in ${groups.groups.length} files`);
+      check('19 the order is the promised total order: by count, then by path',
+        rendered === ordered.map((g) => `${g.name}=${g.count}`).join(', '),
+        `rendered ${rendered} | sorted ${ordered.map((g) => `${g.name}=${g.count}`).join(', ')}`);
+      check('19 both the block heading and each group heading are sticky',
+        groups.blockSticky === 'sticky' && groups.groups.every((g) => g.sticky === 'sticky'),
+        `block ${groups.blockSticky}, groups ${[...new Set(groups.groups.map((g) => g.sticky))].join('/')}`);
       check('19 the wheel scrolls it', drawerScroll.wheelMoved);
       check('19 the keyboard scrolls it, and it is focusable',
         drawerScroll.pageDownMoved && drawerScroll.endReachedBottom && drawerScroll.focusable,
@@ -1482,12 +1583,12 @@ async function main(): Promise<void> {
       await open(audit, url, `/${EVIDENCE_REPO}`);
       const scrollers = await audit.evaluate(`(() => {
         const out = [];
-        for (const el of document.querySelectorAll('body, body *')) {
+        for (const el of document.querySelectorAll('html, body, main, #main, body *')) {
           const cs = getComputedStyle(el);
           const scrolls = cs.overflowY === 'auto' || cs.overflowY === 'scroll'
             || cs.overflowX === 'auto' || cs.overflowX === 'scroll';
           if (!scrolls) continue;
-          out.push({ el: el.tagName + '.' + (el.className || '').toString().split(' ')[0],
+          out.push({ el: el.tagName + (el.id ? '#' + el.id : ''),
                      scrollbarWidth: cs.scrollbarWidth,
                      gutterPx: el.offsetWidth - el.clientWidth,
                      focusable: el.tabIndex >= 0 });
@@ -1499,6 +1600,36 @@ async function main(): Promise<void> {
       check('19 no scrollable region in the product keeps its native scrollbar',
         painted.length === 0,
         painted.map((s) => `${s.el} ${s.scrollbarWidth} ${s.gutterPx}px`).join(', '));
+
+      /*
+       * The document itself.
+       *
+       * The rule is global and this is the part that was left out first: `html` and
+       * `body` are scrollers too, and they were still painting. The claim is stronger
+       * than "no panel has a scrollbar" -- it is that the page is a viewport-sized shell
+       * which does not scroll at all, so there is nothing on it to hide.
+       */
+      const shell = await audit.evaluate(`(() => ({
+        docH: document.documentElement.scrollHeight,
+        inner: window.innerHeight,
+        bodyH: Math.round(document.body.getBoundingClientRect().height),
+        htmlScrollbarWidth: getComputedStyle(document.documentElement).scrollbarWidth,
+        bodyScrollbarWidth: getComputedStyle(document.body).scrollbarWidth,
+        docGutter: document.documentElement.offsetWidth - document.documentElement.clientWidth,
+        mainFlex: getComputedStyle(document.querySelector('#main')).display,
+      }))()`) as {
+        docH: number; inner: number; bodyH: number;
+        htmlScrollbarWidth: string; bodyScrollbarWidth: string; docGutter: number; mainFlex: string;
+      };
+      report['19-document-shell'] = shell;
+      check('19 the document itself is a viewport-sized shell and does not scroll',
+        shell.docH <= shell.inner && shell.bodyH <= shell.inner,
+        `document ${shell.docH} vs viewport ${shell.inner}, body ${shell.bodyH}`);
+      check('19 the document scrollbar is hidden even so',
+        shell.htmlScrollbarWidth === 'none' && shell.bodyScrollbarWidth === 'none' && shell.docGutter === 0,
+        `html ${shell.htmlScrollbarWidth}, body ${shell.bodyScrollbarWidth}, gutter ${shell.docGutter}px`);
+      check('19 the shell is a flex chain, so regions flex against a real height',
+        shell.mainFlex === 'flex', `#main display: ${shell.mainFlex}`);
       await audit.close();
     }
 

@@ -55,16 +55,33 @@
 
   <!-- ------------------------------------------------------------ landing -->
   <!--
-    Five registers, in this order, and the hero is a composition rather than a
-    stack. See the LANDING section of app.css for why each one is there.
+    Seven registers, and the hero is a composition rather than a stack.
+
+      1  the kicker
+      2  the primary display
+      3  a hard-offset underprint, printed behind the display in the rule colour
+      4  the second register, drawn as an outline so it cannot read as a second
+         headline
+      5  the trace band: source, evidence, relationship, lineage
+      6  the statement and its aside
+      7  the repository input
 
     The trace band's numbers are real, from one real repository, and it says so on
     its face. They are not this visitor's result: nothing has been analysed yet.
+
+    This column scrolls inside itself rather than growing the page, so the document
+    never scrolls and never paints a scrollbar. See the LANDING section of app.css.
   -->
-  <section id="landing" class="landing">
+  <section id="landing" class="landing gl-scroll" tabindex="0">
+    <span class="hero-reg" aria-hidden="true"></span>
+
     <p class="eyebrow">Evidence-backed repository lineage</p>
 
-    <h1>Where did this software</h1>
+    <h1>
+      <span class="hero-underprint" aria-hidden="true">Where did this
+software</span>
+      <span class="hero-glyphs">Where did this software</span>
+    </h1>
     <p class="hero-fold">come from?</p>
 
     <div class="hero-trace">
@@ -272,6 +289,12 @@
       <button class="drawer-scrim" id="drawer-scrim" hidden aria-label="Close evidence drawer"></button>
     </div>
   </section>
+  <!--
+    The landing's continuation rule, on `#main` rather than on the scroller: a
+    pseudo-element on a scrolling box travels down the list with its content. Same
+    arrangement as the rail and the Drawer, for the same reason.
+  -->
+  <span class="landing-more" aria-hidden="true"></span>
 </main>
 
 <script type="module" src="/app.js"></script>

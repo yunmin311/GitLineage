@@ -9,7 +9,7 @@
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 import {
@@ -1144,4 +1144,34 @@ test('repository and depth navigation still refit deliberately', () => {
   assert.match(code(functionBody('navigate')), /refitPending\s*=\s*true/, 'a new repository must refit');
   const depth = APP_SOURCE.slice(APP_SOURCE.indexOf('state.depth = Number'));
   assert.match(code(depth).slice(0, 400), /refitPending\s*=\s*true/, 'a depth change must refit');
+});
+
+test('no shipped client file contains a replacement character', () => {
+  /*
+   * A guard against the tools, not against the code.
+   *
+   * Editing these files through a Windows shell round-trip silently turned one `·` in
+   * the Drawer's row label into two U+FFFD. Everything still type-checked, every test
+   * still passed, and the defect was invisible until a screenshot was read: the Drawer
+   * shipped `depends on <��> cargo:serde`. A character that has become U+FFFD has lost
+   * the only property that mattered -- it no longer says what it said -- and nothing in
+   * the toolchain objects.
+   *
+   * So the check is on the bytes. U+FFFD cannot legitimately appear in a source file
+   * here; if it does, something has rewritten the file rather than edited it.
+   */
+  const clientDir = resolve(import.meta.dirname, '..', 'src/web/client');
+  const files = readdirSync(clientDir, { recursive: true, encoding: 'utf8' })
+    .filter((name) => /\.(js|mjs|css|html)$/.test(name));
+  assert.ok(files.length > 0, 'the client source files were found');
+  const offenders: string[] = [];
+  for (const name of files) {
+    const text = readFileSync(resolve(clientDir, name), 'utf8');
+    const at = text.indexOf('\uFFFD');
+    if (at !== -1) {
+      const line = text.slice(0, at).split('\n').length;
+      offenders.push(`${name}:${line}`);
+    }
+  }
+  assert.deepEqual(offenders, [], 'these client files contain U+FFFD');
 });

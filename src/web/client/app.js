@@ -2245,6 +2245,56 @@ function verificationSentence(edge, records) {
   return `Recorded by ${first.collector}/${first.extractor}.`;
 }
 
+/**
+ * A node's relationships, grouped by the file that declares them.
+ *
+ * `Kuddev/pebrel`'s subject has ninety-seven one-hop dependencies, and listing them as
+ * ninety-seven rows in a flat list is not an answer: it is the count restated. What the
+ * evidence actually says is that they are declared by a handful of manifests -- a dozen
+ * `Cargo.toml` and `package.json` files, of which the workspace root declares about half
+ * -- and that structure is the answer.
+ *
+ * The group key is `evidenceByRelationship[edgeId][0].data.manifest_path`, which is the
+ * manifest the analyser's own evidence record names. So the grouping is evidence-backed
+ * rather than invented, and it needs nothing the analyser does not already emit: this is
+ * presentation, computed from the payload in the view model.
+ *
+ * The first record is the primary one. Where several manifests declare the same
+ * relationship -- a workspace crate and the binary that wraps it both depend on `serde` --
+ * the relationship is filed under the record the analyser put first, which is the
+ * declaring manifest rather than the incidental one. There are twenty-three such
+ * relationships in `pebrel`; filing them by first record keeps every relationship in
+ * exactly one group, which is what makes the counts a partition rather than a tally.
+ *
+ * Where a relationship has no manifest -- an ancestry claim from git history, say -- it
+ * is grouped by its own relationship type rather than dropped, because an unattributed
+ * relationship is still a relationship.
+ *
+ * Ordering is fixed and total: groups by descending member count, then by path, so the
+ * same repository always produces the same list in the same order. Within a group the
+ * order is the view model's edge order, which is the analyser's own deterministic order.
+ */
+function groupRelationshipsByManifest(view, edgeIds) {
+  const evidence = view.evidenceByRelationship || {};
+  const groups = new Map();
+  for (const id of edgeIds) {
+    const edge = view.edges.find((item) => item.id === id);
+    if (!edge) continue;
+    const record = (evidence[id] || [])[0];
+    // The evidence record's own shape, not a guess at it: `data` is the extractor's
+    // structured payload and `manifest_path` is one of its documented fields, but the
+    // record may also be a flat one. Both are read, and neither is assumed.
+    const payload = record && record.data ? (record.data.data || record.data) : null;
+    const manifest = payload ? payload.manifest_path : null;
+    const key = manifest || edge.relationshipType;
+    const group = groups.get(key) || { key, manifest: Boolean(manifest), members: [] };
+    group.members.push(edge);
+    groups.set(key, group);
+  }
+  return [...groups.values()].sort((a, b) =>
+    b.members.length - a.members.length || String(a.key).localeCompare(String(b.key)));
+}
+
 function renderNodeDrawer() {
   const view = state.view;
   const node = view.nodes.find((item) => item.id === state.selectedNodeId);
@@ -2264,22 +2314,40 @@ function renderNodeDrawer() {
   facts.append(kv);
   wrap.append(facts);
 
+  /*
+   * Relationships, by declaring manifest.
+   *
+   * Grouped, counted and sticky, because a flat list of ninety-seven is the count
+   * again. Each group is one real file, named in mono because a path is technical data,
+   * with its member count -- and the sticky heading means the reader always knows which
+   * file they are reading while the members scroll under it.
+   */
   const related = edgesForNode(view, node.id);
+  const groups = groupRelationshipsByManifest(view, related);
   const relBlock = el('div', { class: 'd-block' });
-  relBlock.append(el('p', { class: 'd-block-head', text: `RELATIONSHIPS (${related.length})` }));
-  if (related.length === 0) {
+  relBlock.append(el('p', {
+    class: 'd-block-head',
+    text: `RELATIONSHIPS (${related.length} in ${groups.length} ${groups.length === 1 ? 'file' : 'files'})`,
+  }));
+  if (groups.length === 0) {
     relBlock.append(el('p', { class: 'node-detail', text: 'No one-hop relationship in this view.' }));
   }
-  for (const id of related) {
-    const edge = view.edges.find((item) => item.id === id);
-    if (!edge) continue;
-    const other = edge.source === node.id ? edge.target : edge.source;
-    const row = el('button', { class: 'bundle-row', text: `${edge.label} · ${nameOf(other)}` });
-    row.addEventListener('click', () => {
-      state.selectedNodeId = '';
-      selectEdge(edge.id);
-    });
-    relBlock.append(row);
+  for (const group of groups) {
+    const section = el('div', { class: 'd-group' });
+    section.append(el('p', { class: 'd-group-head' }, [
+      el('span', { class: 'mono', text: group.manifest ? group.key : `${group.key} · no manifest` }),
+      el('span', { class: 'd-group-count r-mono', text: String(group.members.length) }),
+    ]));
+    for (const edge of group.members) {
+      const other = edge.source === node.id ? edge.target : edge.source;
+      const row = el('button', { class: 'bundle-row', text: `${edge.label} · ${nameOf(other)}` });
+      row.addEventListener('click', () => {
+        state.selectedNodeId = '';
+        selectEdge(edge.id);
+      });
+      section.append(row);
+    }
+    relBlock.append(section);
   }
   wrap.append(relBlock);
 
@@ -2490,6 +2558,10 @@ $('layers-btn').addEventListener('click', () => toggleLayers());
    */
   registerScrollRegion($('rail-scroll'), $('rail'));
   registerScrollRegion($('drawer-inner'), $('drawer'));
+  // The landing is a scroller too. It is the one region that is sometimes the whole
+  // page, so its rule is on `#main` -- and registering it here means the rule appears and
+  // withdraws on exactly the same evidence as the rail's and the Drawer's.
+  registerScrollRegion($('landing'), $('main'));
 
   $('search-input').addEventListener('input', (event) => {
     state.query = event.target.value;
