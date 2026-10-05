@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>GitLineage — variant C · Diagrammatic Type</title>
+<!--
+  VARIANT C — DIAGRAMMATIC TYPE
+
+  The most aggressive of the three, and the one that most risks being decoration.
+
+  Here the headline and the trace are the same object. "software" is not a word in a
+  sentence, it is the Subject node: it carries the Subject's 6px hard offset and sits in
+  a plate. The rules that would connect a plate to its evidence are drawn, and they land
+  on specific words -- "did this" resolves, "come from" is the lineage question, and the
+  trace runs underneath as nodes on the same axis the words sit on.
+
+  So the type participates in the lineage metaphor rather than sitting above it. That is
+  the line this variant is trying to stay on the right side of: every rule here connects
+  two things the product actually connects.
+
+  No gradient, no glow, no blur, no card, no floating anything.
+-->
+<link rel="stylesheet" href="../../src/web/client/app.css" />
+<style>
+  body { background: var(--paper); }
+
+  .hero {
+    max-width: 1180px; margin: 0 auto;
+    padding: 58px 40px 0;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    column-gap: 22px;
+  }
+
+  .hero-kicker {
+    grid-column: 1 / -1; display: flex; align-items: center; gap: 16px;
+    margin: 0 0 34px;
+    font-family: var(--mono); font-size: var(--t-section-size); font-weight: var(--t-section-wt);
+    letter-spacing: var(--t-section-track); text-transform: uppercase; color: var(--ink-3);
+  }
+  .hero-kicker::after { content: ""; flex: 1; height: 1px; background: var(--rule); }
+
+  /* ── 2 · the display, broken so the words sit on the graph ─────────────── */
+  .hero-display {
+    grid-column: 1 / -1; margin: 0;
+    font-size: 72px; line-height: 1.0; letter-spacing: -0.04em;
+    font-weight: var(--t-display-wt); color: var(--ink);
+  }
+  /*
+    Three lines, each indented onto a different column, because they are three different
+    places rather than one sentence. "software" is the Subject: the word is set in a
+    plate, and the plate throws the Subject's own 6px offset, so the type carries the same
+    depth the canvas gives a repository.
+  */
+  .line { display: block; }
+  .l1 { margin-left: 0; }
+  .l2 { margin-left: 2.6em; }
+  .l3 { margin-left: 5.2em; font-weight: 400; color: var(--ink-2); font-size: 60px; }
+
+  /* The Subject plate, drawn around one word. */
+  .subject-word {
+    position: relative; display: inline-block;
+    padding: 0 14px 4px; margin: 0 -14px 0;
+    background: var(--surface-hi);
+    border: 1px solid var(--ink);
+    box-shadow: 6px 6px 0 var(--rule-2);
+  }
+  /* Its revision, in mono, because a revision is technical data. */
+  .subject-word sup {
+    font-family: var(--mono); font-size: var(--t-meta-size); font-weight: 400;
+    letter-spacing: var(--t-meta-track); color: var(--ink-4);
+    vertical-align: super; margin-left: 8px;
+  }
+
+  /*
+    The apparatus: one vertical rule in the left gutter, from the kicker down to the
+    trace's own rule, with a tick where the Subject sits.
+
+    The first attempt was two short stubs floating in the margin with a stray square
+    beside the plate. Nothing connected to anything: a stub is not a tie, and a mark with
+    no line through it is a smudge. A tie has two ends, so this is now a single
+    continuous line that the kicker, the Subject and the trace all hang off -- the
+    product's own shape, at hero scale.
+  */
+  /* Spans the whole field, or it becomes a grid item in column one and every layer
+     below it auto-places into the wrong column. The first run rendered the statement
+     and the form squeezed into the right half for exactly that reason. */
+  .apparatus { grid-column: 1 / -1; position: relative; }
+  .apparatus::before {
+    content: ""; position: absolute; left: 128px; top: -12px; bottom: -40px;
+    width: 1px; background: var(--rule-2);
+  }
+  .apparatus .tick {
+    position: absolute; left: 123px; width: 11px; height: 1px; background: var(--ink-4);
+  }
+  .apparatus .tick-subject { top: 50%; }
+
+  /* ── 3 + 4 · the trace, on the axis the words sit on ──────────────────── */
+  .trace {
+    grid-column: 1 / -1; margin: 46px 0 0; padding: 20px 0 20px 128px;
+    border-top: var(--rule-heavy);
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; position: relative;
+  }
+  .trace::before {
+    content: ""; position: absolute; left: 128px; right: 0; top: 24px; height: 1px;
+    background: var(--rule-2);
+  }
+  .trace-node { padding-right: 20px; position: relative; }
+  .trace-mark { width: 9px; height: 9px; background: var(--ink); display: block; margin-bottom: 13px; position: relative; z-index: 1; }
+  .trace-node:last-child .trace-mark { background: var(--accent); }
+  .trace-stage {
+    font-family: var(--mono); font-size: var(--t-meta-size); font-weight: 500;
+    letter-spacing: var(--t-meta-track); text-transform: uppercase; color: var(--ink-4); margin: 0 0 5px;
+  }
+  .trace-value { font-size: var(--t-row-size); font-weight: 590; color: var(--ink); margin: 0; }
+  /* Each stage names the thing it would read from, in the app's own mono. */
+  .trace-src { font-family: var(--mono); font-size: var(--t-meta-size); color: var(--ink-4); margin: 4px 0 0; }
+  .trace-note {
+    grid-column: 1 / -1; margin: 14px 0 0 -128px; padding-left: 128px;
+    font-family: var(--mono); font-size: var(--t-meta-size); color: var(--ink-4);
+    letter-spacing: var(--t-meta-track);
+  }
+
+  /* ── 5 · statement, keyed to the trace's own column ───────────────────── */
+  .hero-statement {
+    grid-column: 2 / 8; margin: 34px 0 0;
+    font-size: var(--t-body-size); line-height: 1.62; color: var(--ink-2); max-width: 44ch;
+  }
+  .hero-aside {
+    grid-column: 9 / -1; margin: 34px 0 0; padding-left: 20px;
+    border-left: 1px solid var(--rule-2);
+    font-family: var(--mono); font-size: var(--t-meta-size); line-height: 1.7; color: var(--ink-3);
+  }
+  .hero-aside b { font-weight: 500; color: var(--ink-2); }
+
+  .hero-form { grid-column: 2 / 9; margin: 44px 0 0; }
+  .input-card { background: var(--surface); border: 1px solid var(--rule-2); padding: 0; }
+  .input-row { display: flex; gap: 0; align-items: stretch; }
+  #repo-input { flex: 1; min-width: 0; font-family: var(--mono); font-size: var(--t-row-size); padding: 18px; border: 0; border-right: 1px solid var(--rule-2); background: var(--surface-hi); color: var(--ink); }
+  #repo-input:focus { outline: 2px solid var(--ink); outline-offset: -2px; }
+  #submit { font-size: var(--t-row-size); font-weight: 590; padding: 18px 28px; border: 0; background: var(--ink); color: var(--paper); }
+  .sub-row { display: flex; align-items: center; gap: 16px; padding: 12px 18px; border-top: 1px solid var(--rule); background: var(--surface-sunk); }
+  .seg { display: inline-flex; border: 1px solid var(--rule-2); background: var(--paper); }
+  .seg-btn { font-size: var(--t-secondary-size); font-weight: 500; padding: 5px 12px; border: 0; border-right: 1px solid var(--rule-2); background: transparent; color: var(--ink-2); }
+  .seg-btn.is-active { background: var(--ink); color: var(--paper); }
+  .check { font-size: var(--t-secondary-size); color: var(--ink-4); display: inline-flex; align-items: center; gap: 6px; }
+  .hero-foot { grid-column: 1 / -1; margin: 24px 0 44px; font-size: var(--t-secondary-size); color: var(--ink-3); }
+  .hero-foot code { font-family: var(--mono); font-size: var(--t-meta-size); color: var(--ink-2); }
+  .samples { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+    font-family: var(--mono); font-size: var(--t-meta-size); color: var(--ink-3); margin: 0 0 40px; }
+  .samples a { color: var(--ink-2); text-decoration: none; border: 1px solid var(--rule-2); padding: 4px 8px; background: var(--surface-hi); }
+  .sample-tag { font-size: var(--t-meta-size); color: var(--ink-4); margin-right: 8px; }
+</style>
+</head>
+<body>
+
+<header class="appbar">
+  <a class="brand" href="#"><span class="brand-mark" aria-hidden="true"></span><span>GitLineage</span></a>
+  <div class="appbar-mid"><span class="crumb-repo">Kuddev/pebrel</span></div>
+  <div class="appbar-right"><span class="crumb-count r-meta">97 one-hop · 0 verified</span></div>
+</header>
+
+<main>
+  <section class="hero">
+
+    <p class="hero-kicker">Evidence-backed repository lineage</p>
+
+    <!-- The headline, as three positions on a graph rather than one sentence. -->
+    <div class="apparatus">
+      <span class="tick tick-subject" aria-hidden="true"></span>
+      <h1 class="hero-display">
+        <span class="line l1">Where did this</span>
+        <span class="line l2"><span class="subject-word">software<sup>51514bd</sup></span></span>
+        <span class="line l3">come from?</span>
+      </h1>
+    </div>
+
+    <div class="trace">
+      <div class="trace-node">
+        <span class="trace-mark"></span>
+        <p class="trace-stage">source</p>
+        <p class="trace-value">98 entities</p>
+        <p class="trace-src">the repository</p>
+      </div>
+      <div class="trace-node">
+        <span class="trace-mark"></span>
+        <p class="trace-stage">evidence</p>
+        <p class="trace-value">137 manifest records</p>
+        <p class="trace-src">the file it was written in</p>
+      </div>
+      <div class="trace-node">
+        <span class="trace-mark"></span>
+        <p class="trace-stage">relationship</p>
+        <p class="trace-value">97 depends_on</p>
+        <p class="trace-src">a claim, not an inference</p>
+      </div>
+      <div class="trace-node">
+        <span class="trace-mark"></span>
+        <p class="trace-stage">lineage</p>
+        <p class="trace-value">1 repository</p>
+        <p class="trace-src">where it came from</p>
+      </div>
+      <p class="trace-note">Example trace · Kuddev/pebrel · rev 51514bd</p>
+    </div>
+
+    <p class="hero-statement">
+      Paste a repository. GitLineage reads its manifests, documents and git objects,
+      and draws the relationships between them — every one with the file it was written
+      in attached, and openable.
+    </p>
+    <p class="hero-aside">
+      <b>Nothing inferred.</b><br />
+      Similarity never renders as verified lineage. The graph makes that structurally
+      true, not a promise in the copy.
+    </p>
+
+    <form class="hero-form" autocomplete="off" onsubmit="return false">
+      <div class="input-card">
+        <div class="input-row">
+          <input id="repo-input" name="repo" placeholder="github.com/owner/repo" spellcheck="false" />
+          <button id="submit" type="submit">Trace lineage</button>
+        </div>
+        <div class="sub-row">
+          <span class="mono sub-label">Depth</span>
+          <span class="seg" role="group" aria-label="Analysis depth">
+            <button type="button" class="seg-btn">Metadata</button>
+            <button type="button" class="seg-btn is-active">Standard</button>
+            <button type="button" class="seg-btn">Deep</button>
+          </span>
+          <label class="mono check is-disabled"><input type="checkbox" disabled /> Token fingerprints</label>
+        </div>
+      </div>
+    </form>
+
+    <p class="hero-foot">
+      Or replace <code>github</code> with <code>gitlineage</code> in any GitHub URL —
+      <code>github.com/o/r</code> becomes <code>gitlineage.com/o/r</code>
+    </p>
+    <p class="samples">Try
+      <a href="#">nachocebey/is</a><span class="sample-tag">forked</span>
+      <a href="#">grpc/grpc</a><span class="sample-tag">submodules</span>
+      <a href="#">vitest-dev/vitest</a><span class="sample-tag">declared</span>
+      <a href="#">octocat/Spoon-Knife</a><span class="sample-tag">no lineage</span>
+    </p>
+
+  </section>
+</main>
+</body>
+</html>

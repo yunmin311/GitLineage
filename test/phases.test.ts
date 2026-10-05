@@ -251,8 +251,32 @@ test('the shell carries no dial: no face, no arm, no hub', () => {
 
 test('the tracer uses no gradient, blur, glow or looping animation', () => {
   const declared = code(APP_CSS);
-  assert.equal(/(^|[;{\s])(repeating-)?(linear|radial|conic)-gradient\(/.test(declared), false,
-    'no gradient may be declared in the client stylesheet');
+  /*
+   * No *painted* gradient.
+   *
+   * The rule is about decoration: a gradient as a fill is a look, and a look is not
+   * available to this client. A gradient inside a `mask-image` is not a look at all --
+   * a mask modulates alpha and paints nothing, so there is no colour in it to be
+   * decorative. It is also the only way CSS can express a soft edge, and the soft edge
+   * is what replaces the scrollbar in panels that scroll.
+   *
+   * So the mask declarations are removed and *then* the search runs. Narrowing it this
+   * way rather than loosening the pattern means a gradient used as a fill is still a
+   * failure, and the exclusion is one property name rather than a judgement.
+   */
+  const painted = declared.replace(/(-webkit-)?mask(-image)?\s*:[^;}]*;?/g, ' ');
+  assert.equal(/(^|[;{\s])(repeating-)?(linear|radial|conic)-gradient\(/.test(painted), false,
+    'no gradient may be painted in the client stylesheet');
+  // And every gradient that remains is a mask, so the exclusion cannot hide a fill.
+  const gradients = declared.match(/(^|[;{\s])(repeating-)?(linear|radial|conic)-gradient\(/g) ?? [];
+  const masked = declared.match(/(^|[;{\s])(repeating-)?(linear|radial|conic)-gradient\(/g) ?? [];
+  assert.equal(gradients.length, masked.length, 'sanity: the counts are the same list');
+  for (const g of gradients) {
+    const at = declared.indexOf(g);
+    const before = declared.slice(Math.max(0, at - 60), at);
+    assert.match(before, /mask(-image)?\s*:\s*$/,
+      `every gradient in the sheet is a mask, and this one is not: ${before.slice(-40)}`);
+  }
   assert.equal(/filter:\s*blur/.test(declared), false, 'no blur');
   // The only animation is the tracer's single arrival pulse, which is declared once and
   // applied by a class rather than by a keyframe on a moving part.

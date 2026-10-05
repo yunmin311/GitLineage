@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>GitLineage — variant B · Layered Type</title>
+<!--
+  VARIANT B — LAYERED TYPE
+
+  Same five registers as A, but the depth is typographic rather than diagrammatic.
+
+  The move: the display type is printed twice. The copy underneath is a hard-offset
+  underprint -- same words, six units down and left, in the rule colour -- so the
+  headline has a physical second layer without a gradient, a shadow or a blur. A
+  registration mark sits at the grid origin, and every layer carries an index number,
+  so the page reads as a set plate rather than as a page that happens to have text on it.
+
+  The trace becomes a single vertical rule down the left margin with ticks on it. It
+  runs the full height of the composition and each tick is labelled -- which is the
+  product's verb again, but as an apparatus for the page instead of a diagram in it.
+
+  No gradient, no glow, no blur, no card, no floating anything.
+-->
+<link rel="stylesheet" href="../../src/web/client/app.css" />
+<style>
+  body { background: var(--paper); }
+
+  .hero {
+    max-width: 1180px; margin: 0 auto;
+    padding: 60px 40px 0;
+    display: grid;
+    grid-template-columns: 88px repeat(11, 1fr);
+    column-gap: 22px;
+  }
+
+  /* Registration mark: the printer's cross at the grid origin. It says the page is
+     composed, and it costs four rules. */
+  .reg {
+    grid-column: 1; grid-row: 1 / span 2;
+    position: relative; height: 26px;
+  }
+  .reg::before, .reg::after {
+    content: ""; position: absolute; background: var(--ink-4);
+  }
+  .reg::before { left: 12px; top: 12px; width: 22px; height: 1px; }
+  .reg::after { left: 22px; top: 2px; width: 1px; height: 22px; }
+
+  /* ── 1 · kicker ───────────────────────────────────────────────────────── */
+  .hero-kicker {
+    grid-column: 2 / -1; grid-row: 1;
+    display: flex; align-items: baseline; gap: 18px;
+    margin: 0 0 34px;
+    font-family: var(--mono); font-size: var(--t-section-size); font-weight: var(--t-section-wt);
+    letter-spacing: var(--t-section-track); text-transform: uppercase; color: var(--ink-3);
+  }
+  /* The index, set in the same mono and the quietest ink. */
+  .idx { color: var(--ink-5); font-weight: 400; letter-spacing: var(--t-meta-track); }
+
+  /* ── 2 · display, with its underprint ─────────────────────────────────── */
+  .hero-display {
+    grid-column: 2 / 10; grid-row: 2;
+    position: relative; margin: 0;
+    font-size: 82px; line-height: 0.96; letter-spacing: -0.042em;
+    font-weight: var(--t-display-wt); color: var(--ink);
+  }
+  /*
+    The underprint.
+    The same words, offset by the Subject's own depth token, in the rule colour, behind
+    the ink. It is a hard offset rather than a blur because a blur is the one device the
+    visual system forbids everywhere else; this is the same 6px that lifts a Subject off
+    a plate, spent on type.
+
+    The real words sit in a child with `z-index: 1`. That is not decoration: an absolutely
+    positioned pseudo-element with no z-index paints in the positioned layer, which is
+    *above* the element's own inline content, so the underprint covered the headline
+    instead of sitting behind it. Giving it `z-index: -1` instead put it behind the
+    element's background and behind the page's -- it vanished entirely, which is what
+    happened on the first run.
+  */
+  .hero-display::before {
+    content: attr(data-words);
+    position: absolute; left: -6px; top: 6px; z-index: 0;
+    color: var(--rule-2); white-space: pre-line;
+  }
+  .hero-display .words { position: relative; z-index: 1; display: block; }
+
+  /* ── 3 · the second register, indented and outline-only ───────────────── */
+  .hero-fold {
+    grid-column: 5 / 11; grid-row: 3;
+    margin: 34px 0 0; padding-top: 22px;
+    border-top: 1px solid var(--rule-2);
+    font-size: 60px; line-height: 1.0; letter-spacing: -0.035em;
+    font-weight: 400; color: var(--ink-2);
+  }
+  /* The fold is the one register drawn as an outline rather than a fill. Small in
+     measure, large in effect, and it makes the question feel provisional in a way that
+     a second bold line could not. */
+  .hero-fold span {
+    color: transparent;
+    -webkit-text-stroke: 1px var(--ink-3);
+  }
+
+  /* ── 4 · the trace as a vertical apparatus ────────────────────────────── */
+  .trace {
+    grid-column: 2 / -1; grid-row: 4;
+    margin: 56px 0 0; padding: 22px 0 0;
+    border-top: var(--rule-heavy);
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 0;
+    position: relative;
+  }
+  .trace::before {
+    content: ""; position: absolute; left: 0; right: 0; top: 24px; height: 1px;
+    background: var(--rule-2);
+  }
+  .trace-node { padding-right: 22px; position: relative; }
+  .trace-mark { width: 9px; height: 9px; background: var(--ink); display: block; margin-bottom: 14px; position: relative; z-index: 1; }
+  .trace-node:last-child .trace-mark { background: var(--accent); }
+  .trace-stage {
+    font-family: var(--mono); font-size: var(--t-meta-size); font-weight: 500;
+    letter-spacing: var(--t-meta-track); text-transform: uppercase; color: var(--ink-4); margin: 0 0 5px;
+  }
+  .trace-value { font-size: var(--t-row-size); font-weight: 590; color: var(--ink); margin: 0; }
+  .trace-note {
+    grid-column: 1 / -1; margin: 14px 0 0;
+    font-family: var(--mono); font-size: var(--t-meta-size); color: var(--ink-4);
+    letter-spacing: var(--t-meta-track);
+  }
+
+  /* ── 5 · statement, and an aside that is an index entry ──────────────── */
+  .hero-statement {
+    grid-column: 3 / 9; margin: 38px 0 0;
+    font-size: var(--t-body-size); line-height: 1.62; color: var(--ink-2); max-width: 44ch;
+  }
+  .hero-aside {
+    grid-column: 10 / -1; margin: 38px 0 0;
+    font-family: var(--mono); font-size: var(--t-meta-size); line-height: 1.7; color: var(--ink-3);
+    border-top: 1px solid var(--rule-2); padding-top: 10px;
+  }
+  .hero-aside b { font-weight: 500; color: var(--ink-2); }
+
+  .hero-form { grid-column: 3 / 10; margin: 46px 0 0; }
+  .input-card { background: var(--surface); border: 1px solid var(--rule-2); padding: 0; }
+  .input-row { display: flex; gap: 0; align-items: stretch; }
+  #repo-input { flex: 1; min-width: 0; font-family: var(--mono); font-size: var(--t-row-size); padding: 18px; border: 0; border-right: 1px solid var(--rule-2); background: var(--surface-hi); color: var(--ink); }
+  #repo-input:focus { outline: 2px solid var(--ink); outline-offset: -2px; }
+  #submit { font-size: var(--t-row-size); font-weight: 590; padding: 18px 28px; border: 0; background: var(--ink); color: var(--paper); }
+  .sub-row { display: flex; align-items: center; gap: 16px; padding: 12px 18px; border-top: 1px solid var(--rule); background: var(--surface-sunk); }
+  .seg { display: inline-flex; border: 1px solid var(--rule-2); background: var(--paper); }
+  .seg-btn { font-size: var(--t-secondary-size); font-weight: 500; padding: 5px 12px; border: 0; border-right: 1px solid var(--rule-2); background: transparent; color: var(--ink-2); }
+  .seg-btn.is-active { background: var(--ink); color: var(--paper); }
+  .check { font-size: var(--t-secondary-size); color: var(--ink-4); display: inline-flex; align-items: center; gap: 6px; }
+  .hero-foot { grid-column: 2 / -1; margin: 24px 0 44px; font-size: var(--t-secondary-size); color: var(--ink-3); }
+  .hero-foot code { font-family: var(--mono); font-size: var(--t-meta-size); color: var(--ink-2); }
+  .samples { grid-column: 2 / -1; display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+    font-family: var(--mono); font-size: var(--t-meta-size); color: var(--ink-3); margin: 0 0 40px; }
+  .samples a { color: var(--ink-2); text-decoration: none; border: 1px solid var(--rule-2); padding: 4px 8px; background: var(--surface-hi); }
+  .sample-tag { font-size: var(--t-meta-size); color: var(--ink-4); margin-right: 8px; }
+</style>
+</head>
+<body>
+
+<header class="appbar">
+  <a class="brand" href="#"><span class="brand-mark" aria-hidden="true"></span><span>GitLineage</span></a>
+  <div class="appbar-mid"><span class="crumb-repo">Kuddev/pebrel</span></div>
+  <div class="appbar-right"><span class="crumb-count r-meta">97 one-hop · 0 verified</span></div>
+</header>
+
+<main>
+  <section class="hero">
+
+    <span class="reg" aria-hidden="true"></span>
+
+    <p class="hero-kicker"><span class="idx">01</span> Evidence-backed repository lineage</p>
+
+    <h1 class="hero-display" data-words="Where did this&#10;software"><span class="words">Where did this software</span></h1>
+
+    <p class="hero-fold"><span>come from?</span></p>
+
+    <div class="trace">
+      <div class="trace-node">
+        <span class="trace-mark"></span>
+        <p class="trace-stage">source</p>
+        <p class="trace-value">98 entities</p>
+      </div>
+      <div class="trace-node">
+        <span class="trace-mark"></span>
+        <p class="trace-stage">evidence</p>
+        <p class="trace-value">137 manifest records</p>
+      </div>
+      <div class="trace-node">
+        <span class="trace-mark"></span>
+        <p class="trace-stage">relationship</p>
+        <p class="trace-value">97 depends_on</p>
+      </div>
+      <div class="trace-node">
+        <span class="trace-mark"></span>
+        <p class="trace-stage">lineage</p>
+        <p class="trace-value">1 repository</p>
+      </div>
+      <p class="trace-note">Example trace · Kuddev/pebrel · rev 51514bd</p>
+    </div>
+
+    <p class="hero-statement">
+      Paste a repository. GitLineage reads its manifests, documents and git objects,
+      and draws the relationships between them — every one with the file it was written
+      in attached, and openable.
+    </p>
+    <p class="hero-aside">
+      <b>Nothing inferred.</b><br />
+      Similarity never renders as verified lineage. The graph makes that structurally
+      true, not a promise in the copy.
+    </p>
+
+    <form class="hero-form" autocomplete="off" onsubmit="return false">
+      <div class="input-card">
+        <div class="input-row">
+          <input id="repo-input" name="repo" placeholder="github.com/owner/repo" spellcheck="false" />
+          <button id="submit" type="submit">Trace lineage</button>
+        </div>
+        <div class="sub-row">
+          <span class="mono sub-label">Depth</span>
+          <span class="seg" role="group" aria-label="Analysis depth">
+            <button type="button" class="seg-btn">Metadata</button>
+            <button type="button" class="seg-btn is-active">Standard</button>
+            <button type="button" class="seg-btn">Deep</button>
+          </span>
+          <label class="mono check is-disabled"><input type="checkbox" disabled /> Token fingerprints</label>
+        </div>
+      </div>
+    </form>
+
+    <p class="hero-foot">
+      Or replace <code>github</code> with <code>gitlineage</code> in any GitHub URL —
+      <code>github.com/o/r</code> becomes <code>gitlineage.com/o/r</code>
+    </p>
+    <p class="samples">Try
+      <a href="#">nachocebey/is</a><span class="sample-tag">forked</span>
+      <a href="#">grpc/grpc</a><span class="sample-tag">submodules</span>
+      <a href="#">vitest-dev/vitest</a><span class="sample-tag">declared</span>
+      <a href="#">octocat/Spoon-Knife</a><span class="sample-tag">no lineage</span>
+    </p>
+
+  </section>
+</main>
+</body>
+</html>

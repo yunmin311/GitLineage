@@ -907,8 +907,81 @@ function visibleCandidates(view) {
  * has a block and the data has no honest equivalent, the block is omitted rather
  * than filled with an invented number.
  */
+/**
+ * Says, from the region's own scroll position, whether there is more to read.
+ *
+ * Three classes, and only three facts are claimable: more above, more below, and how far
+ * through the list the reader is. Everything is measured from `scrollTop` rather than
+ * assumed from content length, because the rail and the Drawer change height constantly
+ * -- a plate opens, the Drawer arrives, the viewport resizes -- and an affordance that
+ * is stale is worse than none: it tells a reader the list ends when it does not.
+ *
+ * The continuation rule lives on the panel's *frame* rather than on the scroller, so it
+ * is `is-more-below` on the parent. A pseudo-element on a scrolling box would travel
+ * down the list with its content.
+ */
+function scrollAffordance(node, frame) {
+  if (!node) return;
+  // 2px of slack: fractional layout sizes make `scrollHeight - clientHeight` land on
+  // values like 1.5, and a rule that flickers on for half a pixel is a defect.
+  const slack = 2;
+  const room = node.scrollHeight - node.clientHeight;
+  const scrollable = room > slack;
+  const above = scrollable && node.scrollTop > slack;
+  const below = scrollable && node.scrollTop < room - slack;
+  node.classList.toggle('gl-has-above', above);
+  node.classList.toggle('gl-has-below', below);
+  // How far through, as a whole percent. The cue is a count because a count is a fact.
+  const through = scrollable ? Math.round(((node.scrollTop + node.clientHeight) / node.scrollHeight) * 100) : 100;
+  if (frame) frame.classList.toggle('is-more-below', below);
+  node.setAttribute('data-scroll-through', scrollable ? `${Math.min(99, Math.max(1, through))}%` : '100%');
+}
+
+/**
+ * Keeps both panels' affordances true, cheaply.
+ *
+ * A scroll listener per region, coalesced into one animation frame, plus a
+ * `ResizeObserver` on the scrolled box. The observer is what makes it correct rather
+ * than merely working: the rail's content changes with the graph, the Drawer's with the
+ * selection, and neither fires a scroll event when its own height changes. An earlier
+ * version listened only to `scroll`, so opening a plate of ninety-seven rows left the
+ * rule claiming there was nothing below.
+ */
+const scrollRegions = [];
+
+function registerScrollRegion(node, frame) {
+  if (!node) return;
+  const entry = { node, frame };
+  scrollRegions.push(entry);
+
+  let queued = false;
+  const sync = () => {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(() => {
+      queued = false;
+      scrollAffordance(entry.node, entry.frame);
+    });
+  };
+  node.addEventListener('scroll', sync, { passive: true });
+
+  if (typeof ResizeObserver === 'function') {
+    const observer = new ResizeObserver(sync);
+    observer.observe(node);
+    // The content box, not the node: the node's own height is fixed by the grid, so
+    // observing only it would never fire when the list inside it grew.
+    for (const child of node.children) observer.observe(child);
+  }
+  scrollAffordance(node, frame);
+  return entry;
+}
+
+function syncAllScrollAffordances() {
+  for (const { node, frame } of scrollRegions) scrollAffordance(node, frame);
+}
+
 function renderRail(view) {
-  const rail = $('rail');
+  const rail = $('rail-scroll');
   if (!rail) return;
   rail.replaceChildren();
 
@@ -1024,6 +1097,10 @@ function renderRail(view) {
   renderFamilyKey(keyHost);
 
   rail.hidden = false;
+  // The rail's content just changed height, so its own scroll position is no longer
+  // evidence of anything. Without this it keeps whatever fade it had while the content
+  // beneath it is a different list.
+  scrollAffordance(rail, $('rail'));
 }
 
 
@@ -1965,6 +2042,21 @@ function renderDrawer() {
   }
 
   inner.append(close, block);
+
+  /*
+   * Two things about a freshly-filled scroller.
+   *
+   * The position resets, because the Drawer shows one relationship's evidence at a time
+   * and the reader is meant to start at its title; carrying the previous one's scroll
+   * offset over would drop them into the middle of an unrelated list.
+   *
+   * Then the affordance is measured rather than assumed. `pebrel` opens a Drawer of
+   * ninety-seven rows here, which scrolls; `nachocebey/is` opens one of four, which does
+   * not. A rule that appeared on both would be a lie on the second.
+   */
+  inner.scrollTop = 0;
+  inner.classList.remove('gl-has-above', 'gl-has-below');
+  scrollAffordance(inner, drawer);
 }
 
 function nameOf(id) {
@@ -2302,6 +2394,9 @@ function setupViewport() {
   $('zoom-fit').addEventListener('click', () => fit());
   window.addEventListener('resize', () => {
     if (state.view) draw();
+    // A resize changes how much of each list fits, which changes whether there is more
+    // to read. The observers catch content changes; this catches the viewport's.
+    syncAllScrollAffordances();
   });
 }
 
@@ -2386,6 +2481,16 @@ $('layers-btn').addEventListener('click', () => toggleLayers());
   $('drawer-scrim').addEventListener('click', () => closeDrawer());
   $('rail-toggle').addEventListener('click', () => toggleRail());
 
+  /*
+   * Both scrollable panels, registered once.
+   *
+   * The Drawer's observer watches its children as well as itself, because the Drawer is
+   * replaced wholesale on every selection -- a new `<div>` with new rows -- and an
+   * observer bound to the old nodes would keep reporting a height that no longer exists.
+   */
+  registerScrollRegion($('rail-scroll'), $('rail'));
+  registerScrollRegion($('drawer-inner'), $('drawer'));
+
   $('search-input').addEventListener('input', (event) => {
     state.query = event.target.value;
     syncUrl();
@@ -2398,11 +2503,28 @@ $('layers-btn').addEventListener('click', () => toggleLayers());
       else if (!$('searchbar').hasAttribute('hidden')) toggleSearch(false);
       else clearSelection();
     }
-    if (event.key === '/' && document.activeElement !== $('search-input')) {
+    /*
+     * Single-key shortcuts yield to whatever the reader is typing into.
+     *
+     * `/` was guarded only against the search field itself, so typing a repository
+     * path into the landing's own input opened the graph search on the `/` and sent the
+     * rest of the name there: `octocat/Spoon-Knife` became `octocat` in the field and
+     * `Spoon-Knife` in a search bar that has no graph to search yet. The landing's
+     * primary control could not be filled by keyboard at all, and nothing caught it
+     * because no check typed into it.
+     *
+     * `f` is guarded for the same reason and was worse: it called `fit()` mid-typing,
+     * which is silent, so a repository name containing an `f` lost a character and
+     * nothing said so.
+     */
+    const target = event.target;
+    const typing = target instanceof HTMLElement
+      && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
+    if (event.key === '/' && !typing && document.activeElement !== $('search-input')) {
       event.preventDefault();
       toggleSearch(true);
     }
-    if (event.key === 'f' && !event.metaKey && !event.ctrlKey) fit();
+    if (event.key === 'f' && !typing && !event.metaKey && !event.ctrlKey) fit();
   });
 
   // One delegated handler for both popovers, so the rows keep working after a

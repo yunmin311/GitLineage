@@ -203,6 +203,74 @@
   opacity: .4; cursor: not-allowed; pointer-events: none; filter: saturate(.5);
 }
 
+/* ======================================================== SCROLL =============
+   A hard product rule: the browser's scrollbar track and thumb are not part of
+   GitLineage's visual language, anywhere inside the product UI.
+
+   They are hidden, not removed. `scrollbar-width: none` is the standard property
+   (Firefox, and Chromium 121+); `::-webkit-scrollbar` covers Blink and WebKit, which
+   ignore the standard one; `-ms-overflow-style` covers the legacy Edge engine. None of
+   them touch `overflow`, so wheel, trackpad, touch, keyboard, programmatic scrolling
+   and find-in-page all keep working. The regions carry `tabindex` in the markup so they
+   are keyboard-reachable without a pointer -- a scrollable box nobody can focus is a
+   scrollable box a keyboard cannot scroll.
+
+   What replaces the scrollbar is an edge fade and a continuation rule, both below,
+   both drawn in the same ink as everything else here. No custom scrollbar, and
+   deliberately no floating scroll pill: a scrollbar-shaped widget floating over a page
+   is a SaaS tell, and this page is trying not to be one.
+   ========================================================================== */
+.gl-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  /* Scrolling a panel must not carry the page with it. */
+  overscroll-behavior: contain;
+  /* The edge fade's depth. A length, not a percentage: a percentage of a scroll
+     container resolves against the viewport, so a percentage fade would change size
+     as the panel scrolls. */
+  --gl-fade: 26px;
+  /* Where the top fade starts, for a region whose first child is sticky. The Drawer's
+     group heading pins to the top of the scroller, so a fade from zero would dim the
+     one line that says what the list is -- the heading would fade out precisely when
+     the reader most needs it. It starts below the heading instead, which also leaves a
+     clean band for rows to pass under. */
+  --gl-fade-top: 0px;
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+.gl-scroll::-webkit-scrollbar { width: 0; height: 0; display: none; }
+
+/*
+ * The fade, in three states, toggled from the region's own scrollTop.
+ *
+ * A mask rather than a gradient overlay, because an overlay sits *on* the content and
+ * would tint the text; a mask takes the pixels away at the edge, so the paper shows
+ * through and the type fades rather than being covered.
+ */
+.gl-scroll.gl-has-above {
+  -webkit-mask-image: linear-gradient(
+    to bottom, transparent var(--gl-fade-top), #000 calc(var(--gl-fade-top) + var(--gl-fade)));
+  mask-image: linear-gradient(
+    to bottom, transparent var(--gl-fade-top), #000 calc(var(--gl-fade-top) + var(--gl-fade)));
+}
+.gl-scroll.gl-has-below {
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - var(--gl-fade)), transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - var(--gl-fade)), transparent 100%);
+}
+.gl-scroll.gl-has-above.gl-has-below {
+  -webkit-mask-image: linear-gradient(
+    to bottom, transparent var(--gl-fade-top), #000 calc(var(--gl-fade-top) + var(--gl-fade)),
+    #000 calc(100% - var(--gl-fade)), transparent 100%);
+  mask-image: linear-gradient(
+    to bottom, transparent var(--gl-fade-top), #000 calc(var(--gl-fade-top) + var(--gl-fade)),
+    #000 calc(100% - var(--gl-fade)), transparent 100%);
+}
+/*
+ * A mask clips outlines, so a focused row near a faded edge would lose its ring. The
+ * ring is therefore drawn inwards on the row itself rather than outside it.
+ */
+.gl-scroll :focus-visible { outline-offset: -2px; }
+
 /* ------------------------------------------------------------ motion principles
    1. Nothing decorative loops. The tracer moves because a phase advanced.
    2. Anything that relocates uses --dur-move and the same easing, so the
@@ -328,43 +396,204 @@ a { color: inherit; }
 .layer-row.is-off { opacity: 0.45; }
 .pop-note { font-size: 10px; line-height: 1.5; color: var(--ink-4); margin: 9px 0 0; border-top: 1px solid var(--rule); padding-top: 8px; }
 
-/* ---------------------------------------------------------------- landing */
 
-.landing { max-width: 900px; margin: 0 auto; padding: 72px 24px 56px; }
-.eyebrow { font-family: var(--mono); font-size: 10px; font-weight: 800; letter-spacing: 0.09em; color: var(--ink-3); margin: 0 0 20px; display: flex; align-items: center; gap: 14px; }
+/* ============================================================== LANDING =====
+   Five registers, and the hero is a composition rather than a stack.
+
+   The previous hero was kicker, headline, paragraph, input -- four things in a
+   column, which is the shape every developer tool has. It was technically clean
+   and it said nothing about what the product does.
+
+   What replaced it, in order:
+
+     1  a quiet mono kicker, with a rule that runs off to the right
+     2  the display statement as the strongest mass on the page
+     3  a SECOND register -- indented onto a later column, lighter, smaller, in a
+        lower ink, under a rule of its own -- so the question reads as folding out
+        of the statement rather than as the next line of it
+     4  the trace band: source, evidence, relationship, lineage, as nodes on one
+        rule, with real counts and an explicit example label
+     5  the statement at a narrow measure, offset, with an aside keyed to the same
+        column the trace uses
+
+   A 12-column field rather than a single 900px measure, because the composition
+   needs somewhere to be asymmetric. Everything is the shipped token set: no
+   gradient, no glow, no blur, no card, nothing floating.
+   ========================================================================== */
+.landing {
+  max-width: 1180px; margin: 0 auto; padding: 44px 40px 0;
+  display: grid; grid-template-columns: repeat(12, 1fr); column-gap: 24px;
+}
+.landing[hidden] { display: none; }
+
+/* ── 1 · kicker ─────────────────────────────────────────────────────────────── */
+.eyebrow {
+  grid-column: 1 / -1;
+  display: flex; align-items: center; gap: 16px;
+  font-family: var(--mono); font-size: var(--t-section-size); font-weight: var(--t-section-wt);
+  letter-spacing: var(--t-section-track); text-transform: uppercase;
+  color: var(--ink-3); margin: 0 0 28px;
+}
 .eyebrow::after { content: ""; flex: 1; height: 1px; background: var(--rule); }
-.landing h1 { font-size: clamp(38px, 6.2vw, 64px); line-height: 1.0; letter-spacing: -0.045em; font-weight: 700; margin: 0 0 20px; }
-.lede { font-size: 18px; line-height: 1.5; color: var(--ink-2); margin: 0 0 34px; max-width: 46ch; }
 
-.input-card { background: var(--surface); border: 1px solid var(--rule-2); border-radius: 6px; padding: 14px; }
-.input-row { display: flex; gap: 10px; align-items: stretch; }
-.input-icon { width: 15px; height: 15px; align-self: center; margin-left: 12px; fill: var(--ink-4); flex: none; }
-#repo-input { flex: 1; min-width: 0; font-family: var(--mono); font-size: 14px; padding: 13px 12px; border: 1px solid var(--rule-2); border-radius: 4px; background: var(--surface-hi); color: var(--ink); }
-#repo-input:focus { outline: 2px solid var(--ink-2); outline-offset: -1px; }
-#submit { font-size: 14px; font-weight: 650; padding: 13px 22px; border: 1px solid var(--ink); border-radius: 4px; background: var(--ink); color: var(--paper); white-space: nowrap; }
-#submit:hover { background: #000; }
+/* ── 2 · display ────────────────────────────────────────────────────────────── */
+.landing h1 {
+  grid-column: 1 / 10; margin: 0;
+  font-size: clamp(46px, 5.4vw, 76px); line-height: 0.98; letter-spacing: -0.04em;
+  font-weight: var(--t-display-wt); color: var(--ink);
+}
 
-.sub-row { display: flex; align-items: center; gap: 12px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--rule); flex-wrap: wrap; }
-.sub-label { font-size: 9px; font-weight: 800; letter-spacing: 0.08em; color: var(--ink-3); }
-.seg { display: inline-flex; border: 1px solid var(--rule-2); border-radius: 4px; overflow: hidden; background: var(--paper); }
-.seg-btn { font-size: 12px; font-weight: 500; padding: 6px 11px; border: 0; border-right: 1px solid var(--rule-2); background: transparent; color: var(--ink-2); }
+/* ── 3 · the fold ───────────────────────────────────────────────────────────── */
+/*
+   A second register, not a second bold line. It is indented onto a later column,
+   set lighter and smaller, in the second ink, and separated by a rule -- so it reads
+   as the question unfolding rather than as more of the statement.
+*/
+.hero-fold {
+  grid-column: 5 / 11; margin: 18px 0 0; padding-top: 16px;
+  border-top: 1px solid var(--rule-2);
+  font-size: clamp(34px, 3.9vw, 58px); line-height: 1.0; letter-spacing: -0.035em;
+  font-weight: 400; color: var(--ink-2);
+}
+
+/* ── 4 · the trace band ─────────────────────────────────────────────────────── */
+/*
+   The product's own verb, drawn once. It travels under the composition rather than
+   across it, so no rule ever crosses a glyph, and it is the only diagrammatic thing
+   on the page -- which is the point: the diagram *is* the argument.
+
+   The counts are real, from one real repository, and the label says so. Printing
+   `137 evidence -> 97 depends_on` as though it were this visitor's result would be a
+   lie about work nobody has run.
+*/
+.hero-trace {
+  grid-column: 1 / -1; margin: 40px 0 0; padding: 18px 0 18px;
+  border-top: var(--rule-heavy); border-bottom: 1px solid var(--rule);
+  display: grid; grid-template-columns: repeat(4, 1fr); position: relative;
+}
+.hero-trace::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 24px; height: 1px;
+  background: var(--rule-2);
+}
+.hero-trace-node { padding-right: 24px; position: relative; }
+.hero-trace-mark {
+  width: 9px; height: 9px; background: var(--ink); display: block;
+  margin-bottom: 13px; position: relative; z-index: 1;
+}
+/* The outcome is the accent, and the only filled square in the band. */
+.hero-trace-node:last-of-type .hero-trace-mark { background: var(--accent); }
+.hero-trace-stage {
+  font-family: var(--mono); font-size: var(--t-meta-size); font-weight: 500;
+  letter-spacing: var(--t-meta-track); text-transform: uppercase; color: var(--ink-4);
+  margin: 0 0 5px;
+}
+.hero-trace-value { font-size: var(--t-row-size); font-weight: 590; color: var(--ink); margin: 0; }
+.hero-trace-note {
+  grid-column: 1 / -1; margin: 13px 0 0;
+  font-family: var(--mono); font-size: var(--t-meta-size); color: var(--ink-4);
+  letter-spacing: var(--t-meta-track);
+}
+
+/* ── 5 · statement and aside ────────────────────────────────────────────────── */
+.lede {
+  grid-column: 1 / 6; margin: 24px 0 0;
+  font-size: var(--t-body-size); line-height: 1.6; color: var(--ink-2); max-width: 42ch;
+}
+.landing-aside {
+  grid-column: 7 / 11; margin: 24px 0 0;
+  padding-left: 20px; border-left: 1px solid var(--rule-2);
+  font-family: var(--mono); font-size: var(--t-meta-size); line-height: 1.6; color: var(--ink-3);
+}
+.landing-aside b { font-weight: 500; color: var(--ink-2); }
+
+/* ── the input, after the whole sequence ────────────────────────────────────── */
+.input-card { grid-column: 1 / 8; margin: 30px 0 0; background: var(--surface); border: 1px solid var(--rule-2); border-radius: 0; padding: 0; }
+.input-row { display: flex; gap: 0; align-items: stretch; }
+.input-icon { display: none; }
+#repo-input {
+  flex: 1; min-width: 0; font-family: var(--mono); font-size: var(--t-row-size);
+  padding: 17px 18px; border: 0; border-right: 1px solid var(--rule-2);
+  background: var(--surface-hi); color: var(--ink);
+}
+/* Focus is a rule outside the field, not a browser glow inside it. */
+#repo-input:focus { outline: 2px solid var(--ink); outline-offset: -2px; }
+#submit {
+  font-size: var(--t-row-size); font-weight: 590; padding: 17px 28px;
+  border: 0; border-radius: 0; background: var(--ink); color: var(--paper); white-space: nowrap;
+}
+.sub-row {
+  display: flex; align-items: center; gap: 16px; padding: 11px 18px;
+  border-top: 1px solid var(--rule); background: var(--surface-sunk); flex-wrap: wrap;
+}
+.sub-label { font-family: var(--mono); font-size: var(--t-meta-size); letter-spacing: var(--t-meta-track); color: var(--ink-3); }
+.seg { display: inline-flex; border: 1px solid var(--rule-2); border-radius: 0; background: var(--paper); }
+.seg-btn { font-size: var(--t-secondary-size); font-weight: 500; padding: 5px 12px; border: 0; border-right: 1px solid var(--rule-2); background: transparent; color: var(--ink-2); }
 .seg-btn:last-child { border-right: 0; }
 .seg-btn.is-active { background: var(--ink); color: var(--paper); }
-.check { font-size: 11px; color: var(--ink-3); display: inline-flex; align-items: center; gap: 6px; }
-.check.is-disabled { color: var(--ink-4); }
+.check { font-family: var(--mono); font-size: var(--t-meta-size); color: var(--ink-4); display: inline-flex; align-items: center; gap: 6px; }
+.check.is-disabled { color: var(--ink-5); }
 
-.foot { font-size: 12px; color: var(--ink-3); margin: 16px 2px 0; }
-.samples { font-size: 11px; color: var(--ink-3); margin: 26px 2px 0; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
-.samples a { color: var(--ink-2); text-decoration: none; border: 1px solid var(--rule-2); border-radius: 4px; padding: 5px 9px; background: var(--surface-hi); }
-.samples a:hover { border-color: var(--ink-2); }
-.sample-tag { font-size: 10px; color: var(--ink-4); margin-right: 8px; }
+.foot { grid-column: 1 / -1; margin: 16px 0 0; font-size: var(--t-secondary-size); color: var(--ink-3); }
+.foot code { font-family: var(--mono); font-size: var(--t-meta-size); color: var(--ink-2); }
+.samples {
+  grid-column: 1 / -1; margin: 14px 0 0;
+  display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+  font-family: var(--mono); font-size: var(--t-meta-size); color: var(--ink-3);
+}
+.samples a { color: var(--ink-2); text-decoration: none; border: 1px solid var(--rule-2); border-radius: 0; padding: 4px 8px; background: var(--surface-hi); }
+.samples a:hover { border-color: var(--ink-3); color: var(--ink); }
+.sample-tag { font-size: var(--t-meta-size); color: var(--ink-4); margin-right: 8px; }
 
-.trust { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--rule); border: 1px solid var(--rule); margin-top: 40px; }
+/* The assurances belong to the page that makes the promise. */
+.trust { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--rule); border: 1px solid var(--rule); margin: 26px 0 0; }
 .trust-cell { background: var(--surface); padding: 14px 16px; }
-.trust-head { font-size: 9px; font-weight: 800; letter-spacing: 0.07em; color: var(--ink-3); margin: 0 0 7px; }
-.trust-body { font-size: 13px; line-height: 1.5; color: var(--ink-2); margin: 0; }
-.mini-pill { font-family: var(--mono); font-size: 9px; font-weight: 800; letter-spacing: 0.05em; padding: 2px 5px; border: 1px solid currentColor; border-radius: 3px; }
+.trust-head { font-family: var(--mono); font-size: var(--t-section-size); font-weight: var(--t-section-wt); letter-spacing: var(--t-section-track); color: var(--ink-3); margin: 0 0 7px; }
+.trust-body { font-size: var(--t-secondary-size); line-height: 1.5; color: var(--ink-2); margin: 0; }
+.mini-pill { font-family: var(--mono); font-size: var(--t-meta-size); font-weight: 500; letter-spacing: var(--t-meta-track); padding: 1px 4px; border: 1px solid currentColor; border-radius: 0; }
 .mini-pill.v { color: var(--verified); } .mini-pill.d { color: var(--declared); } .mini-pill.t { color: var(--detected); }
+
+/*
+   The footer is a grid item like everything else in the landing, so it needs an
+   explicit column. It did not have one and auto-placed into column one, which made the
+   assurances line wrap into a 200px ribbon down the left edge -- the one part of the
+   page that had been correct for the whole project.
+*/
+.site-foot {
+  grid-column: 1 / -1;
+  margin: 26px 0 0; padding: 16px 0 22px;
+  border-top: 1px solid var(--rule);
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  font-family: var(--mono); font-size: var(--t-meta-size); color: var(--ink-4);
+}
+.site-foot[hidden] { display: none; }
+.foot-links { display: flex; gap: 14px; flex: none; }
+.foot-links a { color: var(--ink-3); text-decoration: none; }
+.foot-links a:hover { color: var(--ink); }
+
+/* The hero folds to fewer columns rather than to a stack. */
+@media (max-width: 1100px) {
+  .landing { padding: 44px 28px 0; grid-template-columns: repeat(6, 1fr); }
+  .landing h1 { grid-column: 1 / -1; }
+  .hero-fold { grid-column: 2 / -1; }
+  .lede, .landing-aside, .input-card { grid-column: 1 / -1; }
+  .landing-aside { border-left: 0; padding-left: 0; border-top: 1px solid var(--rule-2); padding-top: 14px; }
+  .hero-trace { grid-template-columns: repeat(2, 1fr); row-gap: 22px; }
+  /* One rule for the first row, one for the second: the travelling line is two lines
+     at this width and pretending otherwise would draw it across the gap. */
+  .hero-trace::before { display: none; }
+  .hero-trace-node { border-top: 1px solid var(--rule-2); padding-top: 16px; }
+  .hero-trace-node:nth-child(-n+2) { border-top: 0; padding-top: 0; }
+  .hero-trace-mark { margin-bottom: 10px; }
+}
+@media (max-width: 700px) {
+  .landing { grid-template-columns: 1fr; padding: 32px 18px 0; }
+  .hero-fold { grid-column: 1 / -1; }
+  .hero-trace { grid-template-columns: 1fr; }
+  .hero-trace-node { border-top: 1px solid var(--rule-2); padding-top: 14px; }
+  .hero-trace-node:first-of-type { border-top: 0; padding-top: 0; }
+  .trust { grid-template-columns: 1fr; }
+  .site-foot { flex-direction: column; align-items: flex-start; gap: 6px; padding: 18px; }
+}
 
 /* --------------------------------------------------------------- explorer */
 
@@ -394,6 +623,20 @@ a { color: inherit; }
 .explorer-body {
   display: grid;
   grid-template-columns: var(--rail-w) minmax(0, 1fr) 0;
+  /*
+   * The body row is exactly the space the app bar and the strip leave.
+   *
+   * Without it the implicit row is `auto`, which sizes to the tallest item's content --
+   * and the Drawer of a dense repository is 2629 units of evidence. So the row grew to
+   * fit it, the Drawer grew with the row, and the panel that was supposed to scroll
+   * instead pushed the shell taller than the viewport. It had been masked by
+   * `overflow: hidden` on the Drawer, which made it a scroll container with a zero
+   * automatic minimum size; removing that to let a sticky heading work unmasked it.
+   *
+   * `minmax(0, 1fr)` states it directly: the row is the remainder, and anything longer
+   * scrolls inside its own column rather than growing the page.
+   */
+  grid-template-rows: minmax(0, 1fr);
   flex: 1 1 auto; min-height: 0; position: relative;
 }
 .explorer-body.with-drawer { grid-template-columns: var(--rail-w) minmax(0, 1fr) var(--drawer-w); }
@@ -409,10 +652,43 @@ a { color: inherit; }
 .rail {
   grid-column: 1; grid-row: 1;
   border-right: var(--rule-firm); background: var(--surface);
-  padding: var(--sp-base); overflow-y: auto; overflow-x: hidden;
-  display: flex; flex-direction: column; gap: var(--sp-base);
+  overflow: hidden; position: relative;
+  display: flex; flex-direction: column;
   min-width: 0;
 }
+/*
+ * The rail's own scroller.
+ *
+ * The rail's padding moved onto this inner box rather than onto `.rail` itself, because
+ * a padding box that scrolls takes its padding with it: the top padding was consumed
+ * by the first scroll and the content then touched the app bar. `min-height: 0` is what
+ * lets a flex child actually shrink and scroll instead of growing the column.
+ */
+.rail-scroll {
+  flex: 1; min-height: 0;
+  overflow-y: auto; overflow-x: hidden;
+  padding: var(--sp-base) var(--sp-base) var(--sp-block);
+  display: flex; flex-direction: column; gap: var(--sp-base);
+}
+/*
+ * The continuation rule.
+ *
+ * A hairline at the panel's bottom edge, present only while there is more to read below.
+ * It is drawn on the *frame* rather than on the scroller, because a pseudo-element on a
+ * scrolling box scrolls with its content and would travel down the list.
+ *
+ * One hairline, and nothing else. A soft gradient under it was the first attempt and it
+ * is wrong twice over: it spends a gradient on something a rule already says, and the
+ * stylesheet carries a standing rule that no gradient may be declared here at all. The
+ * softening is not missing -- it is the mask on the scroller above, which takes the
+ * pixels away at the edge instead of covering them.
+ */
+.rail-more, .drawer-more {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 1px;
+  background: var(--rule-3); pointer-events: none;
+  opacity: 0; transition: opacity var(--dur-fast) var(--ease-out);
+}
+.is-more-below > .rail-more, .is-more-below > .drawer-more { opacity: 1; }
 .rail[hidden] { display: none; }
 .railsec { display: block; }
 .rs-t {
@@ -909,13 +1185,47 @@ a { color: inherit; }
 .drawer {
   grid-column: 3; grid-row: 1;
   border-left: var(--rule-firm); background: var(--surface);
-  overflow: hidden; display: flex; flex-direction: column; min-width: 0;
+  /*
+   * `overflow: visible`, deliberately -- and this was a real bug, not a preference.
+   *
+   * An `overflow: hidden` box is a scroll container, so it becomes the nearest scrollport
+   * for anything sticky inside it. The Drawer's group heading is sticky, and with this
+   * clipping it was measured against a box that never scrolls: it stayed exactly where
+   * the flow put it and travelled out of view with the first ninety rows. The inner
+   * `.drawer-inner` clips its own content, so nothing is lost by letting this one show
+   * through.
+   */
+  display: flex; flex-direction: column; min-width: 0;
 }
 .drawer[hidden] { display: none; }
 .drawer-inner {
-  flex: 1; overflow-y: auto;
-  padding: var(--sp-section) var(--sp-band) var(--sp-base); position: relative;
+  flex: 1; min-height: 0; overflow-y: auto;
+  padding: var(--sp-section) var(--sp-band) var(--sp-block); position: relative;
+  /* The group's sticky heading occupies the first 30px of this box, so the top fade
+     starts below it. See `--gl-fade-top`. */
+  --gl-fade-top: 54px;
 }
+/*
+ * The group heading, held at the top of the panel while its list scrolls under it.
+ *
+ * `pebrel`'s Drawer is ninety-seven relationship rows long. Without this the reader
+ * loses the only statement of what the list *is* within one screen of scrolling, which
+ * is the failure a sticky heading exists to prevent. The background is the panel's own
+ * surface rather than a blur or a glass, so the rows genuinely pass *under* a printed
+ * rule instead of appearing behind a translucent sheet.
+ *
+ * `z-index` puts it above the rows and below the close button.
+ */
+.d-block-head {
+  position: sticky; top: calc(var(--sp-section) * -1); z-index: 1;
+  margin: 0 calc(var(--sp-band) * -1) var(--sp-tight);
+  padding: var(--sp-tight) var(--sp-band) var(--sp-micro);
+  background: var(--surface);
+  box-shadow: inset 0 -1px 0 var(--rule);
+  font-family: var(--mono); font-size: var(--t-section-size); font-weight: var(--t-section-wt);
+  letter-spacing: var(--t-section-track); text-transform: uppercase; color: var(--ink-4);
+}
+.d-block:first-child .d-block-head { margin-top: 0; }
 .drawer-close {
   position: absolute; top: var(--sp-snug); right: var(--sp-base);
   font-family: var(--mono); font-size: var(--t-meta-size); color: var(--ink-4);
@@ -940,9 +1250,8 @@ a { color: inherit; }
  * provenance heading is deliberately quieter. Order alone was not enough: with the
  * same treatment for both, the metadata still read as equally important.
  */
-.d-block-head { font-family: var(--mono); font-size: 9px; font-weight: 800; letter-spacing: 0.08em; color: var(--ink-4); margin: 0 0 8px; }
-.d-block:has(> .d-block-head:first-child) { /* no-op guard for older engines */ }
-.d-block-head.is-evidence { color: var(--ink-2); font-size: 10px; }
+/* Colour and scale only -- the box model and stickiness are declared once, above. */
+.d-block-head.is-evidence { color: var(--ink-2); font-size: var(--t-meta-size); }
 .d-block-head.is-provenance { color: var(--ink-4); }
 /* The evidence quote is the largest body text in the drawer: it is the record. */
 .d-quote { font-size: 12px; line-height: 1.6; }
@@ -989,12 +1298,6 @@ a { color: inherit; }
 
 .node-detail { font-size: 12px; color: var(--ink-2); line-height: 1.55; }
 
-/* -------------------------------------------------------------- site foot */
-
-.site-foot { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 10px 18px; border-top: 1px solid var(--rule); font-size: 11px; color: var(--ink-4); background: var(--paper); }
-.foot-links { display: flex; gap: 14px; }
-.foot-links a { color: var(--ink-3); text-decoration: none; }
-.foot-links a:hover { color: var(--ink); text-decoration: underline; }
 
 /* ================================================================ RESPONSIVE ===
    SHELL ONLY. The graph world is a fixed spatial coordinate system: 1920 x 1720,
@@ -1057,10 +1360,7 @@ a { color: inherit; }
   .phase { padding: 0 var(--sp-tight); }
   .phase-name { display: none; }
   .phase-n { margin: 0 auto; }
-  .landing { padding: 44px 18px 40px; }
-  .lede { font-size: 16px; }
   .bundles { max-width: calc(100% - 32px); }
-  .site-foot { flex-direction: column; align-items: flex-start; gap: 6px; }
   .viewport-controls { right: var(--sp-tight); bottom: var(--sp-tight); }
 }
 

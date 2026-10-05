@@ -355,6 +355,195 @@ async function plateBandCollisions(page: Page): Promise<string[]> {
   })()`) as Promise<string[]>;
 }
 
+/**
+ * The native-scrollbar proof, in pixels.
+ *
+ * Returns the number of pixels in the panel's right gutter that are not the panel's own
+ * surface colour, with the panel's content hidden and our continuation rule switched
+ * off.
+ *
+ * The content is hidden first, and that is what makes this a proof rather than a
+ * comparison. A scrollbar track and thumb are chrome: they keep painting when the rows
+ * they belong to do not. So with the rows gone the panel shows nothing but its surface,
+ * and anything in the gutter that is not that surface is scrollbar.
+ *
+ * Two earlier attempts were wrong in instructive ways. Comparing two scroll positions
+ * *with* content cannot work -- the rows move, so the strip legitimately differs, and the
+ * first version "failed" on the drawer's close button. And leaving our own continuation
+ * rule in produced twenty non-surface pixels on one strip and none on another, which was
+ * the affordance working correctly and says nothing about the browser.
+ */
+async function scrollbarPixels(browser: Browser, selector: string, repo: string, baseUrl: string): Promise<{
+  gutterPixels: number; gutterWidth: number; height: number; worst: string | null;
+  frameHeight: number | null; explorerHeight: number; rowsInPanel: number;
+}> {
+  const page = await browser.newPage({ viewport: DESKTOP });
+  try {
+    await open(page, baseUrl, `/${repo}`);
+    const openDrawer = await page.evaluate(`(() => !!document.querySelector('.drawer-inner') && !!document.querySelector('svg .node.is-subject .node-hit'))()`);
+    if (openDrawer) {
+      await page.click('svg .node.is-subject .node-hit');
+      await page.waitForTimeout(800);
+    }
+    await page.addStyleTag({
+      content: `${selector} * { visibility: hidden !important; }
+                .drawer-more, .rail-more { display: none !important; }`,
+    });
+const clip = await page.evaluate(`(() => {
+      const n = document.querySelector(${JSON.stringify(selector)});
+      const frame = n.closest('.drawer, .rail');
+      n.scrollTop = 999999;
+      const r = n.getBoundingClientRect();
+      return { x: Math.max(0, Math.round(r.right - 20)), y: Math.round(r.top),
+               width: 20, height: Math.round(r.height),
+               drawerHidden: !!document.querySelector('.drawer')?.hasAttribute('hidden'),
+               frameRect: frame ? [Math.round(frame.getBoundingClientRect().width),
+                                   Math.round(frame.getBoundingClientRect().height)] : null,
+               explorerH: Math.round(document.querySelector('#explorer')?.getBoundingClientRect().height ?? -1),
+               bodyRows: n.querySelectorAll('.bundle-row').length,
+               innerH: Math.round(r.height),
+               innerClient: n.clientHeight, innerScroll: n.scrollHeight,
+               drawerOverflow: getComputedStyle(document.querySelector('.drawer')).overflow };
+    })()`) as { x: number; y: number; width: number; height: number;
+      drawerHidden: boolean; frameRect: number[] | null; explorerH: number; bodyRows: number };
+    const png = await page.screenshot({ clip });
+    /*
+     * The colour the panel is *painted*, not the one it is declared with.
+     *
+     * The scroller itself is transparent -- the surface is on its frame -- so reading
+     * its own `background-color` yields `rgba(0,0,0,0)` and every pixel then counts as
+     * non-surface. That is exactly what happened: twenty thousand "scrollbar" pixels
+     * that were `252,251,248` compared against zero. The nearest non-transparent
+     * background up the tree is what the reader actually sees.
+     */
+    const surface = await page.evaluate(`(() => {
+      let el = document.querySelector(${JSON.stringify(selector)});
+      while (el) {
+        const c = getComputedStyle(el).backgroundColor;
+        const p = (c.match(/[\d.]+/g) || []).map(Number);
+        if (p.length >= 3 && (p[3] === undefined || p[3] > 0.5)) return c;
+        el = el.parentElement;
+      }
+      return 'rgb(252, 251, 248)';
+    })()`) as string;
+    const parsed = (surface.match(/[\d.]+/g) ?? ['252', '251', '248']).map(Number) as number[];
+    const [sr, sg, sb] = [parsed[0]!, parsed[1]!, parsed[2]!];
+    // TOLERANCE covers PNG rounding and antialiasing along the panel's own edge; a
+    // scrollbar track is a different colour by far more than six levels.
+    const TOLERANCE = 6;
+    const values = await samplePixels(browser, png, []);
+    void values;
+    const raw = await probePixels(browser, png);
+    let bad = 0;
+    let worst: string | null = null;
+    for (let i = 0; i < raw.length; i += 4) {
+      const d = Math.max(Math.abs(raw[i]! - sr), Math.abs(raw[i + 1]! - sg), Math.abs(raw[i + 2]! - sb));
+      if (d > TOLERANCE) {
+        bad += 1;
+        if (!worst) worst = `${raw[i]},${raw[i + 1]},${raw[i + 2]} vs ${sr},${sg},${sb}`;
+      }
+    }
+    return { gutterPixels: bad, gutterWidth: clip.width, height: clip.height, worst,
+             frameHeight: clip.frameRect ? clip.frameRect[1]! : null,
+             explorerHeight: clip.explorerH, rowsInPanel: clip.bodyRows };
+  } finally {
+    await page.close();
+  }
+}
+
+/** Decodes a PNG into raw RGBA, via a blank page's 2d context. */
+async function probePixels(browser: Browser, png: Buffer): Promise<number[]> {
+  const page = await browser.newPage();
+  try {
+    return await page.evaluate(
+      async ({ data }) => {
+        const img = new Image();
+        img.src = `data:image/png;base64,${data}`;
+        await img.decode();
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) throw new Error('no 2d context');
+        ctx.drawImage(img, 0, 0);
+        return Array.from(ctx.getImageData(0, 0, img.width, img.height).data);
+      },
+      { data: png.toString('base64') },
+    );
+  } finally {
+    await page.close();
+  }
+}
+
+/**
+ * Proves a scrollable panel still scrolls, by wheel and by keyboard, and that its last
+ * row is reachable at the bottom.
+ */
+async function scrollBehaviour(page: Page, selector: string): Promise<{
+  scrollable: boolean; wheelMoved: boolean; pageDownMoved: boolean; endReachedBottom: boolean;
+  lastRowReachable: boolean; rows: number; focusable: boolean;
+}> {
+  const scrollable = await page.evaluate(`(() => {
+    const n = document.querySelector(${JSON.stringify(selector)});
+    return n.scrollHeight - n.clientHeight;
+  })()`) as number;
+  const focusable = await page.evaluate(
+    `document.querySelector(${JSON.stringify(selector)}).tabIndex >= 0`,
+  ) as boolean;
+  if (scrollable <= 2) {
+    return {
+      scrollable: false, wheelMoved: false, pageDownMoved: false,
+      endReachedBottom: true, lastRowReachable: true, rows: 0, focusable,
+    };
+  }
+
+  await page.evaluate(`document.querySelector(${JSON.stringify(selector)}).scrollTop = 0`);
+  await page.waitForTimeout(150);
+  const box = await page.evaluate(
+    `(() => { const r = document.querySelector(${JSON.stringify(selector)}).getBoundingClientRect();
+       return { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) }; })()`,
+  ) as { x: number; y: number };
+  await page.mouse.move(box.x, box.y);
+  await page.mouse.wheel(0, 600);
+  await page.waitForTimeout(300);
+  const afterWheel = await page.evaluate(
+    `document.querySelector(${JSON.stringify(selector)}).scrollTop`,
+  ) as number;
+
+  await page.evaluate(`document.querySelector(${JSON.stringify(selector)}).scrollTop = 0`);
+  await page.focus(selector);
+  await page.keyboard.press('PageDown');
+  await page.waitForTimeout(300);
+  const afterPageDown = await page.evaluate(
+    `document.querySelector(${JSON.stringify(selector)}).scrollTop`,
+  ) as number;
+  await page.keyboard.press('End');
+  await page.waitForTimeout(400);
+  const end = await page.evaluate(`(() => {
+    const n = document.querySelector(${JSON.stringify(selector)});
+    return { top: n.scrollTop, max: n.scrollHeight - n.clientHeight };
+  })()`) as { top: number; max: number };
+
+  const last = await page.evaluate(`(() => {
+    const n = document.querySelector(${JSON.stringify(selector)});
+    const rows = n.querySelectorAll('.bundle-row, .lblk, .tk-row');
+    const r = rows[rows.length - 1];
+    if (!r) return { rows: 0, reachable: true };
+    const a = r.getBoundingClientRect(), b = n.getBoundingClientRect();
+    return { rows: rows.length, reachable: a.top < b.bottom && a.bottom > b.top };
+  })()`) as { rows: number; reachable: boolean };
+
+  return {
+    scrollable: true,
+    wheelMoved: afterWheel > 0,
+    pageDownMoved: afterPageDown > 0,
+    endReachedBottom: Math.abs(end.top - end.max) <= 2,
+    lastRowReachable: last.reachable,
+    rows: last.rows,
+    focusable,
+  };
+}
+
 /** Waits for the client to draw, whichever terminal state it lands in. */
 async function open(page: Page, url: string, path: string): Promise<void> {
   await page.goto(url + path, { waitUntil: 'domcontentloaded' });
@@ -803,6 +992,85 @@ async function main(): Promise<void> {
       `${shell.samples} samples, ${shell.trust} trust cells`);
     check('10 the landing fits without a scrollbar', shell.scrollY);
 
+    /*
+     * The landing's registers, read off the rendered page.
+     *
+     * A hero is a composition or it is a stack, and the difference is measurable: the
+     * second register must be indented relative to the first, lighter than it, and under
+     * a rule of its own -- which is the whole requirement that `come from?` is not
+     * simply another bold line.
+     */
+    const registers = await page.evaluate(`(() => {
+      const h1 = document.querySelector('#landing h1');
+      const fold = document.querySelector('.hero-fold');
+      const trace = document.querySelector('.hero-trace');
+      const stages = [...document.querySelectorAll('.hero-trace-stage')].map((e) => e.textContent?.trim());
+      const boxes = ['#landing h1', '.hero-fold', '.hero-trace', '.lede', '.landing-aside', '.input-card']
+        .map((s) => { const e = document.querySelector(s); return e ? e.getBoundingClientRect() : null; });
+      let overlaps = 0;
+      for (let i = 0; i < boxes.length; i += 1) for (let j = i + 1; j < boxes.length; j += 1) {
+        const a = boxes[i], b = boxes[j];
+        if (a && b && a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom) overlaps += 1;
+      }
+      return {
+        layers: boxes.filter(Boolean).length, overlaps,
+        foldIndent: Math.round(fold.getBoundingClientRect().left - h1.getBoundingClientRect().left),
+        foldWeight: getComputedStyle(fold).fontWeight,
+        h1Weight: getComputedStyle(h1).fontWeight,
+        foldInk: getComputedStyle(fold).color,
+        h1Ink: getComputedStyle(h1).color,
+        foldRule: getComputedStyle(fold).borderTopWidth,
+        traceStages: stages,
+        traceLabel: document.querySelector('.hero-trace-note')?.textContent?.trim() ?? '',
+        traceBelowHeadline: trace.getBoundingClientRect().top > h1.getBoundingClientRect().bottom,
+        inputAfterTrace: document.querySelector('.input-card').getBoundingClientRect().top
+          > trace.getBoundingClientRect().bottom,
+      };
+    })()`) as {
+      layers: number; overlaps: number;
+      foldIndent: number; foldWeight: string; h1Weight: string;
+      foldInk: string; h1Ink: string; foldRule: string;
+      traceStages: string[]; traceLabel: string;
+      traceBelowHeadline: boolean; inputAfterTrace: boolean;
+    };
+    report['10-registers'] = registers;
+    check('10 the hero is five registers, not a stack',
+      registers.layers >= 6 && registers.overlaps === 0,
+      `${registers.layers} layers, ${registers.overlaps} overlaps`);
+    check('10 the second register is genuinely a second register',
+      registers.foldIndent > 40 && registers.foldWeight < registers.h1Weight
+        && registers.foldInk !== registers.h1Ink && registers.foldRule !== '0px',
+      `indent ${registers.foldIndent}px, weight ${registers.foldWeight} vs ${registers.h1Weight}, own rule ${registers.foldRule}`);
+    check('10 the trace band sits between the headline and the input',
+      registers.traceBelowHeadline && registers.inputAfterTrace
+        && registers.traceStages.join('>') === 'source>evidence>relationship>lineage',
+      `${registers.traceStages.join(' > ')}, label "${registers.traceLabel}"`);
+    check('10 the trace states that it is an example, not this visitor\'s result',
+      /example/i.test(registers.traceLabel) && /pebrel/.test(registers.traceLabel),
+      registers.traceLabel);
+
+    /*
+     * The landing's primary control, filled by keyboard.
+     *
+     * `/` and `f` are single-key shortcuts, and they were live while the reader was in
+     * the repository field. Typing `octocat/Spoon-Knife` therefore opened the graph
+     * search on the slash and put the rest of the name there, and any name containing
+     * an `f` silently lost that character to `fit()`. The landing could not be used by
+     * keyboard, and no check had ever typed into it.
+     */
+    await page.click('#repo-input');
+    await page.keyboard.type('octocat/Spoon-Knife');
+    await page.waitForTimeout(250);
+    const typed = await page.evaluate(`(() => ({
+      value: document.querySelector('#repo-input').value,
+      searchOpen: !document.querySelector('#searchbar').hasAttribute('hidden'),
+      searchValue: document.querySelector('#search-input').value,
+    }))()`) as { value: string; searchOpen: boolean; searchValue: string };
+    report['10-typing'] = typed;
+    check('10 the repository field can be filled by keyboard, slash and all',
+      typed.value === 'octocat/Spoon-Knife' && !typed.searchOpen && typed.searchValue === '',
+      `field "${typed.value}", search opened ${typed.searchOpen}`);
+
     // ============================================ 11 · responsive 1280x800
     const small = await browser.newPage({ viewport: SMALL });
     small.on('pageerror', (e) => errors.push(`[small] pageerror: ${e.message}`));
@@ -1098,6 +1366,141 @@ async function main(): Promise<void> {
       hoverKept.plateSelected && hoverKept.markers > 0,
       `${hoverKept.markers} markers across ${hoverKept.rowStates.length} rows, states ${[...new Set(hoverKept.rowStates)].join(' | ')}`);
     await evidence.close();
+
+    // ================================================ 19 · scroll presentation
+    /*
+     * No native scrollbar anywhere, and scrolling intact.
+     *
+     * The pixel evidence is the point. `scrollbar-width: none` in a stylesheet proves
+     * nothing on its own: a stylesheet can claim it while the engine paints a thumb
+     * anyway, which is exactly what happened once here. The gutter of each panel is read
+     * out of a real screenshot with its content hidden, and any pixel that is not the
+     * panel's own surface is chrome.
+     */
+    const drawerPixels = await scrollbarPixels(browser, '.drawer-inner', EVIDENCE_REPO, url);
+    report['19-scrollbar-drawer'] = drawerPixels;
+    check('19 no native scrollbar is painted in the Drawer gutter',
+      drawerPixels.gutterPixels === 0,
+      `${drawerPixels.gutterPixels} non-surface pixel(s) in ${drawerPixels.gutterWidth}px x ${drawerPixels.height}px${drawerPixels.worst ? `, e.g. ${drawerPixels.worst}` : ''}`);
+
+    const railPixels = await scrollbarPixels(browser, '.rail-scroll', EVIDENCE_REPO, url);
+    report['19-scrollbar-rail'] = railPixels;
+    check('19 no native scrollbar is painted in the rail gutter',
+      railPixels.gutterPixels === 0,
+      `${railPixels.gutterPixels} non-surface pixel(s) in ${railPixels.gutterWidth}px x ${railPixels.height}px`);
+
+    // And the same panel on its own page, scrolled: an affordance that only holds at the
+    // top is not an affordance.
+    {
+      const scroller = await browser.newPage({ viewport: DESKTOP });
+      scroller.on('pageerror', (e) => errors.push(`[scroll] pageerror: ${e.message}`));
+      await open(scroller, url, `/${EVIDENCE_REPO}`);
+      await scroller.click('svg .node.is-subject .node-hit');
+      await scroller.waitForTimeout(900);
+      const drawerScroll = await scrollBehaviour(scroller, '.drawer-inner');
+      report['19-drawer-scroll'] = drawerScroll;
+      check('19 the dense Drawer really scrolls',
+        drawerScroll.scrollable && drawerScroll.rows > 50,
+        `${drawerScroll.rows} rows, ${drawerScroll.scrollable ? 'scrollable' : 'not scrollable'}`);
+      check('19 the wheel scrolls it', drawerScroll.wheelMoved);
+      check('19 the keyboard scrolls it, and it is focusable',
+        drawerScroll.pageDownMoved && drawerScroll.endReachedBottom && drawerScroll.focusable,
+        `pageDown=${drawerScroll.pageDownMoved}, end=${drawerScroll.endReachedBottom}, tabIndex ok=${drawerScroll.focusable}`);
+      check('19 the last relationship is reachable at the bottom',
+        drawerScroll.lastRowReachable);
+
+      // The group heading stays put while its own list runs under it.
+      const sticky = await scroller.evaluate(`(() => {
+        const n = document.querySelector('.drawer-inner');
+        const list = [...n.querySelectorAll('.d-block-head')].find((h) => /RELATIONSHIPS/.test(h.textContent));
+        if (!list) return null;
+        const regionTop = Math.round(n.getBoundingClientRect().top);
+        const at = (t) => { n.scrollTop = t; return Math.round(list.getBoundingClientRect().top - regionTop); };
+        return { position: getComputedStyle(list).position, at700: at(700), at1400: at(1400) };
+      })()`) as { position: string; at700: number; at1400: number } | null;
+      report['19-sticky-heading'] = sticky;
+      check('19 the group heading holds while its list scrolls under it',
+        !!sticky && sticky.position === 'sticky' && sticky.at700 === 0 && sticky.at1400 === 0,
+        sticky ? `position=${sticky.position}, top@700=${sticky.at700}, top@1400=${sticky.at1400}` : 'no list heading');
+
+      // Bottom of the scroll, photographed, and the affordance states what is true.
+      await scroller.evaluate(`document.querySelector('.drawer-inner').scrollTop = 999999`);
+      await scroller.waitForTimeout(400);
+      await scroller.screenshot({ path: `${OUT}/19-drawer-bottom-of-scroll.png` });
+      const atBottom = await scroller.evaluate(`(() => {
+        const n = document.querySelector('.drawer-inner');
+        return { classes: [...n.classList], frameMore: document.querySelector('.drawer').classList.contains('is-more-below') };
+      })()`) as { classes: string[]; frameMore: boolean };
+      check('19 at the bottom the rule withdraws and the top fade appears',
+        atBottom.classes.includes('gl-has-above') && !atBottom.frameMore,
+        `classes ${atBottom.classes.join(' ')}, rule ${atBottom.frameMore}`);
+
+      // And at the top it is the other way round.
+      await scroller.evaluate(`document.querySelector('.drawer-inner').scrollTop = 0`);
+      await scroller.waitForTimeout(400);
+      await scroller.screenshot({ path: `${OUT}/19-drawer-top-of-scroll.png` });
+      const atTop = await scroller.evaluate(`(() => {
+        const n = document.querySelector('.drawer-inner');
+        return { classes: [...n.classList], frameMore: document.querySelector('.drawer').classList.contains('is-more-below') };
+      })()`) as { classes: string[]; frameMore: boolean };
+      check('19 at the top the rule shows and the top fade is absent',
+        atTop.classes.includes('gl-has-below') && !atTop.classes.includes('gl-has-above') && atTop.frameMore,
+        `classes ${atTop.classes.join(' ')}, rule ${atTop.frameMore}`);
+      await scroller.close();
+    }
+
+    // The rail, on a viewport short enough that its content genuinely overflows.
+    {
+      const railPage = await browser.newPage({ viewport: { width: 1600, height: 620 } });
+      railPage.on('pageerror', (e) => errors.push(`[rail-scroll] pageerror: ${e.message}`));
+      await open(railPage, url, `/${EVIDENCE_REPO}`);
+      const railScroll = await scrollBehaviour(railPage, '.rail-scroll');
+      report['19-rail-scroll'] = railScroll;
+      await railPage.screenshot({ path: `${OUT}/19-rail-scrolled.png` });
+      check('19 the rail scrolls, by wheel and by keyboard, with no scrollbar',
+        railScroll.scrollable && railScroll.wheelMoved && railScroll.pageDownMoved && railScroll.focusable,
+        `scrollable=${railScroll.scrollable}, wheel=${railScroll.wheelMoved}, keyboard=${railScroll.pageDownMoved}, focusable=${railScroll.focusable}`);
+      await railPage.evaluate(`document.querySelector('.rail-scroll').scrollTop = 999999`);
+      await railPage.waitForTimeout(400);
+      await railPage.screenshot({ path: `${OUT}/19-rail-bottom-of-scroll.png` });
+      const railBottom = await railPage.evaluate(`(() => {
+        const n = document.querySelector('.rail-scroll');
+        return { classes: [...n.classList], frameMore: document.querySelector('.rail').classList.contains('is-more-below'),
+                 lastBlock: (() => { const b = n.querySelectorAll('.lblk'); const r = b[b.length-1];
+                   if (!r) return null; const a = r.getBoundingClientRect(), c = n.getBoundingClientRect();
+                   return a.top < c.bottom && a.bottom > c.top; })() };
+      })()`) as { classes: string[]; frameMore: boolean; lastBlock: boolean | null };
+      check('19 the rail withdraws its rule at the bottom, with its last block reachable',
+        !railBottom.frameMore && railBottom.lastBlock !== false,
+        `rule ${railBottom.frameMore}, last block visible ${railBottom.lastBlock}`);
+      await railPage.close();
+    }
+
+    // Every scroller the product ships has its chrome hidden and is keyboard-reachable.
+    {
+      const audit = await browser.newPage({ viewport: DESKTOP });
+      await open(audit, url, `/${EVIDENCE_REPO}`);
+      const scrollers = await audit.evaluate(`(() => {
+        const out = [];
+        for (const el of document.querySelectorAll('body, body *')) {
+          const cs = getComputedStyle(el);
+          const scrolls = cs.overflowY === 'auto' || cs.overflowY === 'scroll'
+            || cs.overflowX === 'auto' || cs.overflowX === 'scroll';
+          if (!scrolls) continue;
+          out.push({ el: el.tagName + '.' + (el.className || '').toString().split(' ')[0],
+                     scrollbarWidth: cs.scrollbarWidth,
+                     gutterPx: el.offsetWidth - el.clientWidth,
+                     focusable: el.tabIndex >= 0 });
+        }
+        return out;
+      })()`) as Array<{ el: string; scrollbarWidth: string; gutterPx: number; focusable: boolean }>;
+      report['19-scrollers'] = scrollers;
+      const painted = scrollers.filter((s) => s.scrollbarWidth !== 'none' && s.gutterPx > 0);
+      check('19 no scrollable region in the product keeps its native scrollbar',
+        painted.length === 0,
+        painted.map((s) => `${s.el} ${s.scrollbarWidth} ${s.gutterPx}px`).join(', '));
+      await audit.close();
+    }
 
     // ================================ 14 · the depth ladder, in painted pixels
     /*

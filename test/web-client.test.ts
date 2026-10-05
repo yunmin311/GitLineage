@@ -882,8 +882,22 @@ test('the depth ladder uses no blur, glow, gradient or diffuse shadow', () => {
   assert.equal(/backdrop-filter/.test(APP_CSS), false, 'no backdrop blur');
   // Comments may discuss gradients; no declaration may use one.
   const declared = APP_CSS.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/\/\/[^\n]*/g, ' ');
-  assert.equal(/(^|[;{\s])(repeating-)?(linear|radial|conic)-gradient\(/.test(declared), false,
-    'no gradient may be declared in the client stylesheet');
+  /*
+   * Gradients that are *masks* are excluded, because a mask paints nothing: it
+   * modulates alpha, so there is no colour in it to be decorative. It is also the only
+   * way CSS expresses a soft edge, and the soft edge is what stands in for the
+   * scrollbar in a panel that scrolls. Removing the mask declarations and then searching
+   * keeps this a rule about painted fills rather than a judgement about intent.
+   */
+  const painted = declared.replace(/(-webkit-)?mask(-image)?\s*:[^;}]*;?/g, ' ');
+  assert.equal(/(^|[;{\s])(repeating-)?(linear|radial|conic)-gradient\(/.test(painted), false,
+    'no gradient may be painted in the client stylesheet');
+  // And each remaining one really is a mask, so the exclusion cannot conceal a fill.
+  for (const g of declared.match(/(^|[;{\s])(repeating-)?(linear|radial|conic)-gradient\(/g) ?? []) {
+    const before = declared.slice(Math.max(0, declared.indexOf(g) - 60), declared.indexOf(g));
+    assert.match(before, /mask(-image)?\s*:\s*$/,
+      `every gradient in the sheet is a mask: ${before.slice(-40)}`);
+  }
 });
 
 test('flat surfaces carry no topology shadow', () => {

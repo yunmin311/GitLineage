@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>GitLineage — variant A · Trace Editorial</title>
+<!--
+  VARIANT A — TRACE EDITORIAL
+
+  The five registers the brief asks for, as five things a reader can point at:
+
+    1  a quiet mono kicker, with a rule that runs off to the right
+    2  "Where did this software" as the strongest mass on the page
+    3  "come from?" as a SECOND register, not a second bold line: indented a column,
+       lighter, smaller, in a lower ink tier, with its own rule above it
+    4  a trace band -- source, evidence, relationship, lineage -- that travels under the
+       composition as nodes on a single rule, with real counts and an example label
+    5  the statement, set to a narrow measure and offset, with a small aside keyed to
+       the trace rather than sitting under the headline
+
+  Everything uses the shipped tokens. No gradient, no glow, no blur, no card.
+  Every extra mark either names a stage of the product's own verb or it is not here.
+-->
+<link rel="stylesheet" href="../../src/web/client/app.css" />
+<style>
+  body { background: var(--paper); }
+
+  /* A 12-column field, because the composition needs somewhere to be asymmetric.
+     The landing was a single 900px measure, which is why every layer had to stack. */
+  .hero {
+    max-width: 1180px; margin: 0 auto;
+    padding: 64px 40px 0;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    column-gap: 24px;
+  }
+
+  /* ── 1 · kicker ───────────────────────────────────────────────────────── */
+  .hero-kicker {
+    grid-column: 1 / -1;
+    display: flex; align-items: center; gap: 16px;
+    font-family: var(--mono); font-size: var(--t-section-size); font-weight: var(--t-section-wt);
+    letter-spacing: var(--t-section-track); text-transform: uppercase;
+    color: var(--ink-3); margin: 0 0 40px;
+  }
+  .hero-kicker::after { content: ""; flex: 1; height: 1px; background: var(--rule); }
+
+  /* ── 2 + 3 · the two display registers ────────────────────────────────── */
+  .hero-display {
+    grid-column: 1 / 10;
+    margin: 0;
+    font-size: 76px; line-height: 0.98; letter-spacing: -0.04em;
+    font-weight: var(--t-display-wt); color: var(--ink);
+  }
+  /*
+    The second register.
+    Not the same sentence at a smaller size: it is indented onto column 5, set lighter,
+    set in the second ink, and separated by a rule of its own -- so the question reads as
+    folding out of the statement rather than as the next line of it.
+  */
+  .hero-fold {
+    grid-column: 5 / 11;
+    margin: 28px 0 0;
+    padding-top: 20px;
+    border-top: 1px solid var(--rule-2);
+    font-size: 58px; line-height: 1.0; letter-spacing: -0.035em;
+    font-weight: 400; color: var(--ink-2);
+  }
+
+  /* ── 4 · the trace band ───────────────────────────────────────────────── */
+  /*
+    The product's own verb, drawn as nodes on one rule. It sits under the composition
+    rather than across it, so it never cuts a glyph, and it is the only thing on the page
+    that is diagrammatic -- which is the point: the diagram *is* the argument.
+  */
+  .trace {
+    grid-column: 1 / -1;
+    margin: 64px 0 0;
+    padding: 20px 0 22px;
+    border-top: var(--rule-heavy);
+    border-bottom: 1px solid var(--rule);
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 0;
+    position: relative;
+  }
+  /* The rule the nodes travel along. Drawn as a rule, not as an illustration. */
+  .trace::before {
+    content: ""; position: absolute; left: 0; right: 0; top: 24px;
+    height: 1px; background: var(--rule-2);
+  }
+  .trace-node { padding-right: 24px; position: relative; }
+  .trace-mark {
+    width: 9px; height: 9px; background: var(--ink); border: 0; display: block;
+    margin-bottom: 14px; position: relative; z-index: 1;
+  }
+  /* The last node is the outcome, so it is the accent and the only filled square. */
+  .trace-node:last-child .trace-mark { background: var(--accent); }
+  .trace-stage {
+    font-family: var(--mono); font-size: var(--t-meta-size); font-weight: 500;
+    letter-spacing: var(--t-meta-track); text-transform: uppercase; color: var(--ink-4);
+    margin: 0 0 6px;
+  }
+  .trace-value { font-size: var(--t-row-size); font-weight: 590; color: var(--ink); margin: 0; }
+  /* The example label. Required, because these are real numbers from one real
+     repository -- and presenting them as this visitor's result would be a lie. */
+  .trace-note {
+    grid-column: 1 / -1; margin: 14px 0 0;
+    font-family: var(--mono); font-size: var(--t-meta-size); color: var(--ink-4);
+    letter-spacing: var(--t-meta-track);
+  }
+
+  /* ── 5 · statement + aside ────────────────────────────────────────────── */
+  .hero-statement {
+    grid-column: 1 / 6; margin: 34px 0 0;
+    font-size: var(--t-body-size); line-height: 1.6; color: var(--ink-2); max-width: 42ch;
+  }
+  .hero-aside {
+    grid-column: 7 / 11; margin: 34px 0 0;
+    padding-left: 20px; border-left: 1px solid var(--rule-2);
+    font-family: var(--mono); font-size: var(--t-meta-size); line-height: 1.6; color: var(--ink-3);
+  }
+  .hero-aside b { font-weight: 500; color: var(--ink-2); }
+
+  /* ── the input, after the whole sequence ───────────────────────────────── */
+  .hero-form { grid-column: 1 / 8; margin: 44px 0 0; }
+  .input-card { background: var(--surface); border: 1px solid var(--rule-2); border-radius: 0; padding: 0; }
+  .input-row { display: flex; gap: 0; align-items: stretch; }
+  #repo-input {
+    flex: 1; min-width: 0; font-family: var(--mono); font-size: var(--t-row-size);
+    padding: 18px 18px; border: 0; border-right: 1px solid var(--rule-2);
+    background: var(--surface-hi); color: var(--ink);
+  }
+  #repo-input:focus { outline: 2px solid var(--ink); outline-offset: -2px; }
+  #submit {
+    font-size: var(--t-row-size); font-weight: 590; padding: 18px 28px;
+    border: 0; background: var(--ink); color: var(--paper); white-space: nowrap;
+  }
+  .sub-row {
+    display: flex; align-items: center; gap: 16px; padding: 12px 18px;
+    border-top: 1px solid var(--rule); background: var(--surface-sunk);
+  }
+  .seg { display: inline-flex; border: 1px solid var(--rule-2); background: var(--paper); }
+  .seg-btn { font-size: var(--t-secondary-size); font-weight: 500; padding: 5px 12px; border: 0; border-right: 1px solid var(--rule-2); background: transparent; color: var(--ink-2); }
+  .seg-btn.is-active { background: var(--ink); color: var(--paper); }
+  .check { font-size: var(--t-secondary-size); color: var(--ink-4); display: inline-flex; align-items: center; gap: 6px; }
+  .hero-foot { grid-column: 1 / -1; margin: 26px 0 48px; font-size: var(--t-secondary-size); color: var(--ink-3); }
+  .hero-foot code { font-family: var(--mono); font-size: var(--t-meta-size); color: var(--ink-2); }
+  .samples { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+    font-family: var(--mono); font-size: var(--t-meta-size); color: var(--ink-3); margin: 0 0 40px; }
+  .samples a { color: var(--ink-2); text-decoration: none; border: 1px solid var(--rule-2); padding: 4px 8px; background: var(--surface-hi); }
+  .sample-tag { font-size: var(--t-meta-size); color: var(--ink-4); margin-right: 8px; }
+</style>
+</head>
+<body>
+
+<header class="appbar">
+  <a class="brand" href="#"><span class="brand-mark" aria-hidden="true"></span><span>GitLineage</span></a>
+  <div class="appbar-mid"><span class="crumb-repo">Kuddev/pebrel</span></div>
+  <div class="appbar-right"><span class="crumb-count r-meta">97 one-hop · 0 verified</span></div>
+</header>
+
+<main>
+  <section class="hero">
+
+    <p class="hero-kicker">Evidence-backed repository lineage</p>
+
+    <h1 class="hero-display">Where did this software</h1>
+    <p class="hero-fold">come from?</p>
+
+    <!-- The trace band: the product's verb, drawn once, with real counts. -->
+    <div class="trace">
+      <div class="trace-node">
+        <span class="trace-mark"></span>
+        <p class="trace-stage">source</p>
+        <p class="trace-value">98 entities</p>
+      </div>
+      <div class="trace-node">
+        <span class="trace-mark"></span>
+        <p class="trace-stage">evidence</p>
+        <p class="trace-value">137 manifest records</p>
+      </div>
+      <div class="trace-node">
+        <span class="trace-mark"></span>
+        <p class="trace-stage">relationship</p>
+        <p class="trace-value">97 depends_on</p>
+      </div>
+      <div class="trace-node">
+        <span class="trace-mark"></span>
+        <p class="trace-stage">lineage</p>
+        <p class="trace-value">1 repository</p>
+      </div>
+      <p class="trace-note">Example trace · Kuddev/pebrel · rev 51514bd</p>
+    </div>
+
+    <p class="hero-statement">
+      Paste a repository. GitLineage reads its manifests, documents and git objects,
+      and draws the relationships between them — every one with the file it was
+      written in attached, and openable.
+    </p>
+    <p class="hero-aside">
+      <b>Nothing is inferred.</b><br />
+      Similarity never renders as a verified lineage relationship; the graph makes that
+      structurally true rather than a promise in the copy.
+    </p>
+
+    <form class="hero-form" autocomplete="off" onsubmit="return false">
+      <div class="input-card">
+        <div class="input-row">
+          <input id="repo-input" name="repo" placeholder="github.com/owner/repo" spellcheck="false" />
+          <button id="submit" type="submit">Trace lineage</button>
+        </div>
+        <div class="sub-row">
+          <span class="mono sub-label">Depth</span>
+          <span class="seg" role="group" aria-label="Analysis depth">
+            <button type="button" class="seg-btn">Metadata</button>
+            <button type="button" class="seg-btn is-active">Standard</button>
+            <button type="button" class="seg-btn">Deep</button>
+          </span>
+          <label class="mono check is-disabled"><input type="checkbox" disabled /> Token fingerprints</label>
+        </div>
+      </div>
+    </form>
+
+    <p class="hero-foot">
+      Or replace <code>github</code> with <code>gitlineage</code> in any GitHub URL —
+      <code>github.com/o/r</code> becomes <code>gitlineage.com/o/r</code>
+    </p>
+    <p class="samples">Try
+      <a href="#">nachocebey/is</a><span class="sample-tag">forked</span>
+      <a href="#">grpc/grpc</a><span class="sample-tag">submodules</span>
+      <a href="#">vitest-dev/vitest</a><span class="sample-tag">declared</span>
+      <a href="#">octocat/Spoon-Knife</a><span class="sample-tag">no lineage</span>
+    </p>
+
+  </section>
+</main>
+</body>
+</html>
