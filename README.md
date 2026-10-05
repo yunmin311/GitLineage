@@ -1,5 +1,7 @@
 # GitLineage
 
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://github.com/yunmin311/GitLineage/blob/main/LICENSE)
+
 Evidence-backed repository lineage and software provenance explorer.
 
 GitLineage answers one question with a machine-checkable answer:
@@ -151,3 +153,12 @@ Phase 1 (provenance core) is implemented end to end: URL in, validated
 `graph.json` out, with every relationship backed by reviewable evidence. The
 interactive explorer is not built yet; it should consume `graph.json` without
 changing the contract. See `docs/project-state.md`.
+
+## License
+
+Apache License 2.0. The full text is in [`LICENSE`](LICENSE).
+
+The `LICENSE` file is the standard, unmodified Apache License 2.0 text, including
+the appendix's `Copyright [yyyy] [name of copyright owner]` placeholder — no
+copyright holder has been filled in, because none is stated anywhere in the
+repository and inventing one would be a guess rather than a fact.
