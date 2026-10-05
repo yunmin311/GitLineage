@@ -678,7 +678,17 @@ async function main(): Promise<void> {
   let browser: Browser | undefined;
 
   try {
-    browser = await chromium.launch();
+    /*
+     * `--hide-scrollbars` is dropped on purpose.
+     *
+     * Playwright launches headless Chromium with it, and with it a scrollable box paints
+     * no scrollbar and reserves no gutter -- so every "no native scrollbar" measurement
+     * below would pass no matter what the product did. The proof has to be taken in a
+     * browser that is capable of painting one, or it is not a proof. `scrollbarPixels()`
+     * is verified against a deliberately scrollable control box in
+     * `artifacts/preflight-negative.ts`, which is what keeps this honest.
+     */
+    browser = await chromium.launch({ ignoreDefaultArgs: ['--hide-scrollbars'] });
     const page = await browser.newPage({ viewport: DESKTOP });
     const errors: string[] = [];
     page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));

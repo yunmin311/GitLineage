@@ -654,8 +654,6 @@ a { color: inherit; }
 .seg-btn { font-size: var(--t-secondary-size); font-weight: 500; padding: 5px 12px; border: 0; border-right: 1px solid var(--rule-2); background: transparent; color: var(--ink-2); }
 .seg-btn:last-child { border-right: 0; }
 .seg-btn.is-active { background: var(--ink); color: var(--paper); }
-.check { font-family: var(--mono); font-size: var(--t-meta-size); color: var(--ink-4); display: inline-flex; align-items: center; gap: 6px; }
-.check.is-disabled { color: var(--ink-5); }
 
 .foot { grid-column: 1 / -1; margin: 16px 0 0; font-size: var(--t-secondary-size); color: var(--ink-3); }
 .foot code { font-family: var(--mono); font-size: var(--t-meta-size); color: var(--ink-2); }

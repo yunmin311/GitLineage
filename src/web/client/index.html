@@ -132,9 +132,18 @@ software</span>
           <button type="button" class="seg-btn is-active" data-depth="200">Standard</button>
           <button type="button" class="seg-btn" data-depth="600">Deep</button>
         </span>
-        <label class="mono check is-disabled" title="No similarity detector ships in the V1 analyzer">
-          <input type="checkbox" disabled /> Token fingerprints
-        </label>
+        <!--
+          There is no similarity toggle here, and there was never a working one.
+
+          A disabled "Token fingerprints" checkbox used to sit at the end of this row with
+          a tooltip explaining that no similarity detector ships in the V1 analyzer. It
+          was honest, and it was still a control the reader could see and could not use:
+          a promise of a capability, greyed out, in the one place the product is asking
+          for trust. It has been removed rather than disabled-but-present, and nothing
+          replaces it. Token similarity is not a hidden setting here; it is absent, and
+          the "SIMILARITY IS NOT PROVENANCE" cell below states that as a fact about the
+          analysis instead of offering it as an option.
+        -->
       </div>
     </form>
 
