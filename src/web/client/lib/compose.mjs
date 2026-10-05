@@ -151,20 +151,30 @@ export const ZONES = Object.freeze({
    * two columns: the field runs from the world's left margin to a plate's left edge,
    * and a third 216-unit node on a 248 pitch would need 712 units where 506 exist.
    */
-  dataLeft: 786,
+dataLeft: 786,
   dataTop: 200,
   dataWidth: 480,
   /**
    * The bottom band, and the edge key that lives on it.
    *
-   * At the bottom of the *authored composition*, not at the bottom of the world. The
-   * world is 1720 tall and the composition occupies the top of it, which is the
-   * headroom a reader pans into; putting the key 1600 units down would mean the one
-   * thing a reader needs in order to read the canvas is only findable by panning.
+   * Both its extent and its position are constraints rather than preferences.
+   *
+   * The band is a world object, so it is on screen only where the window happens to
+   * be -- and the window is the stage's own size, centred, because the world never
+   * scales to fit. At 1280x800 the stage is 1280x756 and the window is world
+   * 320..1600 by 182..938; at 1920 with the rail's 264 it is 132..1788 by 42..1078.
+   * A band on the field's left wall (172) is clipped at 1280; one at the world's
+   * margin (48) is clipped at 1920. And one at 980 is below the 800-tall window
+   * entirely. 336..1520 by 900 sits inside every one of those windows, which is what
+   * `the band is inside the opening window` exists to keep true.
+   *
+   * It sits at the bottom of the *authored composition*, not at the bottom of the
+   * world: the world's extra height is headroom a reader pans into, and a key 700
+   * units down would be only findable by panning.
    */
-  bandTop: 980,
-  bandLeft: 48,
-  bandWidth: 1400,
+  bandTop: 900,
+  bandLeft: 336,
+  bandWidth: 1184,
   /** Where the Drawer's overlay is anchored. Never drawn on, never a placement target. */
   gutterLeft: 1548,
   gutterWidth: 372,

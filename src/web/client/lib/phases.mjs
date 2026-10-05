@@ -52,10 +52,20 @@ export function phaseLabel(phase) {
  *    resting further along means strictly more work done -- the one thing the old
  *    dial got right.
  */
-export const TRACER_ARC = Object.freeze({ cx: 21, cy: 4, r: 13 });
+export const TRACER_ARC = Object.freeze({ cx: 34, cy: 6, r: 20 });
 
 /** The arc's sweep in degrees. Open by construction: 110 is not a circle. */
 export const TRACER_SWEEP_DEG = 110;
+
+/**
+ * The gap between one segment and the next, in degrees.
+ *
+ * Without it the seven segments abut into one continuous curve and the arc reads as a
+ * smudge -- which loses the only thing it has to say, which is how many steps there
+ * are. The gap is a fixed angle, not a fixed fraction of the segment, so the marks stay
+ * the same size whether there are seven of them or four.
+ */
+export const TRACER_GAP_DEG = 1.8;
 
 /** One segment's share of the sweep. */
 export const TRACER_STEP_DEG = TRACER_SWEEP_DEG / PHASES.length;
@@ -86,11 +96,19 @@ function clampIndex(index) {
   return Math.max(0, Math.min(PHASES.length - 1, value));
 }
 
-/** A point on the arc, at an angle in degrees. */
+/**
+ * A point on the arc, at an angle in degrees.
+ *
+ * `x` is mirrored. Angles increase along the sweep, and on a y-down SVG increasing
+ * angle walks leftwards -- so the tracer advanced right to left, which is the opposite
+ * of every progress indicator a reader has ever seen. Mirroring x keeps the angle
+ * arithmetic, the adjacency of the segments and the arc's sweep flag exactly as they
+ * were, and puts the first phase on the left where it belongs.
+ */
 function arcPoint(deg) {
   const rad = (deg * Math.PI) / 180;
   return {
-    x: TRACER_ARC.cx + TRACER_ARC.r * Math.cos(rad),
+    x: TRACER_ARC.cx - TRACER_ARC.r * Math.cos(rad),
     y: TRACER_ARC.cy + TRACER_ARC.r * Math.sin(rad),
   };
 }
@@ -102,11 +120,15 @@ function arcPoint(deg) {
  * visibly faceted at this size, and a faceted segment next to smooth neighbours reads
  * as a rendering fault rather than as a step. Sweep flag 1 walks clockwise in SVG's
  * coordinate system, which is what increasing angle means here.
+ *
+ * The segment is inset by half the gap at each end, so consecutive segments do not
+ * touch. `phaseStartAngle` and `phaseEndAngle` still describe the phase's full extent
+ * -- the gap is a mark, not a claim about which phase the space belongs to.
  */
 export function arcSegment(index) {
   const clamped = clampIndex(index);
-  const from = arcPoint(phaseStartAngle(clamped));
-  const to = arcPoint(phaseEndAngle(clamped));
+  const from = arcPoint(phaseStartAngle(clamped) + TRACER_GAP_DEG / 2);
+  const to = arcPoint(phaseEndAngle(clamped) - TRACER_GAP_DEG / 2);
   return `M ${round(from.x)} ${round(from.y)} A ${TRACER_ARC.r} ${TRACER_ARC.r} 0 0 1 ${round(to.x)} ${round(to.y)}`;
 }
 

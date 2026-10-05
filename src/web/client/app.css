@@ -500,8 +500,8 @@ a { color: inherit; }
 .strip[hidden] { display: none; }
 
 /* The arc itself. Geometry lives in lib/phases.mjs; this only supplies colour. */
-.tracer { display: block; flex: none; margin-right: var(--sp-tight); overflow: visible; }
-.tracer-seg { fill: none; stroke: var(--rule-2); stroke-width: 2.5; stroke-linecap: butt; }
+.tracer { display: block; flex: none; margin-right: var(--sp-snug); overflow: visible; }
+.tracer-seg { fill: none; stroke: var(--rule-3); stroke-width: 3; stroke-linecap: butt; }
 .tracer-seg.is-done { stroke: var(--ink-3); }
 .tracer-seg.is-current { stroke: var(--ink); }
 /* The tracer. Restrained: it pulses once per arrival and then rests. */
@@ -511,6 +511,13 @@ a { color: inherit; }
   0%   { opacity: .35; }
   100% { opacity: 1; }
 }
+
+/* The run's job id, once, at the end of the strip. It is one fact about the whole
+   run, so it is stated once; it used to be a column in every phase cell, which
+   printed the same eight characters seven times and took the width each phase's name
+   needed. */
+.strip-job { flex: none; color: var(--ink-4); white-space: nowrap; }
+.strip-job[hidden] { display: none; }
 
 /* One row, seven cells, equal weight. The current phase is the only coloured thing
    on the instrument. */
@@ -535,12 +542,14 @@ a { color: inherit; }
   letter-spacing: var(--t-micro-track); text-transform: uppercase;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-/* The evidence count each phase actually produced. Mono, because it is a count. */
-.phase-ev {
-  font-family: var(--mono); font-size: var(--t-meta-size); color: var(--ink-4);
-  margin-left: auto; padding-left: var(--sp-micro); flex: none;
-  font-variant-numeric: tabular-nums;
-}
+/*
+ * There is deliberately no per-phase evidence column.
+ *
+ * It used to sit here, right-aligned in every cell. It held the job id -- the same
+ * eight characters seven times -- because the analyser reports no per-phase evidence
+ * count, so there was no honest number to put there. The run's id is now stated once,
+ * at the end of the strip. Removing the column gave each phase's name back the width.
+ */
 .phase.is-done { color: var(--ink-3); }
 .phase.is-done .pm { background: var(--ink-3); border-color: var(--ink-3); }
 .phase.is-current { color: var(--ink); background: rgba(255, 255, 255, .7); }
@@ -552,7 +561,7 @@ a { color: inherit; }
 .failure-head { color: var(--alert); }
 .empty-body, .failure-body { font-size: 12px; color: var(--ink-3); margin: 0; max-width: 56ch; line-height: 1.55; }
 
-.viewport-controls { position: absolute; right: 16px; bottom: 16px; display: flex; gap: 4px; z-index: 6; }
+.viewport-controls { position: absolute; right: var(--sp-base); bottom: var(--sp-base); display: flex; gap: var(--sp-micro); z-index: 6; }
 .vp-btn {
   width: 28px; height: 28px; background: var(--paper); border: 1px solid var(--rule-2);
   border-radius: 4px; color: var(--ink-2); font-size: 14px; line-height: 1; display: inline-flex; align-items: center; justify-content: center;
@@ -600,6 +609,7 @@ a { color: inherit; }
   stroke: var(--ink-4);
   stroke-width: 1.2;
   stroke-dasharray: 5 3;
+}
 /*
  * The honest negative.
  *
@@ -625,7 +635,6 @@ a { color: inherit; }
  */
 .key-row { display: flex; align-items: center; gap: var(--sp-snug); font-size: var(--t-row-size); color: var(--ink-2); padding: 3px 0; }
 .key-row .k { margin-left: auto; color: var(--ink-4); }
-}
 .bundle-card:hover .bundle-card-box, .bundle-card:focus .bundle-card-box { stroke: var(--ink); stroke-dasharray: none; }
 .bundle-card.is-open .bundle-card-box { stroke: var(--ink); stroke-width: 1.6; stroke-dasharray: none; }
 .bundle-card-count { font-family: var(--mono); font-size: 13px; font-weight: 700; fill: var(--ink); }
@@ -645,7 +654,14 @@ a { color: inherit; }
 .plate-row-label { font-family: var(--mono); font-size: 11px; fill: var(--ink-2); }
 .plate-row-meta { font-family: var(--mono); font-size: 10px; fill: var(--ink-4); }
 /* The remainder is stated in words, not implied by a shorter list. */
-.plate-row-more { font-family: var(--mono); font-size: 10px; fill: var(--ink-4); }
+.plate-row-more { font-family: var(--mono); font-size: var(--t-meta-size); fill: var(--ink-4); }
+/*
+ * The note for rows that fit in the Drawer rather than on the canvas.
+ *
+ * Distinguished from `.plate-row-more` on purpose: those rows are one click away on the
+ * canvas, these are not on it at all. Same words would claim the same thing twice.
+ */
+.plate-row-held { font-family: var(--mono); font-size: var(--t-meta-size); fill: var(--ink-3); font-style: normal; }
 .plate-row-expand { font-family: var(--mono); font-size: 10px; fill: var(--ink-3); text-decoration: underline; text-underline-offset: 2px; }
 .bundle-card:hover .plate-row-expand { fill: var(--ink); }
 /*
@@ -670,18 +686,16 @@ a { color: inherit; }
 /* ------------------------------------------------------------------ graph */
 
 /*
- * L : the context column.
+ * The rail's own blocks.
  *
- * Flat by construction. It carries contextual and reference information, not
- * topology, so it takes no depth tier and no shadow: a rule and a surface, the
- * same as the census in the frozen design.
+ * The context column's world-positioned rule is gone: the column lived inside the
+ * frame at `left: 46px; top: 128px; width: 496px` and reserved 496 units of world for
+ * itself, which is why the field had to be shoved right and why a 1280 viewport
+ * needed a narrower variant of it. The rail is a shell column now and holds no world
+ * space at all, so it needs no positioning and cannot collide with a composition at
+ * any width.
  */
-.lcol {
-  position: absolute; left: 46px; top: 128px; width: 496px;
-  pointer-events: none;
-}
-.lcol[hidden] { display: none; }
-.lblk { margin-bottom: 22px; }
+.lblk { margin-bottom: var(--sp-loose); }
 .lblk h6 {
   font-size: 9px; letter-spacing: 0.11em; text-transform: uppercase;
   color: var(--ink-4); font-weight: 600; margin: 0 0 8px;
@@ -721,9 +735,32 @@ a { color: inherit; }
  * readout.
  */
 .band {
-  position: absolute; left: 46px; top: 876px; width: 1456px;
-  display: flex; align-items: center; gap: 26px; flex-wrap: wrap;
-  border-top: 1px solid var(--rule); padding-top: 12px;
+  /*
+   * World coordinates, written by the renderer from `ZONES`.
+   *
+   * They were literals here once: `left: 46px; top: 876px; width: 1456px`, copied from
+   * the old fitted frame. When the world's zones moved, the band did not -- it sat 104
+   * units above where the composition said it was, and nothing noticed, because a
+   * stylesheet cannot disagree with a test that only checks the stylesheet. The
+   * fallbacks are the current zones so the sheet is still readable on its own.
+   */
+  position: absolute;
+  left: var(--band-left, 336px); top: var(--band-top, 900px); width: var(--band-w, 1184px);
+  display: flex; align-items: center; gap: var(--sp-band); flex-wrap: wrap;
+  border-top: var(--rule-firm); padding-top: var(--sp-tight);
+  /*
+   * Room for the viewport controls.
+   *
+   * The band is a world object and the controls are shell chrome in the stage's
+   * bottom-right corner, so at some widths the band's right-aligned note ran underneath
+   * them. Nothing caught it, because the harness checked the band against the viewport
+   * and never against the controls that sit on top of it.
+   *
+   * The reserve is the controls' own footprint -- three 28px buttons, their gaps, and
+   * their offset from the edge -- so it is stated once, here, and the controls are sized
+   * from the same tokens.
+   */
+  padding-right: calc(3 * 28px + 2 * var(--sp-micro) + 2 * var(--sp-base));
 }
 .band[hidden] { display: none; }
 .band .key { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
@@ -737,16 +774,19 @@ a { color: inherit; }
 }
 .band .ki-symmetric { border-top-color: var(--rule-2); }
 .band .ki-aggregate { border-top-color: var(--rule-2); border-top-style: dashed; }
-.band-note { font-family: var(--mono); font-size: 10px; color: var(--ink-4); margin-left: auto; }
+.band-note { font-family: var(--mono); font-size: var(--t-meta-size); color: var(--ink-4); margin-left: auto; }
 
-/* A narrow viewport drops the authored columns rather than letting them collide. */
-@media (max-width: 1280px) {
-  .lcol { width: 340px; }
-  .band { width: calc(100% - 92px); }
-}
-@media (max-width: 900px) {
-  .lcol { display: none; }
-}
+/*
+ * There is deliberately no narrow-viewport rule for the band.
+ *
+ * It used to have one: `width: calc(100% - 92px)` at 1280 and below, which was the
+ * fitted frame's width minus its margins. `.frame` is now the world -- 1920 units at
+ * every viewport -- so a percentage of it is not the width of anything the reader can
+ * see. At 1280 it made the band 1828 world units wide, running off the world and off
+ * the screen, while every check passed. A world object's extent is a world
+ * coordinate; it comes from the zones, and no viewport overrides it.
+ */
+
 /*
  * Topological depth ladder.
  *
@@ -998,7 +1038,6 @@ a { color: inherit; }
     position: absolute; right: 0; top: 0; bottom: 0; width: var(--drawer-w);
     z-index: 25; border-left: var(--rule-firm);
   }
-  .phase-ev { display: none; }
   .drawer-scrim {
     display: block; position: absolute; inset: 0;
     background: rgba(20, 19, 15, .10); border: 0; z-index: 24;

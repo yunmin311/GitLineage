@@ -18,6 +18,7 @@ import {
   SETTLED_PHASE,
   TRACER_SWEEP_DEG,
   TRACER_STEP_DEG,
+  TRACER_GAP_DEG,
   TRACER_ARC,
   TRACER_EASE_MS,
   phaseStartAngle,
@@ -122,7 +123,7 @@ test('the tracer sweeps a fixed open arc with one segment per phase', () => {
   assert.equal(phaseStartAngle(99), phaseStartAngle(PHASES.length - 1));
 });
 
-test('segments are adjacent arcs, so no phase owns a gap', () => {
+test('segments are adjacent arcs with a visible gap, so the arc reads as steps', () => {
   for (let at = 0; at < PHASES.length - 1; at += 1) {
     // Within a rounding step: the two are the same angle computed from different
     // expressions, and demanding bit equality would pin the arithmetic rather than
@@ -130,14 +131,28 @@ test('segments are adjacent arcs, so no phase owns a gap', () => {
     assert.ok(Math.abs(phaseEndAngle(at) - phaseStartAngle(at + 1)) < 1e-9,
       `segment ${at} ends where segment ${at + 1} begins`);
   }
+  /*
+   * The gap is the difference between an instrument and a smudge. Without it the seven
+   * segments abut into one continuous curve, and an arc that looks like one stroke says
+   * nothing about how many steps there are -- which is the only thing it has to say.
+   */
+  assert.ok(TRACER_GAP_DEG > 0, 'there is a gap');
+  assert.ok(TRACER_GAP_DEG < TRACER_STEP_DEG, 'and it is smaller than a segment, so no mark vanishes');
+  // Two neighbouring segments must therefore not share an endpoint.
+  const endOf = (at: number) => /A [\d.]+ [\d.]+ 0 0 1 ([\d.]+) ([\d.]+)$/.exec(arcSegment(at));
+  const startOf = (at: number) => /^M ([\d.]+) ([\d.]+) /.exec(arcSegment(at));
+  for (let at = 0; at < PHASES.length - 1; at += 1) {
+    assert.notDeepEqual(endOf(at)?.slice(1), startOf(at + 1)?.slice(1),
+      `segment ${at} does not touch segment ${at + 1}`);
+  }
+
   const first = arcSegment(0);
   const last = arcSegment(PHASES.length - 1);
   assert.match(first, /^M [\d.]+ [\d.]+ A /, 'each segment is a real elliptical arc, not a polyline');
   assert.match(last, /^M [\d.]+ [\d.]+ A /);
   // The two ends differ: a closed dial would render these as the same point.
   const ends = PHASES.map((_, at) => {
-    const d = arcSegment(at);
-    const [, x, y] = /A [\d.]+ [\d.]+ 0 0 1 ([\d.]+) ([\d.]+)$/.exec(d) ?? [];
+    const [, x, y] = endOf(at) ?? [];
     return `${x},${y}`;
   });
   assert.notEqual(ends[0], ends[ends.length - 1], 'the arc is open: its ends are not joined');
@@ -149,7 +164,8 @@ test('the tracer rests on the segment it reports, not on a seam', () => {
     const point = tracerPoint(at);
     const mid = (phaseStartAngle(at) + phaseEndAngle(at)) / 2;
     const rad = (mid * Math.PI) / 180;
-    const expectedX = TRACER_ARC.cx + TRACER_ARC.r * Math.cos(rad);
+    // `x` is mirrored -- see `arcPoint` -- so the radius term is negated here too.
+    const expectedX = TRACER_ARC.cx - TRACER_ARC.r * Math.cos(rad);
     const expectedY = TRACER_ARC.cy + TRACER_ARC.r * Math.sin(rad);
     assert.ok(Math.abs(point.x - expectedX) < 1e-6, `phase ${at} x is the arc's own radius`);
     assert.ok(Math.abs(point.y - expectedY) < 1e-6, `phase ${at} y is the arc's own radius`);
@@ -160,6 +176,26 @@ test('the tracer rests on the segment it reports, not on a seam', () => {
   // Consecutive tracers are distinct positions, so progress is visible as travel.
   const points = PHASES.map((_, at) => JSON.stringify(tracerPoint(at)));
   assert.equal(new Set(points).size, points.length);
+});
+
+test('the tracer advances left to right, the way every progress indicator does', () => {
+  /*
+   * The regression. On a y-down SVG, increasing angle walks leftwards, so the tracer
+   * advanced right to left -- first phase on the right, progress moving away from the
+   * reader's eye. Nothing caught it: every assertion was about which segment the dot
+   * rested on, and it did rest correctly, just on the wrong end of the arc.
+   *
+   * Asserted in screen coordinates, because that is the thing being claimed.
+   */
+  const xs = PHASES.map((_, at) => tracerPoint(at).x);
+  for (let i = 1; i < xs.length; i += 1) {
+    assert.ok(xs[i]! > xs[i - 1]!,
+      `phase ${i} is drawn to the right of phase ${i - 1} (${xs[i - 1]} -> ${xs[i]})`);
+  }
+  // And the arc's own ends agree: the first phase's segment starts leftmost.
+  const firstX = Number(/^M ([\d.]+)/.exec(arcSegment(0))?.[1]);
+  const lastX = Number(/^M ([\d.]+)/.exec(arcSegment(PHASES.length - 1))?.[1]);
+  assert.ok(firstX < lastX, `the first segment starts left of the last (${firstX} vs ${lastX})`);
 });
 
 test('a re-render at the same phase produces no transition', () => {

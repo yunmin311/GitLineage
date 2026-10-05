@@ -21,6 +21,9 @@ export declare const TRACER_SWEEP_DEG: number;
 /** One segment's share of the sweep. */
 export declare const TRACER_STEP_DEG: number;
 
+/** The gap between one segment and the next, in degrees, so the marks read as steps. */
+export declare const TRACER_GAP_DEG: number;
+
 /** The arc's centre and radius, in the tracer SVG's own units. */
 export declare const TRACER_ARC: Readonly<{ cx: number; cy: number; r: number }>;
 

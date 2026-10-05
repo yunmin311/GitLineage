@@ -108,6 +108,16 @@ interface Frame {
   };
   overlaps: string[];
   outsideFrame: string[];
+  /**
+   * Every canonical primitive worn by a drawn entity box on this page, and any entity
+   * wearing more than one.
+   *
+   * Measured per page rather than once, because the set depends on what the
+   * composition chose to draw: a smaller field aggregates more, so the same repository
+   * can legitimately show only its subject on the canvas. Coverage is therefore
+   * accumulated across the whole pass, not asserted on whichever page is open.
+   */
+  primitives: { worn: string[]; multi: string[] };
   search: string;
   keyRows: number;
 }
@@ -283,13 +293,66 @@ const READ_FRAME = () => {
     },
     overlaps,
     outsideFrame,
+    primitives: (() => {
+      const CANON = [
+        'is-repository', 'is-package', 'is-external-project',
+        'is-commit', 'is-release', 'is-source-artifact',
+      ];
+      const worn = new Set<string>();
+      const multi: string[] = [];
+      for (const b of document.querySelectorAll('.node-box')) {
+        const on = [...b.classList].filter((c) => CANON.includes(c));
+        for (const c of on) worn.add(c);
+        if (on.length > 1) {
+          multi.push(`${b.closest('.node')?.querySelector('.node-label')?.textContent ?? '?'} => ${on.join('+')}`);
+        }
+      }
+      return { worn: [...worn].sort(), multi };
+    })(),
     search: location.search,
     keyRows: document.querySelectorAll('.rail .key-row').length,
   };
 };
 
 async function readFrame(page: Page): Promise<Frame> {
-  return page.evaluate(READ_FRAME) as Promise<Frame>;
+  const frame = await page.evaluate(READ_FRAME) as unknown as Frame;
+  // Coverage is accumulated here so it describes the whole pass rather than whichever
+  // repository happens to be open when the assertion runs.
+  for (const primitive of frame.primitives.worn) primitivesSeen.add(primitive);
+  for (const multi of frame.primitives.multi) multiPrimitiveSeen.push(multi);
+  return frame;
+}
+
+/** Every canonical primitive any page in this pass actually drew. */
+const primitivesSeen = new Set<string>();
+/** Entities wearing two primitives. Any entry is a defect. */
+const multiPrimitiveSeen: string[] = [];
+
+/*
+ * Nothing drawn on the world may pass the band.
+ *
+ * The band carries the edge-treatment key -- the one thing a reader needs in order to
+ * read the canvas -- and a plate tall enough to pass it draws its rows straight through
+ * it. `Kuddev/pebrel` is the case: one plate of 97 `package_manifest` records is over
+ * 2500 world units tall against a limit of about 700, so it ran from the top of the
+ * world to the bottom of the window. Every overlap check passed, because the plate's
+ * rows are inside the plate's own box and the band was only ever compared with the
+ * viewport.
+ */
+async function plateBandCollisions(page: Page): Promise<string[]> {
+  return page.evaluate(`(() => {
+    const band = document.querySelector('.band');
+    if (!band || band.hasAttribute('hidden')) return [];
+    const b = band.getBoundingClientRect();
+    const bad = [];
+    for (const box of document.querySelectorAll('svg .bundle-card-box, svg .node-box')) {
+      const r = box.getBoundingClientRect();
+      if (r.left < b.right && b.left < r.right && r.top < b.bottom && b.top < r.bottom) {
+        bad.push((box.getAttribute('class') || 'box') + ' over band');
+      }
+    }
+    return bad;
+  })()`) as Promise<string[]>;
 }
 
 /** Waits for the client to draw, whichever terminal state it lands in. */
@@ -455,6 +518,25 @@ async function main(): Promise<void> {
     check('01 the analysis strip is gone once the analysis has finished',
       fDefault.rails.strip === 'hidden' || fDefault.rails.strip === 'display:none',
       `strip ${fDefault.rails.strip}`);
+    /*
+     * The band is a world object, so it is on screen only where the window is. At
+     * 1920 the window is world 132..1788 and at 1280 it is 320..1600; the zones are
+     * authored so the band is inside both. It was not: it started at world 48 and was
+     * cut in half at 1920, and every check still passed, because nothing compared the
+     * band's position with the zones.
+     */
+    const bandOnScreen = await page.evaluate(() => {
+      const band = document.querySelector('.band');
+      const stage = document.querySelector('#stage');
+      if (!band || !stage) return null;
+      const b = band.getBoundingClientRect();
+      const s = stage.getBoundingClientRect();
+      return { left: Math.round(b.left - s.left), right: Math.round(b.right - s.left), stage: Math.round(s.width) };
+    });
+    report['01-band'] = bandOnScreen;
+    check('01 the band is whole inside the stage at 1920, not cut by its edge',
+      !!bandOnScreen && bandOnScreen.left >= -1 && bandOnScreen.right <= bandOnScreen.stage + 1,
+      bandOnScreen ? `band ${bandOnScreen.left}..${bandOnScreen.right} in stage ${bandOnScreen.stage}` : 'no band');
 
     // ============================================ 02 · expanded to every member
     const more = await affordancePoint(page, '.plate-row-more');
@@ -592,31 +674,29 @@ async function main(): Promise<void> {
      * type maps to must be its own, never Repository's. That is the exact failure
      * this guards -- an ontology addition silently inheriting the repository glyph.
      */
-    const primitives = await page.evaluate(() => {
-      const CANON = ['is-repository', 'is-package', 'is-external-project', 'is-commit', 'is-release', 'is-source-artifact'];
-      const found: Record<string, number> = {};
-      const multi: string[] = [];
-      for (const b of document.querySelectorAll('.node-box')) {
-        const worn = [...b.classList].filter((c) => CANON.includes(c));
-        for (const c of worn) found[c] = (found[c] ?? 0) + 1;
-        if (worn.length > 1) {
-          multi.push(`${b.closest('.node')?.querySelector('.node-label')?.textContent ?? '?'} => ${worn.join('+')}`);
-        }
-      }
-      const key = [...document.querySelectorAll('.tkey .tk-row')].map((r) => ({
+    const key = await page.evaluate(() =>
+      [...document.querySelectorAll('.tkey .tk-row')].map((r) => ({
         type: r.querySelector('.tk-row span:nth-child(2)')?.textContent ?? '',
         glyph: [...(r.querySelector('.gl i')?.classList ?? [])].find((c) => c.startsWith('is-')) ?? '',
         count: r.querySelector('.k')?.textContent ?? '',
-      }));
-      return { found, key, multiPrimitive: multi };
-    });
+      })),
+    );
+    const primitives = { found: [...primitivesSeen], key, multiPrimitive: multiPrimitiveSeen };
     report['06-primitives'] = primitives;
     const canonicalPrimitives = [
       'is-repository', 'is-package', 'is-external-project',
       'is-commit', 'is-release', 'is-source-artifact',
     ];
-    check('06 real data renders more than one entity primitive',
-      Object.keys(primitives.found).length > 1, Object.keys(primitives.found).join(', '));
+    /*
+     * Coverage is asserted across every page this pass visited, not on whichever one is
+     * open. It used to be per-page, and it only passed because the field was big enough
+     * that each repository happened to leave a non-repository node loose; a smaller field
+     * aggregates more, `grpc/grpc` then drew only its subject, and the check failed on a
+     * correct composition. The question is whether real data exercises the primitive
+     * mapping, and that is a property of the corpus, not of one canvas.
+     */
+    check('06 real data across the pass renders more than one entity primitive',
+      primitivesSeen.size > 1, [...primitivesSeen].join(', '));
     /*
      * The fallback this guards against is a node wearing another type's primitive.
      * What matters is not whether `is-repository` appears -- real repositories are
@@ -624,10 +704,10 @@ async function main(): Promise<void> {
      * on the canvas is one the canonical union actually defines.
      */
     check('06 no node wears more than one entity primitive',
-      primitives.multiPrimitive.length === 0, primitives.multiPrimitive.join(', '));
-    check('06 every primitive on the canvas is a canonical one',
-      Object.keys(primitives.found).every((c) => canonicalPrimitives.includes(c)),
-      Object.keys(primitives.found).join(', '));
+      multiPrimitiveSeen.length === 0, multiPrimitiveSeen.join(', '));
+    check('06 every primitive drawn is a canonical one',
+      [...primitivesSeen].every((c) => canonicalPrimitives.includes(c)),
+      [...primitivesSeen].join(', '));
     check('06 the entity key states each type with its own glyph',
       primitives.key.length > 0 &&
         primitives.key.every((r) => canonicalPrimitives.includes(r.glyph)) &&
@@ -645,7 +725,7 @@ async function main(): Promise<void> {
     }
     await page.locator('.tkey').screenshot({ path: `${OUT}/06-entity-primitives.png` }).catch(() => undefined);
 
-    // ================================== 07..09 · the analysis dial, phase by phase
+    // ================================== 07..09 · the analysis tracer, phase by phase
     await open(page, url, `/${SUBJECT_REPO}?tracer-test=1`);
     const tracerProbe = async (phase: string): Promise<void> => {
       await page.evaluate((p) => {
@@ -740,18 +820,22 @@ async function main(): Promise<void> {
       const zones = { rail: rect('.rail'), band: rect('.band'), strip: rect('#strip'), controls: rect('.viewport-controls') };
       const clipped: string[] = [];
       /*
-       * Only shell elements are checked for clipping. The band is a world object now,
-       * so "band right > viewport" is not a defect -- it is a coordinate the reader
-       * pans to. What would be a defect is a *shell* element pushed out of the shell,
-       * or the document growing a scrollbar the canvas is not supposed to have.
+       * Everything shell-and-world that should be on screen is checked, including the
+       * band. The band is a world object, so "outside the viewport" would in principle
+       * be a coordinate to pan to -- but the zones are authored so it is inside the
+       * opening window at every supported width, and it was not: it sat half off the
+       * left edge at 1920 and every automated check passed, because a stylesheet
+       * literal cannot disagree with a test that only reads a stylesheet.
        */
       for (const [name, b] of Object.entries(zones)) {
-        if (!b || name === 'band') continue;
+        if (!b) continue;
         if (b.y + b.h > window.innerHeight + 1) clipped.push(`${name} bottom ${b.y + b.h} > ${window.innerHeight}`);
         if (b.y < -1) clipped.push(`${name} top ${b.y} < 0`);
+        if (b.x < -1) clipped.push(`${name} left ${b.x} < 0`);
         if (b.x + b.w > window.innerWidth + 1) clipped.push(`${name} right ${b.x + b.w} > ${window.innerWidth}`);
       }
-      // Does anything in the shell stand over something the reader has to click?
+      // Does anything in the shell stand over something the reader has to click, and
+      // does anything on the world stand under the shell chrome that floats over it?
       const covered: string[] = [];
       for (const name of ['rail', 'strip'] as const) {
         const shellBox = zones[name];
@@ -763,6 +847,22 @@ async function main(): Promise<void> {
           }
         }
       }
+      /*
+       * The band is a world object and the viewport controls are shell chrome pinned to
+       * the stage's bottom-right, so the band's right-aligned note ran underneath them.
+       * Checked against the controls rather than only against the viewport, because
+       * "inside the viewport" said nothing about the layer above it.
+       */
+      const bandOverlapsControls: string[] = [];
+      const ctrl = rect('.viewport-controls');
+      const note = document.querySelector('.band .band-note');
+      if (ctrl && note) {
+        const n = note.getBoundingClientRect();
+        if (n.width > 0 && n.left < ctrl.x + ctrl.w && ctrl.x < n.right
+          && n.top < ctrl.y + ctrl.h && ctrl.y < n.bottom) {
+          bandOverlapsControls.push(`band note under controls: note ${Math.round(n.left)}..${Math.round(n.right)}, controls ${ctrl.x}..${ctrl.x + ctrl.w}`);
+        }
+      }
       // The zoom controls must still be the thing under their own pixels.
       const controls = zones.controls;
       const hit = controls
@@ -772,6 +872,7 @@ async function main(): Promise<void> {
         zones,
         clipped,
         covered,
+        bandOverlapsControls,
         controlsHittable: !!hit && hit.closest('.viewport-controls') !== null,
         horizontalOverflow: document.documentElement.scrollWidth > window.innerWidth,
         verticalOverflow: document.documentElement.scrollHeight > window.innerHeight,
@@ -785,10 +886,13 @@ async function main(): Promise<void> {
     });
     report['11-responsive'] = responsive;
     await small.screenshot({ path: `${OUT}/11-responsive-1280x800.png` });
-    check('11 no shell zone is clipped at 1280x800',
+    check('11 no zone is clipped at 1280x800, the band included',
       responsive.clipped.length === 0, responsive.clipped.join('; '));
     check('11 nothing in the shell covers something interactive',
       responsive.covered.length === 0, `${responsive.covered.length} covered`);
+    check('11 the band note is not printed under the viewport controls',
+      responsive.bandOverlapsControls.length === 0,
+      responsive.bandOverlapsControls.join('; '));
     check('11 the zoom controls are still clickable',
       responsive.controlsHittable);
     check('11 the canvas owns the viewport with no scrollbar',
@@ -922,6 +1026,16 @@ async function main(): Promise<void> {
     check('15 the dense evidence composes without overlap',
       fEvidence.overlaps.length === 0 && fEvidence.outsideFrame.length === 0,
       `overlaps=${fEvidence.overlaps.length} outside=${fEvidence.outsideFrame.length}`);
+    // The one that matters most here: 97 records in one plate, against a band that must
+    // stay whole.
+    const heldBefore = await page.evaluate(
+      () => document.querySelectorAll('.plate-row-held').length,
+    );
+    check('15 a plate tall enough to reach the band states what it is holding back',
+      heldBefore > 0, `${heldBefore} "in the Drawer" notes on the plate`);
+    const bandHits = await plateBandCollisions(page);
+    check('15 no plate draws through the edge key',
+      bandHits.length === 0, bandHits.join(', '));
     check('15 the rail key states the families this graph really has',
       fEvidence.keyRows > 0, `${fEvidence.keyRows} keyed families`);
 
@@ -936,6 +1050,9 @@ async function main(): Promise<void> {
     check('16 expanding the dense plate reveals held-back evidence',
       fEvidenceExpanded.counts.rows > fEvidence.counts.rows,
       `${fEvidence.counts.rows} rows -> ${fEvidenceExpanded.counts.rows} rows`);
+    const bandHitsExpanded = await plateBandCollisions(evidence);
+    check('16 the expanded dense plate still does not reach the edge key',
+      bandHitsExpanded.length === 0, bandHitsExpanded.join(', '));
     check('16 expanding does not move the world',
       worldCamera(fEvidenceExpanded.camera) === worldCamera(fEvidence.camera));
 

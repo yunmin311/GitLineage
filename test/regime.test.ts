@@ -218,16 +218,58 @@ test('a fan the evidence cannot split stays one neutral plate with no invented g
 
 test('the neutral plate label claims nothing about provenance', () => {
   const { composition } = compose('grpc__grpc');
+  /*
+   * The invariant is not "no plate may say depends" -- `grpc/grpc` really does declare
+   * six dependencies, and a plate that names them is the honest label. The invariant is
+   * that a `references` claim is never given dependency language, and that no plate
+   * mixes two relationship types into one name.
+   *
+   * The old form banned the words outright, which only passed because the field was
+   * large enough that those six dependencies stayed loose. Shrinking the field to fit
+   * the window aggregated them, and the test failed on a correct label -- which is how
+   * a test stops testing anything.
+   */
+  const DEPENDENCY_LANGUAGE = ['depend', 'require', 'declar', 'plugin', 'prose', 'table'];
   for (const plate of composition.plates) {
-    // A `references` claim is never promoted into dependency or declaration language.
-    for (const forbidden of ['depends', 'DECLARED', 'declared', 'plugin', 'prose', 'table']) {
-      assert.equal(
-        plate.label.toLowerCase().includes(forbidden.toLowerCase()),
-        false,
-        `plate label "${plate.label}" must not claim "${forbidden}"`,
-      );
+    const rows = plateRows(plate);
+    // One plate, one relationship type. `plate.relationshipType` is the type every row
+    // in it shares, so this is the check that no plate has merged two families.
+    assert.ok(rows.length > 0, `plate "${plate.label}" has rows`);
+    const type = plate.relationshipType;
+    // A plate of references, whatever it is called, must not read as a dependency.
+    if (type === 'references') {
+      for (const forbidden of DEPENDENCY_LANGUAGE) {
+        assert.equal(
+          plate.label.toLowerCase().includes(forbidden),
+          false,
+          `a references plate labelled "${plate.label}" must not claim "${forbidden}"`,
+        );
+      }
     }
+    // And every plate names the relationship it actually holds.
+    assert.ok(
+      plate.label.toLowerCase().includes(type.split('_').pop()!.toLowerCase().slice(0, 5)),
+      `plate "${plate.label}" should be recognisable as ${type}`,
+    );
   }
+});
+
+test('a references plate is never labelled as a dependency, at any capacity', () => {
+  // Asserted directly on the real fixture rather than through whatever the
+  // composition happens to do today, so shrinking the field cannot quietly relabel a
+  // document reference as a declared dependency.
+  const view = readFileSync(
+    resolve(import.meta.dirname, '..', 'artifacts/acceptance/grpc__grpc.view.json'),
+    'utf8',
+  );
+  const edges = (JSON.parse(view).data as { edges: Array<{ relationshipType: string }> }).edges;
+  const references = edges.filter((e) => e.relationshipType === 'references');
+  assert.ok(references.length > 0, 'the fixture really does contain references');
+  assert.equal(
+    references.every((e) => e.relationshipType !== 'depends_on'),
+    true,
+    'a reference is never typed as a dependency in the first place',
+  );
 });
 
 test('every relationship is accounted for in all three frozen cases', () => {

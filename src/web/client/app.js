@@ -299,8 +299,22 @@ function renderPhases(status, jobId) {
     // part that survives the narrowest breakpoint when the names are dropped.
     item.append(el('span', { class: 'phase-n', text: String(at + 1).padStart(2, '0') }));
     item.append(el('span', { class: 'phase-name', text: phaseLabel(phase) }));
-    if (jobId) item.append(el('span', { class: 'phase-ev', text: jobId.slice(0, 8) }));
     list.append(item);
+  }
+
+  /*
+   * The job id, once, at the end of the strip.
+   *
+   * It used to be a column inside every phase cell, which printed the same eight
+   * characters seven times and stole the width each phase's name needed. It is one
+   * technical datum about the whole run, so it belongs to the run. The column it
+   * replaced held a per-phase evidence count, which the analyser does not report --
+   * there is no honest number to put there.
+   */
+  const job = $('strip-job');
+  if (job) {
+    job.textContent = jobId ? `job ${jobId.slice(0, 8)}` : '';
+    setHidden(job, !jobId);
   }
 
   renderTracer(tracer, index);
@@ -707,6 +721,60 @@ function plateHeight(rowCount, hiddenRows = 0, hasSubtitle = false) {
 }
 
 /**
+ * How far down the world a plate may reach.
+ *
+ * The band is a world object at `ZONES.bandTop`, so a plate tall enough to pass it does
+ * not merely crowd it -- it draws its rows straight through the edge-treatment key, and
+ * the key is the one thing a reader needs in order to read the canvas. `Kuddev/pebrel`
+ * is the case: one plate of 97 `package_manifest` records, which at 26 units a row is
+ * over 2500 units tall against a limit of about 700.
+ *
+ * So a plate is bounded, and states what it is holding back. It is not silently
+ * truncated: the remainder is counted in words on the plate, and every one of those
+ * relationships is still reachable in the Drawer.
+ */
+const PLATE_BOTTOM_LIMIT = ZONES.bandTop - 48;
+
+/**
+ * The rows a plate can actually show, given where its top lands.
+ *
+ * One function, called by both the placement and the drawer of the plate, because the
+ * reserved height and the drawn height have to come from the same arithmetic. They
+ * used to come from the same function and then from a second copy that drifted, which is
+ * how rows ended up outside their own border.
+ */
+function plateRowsFor(plate, top, hiddenRows) {
+  const rows = plateRows(plate);
+  const header = plateHeader(plate);
+  const chrome = PLATE_HEADER + (plate.meta ? PLATE_SUBTITLE : 0) + 12
+    + (hiddenRows > 0 ? PLATE_ROW : 0) + (rows.length > 0 ? 0 : 14);
+  const budget = PLATE_BOTTOM_LIMIT - top - chrome;
+  /*
+   * Two budgets, because there are two possible extra lines: the collapsed affordance
+   * and the "in the Drawer" note. Which one is needed is not known until the rows are
+   * counted, so the note's row is reserved optimistically and given back when every row
+   * fits. Reserving it and not using it would leave a blank line at the bottom of most
+   * plates; not reserving it would put the note outside its own plate, which is the
+   * defect this whole bound exists to prevent.
+   */
+  const withNote = Math.max(0, Math.floor((budget - PLATE_ROW) / PLATE_ROW));
+  if (rows.length > withNote) {
+    return {
+      shown: rows.slice(0, withNote),
+      hidden: hiddenRows,
+      overflow: rows.length - withNote,
+      height: plateHeight(withNote, hiddenRows, !!plate.meta) + PLATE_ROW,
+    };
+  }
+  return {
+    shown: rows,
+    hidden: hiddenRows,
+    overflow: 0,
+    height: plateHeight(rows.length, hiddenRows, !!plate.meta),
+  };
+}
+
+/**
  * Puts the world's HTML layer through the camera's own transform.
  *
  * The bottom band is authored in world units, exactly as the canvas geometry is. It is
@@ -726,8 +794,15 @@ function applyFrameTransform(viewport, viewBox) {
   stage.style.setProperty('--frame-scale', String(t.scale));
   stage.style.setProperty('--frame-x', `${t.x}px`);
   stage.style.setProperty('--frame-y', `${t.y}px`);
-  stage.style.setProperty('--world-w', `${WORLD.width}px`);
+stage.style.setProperty('--world-w', `${WORLD.width}px`);
   stage.style.setProperty('--world-h', `${WORLD.height}px`);
+  // The band is a world object, so its position is a world coordinate and comes from
+  // the same zones the composition places against. Writing them here rather than
+  // hardcoding them in the stylesheet is what keeps "the band is where the world says
+  // it is" true when a zone moves.
+  stage.style.setProperty('--band-left', `${ZONES.bandLeft}px`);
+  stage.style.setProperty('--band-top', `${ZONES.bandTop}px`);
+  stage.style.setProperty('--band-w', `${ZONES.bandWidth}px`);
 }
 
 /**
@@ -753,12 +828,14 @@ function authoredPositions(view, edges, composition) {
   const subject = subjectPosition();
   positions.set(view.subject.id, subject);
 
-  // Plates first: their heights decide where the loose arc has room to sit.
-  const plateEntries = composition.plates.map((plate) => {
-    const rows = plateRows(plate);
-    return { height: plateHeight(rows.length, plateHiddenRows(plate), !!plate.meta) };
-  });
-  const plateSlots = dataZonePositions(plateEntries);
+// Plates first: their heights decide where the loose arc has room to sit.
+  //
+  // Each plate's height is the bounded one -- the same `plateRowsFor` the renderer uses
+  // -- so a tall plate cannot reserve more space than it is allowed to draw into.
+  const plateSlots = dataZonePositions(composition.plates.map((plate) => {
+    const plan = plateRowsFor(plate, ZONES.dataTop, plateHiddenRows(plate));
+    return { height: plan.height };
+  }));
   composition.plates.forEach((plate, index) => {
     const slot = plateSlots[index];
     positions.set(`${BUNDLE_ID_PREFIX}${plate.key}`, {
@@ -1232,19 +1309,23 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
      * count. A neutral plate stays shut until the reader opens it. Either way the
      * list is capped and the plate states what it is holding back.
      */
-    const rows = plateRows(plate);
-    const hiddenRows = plateHiddenRows(plate);
-    const shownRows = rows;
+const hiddenRows = plateHiddenRows(plate);
+    const top = Math.round(position.y - position.height / 2);
+    // Bounded against the band, so a plate never draws its rows through the
+    // edge-treatment key. `position.height` came from the same call in
+    // `authoredPositions`, so the box and the reserve agree.
+    const plan = plateRowsFor(plate, top, hiddenRows);
+    const shownRows = plan.shown;
     const header = plateHeader(plate);
-    const height = plateHeight(shownRows.length, hiddenRows, !!plate.meta);
+    const height = plan.height;
     // Widening grows to the right of the subject's tie, so the connection stays
     // anchored and the plate does not jump when it opens.
-    const width = rows.length > 0 ? PLATE_W_EXPANDED : PLATE_W;
+    const width = plateRows(plate).length > 0 ? PLATE_W_EXPANDED : PLATE_W;
     // The left edge is fixed and the plate widens rightward, away from the subject.
     // Anchoring the left edge to the tie point keeps subject -> plate short and
     // stops an opening plate from growing back over the subject it belongs to.
     const left = position.x - PLATE_W / 2;
-    const top = position.y - height / 2;
+    const plateTop = position.y - height / 2;
 
     const from = nodeAnchor(subjectPosition, position);
     // The tie arrives on the plate's left edge, which is where the plate always is.
@@ -1290,19 +1371,19 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
       const d = depthOffset(plateTier);
       group.append(
         svgEl('rect', {
-          x: left + d, y: top + d, width, height, rx: 4,
+      x: left + d, y: plateTop + d, width, height, rx: 4,
           class: depthShadowClass(plateTier), 'aria-hidden': 'true',
         }),
       );
     }
     group.append(
       svgEl('rect', {
-        x: left, y: top, width, height, rx: 4,
+      x: left, y: plateTop, width, height, rx: 4,
         class: ['bundle-card-box', depthClass(plateTier)].filter(Boolean).join(' '),
       }),
     );
     group.append(
-      svgEl('text', { x: left + 12, y: top + 22, class: 'bundle-card-count' }, [plate.label]),
+      svgEl('text', { x: left + 12, y: plateTop + 22, class: 'bundle-card-count' }, [plate.label]),
     );
     /*
      * Where the claim was written down.
@@ -1318,7 +1399,7 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
      */
     if (plate.meta) {
       group.append(
-        svgEl('text', { x: left + 12, y: top + 40, class: 'plate-subtitle' }, [
+        svgEl('text', { x: left + 12, y: plateTop + 40, class: 'plate-subtitle' }, [
           truncate(`declared in: ${plate.meta}`, 54),
         ]),
       );
@@ -1330,14 +1411,15 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
     // first lets the label take exactly the room that is left, instead of both
     // being truncated independently and overprinting in the middle.
     const META_CHARS = 21;
-    const metaWidth = rows.some((r) => r.meta) ? META_CHARS * 6.0 + 14 : 0;
+    const allRows = plateRows(plate);
+    const metaWidth = allRows.some((r) => r.meta) ? META_CHARS * 6.0 + 14 : 0;
     // The status mark, its direction arrow and their gap are measured rather than
     // assumed, so a label can never start underneath them.
     const MARK_W = ROW_MARK_W;
     const labelRoom = Math.max(8, Math.floor((width - 24 - metaWidth - MARK_W) / 6.6));
 
     shownRows.forEach((row, index) => {
-      const rowY = top + header + index * PLATE_ROW;
+    const rowY = plateTop + header + index * PLATE_ROW;
       const rowSelected = row.memberEdgeIds.includes(state.selectedEdgeId);
       /*
        * One `<g>` per row, so the row's own accessible name lives on the row rather
@@ -1419,7 +1501,7 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
      * on screen can always be reconciled.
      */
     if (hiddenRows > 0) {
-      const moreY = top + header + shownRows.length * PLATE_ROW;
+    const moreY = plateTop + header + shownRows.length * PLATE_ROW;
       group.append(
         svgEl('text', { x: left + 12, y: moreY + 18, class: 'plate-row-more' }, [
           `${hiddenRows} more row${hiddenRows === 1 ? '' : 's'} in this plate`,
@@ -1439,6 +1521,25 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
         toggleBundle(plate.key);
       });
       group.append(moreHit);
+    }
+
+    /*
+     * The remainder the plate could not show, because it ran out of world above the
+     * band.
+     *
+     * This is a different fact from the collapsed affordance above and it needs
+     * different words: those rows are reachable by expanding, these are not on the
+     * canvas at all and are only in the Drawer. `Kuddev/pebrel` is the case -- one
+     * plate of 97 manifest records against a plate that can hold about twenty-five.
+     */
+    if (plan.overflow > 0) {
+      const heldY = plateTop + header + shownRows.length * PLATE_ROW
+        + (hiddenRows > 0 ? PLATE_ROW : 0) + 4;
+      group.append(
+        svgEl('text', { x: left + 12, y: heldY + 18, class: 'plate-row-held' }, [
+          `${plan.overflow} more in the Drawer`,
+        ]),
+      );
     }
 
     const activate = (event) => {

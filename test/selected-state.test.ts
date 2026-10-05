@@ -67,14 +67,30 @@ test('a selected plate draws the selected tier, and a shut plate has no rows', (
    * The height must follow the rows actually shown, the held-back line included. An
    * earlier version measured only the listed rows, so a plate holding six back was
    * drawn too short and its "N more rows" line sat outside its own border.
+   *
+   * And the shown rows are no longer simply "all of them": a plate is bounded above
+   * the band, because `Kuddev/pebrel`'s single plate of 97 manifest records is over
+   * 2500 world units tall and drew straight through the edge-treatment key. Both the
+   * reserved height and the drawn height come from `plateRowsFor`, so they cannot
+   * disagree -- which is the property this test has always been about.
    */
-  assert.match(body, /const rows = plateRows\(plate\)/);
+  assert.match(body, /function plateRowsFor\(/, 'one function bounds a plate');
+  assert.match(body, /const allRows = plateRows\(plate\)/);
   assert.match(body, /const hiddenRows = plateHiddenRows\(plate\)/);
-  assert.match(body, /plateHeight\(shownRows\.length, hiddenRows, !!plate\.meta\)/);
+  assert.match(body, /plateRowsFor\(plate, top, hiddenRows\)/, 'the renderer uses it');
+  // The placement reserves the same bounded height, so a plate never claims space it
+  // is not allowed to draw into.
+  assert.match(body, /plateRowsFor\(plate, ZONES\.dataTop, plateHiddenRows\(plate\)\)/);
+  assert.match(body, /plateHeight\(rows\.length, hiddenRows, !!plate\.meta\)/);
+  // And the bound is the band, named.
+  assert.match(body, /const PLATE_BOTTOM_LIMIT = ZONES\.bandTop - 48/);
   // A plate with no members is not drawn at all.
   assert.match(body, /if \(plate\.count < 1\) continue;/);
-  // And the plate says what it is holding back rather than implying a shorter list.
+  // And the plate says what it is holding back rather than implying a shorter list --
+  // in two different words, because the two remainders are not the same fact.
   assert.match(body, /plate-row-more/);
+  assert.match(body, /plate-row-held/);
+  assert.match(body, /more in the Drawer/);
   assert.match(body, /more row\$\{/);
   assert.match(body, /in this plate/);
 });

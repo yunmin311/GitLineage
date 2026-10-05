@@ -8,6 +8,8 @@
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 
 import {
   WORLD,
@@ -21,6 +23,8 @@ import {
 
 const NODE_W = 216;
 const NODE_H = 52;
+/** The app bar's height, in the same CSS pixels the stage is measured in. */
+const BAR_H = 44;
 /** Collapsed plate half-extents: 184 wide, 60 tall. */
 const platesAt = (ys: number[]) => ys.map((y) => ({ x: ZONES.dataLeft + 92, y, hw: 92, hh: 30 }));
 const collides = (a: { x: number; y: number }, b: { x: number; y: number }) =>
@@ -86,6 +90,67 @@ test('the bottom band is inside the world, below everything placed', () => {
   // units below the composition would only be findable by panning.
   assert.ok(ZONES.bandTop < WORLD.height, 'the band is on the world');
   assert.ok(ZONES.bandTop > ZONES.subject.y + 200, 'and clear of the subject');
+});
+
+test('the whole authored composition is inside the opening window at every desktop width', () => {
+  /*
+   * The regression, stated as geometry.
+   *
+   * The band is a world object and the world never scales to fit, so the band is only
+   * on screen where the window happens to be. The window is the stage's own size,
+   * centred -- 1280x756 at 1280x800 with the rail collapsed, and 1656x1036 at 1920
+   * with the rail's 264. So the window is world 320..1600 by 182..938, and world
+   * 132..1788 by 42..1078.
+   *
+   * The band was on the field's left wall (172) and clipped at 1280; then at the
+   * world's margin (48) and clipped at 1920; then at y 980, which is below the
+   * 800-tall window entirely. Every one of those passed every automated check, because
+   * the band was positioned by literals in the stylesheet and nothing compared them
+   * with the zones. This compares them, on both axes, at every supported width.
+   */
+  // The band's own drawn height: a rule, its padding, and one row of small type.
+  const BAND_H = 30;
+  // The stage is the viewport minus the rail, which collapses below the breakpoint.
+  for (const [viewport, rail] of [
+    [{ width: 1280, height: 800 }, 0],
+    [{ width: 1440, height: 900 }, 0],
+    [{ width: 1920, height: 1080 }, 264],
+    [{ width: 2560, height: 1440 }, 264],
+  ] as const) {
+    const stage = { width: viewport.width - rail, height: viewport.height - BAR_H };
+    const [x, y, w, h] = windowOf(initialViewBox(stage).viewBox);
+    const where = `${viewport.width}x${viewport.height}`;
+    assert.ok(ZONES.bandLeft >= x - 1e-9,
+      `${where}: the band's left (${ZONES.bandLeft}) is inside the window (${x})`);
+    assert.ok(ZONES.bandLeft + ZONES.bandWidth <= x + w + 1e-9,
+      `${where}: its right (${ZONES.bandLeft + ZONES.bandWidth}) is too, window ends ${x + w}`);
+    assert.ok(ZONES.bandTop >= y - 1e-9,
+      `${where}: the band's top (${ZONES.bandTop}) is inside the window (${y})`);
+    assert.ok(ZONES.bandTop + BAND_H <= y + h + 1e-9,
+      `${where}: its bottom (${ZONES.bandTop + BAND_H}) is too, window ends ${y + h}`);
+    // And the data zone it belongs to, so the band is never the only thing on screen.
+    assert.ok(ZONES.dataTop >= y - 1e-9,
+      `${where}: the data zone's top (${ZONES.dataTop}) is inside the window (${y})`);
+    assert.ok(ZONES.subject.y >= y && ZONES.subject.y <= y + h,
+      `${where}: the subject (${ZONES.subject.y}) is inside the window ${y}..${y + h}`);
+  }
+});
+
+test('the band is positioned from the zones, not from literals in the stylesheet', () => {
+  // The duplication that let it drift: `left: 46px; top: 876px; width: 1456px` sat in
+  // the stylesheet while the zones said something else, and a stylesheet cannot
+  // disagree with a test that only reads the stylesheet.
+  const css = readFileSync(resolve(import.meta.dirname, '..', 'src/web/client/app.css'), 'utf8');
+  const rule = /\.band\s*\{[^}]*\}/.exec(css)?.[0] ?? '';
+  assert.match(rule, /left:\s*var\(--band-left/, 'the band takes its left from the renderer');
+  assert.match(rule, /top:\s*var\(--band-top/, 'and its top');
+  assert.match(rule, /width:\s*var\(--band-w/, 'and its width');
+  // The renderer is the only thing that writes them.
+  const app = readFileSync(resolve(import.meta.dirname, '..', 'src/web/client/app.js'), 'utf8');
+  assert.match(app, /--band-left/);
+  assert.match(app, /ZONES\.bandLeft/);
+  assert.match(app, /ZONES\.bandTop/);
+  assert.match(app, /ZONES\.bandWidth/);
 });
 
 test('the subject is fixed and independent of content', () => {
