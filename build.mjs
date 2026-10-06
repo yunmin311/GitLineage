@@ -8,7 +8,7 @@
  *
  *   node build.mjs
  */
-import { cp, mkdir, rm, readFile, writeFile } from 'node:fs/promises';
+import { cp, mkdir, rm, readFile, stat, writeFile } from 'node:fs/promises';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { build } from 'esbuild';
@@ -35,9 +35,34 @@ await mkdir(outDir, { recursive: true });
 await cp(resolve(clientDir, 'index.html'), resolve(outDir, 'index.html'));
 await cp(resolve(clientDir, 'app.css'), resolve(outDir, 'app.css'));
 
-const assets = Object.entries(result.metafile.outputs)
-  .filter(([file]) => file.endsWith('.js') || file.endsWith('.css'))
-  .map(([file, meta]) => ({ file: file.replace(/^dist\/web\//, ''), bytes: meta.bytes }));
+/*
+ * The typeface itself.
+ *
+ * Production used to ship no webfont at all: `--sans` and `--mono` named Geist and
+ * Geist Mono, nothing declared an `@font-face`, and no font file was served -- so every
+ * visitor got `system-ui` and `ui-monospace` instead, and the approved typography was a
+ * declaration rather than a fact. `fonts.css` carries Geist and JetBrains Mono as
+ * base64 woff2, which is why it is copied rather than bundled: it is already minified by
+ * construction, has no imports to resolve, and keeping it out of the esbuild graph stops
+ * a 91 KB data URI from being inlined into `app.js`.
+ *
+ * It is deliberately unminified and unhashed. `index.html` links it directly, so its URL
+ * is stable across deploys and a visitor's cached copy survives a release that changed
+ * only the token values.
+ */
+await cp(resolve(clientDir, 'fonts.css'), resolve(outDir, 'fonts.css'));
+
+const assets = [
+  ...Object.entries(result.metafile.outputs)
+    .filter(([file]) => file.endsWith('.js') || file.endsWith('.css'))
+    .map(([file, meta]) => ({ file: file.replace(/^dist\/web\//, ''), bytes: meta.bytes })),
+];
+// Copied, not bundled, so esbuild does not know about it -- record it explicitly or the
+// manifest would under-report what is actually being served.
+for (const name of ['app.css', 'fonts.css', 'index.html']) {
+  const info = await stat(resolve(outDir, name));
+  assets.push({ file: name, bytes: info.size });
+}
 
 // Point the shell at the bundled module so the build is genuinely self-contained.
 // The path stays root-absolute: the shell is served at `/owner/repo` too, where a

@@ -1,52 +1,120 @@
 /* ===========================================================================
-   GitLineage - Visual System v2, over Direction A "Focused Constellation".
+   GitLineage - Visual System, Frozen V3.3 shared foundation.
 
-   Warm bone paper, near-black ink, one muted accent. Hard offsets, zero blur.
-   Hue is reserved for evidence status and for the current analysis phase;
-   relationship family is encoded by line family and space, never by colour.
+   Warm bone paper, near-black ink, ONE brand pigment, and a reserved hue for
+   each evidence status. Hard offsets, zero blur. Hue is reserved for evidence
+   status and for the current analysis phase; relationship family is encoded by
+   line family and space, never by colour.
 
-   This file implements the frozen visual system: semantic type roles rather than a
-   size ramp, a 4px spacing base with named roles, one interaction-state ladder in
-   which selection outranks hover, and restrained hard-offset depth for topology
-   only. The token values are the frozen ones, not a local approximation.
+   This block is the SINGLE source of the shared visual grammar. Frozen V3.3
+   keeps the same vocabulary in two files -- `tokens.css` for Landing and
+   Analysis, and the frozen `primitives.css` for Explorer -- whose shared values
+   are identical and are machine-checked against each other. Production
+   converges them here instead, so there is one place to change a value and one
+   place for a drift assertion to watch.
+
+   SLICE 1 SCOPE, deliberately. The token NAMES are V3.3's. The token VALUES are
+   still production's approved V2.1 values, unchanged, and each is asserted
+   against a golden value in `test/tokens.test.ts`. Adopting V3.3's own values --
+   its paper, its ink ramp, its type steps -- is deferred to the slice that ports
+   each surface, because changing them here would restyle the Landing and the
+   Explorer before either has been ported, producing a state that belongs to
+   neither design. The exceptions are deliberate and listed in the same test:
+
+     --accent  -> --brand      the green is gone; mineral blue means active
+     --sans / --mono          now resolve to shipped faces instead of falling
+                              back to the system, because production declared
+                              typefaces it never shipped
+
+   Everything else below is an equivalent extraction: same values, new names.
    ========================================================================= */
 
 :root {
-  /* ---------------------------------------------------------- surface & ink
-     Monochrome plus exactly one accent. The accent marks the phase an analysis
-     is in and nothing else, so "what is it doing right now" is the only thing
-     that is ever coloured. */
+  /* ---------------------------------------------------------- paper & surface
+     Monochrome. A warm bone that is never pure white, so the page reads as paper
+     rather than as a screen. */
   --paper: #F7F5F0;
+  --paper-deep: #F1EFE8;
   --surface: #FCFBF8;
   --surface-hi: #FFFFFF;
   --surface-sunk: #F2F0EA;
+
+  /* ------------------------------------------------------------------ ink
+     Five rungs, near-black and warm. Hierarchy moves along this ladder and the
+     weight axis, never along a size ramp. */
   --ink: #14130F;
   --ink-2: #4A4842;
   --ink-3: #7C7970;
   --ink-4: #A8A49A;
   --ink-5: #C4C0B6;
+
+  /* ------------------------------------------------------------------ rules
+     Hairline default, two weights of structure. The 2px structural border is
+     named so the raised objects agree on it rather than each picking 1px or 2px. */
   --rule: #E2DFD6;
   --rule-2: #CFCBC0;
   --rule-3: #B4AFA2;
-  --accent: #1F5C4D;
+  --rule-hair: 1px;
+  --rule-firm: 1px solid var(--rule);
+  --rule-heavy: 1px solid var(--ink);
+  --rule-key: 3px solid var(--ink);
 
-  /* Evidence status. Kept as a separate, muted mineral family so a status is
-     never confused with the accent, and never carries meaning on its own: the
-     word is always present beside the mark. */
-  --verified: #48687F;
-  --declared: #8A6A54;
-  --detected: #6E7379;
-  --alert: #8A5450;
+  /* ----------------------------------------------------------------- brand
+     ONE pigment, and its only job is ACTIVE: the phase an analysis is in right
+     now, the selected object, the primary action. It was green (`#1F5C4D`),
+     which made "what is it doing" and "something is selected" compete with the
+     three status hues for the reader's attention. Mineral dusty blue is
+     reserved for state, so hue now means one thing. */
+  --brand: #33485A;
+  --brand-press: #1E3548;
+  --brand-wash: #DFE9F3;
+  --brand-edge: #8295A6;
 
-  --mono: "Geist Mono", ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Mono", Menlo, Consolas, monospace;
-  --sans: "Geist", "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  /* ------------------------------------------------------ evidence status
+     Three hues, reserved for status and nothing else. None of them is load
+     bearing on its own: the word is always beside the mark, and each status also
+     carries a distinct SHAPE (see `.st`). */
+  --verified: #48687F;      --verified-wash: #E7EEF4;
+  --declared: #8A6A54;      --declared-wash: #F6EDE7;
+  --detected: #6E7379;      --detected-wash: #EDEEEF;
+  --alert: #8A5450;         --alert-wash: #F7EAE9;
 
-/* ------------------------------------------------------------- type scale
-     role                     size  wt   lh     tracking
-     Optical compensation scales with size: tight at display, easing to zero by
-     the row role. Tracking is computed, not decorated, and every level gets
-     its variation from weight and colour inside the role -- never from a new
-     invented size. */
+  /* -------------------------------------------------------------- geometry
+     One radius scale, one structural border weight, and hard shadows that never
+     blur. Depth here means a physical offset, not elevation. */
+  --r-sm: 3px;
+  --r-md: 5px;
+  --r-lg: 6px;
+  --r-pill: 999px;
+  --bw: 2px;
+  --sh-1: 2px 2px 0 0 var(--ink);
+  --sh-2: 3px 3px 0 0 var(--ink);
+  --sh-3: 4px 4px 0 0 var(--ink);
+
+  /* -------------------------------------------------------- spacing, 4px base
+     One ladder. Frozen V3.3 stops at eight steps; production's approved layout
+     also uses 20, 40 and 96, so the ladder carries eleven and every step is the
+     value the old named role already had. Slices 2 to 4 collapse it onto the
+     eight-step V3.3 ladder as each composition that needed the extra steps is
+     replaced -- that is where those values are decided, not here. */
+  --s1: 4px;    /* was --sp-micro */
+  --s2: 8px;    /* was --sp-tight */
+  --s3: 12px;   /* was --sp-snug  */
+  --s4: 16px;   /* was --sp-base  */
+  --s5: 20px;   /* was --sp-loose */
+  --s6: 24px;   /* was --sp-section */
+  --s7: 32px;   /* was --sp-block */
+  --s8: 40px;   /* was --sp-band  */
+  --s9: 48px;   /* was --sp-region */
+  --s10: 64px;  /* was --sp-field */
+  --s11: 96px;  /* was --sp-void  */
+
+  /* ------------------------------------------------------------ type scale
+     Semantic roles rather than a size ramp: each level gets its variation from
+     weight and colour inside the role, never from a new invented size. V3.3
+     names these steps differently, and the surface slices adopt its names as
+     each composition is ported; renaming them here would detach a token from the
+     role it is measured against. */
   --t-display-size: 44px;   --t-display-wt: 600; --t-display-lh: 1.04;  --t-display-track: -0.035em;
   --t-title-size: 25px;     --t-title-wt: 590;   --t-title-lh: 1.12;    --t-title-track: -0.028em;
   --t-subject-size: 25px;   --t-subject-wt: 600; --t-subject-lh: 1.14;   --t-subject-track: -0.030em;
@@ -59,49 +127,110 @@
   --t-section-size: 9px;    --t-section-wt: 600; --t-section-lh: 1;      --t-section-track: 0.10em;
   --t-micro-size: 9px;      --t-micro-wt: 500;   --t-micro-lh: 1;        --t-micro-track: 0.08em;
 
-/* ------------------------------------------------------ spacing scale, 4px base
-     Named roles, so a gap is a decision somebody made rather than a raw number. */
-  --sp-micro: 4px;
-  --sp-tight: 8px;
-  --sp-snug: 12px;
-  --sp-base: 16px;
-  --sp-loose: 20px;
-  --sp-section: 24px;
-  --sp-block: 32px;
-  --sp-band: 40px;
-  --sp-region: 48px;
-  --sp-field: 64px;
-  --sp-void: 96px;
+  /* ------------------------------------------------------------------ type
+     Both faces are shipped in `fonts.css`. Production previously named Geist and
+     Geist Mono while serving no font file, so these stacks resolved to
+     `system-ui` and `ui-monospace` for every visitor. Mono is JetBrains Mono,
+     which is the V3.3 choice; the dead `Geist Mono` reference is gone rather than
+     left to silently fail. */
+  --sans: "Geist", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
-/* ------------------------------------------------------- rule hierarchy */
-  --rule-hair: 1px;
-  --rule-firm: 1px solid var(--rule);
-  --rule-heavy: 1px solid var(--ink);
-  --rule-key: 3px solid var(--ink);
+  /* ---------------------------------------------------------------- motion
+     Two durations for state and relocation, one for the tracer. Anything else is
+     decoration. */
+  --d-fast: 120ms;
+  --d-move: 280ms;
+  --d-trace: 620ms;
+  --ease: cubic-bezier(.22, .61, .36, 1);
+  --ease-inout: cubic-bezier(.4, 0, .2, 1);
 
-/* ------------------------------------------------------- topological depth
+  /* -------------------------------------------------------- topological depth
      Never generic elevation. Applied to the Subject, the selected plate and a
      connected plate, and to nothing else in the product. */
   --depth-connected: 4px;
   --depth-selected: 5px;
   --depth-subject: 6px;
 
-/* ---------------------------------------------------------------- motion
-     Two durations for state and relocation, one for the analysis tracer. Anything
-     else is decoration. */
-  --dur-fast: 120ms;
-  --dur-move: 280ms;
-  --dur-trace: 620ms;
-  --ease-out: cubic-bezier(.22, .61, .36, 1);
-  --ease-inout: cubic-bezier(.4, 0, .2, 1);
-
-/* ------------------------------------------------------------ shell tokens
+  /* ------------------------------------------------------------ shell tokens
      The shell is the only part of the product that responds to the viewport. The
      graph world is a fixed spatial coordinate system and these do not describe it. */
   --rail-w: 264px;
   --bar-h: 44px;
   --strip-h: 46px;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   STATUS PRIMITIVE — Frozen V3.3
+
+   Every evidence status carries a TEXT token and a SHAPE token, so hue is never
+   the only channel: verified is a SOLID rule, declared is DASHED, detected is
+   DOTTED. A reader who cannot separate the three hues still reads three
+   different claims, and a monochrome screenshot still carries the distinction.
+   The word is always present beside the mark, so this chip is reinforcement and
+   never the sole carrier of meaning.
+
+   ── WHY THIS IS NOT THE V3.3 SOURCE, VERBATIM ──────────────────────────────
+
+   Frozen V3.3 draws the three swatches with gradients:
+   `linear-gradient(var(--verified), var(--verified)) 0 50%/100% 2px` for the
+   solid rule, and `repeating-linear-gradient(90deg, …)` for the dash and the
+   dots. Production forbids a painted gradient anywhere in the client sheet --
+   `test/phases.test.ts` strips every `mask` declaration and then fails on any
+   remaining `*-gradient(` -- and separately forbids any non-inset `box-shadow`
+   anywhere in the sheet, because elevation is not available to this client.
+
+   The gradients in V3.3 were not honouring that rule either: the dash and dot stops
+   are a repeating PATTERN, and a pattern is alpha, not colour. So they are
+   transcribed as what they actually are -- a mask over a solid `currentColor` fill.
+   The mask exception is the one production already makes on purpose, and its stated
+   reason applies exactly: a mask modulates alpha and paints no colour of its own.
+
+   That reproduces V3.3's geometry to the pixel rather than approximating it:
+
+     solid   14 x 2 rule, centred
+     dashed  1.5px tall, 4px on / 3px off   (V3.3's own numbers)
+     dotted  1px tall, 1.2px on / 2.8px off (V3.3's own numbers)
+
+   Two rejected alternatives, both of which would have quietly cost the primitive its
+   purpose. `border-style: dashed` leaves the dash phase to the browser and renders the
+   1.2px dots nearly solid at 14px, which destroys the only distinction that survives a
+   monochrome screenshot. Placing the dashes with non-inset `box-shadow` paints fine but
+   is elevation by the only definition the stylesheet test can see.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.st {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 20px; padding: 0 8px 0 7px;
+  border: 1px solid; border-radius: var(--r-sm);
+  white-space: nowrap;
+  font-family: var(--mono); font-size: var(--t-meta-size); font-weight: 600;
+  letter-spacing: 0.04em; text-transform: uppercase;
+}
+.st .sw { width: 14px; height: 8px; flex: 0 0 auto; display: block; position: relative; }
+.st .sw::before {
+  content: ""; position: absolute; left: 0; top: 50%;
+  background: currentColor;
+}
+/* solid — a 2px rule across the full width */
+.st-v { color: var(--verified); border-color: var(--verified); background: var(--verified-wash); }
+.st-v .sw::before { width: 14px; height: 2px; margin-top: -1px; }
+/* dashed — 1.5px tall, 4px on / 3px off */
+.st-d { color: var(--declared); border-color: var(--declared); background: var(--declared-wash); }
+.st-d .sw::before {
+  width: 14px; height: 1.5px; margin-top: -0.75px;
+  -webkit-mask-image: repeating-linear-gradient(90deg, #000 0 4px, transparent 4px 7px);
+  mask-image: repeating-linear-gradient(90deg, #000 0 4px, transparent 4px 7px);
+}
+/* dotted — 1px tall, 1.2px on / 2.8px off, deliberately lighter than the other two */
+.st-t { color: var(--detected); border-color: var(--detected); background: var(--detected-wash); }
+.st-t .sw::before {
+  width: 14px; height: 1px; margin-top: -0.5px; opacity: .7;
+  -webkit-mask-image: repeating-linear-gradient(90deg, #000 0 1.2px, transparent 1.2px 4px);
+  mask-image: repeating-linear-gradient(90deg, #000 0 1.2px, transparent 1.2px 4px);
+}
+/* brand — the same object for an ACTIVE state, never for a status */
+.st-b { color: var(--brand); border-color: var(--brand); background: var(--brand-wash); }
+.st-b .sw::before { width: 14px; height: 2px; margin-top: -1px; }
 
 /* --------------------------------------------------------- type role classes
    Roles are named for what the text IS. Sans carries hierarchy and interface;
@@ -169,9 +298,9 @@
    Priority: disabled < rest < hover < focus-visible < selected < selected+hover
  */
 [data-state] {
-  transition: background var(--dur-fast) var(--ease-out),
-              box-shadow var(--dur-fast) var(--ease-out),
-              color var(--dur-fast) var(--ease-out);
+  transition: background var(--d-fast) var(--ease),
+              box-shadow var(--d-fast) var(--ease),
+              color var(--d-fast) var(--ease);
 }
 [data-state="rest"] { background: var(--surface-hi); }
 /* Hover is a 2% step, never a wash toward white. It was the cause of the reported
@@ -382,7 +511,7 @@ a { color: inherit; }
 /* A solid 9px square. The mark used to be a two-node graph glyph in two colours,
    which read as a product logo rather than as part of the type system. */
 .brand-mark { width: 9px; height: 9px; background: var(--ink); flex: none; }
-.appbar-mid { display: flex; align-items: baseline; gap: var(--sp-snug); min-width: 0; flex: 1; }
+.appbar-mid { display: flex; align-items: baseline; gap: var(--s3); min-width: 0; flex: 1; }
 .crumb-sep { color: var(--ink-5); }
 .crumb-repo {
   font-size: var(--t-title-size); font-weight: var(--t-title-wt);
@@ -396,7 +525,7 @@ a { color: inherit; }
   display: none; align-items: center; gap: 6px;
   font-size: var(--t-micro-size); font-weight: var(--t-micro-wt);
   letter-spacing: var(--t-micro-track); text-transform: uppercase;
-  padding: 5px var(--sp-snug); border: 1px solid var(--rule-2); border-radius: 2px;
+  padding: 5px var(--s3); border: 1px solid var(--rule-2); border-radius: 2px;
   background: var(--surface-hi); color: var(--ink-2); cursor: pointer;
 }
 .rail-toggle:hover { border-color: var(--rule-3); color: var(--ink); }
@@ -409,7 +538,7 @@ a { color: inherit; }
   padding: 1px 5px; letter-spacing: var(--t-meta-track); white-space: nowrap;
 }
 .cache-chip.is-cached { color: var(--verified); border-color: color-mix(in srgb, var(--verified) 40%, var(--rule-2)); }
-.appbar-right { display: flex; align-items: center; gap: var(--sp-tight); }
+.appbar-right { display: flex; align-items: center; gap: var(--s2); }
 
 .icon-btn {
   display: inline-flex; align-items: center; justify-content: center;
@@ -551,9 +680,12 @@ a { color: inherit; }
  */
 .hero-underprint {
   position: absolute; left: -6px; top: 6px; z-index: 0;
-  color: var(--rule-2); white-space: pre-line; pointer-events: none;
+  color: var(--rule-2); pointer-events: none;
   font: inherit; letter-spacing: inherit;
 }
+/* Both layers inherit the h1's line-height and break at their own explicit <br>, so the
+   underprint always sits on the same two lines as the words it prints behind. See the
+   comment in index.html for why that break is not left to the browser. */
 .landing h1 > .hero-glyphs { position: relative; z-index: 1; display: block; }
 
 /* ── 4 · the fold ───────────────────────────────────────────────────────────── */
@@ -605,7 +737,7 @@ a { color: inherit; }
   margin-bottom: 13px; position: relative; z-index: 1;
 }
 /* The outcome is the accent, and the only filled square in the band. */
-.hero-trace-node:last-of-type .hero-trace-mark { background: var(--accent); }
+.hero-trace-node:last-of-type .hero-trace-mark { background: var(--brand); }
 .hero-trace-stage {
   font-family: var(--mono); font-size: var(--t-meta-size); font-weight: 500;
   letter-spacing: var(--t-meta-track); text-transform: uppercase; color: var(--ink-4);
@@ -703,7 +835,7 @@ a { color: inherit; }
 .landing-more {
   position: absolute; left: 0; right: 0; bottom: 0; height: 1px;
   background: var(--rule-3); pointer-events: none;
-  opacity: 0; transition: opacity var(--dur-fast) var(--ease-out);
+  opacity: 0; transition: opacity var(--d-fast) var(--ease);
 }
 .is-more-below > .landing-more { opacity: 1; }
 
@@ -813,8 +945,8 @@ a { color: inherit; }
 .rail-scroll {
   flex: 1; min-height: 0;
   overflow-y: auto; overflow-x: hidden;
-  padding: var(--sp-base) var(--sp-base) var(--sp-block);
-  display: flex; flex-direction: column; gap: var(--sp-base);
+  padding: var(--s4) var(--s4) var(--s7);
+  display: flex; flex-direction: column; gap: var(--s4);
 }
 /*
  * The continuation rule.
@@ -832,7 +964,7 @@ a { color: inherit; }
 .rail-more, .drawer-more {
   position: absolute; left: 0; right: 0; bottom: 0; height: 1px;
   background: var(--rule-3); pointer-events: none;
-  opacity: 0; transition: opacity var(--dur-fast) var(--ease-out);
+  opacity: 0; transition: opacity var(--d-fast) var(--ease);
 }
 .is-more-below > .rail-more, .is-more-below > .drawer-more { opacity: 1; }
 .rail[hidden] { display: none; }
@@ -840,18 +972,18 @@ a { color: inherit; }
 .rs-t {
   font-size: var(--t-section-size); font-weight: var(--t-section-wt);
   letter-spacing: var(--t-section-track); text-transform: uppercase;
-  color: var(--ink-4); padding-bottom: var(--sp-tight);
-  border-bottom: var(--rule-hair) solid var(--rule); margin-bottom: var(--sp-tight);
+  color: var(--ink-4); padding-bottom: var(--s2);
+  border-bottom: var(--rule-hair) solid var(--rule); margin-bottom: var(--s2);
 }
-.kv { display: flex; gap: var(--sp-tight); padding: 3px 0; border-bottom: var(--rule-hair) solid var(--rule); }
+.kv { display: flex; gap: var(--s2); padding: 3px 0; border-bottom: var(--rule-hair) solid var(--rule); }
 .kv .k { font-family: var(--mono); font-size: var(--t-meta-size); color: var(--ink-3); flex: none; }
 .kv .v {
   font-size: var(--t-secondary-size); color: var(--ink-2); margin-left: auto;
   text-align: right; overflow-wrap: anywhere; min-width: 0;
 }
-.cen { display: flex; align-items: center; gap: var(--sp-tight); padding: 2px 0; }
+.cen { display: flex; align-items: center; gap: var(--s2); padding: 2px 0; }
 .cen .k { font-family: var(--mono); font-size: var(--t-meta-size); color: var(--ink-2); min-width: 0; overflow-wrap: anywhere; }
-.cen .n { font-family: var(--mono); font-size: var(--t-meta-size); color: var(--ink-3); margin-left: auto; padding-left: var(--sp-tight); }
+.cen .n { font-family: var(--mono); font-size: var(--t-meta-size); color: var(--ink-3); margin-left: auto; padding-left: var(--s2); }
 .rail-note { font-size: var(--t-secondary-size); color: var(--ink-3); line-height: 1.6; margin: 0; }
 
 /* ------------------------------------------------------------ graph viewport
@@ -913,8 +1045,8 @@ a { color: inherit; }
    thing a progress instrument can do.
  */
 .strip {
-  display: flex; align-items: center; gap: var(--sp-base);
-  padding: 0 var(--sp-region); flex: 0 0 auto;
+  display: flex; align-items: center; gap: var(--s4);
+  padding: 0 var(--s9); flex: 0 0 auto;
   min-height: var(--strip-h);
   border-bottom: var(--rule-firm); background: var(--surface-sunk);
   z-index: 29;
@@ -922,13 +1054,13 @@ a { color: inherit; }
 .strip[hidden] { display: none; }
 
 /* The arc itself. Geometry lives in lib/phases.mjs; this only supplies colour. */
-.tracer { display: block; flex: none; margin-right: var(--sp-snug); overflow: visible; }
+.tracer { display: block; flex: none; margin-right: var(--s3); overflow: visible; }
 .tracer-seg { fill: none; stroke: var(--rule-3); stroke-width: 3; stroke-linecap: butt; }
 .tracer-seg.is-done { stroke: var(--ink-3); }
 .tracer-seg.is-current { stroke: var(--ink); }
 /* The tracer. Restrained: it pulses once per arrival and then rests. */
-.tracer-dot { fill: var(--accent); }
-.tracer-dot.is-moving { animation: tracer-arrive var(--dur-trace) var(--ease-inout); }
+.tracer-dot { fill: var(--brand); }
+.tracer-dot.is-moving { animation: tracer-arrive var(--d-trace) var(--ease-inout); }
 @keyframes tracer-arrive {
   0%   { opacity: .35; }
   100% { opacity: 1; }
@@ -949,10 +1081,10 @@ a { color: inherit; }
 }
 .phase {
   flex: 1; min-width: 0;
-  display: flex; align-items: center; gap: var(--sp-tight);
-  padding: 0 var(--sp-snug); color: var(--ink-5);
+  display: flex; align-items: center; gap: var(--s2);
+  padding: 0 var(--s3); color: var(--ink-5);
   border-right: var(--rule-hair) solid var(--rule);
-  transition: color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
+  transition: color var(--d-fast) var(--ease), background var(--d-fast) var(--ease);
 }
 .phase:last-child { border-right: 0; }
 /* The mark is a 5px square, not a dot: a dot at this size reads as a bullet list
@@ -976,14 +1108,14 @@ a { color: inherit; }
 .phase.is-done .pm { background: var(--ink-3); border-color: var(--ink-3); }
 .phase.is-current { color: var(--ink); background: rgba(255, 255, 255, .7); }
 .phase.is-current .phase-name { font-weight: 590; }
-.phase.is-current .phase-n { color: var(--accent); }
-.phase.is-current .pm { background: var(--accent); border-color: var(--accent); }
+.phase.is-current .phase-n { color: var(--brand); }
+.phase.is-current .pm { background: var(--brand); border-color: var(--brand); }
 .phase.is-settled .phase-name { font-weight: 590; }
 .empty-head, .failure-head { font-size: 18px; font-weight: 650; margin: 0; }
 .failure-head { color: var(--alert); }
 .empty-body, .failure-body { font-size: 12px; color: var(--ink-3); margin: 0; max-width: 56ch; line-height: 1.55; }
 
-.viewport-controls { position: absolute; right: var(--sp-base); bottom: var(--sp-base); display: flex; gap: var(--sp-micro); z-index: 6; }
+.viewport-controls { position: absolute; right: var(--s4); bottom: var(--s4); display: flex; gap: var(--s1); z-index: 6; }
 .vp-btn {
   width: 28px; height: 28px; background: var(--paper); border: 1px solid var(--rule-2);
   border-radius: 4px; color: var(--ink-2); font-size: 14px; line-height: 1; display: inline-flex; align-items: center; justify-content: center;
@@ -1019,12 +1151,12 @@ a { color: inherit; }
  * within one screen of scrolling. It is mono because a manifest path is technical data,
  * and the count is mono and right-aligned because it is a count.
  */
-.d-group { border-top: 1px solid var(--rule); margin-top: var(--sp-tight); }
+.d-group { border-top: 1px solid var(--rule); margin-top: var(--s2); }
 .d-group:first-of-type { border-top: 0; margin-top: 0; }
 .d-group-head {
   position: sticky; top: 0; z-index: 1;
-  display: flex; align-items: baseline; gap: var(--sp-tight);
-  margin: 0 calc(var(--sp-band) * -1); padding: var(--sp-micro) var(--sp-band);
+  display: flex; align-items: baseline; gap: var(--s2);
+  margin: 0 calc(var(--s8) * -1); padding: var(--s1) var(--s8);
   background: var(--surface);
   font-size: var(--t-meta-size); color: var(--ink-3);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -1062,7 +1194,7 @@ a { color: inherit; }
  * to spare. It is a rail block now: the same fact, in the place that is allowed to
  * hold prose.
  */
-.g-empty { display: flex; flex-wrap: wrap; gap: var(--sp-micro) var(--sp-tight); }
+.g-empty { display: flex; flex-wrap: wrap; gap: var(--s1) var(--s2); }
 .g-chip {
   font-family: var(--mono); font-size: var(--t-meta-size); color: var(--ink-4);
   border: 1px solid var(--rule-2); border-radius: 2px; padding: 2px 6px;
@@ -1076,7 +1208,7 @@ a { color: inherit; }
  * top of the composition at every width and had to be hidden whenever anything else
  * claimed the space. The rail owns it now.
  */
-.key-row { display: flex; align-items: center; gap: var(--sp-snug); font-size: var(--t-row-size); color: var(--ink-2); padding: 3px 0; }
+.key-row { display: flex; align-items: center; gap: var(--s3); font-size: var(--t-row-size); color: var(--ink-2); padding: 3px 0; }
 .key-row .k { margin-left: auto; color: var(--ink-4); }
 .bundle-card:hover .bundle-card-box, .bundle-card:focus .bundle-card-box { stroke: var(--ink); stroke-dasharray: none; }
 .bundle-card.is-open .bundle-card-box { stroke: var(--ink); stroke-width: 1.6; stroke-dasharray: none; }
@@ -1138,7 +1270,7 @@ a { color: inherit; }
  * space at all, so it needs no positioning and cannot collide with a composition at
  * any width.
  */
-.lblk { margin-bottom: var(--sp-loose); }
+.lblk { margin-bottom: var(--s5); }
 .lblk h6 {
   font-size: 9px; letter-spacing: 0.11em; text-transform: uppercase;
   color: var(--ink-4); font-weight: 600; margin: 0 0 8px;
@@ -1189,8 +1321,8 @@ a { color: inherit; }
    */
   position: absolute;
   left: var(--band-left, 336px); top: var(--band-top, 900px); width: var(--band-w, 1184px);
-  display: flex; align-items: center; gap: var(--sp-band); flex-wrap: wrap;
-  border-top: var(--rule-firm); padding-top: var(--sp-tight);
+  display: flex; align-items: center; gap: var(--s8); flex-wrap: wrap;
+  border-top: var(--rule-firm); padding-top: var(--s2);
   /*
    * Room for the viewport controls.
    *
@@ -1203,7 +1335,7 @@ a { color: inherit; }
    * their offset from the edge -- so it is stated once, here, and the controls are sized
    * from the same tokens.
    */
-  padding-right: calc(3 * 28px + 2 * var(--sp-micro) + 2 * var(--sp-base));
+  padding-right: calc(3 * 28px + 2 * var(--s1) + 2 * var(--s4));
 }
 .band[hidden] { display: none; }
 .band .key { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
@@ -1367,7 +1499,7 @@ a { color: inherit; }
 .drawer[hidden] { display: none; }
 .drawer-inner {
   flex: 1; min-height: 0; overflow-y: auto;
-  padding: var(--sp-section) var(--sp-band) var(--sp-block); position: relative;
+  padding: var(--s6) var(--s8) var(--s7); position: relative;
   /* The group's sticky heading occupies the first 30px of this box, so the top fade
      starts below it. See `--gl-fade-top`. */
   --gl-fade-top: 54px;
@@ -1384,9 +1516,9 @@ a { color: inherit; }
  * `z-index` puts it above the rows and below the close button.
  */
 .d-block-head {
-  position: sticky; top: calc(var(--sp-section) * -1); z-index: 1;
-  margin: 0 calc(var(--sp-band) * -1) var(--sp-tight);
-  padding: var(--sp-tight) var(--sp-band) var(--sp-micro);
+  position: sticky; top: calc(var(--s6) * -1); z-index: 1;
+  margin: 0 calc(var(--s8) * -1) var(--s2);
+  padding: var(--s2) var(--s8) var(--s1);
   background: var(--surface);
   box-shadow: inset 0 -1px 0 var(--rule);
   font-family: var(--mono); font-size: var(--t-section-size); font-weight: var(--t-section-wt);
@@ -1394,7 +1526,7 @@ a { color: inherit; }
 }
 .d-block:first-child .d-block-head { margin-top: 0; }
 .drawer-close {
-  position: absolute; top: var(--sp-snug); right: var(--sp-base);
+  position: absolute; top: var(--s3); right: var(--s4);
   font-family: var(--mono); font-size: var(--t-meta-size); color: var(--ink-4);
   background: transparent; border: 1px solid var(--rule-2); border-radius: 2px;
   padding: 2px 6px;
@@ -1523,12 +1655,12 @@ a { color: inherit; }
   :root { --drawer-w: 320px; }
   .appbar-mid { flex-wrap: wrap; }
   .crumb-ctx { display: none; }
-  .strip { padding: 0 var(--sp-base); gap: var(--sp-tight); }
-  .phase { padding: 0 var(--sp-tight); }
+  .strip { padding: 0 var(--s4); gap: var(--s2); }
+  .phase { padding: 0 var(--s2); }
   .phase-name { display: none; }
   .phase-n { margin: 0 auto; }
   .bundles { max-width: calc(100% - 32px); }
-  .viewport-controls { right: var(--sp-tight); bottom: var(--sp-tight); }
+  .viewport-controls { right: var(--s2); bottom: var(--s2); }
 }
 
 @media (max-width: 560px) {

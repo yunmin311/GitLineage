@@ -11,6 +11,14 @@
   `/owner/repo`, where a relative `./app.css` would resolve to
   `/owner/app.css` and 404.
 -->
+<!--
+  The typeface is loaded before the token sheet on purpose. `fonts.css` carries the
+  woff2 payloads, and `app.css` resolves `--sans` and `--mono` from them, so a stylesheet
+  order the other way round would let the first paint choose a fallback and then
+  re-render every glyph.
+-->
+<link rel="preload" href="/fonts.css" as="style" />
+<link rel="stylesheet" href="/fonts.css" />
 <link rel="stylesheet" href="/app.css" />
 </head>
 <body>
@@ -78,9 +86,24 @@
     <p class="eyebrow">Evidence-backed repository lineage</p>
 
     <h1>
-      <span class="hero-underprint" aria-hidden="true">Where did this
-software</span>
-      <span class="hero-glyphs">Where did this software</span>
+      <!--
+        Two layers over one grid cell, breaking at the SAME place.
+
+        The underprint is the display words offset down and right in the rule colour; the
+        glyphs are the display words in ink. Both must break identically or the
+        underprint drifts off the words it is supposed to print behind.
+
+        The break is written out as a `<br>` in BOTH layers rather than left to natural
+        wrapping, and that is not cosmetic. This used to depend on where the browser chose
+        to break: the glyph layer was one text run, so its break depended on the font's
+        metrics. Shipping the real typeface changed those metrics, "Where did this
+        software" fit on a single line, and the underprint -- which breaks explicitly --
+        was left stranded on a line of its own, no longer behind the word it belongs to.
+        A composition that moves when the font does is not a composition. An explicit
+        break in both layers cannot.
+      -->
+      <span class="hero-underprint" aria-hidden="true">Where did this<br>software</span>
+      <span class="hero-glyphs">Where did this<br>software</span>
     </h1>
     <p class="hero-fold">come from?</p>
 

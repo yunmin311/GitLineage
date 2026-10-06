@@ -283,7 +283,17 @@ test('the tracer uses no gradient, blur, glow or looping animation', () => {
   const animations = declared.match(/@keyframes\s+([\w-]+)/g) ?? [];
   assert.deepEqual(animations, ['@keyframes tracer-arrive'], 'the only keyframe is the tracer arriving');
   assert.equal(/animation:\s*[^;]*infinite/.test(declared), false, 'nothing loops');
-  assert.match(cssRule('.tracer-dot'), /fill:\s*var\(--accent\)/, 'the tracer is the one accent mark');
+  // The tracer is the one brand mark. Frozen V3.3 renamed this token from `--accent` to
+  // `--brand`: it was green, which made "what is this analysis doing right now" compete
+  // for the reader's attention with the three evidence-status hues. Mineral blue is now
+  // reserved for active state, so hue means exactly one thing.
+  assert.match(cssRule('.tracer-dot'), /fill:\s*var\(--brand\)/, 'the tracer is the one brand mark');
+  // Comments stripped: the stylesheet documents this rename in prose, and a search over
+  // the raw text would find its own obituary and report the token as still present.
+  const withoutComments = APP_CSS.replace(/\/\*[\s\S]*?\*\//g, ' ');
+  assert.equal(/(^|[;{\s])--accent\s*:/.test(withoutComments), false,
+    'and the green accent token is gone');
+  assert.equal(/var\(--accent\)/.test(withoutComments), false, 'and nothing still references it');
   assert.match(code(APP_CSS), /@media \(prefers-reduced-motion: reduce\)/,
     'reduced motion is honoured, so the tracer arrives at once');
   assert.match(code(APP_CSS.replace(/\s+/g, ' ')),
