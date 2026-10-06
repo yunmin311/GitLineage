@@ -81,143 +81,196 @@
     never scrolls and never paints a scrollbar. See the LANDING section of app.css.
   -->
   <section id="landing" class="landing gl-scroll" tabindex="0">
-    <span class="hero-reg" aria-hidden="true"></span>
-
-    <p class="eyebrow">Evidence-backed repository lineage</p>
-
-    <h1>
-      <!--
-        Two layers over one grid cell, breaking at the SAME place.
-
-        The underprint is the display words offset down and right in the rule colour; the
-        glyphs are the display words in ink. Both must break identically or the
-        underprint drifts off the words it is supposed to print behind.
-
-        The break is written out as a `<br>` in BOTH layers rather than left to natural
-        wrapping, and that is not cosmetic. This used to depend on where the browser chose
-        to break: the glyph layer was one text run, so its break depended on the font's
-        metrics. Shipping the real typeface changed those metrics, "Where did this
-        software" fit on a single line, and the underprint -- which breaks explicitly --
-        was left stranded on a line of its own, no longer behind the word it belongs to.
-        A composition that moves when the font does is not a composition. An explicit
-        break in both layers cannot.
-      -->
-      <span class="hero-underprint" aria-hidden="true">Where did this<br>software</span>
-      <span class="hero-glyphs">Where did this<br>software</span>
-    </h1>
-    <p class="hero-fold">come from?</p>
-
-    <div class="hero-trace">
-      <div class="hero-trace-node">
-        <span class="hero-trace-mark" aria-hidden="true"></span>
-        <p class="hero-trace-stage">source</p>
-        <p class="hero-trace-value">98 entities</p>
-      </div>
-      <div class="hero-trace-node">
-        <span class="hero-trace-mark" aria-hidden="true"></span>
-        <p class="hero-trace-stage">evidence</p>
-        <p class="hero-trace-value">137 manifest records</p>
-      </div>
-      <div class="hero-trace-node">
-        <span class="hero-trace-mark" aria-hidden="true"></span>
-        <p class="hero-trace-stage">relationship</p>
-        <p class="hero-trace-value">97 depends_on</p>
-      </div>
-      <div class="hero-trace-node">
-        <span class="hero-trace-mark" aria-hidden="true"></span>
-        <p class="hero-trace-stage">lineage</p>
-        <p class="hero-trace-value">1 repository</p>
-      </div>
-      <p class="hero-trace-note">Example trace · Kuddev/pebrel · rev 51514bd</p>
-    </div>
-
-    <p class="lede">
-      Paste a repository. GitLineage reads its manifests, documents and git objects,
-      and draws the relationships between them — every one with the file it was
-      written in attached, and openable.
-    </p>
-    <p class="landing-aside">
-      <b>Nothing is inferred.</b><br />
-      Similarity never renders as a verified lineage relationship; the graph makes
-      that structurally true rather than a promise in the copy.
-    </p>
-
-    <form id="form" class="input-card" autocomplete="off">
-      <div class="input-row">
-        <svg class="input-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5a6.5 6.5 0 0 0-3.9 11.7L2.5 15l1.9-1.4A6.5 6.5 0 1 0 8 1.5z"/></svg>
-        <input id="repo-input" name="repo" placeholder="github.com/owner/repo" spellcheck="false" />
-        <button id="submit" type="submit">Trace lineage</button>
-      </div>
-      <div class="sub-row">
-        <span class="mono sub-label">Depth</span>
-        <span class="seg" role="group" aria-label="Analysis depth">
-          <button type="button" class="seg-btn" data-depth="0">Metadata</button>
-          <button type="button" class="seg-btn is-active" data-depth="200">Standard</button>
-          <button type="button" class="seg-btn" data-depth="600">Deep</button>
-        </span>
-        <!--
-          There is no similarity toggle here, and there was never a working one.
-
-          A disabled "Token fingerprints" checkbox used to sit at the end of this row with
-          a tooltip explaining that no similarity detector ships in the V1 analyzer. It
-          was honest, and it was still a control the reader could see and could not use:
-          a promise of a capability, greyed out, in the one place the product is asking
-          for trust. It has been removed rather than disabled-but-present, and nothing
-          replaces it. Token similarity is not a hidden setting here; it is absent, and
-          the "SIMILARITY IS NOT PROVENANCE" cell below states that as a fact about the
-          analysis instead of offering it as an option.
-        -->
-      </div>
-    </form>
-
-    <p class="foot">
-      Or replace <code>github</code> with <code>gitlineage</code> in any GitHub URL —
-      <code>github.com/o/r</code> becomes <code>gitlineage.com/o/r</code>
-    </p>
-
-    <p class="samples mono">Try
-      <a href="/nachocebey/is">nachocebey/is</a>
-      <span class="sample-tag">forked</span>
-      <a href="/grpc/grpc">grpc/grpc</a>
-      <span class="sample-tag">submodules</span>
-      <a href="/vitest-dev/vitest">vitest-dev/vitest</a>
-      <span class="sample-tag">declared</span>
-      <a href="/octocat/Spoon-Knife">octocat/Spoon-Knife</a>
-      <span class="sample-tag">no lineage</span>
-    </p>
-
-    <div class="trust">
-      <div class="trust-cell">
-        <p class="trust-head mono">NO LLM IN THE LOOP</p>
-        <p class="trust-body">Relationships come from Git objects, manifests and
-          documents. Nothing is inferred, nothing is guessed.</p>
-      </div>
-      <div class="trust-cell">
-        <p class="trust-head mono">EVERY EDGE IS CHECKABLE</p>
-        <p class="trust-body"><span class="mini-pill v">VERIFIED</span>
-          <span class="mini-pill d">DECLARED</span>
-          <span class="mini-pill t">DETECTED</span>
-          — each one opens the raw evidence.</p>
-      </div>
-      <div class="trust-cell">
-        <p class="trust-head mono">SIMILARITY IS NOT PROVENANCE</p>
-        <p class="trust-body">Token similarity never renders as a verified
-          lineage relationship. The graph makes that structurally true.</p>
-      </div>
-    </div>
 
     <!--
-      Landing footer.
+      LANDING — Frozen V3.3.
 
-      It belongs to the landing, not to the shell. As a body-level sibling it also
-      sat below a full-viewport canvas, where its only effect was a scrollbar that
-      scrolled the canvas out of sight and a strip of marketing copy under a
-      provenance graph. The assurance it carries still matters, so it stays on the
-      page that makes the promise.
+      The composition recovered from the first-version key sample, ported onto the real
+      analysis flow. What is recovered is the SPINE, and only the spine:
+
+        a bounded 852px column, centred, with the body copy left aligned inside it
+        the headline as two layers of the same filled words in one grid cell
+        the repository input card as the single most important object on the page,
+          raised, 2px ink border, hard shadow
+        secondary information INSIDE that same card, one step quieter
+        then a URL helper, then the example chips, then a three column proof block,
+          then a strong footer rule
+
+      Three deliberate departures from the V3.3 prototype, each because the prototype
+      is not production:
+
+        · The prototype's nav and footer links are `href="#"`. Dead controls do not
+          ship. This page keeps the two destinations the product actually serves --
+          the contract at /api/contract and health at /healthz.
+
+        · The prototype's example chips carry relationship counts read out of its own
+          fixture. Those numbers are not evidence and are not hardcoded here. The
+          chips are the real routes; the one set of real counts on this page is the
+          labelled example trace under the card, which names the repository and the
+          revision it was measured at.
+
+        · The prototype drops the depth control because the prototype never had one.
+          Production does, it is wired to `?depth=`, and removing a working feature to
+          match a static file would be the wrong trade. It stays, inside the card,
+          one step quieter than the evidence legend.
+
+      The analysis flow is untouched: `#form`, `#repo-input`, `#submit` and the sample
+      anchors are the same hooks `app.js` already binds, so submitting navigates into
+      the real job and the real view exactly as before.
     -->
+    <div class="ld-inner">
+
+      <div class="eyebrow">
+        <span class="eyebrow-t">Evidence&#8209;backed repository lineage</span>
+        <span class="eyebrow-rule"></span>
+      </div>
+
+      <!--
+        A · offset underprint.
+
+        Two filled passes over one grid cell per line: `.hero-u` in the rule colour,
+        offset by a transform, and `.hero-f` in ink on top. Both passes of a line sit in
+        the SAME cell, so they share one box and one baseline by construction rather
+        than by agreement -- and `white-space: nowrap` means a line cannot re-wrap at all.
+
+        Slice 1 broke the headline as "Where did this" / "software". The V3.3 composition
+        requires a different explicit break, "Where did this software" / "come from?",
+        so that is what is here -- as two line elements rather than a `<br>`, which is
+        strictly stronger: each line is its own grid cell and cannot wrap, so the
+        underprint cannot drift off the words it prints behind at any font or width.
+      -->
+      <h1 class="hero">
+        <span class="hero-line">
+          <span class="hero-u" aria-hidden="true">Where did this software</span><span class="hero-f">Where did this software</span>
+        </span>
+        <span class="hero-line">
+          <span class="hero-u" aria-hidden="true">come from?</span><span class="hero-f">come from?</span>
+        </span>
+      </h1>
+
+      <p class="lede">Paste a GitHub repository. GitLineage traces its ancestry, dependencies and
+        declared attribution &mdash; and shows the evidence behind every relationship it draws.</p>
+
+      <!-- the input card: the primary interaction object on the page -->
+      <form id="form" class="input-card" autocomplete="off">
+        <div class="input-row">
+          <label class="field" for="repo-input">
+            <span class="sr">GitHub repository URL, or owner and repository</span>
+            <svg class="gh" viewBox="0 0 16 16" aria-hidden="true" fill="currentColor">
+              <path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38l-.01-1.33C3.78 14.16 3.34 12.6 3.34 12.6c-.36-.92-.88-1.17-.88-1.17-.72-.49.05-.48.05-.48.8.06 1.22.82 1.22.82.71 1.21 1.86.87 2.31.66.07-.52.28-.87.5-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.03 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8Z" />
+            </svg>
+            <input id="repo-input" name="repo" type="text" placeholder="github.com/owner/repository" spellcheck="false" autocomplete="off" />
+          </label>
+          <button id="submit" type="submit">Trace lineage</button>
+        </div>
+
+        <!--
+          The evidence-status legend, inside the card and one step quieter than the
+          input. This is the real contract: the three statuses are what a relationship
+          can be, and each carries a shape as well as a hue, so they stay separable
+          without colour vision.
+        -->
+        <div class="sub-row">
+          <span class="sub-cap">Evidence status</span>
+          <span class="st st-d"><span class="sw"></span>Declared</span>
+          <span class="st st-v"><span class="sw"></span>Verified</span>
+          <span class="st st-t"><span class="sw"></span>Detected</span>
+        </div>
+
+        <!--
+          Depth, kept because it is a real control wired to `?depth=`. Quiet on purpose:
+          it changes how much is analysed, not what is claimed.
+        -->
+        <div class="sub-row sub-row-depth">
+          <span class="sub-cap">Depth</span>
+          <span class="seg" role="group" aria-label="Analysis depth">
+            <button type="button" class="seg-btn" data-depth="0">Metadata</button>
+            <button type="button" class="seg-btn is-active" data-depth="200">Standard</button>
+            <button type="button" class="seg-btn" data-depth="600">Deep</button>
+          </span>
+        </div>
+      </form>
+
+      <!--
+        The one set of real counts on this page. Kuddev/pebrel is named with the revision
+        it was measured at, so the numbers can be checked and go stale visibly rather
+        than quietly. Nothing here is invented: these are analyser output.
+      -->
+      <div class="hero-trace">
+        <div class="hero-trace-node">
+          <span class="hero-trace-mark" aria-hidden="true"></span>
+          <p class="hero-trace-stage">source</p>
+          <p class="hero-trace-value">98 entities</p>
+        </div>
+        <div class="hero-trace-node">
+          <span class="hero-trace-mark" aria-hidden="true"></span>
+          <p class="hero-trace-stage">evidence</p>
+          <p class="hero-trace-value">137 manifest records</p>
+        </div>
+        <div class="hero-trace-node">
+          <span class="hero-trace-mark" aria-hidden="true"></span>
+          <p class="hero-trace-stage">relationship</p>
+          <p class="hero-trace-value">97 depends_on</p>
+        </div>
+        <div class="hero-trace-node">
+          <span class="hero-trace-mark" aria-hidden="true"></span>
+          <p class="hero-trace-stage">lineage</p>
+          <p class="hero-trace-value">1 repository</p>
+        </div>
+        <p class="hero-trace-note">Example trace &middot; Kuddev/pebrel &middot; rev 51514bd</p>
+      </div>
+
+      <p class="foot">
+        <span class="fine-k">Or replace</span>
+        <span class="fine-v">github</span>
+        <span class="fine-k">with</span>
+        <span class="fine-v">gitlineage</span>
+        <span class="fine-k">in any GitHub URL &mdash;</span>
+        <span class="fine-mono">github.com/o/r</span>
+        <span class="fine-k">becomes</span>
+        <span class="fine-mono">gitlineage.com/o/r</span>
+      </p>
+
+      <!--
+        The four long-term acceptance datasets, plus GitLineage itself as the self case.
+        Real routes: each one is analysed on request and cached.
+      -->
+      <div class="samples">
+        <span class="samples-lab">Try</span>
+        <a href="/yunmin311/GitLineage">yunmin311/GitLineage</a>
+        <a href="/Kuddev/pebrel">Kuddev/pebrel</a>
+        <a href="/grpc/grpc">grpc/grpc</a>
+        <a href="/nachocebey/is">nachocebey/is</a>
+        <a href="/yunmin311/obsidian-config">yunmin311/obsidian-config</a>
+      </div>
+
+      <!-- the three column proof block -->
+      <div class="trust">
+        <div class="trust-cell">
+          <p class="trust-head">No LLM in the loop</p>
+          <p class="trust-body">No language model writes your provenance. Relationships come from
+            Git objects, manifests and documents &mdash; records the analysis found.</p>
+        </div>
+        <div class="trust-cell">
+          <p class="trust-head">Every edge is checkable</p>
+          <p class="trust-body"><span class="mini-pill v">VERIFIED</span>
+            <span class="mini-pill d">DECLARED</span>
+            <span class="mini-pill t">DETECTED</span>
+            &mdash; each opens the raw evidence.</p>
+        </div>
+        <div class="trust-cell">
+          <p class="trust-head">Reference is not dependency</p>
+          <p class="trust-body">They are different canonical relationship types and are drawn
+            separately. A version range is never shown as an exact version.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- the strong footer rule -->
     <footer class="site-foot" id="site-foot">
-      <span class="mono">Deterministic analysis · public repositories · no repository code is ever executed</span>
-      <span class="foot-links mono">
+      <span>Deterministic analysis &middot; public repositories &middot; no repository code is ever executed</span>
+      <span class="foot-links">
         <a href="/api/contract">Method</a>
         <a href="/healthz">Status</a>
       </span>

@@ -43,10 +43,66 @@ const ROOT_BLOCK = /:root\s*\{([\s\S]*?)\n\}/.exec(APP_CSS)?.[1] ?? '';
  */
 const DECLARED_TEXT = APP_CSS.replace(/\/\*[\s\S]*?\*\//g, ' ');
 
-/** Token -> value, taken from the `:root` block only. */
+/**
+ * Surfaces allowed to RE-DECLARE a global token rather than inherit it.
+ *
+ * Frozen V3.3's paper, ink and status values are adopted per surface, not globally: Slice
+ * 2 adopted them for the Landing by declaring them on `.landing`, where they cascade into
+ * the Landing subtree and stop at its edge, so the Explorer is not restyled by a commit
+ * about the Landing. That is a scoped override, not a second token system -- there is
+ * still exactly one global definition of every token in `:root`.
+ *
+ * The distinction matters, because a genuinely parallel token system looks identical to
+ * this from a distance. So the rule is stated as it actually is: exactly one global
+ * definition per token, and re-declaration permitted only inside a selector on this list.
+ * A surface that stops being ported removes itself; a token that starts being re-declared
+ * in two places fails.
+ */
+const ALLOWED_SCOPES = ['.landing'] as const;
+
+/** Every token declared anywhere, with the scope each declaration was found in. */
+function declarations(): Map<string, string[]> {
+  const out = new Map<string, string[]>();
+  // Walk top-level blocks so a declaration can be attributed to the selector that owns it.
+  const re = /(^|\})([^{}@]+)\{/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(DECLARED_TEXT)) !== null) {
+    const selector = (m[2] ?? '').trim().split(/\s*,\s*/)[0] ?? '';
+    const block = DECLARED_TEXT.slice(m.index + m[0].length);
+    const depthAt = block.search(/[{}]/);
+    const body = depthAt === -1 ? block : block.slice(0, depthAt);
+    for (const d of body.matchAll(/(--[a-z0-9-]+)\s*:/g)) {
+      if (!d[1]) continue;
+      const list = out.get(d[1]) ?? [];
+      list.push(selector);
+      out.set(d[1], list);
+    }
+  }
+  return out;
+}
+
+/**
+ * Token -> value, from the GLOBAL `:root` block only.
+ *
+ * Deliberately global. The golden table records what the product's base tokens are, and a
+ * per-surface override that quietly changed a global value would defeat the point of
+ * having a golden table at all. Landing-scoped adoption is asserted separately, against
+ * the `.landing` block, so the two claims cannot be confused.
+ */
 function declared(): Map<string, string> {
   const out = new Map<string, string>();
   for (const m of ROOT_BLOCK.matchAll(/(--[a-z0-9-]+)\s*:\s*([^;]+);/g)) {
+    if (m[1] && m[2]) out.set(m[1], m[2].trim());
+  }
+  return out;
+}
+
+/** Token -> value, from one named top-level selector's block. */
+function declaredIn(selector: string): Map<string, string> {
+  const out = new Map<string, string>();
+  const re = new RegExp(`(?:^|\\})${selector.replace(/[.]/g, '\\.')}\\s*\\{([\\s\\S]*?)\\n\\}`, 'm');
+  const body = re.exec(DECLARED_TEXT)?.[1] ?? '';
+  for (const m of body.matchAll(/(--[a-z0-9-]+)\s*:\s*([^;]+);/g)) {
     if (m[1] && m[2]) out.set(m[1], m[2].trim());
   }
   return out;
@@ -152,32 +208,41 @@ const DEFERRED: Record<string, { v33: string; owner: string }> = {
 
 test('every global token is defined exactly once', () => {
   /*
-   * Not "defined in the file" -- defined once. A token declared in `:root` and again on
-   * a component wins or loses by specificity and by scope, and the result is a second
-   * token system that looks like one until a page renders differently from its
+   * Not "defined in the file" -- defined once, globally. A token declared in `:root` and
+   * again at top level wins or loses by specificity and by scope, and the result is a
+   * second token system that looks like one until a page renders differently from its
    * neighbour.
+   *
+   * A re-declaration inside an ALLOWED_SCOPES selector is the deliberate per-surface
+   * adoption of V3.3's values and is permitted; anywhere else it is the bug this test is
+   * for.
    */
   const offenders: string[] = [];
-  const all = APP_CSS.matchAll(/(--[a-z0-9-]+)\s*:/g);
-  const counts = new Map<string, number>();
-  for (const m of all) if (m[1]) counts.set(m[1], (counts.get(m[1]) ?? 0) + 1);
-  for (const [token, n] of counts) {
+  for (const [token, scopes] of declarations()) {
     // Runtime-set custom properties are written by app.js onto the world frame and are
     // declared nowhere; those are not global tokens and cannot collide.
     if (token.startsWith('--world') || token.startsWith('--frame') || token.startsWith('--gl-')) continue;
-    if (n > 1) offenders.push(`${token} x${n}`);
+    for (const scope of scopes) {
+      const isGlobal = scope === ':root';
+      const isAllowedScope = (ALLOWED_SCOPES as readonly string[]).includes(scope);
+      if (!isGlobal && !isAllowedScope) offenders.push(`${token} in "${scope}"`);
+    }
+    const globals = scopes.filter((s) => s === ':root').length;
+    if (globals > 1) offenders.push(`${token} declared ${globals} times at global scope`);
   }
-  assert.deepEqual(offenders, [], 'these tokens are declared more than once');
+  assert.deepEqual(offenders, [], 'these tokens are declared outside the global :root, or more than once');
 });
 
 test('no reference points at a token that does not exist', () => {
   const declared_ = declared();
   // Set by app.js at runtime, so absent from the stylesheet by design.
   const runtime = /^(--(world|frame|band|gl-|drawer-w))/;
+  const scopes = Object.fromEntries(ALLOWED_SCOPES.map((s) => [s, declaredIn(s)]));
   const missing = [...new Set([...APP_CSS.matchAll(/var\((--[a-z0-9-]+)/g)]
     .map((m) => m[1])
     .filter((t): t is string => typeof t === 'string'))]
-    .filter((t) => !declared_.has(t) && !runtime.test(t));
+    .filter((t) => !declared_.has(t) && !runtime.test(t)
+      && !Object.values(scopes).some((m2) => m2.has(t)));
   assert.deepEqual(missing, [], 'these tokens are referenced but never declared');
 });
 
@@ -307,12 +372,15 @@ test('the spacing ladder is one ladder on a 4px base', () => {
  */
 test('the headline layers carry the same words and break in the same places', () => {
   const shell = readFileSync(resolve(import.meta.dirname, '..', 'src/web/client/index.html'), 'utf8');
-  const h1 = /<h1>([\s\S]*?)<\/h1>/.exec(shell)?.[1];
+  const h1 = /<h1[^>]*>([\s\S]*?)<\/h1>/.exec(shell)?.[1];
   assert.ok(h1, 'the headline exists');
-  const layer = (cls: string) =>
-    new RegExp(`<span class="${cls}"[^>]*>([\\s\\S]*?)</span>`).exec(h1)?.[1];
-  const underprint = layer('hero-underprint');
-  const glyphs = layer('hero-glyphs');
+  // One `.hero-line` per statement, each a grid cell holding the underprint pass and the
+  // foreground pass. The break between statements is therefore structure, not wrapping.
+  const lines = h1.split('<span class="hero-line">').slice(1)
+    .map((chunk) => chunk.split('</span>')[0] ?? '');
+  assert.ok(lines.length >= 2, 'the headline is more than one explicit line');
+  const underprint = lines.map((l) => /<span class="hero-u"[^>]*>([\s\S]*?)<\/span>/.exec(l)?.[1] ?? '').join('<br>');
+  const glyphs = lines.map((l) => /<span class="hero-f"[^>]*>([\s\S]*?)<\/span>/.exec(l)?.[1] ?? '').join('<br>');
   assert.ok(underprint && glyphs, 'both layers are present');
 
   // Words, with markup stripped, must be identical.

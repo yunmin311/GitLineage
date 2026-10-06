@@ -856,12 +856,47 @@ test('the ladder is drawn as geometry, because box-shadow cannot paint an SVG re
   assert.equal(depthShadowClass('plate'), 'depth-shadow depth-shadow-plate');
   assert.equal(depthShadowClass('flat'), '', 'a flat surface must have no offset shape');
 
-  // No tier may be expressed as a box-shadow anywhere in the stylesheet. The one
-  // remaining declaration is the phase dot's inset paper ring, which paints on an
-  // HTML element and is a fill rather than elevation.
-  const shadows = [...APP_CSS.matchAll(/box-shadow:\s*([^;]+);/g)].map((m) => m[1]!);
+  // No tier may be expressed as a box-shadow anywhere in the stylesheet, because
+  // box-shadow computes on an SVG rect and paints nothing -- the offset has to be a real
+  // shape, and `draw` emits one.
+  //
+  // Two forms are permitted, and both are narrower than "elevation is fine":
+  //
+  //   · an inset fill -- the phase dot's paper ring, which paints on an HTML element and
+  //     is a fill rather than a shadow;
+  //   · a reference to the hard-shadow scale `--sh-1/-2/-3`. Frozen V3.3's approved
+  //     grammar requires a raised primary interaction object on the Landing, and a hard
+  //     shadow is the only thing that expresses "raised" in this visual system. Those
+  //     tokens are ZERO BLUR, which is asserted immediately below, so this exception
+  //     cannot be used to smuggle in a diffuse drop shadow -- which is the thing the rule
+  //     exists to prevent.
+  //
+  // Anything else, including a hand-written offset shadow, is still a failure.
+  // Comments stripped first. A comment cannot paint, and this stylesheet quotes the
+  // construction it replaced -- so scanning the raw text finds an explanation of a
+  // blurred ring and reports it as a blurred ring.
+  const paintable = APP_CSS.replace(/\/\*[\s\S]*?\*\//g, ' ');
+  const shadows = [...paintable.matchAll(/box-shadow:\s*([^;}]+)[;}]/g)].map((m) => m[1]!);
   for (const value of shadows) {
-    assert.match(value, /inset/, `only an inset fill may remain, not elevation: ${value}`);
+    if (/inset/.test(value)) continue;
+    if (/var\(--sh-(brand|[123])\)/.test(value)) continue;
+    assert.fail(`only an inset fill or a named hard-shadow token may remain, not elevation: ${value}`);
+  }
+
+  // The exception above is only as safe as the tokens it names. Every hard-shadow token
+  // must stay a hard offset: a non-zero blur would make it exactly the diffuse shadow
+  // this rule bans.
+  for (const token of ['--sh-1', '--sh-2', '--sh-3', '--sh-brand']) {
+    const value = new RegExp(`${token}:\\s*([^;]+);`).exec(paintable)?.[1]?.trim();
+    assert.ok(value, `${token} is defined`);
+    // Read the lengths rather than pattern-matching the string. A hard shadow is
+    // `offsetX offsetY blur spread colour`, so the THIRD length is the blur radius; an
+    // earlier version of this check matched the first `Npx` and so condemned the offset,
+    // which is the one thing that defines a hard shadow.
+    const lengths = [...value.matchAll(/(\d*\.?\d+)px/g)].map((m) => Number(m[1]));
+    assert.ok(lengths.length >= 2, `${token} declares at least an offset: ${value}`);
+    const blur = lengths.length >= 3 ? lengths[2] : 0;
+    assert.equal(blur, 0, `${token} declares no blur radius (found ${blur}px in "${value}")`);
   }
 
   // The renderer must actually emit the offset shape, not merely describe it.
@@ -907,10 +942,20 @@ test('flat surfaces carry no topology shadow', () => {
   // `.legend` and `.status-line` are gone from this list because both are gone from
   // the shell: the key moved into the rail and the status line into it as well. A
   // flat-surface check on a selector that no longer exists would pass vacuously.
+  //
+  // `.input-card` is ALSO gone, and that is a deliberate reversal rather than an
+  // omission. V2.1 held every landing surface flat -- "no card, nothing floating" --
+  // and Frozen V3.3 replaces that with the opposite instruction: the repository input
+  // card is the single most important object on the page and it is raised. That is a
+  // design decision taken upstream, and this list is where it is recorded.
+  //
+  // Its depth is a named hard-shadow token, not a diffuse one, and the box-shadow rule
+  // below is what keeps that honest. Every other surface on this list is Explorer chrome
+  // and stays flat.
   for (const selector of [
     '.drawer', '.drawer-inner', '.rail', '.rail-toggle', '.strip', '.bundles',
     '.key-row', '.phase', '.bundle-row', '.layer-row', '.d-card', '.d-why', '.d-actions',
-    '.input-card', '.layers-pop',
+    '.layers-pop',
   ]) {
     const rule = cssRule(selector);
     assert.equal(/box-shadow/.test(rule), false, `${selector} must stay flat`);
@@ -921,7 +966,11 @@ test('no generic card elevation is left in the client stylesheet', () => {
   // The pre-slice stylesheet carried `3px 3px 0 rgba(23,21,15,0.10)` on two
   // panels. That is decoration, not topology, and it is gone. The scrim keeps
   // its rgba, which is a background and not an elevation.
-  const shadows = [...APP_CSS.matchAll(/box-shadow:\s*([^;]+);/g)].map((m) => m[1]!);
+  // Comments stripped first. A comment cannot paint, and this stylesheet quotes the
+  // construction it replaced -- so scanning the raw text finds an explanation of a
+  // blurred ring and reports it as a blurred ring.
+  const paintable = APP_CSS.replace(/\/\*[\s\S]*?\*\//g, ' ');
+  const shadows = [...paintable.matchAll(/box-shadow:\s*([^;}]+)[;}]/g)].map((m) => m[1]!);
   for (const value of shadows) {
     assert.equal(/rgba\(23,21,15/.test(value), false, `no rgba ink shadow may remain: ${value}`);
   }

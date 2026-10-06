@@ -1002,62 +1002,107 @@ async function main(): Promise<void> {
       `${shell.samples} samples, ${shell.trust} trust cells`);
     check('10 the landing fits without a scrollbar', shell.scrollY);
 
-    /*
-     * The landing's registers, read off the rendered page.
+/*
+     * The landing's composition, read off the rendered page.
      *
-     * A hero is a composition or it is a stack, and the difference is measurable: the
-     * second register must be indented relative to the first, lighter than it, and under
-     * a rule of its own -- which is the whole requirement that `come from?` is not
-     * simply another bold line.
+     * Frozen V3.3 replaced V2.1's five registers. The requirement is the same in kind and
+     * different in shape: a composition, not a stack, and every claim about it measured
+     * rather than read off the stylesheet.
+     *
+     * What is asserted here:
+     *   · the bounded column is the approved 852px measure
+     *   · the body copy is LEFT aligned inside that column, not centred on a middle axis
+     *   · the headline is two explicit lines, each an underprint pass and a foreground
+     *     pass sharing one grid cell, offset by a transform and never by margin -- and
+     *     the offset is exactly 6px on both axes
+     *   · the input card is RAISED, with a 2px ink border and a hard shadow
+     *   · the trace sits BELOW the card rather than above it, because in V3.3 the card is
+     *     the primary object and the trace is secondary information
+     *   · nothing overlaps and nothing overflows horizontally
      */
-    const registers = await page.evaluate(`(() => {
-      const h1 = document.querySelector('#landing h1');
-      const fold = document.querySelector('.hero-fold');
-      const trace = document.querySelector('.hero-trace');
-      const stages = [...document.querySelectorAll('.hero-trace-stage')].map((e) => e.textContent?.trim());
-      const boxes = ['#landing h1', '.hero-fold', '.hero-trace', '.lede', '.landing-aside', '.input-card']
-        .map((s) => { const e = document.querySelector(s); return e ? e.getBoundingClientRect() : null; });
+    const composition = await page.evaluate(`(() => {
+      const q = (s) => document.querySelector(s);
+      const box = (s) => { const e = q(s); return e ? e.getBoundingClientRect() : null; };
+      const inner = box('.landing');
+      const h1 = q('#landing h1');
+      const lines = [...document.querySelectorAll('.hero-line')];
+      const u = q('.hero-u'); const f = q('.hero-f');
+      const ub = u.getBoundingClientRect(); const fb = f.getBoundingClientRect();
+      const lede = q('.lede'); const card = q('.input-card'); const trace = q('.hero-trace');
+      const samples = [...document.querySelectorAll('.samples a')];
+      const boxes = ['.eyebrow', '#landing h1', '.lede', '.input-card', '.hero-trace', '.foot', '.samples', '.trust']
+        .map(box);
       let overlaps = 0;
-      for (let i = 0; i < boxes.length; i += 1) for (let j = i + 1; j < boxes.length; j += 1) {
-        const a = boxes[i], b = boxes[j];
-        if (a && b && a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom) overlaps += 1;
+      for (let a = 0; a < boxes.length; a += 1) for (let b = a + 1; b < boxes.length; b += 1) {
+        const p = boxes[a]; const q2 = boxes[b];
+        if (p && q2 && p.left < q2.right - 1 && q2.left < p.right - 1 && p.top < q2.bottom - 1 && q2.top < p.bottom - 1) overlaps += 1;
       }
+      const cs = getComputedStyle(card);
       return {
-        layers: boxes.filter(Boolean).length, overlaps,
-        foldIndent: Math.round(fold.getBoundingClientRect().left - h1.getBoundingClientRect().left),
-        foldWeight: getComputedStyle(fold).fontWeight,
-        h1Weight: getComputedStyle(h1).fontWeight,
-        foldInk: getComputedStyle(fold).color,
-        h1Ink: getComputedStyle(h1).color,
-        foldRule: getComputedStyle(fold).borderTopWidth,
-        traceStages: stages,
-        traceLabel: document.querySelector('.hero-trace-note')?.textContent?.trim() ?? '',
-        traceBelowHeadline: trace.getBoundingClientRect().top > h1.getBoundingClientRect().bottom,
-        inputAfterTrace: document.querySelector('.input-card').getBoundingClientRect().top
-          > trace.getBoundingClientRect().bottom,
+        columnWidth: inner ? Math.round(inner.width) : 0,
+        ledeLeft: lede ? Math.round(lede.getBoundingClientRect().left) : 0,
+        h1Left: h1 ? Math.round(h1.getBoundingClientRect().left) : 0,
+        ledeAlign: lede ? getComputedStyle(lede).textAlign : '',
+        lineCount: lines.length,
+        nowrap: lines.every((l) => getComputedStyle(l).whiteSpace === 'nowrap'),
+        sameCell: lines.every((l) => getComputedStyle(l).display === 'grid'),
+        offsetX: Math.round(ub.x - fb.x),
+        offsetY: Math.round(ub.y - fb.y),
+        offsetIsTransform: /matrix/.test(getComputedStyle(u).transform),
+        underprintInk: getComputedStyle(u).color,
+        foregroundInk: getComputedStyle(f).color,
+        cardShadow: cs.boxShadow,
+        cardBorder: cs.borderTopWidth + ' ' + cs.borderTopStyle,
+        cardBelowLede: card.getBoundingClientRect().top > lede.getBoundingClientRect().bottom,
+        traceBelowCard: trace.getBoundingClientRect().top > card.getBoundingClientRect().bottom,
+        traceStages: [...document.querySelectorAll('.hero-trace-stage')].map((e) => e.textContent?.trim()),
+        traceLabel: q('.hero-trace-note')?.textContent?.trim() || '',
+        statusChips: document.querySelectorAll('.input-card .st').length,
+        samples: samples.length,
+        sampleHrefs: samples.map((a) => a.getAttribute('href')),
+        depthButtons: document.querySelectorAll('.seg-btn').length,
+        overlaps,
+        horizontalOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
       };
-    })()`) as {
-      layers: number; overlaps: number;
-      foldIndent: number; foldWeight: string; h1Weight: string;
-      foldInk: string; h1Ink: string; foldRule: string;
-      traceStages: string[]; traceLabel: string;
-      traceBelowHeadline: boolean; inputAfterTrace: boolean;
-    };
-    report['10-registers'] = registers;
-    check('10 the hero is five registers, not a stack',
-      registers.layers >= 6 && registers.overlaps === 0,
-      `${registers.layers} layers, ${registers.overlaps} overlaps`);
-    check('10 the second register is genuinely a second register',
-      registers.foldIndent > 40 && registers.foldWeight < registers.h1Weight
-        && registers.foldInk !== registers.h1Ink && registers.foldRule !== '0px',
-      `indent ${registers.foldIndent}px, weight ${registers.foldWeight} vs ${registers.h1Weight}, own rule ${registers.foldRule}`);
-    check('10 the trace band sits between the headline and the input',
-      registers.traceBelowHeadline && registers.inputAfterTrace
-        && registers.traceStages.join('>') === 'source>evidence>relationship>lineage',
-      `${registers.traceStages.join(' > ')}, label "${registers.traceLabel}"`);
-    check('10 the trace states that it is an example, not this visitor\'s result',
-      /example/i.test(registers.traceLabel) && /pebrel/.test(registers.traceLabel),
-      registers.traceLabel);
+    })()`) as Record<string, unknown>;
+    report['10-composition'] = composition;
+
+    check('10 the landing is a bounded 852px column',
+      composition.columnWidth === 852, `column ${composition.columnWidth}px`);
+    check('10 the body copy is left aligned inside that column, not on a middle axis',
+      composition.ledeAlign === 'start' && composition.ledeLeft === composition.h1Left,
+      `text-align ${composition.ledeAlign}, lede left ${composition.ledeLeft}, headline left ${composition.h1Left}`);
+    check('10 the headline is two explicit lines, each one grid cell',
+      composition.lineCount === 2 && Boolean(composition.nowrap) && Boolean(composition.sameCell),
+      `${composition.lineCount} lines, nowrap ${composition.nowrap}, grid ${composition.sameCell}`);
+    check('10 the underprint is offset exactly 6px on both axes, by transform',
+      composition.offsetX === 6 && composition.offsetY === 6 && Boolean(composition.offsetIsTransform),
+      `offset ${composition.offsetX}px / ${composition.offsetY}px, transform ${composition.offsetIsTransform}`);
+    check('10 the underprint is a different ink from the foreground',
+      composition.underprintInk !== composition.foregroundInk,
+      `${composition.underprintInk} under ${composition.foregroundInk}`);
+    check('10 the input card is raised: a 2px solid border and a hard shadow',
+      composition.cardBorder === '2px solid' && /inset/.test(String(composition.cardShadow)) === false
+        && /rgb|var/.test(String(composition.cardShadow)),
+      `border ${composition.cardBorder}, shadow ${composition.cardShadow}`);
+    check('10 the card is the primary object and the trace is secondary to it',
+      Boolean(composition.cardBelowLede) && Boolean(composition.traceBelowCard)
+        && (composition.traceStages as string[]).join('>') === 'source>evidence>relationship>lineage',
+      `trace below card ${composition.traceBelowCard}, stages ${(composition.traceStages as string[]).join(' > ')}`);
+    check('10 the trace states that it is an example, not this visitor result',
+      /example/i.test(String(composition.traceLabel)) && /pebrel/.test(String(composition.traceLabel)),
+      String(composition.traceLabel));
+    check('10 the evidence-status legend is inside the card',
+      composition.statusChips === 3, `${composition.statusChips} status chips in the card`);
+    check('10 the five acceptance datasets are the examples, and every one is a real route',
+      composition.samples === 5
+        && (composition.sampleHrefs as string[]).every((h) => !!h && h.startsWith('/') && h !== '/'),
+      (composition.sampleHrefs as string[]).join(' '));
+    check('10 the real depth control survives the port',
+      composition.depthButtons === 3, `${composition.depthButtons} depth buttons`);
+    check('10 nothing overlaps', composition.overlaps === 0, `${composition.overlaps} overlaps`);
+    check('10 the landing does not overflow horizontally',
+      Number(composition.horizontalOverflow) <= 0, `${composition.horizontalOverflow}px`);
 
     /*
      * The landing's primary control, filled by keyboard.

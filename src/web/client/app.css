@@ -90,6 +90,9 @@
   --sh-1: 2px 2px 0 0 var(--ink);
   --sh-2: 3px 3px 0 0 var(--ink);
   --sh-3: 4px 4px 0 0 var(--ink);
+  /* The one tinted member of the scale: a brand-coloured object raised in brand rather
+     than in ink, so its shadow says which system it belongs to. Still zero blur. */
+  --sh-brand: 2px 2px 0 0 var(--brand-edge);
 
   /* -------------------------------------------------------- spacing, 4px base
      One ladder. Frozen V3.3 stops at eight steps; production's approved layout
@@ -585,48 +588,93 @@ a { color: inherit; }
 
 
 /* ============================================================== LANDING =====
-   Five registers, and the hero is a composition rather than a stack.
+   Frozen V3.3, ported. Presentation only.
 
-   The previous hero was kicker, headline, paragraph, input -- four things in a
-   column, which is the shape every developer tool has. It was technically clean
-   and it said nothing about what the product does.
+   The spine recovered from the first-version key sample, and only the spine:
 
-   What replaced it, in order:
+     · a BOUNDED content column (852px), not a measure stretched across the viewport
+     · the column is centred but the body copy inside it is LEFT aligned
+     · the headline is a COMPOSITION -- two filled passes of the same words over one
+       grid cell, offset by a transform -- not a headline and a subtitle
+     · the repository input card is the single most important object on the page:
+       raised, 2px ink border, hard shadow, and everything secondary lives INSIDE it
+       one step quieter
+     · then a URL helper, the example chips, a three column proof block, and a strong
+       footer rule: a continuous downward increase in density
+     · the first screen looks like a working product, not a poster
 
-     1  a quiet mono kicker, with a rule that runs off to the right
-     2  the display statement as the strongest mass on the page
-     3  a SECOND register -- indented onto a later column, lighter, smaller, in a
-        lower ink, under a rule of its own -- so the question reads as folding out
-        of the statement rather than as the next line of it
-     4  the trace band: source, evidence, relationship, lineage, as nodes on one
-        rule, with real counts and an explicit example label
-     5  the statement at a narrow measure, offset, with an aside keyed to the same
-        column the trace uses
+   ── WHY THE VALUES ARE RE-SCOPED HERE RATHER THAN GLOBALLY ────────────────────
 
-   A 12-column field rather than a single 900px measure, because the composition
-   needs somewhere to be asymmetric. Everything is the shipped token set: no
-   gradient, no glow, no blur, no card, nothing floating.
+   V3.3's paper, ink and status values are adopted for the Landing and ONLY the
+   Landing. They are declared on `.landing`, so they cascade into the Landing subtree and
+   stop at its edge: the Explorer, which is a sibling of this section, keeps the values it
+   was approved with and is not restyled by a commit about the Landing. Slice 1 recorded
+   these as deferred; this is the slice that owns the Landing half of that ledger, and
+   `test/tokens.test.ts` is updated in the same commit to say which are now adopted.
+
+   Anything genuinely SHARED with another live surface is not touched here. The product
+   bar is shared with the Explorer and the analysis strip is shared with the job view, so
+   neither is restyled in this slice; both are Slice 4's. The top bar therefore still
+   reads as V2.1 above a V3.3 page, which is deliberate and reported rather than a
+   half-finished fork of shared chrome.
    ========================================================================== */
+
+/* ---------------------------------------------------------- V3.3 values, Landing only
+   Declared on `.landing`, so they cascade into the Landing subtree and stop at its edge.
+
+   ── WHAT IS DELIBERATELY NOT HERE, AND WHY ──────────────────────────────────
+
+   `--paper` and the `--ink` ramp are NOT adopted, and this is a dependency rather than an
+   oversight.
+
+   `--paper` is painted by the shell, not by the Landing. The Landing element is the
+   852px column, so a Landing-local paper paints a band down the middle of the viewport
+   with the shell's paper either side of it -- measured here as `rgb(242,241,235)` against
+   `rgb(247,245,240)`, a visible vertical seam 534px from each edge. V3.3's Landing has one
+   paper for the whole page because its top bar and its column are one file; in production
+   the top bar is `.appbar`, which the Explorer also uses.
+
+   The ink ramp has the same shape of problem and a quieter version of it. `body` sets
+   `color: var(--ink)`, and that resolves AT BODY SCOPE, so inherited text on the Landing
+   would render in production's `#14130F` while every explicit `color: var(--ink)` inside
+   the Landing rendered in V3.3's `#17150F` -- two inks on one page.
+
+   Adopting either for the Landing alone would mean changing a value the Explorer also
+   reads, or shipping a visible seam. Both are Slice 4's call, made when the shared top bar
+   and the Explorer chrome change together. Everything below that does NOT meet a shared
+   shell surface is adopted now, so the Landing is visibly V3.3 in surface, rules, status,
+   brand and type. */
 .landing {
-  max-width: 1180px; margin: 0 auto; padding: 44px 40px 0;
-  display: grid; grid-template-columns: repeat(12, 1fr); column-gap: 24px;
+  --surface: #F8F7F2;
+  --surface-hi: #FDFCFA;  --surface-sunk: #E3E2DD;
+  --rule: #D5D4CE;       --rule-2: #BCBBB4;   --rule-3: #BCBBB4;
+  --verified: #486884;   --verified-wash: #E0EDF9;
+  --declared: #806151;   --declared-wash: #FBE9E0;
+  --detected: #6B7177;   --detected-wash: #E7ECF0;
+  /* V3.3 type steps, Landing-local names. The Explorer's `--t-*` roles are untouched. */
+  --t-display-size: 58px;  --t-display-lh: 1.03;  --t-display-track: -0.052em;
+  --t-sub-size: 16.5px;    --t-name-size: 15px;    --t-micro-size: 12.5px;
+  --t-cap-size: 9.5px;     --t-foot-size: 12px;    --t-label-size: 11.5px;
+  --t-text-size: 13px;
+  /* The page ground comes from the shell, so there is no seam at the column edge. */
+  background: transparent;
+}
+
+/* The bounded column. Everything below lives inside this. */
+.landing {
+  max-width: 852px; margin: 0 auto;
+  padding: 52px 32px 40px;
+  display: block;
 }
 .landing[hidden] { display: none; }
 
 /*
  * The landing column, which scrolls inside itself.
  *
- * The hero is a long composition -- seven registers -- and letting it push the page
- * taller means the document scrolls, which means the one scrollbar the product is not
- * allowed to have appears. So the hero fills the viewport it is given and scrolls inside
- * it, and the continuation rule says so.
- *
- * `flex: 1 1 auto` with `min-height: 0` rather than `height: 100%`: it takes the
- * remainder of `#main`, whatever the appbar measured, instead of assuming the remainder
- * is the viewport minus a constant.
- *
- * At 1920x1080 the whole composition fits and nothing scrolls at all. At 800 tall it
- * does not, and the affordance earns its place.
+ * Unchanged from the shell Slice 1 verified, and kept verbatim: the Landing is a long
+ * composition and letting it push the page taller means the document scrolls, which means
+ * the one scrollbar the product is not allowed to have appears. So it fills the viewport
+ * it is given and scrolls inside it, and the continuation rule below says so.
  */
 #landing {
   flex: 1 1 auto; min-height: 0;
@@ -634,254 +682,251 @@ a { color: inherit; }
   align-content: start;
   --gl-fade: 30px;
 }
-/* A registration mark at the grid origin: the printer's cross. Four rules, and it is
-   what makes the page read as a set plate rather than as a page with text on it. */
-.hero-reg {
-  position: absolute; left: 40px; top: 74px;
-  width: 22px; height: 22px; pointer-events: none;
-}
-.hero-reg::before, .hero-reg::after { content: ""; position: absolute; background: var(--ink-5); }
-.hero-reg::before { left: 0; top: 10px; width: 22px; height: 1px; }
-.hero-reg::after { left: 10px; top: 0; width: 1px; height: 22px; }
 
-/* ── 1 · kicker ─────────────────────────────────────────────────────────────── */
+/* ── eyebrow ──────────────────────────────────────────────────────────────────
+   A mono caption and a rule that runs off to the right, so the eye has somewhere to
+   stop without a second type style. */
 .eyebrow {
-  grid-column: 1 / -1;
-  display: flex; align-items: center; gap: 16px;
-  font-family: var(--mono); font-size: var(--t-section-size); font-weight: var(--t-section-wt);
-  letter-spacing: var(--t-section-track); text-transform: uppercase;
-  color: var(--ink-3); margin: 0 0 28px;
+  display: flex; align-items: center; gap: 10px; margin: 0 0 20px;
 }
-.eyebrow::after { content: ""; flex: 1; height: 1px; background: var(--rule); }
+.eyebrow-t {
+  font-family: var(--mono); font-size: var(--t-label-size); font-weight: 600;
+  letter-spacing: .09em; text-transform: uppercase; color: var(--ink-2);
+}
+.eyebrow-rule { flex: 1; height: 1px; background: var(--rule); }
 
-/* ── 2 · display ────────────────────────────────────────────────────────────── */
-.landing h1 {
-  grid-column: 1 / 10; margin: 0;
-  font-size: clamp(46px, 5.4vw, 76px); line-height: 0.98; letter-spacing: -0.04em;
-  font-weight: var(--t-display-wt); color: var(--ink);
-  position: relative;
+/* ── A · offset underprint ────────────────────────────────────────────────────
+   Two filled passes over ONE grid cell per line, so they share an identical box and an
+   identical baseline by construction rather than by agreement. `white-space: nowrap`
+   means a line cannot re-wrap at any viewport, which is what makes the offset
+   trustworthy: an underprint that can re-wrap drifts off the words it prints behind. */
+.hero {
+  font-size: var(--t-display-size); line-height: var(--t-display-lh);
+  font-weight: 700; letter-spacing: var(--t-display-track);
+  margin: 0 0 18px;
 }
-/*
- * Layer 3 -- the underprint.
- *
- * The same words, offset by the Subject's own depth token, in the rule colour, printed
- * behind the ink. It is a hard offset rather than a blur because a blur is the one
- * device this visual system forbids everywhere else; this spends the same 6px that
- * lifts a Subject off a plate on type instead.
- *
- * Two things about how it is layered, both learned the hard way. The real words sit in
- * a child with `z-index: 1`: a positioned pseudo-element with no z-index paints in the
- * positioned layer, which is *above* the element's own text, so the underprint covered
- * the headline. And with `z-index: -1` it went behind the element's background and
- * behind the page's, and vanished entirely -- which is what the first version did.
- *
- * It is subordinate on purpose. The rule colour, a 6px offset and no second fill mean
- * it reads as registration on a print sheet rather than as a second headline.
- */
-.hero-underprint {
-  position: absolute; left: -6px; top: 6px; z-index: 0;
-  color: var(--rule-2); pointer-events: none;
-  font: inherit; letter-spacing: inherit;
-}
-/* Both layers inherit the h1's line-height and break at their own explicit <br>, so the
-   underprint always sits on the same two lines as the words it prints behind. See the
-   comment in index.html for why that break is not left to the browser. */
-.landing h1 > .hero-glyphs { position: relative; z-index: 1; display: block; }
+.hero-line { display: grid; white-space: nowrap; }
+.hero-line > * { grid-area: 1 / 1; }
+/* The offset is a transform, which cannot move an origin. */
+.hero-u { color: var(--rule-2); transform: translate(6px, 6px); }
+.hero-f { position: relative; z-index: 1; color: var(--ink); }
 
-/* ── 4 · the fold ───────────────────────────────────────────────────────────── */
-/*
- * A second register, and now a visibly different one: outline, not fill.
- *
- * Indented onto a later column, set lighter and smaller, in the second ink, under a
- * rule of its own -- and then drawn as an outline so it does not compete with the
- * glyphs it follows. A 1px stroke on 58px type is a hairline, so the register is
- * unmistakable and still quiet; a filled weight here would just be a second headline.
- */
-.hero-fold {
-  grid-column: 5 / 11; margin: 18px 0 0; padding-top: 16px;
-  border-top: 1px solid var(--rule-2);
-  font-size: clamp(34px, 3.9vw, 58px); line-height: 1.0; letter-spacing: -0.035em;
-  font-weight: 400; color: transparent;
-  -webkit-text-stroke: 1px var(--ink-3);
-  text-stroke: 1px var(--ink-3);
-}
-/* Print engines without `text-stroke` would render this invisible, which is worse than
-   a filled register: the question would simply be gone. The fill is the fallback and
-   the stroke is the enhancement, in that order. */
-@supports not (-webkit-text-stroke: 1px black) {
-  .hero-fold { color: var(--ink-2); }
+/* ── the statement ────────────────────────────────────────────────────────────
+   One sentence, left aligned, at a readable measure. */
+.lede {
+  font-size: var(--t-sub-size); line-height: 1.55; font-weight: 400;
+  color: var(--ink-2); max-width: 60ch; margin: 0 0 30px;
 }
 
-/* ── 4 · the trace band ─────────────────────────────────────────────────────── */
-/*
-   The product's own verb, drawn once. It travels under the composition rather than
-   across it, so no rule ever crosses a glyph, and it is the only diagrammatic thing
-   on the page -- which is the point: the diagram *is* the argument.
+/* ── the input card: the primary interaction object on the page ────────────────
+   Raised, 2px ink border, hard shadow, and it holds everything secondary. */
+.input-card {
+  margin: 0 0 12px;
+  background: var(--surface); border: var(--bw) solid var(--ink);
+  border-radius: var(--r-lg); box-shadow: var(--sh-2); padding: 12px;
+}
+.input-row { display: flex; gap: 8px; }
 
-   The counts are real, from one real repository, and the label says so. Printing
-   `137 evidence -> 97 depends_on` as though it were this visitor's result would be a
-   lie about work nobody has run.
-*/
+.field {
+  flex: 1; min-width: 0;
+  display: flex; align-items: center; gap: 10px;
+  height: 48px; padding: 0 14px;
+  background: var(--surface-hi);
+  border: var(--bw) solid var(--rule-2); border-radius: var(--r-md);
+}
+.field .gh { width: 15px; height: 15px; flex: 0 0 auto; color: var(--ink-3); }
+.field input {
+  flex: 1; min-width: 0; background: none; border: 0; outline: 0;
+  font-family: var(--sans); font-size: 14.5px; font-weight: 400;
+  color: var(--ink); letter-spacing: -.005em;
+}
+.field input::placeholder { color: var(--ink-4); }
+/* Focus is a hard rule in the brand pigment, drawn OUTSIDE the field.
+   Frozen V3.3 focuses this field with `box-shadow: 0 0 0 3px var(--brand-wash)`, and
+   that has a 3px blur radius -- which is a glow, and a glow is exactly what this
+   stylesheet does not use anywhere. The intent is kept (focus is brand) and the
+   technique is production's: an outline at full sharpness. */
+.field:focus-within { border-color: var(--brand); outline: 2px solid var(--brand); outline-offset: 2px; }
+
+#submit {
+  flex: none;
+  height: 44px; padding: 0 20px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: var(--bw) solid var(--brand-press); border-radius: var(--r-md);
+  background: var(--brand-press); color: var(--surface);
+  font-family: var(--sans); font-size: var(--t-text-size); font-weight: 600;
+  letter-spacing: .005em; white-space: nowrap; cursor: pointer;
+  box-shadow: var(--sh-brand);
+  transition: background var(--d-fast) var(--ease), box-shadow var(--d-fast) var(--ease);
+}
+#submit:hover { background: var(--brand); border-color: var(--brand); box-shadow: var(--sh-2); }
+
+/* Secondary rows live inside the same object, one step quieter, and never compete. */
+.sub-row {
+  display: flex; align-items: center; gap: 10px;
+  margin-top: 10px; padding: 0 2px; flex-wrap: wrap;
+}
+.sub-cap {
+  font-family: var(--mono); font-size: var(--t-label-size); font-weight: 600;
+  letter-spacing: .05em; text-transform: uppercase; color: var(--ink-3);
+  margin-right: 2px;
+}
+
+/* Depth is real and wired to `?depth=`; it is quiet because it changes how much is
+   analysed, not what is claimed. */
+.sub-row-depth { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--rule); }
+.seg {
+  display: inline-flex; overflow: hidden; height: 32px;
+  border: var(--bw) solid var(--rule-2); border-radius: var(--r-sm);
+  background: var(--surface-hi);
+}
+.seg-btn {
+  height: 100%; padding: 0 12px; background: none; border: 0; cursor: pointer;
+  border-right: 1px solid var(--rule);
+  font-family: var(--sans); font-size: var(--t-label-size); font-weight: 600;
+  color: var(--ink-2);
+}
+.seg-btn:last-child { border-right: 0; }
+/* Active depth is state, so it takes the brand pigment rather than the ink. */
+.seg-btn.is-active { background: var(--brand-wash); color: var(--brand-press); box-shadow: inset 0 0 0 1px var(--brand); }
+
+/* ── the example trace ────────────────────────────────────────────────────────
+   The one set of real counts on this page, and it says what it is: a named repository at
+   a named revision, so the numbers are checkable and go stale visibly. */
 .hero-trace {
-  grid-column: 1 / -1; margin: 40px 0 0; padding: 18px 0 18px;
-  border-top: var(--rule-heavy); border-bottom: 1px solid var(--rule);
-  display: grid; grid-template-columns: repeat(4, 1fr); position: relative;
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  margin: 24px 0 0; padding: 18px 0 0;
+  border-top: 1px solid var(--rule);
 }
-.hero-trace::before {
-  content: ""; position: absolute; left: 0; right: 0; top: 24px; height: 1px;
-  background: var(--rule-2);
-}
-.hero-trace-node { padding-right: 24px; position: relative; }
-.hero-trace-mark {
-  width: 9px; height: 9px; background: var(--ink); display: block;
-  margin-bottom: 13px; position: relative; z-index: 1;
-}
-/* The outcome is the accent, and the only filled square in the band. */
+.hero-trace-node { position: relative; padding-right: 18px; }
+.hero-trace-mark { display: block; width: 8px; height: 8px; margin-bottom: 10px; background: var(--ink); }
 .hero-trace-node:last-of-type .hero-trace-mark { background: var(--brand); }
 .hero-trace-stage {
-  font-family: var(--mono); font-size: var(--t-meta-size); font-weight: 500;
-  letter-spacing: var(--t-meta-track); text-transform: uppercase; color: var(--ink-4);
   margin: 0 0 5px;
+  font-family: var(--mono); font-size: var(--t-cap-size); font-weight: 600;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3);
 }
-.hero-trace-value { font-size: var(--t-row-size); font-weight: 590; color: var(--ink); margin: 0; }
+.hero-trace-value {
+  margin: 0;
+  font-family: var(--sans); font-size: var(--t-text-size); font-weight: 600;
+  letter-spacing: -.008em; color: var(--ink);
+}
 .hero-trace-note {
-  grid-column: 1 / -1; margin: 13px 0 0;
-  font-family: var(--mono); font-size: var(--t-meta-size); color: var(--ink-4);
-  letter-spacing: var(--t-meta-track);
-}
-
-/* ── 5 · statement and aside ────────────────────────────────────────────────── */
-.lede {
-  grid-column: 1 / 6; margin: 24px 0 0;
-  font-size: var(--t-body-size); line-height: 1.6; color: var(--ink-2); max-width: 42ch;
-}
-.landing-aside {
-  grid-column: 7 / 11; margin: 24px 0 0;
-  padding-left: 20px; border-left: 1px solid var(--rule-2);
-  font-family: var(--mono); font-size: var(--t-meta-size); line-height: 1.6; color: var(--ink-3);
-}
-.landing-aside b { font-weight: 500; color: var(--ink-2); }
-
-/* ── the input, after the whole sequence ────────────────────────────────────── */
-.input-card { grid-column: 1 / 8; margin: 30px 0 0; background: var(--surface); border: 1px solid var(--rule-2); border-radius: 0; padding: 0; }
-.input-row { display: flex; gap: 0; align-items: stretch; }
-.input-icon { display: none; }
-#repo-input {
-  flex: 1; min-width: 0; font-family: var(--mono); font-size: var(--t-row-size);
-  padding: 17px 18px; border: 0; border-right: 1px solid var(--rule-2);
-  background: var(--surface-hi); color: var(--ink);
-}
-/* Focus is a rule outside the field, not a browser glow inside it. */
-#repo-input:focus { outline: 2px solid var(--ink); outline-offset: -2px; }
-#submit {
-  font-size: var(--t-row-size); font-weight: 590; padding: 17px 28px;
-  border: 0; border-radius: 0; background: var(--ink); color: var(--paper); white-space: nowrap;
-}
-.sub-row {
-  display: flex; align-items: center; gap: 16px; padding: 11px 18px;
-  border-top: 1px solid var(--rule); background: var(--surface-sunk); flex-wrap: wrap;
-}
-.sub-label { font-family: var(--mono); font-size: var(--t-meta-size); letter-spacing: var(--t-meta-track); color: var(--ink-3); }
-.seg { display: inline-flex; border: 1px solid var(--rule-2); border-radius: 0; background: var(--paper); }
-.seg-btn { font-size: var(--t-secondary-size); font-weight: 500; padding: 5px 12px; border: 0; border-right: 1px solid var(--rule-2); background: transparent; color: var(--ink-2); }
-.seg-btn:last-child { border-right: 0; }
-.seg-btn.is-active { background: var(--ink); color: var(--paper); }
-
-.foot { grid-column: 1 / -1; margin: 16px 0 0; font-size: var(--t-secondary-size); color: var(--ink-3); }
-.foot code { font-family: var(--mono); font-size: var(--t-meta-size); color: var(--ink-2); }
-.samples {
   grid-column: 1 / -1; margin: 14px 0 0;
-  display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
-  font-family: var(--mono); font-size: var(--t-meta-size); color: var(--ink-3);
+  font-family: var(--mono); font-size: var(--t-label-size); color: var(--ink-4);
+  letter-spacing: -.005em;
 }
-.samples a { color: var(--ink-2); text-decoration: none; border: 1px solid var(--rule-2); border-radius: 0; padding: 4px 8px; background: var(--surface-hi); }
-.samples a:hover { border-color: var(--ink-3); color: var(--ink); }
-.sample-tag { font-size: var(--t-meta-size); color: var(--ink-4); margin-right: 8px; }
 
-/* The assurances belong to the page that makes the promise. */
-.trust { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--rule); border: 1px solid var(--rule); margin: 26px 0 0; }
-.trust-cell { background: var(--surface); padding: 14px 16px; }
-.trust-head { font-family: var(--mono); font-size: var(--t-section-size); font-weight: var(--t-section-wt); letter-spacing: var(--t-section-track); color: var(--ink-3); margin: 0 0 7px; }
-.trust-body { font-size: var(--t-secondary-size); line-height: 1.5; color: var(--ink-2); margin: 0; }
-.mini-pill { font-family: var(--mono); font-size: var(--t-meta-size); font-weight: 500; letter-spacing: var(--t-meta-track); padding: 1px 4px; border: 1px solid currentColor; border-radius: 0; }
+/* ── the URL helper ───────────────────────────────────────────────────────────
+   The substitution is real and works on any GitHub URL. */
+.foot {
+  display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap;
+  margin: 20px 0 0;
+  font-size: var(--t-micro-size); line-height: 1.5;
+}
+.fine-k { font-family: var(--sans); color: var(--ink-3); }
+.fine-v { font-family: var(--mono); font-weight: 500; color: var(--brand); letter-spacing: -.005em; }
+.fine-mono { font-family: var(--mono); color: var(--ink-2); letter-spacing: -.005em; }
+
+/* ── the example chips ──────────────────────────────────────────────────────────
+   Real routes. The five are the long-term acceptance datasets plus GitLineage itself,
+   because those are the repositories this product is actually verified against. */
+.samples {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  margin: 26px 0 0; padding: 22px 0 0;
+  border-top: 1px solid var(--rule);
+}
+.samples-lab { font-family: var(--sans); font-size: var(--t-label-size); color: var(--ink-3); margin-right: 3px; }
+.samples a {
+  font-family: var(--mono); font-size: var(--t-label-size);
+  color: var(--ink-2); text-decoration: none;
+  background: var(--surface); border: 1px solid var(--rule-2);
+  border-radius: var(--r-sm); padding: 7px 11px;
+  transition: border-color var(--d-fast) var(--ease), color var(--d-fast) var(--ease);
+}
+.samples a:hover { border-color: var(--ink-3); color: var(--ink); }
+
+/* ── the three column proof block ──────────────────────────────────────────────
+   Three claims, equal weight, separated by hairlines rather than by boxes. */
+.trust {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
+  margin: 30px 0 0;
+  background: var(--rule); border: 1px solid var(--rule);
+  border-radius: var(--r-md); overflow: hidden;
+}
+.trust-cell { background: var(--paper); padding: 13px 15px; }
+.trust-head {
+  margin: 0 0 5px;
+  font-family: var(--mono); font-size: var(--t-cap-size); font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3);
+}
+.trust-body {
+  margin: 0; font-family: var(--sans);
+  font-size: var(--t-micro-size); line-height: 1.5; color: var(--ink-2);
+}
+/* The status chips inside the proof block are the same three statuses as the legend in
+   the card, at one step smaller. Colour is never the only channel. */
+.mini-pill {
+  font-family: var(--mono); font-size: var(--t-cap-size); font-weight: 600;
+  letter-spacing: .04em; text-transform: uppercase;
+  padding: 1px 5px; border: 1px solid currentColor; border-radius: var(--r-sm);
+}
 .mini-pill.v { color: var(--verified); } .mini-pill.d { color: var(--declared); } .mini-pill.t { color: var(--detected); }
 
-/*
-   The footer is a grid item like everything else in the landing, so it needs an
-   explicit column. It did not have one and auto-placed into column one, which made the
-   assurances line wrap into a 200px ribbon down the left edge -- the one part of the
-   page that had been correct for the whole project.
-*/
+/* ── the strong footer rule ────────────────────────────────────────────────────
+   A 2px ink rule, the same weight as the input card's border, so the page closes on
+   structure rather than on a hairline. */
 .site-foot {
-  grid-column: 1 / -1;
-  margin: 26px 0 0; padding: 16px 0 22px;
-  border-top: 1px solid var(--rule);
-  display: flex; align-items: center; justify-content: space-between; gap: 14px;
-  font-family: var(--mono); font-size: var(--t-meta-size); color: var(--ink-4);
+  display: flex; align-items: center; gap: 18px;
+  margin: 30px 32px 0; padding: 13px 0 0;
+  border-top: var(--bw) solid var(--ink);
+  font-family: var(--sans); font-size: var(--t-foot-size); line-height: 1;
+  color: var(--ink-3);
 }
 .site-foot[hidden] { display: none; }
-.foot-links { display: flex; gap: 14px; flex: none; }
-.foot-links a { color: var(--ink-3); text-decoration: none; }
-.foot-links a:hover { color: var(--ink); }
+.foot-links { display: flex; gap: 16px; margin-left: auto; font-family: var(--mono); }
+.foot-links a { color: var(--ink-3); text-decoration: none; border-bottom: 1px solid var(--rule-2); }
+.foot-links a:hover { color: var(--ink); border-bottom-color: var(--ink); }
+
+/* Visually hidden, still announced. */
+.sr {
+  position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0);
+}
 
 /*
  * The landing's continuation rule.
  *
- * One hairline at the bottom edge of the page, present only while the hero has more
- * below. It is on `#main` rather than on `#landing` because a pseudo-element on a
- * scrolling box scrolls with its content -- the same reason the rail and the Drawer
- * put theirs on their frames.
+ * One hairline at the bottom edge, present only while the page has more below. It is on
+ * `#main` rather than on `#landing` because a pseudo-element on a scrolling box scrolls
+ * with its content -- the same reason the rail and the Drawer put theirs on their frames.
  */
 .landing-more {
   position: absolute; left: 0; right: 0; bottom: 0; height: 1px;
-  background: var(--rule-3); pointer-events: none;
+  background: var(--rule-2); pointer-events: none;
   opacity: 0; transition: opacity var(--d-fast) var(--ease);
 }
 .is-more-below > .landing-more { opacity: 1; }
 
-/* The hero folds to fewer columns rather than to a stack. */
-@media (max-width: 1100px) {
-  .landing { padding: 44px 28px 0; grid-template-columns: repeat(6, 1fr); }
-  .landing h1 { grid-column: 1 / -1; }
-  .hero-fold { grid-column: 2 / -1; }
-  .lede, .landing-aside, .input-card { grid-column: 1 / -1; }
-  .landing-aside { border-left: 0; padding-left: 0; border-top: 1px solid var(--rule-2); padding-top: 14px; }
-  .hero-trace { grid-template-columns: repeat(2, 1fr); row-gap: 22px; }
-  /* One rule for the first row, one for the second: the travelling line is two lines
-     at this width and pretending otherwise would draw it across the gap. */
-  .hero-trace::before { display: none; }
-  .hero-trace-node { border-top: 1px solid var(--rule-2); padding-top: 16px; }
-  .hero-trace-node:nth-child(-n+2) { border-top: 0; padding-top: 0; }
-  .hero-trace-mark { margin-bottom: 10px; }
+/* ── responsive: the column narrows, the composition holds ─────────────────────
+   The 852px measure is the design; below it the column follows the viewport and the
+   proof block and the trace band fold, but the headline keeps one line per statement
+   and the card keeps its two rows. Nothing here re-decides the composition. */
+@media (max-width: 900px) {
+  .trust { grid-template-columns: 1fr; }
+  .lede { font-size: var(--t-text-size); }
+  .hero-trace { grid-template-columns: repeat(2, 1fr); row-gap: 18px; }
+  .hero-trace-node:nth-child(-n+2) { padding-top: 0; }
 }
 @media (max-width: 700px) {
-  .landing { grid-template-columns: 1fr; padding: 32px 18px 0; }
-  .hero-fold { grid-column: 1 / -1; }
+  .landing { padding: 32px 20px; }
+  .hero { font-size: 34px; }
+  .input-row { flex-direction: column; }
+  #submit { width: 100%; }
   .hero-trace { grid-template-columns: 1fr; }
-  .hero-trace-node { border-top: 1px solid var(--rule-2); padding-top: 14px; }
-  .hero-trace-node:first-of-type { border-top: 0; padding-top: 0; }
-  .trust { grid-template-columns: 1fr; }
-  .site-foot { flex-direction: column; align-items: flex-start; gap: 6px; padding: 18px; }
+  .site-foot { flex-direction: column; align-items: flex-start; gap: 10px; margin: 30px 20px 0; }
+  .foot-links { margin-left: 0; }
 }
 
-/* --------------------------------------------------------------- explorer */
-
-/*
- * The explorer is a column that fills what is left of the viewport.
- *
- * The stage used to be `calc(100vh - --bar-h - --status-h)` with the status height
- * written down as a constant. The status line was a wrapping flex row of real counts,
- * so at a narrower viewport it became two lines, outgrew the constant, and pushed the
- * bottom of the stage past the fold: a scrollbar on a canvas that is not supposed to
- * scroll, with the bottom band below it. The strip is now one fixed-height row that
- * collapses to nothing when no analysis is running, so the body simply takes the
- * remainder.
- */
-/*
- * THE SHELL: header, analysis strip, and a body of rail / graph / drawer.
- *
- * The only part of the product that responds to the viewport.
- */
 #explorer {
   display: flex; flex-direction: column;
   /* The remainder of the shell, not a subtraction from the viewport.
