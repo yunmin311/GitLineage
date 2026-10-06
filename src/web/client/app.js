@@ -825,6 +825,23 @@ function showFailure(error) {
 function renderChrome(view) {
   setHidden($('landing'), true);
   setHidden($('explorer'), false);
+  /*
+   * Presenting a view retires the Analysis surface.
+   *
+   * This is the counterpart of `showWorking()` hiding the Explorer, and it is not
+   * redundant with `hideWorking()`, because `hideWorking()` is not the only way to arrive
+   * here. A cached view resolves on the boot path -- the route is opened, the view is
+   * fetched, and `renderChrome` runs without a job having been started -- and that path
+   * never calls `hideWorking()`.
+   *
+   * Without this, `#analysis` and `#explorer` were both visible at once, and `#main` gave
+   * its flex height to both: the Explorer got roughly 140px of a 800px viewport, the
+   * camera was fitted to that, and the graph painted up through the transparent Analysis
+   * ground. One missing `hidden` produced seven acceptance failures at once -- a clipped
+   * band, an unopened Drawer, a mis-fitted camera, plates drawn over the band, and ink in
+   * the rail and Drawer gutters.
+   */
+  setHidden($('analysis'), true);
   setHidden($('appbar-mid'), false);
   setHidden($('appbar-right'), false);
   const repo = state.repository;
