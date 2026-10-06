@@ -907,6 +907,15 @@ a { color: inherit; }
 }
 .is-more-below > .landing-more { opacity: 1; }
 
+/* The Analysis surface's own continuation rule: the same single hairline, the same
+   arrangement on `#main`, because that surface also scrolls inside itself. */
+.analysis-more {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 1px;
+  background: var(--rule-2); pointer-events: none;
+  opacity: 0; transition: opacity var(--d-fast) var(--ease);
+}
+.is-more-below > .analysis-more { opacity: 1; }
+
 /* ── responsive: the column narrows, the composition holds ─────────────────────
    The 852px measure is the design; below it the column follows the viewport and the
    proof block and the trace band fold, but the headline keeps one line per statement
@@ -926,6 +935,235 @@ a { color: inherit; }
   .site-foot { flex-direction: column; align-items: flex-start; gap: 10px; margin: 30px 20px 0; }
   .foot-links { margin-left: 0; }
 }
+
+/* ============================================================= ANALYSIS =====
+   Frozen V3.3, ported onto the real job lifecycle. Presentation only.
+
+   The five-phase contract and the pipeline are untouched. What changed is the
+   EXPRESSION, and it resolves from the same Slice 1 token vocabulary the Landing uses:
+
+     · the isolated green tracer is RETIRED. It only ever meant "current phase", which is
+       exactly what the mineral brand blue already means in the Explorer. Two pigments for
+       one meaning was the inconsistency.
+     · "current" is carried by THREE channels, not one: the brand fill, a SOLID segment
+       against dashed and dotted elsewhere, and the word "now".
+     · typography follows the same discipline: the phase NAME is Geist because it is a
+       label; only the phase KEY, the job id, the schema, the commit and a count are mono.
+     · it borrows the hard border grammar, the surface hierarchy and the compact spec row,
+       but it stays a STANDALONE progress surface. It is not a rail and has no rail.
+
+   WHY IT IS STANDALONE
+   --------------------
+   Because the strip it replaces rendered beside the previous repository's graph. Starting
+   an analysis on repository B while sitting on repository A left A's canvas, A's rail --
+   provenance, status census, evidence -- and A's revision on screen behind B's progress.
+   That was measured, not suspected: on the path Explorer A -> back -> submit B, A's rail
+   text and A's crumb and A's `97 one-hop` count were all still readable during B's job.
+   A surface with no Explorer beside it cannot show a stale Explorer.
+
+   ── TOKENS ──────────────────────────────────────────────────────────────────
+   Analysis-owned V3.3 values are scoped to `.analysis`. `--paper` and the shared ink ramp
+   are NOT adopted, for the same reason Slice 2 did not adopt them: they are painted by the
+   shared shell, and the shell's top bar is the appbar the Explorer also uses. That is
+   Slice 4's change. Nothing here introduces a second palette -- the brand, status, surface
+   and radius vocabulary all come from the Slice 1 `:root`.
+   ========================================================================== */
+
+.analysis {
+  flex: 1 1 auto; min-height: 0;
+  overflow-y: auto; overflow-x: hidden;
+  /* Analysis-owned V3.3 steps. The Explorer's `--t-*` roles are untouched. */
+  --t-phase-size: 34px;   --t-phase-lh: 1.06;
+  --an-q-size: 58px;      --an-q-lh: 1.03;      --an-q-track: -0.052em;
+  --an-sub-size: 16.5px;  --an-micro-size: 12.5px; --an-cap-size: 9.5px;
+  --an-label-size: 11.5px; --an-text-size: 13px;
+  /* The page ground comes from the shell, so there is no seam against the appbar. */
+  background: transparent;
+}
+.analysis[hidden] { display: none; }
+
+.an-stage {
+  max-width: 1180px; margin: 0 auto;
+  padding: 48px 32px 40px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 272px;
+  column-gap: 64px; align-content: start;
+}
+
+/* ---- the question, and whose it is ---- */
+.an-quest { grid-column: 1; margin-bottom: 12px; }
+.an-repo {
+  margin: 0 0 12px;
+  font-family: var(--mono); font-size: var(--an-label-size);
+  letter-spacing: -.005em; color: var(--ink-2);
+  overflow-wrap: anywhere;
+}
+.an-q {
+  margin: 0; max-width: 17ch;
+  font-family: var(--sans); font-size: var(--an-q-size); line-height: var(--an-q-lh);
+  font-weight: 700; letter-spacing: var(--an-q-track); color: var(--ink);
+}
+
+/* ---- the current phase: the page's live object ----
+   `fit-content` with a floor, so it reads as a discrete raised object rather than a
+   full-width band with a short title floating inside it. */
+.an-phase { grid-column: 1; margin-top: 24px; }
+.an-obj {
+  width: fit-content; min-width: min(520px, 100%); max-width: 100%;
+  padding: 16px 24px 24px;
+  background: var(--surface);
+  border: var(--bw) solid var(--ink); border-radius: var(--r-lg);
+  box-shadow: var(--sh-1);
+}
+.an-pn { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+/* The phase KEY is the machine identifier, so it is mono. The name below is not. */
+.an-pk {
+  font-family: var(--mono); font-size: var(--an-label-size); font-weight: 600;
+  letter-spacing: .05em; text-transform: uppercase;
+  color: var(--brand-press); white-space: nowrap;
+}
+.an-rule { flex: 1; height: 1px; background: var(--rule); }
+.an-ptitle {
+  margin: 0;
+  font-family: var(--sans); font-size: var(--t-phase-size); line-height: var(--t-phase-lh);
+  font-weight: 650; letter-spacing: -.028em; color: var(--ink);
+}
+.an-psub {
+  margin: 12px 0 0;
+  font-family: var(--sans); font-size: var(--an-text-size); line-height: 1.5;
+  color: var(--ink-2);
+}
+
+/* ---- the five-phase path ----
+   done = neutral ink, current = mineral blue, upcoming = a quiet hairline. The current
+   segment also carries the tracer and a solid cap, so the state is never colour alone. */
+.an-path { grid-column: 1; margin-top: 24px; }
+.an-path svg { display: block; width: 100%; height: 64px; overflow: visible; }
+.an-seg { stroke: var(--rule-2); stroke-width: 2; fill: none; }
+.an-seg.is-done { stroke: var(--ink-3); }
+.an-seg.is-now { stroke: var(--brand); }
+/* The current segment is filled outright, and it does not draw itself in.
+   V3.3 animated this segment, which was right for a static preview -- one play, once.
+   Here the surface is re-rendered on every poll, roughly every 1.5s, so the draw would
+   restart five times in a run and the segment would pulse rather than read as progress.
+   The tracer still moves, and that is the motion the design is for. */
+.an-node { fill: var(--surface); stroke: var(--rule-2); stroke-width: 1.5; }
+.an-node.is-done { fill: var(--ink-3); stroke: var(--ink-3); }
+.an-node.is-now { fill: var(--brand); stroke: var(--brand); }
+/* The retired green. It is named in the comment above; nothing here paints it. */
+.an-tracer { fill: var(--brand); }
+.an-tracer-halo { fill: var(--brand); opacity: .14; }
+
+.an-plabels { display: grid; margin-top: 12px; }
+.an-plabel {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
+  padding: 6px 10px 6px 0; min-width: 0;
+  border-top: 1px solid var(--rule); opacity: .45;
+  transition: opacity var(--d-fast) var(--ease);
+}
+.an-plabel.is-done { opacity: 1; }
+.an-plabel.is-now { opacity: 1; border-top: 2px solid var(--brand); padding-top: 5px; }
+.an-plabel .t {
+  font-family: var(--sans); font-size: var(--an-label-size); font-weight: 500;
+  letter-spacing: -.004em; color: var(--ink-3);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
+}
+/* The ordinal is redundant while there is room for the name, so it only appears on a
+   screen too narrow to carry five names. The name stays in the element's aria-label. */
+.an-plabel .n { display: none; }
+.an-plabel.is-done .t { color: var(--ink-2); }
+.an-plabel.is-now .t { color: var(--ink); font-weight: 600; }
+
+/* ---- the sentence under the path ---- */
+.an-verb {
+  grid-column: 1; margin: 24px 0 0; max-width: 56ch;
+  font-family: var(--sans); font-size: var(--an-text-size); line-height: 1.55;
+  color: var(--ink-2);
+}
+
+/* ---- Job / Source: compact spec rows. Both halves are machine values. ---- */
+.an-aside { grid-column: 2; grid-row: 2 / 5; align-self: start; margin-top: 24px; }
+.an-grp { margin-bottom: 24px; }
+.an-grp-cap {
+  margin: 0 0 8px;
+  font-family: var(--sans); font-size: var(--an-label-size); font-weight: 600;
+  color: var(--ink-2);
+}
+.an-spec { margin: 0; }
+.an-row {
+  display: grid; grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+  gap: 12px; align-items: baseline; padding: 3px 0;
+}
+.an-row + .an-row { border-top: 1px solid var(--rule); }
+.an-row .k {
+  font-family: var(--mono); font-size: var(--an-label-size);
+  color: var(--ink-4); letter-spacing: -.005em; white-space: nowrap;
+}
+/* A value the job has not produced yet says so, in mono, and is never a placeholder
+   that looks like data. */
+.an-row .v {
+  font-family: var(--mono); font-size: var(--an-label-size);
+  color: var(--ink-2); letter-spacing: -.005em; text-align: right;
+  overflow-wrap: anywhere; font-variant-numeric: tabular-nums;
+}
+.an-row .v.is-pending { color: var(--ink-4); }
+
+/* ---- the tail ---- */
+.an-tail {
+  grid-column: 1 / -1; margin-top: 32px; padding-top: 16px;
+  border-top: 1px solid var(--rule);
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 64px;
+}
+.an-tail p {
+  margin: 0; font-family: var(--sans); font-size: 12px; line-height: 1.6; color: var(--ink-3);
+}
+.an-tail b { color: var(--ink-2); font-weight: 600; }
+
+/* The column narrows; the composition holds. The phase path stays five segments wide
+   because it is the one thing that must remain legible. */
+@media (max-width: 1340px) {
+  .an-stage { padding: 40px 24px; grid-template-columns: minmax(0, 1fr) 214px; column-gap: 32px; }
+}
+@media (max-width: 760px) {
+  .an-q { font-size: 34px; }
+  .an-ptitle { font-size: 24px; }
+  .an-tail { grid-template-columns: 1fr; row-gap: 12px; }
+  .an-stage { padding: 28px 18px; }
+  /*
+   * The Job and Source rows narrow rather than disappear.
+   *
+   * This breakpoint used to hide `.an-aside` at 1340px, which quietly removed the only
+   * place the job id and the resolved revision are ever stated -- at 1280, the most
+   * ordinary desktop there is. Hiding them to solve a width problem is not the same as
+   * not needing them. Below 760px the aside leaves its column and runs under the phase
+   * path instead, so it stays legible on a phone and the contract still says which job
+   * this is.
+   */
+  .an-stage { grid-template-columns: minmax(0, 1fr); row-gap: 20px; }
+  .an-aside { grid-column: 1; grid-row: auto; margin-top: 4px; }
+  .an-grp { margin-bottom: 16px; }
+  /*
+   * Five phase names across 390px is about 70px each, which ellipsis renders as
+   * "Resol..." and "Valid..." -- five truncated words that tell the reader nothing about
+   * which phase is which. So below this width the axis carries its ordinal instead and
+   * the names move out of the visual layer, where they remain in the aria-label and in
+   * the phase card directly above, which is already naming the current phase in full.
+   */
+  .an-plabel { align-items: center; padding-right: 0; }
+  .an-plabel .t { display: none; }
+  .an-plabel .n {
+    display: block;
+    font-family: var(--mono); font-size: 11px; font-weight: 500;
+    color: var(--ink-4);
+  }
+  .an-plabel.is-done .n { color: var(--ink-3); }
+  .an-plabel.is-now .n { color: var(--brand); }
+}
+
+/* ============================================================ EXPLORER =====
+   The graph surface. Its shell, rail and Drawer are Slice 4's; the world, its topology
+   and its camera are frozen and unchanged.
+   ========================================================================== */
 
 #explorer {
   display: flex; flex-direction: column;

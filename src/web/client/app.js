@@ -56,6 +56,9 @@ import {
   refusalText,
   VISIBLE_PHASES,
   PHASE_TEXT,
+  RUNNING_PHASES,
+  ANALYSIS_PHASE_TEXT,
+  ANALYSIS_FSM_TEXT,
 } from './lib/analysis.mjs';
 import { evidenceSourceUrl, SIMILARITY_DISCLAIMER } from './lib/evidence-links.mjs';
 import { nodePrimitive, nodePrimitiveRadius, depthTier, depthClass, depthOffset, depthShadowClass } from './lib/primitives.mjs';
@@ -217,7 +220,39 @@ function showWorking() {
   // The landing is left behind as soon as a repository route is resolved, so the
   // working frame is never stacked on top of the marketing page.
   setHidden($('landing'), true);
-  setHidden($('explorer'), false);
+
+  /*
+   * The Explorer is HIDDEN, not merely emptied.
+   *
+   * Clearing the canvas was never enough, and this is the measured reason. `state.view`
+   * is only reassigned when a view arrives, so during a job it still holds the PREVIOUS
+   * repository's model, and the rail's DOM still holds its rendered provenance, status
+   * census and evidence. On the path Explorer A -> back -> submit B, A's rail text, A's
+   * crumb, A's `51514bd` and A's `97 one-hop` were all still readable while B was in
+   * `resolving`.
+   *
+   * Hiding the Explorer removes the only surfaces that could show it. The Analysis
+   * surface has no rail, no canvas and no drawer, so there is nothing for stale data to
+   * appear in.
+   */
+  setHidden($('explorer'), true);
+  setHidden($('analysis'), false);
+  /*
+   * And the surface is populated before the first poll lands.
+   *
+   * Shown empty it flashes a blank frame, which was measurable: the first snapshot of a
+   * real run had the section visible with no repository, no key and no segments in it,
+   * because the job had been accepted but no status had come back yet. The state at that
+   * moment is not "nothing" -- it is `queued`, so that is what is drawn, in words.
+   */
+  state.resolvedRevision = '';
+  renderAnalysis('queued', '');
+  // And the previous repository's identity leaves the chrome too, so nothing in the
+  // shared appbar names the repository being replaced.
+  for (const id of ['crumb-repo', 'crumb-ctx', 'crumb-rev', 'crumb-count']) {
+    const node = $(id);
+    if (node) node.textContent = '';
+  }
   setHidden($('empty'), true);
   setHidden($('failure'), true);
   setHidden($('drawer'), true);
@@ -272,6 +307,147 @@ function renderTracer(tracer, index) {
  * Under `prefers-reduced-motion` the tracer arrives immediately. It still shows the
  * phase, so the information never depends on the animation.
  */
+/* ------------------------------------------------------------ the Analysis surface */
+
+/**
+ * Renders the standalone Analysis surface from real job state.
+ *
+ * Frozen V3.3. The five-phase path is the production contract
+ * (`RUNNING_PHASES`), and `queued`, `complete` and `failed` are job FSM states rendered as
+ * words -- never as a sixth or seventh segment, which is how a five-phase contract turns
+ * into a seven-phase one.
+ *
+ * Every value printed here comes from a field the server actually sent. A job that has not
+ * resolved a revision yet says "not yet resolved" in mono, in the pending ink, and is
+ * marked as pending -- it never shows a placeholder that reads like data. Nothing is
+ * counted, timed or interpolated: no percentage, no collector sub-progress, no record
+ * total.
+ */
+function renderAnalysis(status, jobId) {
+  const root = $('analysis');
+  if (!root) return;
+
+  const repository = state.repository
+    ? `${state.repository.owner}/${state.repository.name}`
+    : '';
+  $('an-repo').textContent = repository;
+
+  const running = RUNNING_PHASES.indexOf(status);
+  const fsm = ANALYSIS_FSM_TEXT[status];
+  const current = running >= 0 ? ANALYSIS_PHASE_TEXT[status] : null;
+
+  // The ordinal is language; the key beside it is the machine identifier.
+  $('an-pk').textContent = current
+    ? `phase ${running + 1} of ${RUNNING_PHASES.length} \u00b7 ${current.k}`
+    : (fsm?.key ?? status);
+  $('an-ptitle').textContent = current ? current.t : (fsm?.title ?? status);
+  $('an-psub').textContent = current ? current.s : (fsm?.sub ?? '');
+  $('an-verb').textContent = current ? current.v : (fsm?.verb ?? '');
+
+  // Job: what the server says about the job itself.
+  const jobRows = [
+    ['state', current ? 'running' : (fsm ? fsm.key.split(' \u00b7 ')[1] : status)],
+    // A queued job is not phase zero. It has not entered the path.
+    ['phase', current ? `${running + 1} / ${RUNNING_PHASES.length}` : (fsm ? 'not on the phase path' : 'unknown')],
+    ['job', jobId || 'pending'],
+    ['contract', 'RUNNING_PHASES'],
+  ];
+  const jobDl = $('an-job');
+  jobDl.replaceChildren();
+  for (const [k, v] of jobRows) jobDl.append(specRow(k, v));
+
+  // Source: what is known about the repository. The revision is the honest part --
+  // it is only ever printed once the server has resolved one.
+  const revision = state.resolvedRevision || '';
+  const srcDl = $('an-src');
+  srcDl.replaceChildren();
+  srcDl.append(specRow('repository', repository || 'unknown'));
+  /*
+   * Only two facts, and both are about the repository itself. A resolved depth was
+   * tempting to print and was left out on purpose: there is no resolved depth until the
+   * graph exists, and `state.depth` is the cap the client asked for, so a row reading
+   * "depth 200" beside a resolved revision would read as a measured result rather than
+   * as a request.
+   */
+  srcDl.append(specRow('revision', revision ? revision.slice(0, 12) : 'not yet resolved', !revision));
+
+  // The path. Five segments, always five: a settled job marks all five done and parks the
+  // tracer, rather than adding an endpoint.
+  const n = RUNNING_PHASES.length;
+  const labels = $('an-plabels');
+  const svg = $('an-svg');
+  /*
+   * How much of the path is behind us.
+   *
+   * Three different answers, and conflating them was a real defect: this was originally
+   * `current ? at < running : Boolean(fsm)`, which marks all five segments done for
+   * `queued` as well as for the terminal states. A queued job has completed nothing, and
+   * a full row of done segments says the opposite -- it is the visual form of the exact
+   * claim this surface exists not to make. So a terminal state is done, a running phase
+   * is done up to itself, and a queued job is done not at all.
+   */
+  const terminal = status === 'complete' || status === 'failed';
+  const isDone = (at) => (current ? at < running : terminal);
+  /*
+   * `minmax(0, 1fr)`, not `1fr`.
+   *
+   * A bare `1fr` floors each track at its `min-content` width, which is as wide as the
+   * longest unbreakable word in the phase name. At 390px that made every track wider than
+   * its share of the row, so the five labels overflowed and overlapped each other instead
+   * of ellipsing inside their own columns. The zero minimum is what lets `text-overflow`
+   * do its job.
+   */
+  labels.style.gridTemplateColumns = `repeat(${n}, minmax(0, 1fr))`;
+  labels.replaceChildren();
+  for (const phase of RUNNING_PHASES) {
+    const at = RUNNING_PHASES.indexOf(phase);
+    const done = isDone(at);
+    const now = current ? at === running : false;
+    labels.append(el('div', {
+      class: ['an-plabel', done ? 'is-done' : '', now ? 'is-now' : ''].filter(Boolean).join(' '),
+      'data-phase': phase,
+      // The full name stays reachable when the visible label is reduced to its ordinal
+      // on a narrow screen, so the axis is never five anonymous numbers.
+      'aria-label': `${at + 1} of ${RUNNING_PHASES.length}. ${ANALYSIS_PHASE_TEXT[phase].t}`,
+    }, [
+      el('span', { class: 'n', text: String(at + 1) }),
+      el('span', { class: 't', text: ANALYSIS_PHASE_TEXT[phase].t }),
+    ]));
+  }
+
+  const W = 1000; const pad = 20; const gap = 12; const y = 26;
+  const segW = (W - pad * 2 - gap * (n - 1)) / n;
+  const nodes = [];
+  for (let i = 0; i < n; i += 1) {
+    const x = pad + i * (segW + gap);
+    const done = isDone(i);
+    const now = current ? i === running : false;
+    const cls = ['an-seg', done ? 'is-done' : '', now ? 'is-now' : ''].filter(Boolean).join(' ');
+    nodes.push(svgEl('line', { class: cls, x1: x, y1: y, x2: x + segW, y2: y }));
+    if (now) {
+      nodes.push(svgEl('line', {
+        class: 'an-seg-fill', x1: x, y1: y, x2: x + segW, y2: y,
+        style: `--len:${segW}`,
+      }));
+      nodes.push(svgEl('circle', { class: 'an-tracer-halo', cx: x + segW / 2, cy: y, r: 10 }));
+      nodes.push(svgEl('circle', { class: 'an-tracer', cx: x + segW / 2, cy: y, r: 4.5 }));
+    }
+    const ncls = ['an-node', done ? 'is-done' : '', now ? 'is-now' : ''].filter(Boolean).join(' ');
+    nodes.push(svgEl('circle', { class: ncls, cx: x, cy: y, r: 4 }));
+    nodes.push(svgEl('circle', { class: ncls, cx: x + segW, cy: y, r: 4 }));
+  }
+  svg.replaceChildren(...nodes);
+  state.phase = status;
+}
+
+/** One compact spec row: a schema field name beside a machine value. */
+function specRow(key, value, pending) {
+  return el('div', { class: 'an-row' }, [
+    el('span', { class: 'k', text: key }),
+    el('span', { class: pending ? 'v is-pending' : 'v', text: value }),
+  ]);
+}
+
 function renderPhases(status, jobId) {
   const tracer = $('tracer');
   const list = $('phases');
@@ -281,6 +457,10 @@ function renderPhases(status, jobId) {
   const index = tracerPhaseIndex(status);
   const settled = isSettled(status);
   const moving = phaseTransition(state.phase, status);
+
+  // The standalone Analysis surface is the visible one; the strip is kept for the
+  // in-shell tracer contract and is not rendered while a job runs.
+  renderAnalysis(status, jobId);
 
   list.replaceChildren();
   for (const phase of PHASES) {
@@ -360,6 +540,23 @@ function hideWorking() {
   }
   state.job = null;
   setHidden($('strip'), true);
+  // The Analysis surface is standalone, so it steps aside as the Explorer arrives.
+  setHidden($('analysis'), true);
+  setHidden($('explorer'), false);
+  // Hidden is not the same as empty. A finished job left its repository, revision and
+  // terminal wording sitting in the markup, and the next job's first frame inherited
+  // them. Hidden pixels are not a leak, but stale text in the document is still stale
+  // text in the document, so it is cleared here rather than merely covered.
+  for (const id of ['an-repo', 'an-pk', 'an-ptitle', 'an-psub', 'an-verb', 'an-job', 'an-src']) {
+    const node = $(id);
+    if (node) node.replaceChildren();
+  }
+  for (const id of ['an-plabels']) {
+    const node = $(id);
+    if (node) node.replaceChildren();
+  }
+  $('an-svg')?.replaceChildren();
+  state.resolvedRevision = '';
 }
 
 /**
@@ -535,6 +732,9 @@ async function pollJob(job, elapsed, stale) {
     return;
   }
 
+  // The revision is recorded as soon as the job reports one, so the Analysis surface can
+  // show a real commit instead of a placeholder -- and shows nothing until it has one.
+  if (status.resolvedRevision) state.resolvedRevision = String(status.resolvedRevision);
   renderPhases(status.status, jobId);
   const wait = nextDelayMs(retryAfterMs, elapsed);
   await sleep(wait);
@@ -2562,6 +2762,7 @@ $('layers-btn').addEventListener('click', () => toggleLayers());
   // page, so its rule is on `#main` -- and registering it here means the rule appears and
   // withdraws on exactly the same evidence as the rail's and the Drawer's.
   registerScrollRegion($('landing'), $('main'));
+  registerScrollRegion($('analysis'), $('main'));
 
   $('search-input').addEventListener('input', (event) => {
     state.query = event.target.value;

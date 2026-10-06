@@ -277,6 +277,83 @@
     </footer>
   </section>
 
+  <!-- ============================================================ analysis -->
+  <!--
+    ANALYSIS — Frozen V3.3, a STANDALONE surface.
+
+    This replaces the analysis strip that used to sit inside the Explorer. The strip was
+    correct about progress -- it reported phases the server had actually reached and no
+    percentage -- but it was a row of seven segments in a 46px band, and it rendered
+    *beside* the previous repository's graph. Starting an analysis on repository B while
+    sitting on repository A left A's canvas, A's rail and A's revision on screen behind
+    B's progress. Standing alone, with no Explorer beside it, that cannot happen.
+
+    It is one of five running phases and it always reads as five:
+
+      resolving -> collecting -> resolving_relationships -> validating -> publishing
+
+    `queued`, `complete` and `failed` are job FSM states, not segments on that path. A
+    queued job is waiting before phase 1, a complete job has left the path, and a failed
+    job never had one. Rendering them as a sixth or seventh segment would put an FSM state
+    on a progress axis it does not belong to, which is how a five-phase contract becomes
+    a seven-phase one.
+
+    The product bar is the SHARED appbar, not a second one, and it is deliberately not
+    restyled here -- the appbar's own grammar is Slice 4's, shared with the Explorer.
+
+    Every field is filled from real job state. Where the job has not produced a value the
+    surface says so; it never invents one.
+  -->
+  <section id="analysis" class="analysis gl-scroll" hidden aria-live="polite">
+    <div class="an-stage">
+
+      <div class="an-quest">
+        <p class="an-repo mono" id="an-repo"></p>
+        <h1 class="an-q">Where did this software come from?</h1>
+      </div>
+
+      <!-- the current phase is the page's live object: a raised sheet, not just big type -->
+      <section class="an-phase">
+        <div class="an-obj">
+          <div class="an-pn">
+            <span class="an-pk" id="an-pk"></span>
+            <span class="an-rule" aria-hidden="true"></span>
+          </div>
+          <p class="an-ptitle" id="an-ptitle"></p>
+          <p class="an-psub" id="an-psub"></p>
+        </div>
+      </section>
+
+      <!-- the five-phase path. Three channels, so the current phase is never colour-only -->
+      <div class="an-path">
+        <svg id="an-svg" viewBox="0 0 1000 64" preserveAspectRatio="none" aria-hidden="true"></svg>
+        <div class="an-plabels" id="an-plabels"></div>
+      </div>
+
+      <p class="an-verb" id="an-verb"></p>
+
+      <aside class="an-aside" aria-label="Job and source">
+        <div class="an-grp">
+          <p class="an-grp-cap">Job</p>
+          <dl class="an-spec" id="an-job"></dl>
+        </div>
+        <div class="an-grp">
+          <p class="an-grp-cap">Source</p>
+          <dl class="an-spec" id="an-src"></dl>
+        </div>
+      </aside>
+
+      <div class="an-tail">
+        <p><b>No percentage is shown.</b> The five phases are discrete stages the analyser
+          reports when it reaches them, not a measurable fraction of work.</p>
+        <p><b>These five phases are the whole contract.</b> Finer progress would need new
+          instrumentation emitted from <span class="mono">analyze()</span> &mdash; a change to
+          the pipeline, not to this screen.</p>
+      </div>
+
+    </div>
+  </section>
+
   <!-- ----------------------------------------------------------- explorer -->
   <section id="explorer" class="explorer" hidden>
     <!--
@@ -380,6 +457,11 @@
     arrangement as the rail and the Drawer, for the same reason.
   -->
   <span class="landing-more" aria-hidden="true"></span>
+
+  <!-- The Analysis surface's continuation rule, on `#main` for the same reason: the
+    surface scrolls inside itself, so a pseudo-element on it would travel down with the
+    path instead of holding the bottom edge. -->
+  <span class="analysis-more" aria-hidden="true"></span>
 </main>
 
 <script type="module" src="/app.js"></script>

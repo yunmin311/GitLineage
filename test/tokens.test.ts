@@ -58,7 +58,7 @@ const DECLARED_TEXT = APP_CSS.replace(/\/\*[\s\S]*?\*\//g, ' ');
  * A surface that stops being ported removes itself; a token that starts being re-declared
  * in two places fails.
  */
-const ALLOWED_SCOPES = ['.landing'] as const;
+const ALLOWED_SCOPES = ['.landing', '.analysis'] as const;
 
 /** Every token declared anywhere, with the scope each declaration was found in. */
 function declarations(): Map<string, string[]> {
