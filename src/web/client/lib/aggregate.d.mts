@@ -4,10 +4,18 @@
  */
 import type { ViewGraph, ViewEdge, RelationFamily, RelationshipType, EvidenceStatus } from '../../../web/view-model.ts';
 
-/** How a claim was written down, as far as its evidence shows. */
+/**
+ * How a claim was written down, as far as its evidence shows.
+ *
+ * `manifest` is a real declaration form: the packages collector's payload names the
+ * declaring manifest, so a dependency's declaring SITE is a read of the evidence rather
+ * than an inference. Without it a repository whose density is entirely manifest-declared
+ * could only be presented as one `depends_on x N` mass.
+ */
 export declare const DeclarationForm: Readonly<{
   TableRow: 'table-row';
   Prose: 'prose';
+  Manifest: 'manifest';
   Unknown: 'unknown';
 }>;
 
@@ -25,10 +33,17 @@ export declare const MIN_PLATE_SIZE: number;
  */
 export declare const PLATE_MEMBER_ROWS: number;
 
-export declare function declarationForm(card: unknown): 'table-row' | 'prose' | 'unknown';
+export declare function declarationForm(card: unknown): 'table-row' | 'prose' | 'manifest' | 'unknown';
 
 /** Repository-relative file a claim was written in, from its evidence locator. */
 export declare function declaringPath(card: unknown): string;
+
+/**
+ * The declaring manifest named by one evidence record, or null.
+ *
+ * Read from the record's structured payload (`data.manifest_path`, nested or flat).
+ */
+export declare function manifestPathOf(card: unknown): string | null;
 
 export interface SubgroupMember {
   edgeId: string;
@@ -47,7 +62,7 @@ export declare function evidenceSubgroups(members: SubgroupMember[]): AggregateS
  * Emitted only when the evidence supports it; `[]` otherwise.
  */
 export interface AggregateSubgroup {
-  form: 'table-row' | 'prose';
+  form: 'table-row' | 'prose' | 'manifest';
   /** The declaring file, shown as secondary text on the row. */
   meta: string;
   label: string;
@@ -81,7 +96,7 @@ export interface AggregatePlate {
   /** Declaring file or file count, when the evidence names one place. */
   meta?: string;
   /** The evidence form this plate was named for, or `null` for a neutral plate. */
-  form?: 'table-row' | 'prose' | null;
+  form?: 'table-row' | 'prose' | 'manifest' | null;
   /** Empty unless the evidence supports naming groups inside this fan. */
   subgroups: AggregateSubgroup[];
   /**

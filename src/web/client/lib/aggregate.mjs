@@ -48,12 +48,49 @@ export const MIN_PLATE_SIZE = 2;
  */
 export const PLATE_MEMBER_ROWS = 6;
 
+/*
+ * How many structural groups may each become a mass of its own.
+ *
+ * Six, and the reason is the world rather than taste: the data zone is an authored
+ * composition with a finite number of plate slots, and asking for more masses than it
+ * has room for does not add information -- it draws plates on top of each other. So this
+ * is a bound on masses, exactly as the design's own rule bounds a fan, and it is
+ * enforced on the GROUP count rather than on the relationship count.
+ */
+export const MAX_MAJOR_GROUPS = 6;
+
+/*
+ * The share of a fan's members the named groups must account for.
+ *
+ * 0.80, and what it buys is that the remainder mass stays small. When the leading groups
+ * already cover four fifths of the fan, the honest remainder is a genuine minority rather
+ * than a second full presentation, and it still carries its real count so nothing is
+ * misrepresented. The policy stops taking groups as soon as coverage is reached: the
+ * remaining ones are not diminished, they are simply reported together.
+ */
+export const MAJOR_GROUP_COVERAGE = 0.8;
+
 /** How a claim was written down, as far as the evidence shows. */
 export const DeclarationForm = Object.freeze({
   /** A row of a table, e.g. a markdown pipe row. */
   TableRow: 'table-row',
   /** Anything else written as running text. */
   Prose: 'prose',
+  /*
+   * A dependency written in a package manifest.
+   *
+   * This form did not exist, and its absence was the whole of the
+   * one-family-dense-presentation gap. `declarationForm` used to answer `unknown` for
+   * anything that was not a document reference, on the sound ground that a manifest
+   * dependency carries no prose to be "prose". But `evidenceSubgroups` then declined to
+   * group any fan with a single unclassified member, so a repository whose density is
+   * entirely manifest-declared -- the common case, not an edge case -- could only ever be
+   * presented as one `depends_on x N` mass. The evidence names the declaring manifest in
+   * its own structured payload (`data.manifest_path`), so the declaring site is a fact
+   * about the evidence rather than an inference, and it is the same axis the node
+   * Drawer has always grouped by.
+   */
+  Manifest: 'manifest',
   /** The evidence does not show it. Never guessed. */
   Unknown: 'unknown',
 });
@@ -65,10 +102,18 @@ export const DeclarationForm = Object.freeze({
  * rather than an assumption, and an unknown form is never used to name a group.
  */
 export function declarationForm(card) {
-  // Only a document reference is *written down* somewhere. A manifest dependency or
-  // a submodule edge has no declaration form, and labelling one "Prose" because its
-  // evidence record happened to carry text would be a fabricated claim about where
-  // the relationship came from.
+  /*
+   * The manifest case, read first and from the record's own structured payload.
+   *
+   * `manifest_path` is a documented field of the packages collector's `data`, so this
+   * is a read of the payload and not a guess at its shape. A record that carries no
+   * manifest path falls through to the document cases below unchanged.
+   */
+  if (manifestPathOf(card)) return DeclarationForm.Manifest;
+
+  // A document reference is *written down* somewhere. A submodule edge still has no
+  // declaration form, and labelling one "Prose" because its evidence record happened
+  // to carry text would be a fabricated claim about where the relationship came from.
   const type = card && typeof card.type === 'string' ? card.type : '';
   if (type && type !== 'document_reference' && type !== 'document_attribution') {
     return DeclarationForm.Unknown;
@@ -102,6 +147,22 @@ export function tableQualifier(path) {
   return singular.charAt(0).toUpperCase() + singular.slice(1);
 }
 
+/**
+ * The declaring manifest named by one evidence record, or null.
+ *
+ * Read defensively because the payload is shaped by the collector that produced it: the
+ * packages collector nests its facts under `data.data`, while a flatter record carries
+ * them directly. Both are read; neither is assumed, and a record naming no manifest
+ * returns null so the caller can fall through rather than invent one.
+ */
+export function manifestPathOf(card) {
+  const data = card && typeof card === 'object' ? card.data : undefined;
+  if (!data || typeof data !== 'object') return null;
+  const inner = (data.data && typeof data.data === 'object') ? data.data : data;
+  const path = inner.manifest_path;
+  return typeof path === 'string' && path ? path : null;
+}
+
 /** The repository-relative file a claim was written in, from its locator. */
 export function declaringPath(card) {
   const locator = typeof (card && card.locator) === 'string' ? card.locator : '';
@@ -131,12 +192,40 @@ export function evidenceSubgroups(members) {
     // rather than used as the grouping key: prose written in two different files
     // is still prose, and keying on the file would invent two groups where the
     // evidence shows one.
-    const group = groups.get(form) || { form, paths: new Set(), memberEdgeIds: [] };
-    group.paths.add(declaringPath(card));
+    /*
+     * Grouped by form AND, for a manifest, by the declaring manifest itself.
+     *
+     * Prose stays grouped by form alone -- prose written in two different files is still
+     * prose, and keying on the file would invent two groups where the evidence shows one.
+     * A manifest declaration is the opposite case: `manifest_path` IS the declaring site,
+     * and grouping every manifest together would answer "these are all declarations" when
+     * the real question is "which part of the repository declared these". So the manifest
+     * axis keys on that path, and the form is folded into the key so a fan never mixes
+     * two declaration forms under one group.
+     */
+    const key = form === DeclarationForm.Manifest
+      ? `${form}:${manifestPathOf(card)}`
+      : form;
+    const group = groups.get(key) || { form, paths: new Set(), memberEdgeIds: [], manifest: null };
+    group.paths.add(manifestPathOf(card) || declaringPath(card));
+    if (form === DeclarationForm.Manifest) group.manifest = manifestPathOf(card);
     group.memberEdgeIds.push(member.edgeId);
-    groups.set(form, group);
+    groups.set(key, group);
   }
 
+  /*
+   * Every member must classify, or the fan stays neutral.
+   *
+   * This is unchanged on purpose. A label over some of a fan is a claim about all of
+   * it, and the reader cannot see which members the label covers. Relaxing this to
+   * "group what you can" was tried and is wrong: it names a group over two of three
+   * members and the third silently contradicts it.
+   *
+   * The one-family-dense gap is therefore NOT fixed here. It is fixed by
+   * `declarationForm` recognising a manifest declaration, so that a fan the evidence
+   * fully supports classifies completely. A fan that genuinely mixes a manifest with
+   * an unattributable claim stays neutral, which is the honest answer.
+   */
   if (classified !== members.length) return [];
   const list = [...groups.values()];
   if (!list.some((group) => group.memberEdgeIds.length > 1)) return [];
@@ -149,6 +238,35 @@ export function evidenceSubgroups(members) {
       // neutral rather than guessing.
       const qualifier =
         group.form === DeclarationForm.TableRow && paths.length === 1 ? tableQualifier(paths[0]) : null;
+      /*
+       * A manifest group is named by the manifest that declares it, and by nothing else.
+       *
+       * The declaring site is what the grouping axis IS, so it is the label too -- the
+       * same fact, not a second inference. The qualifier falls back to the manifest's own
+       * file name when the path has no usable words to qualify it with, so a group is
+       * never left nameless.
+       */
+if (group.form === DeclarationForm.Manifest) {
+        const site = group.manifest || (paths.length === 1 ? paths[0] : null);
+        /*
+         * Named by the directory that declares it, not by the bare file name.
+         *
+         * `tableQualifier` reduces `nebula_app/Cargo.toml` to "Cargo", which is the file
+         * every Rust crate in the repository shares -- so a workspace crate and a nested
+         * binary both became a plate labelled "Cargo", and two masses with different
+         * members carried the same name. The declaring DIRECTORY is what distinguishes
+         * two sites in one repository, so that is the label, and the full path stays in
+         * `meta` for the row's secondary text.
+         */
+        const dir = site ? site.split('/').slice(0, -1).join('/') : '';
+        const name = dir || (site ? (site.split('/').pop() ?? site) : null) || 'manifest';
+        return {
+          form: group.form,
+          meta: paths.length === 1 ? paths[0] : `${paths.length} manifests`,
+          label: `${name} ×${group.memberEdgeIds.length}`,
+          memberEdgeIds: [...group.memberEdgeIds].sort(),
+        };
+      }
       return {
         form: group.form,
         // One declaring file names the place. Several are summarised rather than
@@ -163,6 +281,8 @@ export function evidenceSubgroups(members) {
       };
     })
     // Deterministic under reordered input: by form, then label.
+    // Deterministic under reordered input: by form, then by label, which now carries the
+    // declaring site for manifest groups and therefore orders them by that site.
     .sort((a, b) => (a.form === b.form ? (a.label < b.label ? -1 : a.label > b.label ? 1 : 0) : a.form < b.form ? -1 : 1));
 }
 
@@ -202,9 +322,66 @@ function aggregateFan(fan, memberIds, evidence, expanded, plates, describe) {
    * fan whose evidence does not support a split stays one neutral plate below.
    */
   if (subgroups.length > 1) {
-    for (const group of subgroups) {
+    /*
+     * Which groups become masses, and which are reported together.
+     *
+     * Ordered by member count and then by the group's own label, so the choice is a
+     * function of the data and nothing else -- no significance, no centrality, no
+     * dependence on iteration order. The loop stops as soon as the named groups account
+     * for `MAJOR_GROUP_COVERAGE` of the fan, or once `MAX_MAJOR_GROUPS` masses exist,
+     * whichever comes first. Six masses are therefore NOT forced: a fan that genuinely
+     * has six declaring sites is six plates, and a fan with three is three.
+     */
+    const ordered = [...subgroups].sort((a, b) =>
+      (b.memberEdgeIds.length - a.memberEdgeIds.length)
+      || (a.label < b.label ? -1 : a.label > b.label ? 1 : 0));
+    const major = [];
+    let covered = 0;
+    for (const group of ordered) {
+      major.push(group);
+      covered += group.memberEdgeIds.length;
+      if (major.length >= MAX_MAJOR_GROUPS) break;
+      /*
+       * Coverage ends the walk only once the fan has more distinct groups than the cap
+       * would ever name. A single 12-member group already clears 80% of a 14-member fan,
+       * so stopping on coverage alone would demote the remaining `x2` prose group into a
+       * remainder -- and a two-member group the evidence clearly supports is a plate, not
+       * a remainder. So a group the evidence separates is named whenever the fan has few
+       * enough groups to name them all; the remainder is for the fans that genuinely have
+       * more structure than masses.
+       */
+      if (ordered.length > MAX_MAJOR_GROUPS
+          && covered >= Math.ceil(memberIds.length * MAJOR_GROUP_COVERAGE)) break;
+    }
+    const majorIds = new Set(major.flatMap((group) => group.memberEdgeIds));
+
+    /*
+     * Whether the first paint shows rows or just the named masses.
+     *
+     * A plate opened by default carries its rows, and a stack of open plates is a tall
+     * stack: the data zone is an authored column and six open structural masses run past
+     * its bottom. So when a fan genuinely has several structural groups, the first paint
+     * presents them as NAMED masses -- which is the whole point of the grouping, the
+     * reader sees "nebula_app", "mobile/link", "third_party/winit" instead of one
+     * depends_on x 97 -- and each opens on request. A fan with one or two groups still
+     * opens, because two short plates fit and the first paint can carry their claims.
+     */
+    const openGroups = major.filter((group) => group.memberEdgeIds.length >= MIN_PLATE_SIZE).length;
+    const openByDefault = openGroups <= 2;
+
+    for (const group of major) {
       if (group.memberEdgeIds.length < MIN_PLATE_SIZE) continue;
-      const key = `${fan.key}::${group.form}`;
+      /*
+       * The key must be unique per MASS, not per fan.
+       *
+       * It used to be `${fan.key}::${group.form}`, which is one key for every structural
+       * group in a fan -- so several distinct masses were stored under one entry in the
+       * renderer's position map and were all drawn at the same slot. The canvas then
+       * reported them overlapping each other, and the renderer could only ever place the
+       * last one. The group's own label identifies the declaring site, so it is what
+       * distinguishes the keys.
+       */
+      const key = `${fan.key}::${group.form}::${group.label}`;
       plates.push({
         ...base,
         key,
@@ -217,21 +394,28 @@ function aggregateFan(fan, memberIds, evidence, expanded, plates, describe) {
         // A group plate is already named for its evidence, so it does not carry a
         // nested set of the same groups again.
         subgroups: [],
-        // Open by default, so the first paint carries the claims rather than a bare
-        // count. Still capped: `expanded` is the reader asking for the rest.
-        open: true,
+        // Open by default when the stack has room to carry the claims; closed otherwise,
+        // so a many-group fan reads as named masses on the first paint. Either way
+        // `expanded` is the reader asking for the rest.
+        open: openByDefault,
         expanded: expanded.has(key),
       });
     }
-    // A group too small to be a plate of its own stays reachable as a neutral plate,
-    // so no member is left without a way in.
-    const grouped = new Set(subgroups.flatMap((group) => group.memberEdgeIds));
-    const leftover = [...memberIds].filter((id) => !grouped.has(id)).sort();
+    /*
+     * The remainder, and it is explicit.
+     *
+     * Two things land here: a structural group too small to be a mass of its own, and any
+     * further group beyond the major cap or past the coverage target. Both are real
+     * relationships with real evidence, so the plate carries its true count and its own
+     * member rows, and it says plainly that it is a remainder rather than reading as
+     * another declaring site.
+     */
+    const leftover = [...memberIds].filter((id) => !majorIds.has(id)).sort();
     if (leftover.length >= MIN_PLATE_SIZE) {
       plates.push({
         ...base,
         key: fan.key,
-        label: `${fan.relationLabel} ×${leftover.length}`,
+        label: `${fan.relationLabel} remainder ×${leftover.length}`,
         count: leftover.length,
         memberEdgeIds: leftover,
         members: leftover.map(describe),

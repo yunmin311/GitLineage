@@ -1804,8 +1804,21 @@ a { color: inherit; }
  * Labels are decoration, not hit targets. Without this they swallow clicks on
  * the line beneath it including when they are hidden with `opacity: 0`, which
  * still hit-tests. Pointer events go to `.edge-hit` only.
+ *
+ * The same applies inside a plate, and it was a real defect there rather than a
+ * cosmetic one. A plate's own text -- its title, its subtitle, a row's label,
+ * meta, status, direction and the held-back notes -- is drawn as SVG `<text>`,
+ * and SVG text hit-tests the box of its glyphs. When the data zone held a single
+ * plate the plate text never overlapped a row's `.plate-row-hit`, so it went
+ * unnoticed; stacking a structural fan put the subtitle on top of the first
+ * row's hit rect, and a click meant for the row was swallowed by the subtitle
+ * instead, so the relationship could not be selected and its Drawer never opened.
+ * Pointer events belong to `.plate-row-hit` and `.plate-card-hit` alone.
  */
-.edge-label, .edge-badge, .edge-ontology, .node-label, .node-fact, .subject-tag { pointer-events: none; }
+.edge-label, .edge-badge, .edge-ontology, .node-label, .node-fact, .subject-tag,
+.plate-subtitle, .plate-row-label, .plate-row-meta, .plate-row-dir, .plate-row-status,
+.plate-row-more, .plate-row-epand, .plate-row-held,
+.bundle-card-count, .bundle-label, .bundle-status, .bundles-note { pointer-events: none; }
 
 .edge-label { font-family: var(--mono); font-size: 11px; fill: var(--ink-2); }
 .edge-ontology { font-family: var(--mono); font-size: 9px; fill: var(--ink-4); }

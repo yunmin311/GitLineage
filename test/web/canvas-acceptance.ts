@@ -564,8 +564,20 @@ async function rowPoint(page: Page, pattern: RegExp): Promise<{ x: number; y: nu
     const rows = [...document.querySelectorAll('.plate-row')];
     const row = rows.find((r) => re.test(r.querySelector('.plate-row-label')?.textContent ?? ''));
     if (!row) return null;
-    const b = row.getBoundingClientRect();
-    return { x: b.x + b.width / 2, y: b.y + b.height / 2 };
+    /*
+     * Click the row's HIT RECT, not the decorative group's centre.
+     *
+     * The `.plate-row` group is `aria-hidden` and purely visual; the interactive element
+     * is its `.plate-row-hit` rect. Clicking the group's centre worked while a plate was
+     * a single short stack, but the centre of a thin row can fall where a sibling
+     * `<text>` -- the plate subtitle, say -- captures the pointer, because SVG text
+     * hit-tests its glyphs. When a structural fan stacks several masses that overlap
+     * became routine, so the click silently landed on the subtitle and selected nothing.
+     * Targeting the rect the product actually listens on is both correct and stable.
+     */
+    const hit = row.querySelector('.plate-row-hit') ?? row;
+    const b = hit.getBoundingClientRect();
+    return { x: b.x + Math.min(30, b.width / 2), y: b.y + b.height / 2 };
   }, pattern.source);
 }
 

@@ -364,3 +364,161 @@ test('the renderer does not pre-filter the composition input', () => {
   assert.match(draw, /visibleCandidates\(view\)/, 'draw must take its edges from the shared helper');
   assert.equal(/const edges = candidates\.filter/.test(draw), false, 'draw must not read a stale local');
 });
+
+// ================= Slice 5: structural manifest grouping, honestly derived ============
+
+const PEBREL = 'Kuddev__pebrel';
+
+test('a manifest declaration is classified, and read from the payload not guessed', () => {
+  // Nested shape, as the packages collector emits it.
+  assert.equal(
+    declarationForm({ data: { manifest_path: 'nebula_app/Cargo.toml' } }),
+    DeclarationForm.Manifest,
+  );
+  assert.equal(
+    declarationForm({ data: { data: { manifest_path: 'mobile/link/Cargo.toml' } } }),
+    DeclarationForm.Manifest,
+    'the nested payload shape is read too, neither form assumed',
+  );
+  // No manifest named means no manifest form, and the document cases still apply.
+  assert.equal(declarationForm({ data: { ecosystem: 'cargo' } }), DeclarationForm.Unknown);
+  assert.equal(declarationForm({ observedText: '| x |' }), DeclarationForm.TableRow);
+  assert.equal(declarationForm({}), DeclarationForm.Unknown);
+});
+
+test('a manifest fan groups by declaring site, and names itself after it', () => {
+  const members = [
+    { edgeId: 'a', card: { data: { manifest_path: 'nebula_app/Cargo.toml' } } },
+    { edgeId: 'b', card: { data: { manifest_path: 'nebula_app/Cargo.toml' } } },
+    { edgeId: 'c', card: { data: { manifest_path: 'mobile/link/Cargo.toml' } } },
+    { edgeId: 'd', card: { data: { manifest_path: 'mobile/link/Cargo.toml' } } },
+    { edgeId: 'e', card: { data: { manifest_path: 'third_party/winit/Cargo.toml' } } },
+  ];
+  const groups = evidenceSubgroups(members);
+  /*
+   * Three declaring sites, not one undifferentiated plate.
+   *
+   * The third site holds a single member and so does not become a plate of its own --
+   * `MIN_PLATE_SIZE` filters it downstream -- but the subgroup pass still reports it,
+   * because the subgroup is a description of the evidence and the plate decision is made
+   * later. The point being asserted is that the three sites are distinguished at all.
+   */
+  assert.equal(groups.length, 3, 'each declaring site is distinguished, not one undifferentiated plate');
+  const partitions = groups.map((g) => [...g.memberEdgeIds].sort().join(','))
+    .sort();
+  assert.deepEqual(
+    partitions,
+    ['a,b', 'c,d', 'e'],
+    'grouped by declaring site; members partition by the site that declared them',
+  );  for (const g of groups) assert.equal(g.form, DeclarationForm.Manifest);
+  // Every label is derived from the manifest that declared it: no hardcoded repository.
+  for (const g of groups) {
+    assert.ok(g.label.includes('×'), `group is labelled with its count: ${g.label}`);
+    assert.ok(/[A-Za-z]/.test(g.label), `group is named, not numbered: ${g.label}`);
+  }
+});
+
+test('pebrel: a one-family dense graph becomes structural masses, never one giant plate', () => {
+  /*
+   * The regression this slice exists for.
+   *
+   * `Kuddev/pebrel` has 97 one-hop `depends_on` and nothing else in that family. Before
+   * structural grouping the only honest presentation available was a single
+   * `depends_on x 97` mass, which is the count restated. The evidence names the declaring
+   * manifest for every one of those relationships, so the presenting answer is which part
+   * of the repository declared them.
+   */
+  const view = viewOf(PEBREL);
+  const composition = buildComposition(view as never, { edges: visible(view as never) as never });
+
+  const dependencyPlates = composition.plates.filter((p) => p.relationshipType === 'depends_on');
+  assert.ok(dependencyPlates.length > 1, 'the one family becomes several masses');
+
+  // The canonical relationship type is preserved: grouping changed the presentation,
+  // never the semantics.
+  for (const plate of dependencyPlates) {
+    assert.equal(plate.relationshipType, 'depends_on');
+    assert.equal(plate.family, 'dependency');
+    assert.equal(plate.status, 'DECLARED');
+  }
+
+  // Each mass is named for a real declaring manifest from the payload.
+  for (const plate of dependencyPlates) {
+    if (plate.form !== DeclarationForm.Manifest) continue;
+    for (const edgeId of plate.memberEdgeIds) {
+      const cards = (view.evidenceByRelationship?.[edgeId] ?? []) as Array<Record<string, unknown>>;
+      const names = cards.some((card) => {
+        const data = (card.data ?? {}) as Record<string, unknown>;
+        const inner = (data.data && typeof data.data === 'object') ? (data.data as Record<string, unknown>) : data;
+        return typeof inner.manifest_path === 'string' && Boolean(inner.manifest_path);
+      });
+      assert.ok(names, `${edgeId} is in a manifest mass but its evidence names no manifest`);
+    }
+  }
+});
+
+test('REACHABILITY: union(plate members) == every one-hop relationship, exactly once', () => {
+  /*
+   * The machine-testable invariant the presentation policy rests on.
+   *
+   * Representative rows are only the default view. This asserts the partition: every
+   * one-hop relationship appears in exactly one plate or as exactly one loose edge, so
+   * grouping can never quietly drop a member and no "+N more" can be a fiction.
+   */
+  for (const slug of [PEBREL, GRPC, SPARSE, OBSIDIAN]) {
+    const view = viewOf(slug);
+    const composition = buildComposition(view as never, { edges: visible(view as never) as never });
+
+    const seen = new Map<string, string>();
+    for (const plate of composition.plates) {
+      for (const edgeId of plate.memberEdgeIds) {
+        assert.ok(!seen.has(edgeId), `${slug}: ${edgeId} appears in two masses (${seen.get(edgeId)} and ${plate.key})`);
+        seen.set(edgeId, plate.key);
+      }
+    }
+    for (const edgeId of composition.looseEdgeIds) {
+      assert.ok(!seen.has(edgeId), `${slug}: ${edgeId} is both loose and plated`);
+      seen.set(edgeId, 'loose');
+    }
+
+    const expected = new Set(view.edges.map((e: { id: string }) => e.id));
+    assert.deepEqual(
+      [...seen.keys()].sort(),
+      [...expected].sort(),
+      `${slug}: reachable members must equal the canonical one-hop set`,
+    );
+    assert.equal(seen.size, expected.size, `${slug}: no relationship is counted twice`);
+  }
+});
+
+test('sparse data is not over-grouped: nachocebey/is keeps its shape', () => {
+  /*
+   * A dense policy must not be applied to a sparse graph. `nachocebey/is` has four
+   * families and only 21 relationships; the presentation must not manufacture masses
+   * out of structure that the evidence does not carry.
+   */
+  const view = viewOf(SPARSE);
+  const composition = buildComposition(view as never, { edges: visible(view as never) as never });
+
+  const families = new Set(view.edges.map((e: Record<string, unknown>) => e.family as string));
+  assert.ok(families.size >= 3, 'this is a mixed-family graph to begin with');
+  // Every family that had loose relationships keeps some, so sparsity is not erased.
+  assert.ok(
+    composition.looseEdgeIds.length > 0,
+    'a sparse mixed graph is not collapsed into masses just because a dense policy exists',
+  );
+});
+
+test('grouping never changes status, direction or the canonical family', () => {
+  const view = viewOf(PEBREL);
+  const composition = buildComposition(view as never, { edges: visible(view as never) as never });
+  const byId = new Map(view.edges.map((e: { id: string }) => [e.id, e] as const));
+  for (const plate of composition.plates) {
+    for (const edgeId of plate.memberEdgeIds) {
+      const edge = byId.get(edgeId) as Record<string, unknown>;
+      assert.equal(edge.status, plate.status, 'a plate never mixes statuses');
+      assert.equal(edge.relationshipType, plate.relationshipType);
+      assert.equal(edge.family, plate.family);
+    }
+  }
+});

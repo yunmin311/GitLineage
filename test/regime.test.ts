@@ -20,7 +20,7 @@ import {
   isHomogeneousFan,
   partitionPeers,
 } from '../src/web/client/lib/regime.mjs';
-import { buildComposition, plateRows, plateHiddenRows, PLATE_MEMBER_ROWS } from '../src/web/client/lib/aggregate.mjs';
+import { buildComposition, plateRows, plateHiddenRows, evidenceSubgroups, PLATE_MEMBER_ROWS } from '../src/web/client/lib/aggregate.mjs';
 import {
   fieldGeometry, capacity, drawableColumns, subjectPosition, frameTransform, initialViewBox, viewBoxFor,
   loosePositions, WORLD, ZONES,
@@ -299,15 +299,68 @@ test('relation families stay in separate plates', () => {
   assert.equal(new Set(types).size, types.length, 'no family may share a plate with another');
 });
 
-test('subgroup vocabulary is only used where document evidence supports it', () => {
-  // A dependency or submodule edge is not "written down" anywhere, so calling one
-  // "Prose" would fabricate a claim about where it came from.
+test('subgroup vocabulary is only used where the evidence names the declaration', () => {
+  /*
+   * A plate may be NAMED only where the payload says where its members were declared.
+   *
+   * The original assertion here was "only `references` may carry a form", which encoded
+   * the rule at the time: a dependency or a submodule edge is not written down in prose,
+   * so calling one "Prose" would fabricate a claim about where it came from. That rule
+   * still holds, and the anti-fabrication guard is now stated directly rather than
+   * inferred from which relationship type happens to be documented:
+   *
+   *   · a DOCUMENT form (prose, table-row) may only appear on document evidence, and
+   *   · a MANIFEST form may only appear where the payload names `manifest_path`,
+   *   · and anything else is unnamed.
+   *
+   * `data.manifest_path` is a documented field of the packages collector, so a manifest
+   * group is a read of the evidence rather than an inference -- which is what makes it
+   * different from the fabrication this test exists to prevent.
+   */
   const { composition } = compose('grpc__grpc');
+  const view = viewOf('grpc__grpc');
+  const evidence = (view.evidenceByRelationship ?? {}) as Record<string, Array<Record<string, unknown>>>;
+  const namesManifest = (edgeId: string): boolean => {
+    const cards = evidence[edgeId] ?? [];
+    return cards.some((card) => {
+      const data = (card.data ?? {}) as Record<string, unknown>;
+      const inner = (data.data && typeof data.data === 'object') ? (data.data as Record<string, unknown>) : data;
+      return typeof inner.manifest_path === 'string' && Boolean(inner.manifest_path);
+    });
+  };
+
   for (const plate of composition.plates) {
-    if (plate.relationshipType === 'references') continue;
-    assert.equal(plate.form ?? null, null, `${plate.relationshipType} must not be named for a document form`);
-    assert.deepEqual(plate.subgroups, [], `${plate.relationshipType} must not carry document subgroups`);
+    const form = String(plate.form ?? '');
+    if (!form && plate.subgroups.length === 0) continue;
+
+    if (form === 'manifest') {
+      // Every member must be backed by a record that names its declaring manifest.
+      for (const edgeId of plate.memberEdgeIds) {
+        assert.ok(namesManifest(edgeId), `${edgeId} is grouped as manifest but names no manifest_path`);
+      }
+      continue;
+    }
+
+    // A document form is still reserved for document evidence.
+    if (plate.relationshipType !== 'references') {
+      assert.fail(`${plate.relationshipType} must not carry the document form "${form}"`);
+    }
   }
+
+  /*
+   * And the guard the original test was really after, stated on the primitive: an
+   * unattributable member keeps the WHOLE fan neutral. Naming a group over the members
+   * whose evidence happens to be present would be a claim about all of them.
+   */
+  assert.deepEqual(
+    evidenceSubgroups([
+      { edgeId: 'a', card: { data: { manifest_path: 'x/Cargo.toml' } } },
+      { edgeId: 'b', card: { data: { manifest_path: 'y/Cargo.toml' } } },
+      { edgeId: 'c', card: {} },
+    ]),
+    [],
+    'one unclassifiable member keeps the whole fan neutral',
+  );
 });
 
 test('the field geometry derives its numbers rather than restating them', () => {
