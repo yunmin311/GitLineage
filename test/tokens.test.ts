@@ -116,21 +116,22 @@ function declaredIn(selector: string): Map<string, string> {
  */
 const GOLDEN: Record<string, string> = {
   // paper & surface
-  '--paper': '#F7F5F0',
-  '--paper-deep': '#F1EFE8',
-  '--surface': '#FCFBF8',
-  '--surface-hi': '#FFFFFF',
-  '--surface-sunk': '#F2F0EA',
+  '--paper': '#F2F1EB',
+  '--paper-deep': '#E9E8E0',
+  '--surface': '#F8F7F2',
+  '--surface-hi': '#FDFCFA',
+  '--surface-sunk': '#E3E2DD',
   // ink ramp
-  '--ink': '#14130F',
-  '--ink-2': '#4A4842',
-  '--ink-3': '#7C7970',
-  '--ink-4': '#A8A49A',
+  '--ink': '#17150F',
+  '--ink-2': '#525048',
+  '--ink-3': '#6B6961',
+  '--ink-4': '#8D8C86',
   '--ink-5': '#C4C0B6',
   // rules
-  '--rule': '#E2DFD6',
-  '--rule-2': '#CFCBC0',
+  '--rule': '#D5D4CE',
+  '--rule-2': '#BCBBB4',
   '--rule-3': '#B4AFA2',
+  '--rule-strong': '#17150F',
   '--rule-hair': '1px',
   '--rule-firm': '1px solid var(--rule)',
   '--rule-heavy': '1px solid var(--ink)',
@@ -141,10 +142,14 @@ const GOLDEN: Record<string, string> = {
   '--brand-wash': '#DFE9F3',
   '--brand-edge': '#8295A6',
   // evidence status
-  '--verified': '#48687F',
-  '--declared': '#8A6A54',
-  '--detected': '#6E7379',
-  '--alert': '#8A5450',
+  '--verified': '#486884',
+  '--verified-wash': '#E0EDF9',
+  '--declared': '#806151',
+  '--declared-wash': '#FBE9E0',
+  '--detected': '#6B7177',
+  '--detected-wash': '#E7ECF0',
+  '--alert': '#83564F',
+  '--alert-wash': '#FCE7E4',
   // geometry
   '--r-sm': '3px',
   '--r-md': '5px',
@@ -165,8 +170,8 @@ const GOLDEN: Record<string, string> = {
   '--s10': '64px',
   '--s11': '96px',
   // motion
-  '--d-fast': '120ms',
-  '--d-move': '280ms',
+  '--d-fast': '110ms',
+  '--d-move': '260ms',
   '--d-trace': '620ms',
   '--ease': 'cubic-bezier(.22, .61, .36, 1)',
   '--ease-inout': 'cubic-bezier(.4, 0, .2, 1)',
@@ -188,22 +193,7 @@ const GOLDEN: Record<string, string> = {
  * Removing an entry from this table is how a slice claims it.
  */
 const DEFERRED: Record<string, { v33: string; owner: string }> = {
-  '--paper': { v33: '#F2F1EB', owner: 'slice 2 (landing) + 4 (explorer chrome)' },
-  '--paper-deep': { v33: '#E9E8E0', owner: 'slice 2 (landing)' },
-  '--surface': { v33: '#F8F7F2', owner: 'slice 2 (landing)' },
-  '--surface-hi': { v33: '#FDFCFA', owner: 'slice 2 (landing)' },
-  '--surface-sunk': { v33: '#E3E2DD', owner: 'slice 2 (landing)' },
-  '--ink': { v33: '#17150F', owner: 'slice 2 (landing)' },
-  '--ink-2': { v33: '#525048', owner: 'slice 2 (landing)' },
-  '--ink-3': { v33: '#6B6961', owner: 'slice 2 (landing)' },
-  '--ink-4': { v33: '#8D8C86', owner: 'slice 2 (landing)' },
-  '--verified': { v33: '#486884', owner: 'slice 4 (explorer chrome)' },
-  '--declared': { v33: '#806151', owner: 'slice 4 (explorer chrome)' },
-  '--detected': { v33: '#6B7177', owner: 'slice 4 (explorer chrome)' },
-  '--alert': { v33: '#83564F', owner: 'slice 4 (explorer chrome)' },
-  '--d-fast': { v33: '110ms', owner: 'slice 4 (explorer chrome)' },
-  '--d-move': { v33: '260ms', owner: 'slice 4 (explorer chrome)' },
-  '--d-trace': { v33: '900ms', owner: 'slice 3 (analysis)' },
+  '--d-trace': { v33: '900ms', owner: 'slice 4 -- declined on purpose, see app.css' },
 };
 
 test('every global token is defined exactly once', () => {

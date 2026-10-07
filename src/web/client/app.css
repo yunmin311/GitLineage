@@ -33,27 +33,37 @@
   /* ---------------------------------------------------------- paper & surface
      Monochrome. A warm bone that is never pure white, so the page reads as paper
      rather than as a screen. */
-  --paper: #F7F5F0;
-  --paper-deep: #F1EFE8;
-  --surface: #FCFBF8;
-  --surface-hi: #FFFFFF;
-  --surface-sunk: #F2F0EA;
+  --paper: #F2F1EB;
+  --paper-deep: #E9E8E0;
+  --surface: #F8F7F2;
+  /* V3.3's brightest surface is #FDFCFA, not #FFFFFF. A pure-white surface under a
+     warm bone paper is what made a hover read as a washout -- it is the only value in
+     the old system that was not a paper. */
+  --surface-hi: #FDFCFA;
+  --surface-sunk: #E3E2DD;
 
   /* ------------------------------------------------------------------ ink
      Five rungs, near-black and warm. Hierarchy moves along this ladder and the
      weight axis, never along a size ramp. */
-  --ink: #14130F;
-  --ink-2: #4A4842;
-  --ink-3: #7C7970;
-  --ink-4: #A8A49A;
+  --ink: #17150F;
+  --ink-2: #525048;
+  --ink-3: #6B6961;
+  --ink-4: #8D8C86;
+  /* Production's fifth rung. V3.3 stops at four, so this has no counterpart there; it
+     stays because the Explorer chrome still needs one step below `--ink-4`, and it is
+     still on the ramp rather than off it. */
   --ink-5: #C4C0B6;
 
   /* ------------------------------------------------------------------ rules
      Hairline default, two weights of structure. The 2px structural border is
      named so the raised objects agree on it rather than each picking 1px or 2px. */
-  --rule: #E2DFD6;
-  --rule-2: #CFCBC0;
+  --rule: #D5D4CE;
+  --rule-2: #BCBBB4;
   --rule-3: #B4AFA2;
+  /* V3.3 names the 2px structural border as a COLOUR, `--rule-strong`, in ink. The old
+     system had the same idea only as the `--rule-heavy` composite below, so the Drawer
+     identity object and the rail's selected row had no colour to reference. */
+  --rule-strong: #17150F;
   --rule-hair: 1px;
   --rule-firm: 1px solid var(--rule);
   --rule-heavy: 1px solid var(--ink);
@@ -74,10 +84,10 @@
      Three hues, reserved for status and nothing else. None of them is load
      bearing on its own: the word is always beside the mark, and each status also
      carries a distinct SHAPE (see `.st`). */
-  --verified: #48687F;      --verified-wash: #E7EEF4;
-  --declared: #8A6A54;      --declared-wash: #F6EDE7;
-  --detected: #6E7379;      --detected-wash: #EDEEEF;
-  --alert: #8A5450;         --alert-wash: #F7EAE9;
+  --verified: #486884;      --verified-wash: #E0EDF9;
+  --declared: #806151;      --declared-wash: #FBE9E0;
+  --detected: #6B7177;      --detected-wash: #E7ECF0;
+  --alert: #83564F;         --alert-wash: #FCE7E4;
 
   /* -------------------------------------------------------------- geometry
      One radius scale, one structural border weight, and hard shadows that never
@@ -118,6 +128,11 @@
      names these steps differently, and the surface slices adopt its names as
      each composition is ported; renaming them here would detach a token from the
      role it is measured against. */
+  /* V3.3's label role, promoted from the Landing's scoped declaration to the shared
+     vocabulary: one label step for the whole product, which is what stops a section
+     caption in the rail from being a different object from a section caption in the
+     Drawer. */
+  --t-label-size: 11.5px;   --t-label-wt: 600;      --t-label-lh: 1.35;   --t-label-track: .005em;
   --t-display-size: 44px;   --t-display-wt: 600; --t-display-lh: 1.04;  --t-display-track: -0.035em;
   --t-title-size: 25px;     --t-title-wt: 590;   --t-title-lh: 1.12;    --t-title-track: -0.028em;
   --t-subject-size: 25px;   --t-subject-wt: 600; --t-subject-lh: 1.14;   --t-subject-track: -0.030em;
@@ -142,8 +157,13 @@
   /* ---------------------------------------------------------------- motion
      Two durations for state and relocation, one for the tracer. Anything else is
      decoration. */
-  --d-fast: 120ms;
-  --d-move: 280ms;
+  --d-fast: 110ms;
+  --d-move: 260ms;
+  /* V3.3's tracer takes 900ms. Production's is 620ms and STAYS 620ms, deliberately:
+     the canvas acceptance suite reads the tracer's settled position after a fixed 900ms
+     wait, so adopting 900ms exactly would make every one of those reads a race against
+     the animation's own duration. The tracer is the graph world's motion, and the graph
+     world is frozen. Recorded rather than silently left behind. */
   --d-trace: 620ms;
   --ease: cubic-bezier(.22, .61, .36, 1);
   --ease-inout: cubic-bezier(.4, 0, .2, 1);
@@ -310,7 +330,9 @@
    defect: a selected row painted white on hover and lost its marker. */
 [data-state="rest"]:hover,
 [data-state="unselected"]:hover {
-  background: #F1EFE8;
+  /* V3.3's hover step. The old value was the old `--paper-deep`, left as a literal after
+     that token moved -- an orphan colour rather than a choice. */
+  background: #F4F2EC;
   box-shadow: inset 0 0 0 1px var(--rule-2);
 }
 /* Focus-visible is a ring OUTSIDE, so it can never cover the selection bar. */
@@ -324,12 +346,35 @@
 }
 /* selected + hover deepens the ground and keeps both the bar and the ring. */
 [data-state="selected"]:hover, .sel:hover {
-  background: #EFEEE6;
+  background: #EFEDE6;
   box-shadow: inset 3px 0 0 var(--ink), inset 0 0 0 1px var(--rule-2);
 }
 [data-state="selected"]:focus-visible, .sel:focus-visible {
   outline: 2px solid var(--ink); outline-offset: 1px;
   box-shadow: inset 3px 0 0 var(--ink);
+}
+/*
+ * The chrome ladder: mineral blue, and only outside the graph.
+ *
+ * The ladder above is the canvas's, and it stays INK. V3.3 freezes graph selection on
+ * ink deliberately -- the brand pigment is reserved for the rail and the Drawer, so the
+ * world's own selection never competes with the instruments around it. That is the
+ * approved distinction, so it is expressed as a scope rather than as a new value: inside
+ * `.rail` and `.drawer` the same selected state is brand, and inside the canvas it is
+ * untouched ink.
+ */
+.rail [data-state="selected"], .drawer [data-state="selected"] {
+  background: var(--brand-wash);
+  box-shadow: inset 3px 0 0 var(--brand);
+  color: var(--brand-press);
+}
+.rail [data-state="selected"]:hover, .drawer [data-state="selected"]:hover {
+  background: color-mix(in srgb, var(--brand-wash) 84%, var(--brand));
+  box-shadow: inset 3px 0 0 var(--brand), inset 0 0 0 1px var(--brand-edge);
+  color: var(--brand-press);
+}
+.rail [data-state="unselected"]:hover, .drawer [data-state="unselected"]:hover {
+  box-shadow: inset 0 0 0 1px var(--brand-edge);
 }
 [data-state="disabled"] {
   opacity: .4; cursor: not-allowed; pointer-events: none; filter: saturate(.5);
@@ -505,9 +550,13 @@ a { color: inherit; }
 
 .appbar {
   display: flex; align-items: center; gap: 12px;
-  height: var(--bar-h); padding: 0 18px;
-  border-bottom: 2px solid var(--ink);
-  background: var(--paper);
+  /* V3.3's product bar, and the first shared surface this slice unifies. It was a
+     2px ink rule over the page paper, which made the bar the heaviest object in a
+     product whose graph is meant to be the heaviest. V3.3 puts it on `--surface` behind
+     a hairline, which is what lets the bar recede and the world come forward. */
+  height: var(--bar-h); padding: 0 var(--s6);
+  border-bottom: 1px solid var(--rule);
+  background: var(--surface);
   position: sticky; top: 0; z-index: 40;
 }
 .brand { display: inline-flex; align-items: center; gap: 7px; font-weight: 650; font-size: 15px; letter-spacing: -0.01em; text-decoration: none; }
@@ -644,17 +693,22 @@ a { color: inherit; }
    and the Explorer chrome change together. Everything below that does NOT meet a shared
    shell surface is adopted now, so the Landing is visibly V3.3 in surface, rules, status,
    brand and type. */
+/*
+ * The Landing's colour overrides are GONE, and that is the point of this slice.
+ *
+ * Slice 2 declared V3.3's surface, rule and status values here, scoped to `.landing`,
+ * because the shell still carried V2.1's and adopting them globally would have restyled
+ * the Explorer before it was ported. They are now the `:root` values, so the Landing,
+ * the Analysis surface and the Explorer resolve one paper, one ink ramp, one rule scale
+ * and one set of status hues. What is left scoped is only the Landing's own TYPE steps,
+ * which are a composition choice rather than a shared surface, and which the frozen graph
+ * world's own roles still need to keep.
+ */
 .landing {
-  --surface: #F8F7F2;
-  --surface-hi: #FDFCFA;  --surface-sunk: #E3E2DD;
-  --rule: #D5D4CE;       --rule-2: #BCBBB4;   --rule-3: #BCBBB4;
-  --verified: #486884;   --verified-wash: #E0EDF9;
-  --declared: #806151;   --declared-wash: #FBE9E0;
-  --detected: #6B7177;   --detected-wash: #E7ECF0;
   /* V3.3 type steps, Landing-local names. The Explorer's `--t-*` roles are untouched. */
   --t-display-size: 58px;  --t-display-lh: 1.03;  --t-display-track: -0.052em;
   --t-sub-size: 16.5px;    --t-name-size: 15px;    --t-micro-size: 12.5px;
-  --t-cap-size: 9.5px;     --t-foot-size: 12px;    --t-label-size: 11.5px;
+  --t-cap-size: 9.5px;     --t-foot-size: 12px;
   --t-text-size: 13px;
   /* The page ground comes from the shell, so there is no seam at the column edge. */
   background: transparent;
@@ -1252,6 +1306,24 @@ a { color: inherit; }
 .is-more-below > .rail-more, .is-more-below > .drawer-more { opacity: 1; }
 .rail[hidden] { display: none; }
 .railsec { display: block; }
+/*
+ * Rail modules.
+ *
+ * V3.3 separates its five rail modules with one hairline above each module and NO rule
+ * under any heading. Production underlined every heading and drew no module boundary, so
+ * the rail read as a stack of titled text rows -- the exact collapse this slice exists
+ * to undo. Now the label is a label and the hairline does the separating.
+ */
+.rail-scroll > .lblk {
+  padding-top: var(--s4); border-top: 1px solid var(--rule);
+}
+.rail-scroll > .lblk:first-child { padding-top: 0; border-top: 0; }
+/* The one label style for the whole rail. */
+.lblk h6 {
+  font-size: var(--t-label-size); font-weight: var(--t-label-wt);
+  line-height: var(--t-label-lh); letter-spacing: var(--t-label-track);
+  text-transform: none; color: var(--ink-2); margin: 0 0 var(--s2);
+}
 .rs-t {
   font-size: var(--t-section-size); font-weight: var(--t-section-wt);
   letter-spacing: var(--t-section-track); text-transform: uppercase;
@@ -1554,10 +1626,7 @@ a { color: inherit; }
  * any width.
  */
 .lblk { margin-bottom: var(--s5); }
-.lblk h6 {
-  font-size: 9px; letter-spacing: 0.11em; text-transform: uppercase;
-  color: var(--ink-4); font-weight: 600; margin: 0 0 8px;
-}
+.lblk h6 { margin: 0; }
 .statline { display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; color: var(--ink-2); line-height: 1.45; }
 .statline b { font-weight: 650; color: var(--ink); }
 .statline .k { font-family: var(--mono); font-size: 10.5px; color: var(--ink-4); }
@@ -1766,7 +1835,11 @@ a { color: inherit; }
  */
 .drawer {
   grid-column: 3; grid-row: 1;
-  border-left: var(--rule-firm); background: var(--surface);
+  /* V3.3 gives the Drawer a 1px `--ink-4` edge where the rail gets a hairline `--rule`.
+     This is the whole of the Drawer's extra strength at the frame level: the rail must
+     stay the secondary instrument, and the Drawer must read as the active one, without
+     either of them buying that with a bigger font. */
+  border-left: 1px solid var(--ink-4); background: var(--surface);
   /*
    * `overflow: visible`, deliberately -- and this was a real bug, not a preference.
    *
@@ -1817,7 +1890,17 @@ a { color: inherit; }
 .drawer-close:hover { color: var(--ink); border-color: var(--rule-3); }
 
 .d-eyebrow { font-family: var(--mono); font-size: 9px; letter-spacing: 0.08em; color: var(--ink-4); margin: 0 0 6px; }
-.d-head { font-size: 17px; font-weight: 650; margin: 0 0 6px; padding-right: 52px; }
+.d-head {
+  /* The identity object: V3.3's structural border plus the hard shadow.
+     This, and not a larger name, is what makes the Drawer read as stronger than the
+     rail -- the brief asks for strength through structure, surface and hue, never
+     through oversized typography. */
+  border: var(--bw) solid var(--rule-strong);
+  border-radius: var(--r-md);
+  box-shadow: var(--sh-1);
+  padding: var(--s3) var(--s4);
+  margin-bottom: var(--s3);
+  font-size: 17px; font-weight: 650; margin: 0 0 6px; padding-right: 52px; }
 .d-sub { font-size: 12px; color: var(--ink-2); margin: 0 0 10px; }
 .d-sub .mono { font-size: 10px; color: var(--ink-4); }
 .d-pair { font-family: var(--mono); font-size: 12px; color: var(--ink); margin: 0 0 12px; word-break: break-all; }
@@ -1874,7 +1957,11 @@ a { color: inherit; }
 .d-why.st-DECLARED { border-left-color: var(--declared); }
 .d-why.st-DETECTED { border-left-color: var(--detected); }
 .d-why strong { font-weight: 650; color: var(--ink); }
-.d-actions { display: flex; gap: 8px; margin-top: 12px; }
+.d-actions {
+  /* The actions sit on an explicit surface step down from the payload above. */
+  background: var(--surface-sunk);
+  border-top: 1px solid var(--rule);
+  display: flex; gap: 8px; margin-top: 12px; }
 .d-action { font-family: var(--mono); font-size: 11px; padding: 6px 10px; border: 1px solid var(--rule-2); border-radius: 4px; background: var(--surface-hi); color: var(--ink-2); text-decoration: none; }
 .d-action:hover { border-color: var(--ink-4); color: var(--ink); }
 
@@ -1920,8 +2007,12 @@ a { color: inherit; }
   .explorer-body.with-drawer { grid-template-columns: 0 minmax(0, 1fr) 0; }
   .explorer-body.rail-open { grid-template-columns: var(--rail-w) minmax(0, 1fr) 0; }
   .drawer {
+    /* The overlay treatment changes the Drawer's POSITION, not its strength. It kept
+       the older hairline `--rule-firm` edge here, which meant that at 1280 and below --
+       including the narrowest desktop there is -- the Drawer read weaker than the rail
+       it is meant to outrank. The V3.3 ink-4 edge applies at every width. */
     position: absolute; right: 0; top: 0; bottom: 0; width: var(--drawer-w);
-    z-index: 25; border-left: var(--rule-firm);
+    z-index: 25; border-left: 1px solid var(--ink-4);
   }
   .drawer-scrim {
     display: block; position: absolute; inset: 0;
