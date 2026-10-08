@@ -216,11 +216,11 @@ test('the rail is a shell overlay with responsive disclosure', () => {
   const body = code(APP);
   assert.match(CSS, /\.explorer-body\s*\{[^}]*grid-template-columns/, 'the shell is a grid');
   assert.match(CSS, /\.rail\s*\{[^}]*position:\s*absolute/, 'the rail overlays the stage');
-  // Below 1500 the rail collapses to zero width and comes back as a disclosure. The
+  // Below 1600 the rail collapses to zero width and comes back as a disclosure. The
   // world does not move: it is 1920 x 1720 at every viewport, and only the window over
   // it changes.
-  assert.match(CSS, /@media \(max-width:\s*1500px\)/, 'the rail breakpoint is the frozen one');
-  assert.match(CSS, /@media \(max-width:\s*1500px\)[\s\S]{0,600}?\.rail\s*\{\s*display:\s*none/,
+  assert.match(CSS, /@media \(max-width:\s*1599px\)/, 'P0.5 uses the explicit single-panel breakpoint below 1600');
+  assert.match(CSS, /@media \(max-width:\s*1599px\)[\s\S]{0,600}?\.rail\s*\{\s*display:\s*none/,
     'and the rail is hidden there rather than reflowed');
   assert.match(body, /function toggleRail\(/, 'the disclosure is wired');
   assert.match(body, /rail-toggle/, 'to the shell\'s own button');

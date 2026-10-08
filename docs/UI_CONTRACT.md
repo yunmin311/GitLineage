@@ -39,21 +39,56 @@ Shell: appbar, Rail and Drawer. Side panels overlay the stage and do not own gri
 The HUD has a dedicated bottom lane above panels, with inert regions passing through
 pointer input. Its legend and controls cannot overlap each other.
 
-## Rail / Drawer
-Rail defaults visible above 1500px and collapses below that breakpoint; disclosure
-remains available at all widths. Drawer opens on selection, closes on explicit close /
-Escape / genuine blank click. Both panels can coexist. Scroll within panel; panel opening
-never changes stage bounds or triggers fit. At compact widths overlays may cover world
-content; deliberate navigation is available through pan/zoom and closing Context.
+## Responsive Panel Policy
+One reducer owns visible Rail/Drawer state (`lib/panels.mjs`); event handlers must not
+mutually call panel open/close handlers. Selection and camera remain Explorer state.
+
+| CSS viewport width | Initial Context | Selected evidence | Opening Context while selected |
+| --- | --- | --- | --- |
+| >=1600 | open | Drawer may coexist with Rail | both allowed |
+| 1024–1599 | closed | closes Rail and opens Drawer | hides Drawer; keeps selection and evidence DOM |
+| 768–1023 | closed | single temporary Drawer | single temporary Rail |
+
+Closing Context restores retained evidence and its exact scroll offset. Closing evidence
+clears selection and returns focus to its rendered node/row target (Fit fallback when absent). Temporary Context supports Escape,
+Back/Close and its disclosure toggle. Panels scroll independently; transitions must not
+rebuild retained evidence. The <768 legacy shell is not Mobile Explorer acceptance:
+Graph/Relations/Evidence navigation and pinch require the separate Commit B gate.
+
+## Viewport Visibility Contract
+Panels overlay the unchanged stage, above the graph and below the dedicated HUD lane.
+Measure the uncovered rectangle from actual stage, visible panel and HUD bounds. Protect
+an existing selected node box, relation row as a whole:
+its intersection area with either panel must be zero and its real hit targets reachable.
+Unexpanded aggregate members have no rendered row to protect. Direct edges protect their
+visual labels, whose pointer events are disabled; the actual path hit area is separate
+and not covered by this responsive acceptance suite. Label protection must not move nodes
+within the graph or alter canonical semantics.
 
 ## Camera / Zoom / Pan invariants
-For no panel / Rail / Drawer / both: compare stage rect, viewBox, getScreenCTM(), node
-screen rect, zoom and world focal point. All remain equal on panel toggles. Selection
-never silently pans or fits. Explicit fit restores the authored opening camera.
+Compare actual stage rect, getScreenCTM(), node screen dimensions, zoom, viewBox and world
+focal point. Stage and screen scale remain equal across panel transitions. A newly
+occluded selection may cause only the smallest deterministic camera translation needed
+to reach the free rectangle, with an 8px margin, through the existing camera writer.
+CTM translation and focal point may therefore change; unconditional equality was the
+obsolete P0 invariant. Already-visible targets must not move. Repeated open/close cycles
+must not accumulate movement. Closing panels does not undo the protection pan or fit.
+Oversized targets cannot be made to fit through translation alone: keep user zoom and
+camera bounds, never silently shrink or fit. Explicit fit restores the authored camera.
 Zoom and pan affect world only; HUD rect and computed font size remain equal.
 
+## Touch Interaction Contract
+For this desktop/tablet gate, panel scroll containers own vertical native touch scroll
+(`touch-action: pan-y`, contained overscroll); canvas owns its existing pointer pan.
+Real Chromium touch input must prove that evidence scroll leaves camera and selection
+unchanged, hidden evidence restores its scroll, and canvas pan retains evidence and
+selection after pointer-up. Do not claim physical-device or multi-pointer coverage from
+these checks. Pinch, phone navigation, safe areas and soft-keyboard acceptance remain
+Commit B work. No new mobile transitions are introduced by Commit A.
+
 ## Keyboard / Accessibility
-Input fields own their keystrokes. Escape closes search first, then selection. SVG rows
+Input fields own their keystrokes. Escape closes Layers/search first, then temporary
+Context, then selection. Wide Context uses its explicit Close button. SVG rows
 and plates support Enter / Space, expose role/name/state and suppress default page scroll.
 Preserve visible focus and focus return after Drawer close. A pan never activates the
 object under pointer-up. Pointer down is pending until displacement exceeds 5 CSS px;
@@ -61,7 +96,9 @@ then panning owns that gesture. Pointer cancel cleans up capture. Blank click ma
 selection only when this gesture has never crossed the drag threshold.
 
 ## Responsive Viewports
-Test the four sizes above with short and long repository names. Small screens use
+UI Contract tests the four sizes above with short and long repository names. Responsive
+acceptance additionally tests 1920×1080, 1600×900, 1280×800, 1024×768, 768×1024,
+820×1180 and 844×390 (tablet-width landscape). Small screens use
 explicit shell layout changes, never CSS transforms to simulate responsive graph scale.
 200% acceptance includes a compact CSS viewport/device scale probe and a separate full
 Chromium run that selects 200% in browser settings. Verify innerWidth=640, innerHeight=400,
@@ -73,6 +110,10 @@ deviceScaleFactor alone is not browser zoom. Preserve access to primary actions 
 geometry and screenshots under `artifacts/ui-contract/after`. For baseline reproduction,
 build the baseline revision first and select a fresh `UI_EVIDENCE_PHASE` directory;
 the phase flag labels evidence and does not select a revision. Preserve original captures.
+`npm run test:responsive` saves selected-target, free-area, intersection, hit-testing,
+CTM and repeated-transition evidence under `artifacts/responsive/after`. It also dispatches
+actual Chromium touch events for independent evidence scrolling and canvas panning.
+`test/panels.test.ts` covers threshold/state transitions and minimal/idempotent pan.
 Compare screenshots visually and
 assert pixels/geometry/click outcomes. Do not bulk update snapshots. Existing Canvas,
 Landing, Analysis, Preflight and stale A→B remain required regression checks. Changed

@@ -179,6 +179,7 @@
      The shell is the only part of the product that responds to the viewport. The
      graph world is a fixed spatial coordinate system and these do not describe it. */
   --rail-w: 264px;
+  --drawer-w: 440px;
   --bar-h: 44px;
   --hud-h: 64px;
   --strip-h: 46px;
@@ -1928,14 +1929,14 @@ a { color: inherit; }
 .drawer-scrim { display: none; }
 
 /*
- * <= 1500px - the context rail collapses to a disclosure.
+ * <1600px - the context rail collapses to a disclosure.
  *
  * The rail holds prose, a census and the key. Below this width there is no longer
  * room for it beside a 1920-wide world, so it becomes something the reader opens.
  * Nothing about the graph changes: the world is still 1920 x 1720 and the same
  * coordinates land in the same places, the window over them is simply narrower.
  */
-@media (max-width: 1500px) {
+@media (max-width: 1599px) {
   .rail { display: none; }
   .explorer-body.rail-open .rail { display: flex; }
   .rail-toggle { display: inline-flex; }
@@ -1984,3 +1985,15 @@ a { color: inherit; }
   .viewport-hud { gap: var(--s2); padding: var(--s2); }
   .band .key { gap: var(--s2); }
 }
+
+/* Temporary panels retain native scrolling and an explicit return. */
+.rail-close { align-self: flex-start; margin: var(--s2) var(--s4); min-height: 44px; }
+.drawer-inner, .rail-scroll { touch-action: pan-y; overscroll-behavior: contain; }
+@media (min-width: 768px) and (max-width: 1023px) {
+  :root { --drawer-w: 320px; }
+  .drawer-close { min-width: 44px; min-height: 44px; }
+}
+
+/* Programmatic node focus returns to its existing visual primitive. */
+.node:focus-visible { outline: none; }
+.node:focus-visible .node-box { stroke: var(--ink); stroke-width: 1; }

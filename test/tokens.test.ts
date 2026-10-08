@@ -226,7 +226,7 @@ test('every global token is defined exactly once', () => {
 test('no reference points at a token that does not exist', () => {
   const declared_ = declared();
   // Set by app.js at runtime, so absent from the stylesheet by design.
-  const runtime = /^(--(world|frame|band|gl-|drawer-w))/;
+  const runtime = /^(--(world|frame|band|gl-))/;
   const scopes = Object.fromEntries(ALLOWED_SCOPES.map((s) => [s, declaredIn(s)]));
   const missing = [...new Set([...APP_CSS.matchAll(/var\((--[a-z0-9-]+)/g)]
     .map((m) => m[1])

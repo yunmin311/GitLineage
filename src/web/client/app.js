@@ -74,6 +74,10 @@ import {
 } from './lib/compose.mjs';
 import { DRAWABLE_CAPACITY } from './lib/regime.mjs';
 
+import { initialPanels, transitionPanels, visiblePanels, protectionPan } from './lib/panels.mjs';
+
+let panels = initialPanels(window.innerWidth);
+
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const ZOOM_STEP = 1.25;
 /**
@@ -216,6 +220,8 @@ function navigate(repository, push = true) {
  * this only prepares the frame.
  */
 function showWorking() {
+  panels = initialPanels(window.innerWidth);
+  applyPanels();
   // The landing is left behind as soon as a repository route is resolved, so the
   // working frame is never stacked on top of the marketing page.
   setHidden($('landing'), true);
@@ -847,7 +853,7 @@ function renderChrome(view) {
   setHidden($('appbar-mid'), false);
   setHidden($('appbar-right'), false);
   setHidden($('project-source'), true);
-  $('rail-toggle').setAttribute('aria-expanded', String(getComputedStyle($('rail')).display !== 'none'));
+  applyPanels();
   const repo = state.repository;
   $('crumb-repo').textContent = view.subject.owner && view.subject.name
     ? `${view.subject.owner}/${view.subject.name}`
@@ -1466,6 +1472,7 @@ function draw() {
   const view = state.view;
   const canvas = $('canvas');
   const focusedEdge = document.activeElement?.getAttribute('data-edge-id');
+  const focusedNode = document.activeElement?.getAttribute('data-node-id');
   canvas.replaceChildren();
   if (!view) return;
 
@@ -1900,6 +1907,7 @@ const hiddenRows = plateHiddenRows(plate);
       ].filter(Boolean).join(' '),
     });
     group.dataset.nodeId = node.id;
+    group.setAttribute('tabindex', '-1'); // Programmatic focus return after evidence close.
 
     // Identity comes from the canonical `entity.type` on the view node, never
     // from `isPackage`. `nodePrimitive` covers the whole canonical union, so a
@@ -1986,6 +1994,9 @@ const hiddenRows = plateHiddenRows(plate);
   fitGraphText(canvas);
   if (focusedEdge) {
     Array.from(canvas.querySelectorAll('[data-edge-id]')).find(row => row.getAttribute('data-edge-id') === focusedEdge)?.focus({ preventScroll: true });
+  }
+  if (focusedNode) {
+    Array.from(canvas.querySelectorAll('[data-node-id]')).find(node => node.getAttribute('data-node-id') === focusedNode)?.focus({ preventScroll: true });
   }
   renderBundles();
   renderLayersPop();
@@ -2273,17 +2284,16 @@ function clearSelection() {
 }
 
 function closeDrawer() {
-  const edge = state.selectedEdgeId;
+  const edge = state.selectedEdgeId, nodeId = state.selectedNodeId;
   clearSelection();
+  const node = Array.from($('canvas').querySelectorAll('[data-node-id]')).find(node => node.getAttribute('data-node-id') === nodeId);
   const row = Array.from($('canvas').querySelectorAll('[data-edge-id]')).find(row => row.getAttribute('data-edge-id') === edge);
-  (row || $('zoom-fit')).focus({ preventScroll: true });
+  (node || row || $('zoom-fit')).focus({ preventScroll: true });
 }
 
 function renderDrawer() {
   const drawer = $('drawer');
   const inner = $('drawer-inner');
-  const body = $('explorer-body');
-  const scrim = $('drawer-scrim');
   inner.replaceChildren();
 
   const view = state.view;
@@ -2297,9 +2307,8 @@ function renderDrawer() {
   }
 
   const open = Boolean(state.selectedEdgeId || state.selectedNodeId);
-  setHidden(drawer, !open);
-  setHidden(scrim, true);
-  body.classList.toggle('with-drawer', open);
+  panels = transitionPanels(panels, { type: 'selection', selected: open });
+  applyPanels();
   if (!open) {
     // Only rewrite the URL if it actually named something that is gone.
     if (window.location.search) syncUrl();
@@ -2339,6 +2348,7 @@ function renderDrawer() {
   inner.scrollTop = 0;
   inner.classList.remove('gl-has-above', 'gl-has-below');
   scrollAffordance(inner, drawer);
+  protectSelectedTarget();
 }
 
 function nameOf(id) {
@@ -2671,14 +2681,54 @@ function setCamera(canvas, viewBox, zoom) {
   return window;
 }
 
-/** Shell-only disclosure: never redraw or resize the graph. */
-function toggleRail(force) {
+/** The only writer of Rail/Drawer visibility. Hiding evidence retains its DOM/scroll. */
+function applyPanels() {
+  const visible = visiblePanels(panels);
   const body = $('explorer-body');
-  const open = force === undefined ? getComputedStyle($('rail')).display === 'none' : force === true;
-  body.classList.toggle('rail-open', open);
-  body.classList.toggle('rail-closed', !open);
-  $('rail-toggle').setAttribute('aria-expanded', String(open));
+  const hiddenFocus = (!visible.rail && $('rail').contains(document.activeElement))
+    || (!visible.drawer && $('drawer').contains(document.activeElement));
+  setHidden($('rail'), !visible.rail);
+  setHidden($('drawer'), !visible.drawer);
+  setHidden($('drawer-scrim'), true);
+  body.classList.toggle('rail-open', visible.rail);
+  body.classList.toggle('rail-closed', !visible.rail);
+  body.classList.toggle('with-drawer', visible.drawer);
+  body.dataset.panelMode = panels.mode;
+  $('rail-toggle').setAttribute('aria-expanded', String(visible.rail));
+  if (hiddenFocus) $('rail-toggle').focus({ preventScroll: true });
   syncAllScrollAffordances();
+}
+function selectedTarget() {
+  const canvas = $('canvas');
+  if (state.selectedNodeId) {
+    return Array.from(canvas.querySelectorAll('.node')).find(e => e.dataset.nodeId === state.selectedNodeId)?.querySelector('.node-box');
+  }
+  const row = Array.from(canvas.querySelectorAll('.plate-row')).find(e => e.dataset.edgeId === state.selectedEdgeId);
+  if (row) return row;
+  // Protect the visual relationship label; direct path hit coverage is a separate check.
+  const edge = Array.from(canvas.querySelectorAll('.edge-group')).find(e => e.dataset.relationshipId === state.selectedEdgeId);
+  return edge?.querySelector('.edge-label');
+}
+function protectSelectedTarget() {
+  if (panels.mode === 'legacy-mobile' || !state.view) return;
+  const target = selectedTarget();
+  if (!target) return; // Unexpanded aggregate members have no current visible row.
+  const stage = $('stage').getBoundingClientRect();
+  const hud = document.querySelector('.viewport-hud').getBoundingClientRect();
+  const visible = visiblePanels(panels);
+  const free = { left: visible.rail ? $('rail').getBoundingClientRect().right : stage.left,
+    right: visible.drawer ? $('drawer').getBoundingClientRect().left : stage.right,
+    top: stage.top, bottom: hud.top };
+  const pan = protectionPan(target.getBoundingClientRect(), free);
+  if (!pan || (!pan.dx && !pan.dy)) return;
+  const canvas = $('canvas'), c = canvas.getScreenCTM();
+  const [x, y, w, h] = canvas.getAttribute('viewBox').split(/\s+/).map(Number);
+  setCamera(canvas, `${x-pan.dx/c.a} ${y-pan.dy/c.d} ${w} ${h}`, state.zoom);
+}
+function toggleRail(force) {
+  panels = transitionPanels(panels, { type: 'context', open: force === undefined ? !panels.rail : force === true });
+  applyPanels();
+  protectSelectedTarget();
 }
 
 function setupViewport() {
@@ -2739,7 +2789,14 @@ function setupViewport() {
   $('zoom-out').addEventListener('click', () => zoomBy(1 / ZOOM_STEP));
   $('zoom-fit').addEventListener('click', () => fit());
   window.addEventListener('resize', () => {
-    if (state.view) draw();
+    panels = transitionPanels(panels, { type: 'resize', width: window.innerWidth });
+    applyPanels();
+    if (state.view) {
+      const canvas = $('canvas');
+      setCamera(canvas, canvas.getAttribute('viewBox'), state.zoom);
+      draw();
+      protectSelectedTarget();
+    }
     // A resize changes how much of each list fits, which changes whether there is more
     // to read. The observers catch content changes; this catches the viewport's.
     syncAllScrollAffordances();
@@ -2826,6 +2883,7 @@ $('layers-btn').addEventListener('click', () => toggleLayers());
   $('search-close').addEventListener('click', () => toggleSearch(false));
   $('drawer-scrim').addEventListener('click', () => closeDrawer());
   $('rail-toggle').addEventListener('click', () => toggleRail());
+  $('rail-close').addEventListener('click', () => toggleRail(false));
 
   /*
    * Both scrollable panels, registered once.
@@ -2852,6 +2910,7 @@ $('layers-btn').addEventListener('click', () => toggleLayers());
     if (event.key === 'Escape') {
       if (!$('layers-pop').hasAttribute('hidden')) toggleLayers(false);
       else if (!$('searchbar').hasAttribute('hidden')) toggleSearch(false);
+      else if (panels.rail && panels.mode !== 'wide') toggleRail(false);
       else if (state.selectedEdgeId || state.selectedNodeId) closeDrawer();
     }
     /*

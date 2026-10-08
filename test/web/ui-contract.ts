@@ -97,11 +97,14 @@ try {
     const drawerText = await page.locator('#drawer-inner').textContent();
     check(`${width} clicked row opens corresponding evidence`, !!drawerText?.includes(rowText!.replace(/…$/, '')) && (await geometry(page)).drawer);
     const drawer = await geometry(page);
-    check(`${width} drawer screen mapping unchanged`, same(base.stage, drawer.stage) && same(base.ctm, drawer.ctm) && same(base.subject, drawer.subject) && same(base.focal, drawer.focal), { base, drawer });
+    // P0.5 permits minimal protective translation, never a panel-induced scale/resize.
+    check(`${width} drawer stage and screen scale unchanged`, same(base.stage, drawer.stage) && base.ctm.a===drawer.ctm.a && base.ctm.d===drawer.ctm.d && base.subject.w===drawer.subject.w && base.subject.h===drawer.subject.h, { base, drawer });
     if (await page.locator('#rail-toggle').isVisible()) await page.locator('#rail-toggle').click();
-    const both = await geometry(page);
-    check(`${width} rail screen mapping unchanged`, same(drawer.stage, both.stage) && same(drawer.ctm, both.ctm), { drawer, both });
+    let both = await geometry(page);
+    check(`${width} rail stage and screen scale unchanged`, same(drawer.stage, both.stage) && drawer.ctm.a===both.ctm.a && drawer.ctm.d===both.ctm.d, { drawer, both });
+    check(`${width} policy retains selection`, both.selection===drawer.selection && both.rail && (width!>=1600?both.drawer:!both.drawer));
     await shot(page, `${width}-both-panels`);
+    if (width!<1600) { await page.locator('#rail-toggle').click(); both=await geometry(page); }
     // Zoom controls are viewport operations, available even with both panels open.
     const controlsAccessible = await page.locator('#zoom-in').evaluate(e => { const r=e.getBoundingClientRect(); return !!document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)?.closest('#zoom-in'); });
     check(`${width} HUD controls hittable with both panels`, controlsAccessible);
@@ -130,7 +133,7 @@ try {
       await page.waitForTimeout(80);
       const wheel = await geometry(page);
       check('trackpad fractional wheel retains panels and uses proportional zoom',
-        wheel.zoom !== pre.zoom && Math.abs(wheel.zoom-pre.zoom)<.01 && wheel.selection===pre.selection && wheel.drawer && wheel.rail && same(pre.hud,wheel.hud), {pre,wheel});
+        wheel.zoom !== pre.zoom && Math.abs(wheel.zoom-pre.zoom)<.01 && wheel.selection===pre.selection && wheel.drawer===pre.drawer && wheel.rail===pre.rail && same(pre.hud,wheel.hud), {pre,wheel});
       // Moving away then back remains a drag, regardless of the final displacement.
       await page.mouse.move(spot.x,spot.y); await page.mouse.down();
       await page.mouse.move(spot.x+30,spot.y-30,{steps:4}); await page.mouse.move(spot.x,spot.y,{steps:4}); await page.mouse.up();
@@ -148,7 +151,7 @@ try {
       await cdp.send('Input.dispatchTouchEvent', {type:'touchMove',touchPoints:[{x:spot.x+45,y:spot.y-45}]});
       await cdp.send('Input.dispatchTouchEvent', {type:'touchEnd',touchPoints:[]});
       await page.waitForTimeout(80); const touchPost = await geometry(page);
-      check('touch pan retains panels selection and HUD', touchPost.viewBox!==touchPre.viewBox && touchPost.selection===touchPre.selection && touchPost.drawer && touchPost.rail && same(touchPre.hud,touchPost.hud), {touchPre,touchPost});
+      check('touch pan retains panels selection and HUD', touchPost.viewBox!==touchPre.viewBox && touchPost.selection===touchPre.selection && touchPost.drawer===touchPre.drawer && touchPost.rail===touchPre.rail && same(touchPre.hud,touchPost.hud), {touchPre,touchPost});
       await cdp.detach();
       await page.emulateMedia({ reducedMotion:'reduce' });
       check('reduced motion disables surface transitions', await page.locator('#zoom-in').evaluate(e=>getComputedStyle(e).transitionDuration.split(',').every(t=>parseFloat(t)===0)));
@@ -233,11 +236,13 @@ try {
       await page.locator('.plate-row-label').first().click();
       await page.locator('#rail-toggle').click();
       const both = await geometry(page);
-      check('native 200% dual panels preserve screen mapping', same(base.ctm,both.ctm) && same(base.stage,both.stage) && same(base.subject,both.subject));
+      check('native 200% exclusive panels preserve screen mapping and selection', same(base.ctm,both.ctm) && same(base.stage,both.stage) && same(base.subject,both.subject) && both.rail && !both.drawer && !!both.selection);
+      await page.locator('#rail-toggle').click();
+      const reading = await geometry(page);
       await page.locator('#zoom-in').click();
       await page.locator('#zoom-out').click();
       const post = await geometry(page);
-      check('native 200% zoom retains HUD and panel selection', same(both.hud,post.hud) && both.selection===post.selection && post.drawer && post.rail);
+      check('native 200% zoom retains HUD and panel selection', same(both.hud,post.hud) && reading.selection===post.selection && post.drawer && !post.rail);
       await shot(page,'native-200-both-panels');
       await page.keyboard.press('Escape');
       check('native 200% Escape closes drawer', !(await geometry(page)).drawer);

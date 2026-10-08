@@ -20,7 +20,13 @@ verify painted glyphs and real hit targets. For drag changes, test selection and
 panels after pointer-up and test an ordinary blank click separately.
 
 Run build, typecheck, unit, Canvas, Landing, Analysis, Preflight, stale A→B and
-`npm run test:ui-contract`. Record screenshots and geometry with the result. Explain an
+`npm run test:ui-contract` and `npm run test:responsive`. Explorer, Rail, Drawer, camera
+or breakpoint changes must also measure uncovered stage, selected-target/panel intersection,
+real hit targets, focus/scroll restoration and native touch ownership. Use the >=1600 dual /
+1024–1599 exclusive / 768–1023 temporary policy; do not claim the <768 Mobile Explorer
+or physical-device/pinch acceptance until Commit B supplies executable checks. Record screenshots and geometry with the result. Explain an
 obsolete assertion before replacing it; never mask defects with baseline updates.
 Keep reviewable commits by stage. Report failures and unverified cases explicitly.
+Unit build tests rewrite dist/web: finish unit/build before browser suites; never race
+a rebuild against a running browser acceptance test.
 No push or deployment without explicit user authorization. Preserve existing production.
