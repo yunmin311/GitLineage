@@ -63,13 +63,17 @@ selection only when this gesture has never crossed the drag threshold.
 ## Responsive Viewports
 Test the four sizes above with short and long repository names. Small screens use
 explicit shell layout changes, never CSS transforms to simulate responsive graph scale.
-200% acceptance uses half-sized CSS viewport and a separate browser device scale probe;
+200% acceptance includes a compact CSS viewport/device scale probe and a separate full
+Chromium run that selects 200% in browser settings. Verify innerWidth=640, innerHeight=400,
+devicePixelRatio=2 and visualViewport.scale=1 at a 1280×800 browser viewport;
 deviceScaleFactor alone is not browser zoom. Preserve access to primary actions and HUD.
 
 ## Visual Regression / Interaction Acceptance
 `npm run test:ui-contract` executes real Chromium against the built bundle. Saves JSON
-geometry and screenshots under `artifacts/ui-contract/after`. Baseline reproduction:
-`UI_EVIDENCE_PHASE=before npm run test:ui-contract`. Compare screenshots visually and
+geometry and screenshots under `artifacts/ui-contract/after`. For baseline reproduction,
+build the baseline revision first and select a fresh `UI_EVIDENCE_PHASE` directory;
+the phase flag labels evidence and does not select a revision. Preserve original captures.
+Compare screenshots visually and
 assert pixels/geometry/click outcomes. Do not bulk update snapshots. Existing Canvas,
 Landing, Analysis, Preflight and stale A→B remain required regression checks. Changed
 assertions must cite the obsolete invariant and the replacement; never delete failures.
@@ -79,7 +83,7 @@ assertions must cite the obsolete invariant and the replacement; never delete fa
 - [Primer navigation](https://primer.style/product/ui-patterns/navigation/) and [Truncate](https://primer.style/product/components/truncate/): preserve context hierarchy and full identities behind constrained labels.
 - [React Flow Viewport](https://reactflow.dev/api-reference/types/viewport) and [Panel](https://reactflow.dev/api-reference/components/panel): independent world camera and viewport overlays; no React Flow dependency needed.
 - [Playwright assertions](https://playwright.dev/docs/test-assertions): wait for observable state; capture interaction and geometry, not declarations alone.
-- [Stylelint custom property checks](https://stylelint.io/user-guide/rules/no-unknown-custom-properties): token definition/reference validation. Current dynamic world CSS properties require explicit registration; avoid unrelated lint rewrites.
+- [Stylelint custom property checks](https://stylelint.io/user-guide/rules/no-unknown-custom-properties): token definition/reference validation. The lightweight `test/ui-tokens.test.ts` checks all stylesheet references against definitions without adding dependencies. Retired world-overlay properties are removed; avoid unrelated lint rewrites.
 
 Taste `redesign-existing-projects` is not installed in the supplied skill catalog/local
 skills. No installation is needed for this correctness pass; V3.3 remains the design authority.

@@ -1,10 +1,11 @@
 # GitLineage agent workflow
 
-## Runtime
-All shell/build/test/server/browser execution uses WSL2 Ubuntu-24.04, including mounted
-Windows workspaces. Windows-native GUI/OS management alone may use PowerShell.
-Never use /mnt/e/APP/node.js, /mnt/e/npm-global or /mnt/e/APP/Tools/uv/bin from WSL.
-Environment diagnosis at most once per task via agent-env.
+# >>> AI Runtime Contract (managed) >>>
+# Execution: All WSL-capable Agent shell/tool/test/dev-server execution -> WSL2 Ubuntu-24.04 Linux, including /mnt/c and /mnt/e workspaces. Windows-native GUI/OS management only -> PowerShell. Docker -> Desktop WSL Integration.
+# Forbidden in WSL: /mnt/e/APP/node.js, /mnt/e/npm-global, /mnt/e/APP/Tools/uv/bin
+# Env diagnosis: max 1x per task; dynamic facts via `agent-env`
+# Source: C:\Users\lqy\.ai-runtime\RUNTIME.md
+# <<< AI Runtime Contract (managed) <<<
 
 ## UI engineering gate
 Read docs/UI_CONTRACT.md and docs/MOTION_CONTRACT.md before UI changes. Accepted V3.3

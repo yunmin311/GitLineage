@@ -2,7 +2,8 @@
 import { chromium, type Page } from 'playwright';
 import { serve } from '../../src/web/serve.ts';
 import { resolve } from 'node:path';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, writeFile, mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 
 const phase = process.env.UI_EVIDENCE_PHASE ?? 'after';
 const out = resolve('artifacts/ui-contract', phase);
@@ -50,7 +51,7 @@ async function ink(page: Page, selector: string) {
 }
 try {
   for (const [width, height] of [[1920,1080], [1280,800], [768,800], [640,400]]) {
-    const page = await browser.newPage({ viewport: { width: width!, height: height! } });
+    const page = await browser.newPage({ viewport: { width: width!, height: height! }, deviceScaleFactor: width === 640 ? 2 : 1, hasTouch: true });
     const errors: string[] = []; page.on('pageerror', e => errors.push(e.message));
     page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
     await page.goto(url); await page.evaluate(() => document.fonts.ready);
@@ -76,7 +77,9 @@ try {
     evidence[`${width}-topbar`] = top;
     check(`${width} topbar allocation`, top.noOverlap && !top.overflow && top.operations, top);
     // At compact widths the bar may explicitly have two rows. Each row retains centre alignment.
-    check(`${width} topbar centre alignment`, width! <= 700 || top.centreSpread <= 1, top.centreSpread);
+    const spread = (items: typeof top.items) => Math.max(...items.map(r=>r.cy))-Math.min(...items.map(r=>r.cy));
+    const aligned = width! <= 700 ? spread([top.items[0]!, ...top.items.slice(4)]) <= 1 && spread(top.items.slice(1,4)) <= 1 : top.centreSpread <= 1;
+    check(`${width} topbar centre alignment`, aligned, top.items);
     await shot(page, `${width}-long-name`);
     // Keep the actual glyph screen location away from overlay panels for a real hover/click.
     if (initial.rail && await page.locator('#rail-toggle').isVisible()) await page.locator('#rail-toggle').click();
@@ -109,19 +112,51 @@ try {
     }
     // Pan in the exposed centre, not on a panel or graph object. A leftward drag gives room at clamped edges.
     const spot = await page.evaluate(() => {
-      for (let y=180; y<innerHeight-120; y+=30) for(let x=Math.round(innerWidth/2); x<innerWidth-330; x+=20) if(document.elementFromPoint(x,y)?.id==='canvas') return {x,y};
+      for (let y=180; y<innerHeight-120; y+=30) for(let x=300; x<innerWidth-40; x+=20) if(document.elementFromPoint(x,y)?.id==='canvas') return {x,y};
       return null;
     });
     if (spot) {
-      const pre = await geometry(page); await page.mouse.move(spot.x,spot.y); await page.mouse.down(); await page.mouse.move(spot.x-45,spot.y-45,{steps:8}); await page.mouse.up();
+      const pre = await geometry(page); await page.mouse.move(spot.x,spot.y); await page.mouse.down(); await page.mouse.move(spot.x+45,spot.y-45,{steps:8}); await page.mouse.up();
       const post = await geometry(page);
       check(`${width} drag retains selection and panels`, pre.selection === post.selection && pre.drawer === post.drawer && pre.rail === post.rail, { pre, post });
       check(`${width} pan changes camera only and fixes HUD`, pre.viewBox !== post.viewBox && same(pre.stage,post.stage) && same(pre.hud,post.hud) && pre.zoom === post.zoom, { pre,post });
       await shot(page, `${width}-drag`);
     } else check(`${width} exposed canvas for dual-panel pan`, width! < 768, 'No exposed canvas at this compact width');
     if (controlsAccessible) { const pre=await geometry(page); await page.locator('#zoom-fit').click(); const post=await geometry(page); check(`${width} HUD fixed on fit`, same(pre.hud,post.hud)); }
+    if (width === 1280 && spot) {
+      // Continuous trackpad deltas must make proportional camera changes.
+      const pre = await geometry(page);
+      await page.mouse.move(spot.x, spot.y); await page.mouse.wheel(0, .5);
+      await page.waitForTimeout(80);
+      const wheel = await geometry(page);
+      check('trackpad fractional wheel retains panels and uses proportional zoom',
+        wheel.zoom !== pre.zoom && Math.abs(wheel.zoom-pre.zoom)<.01 && wheel.selection===pre.selection && wheel.drawer && wheel.rail && same(pre.hud,wheel.hud), {pre,wheel});
+      // Moving away then back remains a drag, regardless of the final displacement.
+      await page.mouse.move(spot.x,spot.y); await page.mouse.down();
+      await page.mouse.move(spot.x+30,spot.y-30,{steps:4}); await page.mouse.move(spot.x,spot.y,{steps:4}); await page.mouse.up();
+      check('drag returning to origin suppresses deselection', (await geometry(page)).selection===pre.selection && (await geometry(page)).drawer);
+      const small = await geometry(page);
+      await page.mouse.move(spot.x,spot.y); await page.mouse.down(); await page.mouse.move(spot.x+2,spot.y+1); await page.mouse.up();
+      const click = await geometry(page);
+      check('sub-threshold blank click clears selection without panning', !click.drawer && same(small.viewBox,click.viewBox));
+      const row = page.locator('.plate-row[role=button]').first(); await row.focus(); await page.keyboard.press('Enter');
+      check('keyboard Enter opens evidence and preserves graph focus', (await geometry(page)).drawer && await row.evaluate(e=>e===document.activeElement));
+      // Real Chromium touch events, rather than synthetic pointer callbacks.
+      const touchPre = await geometry(page);
+      const cdp = await page.context().newCDPSession(page);
+      await cdp.send('Input.dispatchTouchEvent', {type:'touchStart',touchPoints:[{x:spot.x,y:spot.y}]});
+      await cdp.send('Input.dispatchTouchEvent', {type:'touchMove',touchPoints:[{x:spot.x+45,y:spot.y-45}]});
+      await cdp.send('Input.dispatchTouchEvent', {type:'touchEnd',touchPoints:[]});
+      await page.waitForTimeout(80); const touchPost = await geometry(page);
+      check('touch pan retains panels selection and HUD', touchPost.viewBox!==touchPre.viewBox && touchPost.selection===touchPre.selection && touchPost.drawer && touchPost.rail && same(touchPre.hud,touchPost.hud), {touchPre,touchPost});
+      await cdp.detach();
+      await page.emulateMedia({ reducedMotion:'reduce' });
+      check('reduced motion disables surface transitions', await page.locator('#zoom-in').evaluate(e=>getComputedStyle(e).transitionDuration.split(',').every(t=>parseFloat(t)===0)));
+    }
+    if (width === 1280) await page.locator('.drawer-close').focus();
     await page.keyboard.press('Escape');
     check(`${width} Escape closes drawer`, !(await geometry(page)).drawer);
+    if (width === 1280) check('Escape preserves keyboard row focus', await page.locator('.plate-row[role=button]').first().evaluate(e=>e===document.activeElement));
     check(`${width} runtime errors`, errors.length===0, errors);
     evidence[`${width}-geometry`] = { initial, base, drawer, both };
     await page.close();
@@ -162,6 +197,57 @@ try {
   check('wide glyphs and long manifest stay inside actual cards', overflow.length===0, overflow);
   check('full long manifest remains available', await long.locator('.bundle-card title').allTextContents().then(a=>a.some(t=>t.includes(path))));
   await shot(long,'long-manifest'); await long.close();
+
+  // Real browser page zoom, independent of the compact/device-scale probe above.
+  // Full Chromium exposes settings; headless-shell has no browser zoom UI.
+  if (phase !== 'before' && !process.argv.includes('--phase1')) {
+    const profile = await mkdtemp(resolve(tmpdir(), 'gitlineage-zoom-'));
+    const context = await chromium.launchPersistentContext(profile, {
+      channel: 'chromium', headless: true, viewport: { width: 1280, height: 800 },
+      ignoreDefaultArgs: ['--hide-scrollbars'],
+    });
+    try {
+      const settings = await context.newPage();
+      await settings.goto('chrome://settings/appearance');
+      await settings.locator('#zoomLevel').selectOption('2');
+      const page = await context.newPage();
+      const errors: string[] = [];
+      page.on('pageerror', e => errors.push(e.message));
+      page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
+      await page.goto(url);
+      const zoom = await page.evaluate(() => ({ width: innerWidth, height: innerHeight, dpr: devicePixelRatio, visualScale: visualViewport!.scale }));
+      check('native browser 200% zoom verified', zoom.width === 640 && zoom.height === 400 && zoom.dpr === 2 && zoom.visualScale === 1, zoom);
+      check('native 200% landing project link', await page.locator('#project-source').isVisible());
+      await page.goto(`${url}/yunmin311/obsidian-config`);
+      await page.locator('.plate-row-label').first().waitFor({ timeout: 180000 });
+      await page.evaluate(() => document.fonts.ready);
+      const accessible = await page.evaluate(() => {
+        const visible = ['#search-btn','#layers-btn','#open-source','#rail-toggle','#zoom-in','#zoom-out','#zoom-fit'].every(s => {
+          const e = document.querySelector(s)!, r = e.getBoundingClientRect();
+          return r.width > 0 && r.left >= 0 && r.right <= innerWidth && r.top >= 0 && r.bottom <= innerHeight && document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)?.closest(s);
+        });
+        return visible && document.documentElement.scrollWidth <= innerWidth;
+      });
+      check('native 200% primary actions accessible without horizontal overflow', accessible);
+      const base = await geometry(page);
+      await page.locator('.plate-row-label').first().click();
+      await page.locator('#rail-toggle').click();
+      const both = await geometry(page);
+      check('native 200% dual panels preserve screen mapping', same(base.ctm,both.ctm) && same(base.stage,both.stage) && same(base.subject,both.subject));
+      await page.locator('#zoom-in').click();
+      await page.locator('#zoom-out').click();
+      const post = await geometry(page);
+      check('native 200% zoom retains HUD and panel selection', same(both.hud,post.hud) && both.selection===post.selection && post.drawer && post.rail);
+      await shot(page,'native-200-both-panels');
+      await page.keyboard.press('Escape');
+      check('native 200% Escape closes drawer', !(await geometry(page)).drawer);
+      check('native 200% runtime errors', errors.length===0,errors);
+      evidence['native-200'] = { zoom, base, both, post };
+    } finally {
+      await context.close();
+      await rm(profile, { recursive:true, force:true });
+    }
+  }
 
 } finally {
   await writeFile(`${out}/results.json`, JSON.stringify({ checks, evidence }, null, 2));

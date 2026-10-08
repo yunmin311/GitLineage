@@ -136,21 +136,12 @@ test('the whole authored composition is inside the opening window at every deskt
   }
 });
 
-test('the band is positioned from the zones, not from literals in the stylesheet', () => {
-  // The duplication that let it drift: `left: 46px; top: 876px; width: 1456px` sat in
-  // the stylesheet while the zones said something else, and a stylesheet cannot
-  // disagree with a test that only reads the stylesheet.
+test('the legend belongs to the viewport HUD rather than composition zones', () => {
+  const html = readFileSync(resolve(import.meta.dirname, '..', 'src/web/client/index.html'), 'utf8');
+  assert.match(html, /id="viewport-hud"[\s\S]*?id="band"[\s\S]*?viewport-controls/);
   const css = readFileSync(resolve(import.meta.dirname, '..', 'src/web/client/app.css'), 'utf8');
-  const rule = /\.band\s*\{[^}]*\}/.exec(css)?.[0] ?? '';
-  assert.match(rule, /left:\s*var\(--band-left/, 'the band takes its left from the renderer');
-  assert.match(rule, /top:\s*var\(--band-top/, 'and its top');
-  assert.match(rule, /width:\s*var\(--band-w/, 'and its width');
-  // The renderer is the only thing that writes them.
-  const app = readFileSync(resolve(import.meta.dirname, '..', 'src/web/client/app.js'), 'utf8');
-  assert.match(app, /--band-left/);
-  assert.match(app, /ZONES\.bandLeft/);
-  assert.match(app, /ZONES\.bandTop/);
-  assert.match(app, /ZONES\.bandWidth/);
+  assert.match(css, /\.viewport-hud\s*\{[^}]*height:\s*var\(--hud-h\)/);
+  assert.doesNotMatch(css, /--band-left|--band-top|--band-w/);
 });
 
 test('the subject is fixed and independent of content', () => {
