@@ -763,13 +763,49 @@ async function main(): Promise<void> {
     check('02 a capped plate states its remainder',
       typeof more === 'object' || fDefault.plates.some((p) => p.more),
       fDefault.plates.map((p) => p.more).filter(Boolean).join(' | '));
-    check('02 expanding reveals the held-back members',
-      fExpanded.counts.rows > rowsBefore, `${rowsBefore} rows -> ${fExpanded.counts.rows} rows`);
-    check('02 every relationship is individually reachable',
-      fExpanded.counts.rows === 14, `${fExpanded.counts.rows} selectable rows for 14 relationships`);
-    check('02 expanding moves nothing in the world',
-      worldCamera(fExpanded.camera) === worldCamera(fDefault.camera),
-      'viewBox, centre and world focal identical');
+check('02 expanding reveals the held-back members',
+        fExpanded.counts.rows > rowsBefore, `${rowsBefore} rows -> ${fExpanded.counts.rows} rows`);
+
+      /*
+       * Open EVERY mass before counting, not just the first.
+       *
+       * This used to click one affordance and count, which was correct only while every
+       * mass was open by default. Frozen V3.3 opens the LARGEST structural group and
+       * leaves the rest shut -- the first paint leads with the group holding the most
+       * relationships instead of with every group at once -- so on a repository with two
+       * structural groups one click exposes twelve of fourteen rows and the two in the shut
+       * group were counted as unreachable when they never were.
+       *
+       * The invariant under test has not changed: every relationship is individually
+       * reachable through the interaction model. Both halves of that model are exercised
+       * here -- the row affordance inside an open mass, and the mass's own surface, which is
+       * how a SHUT mass opens at all.
+       */
+      for (let round = 0; round < 12; round += 1) {
+        const next = await affordancePoint(page, '.plate-row-more');
+        if (!next) break;
+        await page.mouse.click(next.x, next.y);
+        await page.waitForTimeout(500);
+      }
+      // Then a shut mass: clicking its own surface toggles it open.
+      const shutPoint = await page.evaluate(() => {
+        const shut = [...document.querySelectorAll('.bundle-card')].find(
+          (g) => !g.classList.contains('is-open'),
+        );
+        const count = shut?.querySelector('.bundle-card-count')?.getBoundingClientRect();
+        if (!count) return null;
+        return { x: count.x + 8, y: count.y + count.height / 2 };
+      });
+      if (shutPoint) {
+        await page.mouse.click(shutPoint.x, shutPoint.y);
+        await page.waitForTimeout(500);
+      }
+      const fAllOpen = await readFrame(page);
+      check('02 every relationship is individually reachable',
+        fAllOpen.counts.rows === 14, `${fAllOpen.counts.rows} selectable rows for 14 relationships`);
+      check('02 expanding moves nothing in the world',
+        worldCamera(fExpanded.camera) === worldCamera(fDefault.camera),
+        'viewBox, centre and world focal identical');
 
     // ============================== 03 · a real member selected, with the Drawer
     const member = await rowPoint(page, new RegExp(MEMBER_NAME));
