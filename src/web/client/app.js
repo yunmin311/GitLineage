@@ -70,7 +70,7 @@ import {
 import { buildComposition, plateRows, plateHiddenRows, PLATE_MEMBER_ROWS } from './lib/aggregate.mjs';
 import { Regime, regimeFor, partitionPeers, isHomogeneousFan } from './lib/regime.mjs';
 import {
-  WORLD, ZONES, subjectPosition, dataZonePositions, loosePositions, initialViewBox, viewBoxFor,
+  WORLD, ZONES, subjectPosition, dataZonePositions, layoutMassStacks, loosePositions, initialViewBox, viewBoxFor,
   frameTransform,
 } from './lib/compose.mjs';
 import { DRAWABLE_CAPACITY } from './lib/regime.mjs';
@@ -1045,22 +1045,57 @@ function authoredPositions(view, edges, composition) {
   const subject = subjectPosition();
   positions.set(view.subject.id, subject);
 
-// Plates first: their heights decide where the loose arc has room to sit.
-  //
-  // Each plate's height is the bounded one -- the same `plateRowsFor` the renderer uses
-  // -- so a tall plate cannot reserve more space than it is allowed to draw into.
-  const plateSlots = dataZonePositions(composition.plates.map((plate) => {
-    const plan = plateRowsFor(plate, ZONES.dataTop, plateHiddenRows(plate));
-    return { height: plan.height };
-  }));
-  composition.plates.forEach((plate, index) => {
-    const slot = plateSlots[index];
-    positions.set(`${BUNDLE_ID_PREFIX}${plate.key}`, {
+/*
+ * Plates: one bounded STACK per fan.
+ *
+ * Each plate is reserved twice -- collapsed (its default rows) and expanded (every
+ * representative row it holds) -- and a stack is placed from the larger, so a mass
+ * can never grow past the slot its siblings were placed against. See
+ * `layoutMassStacks`, which owns the geometry; this only supplies the two heights
+ * and hands each child its slot. The reserved heights are kept on the position so
+ * the draw pass measures the plate from the SAME numbers rather than re-deriving
+ * a taller height the stack was never given room for.
+ */
+  const PLATE_STACK_GAP = 26;
+  const reserved = composition.plates.map((plate) => {
+    const hiddenRows = plateHiddenRows(plate);
+    const collapsed = plateRowsFor(plate, ZONES.dataTop, hiddenRows);
+    // Worst case: open, and holding back nothing, so it can show every member row.
+    const expanded = plateRowsFor(
+      { ...plate, open: true, expanded: true },
+      ZONES.dataTop,
+      0,
+    );
+    return {
+      ...plate,
+      collapsedHeight: collapsed.height,
+      expandedHeight: Math.max(expanded.height, collapsed.height),
+      // The height the stack should reserve for this mass RIGHT NOW. A mass the reader
+      // has expanded occupies its expanded height, so the masses beneath it are placed
+      // below where it actually ends rather than below where it would end if shut. This
+      // is the whole of "downstream masses may shift": the shift happens in the stack's
+      // own reservation, not by nudging one plate after the fact.
+      currentHeight: plate.expanded ? Math.max(expanded.height, collapsed.height) : collapsed.height,
+    };
+  });
+  const plateSlots = layoutMassStacks(reserved, {
+    gap: PLATE_STACK_GAP,
+    rowPitch: PLATE_ROW,
+    // A shut mass is its header and nothing else; the renderer measures it, and this is
+    // how the stack learns the floor an open mass yields down to. BOTH flags are forced:
+    // a shut-but-expanded mass still lists its rows, which would tell the stack that the
+    // mass cannot shrink at all.
+    shutHeight: (plate) => plateRowsFor({ ...plate, open: false, expanded: false }, ZONES.dataTop, 0).height,
+  });
+  for (const [key, slot] of plateSlots) {
+    positions.set(`${BUNDLE_ID_PREFIX}${key}`, {
       x: slot.x,
       y: slot.y + slot.height / 2,
       height: slot.height,
+      collapsedHeight: slot.collapsedHeight,
+      expandedHeight: slot.expandedHeight,
     });
-  });
+  }
 
   // Loose relationships: the endpoints of the relationships actually drawn, in the
   // regime's ranked order, so slot position never decides visual importance.
@@ -1076,16 +1111,16 @@ function authoredPositions(view, edges, composition) {
   // The plate's real drawn extent, not a worst case. Reserving the expanded width
   // for every plate blocked the right-hand column of the field and silently halved
   // how many peers the scene could show.
-  const obstacles = composition.plates.map((plate, index) => {
+  const obstacles = composition.plates.map((plate) => {
     const rows = plateRows(plate);
-    const slot = plateSlots[index];
-    const left = slot.x - PLATE_W / 2;
+    const slot = positions.get(`${BUNDLE_ID_PREFIX}${plate.key}`);
+    const left = (slot?.x ?? ZONES.dataLeft) - PLATE_W / 2;
     const width = rows.length > 0 ? PLATE_W_EXPANDED : PLATE_W;
     return {
       x: left + width / 2,
-      y: slot.y + slot.height / 2,
+      y: (slot?.y ?? ZONES.dataTop) + (slot?.height ?? 0) / 2,
       hw: width / 2,
-      hh: slot.height / 2,
+      hh: (slot?.height ?? 0) / 2,
     };
   });
   const placement = loosePositions(nodeIds.length, slots, [subject], obstacles);
@@ -1605,13 +1640,38 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
      */
 const hiddenRows = plateHiddenRows(plate);
     const top = Math.round(position.y - position.height / 2);
-    // Bounded against the band, so a plate never draws its rows through the
-    // edge-treatment key. `position.height` came from the same call in
-    // `authoredPositions`, so the box and the reserve agree.
+    /*
+     * Drawn no taller than the slot the stack allocated.
+     *
+     * `position.height` is the height this mass was given when the stack was placed, with
+     * every mass below it already accounted for. `plateRowsFor` sizes a plate against the
+     * band from a top, so the budget it returns is first computed from the plate's real top
+     * and then CLAMPED to the slot: a plate that would outgrow its slot has its rows cut
+     * back until it fits, and the rows it drops are counted on the plate and stay reachable
+     * in the Drawer. Clamping after the call rather than before is what keeps the common
+     * case -- a plate that already fits its slot -- showing every row it has, instead of
+     * being sized by a synthetic top.
+     */
     const plan = plateRowsFor(plate, top, hiddenRows);
-    const shownRows = plan.shown;
+    const slotRoom = Math.max(0, position.height - PLATE_HEADER - (plate.meta ? PLATE_SUBTITLE : 0) - 12);
+    const rowLimit = Math.floor(slotRoom / PLATE_ROW);
+    const fitsSlot = plan.height <= position.height + 1;
+    const shownRows = fitsSlot ? plan.shown : plan.shown.slice(0, Math.max(0, rowLimit - 1));
+    const clipped = shownRows.length < plan.shown.length;
     const header = plateHeader(plate);
-    const height = plan.height;
+    /*
+     * A clipped plate still has to say what it is holding back, and the "N more in the
+     * Drawer" note reads `plan.overflow`. Clipping the rows to the slot makes `overflow`
+     * stale -- it counted what the BAND would hide, not what the STACK made room for --
+     * so the rows the clip removes are added to it here. Without this a stack that had to
+     * yield a row went quiet about it, which is the same dishonesty as dropping a member.
+     */
+    const overflow = plan.overflow + (clipped ? plan.shown.length - shownRows.length : 0);
+    const height = plateHeight(
+      shownRows.length,
+      hiddenRows + (clipped ? plan.shown.length - shownRows.length : 0),
+      !!plate.meta,
+    );
     // Widening grows to the right of the subject's tie, so the connection stays
     // anchored and the plate does not jump when it opens.
     const width = plateRows(plate).length > 0 ? PLATE_W_EXPANDED : PLATE_W;
@@ -1826,12 +1886,12 @@ const hiddenRows = plateHiddenRows(plate);
      * canvas at all and are only in the Drawer. `Kuddev/pebrel` is the case -- one
      * plate of 97 manifest records against a plate that can hold about twenty-five.
      */
-    if (plan.overflow > 0) {
+    if (overflow > 0) {
       const heldY = plateTop + header + shownRows.length * PLATE_ROW
         + (hiddenRows > 0 ? PLATE_ROW : 0) + 4;
       group.append(
         svgEl('text', { x: left + 12, y: heldY + 18, class: 'plate-row-held' }, [
-          `${plan.overflow} more in the Drawer`,
+          `${overflow} more in the Drawer`,
         ]),
       );
     }

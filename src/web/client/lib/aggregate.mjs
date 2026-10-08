@@ -51,11 +51,19 @@ export const PLATE_MEMBER_ROWS = 6;
 /*
  * How many structural groups may each become a mass of its own.
  *
- * Six, and the reason is the world rather than taste: the data zone is an authored
- * composition with a finite number of plate slots, and asking for more masses than it
- * has room for does not add information -- it draws plates on top of each other. So this
- * is a bound on masses, exactly as the design's own rule bounds a fan, and it is
- * enforced on the GROUP count rather than on the relationship count.
+ * Six. The reason is the world rather than taste: the data zone is an authored composition
+ * with a finite number of plate slots, and asking for more masses than it has room for
+ * does not add information -- it draws plates on top of each other. So this is a bound on
+ * masses, exactly as the design's own rule bounds a fan, and it is enforced on the GROUP
+ * count rather than on the relationship count.
+ *
+ * Slice 5b lowered this to four on the theory that five masses cannot leave an expandable
+ * one enough room, and reverted it: the measurement that motivated the change was about
+ * WHICH mass is open, not how many there are. `openByDefault` opens at most two masses,
+ * and with four groups that leaves the LARGEST mass shut while a small remainder stays
+ * open -- so the mass a reader can expand is not the one holding most of the evidence.
+ * Capping the count made the composition wrong rather than the layout wrong. The real
+ * question is which mass opens, and it belongs to the openness rule, not to this cap.
  */
 export const MAX_MAJOR_GROUPS = 6;
 
@@ -356,18 +364,34 @@ function aggregateFan(fan, memberIds, evidence, expanded, plates, describe) {
     const majorIds = new Set(major.flatMap((group) => group.memberEdgeIds));
 
     /*
-     * Whether the first paint shows rows or just the named masses.
+     * Which mass the first paint opens: the LARGEST major structural group.
      *
-     * A plate opened by default carries its rows, and a stack of open plates is a tall
-     * stack: the data zone is an authored column and six open structural masses run past
-     * its bottom. So when a fan genuinely has several structural groups, the first paint
-     * presents them as NAMED masses -- which is the whole point of the grouping, the
-     * reader sees "nebula_app", "mobile/link", "third_party/winit" instead of one
-     * depends_on x 97 -- and each opens on request. A fan with one or two groups still
-     * opens, because two short plates fit and the first paint can carry their claims.
+     * A major mass IS one real structural group -- a declaring site, a table, a prose
+     * document -- so the group holding the most relationships is the one whose evidence
+     * the reader most wants to see without asking. This used to be "open when the fan has
+     * at most two groups", which is a statement about COUNT and not about which group
+     * matters: with four groups it shut every one of them and opened the remainder, so the
+     * mass a reader could expand was the leftovers rather than the structure.
+     *
+     * "Largest" is the CANONICAL RELATIONSHIP COUNT -- `memberEdgeIds.length`, one entry
+     * per relationship -- and never an evidence count. `evidenceCount` and
+     * `totalEvidenceCount` say how densely observed a group is, which is a fact about the
+     * analyser's sampling and not about how much of the graph the group accounts for; a
+     * group of three well-observed relationships must not outrank a group of fifty.
+     *
+     * Deterministic and total: groups are ranked by member count descending, then by their
+     * structural label ascending, so a tie resolves the same way on every run and on every
+     * input order. The remainder never wins -- it is by definition the part that did not
+     * become a major group, and opening it by default would lead with the leftovers.
+     * Exactly one mass opens; the rest present as named masses, which is the point of the
+     * grouping in the first place.
      */
-    const openGroups = major.filter((group) => group.memberEdgeIds.length >= MIN_PLATE_SIZE).length;
-    const openByDefault = openGroups <= 2;
+    const openable = major.filter((group) => group.memberEdgeIds.length >= MIN_PLATE_SIZE);
+    const largestKey = openable
+      .slice()
+      .sort((a, b) =>
+        (b.memberEdgeIds.length - a.memberEdgeIds.length)
+        || (a.label < b.label ? -1 : a.label > b.label ? 1 : 0))[0]?.label ?? null;
 
     for (const group of major) {
       if (group.memberEdgeIds.length < MIN_PLATE_SIZE) continue;
@@ -394,10 +418,12 @@ function aggregateFan(fan, memberIds, evidence, expanded, plates, describe) {
         // A group plate is already named for its evidence, so it does not carry a
         // nested set of the same groups again.
         subgroups: [],
-        // Open by default when the stack has room to carry the claims; closed otherwise,
-        // so a many-group fan reads as named masses on the first paint. Either way
-        // `expanded` is the reader asking for the rest.
-        open: openByDefault,
+        /*
+         * Only the largest major group opens. A named mass that is shut still says what it
+         * holds and still opens on request, so nothing is lost -- and the first paint leads
+         * with the group's own relationships rather than with a count.
+         */
+        open: group.label === largestKey,
         expanded: expanded.has(key),
       });
     }
@@ -422,7 +448,14 @@ function aggregateFan(fan, memberIds, evidence, expanded, plates, describe) {
         meta: '',
         form: null,
         subgroups: [],
-        open: true,
+        /*
+         * The remainder is shut whenever a major group opened. It is the part of the fan
+         * that did NOT become a structural group, so opening it by default would lead the
+         * first paint with the leftovers rather than with the structure the grouping was
+         * for. When there was no group big enough to be a mass, the remainder is all the
+         * fan has and it opens.
+         */
+        open: largestKey === null,
         expanded: expanded.has(fan.key),
       });
     }
@@ -611,7 +644,18 @@ export function buildComposition(view, options = {}) {
  * thing the design was avoiding.
  */
 export function plateRows(plate) {
-  if (plate.open === false) return [];
+  /*
+   * A mass shows nothing until it is open, but a CLOSED mass is still openable.
+   *
+   * `open` is the first paint: Frozen V3.3 opens the largest structural group and leaves
+   * the rest shut, because the data zone is a column and a stack of open masses runs past
+   * the edge key. Shutting a mass must not strand it, though. Its members are reachable by
+   * selecting a row, so a mass with no rows has no way in at all -- the reader would have
+   * to guess the relationship exists. So a shut mass becomes openable through the reader's
+   * own expand action, exactly as an open mass does, and the two differ only in whether
+   * they start that way.
+   */
+  if (plate.open === false && !plate.expanded) return [];
   const members = plate.members && plate.members.length
     ? plate.members
     : plate.memberEdgeIds.map((edgeId) => ({ edgeId, label: '', meta: '' }));

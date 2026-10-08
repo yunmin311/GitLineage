@@ -88,6 +88,55 @@ export declare function subjectPosition(): { x: number; y: number };
 export declare function dataZonePositions(entries: Array<{ height: number }>): ComposedPosition[];
 
 /**
+ * How tall a mass may draw, in the two states it can be in.
+ *
+ * The renderer measures these with the same function it draws with, so the reservation and
+ * the plate cannot disagree about how tall the mass is.
+ */
+export interface MassReservations {
+  /** Its header, and its rows while it is shut. */
+  collapsedHeight: number;
+  /** Its header and every row, which is the most it can ever ask for. */
+  expandedHeight: number;
+  /** Which of the two it wants right now. */
+  currentHeight: number;
+}
+
+export interface MassStackOptions {
+  /** Space left between two masses, which the layout may close but never past zero. */
+  gap?: number;
+  /** How much one member row is worth, used to step a mass down when it yields. */
+  rowPitch?: number;
+  /** The height of a mass with its header and nothing else. */
+  shutHeight?: (plate: MassReservations & { open?: boolean; expanded?: boolean }) => number;
+  /** The band the stack is not allowed to start above. */
+  upper?: number;
+  /** The band the stack is not allowed to pass below. */
+  lower?: number;
+}
+
+export interface MassSlot {
+  key: string;
+  x: number;
+  y: number;
+  height: number;
+  /** False when the masses could not all fit, so the caller can say so. */
+  overflow: boolean;
+}
+
+/**
+ * Masses placed as one ordered column against the two zone bounds.
+ *
+ * The stack is placed as a whole: it is never pushed above the upper bound nor below the
+ * lower one, and when it does not fit the open masses yield rows before anything is allowed
+ * to leave the zone. What a mass gives up is reported, never silently drawn.
+ */
+export declare function layoutMassStacks(
+  plates: Array<{ key: string; open?: boolean; expanded?: boolean } & MassReservations>,
+  options?: MassStackOptions,
+): Map<string, MassSlot>;
+
+/**
  * Loose relationships placed on a downward-opening arc around the subject.
  *
  * Never upward: nothing may land in the empty upper field.

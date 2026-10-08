@@ -222,6 +222,201 @@ export function dataZonePositions(entries) {
 }
 
 /**
+ * Lays out every plate as one bounded stack per fan.
+ *
+ * The composition layer can now produce SEVERAL masses from one fan -- one per
+ * declaring site, plus an explicit remainder -- so a fan is a STACK, not a plate.
+ * This was written when a fan was one plate, which is why it bounded each plate
+ * independently against the band: a single plate needs only a ceiling. A stack
+ * needs two-sided bounds, because an expanded mass grows DOWNWARD into the mass
+ * beneath it. Bounding each independently is exactly the bug: the first mass was
+ * free to grow past the one below it, their boxes overlapped, and the lower box
+ * swallowed the clicks meant for the upper mass's rows -- so the relationship
+ * could not be selected and its Drawer never opened.
+ *
+ * The model is the one the rest of the frame already uses: a fixed world, and
+ * space laid out from authored anchors. Each mass is reserved at the height it
+ * could ever need -- open, showing every representative row it holds -- so the
+ * reserved stack IS the drawn stack and a mass can never outgrow its slot. The
+ * stack is then placed as a whole around the fan's anchor and clamped into the
+ * permitted interval, and the children are derived cumulatively. Expanding one
+ * mass changes only that stack: the world does not refit, the camera does not
+ * move, and no unrelated mass moves.
+ *
+ * The ordering of masses is the composition's own order and is never re-sorted
+ * here: the policy decided it, and this only places what it was given.
+ */
+export function layoutMassStacks(plates, options = {}) {
+  const gap = Number.isFinite(options.gap) ? options.gap : 26;
+  /*
+   * How much one member row is worth, used only to step a mass down when it yields.
+   * Row geometry belongs to the renderer, so the caller supplies it; the fallback keeps
+   * the function usable on its own in a test.
+   */
+  const rowPitch = Number.isFinite(options.rowPitch) ? options.rowPitch : 26;
+  const subject = subjectPosition();
+  const upper = Number.isFinite(options.upper) ? options.upper : ZONES.dataTop;
+  const lower = Number.isFinite(options.lower) ? options.lower : ZONES.bandTop - 48;
+  /*
+   * The height a mass has when shut: its header and nothing else. It is the floor a mass
+   * yields down to, and it is what the caller measures a shut card with.
+   */
+  const shutHeight = typeof options.shutHeight === 'function' ? options.shutHeight : () => 86;
+
+  const positions = new Map();
+  /*
+   * Every mass is one ordered column down the data zone, in composition order.
+   *
+   * This is what the frame already did, and it is right: the masses read as a single
+   * stack beside the subject, the tie stays short, and each mass's position is a function
+   * of the masses above it and nothing else -- so re-running the layout on the same input
+   * reproduces the world exactly. Bucketing by fan and centring each stack separately was
+   * tried and is wrong: three families each centre on the same subject line and land on
+   * top of each other, which is exactly what `grpc/grpc` did. The buckets are still built
+   * above, because the per-fan stack identity is what the yield is measured against.
+   */
+  const placed = placeStack(plates, { gap, rowPitch, shutHeight, subject, upper, lower });
+  for (const entry of placed) positions.set(entry.key, entry);
+  return positions;
+}
+
+/** One stack: reserve current heights, place the whole stack, derive children. */
+function placeStack(plates, { gap, rowPitch, shutHeight, subject, upper, lower }) {
+  /*
+   * Each mass is reserved at the height it OCCUPIES right now -- its expanded height if
+   * the reader opened it, its default height otherwise. That is what the stack is built
+   * from, because that is the state it is drawn in. It means an expanded mass pushes the
+   * masses beneath it down inside this stack, which is the "downstream masses may shift"
+   * rule, and it means the draw never has to invent a height the stack did not allocate.
+   */
+  const reserved = plates.map((plate) => ({
+    plate,
+    height: Math.max(1, plate.currentHeight ?? plate.collapsedHeight ?? 0),
+  }));
+
+  /*
+   * Where the stack sits, and how much room is actually left for growth.
+   *
+   * A stack that fits beside the subject is aligned to the subject's line so the tie stays
+   * short; one that cannot is anchored to the top of the zone. Either way the WHOLE stack
+   * is placed once and the children are derived from that one decision, so a mass's
+   * position never depends on any other mass's height at draw time.
+   *
+   * `headroom` is what the masses below the open one still need: their own shut heights
+   * and the gaps between them. A mass may not grow past the point where that would not
+   * fit, because a stack that runs off the bottom of the zone is not a stack -- it is
+   * five masses with the last one drawn over the edge key. The growth limit is reported
+   * so the caller can state what it is holding back rather than pretend it is not.
+   */
+  /*
+   * Solve the stack's budget BEFORE placing it.
+   *
+   * The stack's height and its start are interdependent: the room an open mass may take
+   * is what is left after the closed masses below it, and the start depends on the total.
+   * So the total is computed from the heights as reserved, the start from that total, the
+   * open mass's share from the start, and if that share is smaller than the open mass
+   * wanted, the total is recomputed with the open mass capped and the start re-derived.
+   * One pass is enough: capping the open mass can only shrink the total, which can only
+   * move the start down or leave it, never bring the share below the cap.
+   */
+  const startFor = (totalHeight) => {
+    const anchored = Math.round(subject.y - totalHeight / 2);
+    /*
+     * Align to the subject's line ONLY when the whole column fits there. A column that
+     * does not fit is anchored at the zone top instead, because centring a column that is
+     * too tall spends the headroom above it and then has to yield rows to pay for the
+     * tail it pushed off the band -- `Kuddev/pebrel` lost two member rows to twenty units
+     * of unnecessary centring. Anchoring at the top costs the short tie and gives the rows
+     * back, which is the right trade for a column that was never going to fit beside the
+     * subject anyway.
+     */
+    if (anchored >= upper - 80 && anchored + totalHeight <= lower) return Math.max(upper, anchored);
+    return upper;
+  };
+
+  /*
+   * Shrink the column into the zone, row by row, until it fits.
+   *
+   * When the masses as reserved are taller than the interval there is no placement that
+   * both fits and preserves the world, and the brief's instruction for exactly that case
+   * is to report it rather than overlap. The report is made honest by having the masses
+   * that are SHOWING rows give them up: a shut card has nothing to give, so the yield comes
+   * from the open masses, largest first, one row at a time. The rows each mass drops are
+   * counted on the plate and stay reachable in the Drawer, so nothing is lost -- it is
+   * bounded, not hidden.
+   *
+   * Largest-first is deterministic and it means the mass that can show the most keeps the
+   * most. It converges: each pass removes at least one row, and a mass never goes below the
+   * height of a shut card, so the loop terminates.
+   */
+  /*
+   * Spend GAPS before rows.
+   *
+   * When the column does not fit the zone there is a choice about what gives, and rows
+   * and gaps are not equal: a row is one relationship the reader can read and select, and
+   * a gap is white space between two masses. So the gap is compressed first, down to a
+   * floor that still reads as separation, and only what is left is taken from the open
+   * mass's rows.
+   *
+   * Taking rows first was measurably worse than this. `Kuddev/pebrel` has four shut peers,
+   * and at the authored gap they left the open mass 204 units -- one row fewer than it
+   * shows when shut, so the mass a reader was invited to expand could not expand at all and
+   * the affordance led nowhere. Compressing the gaps gave the same mass room to grow
+   * without dropping a single relationship.
+   */
+  const GAP_FLOOR = 12;
+  const naturalTotal = () => heights.reduce((sum, h) => sum + h, 0) + activeGap * Math.max(0, heights.length - 1);
+  const isOpen = reserved.map((e) => Boolean(e.plate.expanded || e.plate.open));
+  const shut = reserved.map((e) => Math.max(1, shutHeight(e.plate)));
+
+  let activeGap = gap;
+  let heights = reserved.map((e) => e.height);
+  let start = startFor(naturalTotal());
+
+  // 1. Compress the gaps, while the column can still fit without touching a row.
+  while (activeGap > GAP_FLOOR && start + naturalTotal() > lower) {
+    activeGap = Math.max(GAP_FLOOR, activeGap - 2);
+    start = startFor(naturalTotal());
+  }
+
+  /*
+   * 2. Only then take rows, from the largest open mass that still has one to give, one row
+   *    at a time. Never below a shut card's height -- a mass that cannot show a row is not
+   *    a mass. Each pass removes at least one row so the loop terminates, and each one is
+   *    counted on the plate and stays reachable in the Drawer.
+   */
+  for (let pass = 0; pass < 512 && start + naturalTotal() > lower; pass += 1) {
+    let victim = -1;
+    for (const [i, open] of isOpen.entries()) {
+      if (!open || heights[i] <= shut[i]) continue;
+      if (victim < 0 || heights[i] > heights[victim]) victim = i;
+    }
+    if (victim < 0) break;
+    heights[victim] = Math.max(shut[victim], heights[victim] - rowPitch);
+    start = startFor(naturalTotal());
+  }
+  const overflow = start + naturalTotal() > lower;
+
+  const placed = [];
+  let cursor = start;
+  for (const [index, entry] of reserved.entries()) {
+    placed.push({
+      key: entry.plate.key,
+      x: ZONES.dataLeft,
+      // The child's own Y is the TOP of its slot, matching what `dataZonePositions`
+      // returned, so the caller keeps reading a top and adds half the height.
+      y: cursor,
+      height: heights[index],
+collapsedHeight: entry.plate.collapsedHeight ?? entry.height,
+        expandedHeight: entry.plate.expandedHeight ?? entry.height,
+        overflow,
+      });
+    cursor += heights[index] + activeGap;
+  }
+  return placed;
+}
+
+/**
  * Places loose relationships in the field around the subject.
  *
  * Deliberately not a slot grid and not a plain arc. An arc alone collides as soon

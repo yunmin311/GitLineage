@@ -78,10 +78,34 @@ test('a selected plate draws the selected tier, and a shut plate has no rows', (
   assert.match(body, /const allRows = plateRows\(plate\)/);
   assert.match(body, /const hiddenRows = plateHiddenRows\(plate\)/);
   assert.match(body, /plateRowsFor\(plate, top, hiddenRows\)/, 'the renderer uses it');
-  // The placement reserves the same bounded height, so a plate never claims space it
-  // is not allowed to draw into.
-  assert.match(body, /plateRowsFor\(plate, ZONES\.dataTop, plateHiddenRows\(plate\)\)/);
-  assert.match(body, /plateHeight\(rows\.length, hiddenRows, !!plate\.meta\)/);
+  /*
+ * The placement reserves the same bounded height, so a plate never claims space it is not
+ * allowed to draw into.
+ *
+ * This used to assert one reservation call -- `plateRowsFor(plate, ZONES.dataTop, ...)`.
+ * That was correct when a fan was one plate and the reservation was therefore one line.
+ * Frozen V3.3 lets a fan become several masses, so the reservation is now a PAIR: the
+ * collapsed height and the worst-case expanded height, both measured by the same
+ * `plateRowsFor`, and the stack is laid out from the pair. The property is unchanged and
+ * stronger -- a mass is bounded by the height it reserved, and it is bounded in both
+ * states rather than in one -- so the assertion follows the property, not the line.
+ */
+assert.match(
+    body,
+    /const collapsed = plateRowsFor\(plate, ZONES\.dataTop, hiddenRows\)/,
+    'the placement reserves the collapsed height with the same function',
+  );
+assert.match(
+    body,
+    /const expanded = plateRowsFor\(\s*\{ \.\.\.plate, open: true, expanded: true \},\s*ZONES\.dataTop,\s*0,\s*\)/,
+    'and reserves the worst-case expanded height with it',
+  );
+assert.match(body, /layoutMassStacks\(reserved,/, 'the stack is laid out from those reservations');
+// And the draw is clipped to the slot it was given, so a mass that outgrows its slot is
+// cut back and says so rather than drawing over the mass beneath it.
+assert.match(body, /const fitsSlot = plan\.height <= position\.height \+ 1/);
+assert.match(body, /overflow: /, 'and the clipped rows are counted as held back');
+assert.match(body, /plateHeight\(rows\.length, hiddenRows, !!plate\.meta\)/);
   // And the bound is the band, named.
   assert.match(body, /const PLATE_BOTTOM_LIMIT = ZONES\.bandTop - 48/);
   // A plate with no members is not drawn at all.
