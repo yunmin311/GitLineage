@@ -180,6 +180,7 @@
      graph world is a fixed spatial coordinate system and these do not describe it. */
   --rail-w: 264px;
   --bar-h: 44px;
+  --hud-h: 64px;
   --strip-h: 46px;
 }
 
@@ -575,7 +576,7 @@ a { color: inherit; }
 .crumb-rev, .crumb-count { color: var(--ink-4); white-space: nowrap; }
 /* The rail disclosure. Only exists below the breakpoint that hides the rail. */
 .rail-toggle {
-  display: none; align-items: center; gap: 6px;
+  display: inline-flex; align-items: center; gap: 6px;
   font-size: var(--t-micro-size); font-weight: var(--t-micro-wt);
   letter-spacing: var(--t-micro-track); text-transform: uppercase;
   padding: 5px var(--s3); border: 1px solid var(--rule-2); border-radius: 2px;
@@ -1239,7 +1240,7 @@ a { color: inherit; }
 
 .explorer-body {
   display: grid;
-  grid-template-columns: var(--rail-w) minmax(0, 1fr) 0;
+  grid-template-columns: minmax(0, 1fr);
   /*
    * The body row is exactly the space the app bar and the strip leave.
    *
@@ -1256,20 +1257,18 @@ a { color: inherit; }
   grid-template-rows: minmax(0, 1fr);
   flex: 1 1 auto; min-height: 0; position: relative;
 }
-.explorer-body.with-drawer { grid-template-columns: var(--rail-w) minmax(0, 1fr) var(--drawer-w); }
+
 
 /* One owner on the right. The floating panels would otherwise keep painting
    underneath the Drawer, so two things would claim one column. */
 .explorer-body.with-drawer .layers-pop { display: none !important; }
 
 /* --------------------------------------------------------------- context rail
-   A grid column, not an overlay. An overlay can only sit on top of the graph, so
-   the graph has to be kept clear of it -- and at a narrow viewport there is nothing
-   left to keep it clear of. As a column the graph simply begins after it. */
+   Shell overlay. Its visibility never changes the stage or the camera mapping. */
 .rail {
-  grid-column: 1; grid-row: 1;
+  position: absolute; left: 0; top: 0; bottom: var(--hud-h); width: var(--rail-w); z-index: 20;
   border-right: var(--rule-firm); background: var(--surface);
-  overflow: hidden; position: relative;
+  overflow: hidden;
   display: flex; flex-direction: column;
   min-width: 0;
 }
@@ -1306,7 +1305,7 @@ a { color: inherit; }
   opacity: 0; transition: opacity var(--d-fast) var(--ease);
 }
 .is-more-below > .rail-more, .is-more-below > .drawer-more { opacity: 1; }
-.rail[hidden] { display: none; }
+.rail[hidden], .explorer-body.rail-closed .rail { display: none; }
 .railsec { display: block; }
 /*
  * Rail modules.
@@ -1346,32 +1345,9 @@ a { color: inherit; }
 /* ------------------------------------------------------------ graph viewport
    A window onto the fixed world. The world never reflows and never re-scales to
    fit; the window moves over it. */
-.stage { grid-column: 2; grid-row: 1; position: relative; min-width: 0; min-height: 0; overflow: hidden; }
-.canvas { display: block; width: 100%; height: 100%; cursor: grab; }
+.stage { grid-column: 1; grid-row: 1; position: relative; min-width: 0; min-height: 0; overflow: hidden; }
+.canvas { display: block; width: 100%; height: 100%; cursor: grab; touch-action: none; }
 .canvas.is-panning { cursor: grabbing; }
-
-/*
- * The authored frame's HTML layer.
- *
- * Sized and positioned in the frame's own world units, then transformed by exactly
- * the scale and offset the SVG's `viewBox` applies, so an overlay lands on the same
- * world coordinate as the geometry it annotates at every viewport. `--frame-scale`,
- * `--frame-x` and `--frame-y` are written by the renderer from `frameTransform()`.
- *
- * `pointer-events: none` because this layer spans the whole frame: it must never
- * intercept a click meant for the canvas underneath it. The controls that live in it
- * opt back in.
- */
-.frame {
-  position: absolute; left: 0; top: 0;
-  /* The world, not the window: 1920 x 1720 at every viewport and every zoom. */
-  width: var(--world-w, 1920px); height: var(--world-h, 1720px);
-  transform-origin: 0 0;
-  transform: translate(var(--frame-x, 0px), var(--frame-y, 0px)) scale(var(--frame-scale, 1));
-  pointer-events: none;
-  z-index: 4;
-}
-.frame > * { pointer-events: none; }
 
 /*
  * The `hidden` attribute is the client's only state signal for panels, and the
@@ -1667,33 +1643,16 @@ a { color: inherit; }
  * instrumentation, and printing them here would be decoration pretending to be a
  * readout.
  */
+.viewport-hud {
+  position: absolute; inset: auto 0 0; height: var(--hud-h);
+  display: flex; align-items: center; gap: var(--s4); padding: var(--s2) var(--s4);
+  background: var(--surface); z-index: 30; pointer-events: none;
+}
+.viewport-hud .viewport-controls { position: static; flex: none; pointer-events: auto; }
 .band {
-  /*
-   * World coordinates, written by the renderer from `ZONES`.
-   *
-   * They were literals here once: `left: 46px; top: 876px; width: 1456px`, copied from
-   * the old fitted frame. When the world's zones moved, the band did not -- it sat 104
-   * units above where the composition said it was, and nothing noticed, because a
-   * stylesheet cannot disagree with a test that only checks the stylesheet. The
-   * fallbacks are the current zones so the sheet is still readable on its own.
-   */
-  position: absolute;
-  left: var(--band-left, 336px); top: var(--band-top, 900px); width: var(--band-w, 1184px);
-  display: flex; align-items: center; gap: var(--s8); flex-wrap: wrap;
+  min-width: 0; flex: 1;
+  display: flex; align-items: center; gap: var(--s4); flex-wrap: wrap;
   border-top: var(--rule-firm); padding-top: var(--s2);
-  /*
-   * Room for the viewport controls.
-   *
-   * The band is a world object and the controls are shell chrome in the stage's
-   * bottom-right corner, so at some widths the band's right-aligned note ran underneath
-   * them. Nothing caught it, because the harness checked the band against the viewport
-   * and never against the controls that sit on top of it.
-   *
-   * The reserve is the controls' own footprint -- three 28px buttons, their gaps, and
-   * their offset from the edge -- so it is stated once, here, and the controls are sized
-   * from the same tokens.
-   */
-  padding-right: calc(3 * 28px + 2 * var(--s1) + 2 * var(--s4));
 }
 .band[hidden] { display: none; }
 .band .key { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
@@ -1709,16 +1668,6 @@ a { color: inherit; }
 .band .ki-aggregate { border-top-color: var(--rule-2); border-top-style: dashed; }
 .band-note { font-family: var(--mono); font-size: var(--t-meta-size); color: var(--ink-4); margin-left: auto; }
 
-/*
- * There is deliberately no narrow-viewport rule for the band.
- *
- * It used to have one: `width: calc(100% - 92px)` at 1280 and below, which was the
- * fitted frame's width minus its margins. `.frame` is now the world -- 1920 units at
- * every viewport -- so a percentage of it is not the width of anything the reader can
- * see. At 1280 it made the band 1828 world units wide, running off the world and off
- * the screen, while every check passed. A world object's extent is a world
- * coordinate; it comes from the zones, and no viewport overrides it.
- */
 
 /*
  * Topological depth ladder.
@@ -1835,25 +1784,9 @@ a { color: inherit; }
 
 /* ----------------------------------------------------------------- drawer */
 
-/*
- * The Drawer: an overlay over the gutter the frame already reserved.
- *
- * Absolutely positioned inside `.stage` rather than a grid column, so opening it
-/*
- * The Drawer: the third column of the shell.
- *
- * It is a real column rather than an overlay over the graph, because a column cannot
- * move the world. An overlay that pushes the canvas would rescale it, and a canvas
- * that rescales when a reader opens a relationship has moved the scene under them --
- * which is a camera change however the viewBox is spelled. As a column the graph's
- * width changes but its world coordinates, and therefore its camera, do not.
- *
- * At the frozen breakpoint it becomes an overlay over the same gutter, because by
- * then there is no room for a third column and the gutter is the only space that was
- * ever reserved for it.
- */
+/* Drawer is a shell overlay. Visibility never changes the SVG viewport. */
 .drawer {
-  grid-column: 3; grid-row: 1;
+  position: absolute; right: 0; top: 0; bottom: var(--hud-h); width: var(--drawer-w); z-index: 25;
   /* V3.3 gives the Drawer a 1px `--ink-4` edge where the rail gets a hairline `--rule`.
      This is the whole of the Drawer's extra strength at the frame level: the rail must
      stay the secondary instrument, and the Drawer must read as the active one, without
@@ -2003,41 +1936,10 @@ a { color: inherit; }
  * coordinates land in the same places, the window over them is simply narrower.
  */
 @media (max-width: 1500px) {
-  .explorer-body,
-  .explorer-body.with-drawer { grid-template-columns: 0 minmax(0, 1fr) var(--drawer-w); }
   .rail { display: none; }
-  .explorer-body.rail-open { grid-template-columns: var(--rail-w) minmax(0, 1fr) var(--drawer-w); }
   .explorer-body.rail-open .rail { display: flex; }
   .rail-toggle { display: inline-flex; }
   .crumb-count { display: none; }
-}
-
-/*
- * <= 1340px - the Drawer becomes an overlay on the gutter, and the phase strip
- * sheds its per-phase evidence counts.
- *
- * There is no third column left at this width, and the gutter the world reserved is
- * the only space that was ever meant for it. The overlay is anchored to the shell,
- * not to the graph, so opening it still cannot move the world.
- */
-@media (max-width: 1340px) {
-  .explorer-body,
-  .explorer-body.rail-open,
-  .explorer-body.with-drawer { grid-template-columns: 0 minmax(0, 1fr) 0; }
-  .explorer-body.rail-open { grid-template-columns: var(--rail-w) minmax(0, 1fr) 0; }
-  .drawer {
-    /* The overlay treatment changes the Drawer's POSITION, not its strength. It kept
-       the older hairline `--rule-firm` edge here, which meant that at 1280 and below --
-       including the narrowest desktop there is -- the Drawer read weaker than the rail
-       it is meant to outrank. The V3.3 ink-4 edge applies at every width. */
-    position: absolute; right: 0; top: 0; bottom: 0; width: var(--drawer-w);
-    z-index: 25; border-left: 1px solid var(--ink-4);
-  }
-  .drawer-scrim {
-    display: block; position: absolute; inset: 0;
-    background: rgba(20, 19, 15, .10); border: 0; z-index: 24;
-  }
-  .drawer-scrim[hidden] { display: none; }
 }
 
 @media (max-width: 1100px) {
@@ -2045,7 +1947,7 @@ a { color: inherit; }
 }
 
 @media (max-width: 860px) {
-  :root { --drawer-w: 320px; }
+  :root { --drawer-w: 320px; --hud-h: 88px; }
   .appbar-mid { flex-wrap: nowrap; gap: var(--s2); }
   .crumb-ctx { display: none; }
   .strip { padding: 0 var(--s4); gap: var(--s2); }
@@ -2074,4 +1976,11 @@ a { color: inherit; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition-duration: 0s !important; animation-duration: 0s !important; }
+}
+
+@media (max-width: 700px) {
+  .rail { width: min(var(--rail-w), calc((100% - 64px) / 2)); }
+  .drawer { width: min(var(--drawer-w), calc((100% - 64px) / 2)); }
+  .viewport-hud { gap: var(--s2); padding: var(--s2); }
+  .band .key { gap: var(--s2); }
 }

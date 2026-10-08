@@ -71,7 +71,6 @@ import { buildComposition, plateRows, plateHiddenRows, PLATE_MEMBER_ROWS } from 
 import { Regime, regimeFor, partitionPeers, isHomogeneousFan } from './lib/regime.mjs';
 import {
   WORLD, ZONES, subjectPosition, dataZonePositions, layoutMassStacks, loosePositions, initialViewBox, viewBoxFor,
-  frameTransform,
 } from './lib/compose.mjs';
 import { DRAWABLE_CAPACITY } from './lib/regime.mjs';
 
@@ -260,6 +259,9 @@ function showWorking() {
   $('explorer-body').classList.remove('with-drawer');
   setHidden($('bundles'), true);
   $('canvas').replaceChildren();
+  $('rail-scroll').replaceChildren();
+  $('drawer-inner').replaceChildren();
+  $('band').replaceChildren();
   setChrome('analysing');
 }
 
@@ -845,6 +847,7 @@ function renderChrome(view) {
   setHidden($('appbar-mid'), false);
   setHidden($('appbar-right'), false);
   setHidden($('project-source'), true);
+  $('rail-toggle').setAttribute('aria-expanded', String(getComputedStyle($('rail')).display !== 'none'));
   const repo = state.repository;
   $('crumb-repo').textContent = view.subject.owner && view.subject.name
     ? `${view.subject.owner}/${view.subject.name}`
@@ -942,9 +945,8 @@ function plateHeight(rowCount, hiddenRows = 0, hasSubtitle = false) {
 /**
  * How far down the world a plate may reach.
  *
- * The band is a world object at `ZONES.bandTop`, so a plate tall enough to pass it does
- * not merely crowd it -- it draws its rows straight through the edge-treatment key, and
- * the key is the one thing a reader needs in order to read the canvas. `Kuddev/pebrel`
+ * The original composition budget ends at ZONES.bandTop. Keep that authored
+ * geometry limit even though the legend now belongs to the screen HUD. Kuddev/pebrel
  * is the case: one plate of 97 `package_manifest` records, which at 26 units a row is
  * over 2500 units tall against a limit of about 700.
  *
@@ -991,37 +993,6 @@ function plateRowsFor(plate, top, hiddenRows) {
     overflow: 0,
     height: plateHeight(rows.length, hiddenRows, !!plate.meta),
   };
-}
-
-/**
- * Puts the world's HTML layer through the camera's own transform.
- *
- * The bottom band is authored in world units, exactly as the canvas geometry is. It is
- * put through the identical mapping the SVG's `viewBox` performs, so it lands on the
- * world coordinate it annotates at every zoom and every pan. Deriving both from one
- * function is what keeps the authored composition intact everywhere instead of only at
- * the viewport it happened to be designed at.
- *
- * It takes the live `viewBox`, not just the viewport, because with a fixed world the
- * camera is the window: panning moves the overlays too, and reading only the viewport
- * would leave the band behind at the world's origin the first time a reader dragged.
- */
-function applyFrameTransform(viewport, viewBox) {
-  const stage = $('stage');
-  if (!stage) return;
-  const t = frameTransform(viewport, viewBox);
-  stage.style.setProperty('--frame-scale', String(t.scale));
-  stage.style.setProperty('--frame-x', `${t.x}px`);
-  stage.style.setProperty('--frame-y', `${t.y}px`);
-stage.style.setProperty('--world-w', `${WORLD.width}px`);
-  stage.style.setProperty('--world-h', `${WORLD.height}px`);
-  // The band is a world object, so its position is a world coordinate and comes from
-  // the same zones the composition places against. Writing them here rather than
-  // hardcoding them in the stylesheet is what keeps "the band is where the world says
-  // it is" true when a zone moves.
-  stage.style.setProperty('--band-left', `${ZONES.bandLeft}px`);
-  stage.style.setProperty('--band-top', `${ZONES.bandTop}px`);
-  stage.style.setProperty('--band-w', `${ZONES.bandWidth}px`);
 }
 
 /**
@@ -1323,7 +1294,7 @@ function renderRail(view) {
   //
   // This used to be a reserved right-hand gutter in the world, which meant the Drawer
   // and this column were claiming the same space. It is a rail block now, because the
-  // Drawer is a real column and two things must not own one.
+  // Drawer has its own shell overlay and does not own world coordinates.
   const present = new Set((view.edges || []).map((edge) => edge.family));
   const absent = ['lineage', 'dependency', 'attribution', 'source-identity']
     .filter((family) => !present.has(family));
@@ -1494,6 +1465,7 @@ function currentComposition(view) {
 function draw() {
   const view = state.view;
   const canvas = $('canvas');
+  const focusedEdge = document.activeElement?.getAttribute('data-edge-id');
   canvas.replaceChildren();
   if (!view) return;
 
@@ -1534,9 +1506,7 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
     state.hasFitted = true;
     state.refitPending = false;
   }
-  // The band's world coordinates have to be mapped by the same window the canvas is
-  // showing, so this runs after the viewBox above is settled. See `applyFrameTransform`.
-  applyFrameTransform(viewport, canvas.getAttribute('viewBox'));
+
 
   const defs = svgEl('defs');
   for (const [id, status, colour] of [
@@ -1763,16 +1733,8 @@ const hiddenRows = plateHiddenRows(plate);
 
     // Rows are content of the plate. They stay flat: no depth, no shadow, and a
     // selected row is marked by its own solid ink rule rather than by rising.
-    // Mono at 11px advances about 6.6px, at 10px about 6.0px. Measuring the meta
-    // first lets the label take exactly the room that is left, instead of both
-    // being truncated independently and overprinting in the middle.
-    const META_CHARS = 21;
-    const allRows = plateRows(plate);
-    const metaWidth = allRows.some((r) => r.meta) ? META_CHARS * 6.0 + 14 : 0;
-    // The status mark, its direction arrow and their gap are measured rather than
-    // assumed, so a label can never start underneath them.
+    // Reserve independent pixel columns; fitGraphText measures the real font advances.
     const MARK_W = ROW_MARK_W;
-    const labelRoom = Math.max(8, Math.floor((width - 24 - metaWidth - MARK_W) / 6.6));
 
     shownRows.forEach((row, index) => {
     const rowY = plateTop + header + index * PLATE_ROW;
@@ -1783,7 +1745,7 @@ const hiddenRows = plateHiddenRows(plate);
        * element's text content, which put the full name and the full locator into the
        * rendered string.
        */
-      const item = svgEl('g', { class: `plate-row${rowSelected ? ' is-selected' : ''}`, role: 'button', tabindex: '0', 'aria-label': `${row.label}${row.meta ? ` · ${row.meta}` : ''}`, 'aria-pressed': String(rowSelected) });
+      const item = svgEl('g', { class: `plate-row${rowSelected ? ' is-selected' : ''}`, role: 'button', tabindex: '0', 'aria-label': `${row.label}${row.meta ? ` · ${row.meta}` : ''}`, 'aria-pressed': String(rowSelected), 'data-edge-id': row.memberEdgeIds[0] || '' });
       item.append(svgEl('rect', { x: left, y: rowY + 2, width, height: PLATE_ROW - 4, class: 'plate-row-surface' }));
       item.append(svgEl('title', {}, [`${row.label}${row.meta ? ` \u00b7 ${row.meta}` : ''}`]));
       if (rowSelected) {
@@ -2022,6 +1984,9 @@ const hiddenRows = plateHiddenRows(plate);
 
   canvas.append(edgeLayer, nodeLayer);
   fitGraphText(canvas);
+  if (focusedEdge) {
+    Array.from(canvas.querySelectorAll('[data-edge-id]')).find(row => row.getAttribute('data-edge-id') === focusedEdge)?.focus({ preventScroll: true });
+  }
   renderBundles();
   renderLayersPop();
   renderRail(view);
@@ -2308,7 +2273,10 @@ function clearSelection() {
 }
 
 function closeDrawer() {
+  const edge = state.selectedEdgeId;
   clearSelection();
+  const row = Array.from($('canvas').querySelectorAll('[data-edge-id]')).find(row => row.getAttribute('data-edge-id') === edge);
+  (row || $('zoom-fit')).focus({ preventScroll: true });
 }
 
 function renderDrawer() {
@@ -2330,7 +2298,7 @@ function renderDrawer() {
 
   const open = Boolean(state.selectedEdgeId || state.selectedNodeId);
   setHidden(drawer, !open);
-  setHidden(scrim, !open);
+  setHidden(scrim, true);
   body.classList.toggle('with-drawer', open);
   if (!open) {
     // Only rewrite the URL if it actually named something that is gone.
@@ -2686,14 +2654,8 @@ let panState = null;
  * The single place a camera change is written.
  *
  * Every path that moves the window -- wheel, buttons, drag, fit -- goes through here,
- * for two reasons that only hold if there is one path.
- *
- * First, the window is clamped inside the world. The world is fixed at 1920 x 1720, so
- * a raw pan could drag it to empty space and leave the reader looking at nothing; the
- * clamp is structural rather than a check somebody has to remember. Second, the world's
- * HTML layer is remapped here too. It used to be remapped only inside `draw()`, which
- * meant a drag left the band behind at the world's origin while the canvas moved --
- * an overlay annotating a coordinate the canvas was no longer showing.
+ * Camera writes clamp the window inside the authored world. Shell overlays and
+ * viewport HUD never participate in this transform.
  */
 function setCamera(canvas, viewBox, zoom) {
   const viewport = { width: canvas.clientWidth || 1200, height: canvas.clientHeight || 700 };
@@ -2705,30 +2667,18 @@ function setCamera(canvas, viewBox, zoom) {
   const window = viewBoxFor(viewport, centre, z);
   canvas.setAttribute('viewBox', window.viewBox);
   state.zoom = window.zoom;
-  applyFrameTransform(viewport, window.viewBox);
+
   return window;
 }
 
-/**
- * The rail disclosure.
- *
- * Above the breakpoint the rail is a permanent column and this button does not exist.
- * Below it the rail collapses, because there is no longer room for prose and a census
- * beside a 1920-wide world. Opening it adds a column to the shell -- it does not
- * rescale the world, so nothing on the canvas moves and no relationship changes
- * position. That is the whole difference between a disclosure and an overlay here.
- */
+/** Shell-only disclosure: never redraw or resize the graph. */
 function toggleRail(force) {
   const body = $('explorer-body');
-  const button = $('rail-toggle');
-  if (!body) return;
-  const open = force === undefined ? !body.classList.contains('rail-open') : force === true;
+  const open = force === undefined ? getComputedStyle($('rail')).display === 'none' : force === true;
   body.classList.toggle('rail-open', open);
-  if (button) button.setAttribute('aria-expanded', open ? 'true' : 'false');
-  // The stage's pixel width changed, so the canvas element is a different size. The
-  // camera does not follow it: the window stays where the reader left it, in world
-  // coordinates, and the world does not move.
-  if (state.view) draw();
+  body.classList.toggle('rail-closed', !open);
+  $('rail-toggle').setAttribute('aria-expanded', String(open));
+  syncAllScrollAffordances();
 }
 
 function setupViewport() {
@@ -2740,36 +2690,50 @@ function setupViewport() {
   canvas.addEventListener('wheel', (event) => {
     event.preventDefault();
     const rect = canvas.getBoundingClientRect();
-    const factor = event.deltaY < 0 ? ZOOM_STEP : 1 / ZOOM_STEP;
+    if (event.deltaY === 0) return;
+    const factor = Math.exp(-Math.max(-120, Math.min(120, event.deltaY)) * 0.002);
     const focus = clientToGraph(canvas, event.clientX - rect.left, event.clientY - rect.top);
     const next = zoomViewBox(canvas.getAttribute('viewBox'), factor, focus, state.zoom);
     setCamera(canvas, next.viewBox, next.zoom);
   }, { passive: false });
 
-  canvas.addEventListener('mousedown', (event) => {
-    if (event.button !== 0) return;
-    panState = { x: event.clientX, y: event.clientY, viewBox: canvas.getAttribute('viewBox') };
-    canvas.classList.add('is-panning');
+  let suppressClick = false;
+  const DRAG_THRESHOLD = 5;
+  canvas.addEventListener('pointerdown', event => {
+    if (event.button !== 0 || !event.isPrimary) return;
+    suppressClick = false;
+    panState = { pointerId: event.pointerId, x: event.clientX, y: event.clientY,
+      viewBox: canvas.getAttribute('viewBox'), ctm: canvas.getScreenCTM(), dragging: false };
   });
-  window.addEventListener('mousemove', (event) => {
-    if (!panState) return;
-    const rect = canvas.getBoundingClientRect();
-    const parts = String(panState.viewBox).split(/\s+/).map(Number);
-    const [vx, vy, vw, vh] = parts;
-    const dx = ((event.clientX - panState.x) / rect.width) * vw;
-    const dy = ((event.clientY - panState.y) / rect.height) * vh;
-    // The window follows the pointer's world delta, then the same clamp applies: a
-    // drag to the edge stops at the world's edge instead of leaving it.
-    setCamera(canvas, `${vx - dx} ${vy - dy} ${vw} ${vh}`, vw > 0 ? canvas.clientWidth / vw : state.zoom);
+  canvas.addEventListener('pointermove', event => {
+    if (!panState || event.pointerId !== panState.pointerId) return;
+    const sx = event.clientX - panState.x, sy = event.clientY - panState.y;
+    if (!panState.dragging && Math.hypot(sx, sy) <= DRAG_THRESHOLD) return;
+    if (!panState.dragging) {
+      panState.dragging = true;
+      suppressClick = true;
+      canvas.setPointerCapture(event.pointerId);
+      canvas.classList.add('is-panning');
+    }
+    const [vx, vy, vw, vh] = String(panState.viewBox).split(/\s+/).map(Number);
+    const c = panState.ctm;
+    setCamera(canvas, `${vx - sx / c.a} ${vy - sy / c.d} ${vw} ${vh}`, c.a);
   });
-  window.addEventListener('mouseup', () => {
+  const endPointer = event => {
+    if (!panState || event.pointerId !== panState.pointerId) return;
+    if (event.type === 'pointercancel') suppressClick = true;
     panState = null;
     canvas.classList.remove('is-panning');
-  });
-
-  canvas.addEventListener('click', (event) => {
+    if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
+  };
+  canvas.addEventListener('pointerup', endPointer);
+  canvas.addEventListener('pointercancel', endPointer);
+  canvas.addEventListener('lostpointercapture', endPointer);
+  // Capture phase blocks node/row activation as well as blank deselection after a drag.
+  canvas.addEventListener('click', event => {
+    if (suppressClick) { event.preventDefault(); event.stopImmediatePropagation(); suppressClick = false; return; }
     if (event.target === canvas) clearSelection();
-  });
+  }, true);
 
   $('zoom-in').addEventListener('click', () => zoomBy(ZOOM_STEP));
   $('zoom-out').addEventListener('click', () => zoomBy(1 / ZOOM_STEP));
@@ -2783,10 +2747,9 @@ function setupViewport() {
 }
 
 function clientToGraph(canvas, clientX, clientY) {
-  const viewBox = canvas.getAttribute('viewBox').split(/\s+/).map(Number);
-  const [vx, vy, vw, vh] = viewBox;
   const rect = canvas.getBoundingClientRect();
-  return { x: vx + (clientX / rect.width) * vw, y: vy + (clientY / rect.height) * vh };
+  const point = new DOMPoint(rect.left + clientX, rect.top + clientY).matrixTransform(canvas.getScreenCTM().inverse());
+  return { x: point.x, y: point.y };
 }
 
 function zoomBy(factor) {
@@ -2889,7 +2852,7 @@ $('layers-btn').addEventListener('click', () => toggleLayers());
     if (event.key === 'Escape') {
       if (!$('layers-pop').hasAttribute('hidden')) toggleLayers(false);
       else if (!$('searchbar').hasAttribute('hidden')) toggleSearch(false);
-      else clearSelection();
+      else if (state.selectedEdgeId || state.selectedNodeId) closeDrawer();
     }
     /*
      * Single-key shortcuts yield to whatever the reader is typing into.

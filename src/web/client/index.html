@@ -376,25 +376,7 @@
     </div>
 
     <div class="explorer-body" id="explorer-body">
-      <!--
-        The context rail. A real grid column, not an overlay: an overlay can only
-        ever sit on top of the graph, so the graph has to be kept clear of it, and
-        at a narrow viewport there is nothing left to keep it clear of. As a column
-        the graph simply starts after it, and the legend lives here rather than
-        floating across the canvas.
-      -->
-      <!--
-        The context rail.
-
-        The frame clips; an inner box scrolls. A padding box that scrolls takes its own
-        padding with it, so the rail's padding lives on `.rail-scroll` instead -- on the
-        frame it would be consumed by the first scroll and the content would end up
-        touching the app bar.
-
-        `tabindex="0"` is not optional decoration: a scrollable region a keyboard cannot
-        focus is a scrollable region a keyboard cannot scroll. With it, Tab reaches the
-        rail and the arrow keys, Page Up/Down, Home and End all work inside it.
-      -->
+      <!-- Context is a shell overlay; it never resizes the graph stage. -->
       <aside class="rail" id="rail" aria-label="Context">
         <div class="rail-scroll gl-scroll" id="rail-scroll" tabindex="0"></div>
         <span class="rail-more" aria-hidden="true"></span>
@@ -412,39 +394,23 @@
           <button class="d-action" id="retry-analysis" type="button" hidden>Try again</button>
         </div>
 
-        <svg id="canvas" class="canvas" role="img" aria-label="Repository lineage graph"></svg>
+        <svg id="canvas" class="canvas" role="group" aria-label="Repository lineage graph"></svg>
 
-        <!--
-          The world's HTML layer.
-
-          Authored in the same world units as the canvas geometry and put through
-          the identical transform the camera applies, so an overlay lands on the
-          world coordinate it annotates at every zoom.
-        -->
-        <div class="frame" id="frame">
-          <!--
-            Bottom band: the edge key, on the world rather than in the shell, so it
-            sits with the composition instead of colliding with a rail at some width.
-          -->
+        <!-- HUD owns screen pixels; the camera transforms SVG world content only. -->
+        <div class="viewport-hud" id="viewport-hud">
           <div class="band" id="band" hidden></div>
-        </div>
-
         <div class="viewport-controls">
           <button class="vp-btn" id="zoom-out" aria-label="Zoom out">−</button>
           <button class="vp-btn" id="zoom-in" aria-label="Zoom in">+</button>
           <button class="vp-btn vp-fit" id="zoom-fit" aria-label="Fit to view">⤢</button>
         </div>
 
+        </div>
+
         <div class="bundles" id="bundles" hidden></div>
       </div>
 
-      <!--
-        The Drawer: the third column of the shell.
-
-        It shares one rail with the graph's reserved gutter, and at the frozen
-        breakpoint it becomes an overlay on that same gutter. Either way the world
-        never moves, so reading a relationship cannot relocate the scene.
-      -->
+      <!-- Non-modal Shell overlay; scrolls independently of the graph camera. -->
       <aside class="drawer" id="drawer" hidden aria-live="polite">
         <div class="drawer-inner gl-scroll" id="drawer-inner" tabindex="0"></div>
         <span class="drawer-more" aria-hidden="true"></span>
