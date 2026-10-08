@@ -20,7 +20,8 @@
     "test:canvas": "node test/web/canvas-acceptance.ts",
     "shots": "node build.mjs && node test/web/screenshots.ts",
     "analyze": "node src/cli/main.ts analyze",
-    "check": "npm run typecheck && npm test"
+    "check": "npm run typecheck && npm test",
+    "test:ui-contract": "node test/web/ui-contract.ts"
   },
   "dependencies": {
     "smol-toml": "^1.4.2"

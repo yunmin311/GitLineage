@@ -844,10 +844,12 @@ function renderChrome(view) {
   setHidden($('analysis'), true);
   setHidden($('appbar-mid'), false);
   setHidden($('appbar-right'), false);
+  setHidden($('project-source'), true);
   const repo = state.repository;
   $('crumb-repo').textContent = view.subject.owner && view.subject.name
     ? `${view.subject.owner}/${view.subject.name}`
     : `${repo.owner}/${repo.name}`;
+  $('crumb-repo').title = $('crumb-repo').textContent;
   $('crumb-rev').textContent = state.resolvedRevision.slice(0, 7);
   /*
    * The app bar states the size of the graph, not the composition's internal split.
@@ -1754,7 +1756,7 @@ const hiddenRows = plateHiddenRows(plate);
     if (plate.meta) {
       group.append(
         svgEl('text', { x: left + 12, y: plateTop + 40, class: 'plate-subtitle' }, [
-          truncate(`declared in: ${plate.meta}`, 54),
+          `declared in: ${plate.meta}`,
         ]),
       );
     }
@@ -1781,7 +1783,8 @@ const hiddenRows = plateHiddenRows(plate);
        * element's text content, which put the full name and the full locator into the
        * rendered string.
        */
-      const item = svgEl('g', { class: 'plate-row', 'aria-hidden': 'true' });
+      const item = svgEl('g', { class: `plate-row${rowSelected ? ' is-selected' : ''}`, role: 'button', tabindex: '0', 'aria-label': `${row.label}${row.meta ? ` · ${row.meta}` : ''}`, 'aria-pressed': String(rowSelected) });
+      item.append(svgEl('rect', { x: left, y: rowY + 2, width, height: PLATE_ROW - 4, class: 'plate-row-surface' }));
       item.append(svgEl('title', {}, [`${row.label}${row.meta ? ` \u00b7 ${row.meta}` : ''}`]));
       if (rowSelected) {
         item.append(
@@ -1815,7 +1818,7 @@ const hiddenRows = plateHiddenRows(plate);
         );
       }
       const labelX = markX + MARK_W;
-      const label = svgEl('text', { x: labelX, y: rowY + 18, class: 'plate-row-label' }, [truncate(row.label, labelRoom)]);
+      const label = svgEl('text', { x: labelX, y: rowY + 18, class: 'plate-row-label' }, [row.label]);
       item.append(label);
       /*
        * A row is selectable.
@@ -1836,10 +1839,15 @@ const hiddenRows = plateHiddenRows(plate);
         selectEdge(first);
       });
       item.append(rowHit);
+      item.addEventListener('keydown', event => {
+        if (event.key !== 'Enter' && event.key !== ' ') return;
+        event.preventDefault(); event.stopPropagation();
+        if (row.memberEdgeIds[0]) selectEdge(row.memberEdgeIds[0]);
+      });
       if (row.meta) {
         item.append(
           svgEl('text', { x: left + width - 12, y: rowY + 18, class: 'plate-row-meta', 'text-anchor': 'end' }, [
-            truncate(compactLocator(row.meta), META_CHARS),
+            compactLocator(row.meta),
           ]),
         );
       }
@@ -1903,7 +1911,7 @@ const hiddenRows = plateHiddenRows(plate);
       toggleBundle(plate.key);
     };    group.addEventListener('click', activate);
     group.addEventListener('keydown', (event) => {
-      if (event.key === 'Enter' || event.key === ' ') activate(event);
+      if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); activate(event); }
     });
     nodeLayer.append(group);
   }
@@ -1980,14 +1988,14 @@ const hiddenRows = plateHiddenRows(plate);
     group.append(
       svgEl('title', {}, [node.label]),
       svgEl('text', { x: position.x - NODE_W / 2 + 10, y: position.y - 3, class: 'node-label' }, [
-        truncate(node.label, Math.floor((NODE_W - 20) / 7.2)),
+        node.label,
       ]),
     );
     if (node.fact) {
       group.append(
         svgEl('text', {
           x: position.x + NODE_W / 2 - 10, y: position.y + 15, class: 'node-fact', 'text-anchor': 'end',
-        }, [truncate(node.fact, 22)]),
+        }, [node.fact]),
       );
     }
     if (node.isSubject) {
@@ -2013,11 +2021,40 @@ const hiddenRows = plateHiddenRows(plate);
   }
 
   canvas.append(edgeLayer, nodeLayer);
+  fitGraphText(canvas);
   renderBundles();
   renderLayersPop();
   renderRail(view);
   renderBottomBand(view);
   updateSearchCount();
+}
+
+/** Fit real glyph advances after attachment, preserving complete values in titles. */
+function fitGraphText(canvas) {
+  for (const text of canvas.querySelectorAll('.bundle-card text, .node text')) {
+    const full = text.textContent;
+    const card = text.closest('.bundle-card, .node');
+    const box = card.querySelector('.bundle-card-box, .node-box').getBBox();
+    const hasMeta = text.closest('.plate-row')?.querySelector('.plate-row-meta');
+    let room = box.width - 24;
+    if (text.classList.contains('plate-row-label')) room -= ROW_MARK_W + (hasMeta ? 140 : 0);
+    if (text.classList.contains('plate-row-meta')) room = 126;
+    if (text.classList.contains('plate-row-more')) room -= 80;
+    if (text.classList.contains('plate-row-expand')) room = 64;
+    if (text.classList.contains('subject-tag')) continue;
+    if (text.getComputedTextLength() <= room) continue;
+    const chars = Array.from(full);
+    let lo = 0, hi = chars.length;
+    while (lo < hi) {
+      const mid = Math.ceil((lo + hi) / 2);
+      text.textContent = chars.slice(0, mid).join('') + '…';
+      if (text.getComputedTextLength() <= room) lo = mid; else hi = mid - 1;
+    }
+    text.textContent = chars.slice(0, lo).join('') + '…';
+    // Put the title beside text, never inside it (SVG textContent would include it).
+    if (!card.querySelector('title')) card.prepend(svgEl('title', {}, [full]));
+    if (text.classList.contains('plate-subtitle')) card.prepend(svgEl('title', {}, [full]));
+  }
 }
 
 function isEdgeTouching(edge, nodeIds) {
@@ -2779,6 +2816,7 @@ function showLanding() {
   setHidden($('explorer'), true);
   setHidden($('appbar-mid'), true);
   setHidden($('appbar-right'), true);
+  setHidden($('project-source'), false);
   setHidden($('site-foot'), false);
   setHidden($('searchbar'), true);
   toggleLayers(false);

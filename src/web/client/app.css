@@ -554,23 +554,24 @@ a { color: inherit; }
      2px ink rule over the page paper, which made the bar the heaviest object in a
      product whose graph is meant to be the heaviest. V3.3 puts it on `--surface` behind
      a hairline, which is what lets the bar recede and the world come forward. */
-  height: var(--bar-h); padding: 0 var(--s6);
+  height: var(--bar-h); flex: none; padding: 0 var(--s6);
   border-bottom: 1px solid var(--rule);
   background: var(--surface);
   position: sticky; top: 0; z-index: 40;
 }
-.brand { display: inline-flex; align-items: center; gap: 7px; font-weight: 650; font-size: 15px; letter-spacing: -0.01em; text-decoration: none; }
+.brand { flex: none; line-height: 20px; display: inline-flex; align-items: center; gap: 7px; font-weight: 650; font-size: 15px; letter-spacing: -0.01em; text-decoration: none; }
 /* A solid 9px square. The mark used to be a two-node graph glyph in two colours,
    which read as a product logo rather than as part of the type system. */
 .brand-mark { width: 9px; height: 9px; background: var(--ink); flex: none; }
-.appbar-mid { display: flex; align-items: baseline; gap: var(--s3); min-width: 0; flex: 1; }
+.appbar-mid { display: flex; align-items: center; gap: var(--s3); min-width: 0; flex: 1; }
 .crumb-sep { color: var(--ink-5); }
 .crumb-repo {
   font-size: var(--t-title-size); font-weight: var(--t-title-wt);
   line-height: var(--t-title-lh); letter-spacing: var(--t-title-track);
-  white-space: nowrap;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
 }
 .crumb-ctx { font-size: var(--t-secondary-size); color: var(--ink-3); white-space: nowrap; }
+.crumb-sep, .crumb-ctx, .crumb-rev, .cache-chip { flex: none; }
 .crumb-rev, .crumb-count { color: var(--ink-4); white-space: nowrap; }
 /* The rail disclosure. Only exists below the breakpoint that hides the rail. */
 .rail-toggle {
@@ -590,7 +591,8 @@ a { color: inherit; }
   padding: 1px 5px; letter-spacing: var(--t-meta-track); white-space: nowrap;
 }
 .cache-chip.is-cached { color: var(--verified); border-color: color-mix(in srgb, var(--verified) 40%, var(--rule-2)); }
-.appbar-right { display: flex; align-items: center; gap: var(--s2); }
+.project-source { margin-left: auto; }
+.appbar-right { flex: none; display: flex; align-items: center; gap: var(--s2); }
 
 .icon-btn {
   display: inline-flex; align-items: center; justify-content: center;
@@ -1610,7 +1612,11 @@ a { color: inherit; }
 /* Transparent and beneath the row's own text, so selecting a row never changes how
    the row looks. */
 .plate-row-hit { fill: transparent; cursor: pointer; }
-.plate-row-hit:hover { fill: var(--surface-hi); }
+.plate-row-surface { fill: transparent; pointer-events: none; }
+.plate-row:hover .plate-row-surface { fill: var(--surface-hi); }
+.plate-row.is-selected .plate-row-surface { fill: var(--surface-hi); }
+.plate-row:focus-visible { outline: none; }
+.plate-row:focus-visible .plate-row-surface { stroke: var(--ink); stroke-width: 1; }
 .bundle-card.is-selected .bundle-card-label { fill: var(--ink); }
 
 /* ------------------------------------------------------------------ graph */
@@ -2040,7 +2046,7 @@ a { color: inherit; }
 
 @media (max-width: 860px) {
   :root { --drawer-w: 320px; }
-  .appbar-mid { flex-wrap: wrap; }
+  .appbar-mid { flex-wrap: nowrap; gap: var(--s2); }
   .crumb-ctx { display: none; }
   .strip { padding: 0 var(--s4); gap: var(--s2); }
   .phase { padding: 0 var(--s2); }
@@ -2057,3 +2063,15 @@ a { color: inherit; }
   .layers-pop { right: 10px; left: 10px; width: auto; }
 }
 
+
+/* Compact shell: explicit two-row ownership keeps operations accessible at 200%. */
+@media (max-width: 700px) {
+  :root { --bar-h: 80px; }
+  .appbar { flex-wrap: wrap; gap: 4px 8px; padding: 4px var(--s3); }
+  .appbar-mid { order: 3; flex: 1 0 100%; width: 100%; }
+  .appbar-right { margin-left: auto; }
+  .crumb-ctx, .crumb-sep { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0s !important; animation-duration: 0s !important; }
+}
