@@ -27,7 +27,9 @@
     "test:preflight": "node test/web/preflight-acceptance.ts",
     "test:responsive": "node test/web/responsive-acceptance.ts",
     "test:mobile": "node test/web/mobile-acceptance.ts",
-    "test:stale": "node test/web/stale-acceptance.ts"
+    "test:stale": "node test/web/stale-acceptance.ts",
+    "preview:deep": "node experiments/discovery-v2/serve-preview.ts",
+    "test:deep-search": "node test/web/deep-search-acceptance.ts"
   },
   "dependencies": {
     "smol-toml": "^1.4.2"
