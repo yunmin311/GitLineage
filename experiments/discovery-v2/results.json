@@ -1,0 +1,747 @@
+{
+  "version": "js-token-spike@1",
+  "budget": {
+    "maxBytes": 262144,
+    "maxTokens": 20000,
+    "k": 5,
+    "window": 4,
+    "permutations": 64
+  },
+  "environment": {
+    "node": "v24.21.0",
+    "typescript": "5.9.3",
+    "platform": "linux"
+  },
+  "corpusDigest": "821d57a4b10f022a3c8694a143d86fabc4b8343277ab915e5740dd37bc247c41",
+  "declarationAudits": [
+    {
+      "repository": "sindresorhus/yocto-queue",
+      "revision": "72a8fa96a9d389765cdf2bb9c6daba8302fc375d",
+      "scope": "pinned README only; parser recognition does not prove absence",
+      "explicitLineageDeclarations": 0,
+      "references": [
+        {
+          "type": "references",
+          "object": {
+            "kind": "repository",
+            "provider": "github",
+            "owner": "sindresorhus",
+            "name": "quick-lru"
+          },
+          "locator": {
+            "path": "readme.md",
+            "lineStart": 80,
+            "lineEnd": 80
+          }
+        }
+      ]
+    },
+    {
+      "repository": "sindresorhus/p-throttle",
+      "revision": "a0d20bf8c1a5f0067b1dce529b1ff013878591d3",
+      "scope": "pinned README only; parser recognition does not prove absence",
+      "explicitLineageDeclarations": 0,
+      "references": [
+        {
+          "type": "references",
+          "object": {
+            "kind": "repository",
+            "provider": "github",
+            "owner": "sindresorhus",
+            "name": "p-debounce"
+          },
+          "locator": {
+            "path": "readme.md",
+            "lineStart": 222,
+            "lineEnd": 222
+          }
+        },
+        {
+          "type": "references",
+          "object": {
+            "kind": "repository",
+            "provider": "github",
+            "owner": "sindresorhus",
+            "name": "p-limit"
+          },
+          "locator": {
+            "path": "readme.md",
+            "lineStart": 223,
+            "lineEnd": 223
+          }
+        },
+        {
+          "type": "references",
+          "object": {
+            "kind": "repository",
+            "provider": "github",
+            "owner": "sindresorhus",
+            "name": "p-memoize"
+          },
+          "locator": {
+            "path": "readme.md",
+            "lineStart": 224,
+            "lineEnd": 224
+          }
+        },
+        {
+          "type": "references",
+          "object": {
+            "kind": "repository",
+            "provider": "github",
+            "owner": "sindresorhus",
+            "name": "promise-fun"
+          },
+          "locator": {
+            "path": "readme.md",
+            "lineStart": 225,
+            "lineEnd": 225
+          }
+        }
+      ]
+    }
+  ],
+  "fixtureRepositories": [
+    {
+      "repository": "sindresorhus/p-limit",
+      "revision": "a8a6fbec4e0e866d6d779b10889bb4f5567e70eb",
+      "parent": null,
+      "license": "MIT"
+    },
+    {
+      "repository": "jucke/p-limit",
+      "revision": "e293f0b92536447f72ca818fcf07be8d287f1c24",
+      "parent": "sindresorhus/p-limit",
+      "license": "MIT"
+    },
+    {
+      "repository": "sindresorhus/yocto-queue",
+      "revision": "72a8fa96a9d389765cdf2bb9c6daba8302fc375d",
+      "parent": null,
+      "license": "MIT"
+    },
+    {
+      "repository": "sindresorhus/p-throttle",
+      "revision": "a0d20bf8c1a5f0067b1dce529b1ff013878591d3",
+      "parent": null,
+      "license": "MIT"
+    }
+  ],
+  "scope": {
+    "repositories": 9,
+    "indexedFiles": 9,
+    "sourceFilesPerRepository": 1,
+    "positiveCandidates": 4,
+    "unknownCandidates": 2,
+    "externalRecall": "not measurable; no exhaustive ground truth",
+    "offlinePoolCoverage": 1
+  },
+  "reinitialized": {
+    "commit": "946596de98daa9925a697fd2e71972d80235daab",
+    "parents": [],
+    "differsFromPinnedUpstream": true,
+    "blobMatchesSource": true
+  },
+  "results": {
+    "exact_blob": {
+      "ranking": [
+        {
+          "id": "synthetic/reinitialized",
+          "label": "positive",
+          "score": 1
+        },
+        {
+          "id": "jucke/p-limit",
+          "label": "positive",
+          "score": 0
+        },
+        {
+          "id": "sindresorhus/p-throttle",
+          "label": "unknown",
+          "score": 0
+        },
+        {
+          "id": "sindresorhus/yocto-queue",
+          "label": "unknown",
+          "score": 0
+        },
+        {
+          "id": "synthetic/format-path",
+          "label": "positive",
+          "score": 0
+        },
+        {
+          "id": "synthetic/independent-app",
+          "label": "negative",
+          "score": 0
+        },
+        {
+          "id": "synthetic/renamed-format-path",
+          "label": "positive",
+          "score": 0
+        },
+        {
+          "id": "synthetic/template-only",
+          "label": "negative",
+          "score": 0
+        }
+      ],
+      "metrics": [
+        {
+          "k": 1,
+          "returned": 1,
+          "positives": 1,
+          "unknown": 0,
+          "recall": 0.25,
+          "precisionJudged": 1,
+          "precisionLowerBound": 1,
+          "precisionUpperBound": 1
+        },
+        {
+          "k": 3,
+          "returned": 1,
+          "positives": 1,
+          "unknown": 0,
+          "recall": 0.25,
+          "precisionJudged": 1,
+          "precisionLowerBound": 0.3333333333333333,
+          "precisionUpperBound": 0.3333333333333333
+        },
+        {
+          "k": 5,
+          "returned": 1,
+          "positives": 1,
+          "unknown": 0,
+          "recall": 0.25,
+          "precisionJudged": 1,
+          "precisionLowerBound": 0.2,
+          "precisionUpperBound": 0.2
+        }
+      ]
+    },
+    "strict_jaccard": {
+      "ranking": [
+        {
+          "id": "synthetic/format-path",
+          "label": "positive",
+          "score": 1
+        },
+        {
+          "id": "synthetic/reinitialized",
+          "label": "positive",
+          "score": 1
+        },
+        {
+          "id": "synthetic/renamed-format-path",
+          "label": "positive",
+          "score": 0.06567992599444958
+        },
+        {
+          "id": "jucke/p-limit",
+          "label": "positive",
+          "score": 0.05507246376811594
+        },
+        {
+          "id": "sindresorhus/p-throttle",
+          "label": "unknown",
+          "score": 0.01738672286617492
+        },
+        {
+          "id": "synthetic/template-only",
+          "label": "negative",
+          "score": 0.005
+        },
+        {
+          "id": "sindresorhus/yocto-queue",
+          "label": "unknown",
+          "score": 0.004932182490752158
+        },
+        {
+          "id": "synthetic/independent-app",
+          "label": "negative",
+          "score": 0
+        }
+      ],
+      "metrics": [
+        {
+          "k": 1,
+          "returned": 1,
+          "positives": 1,
+          "unknown": 0,
+          "recall": 0.25,
+          "precisionJudged": 1,
+          "precisionLowerBound": 1,
+          "precisionUpperBound": 1
+        },
+        {
+          "k": 3,
+          "returned": 3,
+          "positives": 3,
+          "unknown": 0,
+          "recall": 0.75,
+          "precisionJudged": 1,
+          "precisionLowerBound": 1,
+          "precisionUpperBound": 1
+        },
+        {
+          "k": 5,
+          "returned": 5,
+          "positives": 4,
+          "unknown": 1,
+          "recall": 1,
+          "precisionJudged": 1,
+          "precisionLowerBound": 0.8,
+          "precisionUpperBound": 1
+        }
+      ]
+    },
+    "normalized_jaccard": {
+      "ranking": [
+        {
+          "id": "synthetic/format-path",
+          "label": "positive",
+          "score": 1
+        },
+        {
+          "id": "synthetic/reinitialized",
+          "label": "positive",
+          "score": 1
+        },
+        {
+          "id": "synthetic/renamed-format-path",
+          "label": "positive",
+          "score": 1
+        },
+        {
+          "id": "jucke/p-limit",
+          "label": "positive",
+          "score": 0.14147286821705427
+        },
+        {
+          "id": "sindresorhus/p-throttle",
+          "label": "unknown",
+          "score": 0.13479359730412804
+        },
+        {
+          "id": "sindresorhus/yocto-queue",
+          "label": "unknown",
+          "score": 0.0390625
+        },
+        {
+          "id": "synthetic/template-only",
+          "label": "negative",
+          "score": 0.03023758099352052
+        },
+        {
+          "id": "synthetic/independent-app",
+          "label": "negative",
+          "score": 0.012958963282937365
+        }
+      ],
+      "metrics": [
+        {
+          "k": 1,
+          "returned": 1,
+          "positives": 1,
+          "unknown": 0,
+          "recall": 0.25,
+          "precisionJudged": 1,
+          "precisionLowerBound": 1,
+          "precisionUpperBound": 1
+        },
+        {
+          "k": 3,
+          "returned": 3,
+          "positives": 3,
+          "unknown": 0,
+          "recall": 0.75,
+          "precisionJudged": 1,
+          "precisionLowerBound": 1,
+          "precisionUpperBound": 1
+        },
+        {
+          "k": 5,
+          "returned": 5,
+          "positives": 4,
+          "unknown": 1,
+          "recall": 1,
+          "precisionJudged": 1,
+          "precisionLowerBound": 0.8,
+          "precisionUpperBound": 1
+        }
+      ]
+    },
+    "minhash64": {
+      "ranking": [
+        {
+          "id": "synthetic/format-path",
+          "label": "positive",
+          "score": 1
+        },
+        {
+          "id": "synthetic/reinitialized",
+          "label": "positive",
+          "score": 1
+        },
+        {
+          "id": "synthetic/renamed-format-path",
+          "label": "positive",
+          "score": 1
+        },
+        {
+          "id": "jucke/p-limit",
+          "label": "positive",
+          "score": 0.1875
+        },
+        {
+          "id": "sindresorhus/p-throttle",
+          "label": "unknown",
+          "score": 0.171875
+        },
+        {
+          "id": "sindresorhus/yocto-queue",
+          "label": "unknown",
+          "score": 0.015625
+        },
+        {
+          "id": "synthetic/independent-app",
+          "label": "negative",
+          "score": 0
+        },
+        {
+          "id": "synthetic/template-only",
+          "label": "negative",
+          "score": 0
+        }
+      ],
+      "metrics": [
+        {
+          "k": 1,
+          "returned": 1,
+          "positives": 1,
+          "unknown": 0,
+          "recall": 0.25,
+          "precisionJudged": 1,
+          "precisionLowerBound": 1,
+          "precisionUpperBound": 1
+        },
+        {
+          "k": 3,
+          "returned": 3,
+          "positives": 3,
+          "unknown": 0,
+          "recall": 0.75,
+          "precisionJudged": 1,
+          "precisionLowerBound": 1,
+          "precisionUpperBound": 1
+        },
+        {
+          "k": 5,
+          "returned": 5,
+          "positives": 4,
+          "unknown": 1,
+          "recall": 1,
+          "precisionJudged": 1,
+          "precisionLowerBound": 0.8,
+          "precisionUpperBound": 1
+        }
+      ]
+    },
+    "winnowing_jaccard": {
+      "ranking": [
+        {
+          "id": "synthetic/format-path",
+          "label": "positive",
+          "score": 1
+        },
+        {
+          "id": "synthetic/reinitialized",
+          "label": "positive",
+          "score": 1
+        },
+        {
+          "id": "synthetic/renamed-format-path",
+          "label": "positive",
+          "score": 1
+        },
+        {
+          "id": "sindresorhus/p-throttle",
+          "label": "unknown",
+          "score": 0.11401869158878504
+        },
+        {
+          "id": "jucke/p-limit",
+          "label": "positive",
+          "score": 0.10572687224669604
+        },
+        {
+          "id": "sindresorhus/yocto-queue",
+          "label": "unknown",
+          "score": 0.025
+        },
+        {
+          "id": "synthetic/template-only",
+          "label": "negative",
+          "score": 0.014563106796116505
+        },
+        {
+          "id": "synthetic/independent-app",
+          "label": "negative",
+          "score": 0
+        }
+      ],
+      "metrics": [
+        {
+          "k": 1,
+          "returned": 1,
+          "positives": 1,
+          "unknown": 0,
+          "recall": 0.25,
+          "precisionJudged": 1,
+          "precisionLowerBound": 1,
+          "precisionUpperBound": 1
+        },
+        {
+          "k": 3,
+          "returned": 3,
+          "positives": 3,
+          "unknown": 0,
+          "recall": 0.75,
+          "precisionJudged": 1,
+          "precisionLowerBound": 1,
+          "precisionUpperBound": 1
+        },
+        {
+          "k": 5,
+          "returned": 5,
+          "positives": 4,
+          "unknown": 1,
+          "recall": 1,
+          "precisionJudged": 1,
+          "precisionLowerBound": 0.8,
+          "precisionUpperBound": 1
+        }
+      ]
+    }
+  },
+  "negativePairs": [
+    {
+      "name": "identical shared dependency/template",
+      "label": "negative_host_lineage",
+      "explanation": "Identical third-party fragment; no host-to-host derivation by construction.",
+      "scores": {
+        "exact_blob": 1,
+        "strict_jaccard": 1,
+        "normalized_jaccard": 1,
+        "minhash64": 1,
+        "winnowing_jaccard": 1
+      }
+    },
+    {
+      "name": "generic validators with renamed names",
+      "label": "negative_control",
+      "explanation": "Independently specified generic guard idiom; intentional adversarial lexical convergence.",
+      "scores": {
+        "exact_blob": 0,
+        "strict_jaccard": 0.2571428571428571,
+        "normalized_jaccard": 1,
+        "minhash64": 1,
+        "winnowing_jaccard": 1
+      }
+    }
+  ],
+  "explanations": [
+    {
+      "hash": "342b871a5083a8d24ad61344ea0e4f8793ef6210512a8b7c2a983bbaaaeaf40e",
+      "firstPath": "index.js",
+      "firstToken": 3,
+      "firstOffset": 18,
+      "secondPath": "lib/renamed.js",
+      "secondToken": 3
+    },
+    {
+      "hash": "69ecb05a0732a68f57cae8fcd1ce14b1209184f2ca8e914eb500621b6b2d15e1",
+      "firstPath": "index.js",
+      "firstToken": 5,
+      "firstOffset": 34,
+      "secondPath": "lib/renamed.js",
+      "secondToken": 5
+    },
+    {
+      "hash": "7a3e2affcdcffde121a71e01b90cabb5bb0cb1221ca66c7fb0d48f422ca37666",
+      "firstPath": "index.js",
+      "firstToken": 8,
+      "firstOffset": 58,
+      "secondPath": "lib/renamed.js",
+      "secondToken": 8
+    },
+    {
+      "hash": "7cff642c8e1c3530fc4aafe75f0864ca07ef340d6ee6b14c941fac4d9e5ab4d5",
+      "firstPath": "index.js",
+      "firstToken": 10,
+      "firstOffset": 65,
+      "secondPath": "lib/renamed.js",
+      "secondToken": 10
+    },
+    {
+      "hash": "516170ea7cf3bdc51f0deb7e48fb89ac3517d58a46f9150fabdd8538324e94ad",
+      "firstPath": "index.js",
+      "firstToken": 13,
+      "firstOffset": 81,
+      "secondPath": "lib/renamed.js",
+      "secondToken": 13
+    }
+  ],
+  "costs": [
+    {
+      "repository": "sindresorhus/p-limit",
+      "bytes": 3868,
+      "tokens": 633,
+      "state": "complete",
+      "wallMs": 33.075784,
+      "cpuMs": 49.091,
+      "apiCalls": 0,
+      "phaseMs": {
+        "parseAndNormalizeMs": 5.595563999999968,
+        "shinglesMs": 2.601914000000022,
+        "winnowingMs": 0.22590399999995725,
+        "minhashMs": 24.447375000000022
+      }
+    },
+    {
+      "repository": "jucke/p-limit",
+      "bytes": 640,
+      "tokens": 162,
+      "state": "complete",
+      "wallMs": 9.38608899999997,
+      "cpuMs": 11.198,
+      "apiCalls": 0,
+      "phaseMs": {
+        "parseAndNormalizeMs": 1.6045090000000073,
+        "shinglesMs": 0.4384249999999952,
+        "winnowingMs": 0.031080000000031305,
+        "minhashMs": 7.260265000000004
+      }
+    },
+    {
+      "repository": "sindresorhus/yocto-queue",
+      "bytes": 1587,
+      "tokens": 268,
+      "state": "complete",
+      "wallMs": 16.839917000000014,
+      "cpuMs": 24.086,
+      "apiCalls": 0,
+      "phaseMs": {
+        "parseAndNormalizeMs": 4.239765999999975,
+        "shinglesMs": 0.6021000000000072,
+        "winnowingMs": 0.038699999999948886,
+        "minhashMs": 11.895250000000033
+      }
+    },
+    {
+      "repository": "sindresorhus/p-throttle",
+      "bytes": 9716,
+      "tokens": 1592,
+      "state": "complete",
+      "wallMs": 46.74165799999997,
+      "cpuMs": 63.755,
+      "apiCalls": 0,
+      "phaseMs": {
+        "parseAndNormalizeMs": 8.559969999999964,
+        "shinglesMs": 2.1765869999999836,
+        "winnowingMs": 0.042417999999997846,
+        "minhashMs": 35.86148099999997
+      }
+    },
+    {
+      "repository": "synthetic/reinitialized",
+      "bytes": 3868,
+      "tokens": 633,
+      "state": "complete",
+      "wallMs": 22.925851000000023,
+      "cpuMs": 26.562,
+      "apiCalls": 0,
+      "phaseMs": {
+        "parseAndNormalizeMs": 2.45993500000003,
+        "shinglesMs": 1.0490729999999644,
+        "winnowingMs": 0.016763999999966472,
+        "minhashMs": 19.320178999999996
+      }
+    },
+    {
+      "repository": "synthetic/format-path",
+      "bytes": 2893,
+      "tokens": 633,
+      "state": "complete",
+      "wallMs": 20.294024000000036,
+      "cpuMs": 25.664,
+      "apiCalls": 0,
+      "phaseMs": {
+        "parseAndNormalizeMs": 2.6030420000000163,
+        "shinglesMs": 0.8350470000000314,
+        "winnowingMs": 0.014598000000034972,
+        "minhashMs": 16.770926999999972
+      }
+    },
+    {
+      "repository": "synthetic/renamed-format-path",
+      "bytes": 2931,
+      "tokens": 633,
+      "state": "complete",
+      "wallMs": 27.41654399999993,
+      "cpuMs": 50.347,
+      "apiCalls": 0,
+      "phaseMs": {
+        "parseAndNormalizeMs": 4.8483099999999695,
+        "shinglesMs": 1.4979439999999613,
+        "winnowingMs": 0.017390999999975065,
+        "minhashMs": 20.996685999999954
+      }
+    },
+    {
+      "repository": "synthetic/template-only",
+      "bytes": 129,
+      "tokens": 31,
+      "state": "complete",
+      "wallMs": 1.7764440000000832,
+      "cpuMs": 2.263,
+      "apiCalls": 0,
+      "phaseMs": {
+        "parseAndNormalizeMs": 0.24766199999999117,
+        "shinglesMs": 0.11242400000003272,
+        "winnowingMs": 0.0024880000000848668,
+        "minhashMs": 1.378842000000077
+      }
+    },
+    {
+      "repository": "synthetic/independent-app",
+      "bytes": 71,
+      "tokens": 23,
+      "state": "complete",
+      "wallMs": 0.9039309999999432,
+      "cpuMs": 1.021,
+      "apiCalls": 0,
+      "phaseMs": {
+        "parseAndNormalizeMs": 0.23692900000003192,
+        "shinglesMs": 0.03251199999999699,
+        "winnowingMs": 0.0009919999999965512,
+        "minhashMs": 0.5889250000000175
+      }
+    }
+  ],
+  "usage": {
+    "apiCalls": 0,
+    "githubRateLimitConsumed": 0,
+    "wallMs": 349.09077999999994,
+    "cpuMs": 343.324,
+    "paidCalls": 0
+  },
+  "limitations": [
+    "one JavaScript file per pinned public repository",
+    "fork is older than current upstream; fork metadata proves the positive label, not matching algorithm",
+    "identifier normalization deliberately drops binding/property distinctions",
+    "thresholds uncalibrated; no global index",
+    "unknown public candidates excluded from judged precision, bounds reported",
+    "MinHash seeded SHA implementation prioritizes reproducibility over speed"
+  ]
+}
