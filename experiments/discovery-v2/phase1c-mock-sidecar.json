@@ -1,0 +1,2334 @@
+{
+  "budget": {
+    "attempts": 24,
+    "bytesPerFile": 131072,
+    "candidates": 3,
+    "concurrency": 2,
+    "cpuMs": null,
+    "filesPerCandidate": 8,
+    "searchAttempts": 4,
+    "totalBytes": 2097152,
+    "wallMs": 30000
+  },
+  "candidateSchema": "discovery-candidate@1",
+  "candidates": [
+    {
+      "comparison": {
+        "candidate": {
+          "aliases": [
+            "old/example"
+          ],
+          "completeness": "provider_id",
+          "fullName": "fork/example",
+          "provider": "github",
+          "repositoryId": 2,
+          "revision": "c7df49b85e4885242789c07867c56fba789e1929"
+        },
+        "checks": [
+          {
+            "kind": "similarity",
+            "reasons": [],
+            "state": "completed"
+          }
+        ],
+        "coverage": {
+          "comparedPairs": 1,
+          "expectedPairs": 1,
+          "pending": [],
+          "reasons": [],
+          "state": "completed"
+        },
+        "discoveries": [
+          {
+            "locator": "example in:name is:public fork:true",
+            "reason": "fixed target repository name",
+            "source": "repository_search",
+            "version": "github-rest-repository-search@1"
+          }
+        ],
+        "files": {
+          "candidate": [
+            {
+              "blob": "6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+              "bytes": 90,
+              "classification": "application_source",
+              "digest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+              "filterVersion": "source-filter@1",
+              "language": "javascript",
+              "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+              "path": "index.js",
+              "reasons": [
+                "supported source; no exclusion heuristic matched"
+              ]
+            }
+          ],
+          "target": [
+            {
+              "blob": "6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+              "bytes": 90,
+              "classification": "application_source",
+              "digest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+              "filterVersion": "source-filter@1",
+              "language": "javascript",
+              "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+              "path": "index.js",
+              "reasons": [
+                "supported source; no exclusion heuristic matched"
+              ]
+            }
+          ]
+        },
+        "lineageClaim": "none",
+        "schemaVersion": "discovery-candidate@1",
+        "similarity": [
+          {
+            "filterVersion": "source-filter@1",
+            "firstCoverage": null,
+            "firstDigest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+            "firstPath": "index.js",
+            "firstShingles": null,
+            "firstTokens": 26,
+            "method": "exact_blob",
+            "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+            "ranges": [],
+            "rangesTruncated": false,
+            "reasons": [],
+            "score": 1,
+            "secondCoverage": null,
+            "secondDigest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+            "secondPath": "index.js",
+            "secondShingles": null,
+            "secondTokens": 26,
+            "sharedShingles": null,
+            "state": "completed",
+            "version": "git-blob-sha1@1"
+          },
+          {
+            "filterVersion": "source-filter@1",
+            "firstCoverage": 1,
+            "firstDigest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+            "firstPath": "index.js",
+            "firstShingles": 22,
+            "firstTokens": 26,
+            "method": "strict_token5",
+            "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+            "ranges": [
+              {
+                "fingerprint": "108ba48d7c84ec1d913ec77af2a6e2710dacd1ef86d6a6f194a5f6211ba3ff8c",
+                "first": [
+                  18,
+                  23
+                ],
+                "firstChars": [
+                  69,
+                  85
+                ],
+                "second": [
+                  18,
+                  23
+                ],
+                "secondChars": [
+                  69,
+                  85
+                ]
+              },
+              {
+                "fingerprint": "1962aa23fbc696fce14d35bebe15eb99eb7a94a56ed34845a2811cdee3f88575",
+                "first": [
+                  1,
+                  6
+                ],
+                "firstChars": [
+                  7,
+                  27
+                ],
+                "second": [
+                  1,
+                  6
+                ],
+                "secondChars": [
+                  7,
+                  27
+                ]
+              },
+              {
+                "fingerprint": "1bca3ffe71a3714c8ced5cbc8ce6fde5726c715eac242cff3c0bfe4d9036ba70",
+                "first": [
+                  16,
+                  21
+                ],
+                "firstChars": [
+                  64,
+                  82
+                ],
+                "second": [
+                  16,
+                  21
+                ],
+                "secondChars": [
+                  64,
+                  82
+                ]
+              },
+              {
+                "fingerprint": "20c2bd0c95d817a79ee599493359289d6bf70bab2909649f549c0a97b10e1b3f",
+                "first": [
+                  6,
+                  11
+                ],
+                "firstChars": [
+                  28,
+                  50
+                ],
+                "second": [
+                  6,
+                  11
+                ],
+                "secondChars": [
+                  28,
+                  50
+                ]
+              },
+              {
+                "fingerprint": "361d650f92bd3a947289dfd0d3201d79c2c12dbf209b705ea013cea843919ec6",
+                "first": [
+                  8,
+                  13
+                ],
+                "firstChars": [
+                  37,
+                  52
+                ],
+                "second": [
+                  8,
+                  13
+                ],
+                "secondChars": [
+                  37,
+                  52
+                ]
+              },
+              {
+                "fingerprint": "37584f1a7aa1894424805babfe0e4be0be1860c9a5d908408c46a8c1c613e70a",
+                "first": [
+                  21,
+                  26
+                ],
+                "firstChars": [
+                  82,
+                  89
+                ],
+                "second": [
+                  21,
+                  26
+                ],
+                "secondChars": [
+                  82,
+                  89
+                ]
+              },
+              {
+                "fingerprint": "4579856b198ff4ab2695fb0ee5236125d2b13004ffc640ac85b2981ee0f37153",
+                "first": [
+                  9,
+                  14
+                ],
+                "firstChars": [
+                  43,
+                  57
+                ],
+                "second": [
+                  9,
+                  14
+                ],
+                "secondChars": [
+                  43,
+                  57
+                ]
+              },
+              {
+                "fingerprint": "4603e535bbbcfb34aecbe921c9e08bb49d1e6cd6cffeb8a1a14ae33d231c37f0",
+                "first": [
+                  17,
+                  22
+                ],
+                "firstChars": [
+                  66,
+                  83
+                ],
+                "second": [
+                  17,
+                  22
+                ],
+                "secondChars": [
+                  66,
+                  83
+                ]
+              },
+              {
+                "fingerprint": "4c794b0311491c3cd097dc4990702b87bc2c82b8f76425b95edb287390d4491a",
+                "first": [
+                  11,
+                  16
+                ],
+                "firstChars": [
+                  50,
+                  64
+                ],
+                "second": [
+                  11,
+                  16
+                ],
+                "secondChars": [
+                  50,
+                  64
+                ]
+              },
+              {
+                "fingerprint": "56de93cdb473877b4c88e85520fcc117078753b4d4ef4b924ce28d27de92944e",
+                "first": [
+                  7,
+                  12
+                ],
+                "firstChars": [
+                  30,
+                  51
+                ],
+                "second": [
+                  7,
+                  12
+                ],
+                "secondChars": [
+                  30,
+                  51
+                ]
+              },
+              {
+                "fingerprint": "5b84d8a4d3705abd9b2b95b6f2dda42144feba203124d66371a1147060c9957f",
+                "first": [
+                  3,
+                  8
+                ],
+                "firstChars": [
+                  19,
+                  36
+                ],
+                "second": [
+                  3,
+                  8
+                ],
+                "secondChars": [
+                  19,
+                  36
+                ]
+              },
+              {
+                "fingerprint": "7edf20d8ceedc29046cb6caee28eb86389a32a96124b6cf946659fff15229244",
+                "first": [
+                  12,
+                  17
+                ],
+                "firstChars": [
+                  51,
+                  65
+                ],
+                "second": [
+                  12,
+                  17
+                ],
+                "secondChars": [
+                  51,
+                  65
+                ]
+              }
+            ],
+            "rangesTruncated": true,
+            "reasons": [],
+            "score": 1,
+            "secondCoverage": 1,
+            "secondDigest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+            "secondPath": "index.js",
+            "secondShingles": 22,
+            "secondTokens": 26,
+            "sharedShingles": 22,
+            "state": "completed",
+            "version": "token5-set@1"
+          },
+          {
+            "filterVersion": "source-filter@1",
+            "firstCoverage": 1,
+            "firstDigest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+            "firstPath": "index.js",
+            "firstShingles": 22,
+            "firstTokens": 26,
+            "method": "normalized_token5",
+            "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+            "ranges": [
+              {
+                "fingerprint": "0e69bfe5aeb2ba2b3f424f743310d676260157d23cc4c3e41f5bfd2062eed022",
+                "first": [
+                  12,
+                  17
+                ],
+                "firstChars": [
+                  51,
+                  65
+                ],
+                "second": [
+                  12,
+                  17
+                ],
+                "secondChars": [
+                  51,
+                  65
+                ]
+              },
+              {
+                "fingerprint": "2a142c337ce35984f433cfd66a45766716a789161caa07b8258752dfd3588bd9",
+                "first": [
+                  4,
+                  9
+                ],
+                "firstChars": [
+                  20,
+                  43
+                ],
+                "second": [
+                  4,
+                  9
+                ],
+                "secondChars": [
+                  20,
+                  43
+                ]
+              },
+              {
+                "fingerprint": "37584f1a7aa1894424805babfe0e4be0be1860c9a5d908408c46a8c1c613e70a",
+                "first": [
+                  21,
+                  26
+                ],
+                "firstChars": [
+                  82,
+                  89
+                ],
+                "second": [
+                  21,
+                  26
+                ],
+                "secondChars": [
+                  82,
+                  89
+                ]
+              },
+              {
+                "fingerprint": "37bdbdc0c8589b7dac9a5213216cd56c07165c772cfb0fccc12790ca6b98a476",
+                "first": [
+                  3,
+                  8
+                ],
+                "firstChars": [
+                  19,
+                  36
+                ],
+                "second": [
+                  3,
+                  8
+                ],
+                "secondChars": [
+                  19,
+                  36
+                ]
+              },
+              {
+                "fingerprint": "43c2aa3c560ea492326a98c1d337b92f5ebe8d0c06c13c18e650f2c611a4b5bc",
+                "first": [
+                  7,
+                  12
+                ],
+                "firstChars": [
+                  30,
+                  51
+                ],
+                "second": [
+                  7,
+                  12
+                ],
+                "secondChars": [
+                  30,
+                  51
+                ]
+              },
+              {
+                "fingerprint": "4a7d6e75fb4e071fb735b404266acb7a76e0c27e18153eb334321918d0f662ca",
+                "first": [
+                  13,
+                  18
+                ],
+                "firstChars": [
+                  52,
+                  68
+                ],
+                "second": [
+                  13,
+                  18
+                ],
+                "secondChars": [
+                  52,
+                  68
+                ]
+              },
+              {
+                "fingerprint": "4e32b53bd19cc48a122610ceaf6705b79b77ef20e5cd2618a5eca790f791854b",
+                "first": [
+                  9,
+                  14
+                ],
+                "firstChars": [
+                  43,
+                  57
+                ],
+                "second": [
+                  9,
+                  14
+                ],
+                "secondChars": [
+                  43,
+                  57
+                ]
+              },
+              {
+                "fingerprint": "56adedfd5a9824622ab470bf3d965a257e491f9b7de4c143e67884ff347ea7e3",
+                "first": [
+                  0,
+                  5
+                ],
+                "firstChars": [
+                  0,
+                  26
+                ],
+                "second": [
+                  0,
+                  5
+                ],
+                "secondChars": [
+                  0,
+                  26
+                ]
+              },
+              {
+                "fingerprint": "5dff5973dafb78f35457a627f24b803f9bdc708ba9d42ebfbd165eea4d6c5a0b",
+                "first": [
+                  15,
+                  20
+                ],
+                "firstChars": [
+                  59,
+                  76
+                ],
+                "second": [
+                  15,
+                  20
+                ],
+                "secondChars": [
+                  59,
+                  76
+                ]
+              },
+              {
+                "fingerprint": "5eb92ba653719d2781211c9273416ffa00e98849f6b0afd4ed4f6c501643670c",
+                "first": [
+                  10,
+                  15
+                ],
+                "firstChars": [
+                  44,
+                  58
+                ],
+                "second": [
+                  10,
+                  15
+                ],
+                "secondChars": [
+                  44,
+                  58
+                ]
+              },
+              {
+                "fingerprint": "5ebd832672ad7d1bcf9ce15438f17597f115257caeea3537124bcddb62c68435",
+                "first": [
+                  19,
+                  24
+                ],
+                "firstChars": [
+                  75,
+                  86
+                ],
+                "second": [
+                  19,
+                  24
+                ],
+                "secondChars": [
+                  75,
+                  86
+                ]
+              },
+              {
+                "fingerprint": "7a3e2affcdcffde121a71e01b90cabb5bb0cb1221ca66c7fb0d48f422ca37666",
+                "first": [
+                  2,
+                  7
+                ],
+                "firstChars": [
+                  16,
+                  29
+                ],
+                "second": [
+                  2,
+                  7
+                ],
+                "secondChars": [
+                  16,
+                  29
+                ]
+              }
+            ],
+            "rangesTruncated": true,
+            "reasons": [],
+            "score": 1,
+            "secondCoverage": 1,
+            "secondDigest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+            "secondPath": "index.js",
+            "secondShingles": 22,
+            "secondTokens": 26,
+            "sharedShingles": 22,
+            "state": "completed",
+            "version": "token5-set@1"
+          }
+        ],
+        "target": {
+          "aliases": [],
+          "completeness": "provider_id",
+          "fullName": "root/example",
+          "provider": "github",
+          "repositoryId": 1,
+          "revision": "cac1a6416a877d091954f52cae3f640c61a4e011"
+        },
+        "usage": {
+          "activeWorkers": 0,
+          "attempts": 9,
+          "bytesByFile": {
+            "[\"github:1@cac1a6416a877d091954f52cae3f640c61a4e011\",\"index.js\"]": 90,
+            "[\"github:2@c7df49b85e4885242789c07867c56fba789e1929\",\"index.js\"]": 90
+          },
+          "candidates": 3,
+          "files": {
+            "github:1@cac1a6416a877d091954f52cae3f640c61a4e011": 1,
+            "github:2@c7df49b85e4885242789c07867c56fba789e1929": 1
+          },
+          "peakWorkers": 1,
+          "searchAttempts": 1,
+          "totalBytes": 180
+        },
+        "verification": {
+          "canonicalEvidenceIds": [],
+          "checks": [],
+          "state": "pending"
+        }
+      },
+      "lineageClaim": "none",
+      "reasons": [
+        "search_metadata_name_disagreement"
+      ],
+      "repositoryId": 2,
+      "resolution": {
+        "defaultBranch": "main",
+        "identity": {
+          "aliases": [
+            "old/example"
+          ],
+          "completeness": "provider_id",
+          "fullName": "fork/example",
+          "provider": "github",
+          "repositoryId": 2,
+          "revision": "c7df49b85e4885242789c07867c56fba789e1929"
+        },
+        "metadata": {
+          "fork": true,
+          "parentId": 1
+        },
+        "observations": [
+          {
+            "fullName": "old/example",
+            "htmlUrl": "https://github.com/old/example",
+            "repositoryId": 2,
+            "source": "repository_search"
+          },
+          {
+            "fullName": "fork/example",
+            "htmlUrl": "https://github.com/fork/example",
+            "repositoryId": 2,
+            "source": "repository_metadata"
+          }
+        ],
+        "parents": [
+          "cac1a6416a877d091954f52cae3f640c61a4e011"
+        ],
+        "reasons": [
+          "search_metadata_name_disagreement"
+        ],
+        "requestSource": "github-rest-id-scoped@1",
+        "requestedId": 2,
+        "schemaVersion": "repository-snapshot@1",
+        "state": "resolved",
+        "tree": "1f71f9ac9237086831306ba771dfc2ac8bd299d9"
+      },
+      "source": {
+        "bindings": [
+          {
+            "blob": "6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+            "bytes": 90,
+            "digest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+            "filterVersion": "source-filter@1",
+            "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+            "path": "index.js",
+            "repositoryId": 2,
+            "revision": "c7df49b85e4885242789c07867c56fba789e1929"
+          }
+        ],
+        "coverage": {
+          "pending": [],
+          "reasons": [],
+          "scope": "explicit selected paths only",
+          "state": "completed",
+          "treeTruncated": false
+        },
+        "materializedBytes": 90,
+        "selections": [
+          {
+            "path": "index.js",
+            "reason": "explicit root JS entry; selected-path coverage only"
+          }
+        ],
+        "snapshot": {
+          "files": [
+            {
+              "blob": "6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+              "bytes": 90,
+              "classification": "application_source",
+              "digest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+              "filterVersion": "source-filter@1",
+              "language": "javascript",
+              "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+              "path": "index.js",
+              "reasons": [
+                "supported source; no exclusion heuristic matched"
+              ]
+            }
+          ],
+          "identity": {
+            "aliases": [
+              "old/example"
+            ],
+            "completeness": "provider_id",
+            "fullName": "fork/example",
+            "provider": "github",
+            "repositoryId": 2,
+            "revision": "c7df49b85e4885242789c07867c56fba789e1929"
+          },
+          "pending": [],
+          "reasons": [],
+          "state": "completed"
+        }
+      },
+      "state": "completed",
+      "summary": {
+        "comparedPairs": 1,
+        "exactPairs": 1,
+        "expectedPairs": 1,
+        "failures": [],
+        "firstFiltered": 0,
+        "firstIncluded": 1,
+        "firstTokens": 26,
+        "normalized": {
+          "first": 22,
+          "firstCoverage": 1,
+          "score": 1,
+          "second": 22,
+          "secondCoverage": 1,
+          "shared": 22
+        },
+        "secondFiltered": 0,
+        "secondIncluded": 1,
+        "secondTokens": 26,
+        "state": "completed",
+        "strict": {
+          "first": 22,
+          "firstCoverage": 1,
+          "score": 1,
+          "second": 22,
+          "secondCoverage": 1,
+          "shared": 22
+        }
+      },
+      "verification": "pending"
+    },
+    {
+      "comparison": {
+        "candidate": {
+          "aliases": [],
+          "completeness": "provider_id",
+          "fullName": "other/example",
+          "provider": "github",
+          "repositoryId": 3,
+          "revision": "828ee9fa75dfd9b925c19fc27eed09c087b8cdc3"
+        },
+        "checks": [
+          {
+            "kind": "similarity",
+            "reasons": [],
+            "state": "completed"
+          }
+        ],
+        "coverage": {
+          "comparedPairs": 1,
+          "expectedPairs": 1,
+          "pending": [],
+          "reasons": [],
+          "state": "completed"
+        },
+        "discoveries": [
+          {
+            "locator": "example in:name is:public fork:true",
+            "reason": "fixed target repository name",
+            "source": "repository_search",
+            "version": "github-rest-repository-search@1"
+          }
+        ],
+        "files": {
+          "candidate": [
+            {
+              "blob": "b57e980fa8065f44e6bd32654a8258630ee394fb",
+              "bytes": 29,
+              "classification": "application_source",
+              "digest": "251ea9cc653094a6cb9d50cfed3d5f1971d33a98ca8b57cbc31ce44180db3cc3",
+              "filterVersion": "source-filter@1",
+              "language": "javascript",
+              "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+              "path": "index.js",
+              "reasons": [
+                "supported source; no exclusion heuristic matched"
+              ]
+            }
+          ],
+          "target": [
+            {
+              "blob": "6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+              "bytes": 90,
+              "classification": "application_source",
+              "digest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+              "filterVersion": "source-filter@1",
+              "language": "javascript",
+              "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+              "path": "index.js",
+              "reasons": [
+                "supported source; no exclusion heuristic matched"
+              ]
+            }
+          ]
+        },
+        "lineageClaim": "none",
+        "schemaVersion": "discovery-candidate@1",
+        "similarity": [
+          {
+            "filterVersion": "source-filter@1",
+            "firstCoverage": null,
+            "firstDigest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+            "firstPath": "index.js",
+            "firstShingles": null,
+            "firstTokens": 26,
+            "method": "exact_blob",
+            "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+            "ranges": [],
+            "rangesTruncated": false,
+            "reasons": [],
+            "score": 0,
+            "secondCoverage": null,
+            "secondDigest": "251ea9cc653094a6cb9d50cfed3d5f1971d33a98ca8b57cbc31ce44180db3cc3",
+            "secondPath": "index.js",
+            "secondShingles": null,
+            "secondTokens": 6,
+            "sharedShingles": null,
+            "state": "completed",
+            "version": "git-blob-sha1@1"
+          },
+          {
+            "filterVersion": "source-filter@1",
+            "firstCoverage": 0,
+            "firstDigest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+            "firstPath": "index.js",
+            "firstShingles": 22,
+            "firstTokens": 26,
+            "method": "strict_token5",
+            "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+            "ranges": [],
+            "rangesTruncated": false,
+            "reasons": [],
+            "score": 0,
+            "secondCoverage": 0,
+            "secondDigest": "251ea9cc653094a6cb9d50cfed3d5f1971d33a98ca8b57cbc31ce44180db3cc3",
+            "secondPath": "index.js",
+            "secondShingles": 2,
+            "secondTokens": 6,
+            "sharedShingles": 0,
+            "state": "completed",
+            "version": "token5-set@1"
+          },
+          {
+            "filterVersion": "source-filter@1",
+            "firstCoverage": 0,
+            "firstDigest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+            "firstPath": "index.js",
+            "firstShingles": 22,
+            "firstTokens": 26,
+            "method": "normalized_token5",
+            "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+            "ranges": [],
+            "rangesTruncated": false,
+            "reasons": [],
+            "score": 0,
+            "secondCoverage": 0,
+            "secondDigest": "251ea9cc653094a6cb9d50cfed3d5f1971d33a98ca8b57cbc31ce44180db3cc3",
+            "secondPath": "index.js",
+            "secondShingles": 2,
+            "secondTokens": 6,
+            "sharedShingles": 0,
+            "state": "completed",
+            "version": "token5-set@1"
+          }
+        ],
+        "target": {
+          "aliases": [],
+          "completeness": "provider_id",
+          "fullName": "root/example",
+          "provider": "github",
+          "repositoryId": 1,
+          "revision": "cac1a6416a877d091954f52cae3f640c61a4e011"
+        },
+        "usage": {
+          "activeWorkers": 0,
+          "attempts": 13,
+          "bytesByFile": {
+            "[\"github:1@cac1a6416a877d091954f52cae3f640c61a4e011\",\"index.js\"]": 90,
+            "[\"github:2@c7df49b85e4885242789c07867c56fba789e1929\",\"index.js\"]": 90,
+            "[\"github:3@828ee9fa75dfd9b925c19fc27eed09c087b8cdc3\",\"index.js\"]": 29
+          },
+          "candidates": 3,
+          "files": {
+            "github:1@cac1a6416a877d091954f52cae3f640c61a4e011": 1,
+            "github:2@c7df49b85e4885242789c07867c56fba789e1929": 1,
+            "github:3@828ee9fa75dfd9b925c19fc27eed09c087b8cdc3": 1
+          },
+          "peakWorkers": 1,
+          "searchAttempts": 1,
+          "totalBytes": 209
+        },
+        "verification": {
+          "canonicalEvidenceIds": [],
+          "checks": [],
+          "state": "pending"
+        }
+      },
+      "lineageClaim": "none",
+      "reasons": [],
+      "repositoryId": 3,
+      "resolution": {
+        "defaultBranch": "main",
+        "identity": {
+          "aliases": [],
+          "completeness": "provider_id",
+          "fullName": "other/example",
+          "provider": "github",
+          "repositoryId": 3,
+          "revision": "828ee9fa75dfd9b925c19fc27eed09c087b8cdc3"
+        },
+        "metadata": {
+          "fork": false,
+          "parentId": null
+        },
+        "observations": [
+          {
+            "fullName": "other/example",
+            "htmlUrl": "https://github.com/other/example",
+            "repositoryId": 3,
+            "source": "repository_search"
+          },
+          {
+            "fullName": "other/example",
+            "htmlUrl": "https://github.com/other/example",
+            "repositoryId": 3,
+            "source": "repository_metadata"
+          }
+        ],
+        "parents": [],
+        "reasons": [],
+        "requestSource": "github-rest-id-scoped@1",
+        "requestedId": 3,
+        "schemaVersion": "repository-snapshot@1",
+        "state": "resolved",
+        "tree": "f067ff3135c3d39b2b39190c1cb5d37642f8c2d7"
+      },
+      "source": {
+        "bindings": [
+          {
+            "blob": "b57e980fa8065f44e6bd32654a8258630ee394fb",
+            "bytes": 29,
+            "digest": "251ea9cc653094a6cb9d50cfed3d5f1971d33a98ca8b57cbc31ce44180db3cc3",
+            "filterVersion": "source-filter@1",
+            "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+            "path": "index.js",
+            "repositoryId": 3,
+            "revision": "828ee9fa75dfd9b925c19fc27eed09c087b8cdc3"
+          }
+        ],
+        "coverage": {
+          "pending": [],
+          "reasons": [],
+          "scope": "explicit selected paths only",
+          "state": "completed",
+          "treeTruncated": false
+        },
+        "materializedBytes": 29,
+        "selections": [
+          {
+            "path": "index.js",
+            "reason": "explicit root JS entry; selected-path coverage only"
+          }
+        ],
+        "snapshot": {
+          "files": [
+            {
+              "blob": "b57e980fa8065f44e6bd32654a8258630ee394fb",
+              "bytes": 29,
+              "classification": "application_source",
+              "digest": "251ea9cc653094a6cb9d50cfed3d5f1971d33a98ca8b57cbc31ce44180db3cc3",
+              "filterVersion": "source-filter@1",
+              "language": "javascript",
+              "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+              "path": "index.js",
+              "reasons": [
+                "supported source; no exclusion heuristic matched"
+              ]
+            }
+          ],
+          "identity": {
+            "aliases": [],
+            "completeness": "provider_id",
+            "fullName": "other/example",
+            "provider": "github",
+            "repositoryId": 3,
+            "revision": "828ee9fa75dfd9b925c19fc27eed09c087b8cdc3"
+          },
+          "pending": [],
+          "reasons": [],
+          "state": "completed"
+        }
+      },
+      "state": "completed",
+      "summary": {
+        "comparedPairs": 1,
+        "exactPairs": 0,
+        "expectedPairs": 1,
+        "failures": [],
+        "firstFiltered": 0,
+        "firstIncluded": 1,
+        "firstTokens": 26,
+        "normalized": {
+          "first": 22,
+          "firstCoverage": 0,
+          "score": 0,
+          "second": 2,
+          "secondCoverage": 0,
+          "shared": 0
+        },
+        "secondFiltered": 0,
+        "secondIncluded": 1,
+        "secondTokens": 6,
+        "state": "completed",
+        "strict": {
+          "first": 22,
+          "firstCoverage": 0,
+          "score": 0,
+          "second": 2,
+          "secondCoverage": 0,
+          "shared": 0
+        }
+      },
+      "verification": "pending"
+    },
+    {
+      "comparison": {
+        "candidate": {
+          "aliases": [],
+          "completeness": "provider_id",
+          "fullName": "unknown/example",
+          "provider": "github",
+          "repositoryId": 4,
+          "revision": "23a35c48631619eefea680cd47964b5bd05a1741"
+        },
+        "checks": [
+          {
+            "kind": "similarity",
+            "reasons": [],
+            "state": "completed"
+          }
+        ],
+        "coverage": {
+          "comparedPairs": 1,
+          "expectedPairs": 1,
+          "pending": [],
+          "reasons": [],
+          "state": "completed"
+        },
+        "discoveries": [
+          {
+            "locator": "example in:name is:public fork:true",
+            "reason": "fixed target repository name",
+            "source": "repository_search",
+            "version": "github-rest-repository-search@1"
+          }
+        ],
+        "files": {
+          "candidate": [
+            {
+              "blob": "6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+              "bytes": 90,
+              "classification": "application_source",
+              "digest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+              "filterVersion": "source-filter@1",
+              "language": "javascript",
+              "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+              "path": "index.js",
+              "reasons": [
+                "supported source; no exclusion heuristic matched"
+              ]
+            }
+          ],
+          "target": [
+            {
+              "blob": "6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+              "bytes": 90,
+              "classification": "application_source",
+              "digest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+              "filterVersion": "source-filter@1",
+              "language": "javascript",
+              "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+              "path": "index.js",
+              "reasons": [
+                "supported source; no exclusion heuristic matched"
+              ]
+            }
+          ]
+        },
+        "lineageClaim": "none",
+        "schemaVersion": "discovery-candidate@1",
+        "similarity": [
+          {
+            "filterVersion": "source-filter@1",
+            "firstCoverage": null,
+            "firstDigest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+            "firstPath": "index.js",
+            "firstShingles": null,
+            "firstTokens": 26,
+            "method": "exact_blob",
+            "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+            "ranges": [],
+            "rangesTruncated": false,
+            "reasons": [],
+            "score": 1,
+            "secondCoverage": null,
+            "secondDigest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+            "secondPath": "index.js",
+            "secondShingles": null,
+            "secondTokens": 26,
+            "sharedShingles": null,
+            "state": "completed",
+            "version": "git-blob-sha1@1"
+          },
+          {
+            "filterVersion": "source-filter@1",
+            "firstCoverage": 1,
+            "firstDigest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+            "firstPath": "index.js",
+            "firstShingles": 22,
+            "firstTokens": 26,
+            "method": "strict_token5",
+            "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+            "ranges": [
+              {
+                "fingerprint": "108ba48d7c84ec1d913ec77af2a6e2710dacd1ef86d6a6f194a5f6211ba3ff8c",
+                "first": [
+                  18,
+                  23
+                ],
+                "firstChars": [
+                  69,
+                  85
+                ],
+                "second": [
+                  18,
+                  23
+                ],
+                "secondChars": [
+                  69,
+                  85
+                ]
+              },
+              {
+                "fingerprint": "1962aa23fbc696fce14d35bebe15eb99eb7a94a56ed34845a2811cdee3f88575",
+                "first": [
+                  1,
+                  6
+                ],
+                "firstChars": [
+                  7,
+                  27
+                ],
+                "second": [
+                  1,
+                  6
+                ],
+                "secondChars": [
+                  7,
+                  27
+                ]
+              },
+              {
+                "fingerprint": "1bca3ffe71a3714c8ced5cbc8ce6fde5726c715eac242cff3c0bfe4d9036ba70",
+                "first": [
+                  16,
+                  21
+                ],
+                "firstChars": [
+                  64,
+                  82
+                ],
+                "second": [
+                  16,
+                  21
+                ],
+                "secondChars": [
+                  64,
+                  82
+                ]
+              },
+              {
+                "fingerprint": "20c2bd0c95d817a79ee599493359289d6bf70bab2909649f549c0a97b10e1b3f",
+                "first": [
+                  6,
+                  11
+                ],
+                "firstChars": [
+                  28,
+                  50
+                ],
+                "second": [
+                  6,
+                  11
+                ],
+                "secondChars": [
+                  28,
+                  50
+                ]
+              },
+              {
+                "fingerprint": "361d650f92bd3a947289dfd0d3201d79c2c12dbf209b705ea013cea843919ec6",
+                "first": [
+                  8,
+                  13
+                ],
+                "firstChars": [
+                  37,
+                  52
+                ],
+                "second": [
+                  8,
+                  13
+                ],
+                "secondChars": [
+                  37,
+                  52
+                ]
+              },
+              {
+                "fingerprint": "37584f1a7aa1894424805babfe0e4be0be1860c9a5d908408c46a8c1c613e70a",
+                "first": [
+                  21,
+                  26
+                ],
+                "firstChars": [
+                  82,
+                  89
+                ],
+                "second": [
+                  21,
+                  26
+                ],
+                "secondChars": [
+                  82,
+                  89
+                ]
+              },
+              {
+                "fingerprint": "4579856b198ff4ab2695fb0ee5236125d2b13004ffc640ac85b2981ee0f37153",
+                "first": [
+                  9,
+                  14
+                ],
+                "firstChars": [
+                  43,
+                  57
+                ],
+                "second": [
+                  9,
+                  14
+                ],
+                "secondChars": [
+                  43,
+                  57
+                ]
+              },
+              {
+                "fingerprint": "4603e535bbbcfb34aecbe921c9e08bb49d1e6cd6cffeb8a1a14ae33d231c37f0",
+                "first": [
+                  17,
+                  22
+                ],
+                "firstChars": [
+                  66,
+                  83
+                ],
+                "second": [
+                  17,
+                  22
+                ],
+                "secondChars": [
+                  66,
+                  83
+                ]
+              },
+              {
+                "fingerprint": "4c794b0311491c3cd097dc4990702b87bc2c82b8f76425b95edb287390d4491a",
+                "first": [
+                  11,
+                  16
+                ],
+                "firstChars": [
+                  50,
+                  64
+                ],
+                "second": [
+                  11,
+                  16
+                ],
+                "secondChars": [
+                  50,
+                  64
+                ]
+              },
+              {
+                "fingerprint": "56de93cdb473877b4c88e85520fcc117078753b4d4ef4b924ce28d27de92944e",
+                "first": [
+                  7,
+                  12
+                ],
+                "firstChars": [
+                  30,
+                  51
+                ],
+                "second": [
+                  7,
+                  12
+                ],
+                "secondChars": [
+                  30,
+                  51
+                ]
+              },
+              {
+                "fingerprint": "5b84d8a4d3705abd9b2b95b6f2dda42144feba203124d66371a1147060c9957f",
+                "first": [
+                  3,
+                  8
+                ],
+                "firstChars": [
+                  19,
+                  36
+                ],
+                "second": [
+                  3,
+                  8
+                ],
+                "secondChars": [
+                  19,
+                  36
+                ]
+              },
+              {
+                "fingerprint": "7edf20d8ceedc29046cb6caee28eb86389a32a96124b6cf946659fff15229244",
+                "first": [
+                  12,
+                  17
+                ],
+                "firstChars": [
+                  51,
+                  65
+                ],
+                "second": [
+                  12,
+                  17
+                ],
+                "secondChars": [
+                  51,
+                  65
+                ]
+              }
+            ],
+            "rangesTruncated": true,
+            "reasons": [],
+            "score": 1,
+            "secondCoverage": 1,
+            "secondDigest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+            "secondPath": "index.js",
+            "secondShingles": 22,
+            "secondTokens": 26,
+            "sharedShingles": 22,
+            "state": "completed",
+            "version": "token5-set@1"
+          },
+          {
+            "filterVersion": "source-filter@1",
+            "firstCoverage": 1,
+            "firstDigest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+            "firstPath": "index.js",
+            "firstShingles": 22,
+            "firstTokens": 26,
+            "method": "normalized_token5",
+            "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+            "ranges": [
+              {
+                "fingerprint": "0e69bfe5aeb2ba2b3f424f743310d676260157d23cc4c3e41f5bfd2062eed022",
+                "first": [
+                  12,
+                  17
+                ],
+                "firstChars": [
+                  51,
+                  65
+                ],
+                "second": [
+                  12,
+                  17
+                ],
+                "secondChars": [
+                  51,
+                  65
+                ]
+              },
+              {
+                "fingerprint": "2a142c337ce35984f433cfd66a45766716a789161caa07b8258752dfd3588bd9",
+                "first": [
+                  4,
+                  9
+                ],
+                "firstChars": [
+                  20,
+                  43
+                ],
+                "second": [
+                  4,
+                  9
+                ],
+                "secondChars": [
+                  20,
+                  43
+                ]
+              },
+              {
+                "fingerprint": "37584f1a7aa1894424805babfe0e4be0be1860c9a5d908408c46a8c1c613e70a",
+                "first": [
+                  21,
+                  26
+                ],
+                "firstChars": [
+                  82,
+                  89
+                ],
+                "second": [
+                  21,
+                  26
+                ],
+                "secondChars": [
+                  82,
+                  89
+                ]
+              },
+              {
+                "fingerprint": "37bdbdc0c8589b7dac9a5213216cd56c07165c772cfb0fccc12790ca6b98a476",
+                "first": [
+                  3,
+                  8
+                ],
+                "firstChars": [
+                  19,
+                  36
+                ],
+                "second": [
+                  3,
+                  8
+                ],
+                "secondChars": [
+                  19,
+                  36
+                ]
+              },
+              {
+                "fingerprint": "43c2aa3c560ea492326a98c1d337b92f5ebe8d0c06c13c18e650f2c611a4b5bc",
+                "first": [
+                  7,
+                  12
+                ],
+                "firstChars": [
+                  30,
+                  51
+                ],
+                "second": [
+                  7,
+                  12
+                ],
+                "secondChars": [
+                  30,
+                  51
+                ]
+              },
+              {
+                "fingerprint": "4a7d6e75fb4e071fb735b404266acb7a76e0c27e18153eb334321918d0f662ca",
+                "first": [
+                  13,
+                  18
+                ],
+                "firstChars": [
+                  52,
+                  68
+                ],
+                "second": [
+                  13,
+                  18
+                ],
+                "secondChars": [
+                  52,
+                  68
+                ]
+              },
+              {
+                "fingerprint": "4e32b53bd19cc48a122610ceaf6705b79b77ef20e5cd2618a5eca790f791854b",
+                "first": [
+                  9,
+                  14
+                ],
+                "firstChars": [
+                  43,
+                  57
+                ],
+                "second": [
+                  9,
+                  14
+                ],
+                "secondChars": [
+                  43,
+                  57
+                ]
+              },
+              {
+                "fingerprint": "56adedfd5a9824622ab470bf3d965a257e491f9b7de4c143e67884ff347ea7e3",
+                "first": [
+                  0,
+                  5
+                ],
+                "firstChars": [
+                  0,
+                  26
+                ],
+                "second": [
+                  0,
+                  5
+                ],
+                "secondChars": [
+                  0,
+                  26
+                ]
+              },
+              {
+                "fingerprint": "5dff5973dafb78f35457a627f24b803f9bdc708ba9d42ebfbd165eea4d6c5a0b",
+                "first": [
+                  15,
+                  20
+                ],
+                "firstChars": [
+                  59,
+                  76
+                ],
+                "second": [
+                  15,
+                  20
+                ],
+                "secondChars": [
+                  59,
+                  76
+                ]
+              },
+              {
+                "fingerprint": "5eb92ba653719d2781211c9273416ffa00e98849f6b0afd4ed4f6c501643670c",
+                "first": [
+                  10,
+                  15
+                ],
+                "firstChars": [
+                  44,
+                  58
+                ],
+                "second": [
+                  10,
+                  15
+                ],
+                "secondChars": [
+                  44,
+                  58
+                ]
+              },
+              {
+                "fingerprint": "5ebd832672ad7d1bcf9ce15438f17597f115257caeea3537124bcddb62c68435",
+                "first": [
+                  19,
+                  24
+                ],
+                "firstChars": [
+                  75,
+                  86
+                ],
+                "second": [
+                  19,
+                  24
+                ],
+                "secondChars": [
+                  75,
+                  86
+                ]
+              },
+              {
+                "fingerprint": "7a3e2affcdcffde121a71e01b90cabb5bb0cb1221ca66c7fb0d48f422ca37666",
+                "first": [
+                  2,
+                  7
+                ],
+                "firstChars": [
+                  16,
+                  29
+                ],
+                "second": [
+                  2,
+                  7
+                ],
+                "secondChars": [
+                  16,
+                  29
+                ]
+              }
+            ],
+            "rangesTruncated": true,
+            "reasons": [],
+            "score": 1,
+            "secondCoverage": 1,
+            "secondDigest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+            "secondPath": "index.js",
+            "secondShingles": 22,
+            "secondTokens": 26,
+            "sharedShingles": 22,
+            "state": "completed",
+            "version": "token5-set@1"
+          }
+        ],
+        "target": {
+          "aliases": [],
+          "completeness": "provider_id",
+          "fullName": "root/example",
+          "provider": "github",
+          "repositoryId": 1,
+          "revision": "cac1a6416a877d091954f52cae3f640c61a4e011"
+        },
+        "usage": {
+          "activeWorkers": 0,
+          "attempts": 17,
+          "bytesByFile": {
+            "[\"github:1@cac1a6416a877d091954f52cae3f640c61a4e011\",\"index.js\"]": 90,
+            "[\"github:2@c7df49b85e4885242789c07867c56fba789e1929\",\"index.js\"]": 90,
+            "[\"github:3@828ee9fa75dfd9b925c19fc27eed09c087b8cdc3\",\"index.js\"]": 29,
+            "[\"github:4@23a35c48631619eefea680cd47964b5bd05a1741\",\"index.js\"]": 90
+          },
+          "candidates": 3,
+          "files": {
+            "github:1@cac1a6416a877d091954f52cae3f640c61a4e011": 1,
+            "github:2@c7df49b85e4885242789c07867c56fba789e1929": 1,
+            "github:3@828ee9fa75dfd9b925c19fc27eed09c087b8cdc3": 1,
+            "github:4@23a35c48631619eefea680cd47964b5bd05a1741": 1
+          },
+          "peakWorkers": 1,
+          "searchAttempts": 1,
+          "totalBytes": 299
+        },
+        "verification": {
+          "canonicalEvidenceIds": [],
+          "checks": [],
+          "state": "pending"
+        }
+      },
+      "lineageClaim": "none",
+      "reasons": [],
+      "repositoryId": 4,
+      "resolution": {
+        "defaultBranch": "main",
+        "identity": {
+          "aliases": [],
+          "completeness": "provider_id",
+          "fullName": "unknown/example",
+          "provider": "github",
+          "repositoryId": 4,
+          "revision": "23a35c48631619eefea680cd47964b5bd05a1741"
+        },
+        "metadata": {
+          "fork": false,
+          "parentId": null
+        },
+        "observations": [
+          {
+            "fullName": "unknown/example",
+            "htmlUrl": "https://github.com/unknown/example",
+            "repositoryId": 4,
+            "source": "repository_search"
+          },
+          {
+            "fullName": "unknown/example",
+            "htmlUrl": "https://github.com/unknown/example",
+            "repositoryId": 4,
+            "source": "repository_metadata"
+          }
+        ],
+        "parents": [],
+        "reasons": [],
+        "requestSource": "github-rest-id-scoped@1",
+        "requestedId": 4,
+        "schemaVersion": "repository-snapshot@1",
+        "state": "resolved",
+        "tree": "1f71f9ac9237086831306ba771dfc2ac8bd299d9"
+      },
+      "source": {
+        "bindings": [
+          {
+            "blob": "6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+            "bytes": 90,
+            "digest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+            "filterVersion": "source-filter@1",
+            "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+            "path": "index.js",
+            "repositoryId": 4,
+            "revision": "23a35c48631619eefea680cd47964b5bd05a1741"
+          }
+        ],
+        "coverage": {
+          "pending": [],
+          "reasons": [],
+          "scope": "explicit selected paths only",
+          "state": "completed",
+          "treeTruncated": false
+        },
+        "materializedBytes": 90,
+        "selections": [
+          {
+            "path": "index.js",
+            "reason": "explicit root JS entry; selected-path coverage only"
+          }
+        ],
+        "snapshot": {
+          "files": [
+            {
+              "blob": "6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+              "bytes": 90,
+              "classification": "application_source",
+              "digest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+              "filterVersion": "source-filter@1",
+              "language": "javascript",
+              "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+              "path": "index.js",
+              "reasons": [
+                "supported source; no exclusion heuristic matched"
+              ]
+            }
+          ],
+          "identity": {
+            "aliases": [],
+            "completeness": "provider_id",
+            "fullName": "unknown/example",
+            "provider": "github",
+            "repositoryId": 4,
+            "revision": "23a35c48631619eefea680cd47964b5bd05a1741"
+          },
+          "pending": [],
+          "reasons": [],
+          "state": "completed"
+        }
+      },
+      "state": "completed",
+      "summary": {
+        "comparedPairs": 1,
+        "exactPairs": 1,
+        "expectedPairs": 1,
+        "failures": [],
+        "firstFiltered": 0,
+        "firstIncluded": 1,
+        "firstTokens": 26,
+        "normalized": {
+          "first": 22,
+          "firstCoverage": 1,
+          "score": 1,
+          "second": 22,
+          "secondCoverage": 1,
+          "shared": 22
+        },
+        "secondFiltered": 0,
+        "secondIncluded": 1,
+        "secondTokens": 26,
+        "state": "completed",
+        "strict": {
+          "first": 22,
+          "firstCoverage": 1,
+          "score": 1,
+          "second": 22,
+          "secondCoverage": 1,
+          "shared": 22
+        }
+      },
+      "verification": "pending"
+    }
+  ],
+  "coverage": {
+    "completed": 3,
+    "discovered": 3,
+    "inconclusive": 0,
+    "scope": "bounded search and explicit selected paths; no repository-wide scan",
+    "state": "completed"
+  },
+  "cpuBudget": "unsupported",
+  "lineageClaim": "none",
+  "network": {
+    "overflowBytes": 0,
+    "receivedBytes": 2890,
+    "reservedBytes": 557056,
+    "retainedBytes": 2890
+  },
+  "networkProfile": {
+    "perResponseBytes": 32768,
+    "totalResponseBytes": 1048576
+  },
+  "requests": {
+    "search": [
+      {
+        "outcome": "success",
+        "page": 1,
+        "query": 0,
+        "receivedBytes": 303,
+        "reservedBytes": 32768,
+        "retainedBytes": 303,
+        "retry": 0,
+        "status": 200
+      }
+    ],
+    "snapshot": [
+      {
+        "endpoint": "/repositories/1",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 117,
+        "reservedBytes": 32768,
+        "retainedBytes": 117,
+        "status": 200
+      },
+      {
+        "endpoint": "/repositories/1/commits/cac1a6416a877d091954f52cae3f640c61a4e011",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 132,
+        "reservedBytes": 32768,
+        "retainedBytes": 132,
+        "status": 200
+      },
+      {
+        "endpoint": "/repositories/1/git/trees/1f71f9ac9237086831306ba771dfc2ac8bd299d9",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 186,
+        "reservedBytes": 32768,
+        "retainedBytes": 186,
+        "status": 200
+      },
+      {
+        "endpoint": "/repositories/1/git/blobs/6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 213,
+        "reservedBytes": 32768,
+        "retainedBytes": 213,
+        "status": 200
+      },
+      {
+        "endpoint": "/repositories/2",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 134,
+        "reservedBytes": 32768,
+        "retainedBytes": 134,
+        "status": 200
+      },
+      {
+        "endpoint": "/repositories/2/commits/main",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 182,
+        "reservedBytes": 32768,
+        "retainedBytes": 182,
+        "status": 200
+      },
+      {
+        "endpoint": "/repositories/2/git/trees/1f71f9ac9237086831306ba771dfc2ac8bd299d9",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 186,
+        "reservedBytes": 32768,
+        "retainedBytes": 186,
+        "status": 200
+      },
+      {
+        "endpoint": "/repositories/2/git/blobs/6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 213,
+        "reservedBytes": 32768,
+        "retainedBytes": 213,
+        "status": 200
+      },
+      {
+        "endpoint": "/repositories/3",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 119,
+        "reservedBytes": 32768,
+        "retainedBytes": 119,
+        "status": 200
+      },
+      {
+        "endpoint": "/repositories/3/commits/main",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 132,
+        "reservedBytes": 32768,
+        "retainedBytes": 132,
+        "status": 200
+      },
+      {
+        "endpoint": "/repositories/3/git/trees/f067ff3135c3d39b2b39190c1cb5d37642f8c2d7",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 186,
+        "reservedBytes": 32768,
+        "retainedBytes": 186,
+        "status": 200
+      },
+      {
+        "endpoint": "/repositories/3/git/blobs/b57e980fa8065f44e6bd32654a8258630ee394fb",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 133,
+        "reservedBytes": 32768,
+        "retainedBytes": 133,
+        "status": 200
+      },
+      {
+        "endpoint": "/repositories/4",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 123,
+        "reservedBytes": 32768,
+        "retainedBytes": 123,
+        "status": 200
+      },
+      {
+        "endpoint": "/repositories/4/commits/main",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 132,
+        "reservedBytes": 32768,
+        "retainedBytes": 132,
+        "status": 200
+      },
+      {
+        "endpoint": "/repositories/4/git/trees/1f71f9ac9237086831306ba771dfc2ac8bd299d9",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 186,
+        "reservedBytes": 32768,
+        "retainedBytes": 186,
+        "status": 200
+      },
+      {
+        "endpoint": "/repositories/4/git/blobs/6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 213,
+        "reservedBytes": 32768,
+        "retainedBytes": 213,
+        "status": 200
+      }
+    ]
+  },
+  "schemaVersion": "discovery-e2e-sidecar@1",
+  "search": {
+    "candidates": [
+      {
+        "candidate": {
+          "aliases": [],
+          "completeness": "provider_id",
+          "conflicts": [],
+          "fullName": "old/example",
+          "htmlUrl": "https://github.com/old/example",
+          "observations": [
+            {
+              "fullName": "old/example",
+              "htmlUrl": "https://github.com/old/example",
+              "repositoryId": 2,
+              "source": "repository_search"
+            }
+          ],
+          "provider": "github",
+          "repositoryId": 2,
+          "revision": {
+            "sha": null,
+            "state": "unresolved"
+          }
+        },
+        "comparison": {
+          "reason": "revision unresolved",
+          "state": "unexecuted"
+        },
+        "discoveries": [
+          {
+            "page": 1,
+            "query": "example in:name is:public fork:true",
+            "querySource": "repository_name",
+            "rank": 1,
+            "reason": "fixed target repository name",
+            "source": "repository_search",
+            "version": "github-rest-repository-search@1"
+          }
+        ],
+        "lineageClaim": "none",
+        "schemaVersion": "discovery-candidate@2",
+        "similarity": [],
+        "supportingFiles": [],
+        "target": {
+          "aliases": [],
+          "completeness": "provider_id",
+          "fullName": "root/example",
+          "provider": "github",
+          "repositoryId": 1,
+          "revision": "cac1a6416a877d091954f52cae3f640c61a4e011"
+        },
+        "verification": {
+          "canonicalEvidenceIds": [],
+          "state": "pending"
+        }
+      },
+      {
+        "candidate": {
+          "aliases": [],
+          "completeness": "provider_id",
+          "conflicts": [],
+          "fullName": "other/example",
+          "htmlUrl": "https://github.com/other/example",
+          "observations": [
+            {
+              "fullName": "other/example",
+              "htmlUrl": "https://github.com/other/example",
+              "repositoryId": 3,
+              "source": "repository_search"
+            }
+          ],
+          "provider": "github",
+          "repositoryId": 3,
+          "revision": {
+            "sha": null,
+            "state": "unresolved"
+          }
+        },
+        "comparison": {
+          "reason": "revision unresolved",
+          "state": "unexecuted"
+        },
+        "discoveries": [
+          {
+            "page": 1,
+            "query": "example in:name is:public fork:true",
+            "querySource": "repository_name",
+            "rank": 2,
+            "reason": "fixed target repository name",
+            "source": "repository_search",
+            "version": "github-rest-repository-search@1"
+          }
+        ],
+        "lineageClaim": "none",
+        "schemaVersion": "discovery-candidate@2",
+        "similarity": [],
+        "supportingFiles": [],
+        "target": {
+          "aliases": [],
+          "completeness": "provider_id",
+          "fullName": "root/example",
+          "provider": "github",
+          "repositoryId": 1,
+          "revision": "cac1a6416a877d091954f52cae3f640c61a4e011"
+        },
+        "verification": {
+          "canonicalEvidenceIds": [],
+          "state": "pending"
+        }
+      },
+      {
+        "candidate": {
+          "aliases": [],
+          "completeness": "provider_id",
+          "conflicts": [],
+          "fullName": "unknown/example",
+          "htmlUrl": "https://github.com/unknown/example",
+          "observations": [
+            {
+              "fullName": "unknown/example",
+              "htmlUrl": "https://github.com/unknown/example",
+              "repositoryId": 4,
+              "source": "repository_search"
+            }
+          ],
+          "provider": "github",
+          "repositoryId": 4,
+          "revision": {
+            "sha": null,
+            "state": "unresolved"
+          }
+        },
+        "comparison": {
+          "reason": "revision unresolved",
+          "state": "unexecuted"
+        },
+        "discoveries": [
+          {
+            "page": 1,
+            "query": "example in:name is:public fork:true",
+            "querySource": "repository_name",
+            "rank": 3,
+            "reason": "fixed target repository name",
+            "source": "repository_search",
+            "version": "github-rest-repository-search@1"
+          }
+        ],
+        "lineageClaim": "none",
+        "schemaVersion": "discovery-candidate@2",
+        "similarity": [],
+        "supportingFiles": [],
+        "target": {
+          "aliases": [],
+          "completeness": "provider_id",
+          "fullName": "root/example",
+          "provider": "github",
+          "repositoryId": 1,
+          "revision": "cac1a6416a877d091954f52cae3f640c61a4e011"
+        },
+        "verification": {
+          "canonicalEvidenceIds": [],
+          "state": "pending"
+        }
+      }
+    ],
+    "coverage": {
+      "accessibleWindow": 1000,
+      "attemptedQueries": 1,
+      "completedPages": 1,
+      "excludedTarget": 0,
+      "plannedQueries": 1,
+      "processedCandidates": 3,
+      "rejectedBudget": 0,
+      "rejectedIdentity": 0,
+      "requestedPages": 1,
+      "returnedItems": 3,
+      "scope": "bounded public repository metadata search; never all GitHub",
+      "state": "complete_within_requested",
+      "uncompletedPlanned": [],
+      "uniqueObserved": 3
+    },
+    "plan": {
+      "pages": 1,
+      "perPage": 5,
+      "queries": [
+        {
+          "q": "example in:name is:public fork:true",
+          "reason": "fixed target repository name",
+          "source": "repository_name"
+        }
+      ],
+      "target": {
+        "aliases": [],
+        "completeness": "provider_id",
+        "fullName": "root/example",
+        "provider": "github",
+        "repositoryId": 1,
+        "revision": "cac1a6416a877d091954f52cae3f640c61a4e011"
+      },
+      "version": "repository-query-plan@1"
+    },
+    "queries": [
+      {
+        "beyondWindow": 0,
+        "completedPages": [
+          1
+        ],
+        "incompleteResults": false,
+        "query": 0,
+        "requestedPages": [
+          1
+        ],
+        "returnedItems": 3,
+        "state": "complete_within_requested",
+        "totalCount": 3,
+        "unfetchedAccessiblePages": 0
+      }
+    ],
+    "rejectedIdentities": []
+  },
+  "searchCandidateSchema": "discovery-candidate@2",
+  "sourceMaterializedBytes": 299,
+  "target": {
+    "resolution": {
+      "defaultBranch": "main",
+      "identity": {
+        "aliases": [],
+        "completeness": "provider_id",
+        "fullName": "root/example",
+        "provider": "github",
+        "repositoryId": 1,
+        "revision": "cac1a6416a877d091954f52cae3f640c61a4e011"
+      },
+      "metadata": {
+        "fork": false,
+        "parentId": null
+      },
+      "observations": [
+        {
+          "fullName": "root/example",
+          "htmlUrl": "https://github.com/root/example",
+          "repositoryId": 1,
+          "source": "repository_metadata"
+        }
+      ],
+      "parents": [],
+      "reasons": [],
+      "requestSource": "github-rest-id-scoped@1",
+      "requestedId": 1,
+      "schemaVersion": "repository-snapshot@1",
+      "state": "resolved",
+      "tree": "1f71f9ac9237086831306ba771dfc2ac8bd299d9"
+    },
+    "source": {
+      "bindings": [
+        {
+          "blob": "6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+          "bytes": 90,
+          "digest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+          "filterVersion": "source-filter@1",
+          "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+          "path": "index.js",
+          "repositoryId": 1,
+          "revision": "cac1a6416a877d091954f52cae3f640c61a4e011"
+        }
+      ],
+      "coverage": {
+        "pending": [],
+        "reasons": [],
+        "scope": "explicit selected paths only",
+        "state": "completed",
+        "treeTruncated": false
+      },
+      "materializedBytes": 90,
+      "selections": [
+        {
+          "path": "index.js",
+          "reason": "explicit root JS entry; selected-path coverage only"
+        }
+      ],
+      "snapshot": {
+        "files": [
+          {
+            "blob": "6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+            "bytes": 90,
+            "classification": "application_source",
+            "digest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+            "filterVersion": "source-filter@1",
+            "language": "javascript",
+            "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+            "path": "index.js",
+            "reasons": [
+              "supported source; no exclusion heuristic matched"
+            ]
+          }
+        ],
+        "identity": {
+          "aliases": [],
+          "completeness": "provider_id",
+          "fullName": "root/example",
+          "provider": "github",
+          "repositoryId": 1,
+          "revision": "cac1a6416a877d091954f52cae3f640c61a4e011"
+        },
+        "pending": [],
+        "reasons": [],
+        "state": "completed"
+      }
+    }
+  },
+  "usage": {
+    "activeWorkers": 0,
+    "attempts": 17,
+    "bytesByFile": {
+      "[\"github:1@cac1a6416a877d091954f52cae3f640c61a4e011\",\"index.js\"]": 90,
+      "[\"github:2@c7df49b85e4885242789c07867c56fba789e1929\",\"index.js\"]": 90,
+      "[\"github:3@828ee9fa75dfd9b925c19fc27eed09c087b8cdc3\",\"index.js\"]": 29,
+      "[\"github:4@23a35c48631619eefea680cd47964b5bd05a1741\",\"index.js\"]": 90
+    },
+    "candidates": 3,
+    "files": {
+      "github:1@cac1a6416a877d091954f52cae3f640c61a4e011": 1,
+      "github:2@c7df49b85e4885242789c07867c56fba789e1929": 1,
+      "github:3@828ee9fa75dfd9b925c19fc27eed09c087b8cdc3": 1,
+      "github:4@23a35c48631619eefea680cd47964b5bd05a1741": 1
+    },
+    "peakWorkers": 1,
+    "searchAttempts": 1,
+    "totalBytes": 299
+  },
+  "verification": "pending"
+}

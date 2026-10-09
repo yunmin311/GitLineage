@@ -46,3 +46,15 @@ export class RepositorySnapshotResolver {
   validateResolution(r);return r;
  }
 }
+export type TimelessResolution=Omit<Resolution,'observations'>&{observations:Omit<IdentityObservation,'observedAt'>[]};
+/** Persisted resolution observations have no fabricated clocks. Metadata is the
+ * final ID-scoped observation; aliases are exactly the other observed names. */
+export function validateTimelessResolution(value:unknown):asserts value is TimelessResolution {
+ const r=closed(value,['schemaVersion','requestedId','state','identity','observations','defaultBranch','tree','parents','metadata','reasons','requestSource']);
+ if(r.schemaVersion!=='repository-snapshot@1'||r.requestSource!=='github-rest-id-scoped@1'||!Number.isSafeInteger(r.requestedId)||Number(r.requestedId)<1||!['resolved','inconclusive'].includes(String(r.state))||!Array.isArray(r.observations)||!Array.isArray(r.parents)||!r.parents.every(fullSHA)||!Array.isArray(r.reasons)||!r.reasons.every(x=>typeof x==='string'&&x.length))throw new TypeError('invalid timeless resolution');
+ const m=closed(r.metadata,['fork','parentId']);if(m.fork!==null&&typeof m.fork!=='boolean'||m.parentId!==null&&(!Number.isSafeInteger(m.parentId)||Number(m.parentId)<1))throw new TypeError('invalid metadata');
+ if(r.defaultBranch!==null&&(typeof r.defaultBranch!=='string'||!r.defaultBranch.length||r.defaultBranch.length>255))throw new TypeError('invalid branch');
+ const names:string[]=[],metadataNames:string[]=[];for(const value of r.observations){const o=closed(value,['repositoryId','fullName','htmlUrl','source']);if(o.repositoryId!==r.requestedId||typeof o.fullName!=='string'||! /^[a-z0-9][a-z0-9-]{0,38}\/[a-z0-9_.-]{1,100}$/.test(o.fullName)||['.','..'].includes(o.fullName.split('/')[1]!)||o.htmlUrl!==`https://github.com/${o.fullName}`||!['repository_search','repository_metadata'].includes(String(o.source)))throw new TypeError('invalid timeless observation');names.push(o.fullName);if(o.source==='repository_metadata')metadataNames.push(o.fullName);}
+ if(r.state==='resolved'){validateIdentity(r.identity);const i=r.identity;if(i.provider!=='github'||i.completeness!=='provider_id'||i.repositoryId!==r.requestedId||!fullSHA(r.tree)||!r.defaultBranch||metadataNames.at(-1)!==i.fullName||JSON.stringify(i.aliases)!==JSON.stringify([...new Set(names)].filter(n=>n!==i.fullName).sort()))throw new TypeError('invalid timeless provenance');}
+ else if(r.identity!==null||r.tree!==null||!r.reasons.length)throw new TypeError('invalid unresolved state');
+}

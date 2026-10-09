@@ -16,7 +16,8 @@ export class SnapshotProvider {
   this.token=options.token;this.transport=options.transport??((url,init)=>fetch(url,init));
  }
  async get(endpoint:string,network:NetworkLedger):Promise<unknown|null>{
-  if(!/^\/repositories\/[1-9]\d*(?:\/commits\/[^/?#]+|\/git\/(?:trees|blobs)\/[a-f0-9]{40})?$/.test(endpoint))throw new TypeError('endpoint not allowed');
+  if(!/^\/repositories\/[1-9]\d*(?:\/commits\/[^/?#]+|\/git\/(?:trees|blobs)\/[a-f0-9]{40})?$/.test(endpoint)&&!/^\/repos\/[a-zA-Z0-9][a-zA-Z0-9-]{0,38}\/[a-zA-Z0-9_.-]{1,100}$/.test(endpoint))throw new TypeError('endpoint not allowed');
+  if(endpoint.split('/').some(p=>p==='.'||p==='..'))throw new TypeError('unsafe endpoint segment');
   const startedAt=this.now();if(!Number.isFinite(Date.parse(startedAt)))throw new TypeError('invalid receipt clock');
   const started=performance.now(),request:SnapshotRequest={endpoint,status:null,outcome:'budget_denied',reason:null,reservedBytes:0,receivedBytes:0,retainedBytes:0};
   const receipt:SnapshotReceipt={request,startedAt,wallMs:0,headers:{}};this.receipts.push(receipt);

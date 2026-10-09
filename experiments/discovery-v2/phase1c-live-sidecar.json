@@ -1,0 +1,93 @@
+{
+  "bootstrap": [
+    {
+      "name": "sindresorhus/p-limit",
+      "observation": null,
+      "state": "inconclusive"
+    },
+    {
+      "name": "jucke/p-limit",
+      "observation": null,
+      "state": "inconclusive"
+    },
+    {
+      "name": "sindresorhus/p-throttle",
+      "observation": null,
+      "state": "inconclusive"
+    }
+  ],
+  "budget": {
+    "attempts": 24,
+    "bytesPerFile": 131072,
+    "candidates": 3,
+    "concurrency": 2,
+    "cpuMs": null,
+    "filesPerCandidate": 8,
+    "searchAttempts": 4,
+    "totalBytes": 2097152,
+    "wallMs": 30000
+  },
+  "comparisons": [
+    {
+      "candidate": null,
+      "label": "Phase0 known fork control; separately rechecked below",
+      "name": "jucke/p-limit",
+      "reason": "unresolved selected control",
+      "summary": null
+    },
+    {
+      "candidate": null,
+      "label": "unknown; unjudged",
+      "name": "sindresorhus/p-throttle",
+      "reason": "unresolved selected control",
+      "summary": null
+    }
+  ],
+  "cpuBudget": "unsupported",
+  "lineageClaim": "none",
+  "network": {
+    "overflowBytes": 0,
+    "receivedBytes": 0,
+    "reservedBytes": 32768,
+    "retainedBytes": 0
+  },
+  "networkProfile": {
+    "perResponseBytes": 32768,
+    "totalResponseBytes": 1048576
+  },
+  "schemaVersion": "discovery-public-snapshot-probe@1",
+  "scope": "three explicit Phase0 controls; no Search recall or Precision claim",
+  "sharedCommit": null,
+  "snapshots": [
+    {
+      "name": "sindresorhus/p-limit",
+      "reason": "bootstrap: rate_limit",
+      "resolution": null,
+      "source": null
+    },
+    {
+      "name": "jucke/p-limit",
+      "reason": "bootstrap: budget_denied: provider stopped by rate limit or redirect",
+      "resolution": null,
+      "source": null
+    },
+    {
+      "name": "sindresorhus/p-throttle",
+      "reason": "bootstrap: budget_denied: provider stopped by rate limit or redirect",
+      "resolution": null,
+      "source": null
+    }
+  ],
+  "sourceMaterializedBytes": 0,
+  "usage": {
+    "activeWorkers": 0,
+    "attempts": 1,
+    "bytesByFile": {},
+    "candidates": 0,
+    "files": {},
+    "peakWorkers": 1,
+    "searchAttempts": 0,
+    "totalBytes": 0
+  },
+  "verification": "pending"
+}
