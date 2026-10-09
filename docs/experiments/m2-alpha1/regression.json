@@ -1,0 +1,92 @@
+{
+  "baseline": "68f9b75f87216fbeb1f43a6ee65ea74dab80a489",
+  "runtime": "WSL2 Ubuntu-24.04 / Node v24.21.0 / Chromium",
+  "typecheck": "PASS",
+  "build": "PASS",
+  "unit": {
+    "total": 562,
+    "pass": 559,
+    "skip": 3,
+    "fail": 0
+  },
+  "discovery": {
+    "pass": 115,
+    "fail": 0
+  },
+  "phase0": {
+    "pass": 6,
+    "fail": 0
+  },
+  "phase1a1b1c1d": "fixed entry replays PASS, historical files unchanged",
+  "browser": [
+    {
+      "suite": "deep-search",
+      "exit": 0
+    },
+    {
+      "suite": "canvas",
+      "exit": 0
+    },
+    {
+      "suite": "landing",
+      "exit": 0
+    },
+    {
+      "suite": "analysis",
+      "exit": 0
+    },
+    {
+      "suite": "preflight",
+      "exit": 0
+    },
+    {
+      "suite": "stale",
+      "exit": 0
+    },
+    {
+      "suite": "ui-contract",
+      "exit": 0
+    },
+    {
+      "suite": "responsive",
+      "exit": 0
+    },
+    {
+      "suite": "mobile",
+      "exit": 0
+    }
+  ],
+  "browserCounts": {
+    "canvas": 113,
+    "landing": 40,
+    "analysisStates": 16,
+    "analysisViolations": 0,
+    "preflight": 45,
+    "uiContract": 75,
+    "responsive": 71,
+    "mobile": 133,
+    "deepSearchScenarios": 7
+  },
+  "assetSHA256": {
+    "dist/web/assets/app.js": "f6993d91e4b8c6bf405c3a136ba701d7741caae68538e5e87eeb3a02ce48d20e",
+    "dist/web/app.css": "52bb91c61da26606dc2266fac146699f4d377bd1fafe89c27d3e5790b24af102"
+  },
+  "network": "new interaction acceptance uses fixed official API Mock; no new live GitHub API claim",
+  "webkit": "not run",
+  "physicalDevice": "not run",
+  "zeroGraphWrite": "per-width cache file proofs and Graph camera/selection/URL preserved; no Graph writer imports",
+  "limits": {
+    "httpAttempts": 24,
+    "candidates": 3,
+    "filesPerRepo": 8,
+    "sourceBytesPerFile": 131072,
+    "sourceBytesTotal": 2097152,
+    "responseBytes": 32768,
+    "reservedNetworkBytes": 1048576,
+    "workers": 2,
+    "cumulativeActiveWallMs": 30000,
+    "cpuHardBudget": "unsupported",
+    "wireByteHardCap": "not guaranteed",
+    "idleAccounting": "human selection and cooldown excluded from active work; elapsed wall also recorded"
+  }
+}

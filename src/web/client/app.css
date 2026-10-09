@@ -2079,3 +2079,9 @@ body.mobile-explorer .band-note { display: -webkit-box; -webkit-line-clamp: 2; -
  .deep-heading .deep-action { max-width: 140px; }
  .deep-form input { flex-basis: 100%; }
 }
+
+/* Alpha.1 source selection stays within the owned local-preview dialog. */
+.deep-file-card { margin-block: var(--s4); padding: var(--s4); border: 1px solid var(--rule); background: var(--surface); min-width: 0; overflow-wrap: anywhere; }
+.deep-file-row { display: flex; align-items: center; gap: var(--s3); min-height: 44px; cursor: pointer; font-family: var(--mono); font-size: var(--t-secondary-size); }
+.deep-file-row input { width: 24px; height: 24px; flex-shrink: 0; accent-color: var(--brand); }
+.deep-file-row span { min-width: 0; overflow-wrap: anywhere; }
