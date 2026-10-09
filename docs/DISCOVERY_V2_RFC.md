@@ -258,3 +258,8 @@ The Phase 1A ledger now actually guards this new provider without changing its i
 Serial page rounds give each planned source a first page before deeper pagination. At most one retry for network/5xx; positive Retry-After stops the run. 401/403/429/redirects stop globally; remaining=0 also stops. Receipts distinguish full bounded execution, budget/provider partiality, unavailable, cancelled and unattempted queries, keep completed candidates, and list unfinished pages. No cache means every experimental run pays its actual GET cost; Standard cost/cache behavior is unchanged. A single live probe is interface evidence, not discovery recall or lineage precision.
 
 Before future production release, independently invalidate or reverify old Graph caches that may retain pre-fix shallow-history containment; this phase deliberately performs no migration. Next slice: resolve a small user-selected set of numeric IDs to verified full SHAs through independently charged bounded metadata requests, then explicitly compare fixed snapshot files using Phase 1A. Unresolved/conflicting identities must remain pending. Rollback is removal of independent Phase 1B modules/experimental entry point; v1, Standard and Graph schema remain intact.
+
+
+### Phase 1D 实验接口补充（2026-10-09）
+
+公开探针已成功通过 numeric ID Metadata → verified owner/repo → manifest 完整 commit SHA → Tree/Blob 固定 SHA → owner/repo 最终 ID 核实。新默认 SnapshotProvider 使用正式 owner/repo Git 路由，旧数字 ID Git 子路由只保留给注入 transport 的历史 Mock 重放；不依赖它们的真实兼容性。身份转移发生在读取前时使用 ID Metadata 的新名称；读取中名称/ID 变化、301 或 404 时放弃该快照，不自动重启。比较与生产 Graph 仍分离。实际收据、资源使用与限制见 [Phase 1D 报告](DISCOVERY_V2_PHASE1D_REPORT.md) 和 [重放说明](../experiments/discovery-v2/PHASE1D_README.md)。本补充不修改既有 Graph 或 VERIFIED 语义。
