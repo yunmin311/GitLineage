@@ -44,7 +44,7 @@ for(const kind of ['malformed','shape','network','redirect'] as const)test(`${ki
 test('retry charges each attempt; bounded Retry-After stops rather than evading server delay',async()=>{
  let calls=0;const r=await run(async()=>++calls===1?new Response('',{status:503}):response([item()]));
  assert.equal(r.usage.attempts,4);assert.equal(r.attempts[1]!.retry,1);assert.equal(r.candidates.length,1);
- const stopped=await run(async()=>new Response('',{status:503,headers:{'retry-after':'60'}}));assert.equal(stopped.usage.attempts,3);assert.equal(stopped.coverage.state,'unavailable');
+ const stopped=await run(async()=>new Response('',{status:503,headers:{'retry-after':'60'}}));assert.equal(stopped.usage.attempts,1);assert.equal(stopped.coverage.state,'unavailable');
 });
 test('pagination charges each page and reports unrequested pages / 1000 window',async()=>{
  const p=buildQueryPlan(fixed,{}, {perPage:2,pages:2});const r=await discoverRepositories(p,{transport:async()=>response([item()],{total_count:1500})});
@@ -95,4 +95,9 @@ test('unsafe mutated plan cannot become free-form Search API client',async()=>{
 test('retry and pagination both remain inside search cap; no recursive retry',async()=>{
  let calls=0;const r=await run(async()=>{calls++;return new Response('',{status:503});});
  assert.equal(calls,4);assert.equal(r.usage.attempts,4);assert.equal(r.attempts.filter(a=>a.retry===1).length,2);assert.equal(r.coverage.state,'partial_budget');
+});
+
+test('positive Retry-After prevents follow-up queries to the same search service',async()=>{
+ let calls=0;const r=await run(async()=>++calls===1?response([item()]):new Response('',{status:503,headers:{'retry-after':'60'}}));
+ assert.equal(calls,2);assert.equal(r.candidates.length,1);assert.equal(r.attempts.length,2);assert.equal(r.queries[2]!.state,'not_attempted');assert.equal(r.coverage.state,'partial_provider');
 });

@@ -24,7 +24,7 @@ Boundaries: at most four queries, 25 results/page, two pages/query; separate tot
 
 Fetch already received each chunk before this module sees it. Retention/JSON parsing is strictly capped, first overflowing chunk is discarded and the stream cancelled; delivered overflow bytes are counted separately. This is not a hard cap on bytes transferred on the wire, decompression buffers, process RSS or CPU. No hard CPU budget is implemented.
 
-401/403/429 and redirects stop the run; success with remaining=0 stops subsequent requests. One immediate retry is permitted for network error/5xx when Retry-After is absent/zero, charged separately. Positive Retry-After is respected by omitting retry; this experiment does not sleep or bypass it. There is no automatic credential fallback, metadata lookup or traversal. Receipts retain only allowlisted headers and safe diagnostics, not arbitrary remote messages/descriptions.
+401/403/429 and redirects stop the run; success with remaining=0 stops subsequent requests. One immediate retry is permitted for network error/5xx when Retry-After is absent/zero, charged separately. Positive Retry-After stops follow-up queries to the same service; this experiment does not sleep or bypass it. There is no automatic credential fallback, metadata lookup or traversal. Receipts retain only allowlisted headers and safe diagnostics, not arbitrary remote messages/descriptions.
 
 Coverage includes per-query states, returned/unique/admitted/rejected counts, rejected identity locations, planned pages left unfinished, total_count, incomplete_results, accessible pages still unfetched and results beyond GitHub's 1000-result window. A completed bounded search is never global coverage. Unknown live candidates are not benchmark truth labels.
 

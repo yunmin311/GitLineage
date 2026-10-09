@@ -54,7 +54,7 @@ topic:concurrency language:javascript is:public fork:true
 
 ## 7. 限流、重试、分页
 
-401/403/429 与3xx全局停止，不自动换认证或无限等待。remaining=0 的成功请求也阻止后续请求。仅网络失败/5xx最多一次立即重试且重新扣账；Retry-After>0时省略重试以遵守等待，不用短延迟绕过。每 source 先第一页再下一轮，最多2页，不遍历1000结果。允许 headers：X-RateLimit-* 的数值/资源、Retry-After、实际 API Version；不保留 Authorization 或远端原文。超时/取消释放容量，已完成候选保留。
+401/403/429 与3xx全局停止，不自动换认证或无限等待。remaining=0 的成功请求也阻止后续请求。仅网络失败/5xx最多一次立即重试且重新扣账；Retry-After>0时停止本轮后续请求以遵守等待，不用短延迟绕过。每 source 先第一页再下一轮，最多2页，不遍历1000结果。允许 headers：X-RateLimit-* 的数值/资源、Retry-After、实际 API Version；不保留 Authorization 或远端原文。超时/取消释放容量，已完成候选保留。
 
 ## 8. Coverage
 
@@ -64,7 +64,7 @@ topic:concurrency language:javascript is:public fork:true
 
 ## 9. Mock 测试
 
-先执行失败行为测试，再完成实现。新增 provider 测试覆盖身份、HTTP、预算、限流/分页/覆盖/取消，以及字节和凭据边界；既有 Phase 1A 全部保留。当前针对性 Discovery 51项通过（原17、新provider31、新隔离3），0失败、0跳过；mock入口3次请求、4个候选、网络保留744字节、保守预留786432字节、源字节0。mock费率头是测试夹具，不能当作真实 API 用量。
+先执行失败行为测试，再完成实现。新增 provider 测试覆盖身份、HTTP、预算、限流/分页/覆盖/取消，以及字节和凭据边界；既有 Phase 1A 全部保留。当前针对性 Discovery 52项通过（原17、新provider32、新隔离3），0失败、0跳过；mock入口3次请求、4个候选、网络保留744字节、保守预留786432字节、源字节0。补查发现旧实验断言只禁止503的当前重试，却允许后续query；新失败测试证明继续请求会绕过服务等待。现收紧为Retry-After>0全局停止，原3次请求期望改为1次，不放宽任何门槛。mock费率头是测试夹具，不能当作真实 API 用量。
 
 ## 10. Live Probe
 

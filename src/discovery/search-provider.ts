@@ -46,7 +46,7 @@ export class RepositorySearchProvider {
    void request.then(response=>{if(finished||controller.signal.aborted)void response.body?.cancel().catch(()=>{});},()=>{});
    const response=await guarded(request);body=response.body;receipt.status=response.status;receipt.headers=receiptHeaders(response.headers,this.token);
    const retryAfterMs=delayHeader(receipt.headers['retry-after']);
-   if(response.status!==200){receipt.outcome=response.status===401?'unauthorized':[403,429].includes(response.status)?'rate_limit':response.status>=300&&response.status<400?'redirect_rejected':'http_error';if(body)await guarded(body.cancel());return{data:null,receipt,stop:['unauthorized','rate_limit','redirect_rejected'].includes(receipt.outcome),retryAfterMs};}
+   if(response.status!==200){receipt.outcome=response.status===401?'unauthorized':[403,429].includes(response.status)?'rate_limit':response.status>=300&&response.status<400?'redirect_rejected':'http_error';if(body)await guarded(body.cancel());return{data:null,receipt,stop:['unauthorized','rate_limit','redirect_rejected'].includes(receipt.outcome)||(retryAfterMs??0)>0,retryAfterMs};}
    if(response.redirected||response.url&&new URL(response.url).origin!=='https://api.github.com'){receipt.outcome='redirect_rejected';if(body)await guarded(body.cancel());return{data:null,receipt,stop:true,retryAfterMs:null};}
    // Content-Length is diagnostic only; actual delivered bytes govern retention.
    if(!body){receipt.outcome='invalid_response';return{data:null,receipt,stop:false,retryAfterMs:null};}
