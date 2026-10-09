@@ -7,7 +7,7 @@ const sha='a'.repeat(40),tree='b'.repeat(40);
 const observation={repositoryId:2,fullName:'old/root',htmlUrl:'https://github.com/old/root',source:'repository_search' as const,observedAt:'2026-10-09T00:00:00.000Z'};
 function setup(metadata:unknown,commit:unknown={sha,commit:{tree:{sha:tree}},parents:[]}){
  const network=new NetworkLedger(new BudgetLedger(SNAPSHOT_PROFILE),{perResponseBytes:32768,totalResponseBytes:1048576});
- const calls:string[]=[];const resolver=new RepositorySnapshotResolver(network,{now:()=>observation.observedAt,transport:async url=>{calls.push(url);return new Response(JSON.stringify(calls.length===1?metadata:commit));}});
+ const calls:string[]=[];const resolver=new RepositorySnapshotResolver(network,{historicalRoutes:true,now:()=>observation.observedAt,transport:async url=>{calls.push(url);return new Response(JSON.stringify(calls.length===1?metadata:commit));}});
  return{resolver,network,calls};
 }
 test('stable ID resolves current name, observed aliases, full commit and tree',async()=>{

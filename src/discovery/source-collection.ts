@@ -28,7 +28,7 @@ export async function collectSources(resolution:Resolution,selections:SourceSele
  const key=`github:${resolution.requestedId}@${identity.revision}`,trees=new Map<string,TreeEntry[]>();
  async function tree(sha:string):Promise<TreeEntry[]>{
   const cached=trees.get(sha);if(cached)return cached;
-  const raw=await resolver.provider.get(`/repositories/${resolution.requestedId}/git/trees/${sha}`,resolver.network);if(!raw)throw new Error(`tree: ${resolver.provider.failure()}`);const data=record(raw);
+  const raw=await resolver.provider.get(resolver.objectEndpoint(resolution,'trees',sha),resolver.network);if(!raw)throw new Error(`tree: ${resolver.provider.failure()}`);const data=record(raw);
   if(data.sha!==sha||typeof data.truncated!=='boolean'||!Array.isArray(data.tree)||data.tree.length>4096)throw new Error('tree identity or shape mismatch');
   const entries:TreeEntry[]=[],seen=new Set<string>();for(const value of data.tree){const e=record(value);if(typeof e.path!=='string'||!e.path.length||e.path.includes('/')||e.path.includes('\\')||['.','..'].includes(e.path)||/[\x00-\x1f]/.test(e.path)||seen.has(e.path)||!fullSHA(e.sha)||typeof e.mode!=='string'||!['100644','100755','040000','40000','120000','160000'].includes(e.mode)||!['blob','tree','commit'].includes(String(e.type)))throw new Error('invalid tree entry');seen.add(e.path);
    if((e.type==='tree')!==['040000','40000'].includes(e.mode)||(e.type==='commit')!==(e.mode==='160000'))throw new Error('tree mode/type mismatch');
@@ -42,7 +42,7 @@ export async function collectSources(resolution:Resolution,selections:SourceSele
    for(let i=0;i<parts.length;i++){entry=(await tree(hash)).find(e=>e.path===parts[i]);if(!entry)throw new Error('selected path unavailable');if(i<parts.length-1){if(entry.type!=='tree')throw new Error('selected directory unavailable');hash=entry.sha;}}
    if(!entry||entry.type!=='blob'||!['100644','100755'].includes(entry.mode)||entry.size===undefined)throw new Error('selected path is not a regular sized source blob');
    resolver.network.budget.file(key,selection.path);resolver.network.budget.bytes(key,selection.path,entry.size);
-   const raw=await resolver.provider.get(`/repositories/${resolution.requestedId}/git/blobs/${entry.sha}`,resolver.network);if(!raw)throw new Error(`blob: ${resolver.provider.failure()}`);const b=record(raw);
+   const raw=await resolver.provider.get(resolver.objectEndpoint(resolution,'blobs',entry.sha),resolver.network);if(!raw)throw new Error(`blob: ${resolver.provider.failure()}`);const b=record(raw);
    if(b.sha!==entry.sha||b.size!==entry.size||b.encoding!=='base64'||typeof b.content!=='string')throw new Error('blob identity or byte count mismatch');
    const encoded=b.content.replace(/\n/g,'');if(!/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(encoded)||encoded.length!==4*Math.ceil(entry.size/3))throw new Error('invalid bounded base64');
    const bytes=Buffer.from(encoded,'base64');out.materializedBytes+=bytes.length;

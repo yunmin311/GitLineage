@@ -45,7 +45,7 @@ test('production source does not import Discovery',async()=>{
 });
 
 test('Discovery module loading and query construction perform no network I/O',async()=>{
- const script=`let calls=0;globalThis.fetch=()=>{calls++;throw new Error('unexpected network');};const {buildQueryPlan}=await import('./src/discovery/search.ts');await import('./src/discovery/search-output.ts');await import('./src/discovery/e2e.ts');await import('./src/discovery/resolution.ts');await import('./src/discovery/source-collection.ts');buildQueryPlan({provider:'github',repositoryId:1,completeness:'provider_id',fullName:'test/root',aliases:[],revision:'a'.repeat(40)},{});console.log(calls);`;
+ const script=`let calls=0;globalThis.fetch=()=>{calls++;throw new Error('unexpected network');};const {buildQueryPlan}=await import('./src/discovery/search.ts');await import('./src/discovery/search-output.ts');await import('./src/discovery/e2e.ts');await import('./src/discovery/pinned-probe.ts');await import('./src/discovery/resolution.ts');await import('./src/discovery/source-collection.ts');buildQueryPlan({provider:'github',repositoryId:1,completeness:'provider_id',fullName:'test/root',aliases:[],revision:'a'.repeat(40)},{});console.log(calls);`;
  const r=await promisify(execFile)('node',['--input-type=module','-e',script],{cwd:process.cwd(),timeout:10000,maxBuffer:100000});
  assert.equal(r.stdout.trim(),'0');
 });
@@ -55,5 +55,13 @@ test('Phase1C E2E exports under write-only-sidecar permission; canonical Graph/c
  try{const script=`import {mockFixture,FIXED_TIME} from './experiments/discovery-v2/phase1c-mock.ts';import {runSnapshotDiscovery,writeEndToEnd} from './src/discovery/e2e.ts';const f=mockFixture();await writeEndToEnd(${JSON.stringify(out)},await runSnapshotDiscovery(f.plan,{transport:f.transport,now:()=>FIXED_TIME}));`;
  await promisify(execFile)('node',['--permission','--allow-worker','--allow-fs-read=*',`--allow-fs-write=${out}`,`--allow-fs-write=${out}/*`,'--input-type=module','-e',script],{cwd:process.cwd(),timeout:30000,maxBuffer:100000});
  assert.equal(await readFile(graph,'utf8'),'canonical graph sentinel');assert.equal(await readFile(cache,'utf8'),'standard cache sentinel');const r=JSON.parse(await readFile(join(out,'sidecar.json'),'utf8'));assert.equal(r.schemaVersion,'discovery-e2e-sidecar@1');assert.equal(r.coverage.completed,3);assert.ok(r.candidates.every((c:any)=>c.lineageClaim==='none'&&c.comparison.verification.canonicalEvidenceIds.length===0));
+ }finally{await rm(dir,{recursive:true,force:true});}
+});
+
+test('Phase1D official-path probe writes only allowed Sidecar; Graph/cache bytes unchanged',async()=>{
+ const dir=await mkdtemp(join(tmpdir(),'pinned-permission-')),out=join(dir,'sidecar'),graph=join(dir,'graph.json'),cache=join(dir,'analysis-cache.json');await writeFile(graph,'canonical graph sentinel');await writeFile(cache,'standard cache sentinel');
+ try{const script=`import {officialFixture,FIXED_TIME} from './experiments/discovery-v2/phase1d-mock.ts';import {runPinnedProbe,writePinnedProbe} from './src/discovery/pinned-probe.ts';const f=officialFixture();await writePinnedProbe(${JSON.stringify(out)},await runPinnedProbe(f.controls,{transport:f.transport,now:()=>FIXED_TIME}));`;
+ await promisify(execFile)('node',['--permission','--allow-worker','--allow-fs-read=*',`--allow-fs-write=${out}`,`--allow-fs-write=${out}/*`,'--input-type=module','-e',script],{cwd:process.cwd(),timeout:30000,maxBuffer:100000});
+ assert.equal(await readFile(graph,'utf8'),'canonical graph sentinel');assert.equal(await readFile(cache,'utf8'),'standard cache sentinel');const r=JSON.parse(await readFile(join(out,'sidecar.json'),'utf8'));assert.equal(r.coverage.completed,2);assert.ok(r.snapshots.every((s:any)=>s.identityCheck.state==='matched'));assert.ok(r.comparisons.every((c:any)=>c.candidate.verification.state==='pending'&&c.candidate.lineageClaim==='none'));
  }finally{await rm(dir,{recursive:true,force:true});}
 });
