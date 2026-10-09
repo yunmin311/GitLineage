@@ -1,4 +1,4 @@
-import { createServer, type Server } from 'node:http';
+import { createServer, type Server, type IncomingMessage, type ServerResponse } from 'node:http';
 import { GitLineageServer } from './server.ts';
 import { loadConfig, type ServerConfig } from './config.ts';
 import type { AnalyzeInvocation } from './analysis/scheduler.ts';
@@ -6,6 +6,8 @@ import { logEvent, logStartup } from './analysis/logging.ts';
 import type { LineageGraph } from './types.ts';
 
 export interface ServeOptions {
+  /** Opt-in local experiment seam. Normal CLI never installs a handler. */
+  previewHandler?: (request: IncomingMessage, response: ServerResponse) => Promise<void>;
   port?: number;
   host?: string;
   cacheRoot?: string;
@@ -90,6 +92,19 @@ export async function serve(
   );
 
 const server = createServer((request, response) => {
+      if (!options.previewHandler && request.method === 'GET' && request.url === '/api/deep-search/capabilities') {
+        response.writeHead(200, { 'content-type': 'application/json', 'cache-control': 'no-store' });
+        response.end('{"enabled":false}');
+        return;
+      }
+      if (options.previewHandler && /^\/(?:api\/deep-search(?:\/|$)|preview-access\/)/.test(request.url ?? '')) {
+        // Bootstrap capabilities are private and must not enter HTTP logs.
+        void options.previewHandler(request, response).catch(() => {
+          if (!response.headersSent) response.writeHead(500, { 'content-type': 'application/json' });
+          response.end('{"error":"preview_internal"}');
+        });
+        return;
+      }
       const startedAt = Date.now();
       const method = request.method ?? 'GET';
       // The path is recorded without its query string: view state is already
