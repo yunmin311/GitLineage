@@ -1,0 +1,471 @@
+{
+  "contentDigest": "03f08f5d399e45d950705813c5eae90c09389a33d6875b59299173edad5b399e",
+  "cpuBudget": "unsupported",
+  "cpuScope": "process including workers; observational only",
+  "node": "v24.21.0",
+  "observations": [
+    {
+      "bootstrap": {
+        "fullName": "sindresorhus/p-limit",
+        "htmlUrl": "https://github.com/sindresorhus/p-limit",
+        "observedAt": "2026-10-09T11:44:06.378Z",
+        "repositoryId": 71542716,
+        "source": "repository_metadata"
+      },
+      "expectedId": 71542716,
+      "resolution": [
+        {
+          "fullName": "sindresorhus/p-limit",
+          "htmlUrl": "https://github.com/sindresorhus/p-limit",
+          "observedAt": "2026-10-09T11:44:06.378Z",
+          "repositoryId": 71542716,
+          "source": "repository_metadata"
+        },
+        {
+          "fullName": "sindresorhus/p-limit",
+          "htmlUrl": "https://github.com/sindresorhus/p-limit",
+          "observedAt": "2026-10-09T11:44:06.806Z",
+          "repositoryId": 71542716,
+          "source": "repository_metadata"
+        }
+      ]
+    },
+    {
+      "bootstrap": {
+        "fullName": "jucke/p-limit",
+        "htmlUrl": "https://github.com/jucke/p-limit",
+        "observedAt": "2026-10-09T11:44:09.060Z",
+        "repositoryId": 72682439,
+        "source": "repository_metadata"
+      },
+      "expectedId": 72682439,
+      "resolution": [
+        {
+          "fullName": "jucke/p-limit",
+          "htmlUrl": "https://github.com/jucke/p-limit",
+          "observedAt": "2026-10-09T11:44:09.060Z",
+          "repositoryId": 72682439,
+          "source": "repository_metadata"
+        },
+        {
+          "fullName": "jucke/p-limit",
+          "htmlUrl": "https://github.com/jucke/p-limit",
+          "observedAt": "2026-10-09T11:44:09.736Z",
+          "repositoryId": 72682439,
+          "source": "repository_metadata"
+        }
+      ]
+    },
+    {
+      "bootstrap": {
+        "fullName": "sindresorhus/p-throttle",
+        "htmlUrl": "https://github.com/sindresorhus/p-throttle",
+        "observedAt": "2026-10-09T11:44:11.978Z",
+        "repositoryId": 71544230,
+        "source": "repository_metadata"
+      },
+      "expectedId": 71544230,
+      "resolution": [
+        {
+          "fullName": "sindresorhus/p-throttle",
+          "htmlUrl": "https://github.com/sindresorhus/p-throttle",
+          "observedAt": "2026-10-09T11:44:11.978Z",
+          "repositoryId": 71544230,
+          "source": "repository_metadata"
+        },
+        {
+          "fullName": "sindresorhus/p-throttle",
+          "htmlUrl": "https://github.com/sindresorhus/p-throttle",
+          "observedAt": "2026-10-09T11:44:12.356Z",
+          "repositoryId": 71544230,
+          "source": "repository_metadata"
+        }
+      ]
+    }
+  ],
+  "platform": "linux",
+  "processCpuMs": 877.706,
+  "requests": [
+    {
+      "headers": {
+        "x-github-api-version-selected": "2026-03-10",
+        "x-ratelimit-limit": "60",
+        "x-ratelimit-remaining": "49",
+        "x-ratelimit-reset": "1791549581",
+        "x-ratelimit-resource": "core",
+        "x-ratelimit-used": "11"
+      },
+      "request": {
+        "endpoint": "/repos/sindresorhus/p-limit",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 5364,
+        "reservedBytes": 32768,
+        "retainedBytes": 5364,
+        "status": 200
+      },
+      "startedAt": "2026-10-09T11:44:05.177Z",
+      "wallMs": 1201.329369
+    },
+    {
+      "headers": {
+        "x-github-api-version-selected": "2026-03-10",
+        "x-ratelimit-limit": "60",
+        "x-ratelimit-remaining": "48",
+        "x-ratelimit-reset": "1791549581",
+        "x-ratelimit-resource": "core",
+        "x-ratelimit-used": "12"
+      },
+      "request": {
+        "endpoint": "/repositories/71542716",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 5364,
+        "reservedBytes": 32768,
+        "retainedBytes": 5364,
+        "status": 200
+      },
+      "startedAt": "2026-10-09T11:44:06.379Z",
+      "wallMs": 427.34016899999983
+    },
+    {
+      "headers": {
+        "x-github-api-version-selected": "2026-03-10",
+        "x-ratelimit-limit": "60",
+        "x-ratelimit-remaining": "47",
+        "x-ratelimit-reset": "1791549581",
+        "x-ratelimit-resource": "core",
+        "x-ratelimit-used": "13"
+      },
+      "request": {
+        "endpoint": "/repos/sindresorhus/p-limit/commits/a8a6fbec4e0e866d6d779b10889bb4f5567e70eb",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 4304,
+        "reservedBytes": 32768,
+        "retainedBytes": 4304,
+        "status": 200
+      },
+      "startedAt": "2026-10-09T11:44:06.806Z",
+      "wallMs": 403.18575599999986
+    },
+    {
+      "headers": {
+        "x-github-api-version-selected": "2026-03-10",
+        "x-ratelimit-limit": "60",
+        "x-ratelimit-remaining": "46",
+        "x-ratelimit-reset": "1791549581",
+        "x-ratelimit-resource": "core",
+        "x-ratelimit-used": "14"
+      },
+      "request": {
+        "endpoint": "/repos/sindresorhus/p-limit/git/trees/dcc7e576c722ad0f7d474128a704accb0ffc6abd",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 3483,
+        "reservedBytes": 32768,
+        "retainedBytes": 3483,
+        "status": 200
+      },
+      "startedAt": "2026-10-09T11:44:07.217Z",
+      "wallMs": 448.83223099999987
+    },
+    {
+      "headers": {
+        "x-github-api-version-selected": "2026-03-10",
+        "x-ratelimit-limit": "60",
+        "x-ratelimit-remaining": "45",
+        "x-ratelimit-reset": "1791549581",
+        "x-ratelimit-resource": "core",
+        "x-ratelimit-used": "15"
+      },
+      "request": {
+        "endpoint": "/repos/sindresorhus/p-limit/git/blobs/c24de5782032605aa83636bcf455f700e3b2ada7",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 5625,
+        "reservedBytes": 32768,
+        "retainedBytes": 5625,
+        "status": 200
+      },
+      "startedAt": "2026-10-09T11:44:07.667Z",
+      "wallMs": 774.1696980000002
+    },
+    {
+      "headers": {
+        "x-github-api-version-selected": "2026-03-10",
+        "x-ratelimit-limit": "60",
+        "x-ratelimit-remaining": "44",
+        "x-ratelimit-reset": "1791549581",
+        "x-ratelimit-resource": "core",
+        "x-ratelimit-used": "16"
+      },
+      "request": {
+        "endpoint": "/repos/sindresorhus/p-limit",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 5364,
+        "reservedBytes": 32768,
+        "retainedBytes": 5364,
+        "status": 200
+      },
+      "startedAt": "2026-10-09T11:44:08.442Z",
+      "wallMs": 143.08214899999984
+    },
+    {
+      "headers": {
+        "x-github-api-version-selected": "2026-03-10",
+        "x-ratelimit-limit": "60",
+        "x-ratelimit-remaining": "43",
+        "x-ratelimit-reset": "1791549581",
+        "x-ratelimit-resource": "core",
+        "x-ratelimit-used": "17"
+      },
+      "request": {
+        "endpoint": "/repos/jucke/p-limit",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 15568,
+        "reservedBytes": 32768,
+        "retainedBytes": 15568,
+        "status": 200
+      },
+      "startedAt": "2026-10-09T11:44:08.586Z",
+      "wallMs": 474.7089059999994
+    },
+    {
+      "headers": {
+        "x-github-api-version-selected": "2026-03-10",
+        "x-ratelimit-limit": "60",
+        "x-ratelimit-remaining": "42",
+        "x-ratelimit-reset": "1791549581",
+        "x-ratelimit-resource": "core",
+        "x-ratelimit-used": "18"
+      },
+      "request": {
+        "endpoint": "/repositories/72682439",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 15568,
+        "reservedBytes": 32768,
+        "retainedBytes": 15568,
+        "status": 200
+      },
+      "startedAt": "2026-10-09T11:44:09.060Z",
+      "wallMs": 675.7857800000002
+    },
+    {
+      "headers": {
+        "x-github-api-version-selected": "2026-03-10",
+        "x-ratelimit-limit": "60",
+        "x-ratelimit-remaining": "41",
+        "x-ratelimit-reset": "1791549581",
+        "x-ratelimit-resource": "core",
+        "x-ratelimit-used": "19"
+      },
+      "request": {
+        "endpoint": "/repos/jucke/p-limit/commits/e293f0b92536447f72ca818fcf07be8d287f1c24",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 4372,
+        "reservedBytes": 32768,
+        "retainedBytes": 4372,
+        "status": 200
+      },
+      "startedAt": "2026-10-09T11:44:09.736Z",
+      "wallMs": 441.7944800000005
+    },
+    {
+      "headers": {
+        "x-github-api-version-selected": "2026-03-10",
+        "x-ratelimit-limit": "60",
+        "x-ratelimit-remaining": "40",
+        "x-ratelimit-reset": "1791549581",
+        "x-ratelimit-resource": "core",
+        "x-ratelimit-used": "20"
+      },
+      "request": {
+        "endpoint": "/repos/jucke/p-limit/git/trees/2ba2ab5828da5f5a0a37a657903ed24cf17a868a",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 2105,
+        "reservedBytes": 32768,
+        "retainedBytes": 2105,
+        "status": 200
+      },
+      "startedAt": "2026-10-09T11:44:10.178Z",
+      "wallMs": 527.7758729999996
+    },
+    {
+      "headers": {
+        "x-github-api-version-selected": "2026-03-10",
+        "x-ratelimit-limit": "60",
+        "x-ratelimit-remaining": "39",
+        "x-ratelimit-reset": "1791549581",
+        "x-ratelimit-resource": "core",
+        "x-ratelimit-used": "21"
+      },
+      "request": {
+        "endpoint": "/repos/jucke/p-limit/git/blobs/6008403a98879d80c8cbff6f43e5634e3a5fd9ce",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 1171,
+        "reservedBytes": 32768,
+        "retainedBytes": 1171,
+        "status": 200
+      },
+      "startedAt": "2026-10-09T11:44:10.706Z",
+      "wallMs": 567.3472769999998
+    },
+    {
+      "headers": {
+        "x-github-api-version-selected": "2026-03-10",
+        "x-ratelimit-limit": "60",
+        "x-ratelimit-remaining": "38",
+        "x-ratelimit-reset": "1791549581",
+        "x-ratelimit-resource": "core",
+        "x-ratelimit-used": "22"
+      },
+      "request": {
+        "endpoint": "/repos/jucke/p-limit",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 15568,
+        "reservedBytes": 32768,
+        "retainedBytes": 15568,
+        "status": 200
+      },
+      "startedAt": "2026-10-09T11:44:11.274Z",
+      "wallMs": 196.6398589999999
+    },
+    {
+      "headers": {
+        "x-github-api-version-selected": "2026-03-10",
+        "x-ratelimit-limit": "60",
+        "x-ratelimit-remaining": "37",
+        "x-ratelimit-reset": "1791549581",
+        "x-ratelimit-resource": "core",
+        "x-ratelimit-used": "23"
+      },
+      "request": {
+        "endpoint": "/repos/sindresorhus/p-throttle",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 5463,
+        "reservedBytes": 32768,
+        "retainedBytes": 5463,
+        "status": 200
+      },
+      "startedAt": "2026-10-09T11:44:11.471Z",
+      "wallMs": 507.1265829999993
+    },
+    {
+      "headers": {
+        "x-github-api-version-selected": "2026-03-10",
+        "x-ratelimit-limit": "60",
+        "x-ratelimit-remaining": "36",
+        "x-ratelimit-reset": "1791549581",
+        "x-ratelimit-resource": "core",
+        "x-ratelimit-used": "24"
+      },
+      "request": {
+        "endpoint": "/repositories/71544230",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 5463,
+        "reservedBytes": 32768,
+        "retainedBytes": 5463,
+        "status": 200
+      },
+      "startedAt": "2026-10-09T11:44:11.978Z",
+      "wallMs": 377.74540499999966
+    },
+    {
+      "headers": {
+        "x-github-api-version-selected": "2026-03-10",
+        "x-ratelimit-limit": "60",
+        "x-ratelimit-remaining": "35",
+        "x-ratelimit-reset": "1791549581",
+        "x-ratelimit-resource": "core",
+        "x-ratelimit-used": "25"
+      },
+      "request": {
+        "endpoint": "/repos/sindresorhus/p-throttle/commits/a0d20bf8c1a5f0067b1dce529b1ff013878591d3",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 4337,
+        "reservedBytes": 32768,
+        "retainedBytes": 4337,
+        "status": 200
+      },
+      "startedAt": "2026-10-09T11:44:12.356Z",
+      "wallMs": 526.2111380000006
+    },
+    {
+      "headers": {
+        "x-github-api-version-selected": "2026-03-10",
+        "x-ratelimit-limit": "60",
+        "x-ratelimit-remaining": "34",
+        "x-ratelimit-reset": "1791549581",
+        "x-ratelimit-resource": "core",
+        "x-ratelimit-used": "26"
+      },
+      "request": {
+        "endpoint": "/repos/sindresorhus/p-throttle/git/trees/bd45d1c6634275599efd314d792a96e9e1b277a7",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 3079,
+        "reservedBytes": 32768,
+        "retainedBytes": 3079,
+        "status": 200
+      },
+      "startedAt": "2026-10-09T11:44:12.882Z",
+      "wallMs": 471.87434199999916
+    },
+    {
+      "headers": {
+        "x-github-api-version-selected": "2026-03-10",
+        "x-ratelimit-limit": "60",
+        "x-ratelimit-remaining": "33",
+        "x-ratelimit-reset": "1791549581",
+        "x-ratelimit-resource": "core",
+        "x-ratelimit-used": "27"
+      },
+      "request": {
+        "endpoint": "/repos/sindresorhus/p-throttle/git/blobs/5175416b80a246fb0cec7c2547906fd4c025cf18",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 13684,
+        "reservedBytes": 32768,
+        "retainedBytes": 13684,
+        "status": 200
+      },
+      "startedAt": "2026-10-09T11:44:13.355Z",
+      "wallMs": 642.0020320000003
+    },
+    {
+      "headers": {
+        "x-github-api-version-selected": "2026-03-10",
+        "x-ratelimit-limit": "60",
+        "x-ratelimit-remaining": "32",
+        "x-ratelimit-reset": "1791549581",
+        "x-ratelimit-resource": "core",
+        "x-ratelimit-used": "28"
+      },
+      "request": {
+        "endpoint": "/repos/sindresorhus/p-throttle",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 5463,
+        "reservedBytes": 32768,
+        "retainedBytes": 5463,
+        "status": 200
+      },
+      "startedAt": "2026-10-09T11:44:13.997Z",
+      "wallMs": 1121.2663040000007
+    }
+  ],
+  "schemaVersion": "discovery-pinned-probe-receipt@1",
+  "startedAt": "2026-10-09T11:44:05.176Z",
+  "wallMs": 10564.498809
+}
