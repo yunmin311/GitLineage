@@ -58,6 +58,43 @@ Exact 是文件对二值测量，表中计数不是“仓库血缘概率”。�
 
 下一最小切片：显式 provider 的 bounded Repository Search adapter，先补稳定 numeric ID 与 rename aliases、请求失败/重试/分页逐次预留、流式响应字节限制、deadline/abort、rate-limit headers 收据、索引覆盖/不完整响应报告。将内容输入固定到单一 revision，扩展多文件真实人审标签后再评估排名。保持 relevance、similarity、verification 分离；不实现生产 UI、AI 或最终谱系裁决。
 
+## 文件与复现入口
+
+- `src/discovery/contract.ts`：完整 Candidate 类型、闭合运行时 Validator；`budget.ts`：预算预留账本。
+- `src/discovery/snapshot.ts`：固定输入读取/校验/过滤；`similarity.ts`：三种确定性测量；`worker.ts` / `worker-entry.ts`：终止和收尾；`offline.ts`：固定池调度和稳定 Sidecar 写入。
+- `test/discovery/*.test.ts`：17 项合同、预算、输入完整性、重复性、Worker 取消及 Graph/cache 边界测试。
+- `experiments/discovery-v2/create-phase1-fixtures.mjs` / `phase1-fixtures.json`：合成数据生成和固定输入；`run-phase1.ts`：离线入口；`phase1-results.json`：保存的小型结果；`PHASE1_README.md`：复现与限制。
+- 浅历史修复涉及 `src/platform/git.ts`、`src/collectors/git/history.ts`，以及 `src/pipeline/analyze.ts` 的事实用途注释；独立回归 `test/shallow-completeness.test.ts`。
+- npm 修复涉及 `src/collectors/packages/registry.ts`；独立回归 `test/registry-url.test.ts`；`probe-npm.ts` / `npm-baseline-probe.json` 为单独显式网络诊断及收据。
+
+固定样本生成脚本重新运行后 `phase1-fixtures.json` 字节一致，SHA-256=`09229980d03e17982e2d88f68ec7ccfba6ed04ec207a6994a926ae378a695f3f`。生产调用路径没有新增 Discovery import，Graph Schema、Policy、UI 和移动交互没有改动。原有未跟踪 `tools/` 保留。
+
 ## 独立基线风险与最终验收
 
-待完成两个独立风险修复及完整回归后补录实际结果。
+A：真实本地六提交仓库经 `file:// --depth=2` 克隆后，仅有两提交，旧的 `commits.length >= depth*5` 判断仍为 false。旧逻辑会将浅窗口包含关系提升为 derived_from，失败测试已复现。修复后，fetch 事实存在时必须明确 isShallow=false 且没有 shallow boundary，才可参与完整历史包含判定；未知/矛盾事实按不完整处理。完整历史原有判定保留，浅历史仍可生成 shares_history_with。针对性 35 项通过、类型检查通过。已有缓存没有重写或失效处理，未来 Deep Search 必须重新验证完整性，不得把旧缓存的 containment 当作新的完整历史证明。
+
+B：固定 p-limit@7.1.1 的旧 `_p-limit/7.1.1` 实际返回 404，正确 `p-limit/7.1.1` 返回 200、repository 指向 sindresorhus/p-limit；resolver 的 latest 地址也重现相同 404/200 差异。独立回归用固定元数据验证未带 scope 和带 scope 两种 URL，并验证 memo 命中。修复只去掉未带 scope 包名的额外下划线。针对性 16 项通过、类型检查通过。详见 [注册表收据](../experiments/discovery-v2/npm-baseline-probe.json)。该诊断最后一轮 4 次 GET，加此前固定版本复现 2 次，本任务共 6 次注册表 GET；不计入离线 Discovery 的 attempts=0，也没有外部搜索 API 调用。
+
+提交：
+
+- `8efc1d85ac317e2b88cc7610a4cc8b1142cc6384`：Candidate Contract / Budget Ledger；类型检查和 6 项针对性测试通过。
+- `dba4eaf8624f60d6e648c7ba86b350f20fe369dd`：固定快照 / Worker / Similarity / Sidecar / 实验和报告；类型检查和 17 项 Discovery 测试通过。
+- `5016978324aa506535608450713f5f59f0c50730`：浅历史完整性修复与失败复现。
+- `2abdfa6d000f3922559871effdb0e225ed538c64`：npm URL 修复、回归与真实请求收据。
+
+完整回归按 Typecheck → Unit → Build → Phase 0 → 串行浏览器套件执行，全部已执行套件退出码为 0。单元测试 464 项：461 pass、0 fail、3 skip；跳过的是既有 live integration 三项，未启用，不能视为实测通过。Phase 0 实验 6/6。
+
+| 浏览器套件 | 结果 |
+|---|---|
+| Canvas | 113/113 |
+| Landing | 40/40 |
+| Analysis | PASS，16 个状态样本，page errors=none |
+| Preflight | 45/45 |
+| Stale A→B | PASS，6 个采样，failed=false、complete=true、observed=true |
+| UI Contract | 75/75 |
+| Responsive | 71/71 |
+| Mobile | 133/133，Chromium CDP touch simulation |
+
+验收没有删除测试、更新基线或放宽容差。WebKit executable 缺失，实体手机未验证；Mobile 通过不代表 Safari 或实体设备通过。各套件产物位置与实际文件哈希见 [验收收据](../experiments/discovery-v2/phase1-validation.json)，截图与几何仍位于原有 artifacts 目录。Graph/API/cache 回归保持通过；Discovery 的独立边界测试已验证可写范围与无图依赖。
+
+完成后没有 push、deploy、OCI/Caddy/TLS 或 UI 变更。等待 Review。
