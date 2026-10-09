@@ -10,7 +10,7 @@ import type {ProviderOptions} from './search-provider.ts';
 import {parseObservation} from './search-contract.ts';
 import type {IdentityObservation} from './search-contract.ts';
 import {collectSources,validateSelections} from './source-collection.ts';
-import type {SourceSelection} from './source-collection.ts';
+import type {TreeCache,SourceSelection} from './source-collection.ts';
 import {pinnedCandidate} from './e2e.ts';
 import {runComparison} from './worker.ts';
 import {validateCandidate,validateUsage} from './contract.ts';
@@ -19,7 +19,7 @@ import type {compareSnapshots} from './similarity.ts';
 import {stableJSON} from './offline.ts';
 import {sha256} from './snapshot.ts';
 export interface ProbeControl {name:string;repositoryId:number|null;revision?:string;selections:SourceSelection[];observations?:IdentityObservation[]}
-export interface ProbeOptions extends ProviderOptions {now?:()=>string;profile?:BudgetProfile;signal?:AbortSignal;discoveryById?:Map<number,DiscoveryCandidate['discoveries']>}
+export interface ProbeOptions extends ProviderOptions {now?:()=>string;profile?:BudgetProfile;signal?:AbortSignal;discoveryById?:Map<number,DiscoveryCandidate['discoveries']>;context?:{network:NetworkLedger;resolver:RepositorySnapshotResolver;resolutions:Map<number,Resolution>;trees:TreeCache}}
 type Check={state:'matched'|'not_attempted'|'unavailable'|'id_conflict'|'name_changed';repositoryId:number|null;fullName:string|null;reason:string|null};
 function view(source:Awaited<ReturnType<typeof collectSources>>){return {...source,snapshot:source.snapshot?{identity:source.snapshot.identity,files:source.snapshot.files,state:source.snapshot.state,pending:source.snapshot.pending,reasons:source.snapshot.reasons}:null};}
 function timeless(r:Resolution){return {...r,observations:r.observations.map(({observedAt,...o})=>o)};}
@@ -28,7 +28,7 @@ export async function runPinnedProbe(controls:ProbeControl[],options:ProbeOption
  const names=new Set<string>(),ids=new Set<number>();for(const c of controls){if(!/^[a-z0-9][a-z0-9-]{0,38}\/[a-z0-9_.-]{1,100}$/.test(c.name)||['.','..'].includes(c.name.split('/')[1]!)||names.has(c.name)||c.repositoryId!==null&&(!Number.isSafeInteger(c.repositoryId)||c.repositoryId<1||ids.has(c.repositoryId))||c.revision!==undefined&&!fullSHA(c.revision))throw new TypeError('invalid explicit control');names.add(c.name);if(c.repositoryId!==null)ids.add(c.repositoryId);validateSelections(c.selections);}
  if(options.token&&JSON.stringify(controls).includes(options.token))throw new TypeError('credential reflection rejected');
  for(const c of controls)for(const o of c.observations??[])if(c.repositoryId===null||o.repositoryId!==c.repositoryId||!['repository_search','repository_metadata'].includes(o.source)||!parseObservation({id:o.repositoryId,full_name:o.fullName,html_url:o.htmlUrl},o.observedAt,o.source))throw new TypeError('invalid supplied observation');
- const profile=options.profile??SNAPSHOT_PROFILE;checkSnapshotProfile(profile);const ledger=new BudgetLedger(profile,options.signal),network=new NetworkLedger(ledger,SNAPSHOT_NETWORK),resolver=new RepositorySnapshotResolver(network,options),now=options.now??(()=>new Date().toISOString()),startedAt=now(),started=performance.now(),cpu=process.cpuUsage();
+ const profile=options.profile??SNAPSHOT_PROFILE;checkSnapshotProfile(profile);const ledger=options.context?.network.budget??new BudgetLedger(profile,options.signal),network=options.context?.network??new NetworkLedger(ledger,SNAPSHOT_NETWORK),resolver=options.context?.resolver??new RepositorySnapshotResolver(network,options),now=options.now??(()=>new Date().toISOString()),startedAt=now(),started=performance.now(),cpu=process.cpuUsage();
  const snapshots=[];
  for(const control of controls){
   // A null ID permits only an explicit name bootstrap, then a separate ID metadata check.
@@ -37,9 +37,9 @@ export async function runPinnedProbe(controls:ProbeControl[],options:ProbeOption
   const expectedId=control.repositoryId??observation?.repositoryId??null;
   if(expectedId===null){snapshots.push({control:structuredClone(control),expectedId,bootstrap:null,resolution:null,source:null,identityCheck:{state:'not_attempted',repositoryId:null,fullName:null,reason:'bootstrap: '+resolver.provider.failure()} as Check,state:'inconclusive'});continue;}
   // Explicit caller names are aliases only, not fabricated Search observations.
-  const resolution=await resolver.resolve(expectedId,[...(control.observations??[]),...(observation?[observation]:[])],control.revision);
+  const resolution=options.context?.resolutions.get(expectedId)??await resolver.resolve(expectedId,[...(control.observations??[]),...(observation?[observation]:[])],control.revision);
   if(!observation&&resolution.identity&&resolution.identity.fullName!==control.name)resolution.reasons.push('caller_name_metadata_disagreement');
-  const source=await collectSources(resolution,control.selections,resolver);
+  const source=await collectSources(resolution,control.selections,resolver,options.context?.trees);
   const check:Check={state:'not_attempted',repositoryId:null,fullName:null,reason:'pre-resolution unavailable'};
   if(resolution.identity){const canonical=resolution.identity.fullName,raw=await resolver.provider.get(`/repos/${canonical}`,network),post=raw?parseObservation(raw,now(),'repository_metadata'):null;
    check.state=!post?'unavailable':post.repositoryId!==expectedId?'id_conflict':post.fullName!==canonical?'name_changed':'matched';check.repositoryId=post?.repositoryId??null;check.fullName=post?.fullName??null;check.reason=check.state==='matched'?null:post?`final identity: ${check.state}`:'final metadata: '+resolver.provider.failure();
@@ -55,7 +55,7 @@ export async function runPinnedProbe(controls:ProbeControl[],options:ProbeOption
   }catch(error){reason=error instanceof Error?error.message:'comparison failed';if(candidate){candidate.coverage.state='partial';candidate.coverage.reasons.push(reason);candidate.coverage.pending.push(reason);}}
   if(candidate){candidate.usage=ledger.usage();validateCandidate(candidate);}comparisons.push({name:item.control.name,candidate,summary,reason,label:item.control.name==='jucke/p-limit'?'known public Fork control; metadata observation only':'unknown; unjudged'});
  }
- const content={schemaVersion:'discovery-pinned-probe@1' as const,scope:'explicit controls and selected paths only; no discovery recall claim',snapshots:snapshots.map(s=>({...s,control:(({observations,...c})=>c)(s.control),bootstrap:s.bootstrap?(({observedAt,...o})=>o)(s.bootstrap):null,resolution:s.resolution?timeless(s.resolution):null,source:s.source?view(s.source):null})),comparisons,
+ const content={schemaVersion:'discovery-pinned-probe@1' as const,scope:options.discoveryById?'bounded search preview and user-selected paths only; search observations are not verified evidence':'explicit controls and selected paths only; no discovery recall claim',snapshots:snapshots.map(s=>({...s,control:(({observations,...c})=>c)(s.control),bootstrap:s.bootstrap?(({observedAt,...o})=>o)(s.bootstrap):null,resolution:s.resolution?timeless(s.resolution):null,source:s.source?view(s.source):null})),comparisons,
   requests:resolver.provider.receipts.map(r=>r.request),budget:ledger.profile,networkProfile:network.profile,usage:ledger.usage(),network:network.usage(),sourceMaterializedBytes:snapshots.reduce((n,s)=>n+(s.source?.materializedBytes??0),0),coverage:{state:comparisons.every(c=>c.candidate?.coverage.state==='completed')?'completed':'partial',completed:comparisons.filter(c=>c.candidate?.coverage.state==='completed').length,inconclusive:comparisons.filter(c=>c.candidate?.coverage.state!=='completed').length},verification:'pending' as const,lineageClaim:'none' as const,cpuBudget:'unsupported' as const};
  validatePinnedProbe(content);const measured=process.cpuUsage(cpu);
  return {content,receipt:{schemaVersion:'discovery-pinned-probe-receipt@1',contentDigest:sha256(stableJSON(content)),startedAt,wallMs:performance.now()-started,processCpuMs:(measured.user+measured.system)/1000,cpuBudget:'unsupported',cpuScope:'process including workers; observational only',requests:resolver.provider.receipts,observations:snapshots.map(s=>({expectedId:s.expectedId,bootstrap:s.bootstrap,resolution:s.resolution?.observations??[]})),node:process.version,platform:process.platform}};
