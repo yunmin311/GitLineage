@@ -1,0 +1,1768 @@
+{
+  "mode": "explicit anonymous real GitHub; standard Graph uses the existing local fixture",
+  "startedAt": "2026-10-09T12:46:31.428Z",
+  "elapsedMs": 24613,
+  "tasks": [
+    {
+      "id": "b87e51afe301e48720995d82",
+      "kind": "search",
+      "state": "partial",
+      "phase": "partial",
+      "createdAt": "2026-10-09T12:46:31.756Z",
+      "error": "Search partial_provider: unfetched pages or rejected identities; see coverage",
+      "search": {
+        "target": {
+          "schemaVersion": "repository-snapshot@1",
+          "requestedId": 315531538,
+          "state": "resolved",
+          "identity": {
+            "provider": "github",
+            "repositoryId": 315531538,
+            "completeness": "provider_id",
+            "fullName": "sindresorhus/yocto-queue",
+            "aliases": [],
+            "revision": "72a8fa96a9d389765cdf2bb9c6daba8302fc375d"
+          },
+          "observations": [
+            {
+              "repositoryId": 315531538,
+              "fullName": "sindresorhus/yocto-queue",
+              "htmlUrl": "https://github.com/sindresorhus/yocto-queue",
+              "source": "repository_metadata",
+              "observedAt": "2026-10-09T12:46:32.431Z"
+            },
+            {
+              "repositoryId": 315531538,
+              "fullName": "sindresorhus/yocto-queue",
+              "htmlUrl": "https://github.com/sindresorhus/yocto-queue",
+              "source": "repository_metadata",
+              "observedAt": "2026-10-09T12:46:33.024Z"
+            }
+          ],
+          "defaultBranch": "main",
+          "tree": "0b81d56218d4a4ab1b9ec91109e7b5d493e123d7",
+          "parents": [
+            "b07eac099753833b29d06c614149904445739776"
+          ],
+          "metadata": {
+            "fork": false,
+            "parentId": null
+          },
+          "reasons": [],
+          "requestSource": "github-rest-verified-name@1"
+        },
+        "result": {
+          "schemaVersion": "discovery-search-sidecar@2",
+          "candidateSchema": "discovery-candidate@2",
+          "plan": {
+            "version": "repository-query-plan@1",
+            "target": {
+              "provider": "github",
+              "repositoryId": 315531538,
+              "completeness": "provider_id",
+              "fullName": "sindresorhus/yocto-queue",
+              "aliases": [],
+              "revision": "72a8fa96a9d389765cdf2bb9c6daba8302fc375d"
+            },
+            "queries": [
+              {
+                "q": "yocto-queue in:name is:public fork:true",
+                "source": "repository_name",
+                "reason": "fixed target repository name"
+              }
+            ],
+            "perPage": 3,
+            "pages": 1
+          },
+          "candidates": [
+            {
+              "schemaVersion": "discovery-candidate@2",
+              "target": {
+                "provider": "github",
+                "repositoryId": 315531538,
+                "completeness": "provider_id",
+                "fullName": "sindresorhus/yocto-queue",
+                "aliases": [],
+                "revision": "72a8fa96a9d389765cdf2bb9c6daba8302fc375d"
+              },
+              "candidate": {
+                "provider": "github",
+                "repositoryId": 1168938776,
+                "completeness": "provider_id",
+                "fullName": "munachi-n/yocto-queue",
+                "aliases": [],
+                "htmlUrl": "https://github.com/munachi-n/yocto-queue",
+                "observations": [
+                  {
+                    "repositoryId": 1168938776,
+                    "fullName": "munachi-n/yocto-queue",
+                    "htmlUrl": "https://github.com/munachi-n/yocto-queue",
+                    "source": "repository_search",
+                    "observedAt": "2026-10-09T12:46:34.096Z"
+                  }
+                ],
+                "conflicts": [],
+                "revision": {
+                  "state": "unresolved",
+                  "sha": null
+                }
+              },
+              "discoveries": [
+                {
+                  "source": "repository_search",
+                  "version": "github-rest-repository-search@1",
+                  "query": "yocto-queue in:name is:public fork:true",
+                  "querySource": "repository_name",
+                  "reason": "fixed target repository name",
+                  "page": 1,
+                  "rank": 2,
+                  "observedAt": "2026-10-09T12:46:34.096Z"
+                }
+              ],
+              "similarity": [],
+              "supportingFiles": [],
+              "verification": {
+                "state": "pending",
+                "canonicalEvidenceIds": []
+              },
+              "lineageClaim": "none",
+              "comparison": {
+                "state": "unexecuted",
+                "reason": "revision unresolved"
+              }
+            },
+            {
+              "schemaVersion": "discovery-candidate@2",
+              "target": {
+                "provider": "github",
+                "repositoryId": 315531538,
+                "completeness": "provider_id",
+                "fullName": "sindresorhus/yocto-queue",
+                "aliases": [],
+                "revision": "72a8fa96a9d389765cdf2bb9c6daba8302fc375d"
+              },
+              "candidate": {
+                "provider": "github",
+                "repositoryId": 534001472,
+                "completeness": "provider_id",
+                "fullName": "mosquito18/yocto-queue",
+                "aliases": [],
+                "htmlUrl": "https://github.com/mosquito18/yocto-queue",
+                "observations": [
+                  {
+                    "repositoryId": 534001472,
+                    "fullName": "mosquito18/yocto-queue",
+                    "htmlUrl": "https://github.com/mosquito18/yocto-queue",
+                    "source": "repository_search",
+                    "observedAt": "2026-10-09T12:46:34.096Z"
+                  }
+                ],
+                "conflicts": [],
+                "revision": {
+                  "state": "unresolved",
+                  "sha": null
+                }
+              },
+              "discoveries": [
+                {
+                  "source": "repository_search",
+                  "version": "github-rest-repository-search@1",
+                  "query": "yocto-queue in:name is:public fork:true",
+                  "querySource": "repository_name",
+                  "reason": "fixed target repository name",
+                  "page": 1,
+                  "rank": 3,
+                  "observedAt": "2026-10-09T12:46:34.096Z"
+                }
+              ],
+              "similarity": [],
+              "supportingFiles": [],
+              "verification": {
+                "state": "pending",
+                "canonicalEvidenceIds": []
+              },
+              "lineageClaim": "none",
+              "comparison": {
+                "state": "unexecuted",
+                "reason": "revision unresolved"
+              }
+            }
+          ],
+          "queries": [
+            {
+              "state": "partial_provider",
+              "query": 0,
+              "requestedPages": [
+                1
+              ],
+              "completedPages": [
+                1
+              ],
+              "totalCount": 39,
+              "incompleteResults": false,
+              "returnedItems": 3,
+              "unfetchedAccessiblePages": 12,
+              "beyondWindow": 0
+            }
+          ],
+          "attempts": [
+            {
+              "query": 0,
+              "page": 1,
+              "retry": 0,
+              "status": 200,
+              "outcome": "success",
+              "headers": {
+                "x-ratelimit-limit": "10",
+                "x-ratelimit-remaining": "9",
+                "x-ratelimit-reset": "1791550053",
+                "x-ratelimit-used": "1",
+                "x-ratelimit-resource": "search",
+                "x-github-api-version-selected": "2026-03-10"
+              },
+              "receivedBytes": 15910,
+              "retainedBytes": 15910,
+              "reservedBytes": 32768
+            }
+          ],
+          "rejectedIdentities": [],
+          "coverage": {
+            "state": "partial_provider",
+            "scope": "bounded public repository metadata search; never all GitHub",
+            "plannedQueries": 1,
+            "attemptedQueries": 1,
+            "requestedPages": 1,
+            "completedPages": 1,
+            "returnedItems": 3,
+            "uniqueObserved": 2,
+            "processedCandidates": 2,
+            "rejectedIdentity": 0,
+            "rejectedBudget": 0,
+            "excludedTarget": 1,
+            "accessibleWindow": 1000,
+            "uncompletedPlanned": []
+          },
+          "budget": {
+            "attempts": 24,
+            "searchAttempts": 2,
+            "candidates": 3,
+            "filesPerCandidate": 8,
+            "bytesPerFile": 131072,
+            "totalBytes": 2097152,
+            "wallMs": 30000,
+            "concurrency": 2,
+            "cpuMs": null
+          },
+          "networkProfile": {
+            "perResponseBytes": 32768,
+            "totalResponseBytes": 1048576
+          },
+          "usage": {
+            "attempts": 4,
+            "searchAttempts": 1,
+            "candidates": 2,
+            "files": {},
+            "bytesByFile": {},
+            "totalBytes": 0,
+            "activeWorkers": 0,
+            "peakWorkers": 1
+          },
+          "network": {
+            "reservedBytes": 131072,
+            "receivedBytes": 31382,
+            "retainedBytes": 31382,
+            "overflowBytes": 0
+          },
+          "wallMs": 671.8679769999999,
+          "cpuBudget": "unsupported",
+          "message": "发现候选尚未验证，不构成谱系关系。"
+        },
+        "requests": [
+          {
+            "request": {
+              "endpoint": "/repos/sindresorhus/yocto-queue",
+              "status": 200,
+              "outcome": "success",
+              "reason": null,
+              "reservedBytes": 32768,
+              "receivedBytes": 5562,
+              "retainedBytes": 5562
+            },
+            "startedAt": "2026-10-09T12:46:31.757Z",
+            "wallMs": 673.4206039999999,
+            "headers": {
+              "x-ratelimit-limit": "60",
+              "x-ratelimit-remaining": "34",
+              "x-ratelimit-reset": "1791553188",
+              "x-ratelimit-used": "26",
+              "x-ratelimit-resource": "core",
+              "x-github-api-version-selected": "2026-03-10"
+            }
+          },
+          {
+            "request": {
+              "endpoint": "/repositories/315531538",
+              "status": 200,
+              "outcome": "success",
+              "reason": null,
+              "reservedBytes": 32768,
+              "receivedBytes": 5562,
+              "retainedBytes": 5562
+            },
+            "startedAt": "2026-10-09T12:46:32.431Z",
+            "wallMs": 592.969677,
+            "headers": {
+              "x-ratelimit-limit": "60",
+              "x-ratelimit-remaining": "33",
+              "x-ratelimit-reset": "1791553188",
+              "x-ratelimit-used": "27",
+              "x-ratelimit-resource": "core",
+              "x-github-api-version-selected": "2026-03-10"
+            }
+          },
+          {
+            "request": {
+              "endpoint": "/repos/sindresorhus/yocto-queue/commits/main",
+              "status": 200,
+              "outcome": "success",
+              "reason": null,
+              "reservedBytes": 32768,
+              "receivedBytes": 4348,
+              "retainedBytes": 4348
+            },
+            "startedAt": "2026-10-09T12:46:33.024Z",
+            "wallMs": 399.35818800000015,
+            "headers": {
+              "x-ratelimit-limit": "60",
+              "x-ratelimit-remaining": "32",
+              "x-ratelimit-reset": "1791553188",
+              "x-ratelimit-used": "28",
+              "x-ratelimit-resource": "core",
+              "x-github-api-version-selected": "2026-03-10"
+            }
+          }
+        ],
+        "usage": {
+          "attempts": 4,
+          "searchAttempts": 1,
+          "candidates": 2,
+          "files": {},
+          "bytesByFile": {},
+          "totalBytes": 0,
+          "activeWorkers": 0,
+          "peakWorkers": 1
+        },
+        "network": {
+          "reservedBytes": 131072,
+          "receivedBytes": 31382,
+          "retainedBytes": 31382,
+          "overflowBytes": 0
+        },
+        "scope": "one name query, first three results, at most three candidates; no whole-GitHub coverage"
+      }
+    },
+    {
+      "id": "f5c8c31a1c8bf29e513b692f",
+      "kind": "compare",
+      "state": "partial",
+      "phase": "partial",
+      "createdAt": "2026-10-09T12:46:49.856Z",
+      "error": null,
+      "comparison": {
+        "content": {
+          "schemaVersion": "discovery-pinned-probe@1",
+          "scope": "explicit controls and selected paths only; no discovery recall claim",
+          "snapshots": [
+            {
+              "control": {
+                "name": "sindresorhus/yocto-queue",
+                "repositoryId": 315531538,
+                "revision": "72a8fa96a9d389765cdf2bb9c6daba8302fc375d",
+                "selections": [
+                  {
+                    "path": "index.js",
+                    "reason": "fixed root JavaScript entry"
+                  },
+                  {
+                    "path": "index.ts",
+                    "reason": "fixed root TypeScript entry"
+                  },
+                  {
+                    "path": "src/index.js",
+                    "reason": "fixed src JavaScript entry"
+                  },
+                  {
+                    "path": "src/index.ts",
+                    "reason": "fixed src TypeScript entry"
+                  }
+                ]
+              },
+              "expectedId": 315531538,
+              "bootstrap": null,
+              "resolution": {
+                "schemaVersion": "repository-snapshot@1",
+                "requestedId": 315531538,
+                "state": "resolved",
+                "identity": {
+                  "provider": "github",
+                  "repositoryId": 315531538,
+                  "completeness": "provider_id",
+                  "fullName": "sindresorhus/yocto-queue",
+                  "aliases": [],
+                  "revision": "72a8fa96a9d389765cdf2bb9c6daba8302fc375d"
+                },
+                "observations": [
+                  {
+                    "repositoryId": 315531538,
+                    "fullName": "sindresorhus/yocto-queue",
+                    "htmlUrl": "https://github.com/sindresorhus/yocto-queue",
+                    "source": "repository_metadata"
+                  }
+                ],
+                "defaultBranch": "main",
+                "tree": "0b81d56218d4a4ab1b9ec91109e7b5d493e123d7",
+                "parents": [
+                  "b07eac099753833b29d06c614149904445739776"
+                ],
+                "metadata": {
+                  "fork": false,
+                  "parentId": null
+                },
+                "reasons": [],
+                "requestSource": "github-rest-verified-name@1"
+              },
+              "source": {
+                "snapshot": {
+                  "identity": {
+                    "provider": "github",
+                    "repositoryId": 315531538,
+                    "completeness": "provider_id",
+                    "fullName": "sindresorhus/yocto-queue",
+                    "aliases": [],
+                    "revision": "72a8fa96a9d389765cdf2bb9c6daba8302fc375d"
+                  },
+                  "files": [
+                    {
+                      "path": "index.js",
+                      "digest": "2eabf3096793c43934ef127fb50238dcba93074fb54f943fc62aeab616769dfc",
+                      "blob": "627ed535f3163b37f2e3b208a23788fd0a715eba",
+                      "bytes": 1587,
+                      "language": "javascript",
+                      "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                      "filterVersion": "source-filter@1",
+                      "classification": "application_source",
+                      "reasons": [
+                        "supported source; no exclusion heuristic matched"
+                      ]
+                    }
+                  ],
+                  "state": "partial",
+                  "pending": [
+                    "index.ts",
+                    "src/index.js",
+                    "src/index.ts"
+                  ],
+                  "reasons": [
+                    "index.ts: selected path unavailable",
+                    "src/index.js: selected path unavailable",
+                    "src/index.ts: selected path unavailable"
+                  ]
+                },
+                "selections": [
+                  {
+                    "path": "index.js",
+                    "reason": "fixed root JavaScript entry"
+                  },
+                  {
+                    "path": "index.ts",
+                    "reason": "fixed root TypeScript entry"
+                  },
+                  {
+                    "path": "src/index.js",
+                    "reason": "fixed src JavaScript entry"
+                  },
+                  {
+                    "path": "src/index.ts",
+                    "reason": "fixed src TypeScript entry"
+                  }
+                ],
+                "bindings": [
+                  {
+                    "repositoryId": 315531538,
+                    "revision": "72a8fa96a9d389765cdf2bb9c6daba8302fc375d",
+                    "path": "index.js",
+                    "blob": "627ed535f3163b37f2e3b208a23788fd0a715eba",
+                    "digest": "2eabf3096793c43934ef127fb50238dcba93074fb54f943fc62aeab616769dfc",
+                    "bytes": 1587,
+                    "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                    "filterVersion": "source-filter@1"
+                  }
+                ],
+                "materializedBytes": 1587,
+                "coverage": {
+                  "scope": "explicit selected paths only",
+                  "state": "partial",
+                  "treeTruncated": false,
+                  "reasons": [
+                    "index.ts: selected path unavailable",
+                    "src/index.js: selected path unavailable",
+                    "src/index.ts: selected path unavailable"
+                  ],
+                  "pending": [
+                    "index.ts",
+                    "src/index.js",
+                    "src/index.ts"
+                  ]
+                }
+              },
+              "identityCheck": {
+                "state": "matched",
+                "repositoryId": 315531538,
+                "fullName": "sindresorhus/yocto-queue",
+                "reason": null
+              },
+              "state": "inconclusive"
+            },
+            {
+              "control": {
+                "name": "munachi-n/yocto-queue",
+                "repositoryId": 1168938776,
+                "selections": [
+                  {
+                    "path": "index.js",
+                    "reason": "fixed root JavaScript entry"
+                  },
+                  {
+                    "path": "index.ts",
+                    "reason": "fixed root TypeScript entry"
+                  },
+                  {
+                    "path": "src/index.js",
+                    "reason": "fixed src JavaScript entry"
+                  },
+                  {
+                    "path": "src/index.ts",
+                    "reason": "fixed src TypeScript entry"
+                  }
+                ]
+              },
+              "expectedId": 1168938776,
+              "bootstrap": null,
+              "resolution": {
+                "schemaVersion": "repository-snapshot@1",
+                "requestedId": 1168938776,
+                "state": "resolved",
+                "identity": {
+                  "provider": "github",
+                  "repositoryId": 1168938776,
+                  "completeness": "provider_id",
+                  "fullName": "munachi-n/yocto-queue",
+                  "aliases": [],
+                  "revision": "db05e3dcd2aabd33b5b325aa7646f8d2c4b1ffd0"
+                },
+                "observations": [
+                  {
+                    "repositoryId": 1168938776,
+                    "fullName": "munachi-n/yocto-queue",
+                    "htmlUrl": "https://github.com/munachi-n/yocto-queue",
+                    "source": "repository_search"
+                  },
+                  {
+                    "repositoryId": 1168938776,
+                    "fullName": "munachi-n/yocto-queue",
+                    "htmlUrl": "https://github.com/munachi-n/yocto-queue",
+                    "source": "repository_metadata"
+                  }
+                ],
+                "defaultBranch": "master",
+                "tree": "9925e53c997bf4590cbab809fc482b74093f3da8",
+                "parents": [],
+                "metadata": {
+                  "fork": false,
+                  "parentId": null
+                },
+                "reasons": [],
+                "requestSource": "github-rest-verified-name@1"
+              },
+              "source": {
+                "snapshot": {
+                  "identity": {
+                    "provider": "github",
+                    "repositoryId": 1168938776,
+                    "completeness": "provider_id",
+                    "fullName": "munachi-n/yocto-queue",
+                    "aliases": [],
+                    "revision": "db05e3dcd2aabd33b5b325aa7646f8d2c4b1ffd0"
+                  },
+                  "files": [
+                    {
+                      "path": "index.js",
+                      "digest": "2eabf3096793c43934ef127fb50238dcba93074fb54f943fc62aeab616769dfc",
+                      "blob": "627ed535f3163b37f2e3b208a23788fd0a715eba",
+                      "bytes": 1587,
+                      "language": "javascript",
+                      "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                      "filterVersion": "source-filter@1",
+                      "classification": "application_source",
+                      "reasons": [
+                        "supported source; no exclusion heuristic matched"
+                      ]
+                    }
+                  ],
+                  "state": "partial",
+                  "pending": [
+                    "index.ts",
+                    "src/index.js",
+                    "src/index.ts"
+                  ],
+                  "reasons": [
+                    "index.ts: selected path unavailable",
+                    "src/index.js: selected path unavailable",
+                    "src/index.ts: selected path unavailable"
+                  ]
+                },
+                "selections": [
+                  {
+                    "path": "index.js",
+                    "reason": "fixed root JavaScript entry"
+                  },
+                  {
+                    "path": "index.ts",
+                    "reason": "fixed root TypeScript entry"
+                  },
+                  {
+                    "path": "src/index.js",
+                    "reason": "fixed src JavaScript entry"
+                  },
+                  {
+                    "path": "src/index.ts",
+                    "reason": "fixed src TypeScript entry"
+                  }
+                ],
+                "bindings": [
+                  {
+                    "repositoryId": 1168938776,
+                    "revision": "db05e3dcd2aabd33b5b325aa7646f8d2c4b1ffd0",
+                    "path": "index.js",
+                    "blob": "627ed535f3163b37f2e3b208a23788fd0a715eba",
+                    "digest": "2eabf3096793c43934ef127fb50238dcba93074fb54f943fc62aeab616769dfc",
+                    "bytes": 1587,
+                    "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                    "filterVersion": "source-filter@1"
+                  }
+                ],
+                "materializedBytes": 1587,
+                "coverage": {
+                  "scope": "explicit selected paths only",
+                  "state": "partial",
+                  "treeTruncated": false,
+                  "reasons": [
+                    "index.ts: selected path unavailable",
+                    "src/index.js: selected path unavailable",
+                    "src/index.ts: selected path unavailable"
+                  ],
+                  "pending": [
+                    "index.ts",
+                    "src/index.js",
+                    "src/index.ts"
+                  ]
+                }
+              },
+              "identityCheck": {
+                "state": "matched",
+                "repositoryId": 1168938776,
+                "fullName": "munachi-n/yocto-queue",
+                "reason": null
+              },
+              "state": "inconclusive"
+            }
+          ],
+          "comparisons": [
+            {
+              "name": "munachi-n/yocto-queue",
+              "candidate": {
+                "schemaVersion": "discovery-candidate@1",
+                "target": {
+                  "provider": "github",
+                  "repositoryId": 315531538,
+                  "completeness": "provider_id",
+                  "fullName": "sindresorhus/yocto-queue",
+                  "aliases": [],
+                  "revision": "72a8fa96a9d389765cdf2bb9c6daba8302fc375d"
+                },
+                "candidate": {
+                  "provider": "github",
+                  "repositoryId": 1168938776,
+                  "completeness": "provider_id",
+                  "fullName": "munachi-n/yocto-queue",
+                  "aliases": [],
+                  "revision": "db05e3dcd2aabd33b5b325aa7646f8d2c4b1ffd0"
+                },
+                "discoveries": [
+                  {
+                    "source": "explicit_public_probe",
+                    "version": "phase1d-controls@1",
+                    "reason": "explicit bounded controls; no Search or inferred lineage",
+                    "locator": "https://github.com/munachi-n/yocto-queue"
+                  }
+                ],
+                "similarity": [
+                  {
+                    "version": "git-blob-sha1@1",
+                    "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                    "filterVersion": "source-filter@1",
+                    "firstPath": "index.js",
+                    "secondPath": "index.js",
+                    "firstDigest": "2eabf3096793c43934ef127fb50238dcba93074fb54f943fc62aeab616769dfc",
+                    "secondDigest": "2eabf3096793c43934ef127fb50238dcba93074fb54f943fc62aeab616769dfc",
+                    "firstTokens": 268,
+                    "secondTokens": 268,
+                    "rangesTruncated": false,
+                    "reasons": [],
+                    "method": "exact_blob",
+                    "state": "completed",
+                    "score": 1,
+                    "sharedShingles": null,
+                    "firstShingles": null,
+                    "secondShingles": null,
+                    "firstCoverage": null,
+                    "secondCoverage": null,
+                    "ranges": []
+                  },
+                  {
+                    "version": "token5-set@1",
+                    "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                    "filterVersion": "source-filter@1",
+                    "firstPath": "index.js",
+                    "secondPath": "index.js",
+                    "firstDigest": "2eabf3096793c43934ef127fb50238dcba93074fb54f943fc62aeab616769dfc",
+                    "secondDigest": "2eabf3096793c43934ef127fb50238dcba93074fb54f943fc62aeab616769dfc",
+                    "firstTokens": 268,
+                    "secondTokens": 268,
+                    "rangesTruncated": true,
+                    "reasons": [],
+                    "method": "strict_token5",
+                    "state": "completed",
+                    "score": 1,
+                    "sharedShingles": 239,
+                    "firstShingles": 239,
+                    "secondShingles": 239,
+                    "firstCoverage": 1,
+                    "secondCoverage": 1,
+                    "ranges": [
+                      {
+                        "first": [
+                          95,
+                          100
+                        ],
+                        "second": [
+                          95,
+                          100
+                        ],
+                        "firstChars": [
+                          853,
+                          874
+                        ],
+                        "secondChars": [
+                          853,
+                          874
+                        ],
+                        "fingerprint": "00d230a4305b002ee8bd09289e649673114ce243a9be6c0bfe78afe099e97831"
+                      },
+                      {
+                        "first": [
+                          238,
+                          243
+                        ],
+                        "second": [
+                          238,
+                          243
+                        ],
+                        "firstChars": [
+                          1485,
+                          1507
+                        ],
+                        "secondChars": [
+                          1485,
+                          1507
+                        ],
+                        "fingerprint": "014f80016ac4a6bdb88ec42db19c47e8923f6cb6bdd5c9d62f53fa9916f15690"
+                      },
+                      {
+                        "first": [
+                          43,
+                          48
+                        ],
+                        "second": [
+                          43,
+                          48
+                        ],
+                        "firstChars": [
+                          674,
+                          691
+                        ],
+                        "secondChars": [
+                          674,
+                          691
+                        ],
+                        "fingerprint": "033cc72859d09aab22cc013587222073d73274836f10b17d9ee57dd9a76417d6"
+                      },
+                      {
+                        "first": [
+                          18,
+                          23
+                        ],
+                        "second": [
+                          18,
+                          23
+                        ],
+                        "firstChars": [
+                          570,
+                          595
+                        ],
+                        "secondChars": [
+                          570,
+                          595
+                        ],
+                        "fingerprint": "0479b6f37d4bdad5ffa2cc3f43f517857442efae593bd0dab9dc78b05080a0dc"
+                      },
+                      {
+                        "first": [
+                          218,
+                          223
+                        ],
+                        "second": [
+                          218,
+                          223
+                        ],
+                        "firstChars": [
+                          1404,
+                          1422
+                        ],
+                        "secondChars": [
+                          1404,
+                          1422
+                        ],
+                        "fingerprint": "06a2a7c1c8762d7accdd5866aba9a710f5b47297fee9515d463538706b029052"
+                      },
+                      {
+                        "first": [
+                          75,
+                          80
+                        ],
+                        "second": [
+                          75,
+                          80
+                        ],
+                        "firstChars": [
+                          780,
+                          796
+                        ],
+                        "secondChars": [
+                          780,
+                          796
+                        ],
+                        "fingerprint": "0783de7c9a364b95fb5e8f028cd06b799be8a8fbdf36a72d6304beeb08fc2871"
+                      },
+                      {
+                        "first": [
+                          193,
+                          198
+                        ],
+                        "second": [
+                          193,
+                          198
+                        ],
+                        "firstChars": [
+                          1321,
+                          1337
+                        ],
+                        "secondChars": [
+                          1321,
+                          1337
+                        ],
+                        "fingerprint": "07c342429ab0fcb6e56da2c9252203a38a814853692adeb889ebbb4b20f67250"
+                      },
+                      {
+                        "first": [
+                          212,
+                          217
+                        ],
+                        "second": [
+                          212,
+                          217
+                        ],
+                        "firstChars": [
+                          1385,
+                          1403
+                        ],
+                        "secondChars": [
+                          1385,
+                          1403
+                        ],
+                        "fingerprint": "08e89d685cada98a3448165523f6fab37c2d0282ca26cec0c3fe995a2fc3293d"
+                      },
+                      {
+                        "first": [
+                          7,
+                          12
+                        ],
+                        "second": [
+                          7,
+                          12
+                        ],
+                        "firstChars": [
+                          526,
+                          546
+                        ],
+                        "secondChars": [
+                          526,
+                          546
+                        ],
+                        "fingerprint": "093a85ec9b829578d2bec8c57ca33cf2de28794512b9bbbee98d9b1c4482a8e5"
+                      },
+                      {
+                        "first": [
+                          103,
+                          108
+                        ],
+                        "second": [
+                          103,
+                          108
+                        ],
+                        "firstChars": [
+                          881,
+                          902
+                        ],
+                        "secondChars": [
+                          881,
+                          902
+                        ],
+                        "fingerprint": "0c1f8c053ccd50b167373302fac8bcfd95df4da13b4b2c8bc0762f60b6e12c43"
+                      },
+                      {
+                        "first": [
+                          257,
+                          262
+                        ],
+                        "second": [
+                          257,
+                          262
+                        ],
+                        "firstChars": [
+                          1551,
+                          1574
+                        ],
+                        "secondChars": [
+                          1551,
+                          1574
+                        ],
+                        "fingerprint": "0c53160579ffd64c94d51e0860e8e15ccbf638fc331a5fec6361718d56db19c2"
+                      },
+                      {
+                        "first": [
+                          17,
+                          22
+                        ],
+                        "second": [
+                          17,
+                          22
+                        ],
+                        "firstChars": [
+                          567,
+                          589
+                        ],
+                        "secondChars": [
+                          567,
+                          589
+                        ],
+                        "fingerprint": "0c924aa56629ddb34c06b56f736bc0ee2a52e1776bdcf6afb5f20bc55fb309af"
+                      }
+                    ]
+                  },
+                  {
+                    "version": "token5-set@1",
+                    "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                    "filterVersion": "source-filter@1",
+                    "firstPath": "index.js",
+                    "secondPath": "index.js",
+                    "firstDigest": "2eabf3096793c43934ef127fb50238dcba93074fb54f943fc62aeab616769dfc",
+                    "secondDigest": "2eabf3096793c43934ef127fb50238dcba93074fb54f943fc62aeab616769dfc",
+                    "firstTokens": 268,
+                    "secondTokens": 268,
+                    "rangesTruncated": true,
+                    "reasons": [],
+                    "method": "normalized_token5",
+                    "state": "completed",
+                    "score": 1,
+                    "sharedShingles": 215,
+                    "firstShingles": 215,
+                    "secondShingles": 215,
+                    "firstCoverage": 1,
+                    "secondCoverage": 1,
+                    "ranges": [
+                      {
+                        "first": [
+                          213,
+                          218
+                        ],
+                        "second": [
+                          213,
+                          218
+                        ],
+                        "firstChars": [
+                          1387,
+                          1404
+                        ],
+                        "secondChars": [
+                          1387,
+                          1404
+                        ],
+                        "fingerprint": "000909a78b10a41411d670b572863370bc2ac176684a0c3fb5bd4d87a5149504"
+                      },
+                      {
+                        "first": [
+                          52,
+                          57
+                        ],
+                        "second": [
+                          52,
+                          57
+                        ],
+                        "firstChars": [
+                          707,
+                          721
+                        ],
+                        "secondChars": [
+                          707,
+                          721
+                        ],
+                        "fingerprint": "016152032a266cfa7d6b753c1b6a22157d47d3b6602c23f2ece6fad4c4a42dff"
+                      },
+                      {
+                        "first": [
+                          18,
+                          23
+                        ],
+                        "second": [
+                          18,
+                          23
+                        ],
+                        "firstChars": [
+                          570,
+                          595
+                        ],
+                        "secondChars": [
+                          570,
+                          595
+                        ],
+                        "fingerprint": "0479b6f37d4bdad5ffa2cc3f43f517857442efae593bd0dab9dc78b05080a0dc"
+                      },
+                      {
+                        "first": [
+                          212,
+                          217
+                        ],
+                        "second": [
+                          212,
+                          217
+                        ],
+                        "firstChars": [
+                          1385,
+                          1403
+                        ],
+                        "secondChars": [
+                          1385,
+                          1403
+                        ],
+                        "fingerprint": "0510971fb14c41616662d5ec1811068b31aff7ed398346791182aef2200762fa"
+                      },
+                      {
+                        "first": [
+                          39,
+                          44
+                        ],
+                        "second": [
+                          39,
+                          44
+                        ],
+                        "firstChars": [
+                          659,
+                          675
+                        ],
+                        "secondChars": [
+                          659,
+                          675
+                        ],
+                        "fingerprint": "05d2cc7234d1a1eabf5dff4519874c55bad262d5acc4adf60a074a682dec0bd2"
+                      },
+                      {
+                        "first": [
+                          193,
+                          198
+                        ],
+                        "second": [
+                          193,
+                          198
+                        ],
+                        "firstChars": [
+                          1321,
+                          1337
+                        ],
+                        "secondChars": [
+                          1321,
+                          1337
+                        ],
+                        "fingerprint": "07c342429ab0fcb6e56da2c9252203a38a814853692adeb889ebbb4b20f67250"
+                      },
+                      {
+                        "first": [
+                          152,
+                          157
+                        ],
+                        "second": [
+                          152,
+                          157
+                        ],
+                        "firstChars": [
+                          1116,
+                          1133
+                        ],
+                        "secondChars": [
+                          1116,
+                          1133
+                        ],
+                        "fingerprint": "07eec7b77e0b4c4e486ccddbfee136bbde0c41ab18c48349a13d1863338881ba"
+                      },
+                      {
+                        "first": [
+                          50,
+                          55
+                        ],
+                        "second": [
+                          50,
+                          55
+                        ],
+                        "firstChars": [
+                          699,
+                          714
+                        ],
+                        "secondChars": [
+                          699,
+                          714
+                        ],
+                        "fingerprint": "08d22ef050e7a6122c6b0cfb083dc510fd87a3812958a94b6d42c558404b91e1"
+                      },
+                      {
+                        "first": [
+                          257,
+                          262
+                        ],
+                        "second": [
+                          257,
+                          262
+                        ],
+                        "firstChars": [
+                          1551,
+                          1574
+                        ],
+                        "secondChars": [
+                          1551,
+                          1574
+                        ],
+                        "fingerprint": "08f4bfbf904fa6652e6235393459244a637680e6aa8648f5c009b4b3f6958b95"
+                      },
+                      {
+                        "first": [
+                          126,
+                          131
+                        ],
+                        "second": [
+                          126,
+                          131
+                        ],
+                        "firstChars": [
+                          968,
+                          982
+                        ],
+                        "secondChars": [
+                          968,
+                          982
+                        ],
+                        "fingerprint": "0973e74b16de260cdfdf06a8f40819d59070818ecf479f47094cb37eda046308"
+                      },
+                      {
+                        "first": [
+                          5,
+                          10
+                        ],
+                        "second": [
+                          5,
+                          10
+                        ],
+                        "firstChars": [
+                          518,
+                          543
+                        ],
+                        "secondChars": [
+                          518,
+                          543
+                        ],
+                        "fingerprint": "0b93fb49509d45d3f6c50596b974a423f0b198666f3cf08971c48815d03c516a"
+                      },
+                      {
+                        "first": [
+                          17,
+                          22
+                        ],
+                        "second": [
+                          17,
+                          22
+                        ],
+                        "firstChars": [
+                          567,
+                          589
+                        ],
+                        "secondChars": [
+                          567,
+                          589
+                        ],
+                        "fingerprint": "0c924aa56629ddb34c06b56f736bc0ee2a52e1776bdcf6afb5f20bc55fb309af"
+                      }
+                    ]
+                  }
+                ],
+                "files": {
+                  "target": [
+                    {
+                      "path": "index.js",
+                      "digest": "2eabf3096793c43934ef127fb50238dcba93074fb54f943fc62aeab616769dfc",
+                      "blob": "627ed535f3163b37f2e3b208a23788fd0a715eba",
+                      "bytes": 1587,
+                      "language": "javascript",
+                      "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                      "filterVersion": "source-filter@1",
+                      "classification": "application_source",
+                      "reasons": [
+                        "supported source; no exclusion heuristic matched"
+                      ]
+                    }
+                  ],
+                  "candidate": [
+                    {
+                      "path": "index.js",
+                      "digest": "2eabf3096793c43934ef127fb50238dcba93074fb54f943fc62aeab616769dfc",
+                      "blob": "627ed535f3163b37f2e3b208a23788fd0a715eba",
+                      "bytes": 1587,
+                      "language": "javascript",
+                      "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                      "filterVersion": "source-filter@1",
+                      "classification": "application_source",
+                      "reasons": [
+                        "supported source; no exclusion heuristic matched"
+                      ]
+                    }
+                  ]
+                },
+                "checks": [],
+                "verification": {
+                  "state": "pending",
+                  "checks": [],
+                  "canonicalEvidenceIds": []
+                },
+                "lineageClaim": "none",
+                "coverage": {
+                  "state": "partial",
+                  "expectedPairs": 1,
+                  "comparedPairs": 1,
+                  "pending": [
+                    "index.ts",
+                    "src/index.js",
+                    "src/index.ts",
+                    "index.ts",
+                    "src/index.js",
+                    "src/index.ts"
+                  ],
+                  "reasons": [
+                    "index.ts: selected path unavailable",
+                    "src/index.js: selected path unavailable",
+                    "src/index.ts: selected path unavailable",
+                    "index.ts: selected path unavailable",
+                    "src/index.js: selected path unavailable",
+                    "src/index.ts: selected path unavailable"
+                  ]
+                },
+                "usage": {
+                  "attempts": 10,
+                  "searchAttempts": 0,
+                  "candidates": 1,
+                  "files": {
+                    "github:315531538@72a8fa96a9d389765cdf2bb9c6daba8302fc375d": 1,
+                    "github:1168938776@db05e3dcd2aabd33b5b325aa7646f8d2c4b1ffd0": 1
+                  },
+                  "bytesByFile": {
+                    "[\"github:315531538@72a8fa96a9d389765cdf2bb9c6daba8302fc375d\",\"index.js\"]": 1587,
+                    "[\"github:1168938776@db05e3dcd2aabd33b5b325aa7646f8d2c4b1ffd0\",\"index.js\"]": 1587
+                  },
+                  "totalBytes": 3174,
+                  "activeWorkers": 0,
+                  "peakWorkers": 1
+                }
+              },
+              "summary": {
+                "state": "partial",
+                "strict": {
+                  "shared": 239,
+                  "first": 239,
+                  "second": 239,
+                  "score": null,
+                  "firstCoverage": null,
+                  "secondCoverage": null
+                },
+                "normalized": {
+                  "shared": 215,
+                  "first": 215,
+                  "second": 215,
+                  "score": null,
+                  "firstCoverage": null,
+                  "secondCoverage": null
+                },
+                "firstTokens": 268,
+                "secondTokens": 268,
+                "firstIncluded": 1,
+                "secondIncluded": 1,
+                "firstFiltered": 0,
+                "secondFiltered": 0,
+                "exactPairs": 1,
+                "expectedPairs": 1,
+                "comparedPairs": 1,
+                "failures": []
+              },
+              "reason": null,
+              "label": "unknown; unjudged"
+            }
+          ],
+          "requests": [
+            {
+              "endpoint": "/repositories/315531538",
+              "status": 200,
+              "outcome": "success",
+              "reason": null,
+              "reservedBytes": 32768,
+              "receivedBytes": 5562,
+              "retainedBytes": 5562
+            },
+            {
+              "endpoint": "/repos/sindresorhus/yocto-queue/commits/72a8fa96a9d389765cdf2bb9c6daba8302fc375d",
+              "status": 200,
+              "outcome": "success",
+              "reason": null,
+              "reservedBytes": 32768,
+              "receivedBytes": 4348,
+              "retainedBytes": 4348
+            },
+            {
+              "endpoint": "/repos/sindresorhus/yocto-queue/git/trees/0b81d56218d4a4ab1b9ec91109e7b5d493e123d7",
+              "status": 200,
+              "outcome": "success",
+              "reason": null,
+              "reservedBytes": 32768,
+              "receivedBytes": 2879,
+              "retainedBytes": 2879
+            },
+            {
+              "endpoint": "/repos/sindresorhus/yocto-queue/git/blobs/627ed535f3163b37f2e3b208a23788fd0a715eba",
+              "status": 200,
+              "outcome": "success",
+              "reason": null,
+              "reservedBytes": 32768,
+              "receivedBytes": 2485,
+              "retainedBytes": 2485
+            },
+            {
+              "endpoint": "/repos/sindresorhus/yocto-queue",
+              "status": 200,
+              "outcome": "success",
+              "reason": null,
+              "reservedBytes": 32768,
+              "receivedBytes": 5562,
+              "retainedBytes": 5562
+            },
+            {
+              "endpoint": "/repositories/1168938776",
+              "status": 200,
+              "outcome": "success",
+              "reason": null,
+              "reservedBytes": 32768,
+              "receivedBytes": 5252,
+              "retainedBytes": 5252
+            },
+            {
+              "endpoint": "/repos/munachi-n/yocto-queue/commits/master",
+              "status": 200,
+              "outcome": "success",
+              "reason": null,
+              "reservedBytes": 32768,
+              "receivedBytes": 20229,
+              "retainedBytes": 20229
+            },
+            {
+              "endpoint": "/repos/munachi-n/yocto-queue/git/trees/9925e53c997bf4590cbab809fc482b74093f3da8",
+              "status": 200,
+              "outcome": "success",
+              "reason": null,
+              "reservedBytes": 32768,
+              "receivedBytes": 2632,
+              "retainedBytes": 2632
+            },
+            {
+              "endpoint": "/repos/munachi-n/yocto-queue/git/blobs/627ed535f3163b37f2e3b208a23788fd0a715eba",
+              "status": 200,
+              "outcome": "success",
+              "reason": null,
+              "reservedBytes": 32768,
+              "receivedBytes": 2475,
+              "retainedBytes": 2475
+            },
+            {
+              "endpoint": "/repos/munachi-n/yocto-queue",
+              "status": 200,
+              "outcome": "success",
+              "reason": null,
+              "reservedBytes": 32768,
+              "receivedBytes": 5252,
+              "retainedBytes": 5252
+            }
+          ],
+          "budget": {
+            "attempts": 24,
+            "searchAttempts": 2,
+            "candidates": 3,
+            "filesPerCandidate": 8,
+            "bytesPerFile": 131072,
+            "totalBytes": 2097152,
+            "wallMs": 30000,
+            "concurrency": 2,
+            "cpuMs": null
+          },
+          "networkProfile": {
+            "perResponseBytes": 32768,
+            "totalResponseBytes": 1048576
+          },
+          "usage": {
+            "attempts": 10,
+            "searchAttempts": 0,
+            "candidates": 1,
+            "files": {
+              "github:315531538@72a8fa96a9d389765cdf2bb9c6daba8302fc375d": 1,
+              "github:1168938776@db05e3dcd2aabd33b5b325aa7646f8d2c4b1ffd0": 1
+            },
+            "bytesByFile": {
+              "[\"github:315531538@72a8fa96a9d389765cdf2bb9c6daba8302fc375d\",\"index.js\"]": 1587,
+              "[\"github:1168938776@db05e3dcd2aabd33b5b325aa7646f8d2c4b1ffd0\",\"index.js\"]": 1587
+            },
+            "totalBytes": 3174,
+            "activeWorkers": 0,
+            "peakWorkers": 1
+          },
+          "network": {
+            "reservedBytes": 327680,
+            "receivedBytes": 56676,
+            "retainedBytes": 56676,
+            "overflowBytes": 0
+          },
+          "sourceMaterializedBytes": 3174,
+          "coverage": {
+            "state": "partial",
+            "completed": 0,
+            "inconclusive": 1
+          },
+          "verification": "pending",
+          "lineageClaim": "none",
+          "cpuBudget": "unsupported"
+        },
+        "receipt": {
+          "schemaVersion": "discovery-pinned-probe-receipt@1",
+          "contentDigest": "5e6e0e8218cda42fbae72c8e3b8821a26075c92b4eeb8ade332561d88a30cad0",
+          "startedAt": "2026-10-09T12:46:49.856Z",
+          "wallMs": 5873.788118,
+          "processCpuMs": 418.521,
+          "cpuBudget": "unsupported",
+          "cpuScope": "process including workers; observational only",
+          "requests": [
+            {
+              "request": {
+                "endpoint": "/repositories/315531538",
+                "status": 200,
+                "outcome": "success",
+                "reason": null,
+                "reservedBytes": 32768,
+                "receivedBytes": 5562,
+                "retainedBytes": 5562
+              },
+              "startedAt": "2026-10-09T12:46:49.856Z",
+              "wallMs": 739.122035999997,
+              "headers": {
+                "x-ratelimit-limit": "60",
+                "x-ratelimit-remaining": "31",
+                "x-ratelimit-reset": "1791553188",
+                "x-ratelimit-used": "29",
+                "x-ratelimit-resource": "core",
+                "x-github-api-version-selected": "2026-03-10"
+              }
+            },
+            {
+              "request": {
+                "endpoint": "/repos/sindresorhus/yocto-queue/commits/72a8fa96a9d389765cdf2bb9c6daba8302fc375d",
+                "status": 200,
+                "outcome": "success",
+                "reason": null,
+                "reservedBytes": 32768,
+                "receivedBytes": 4348,
+                "retainedBytes": 4348
+              },
+              "startedAt": "2026-10-09T12:46:50.596Z",
+              "wallMs": 356.0147689999976,
+              "headers": {
+                "x-ratelimit-limit": "60",
+                "x-ratelimit-remaining": "30",
+                "x-ratelimit-reset": "1791553188",
+                "x-ratelimit-used": "30",
+                "x-ratelimit-resource": "core",
+                "x-github-api-version-selected": "2026-03-10"
+              }
+            },
+            {
+              "request": {
+                "endpoint": "/repos/sindresorhus/yocto-queue/git/trees/0b81d56218d4a4ab1b9ec91109e7b5d493e123d7",
+                "status": 200,
+                "outcome": "success",
+                "reason": null,
+                "reservedBytes": 32768,
+                "receivedBytes": 2879,
+                "retainedBytes": 2879
+              },
+              "startedAt": "2026-10-09T12:46:50.953Z",
+              "wallMs": 542.7630939999981,
+              "headers": {
+                "x-ratelimit-limit": "60",
+                "x-ratelimit-remaining": "29",
+                "x-ratelimit-reset": "1791553188",
+                "x-ratelimit-used": "31",
+                "x-ratelimit-resource": "core",
+                "x-github-api-version-selected": "2026-03-10"
+              }
+            },
+            {
+              "request": {
+                "endpoint": "/repos/sindresorhus/yocto-queue/git/blobs/627ed535f3163b37f2e3b208a23788fd0a715eba",
+                "status": 200,
+                "outcome": "success",
+                "reason": null,
+                "reservedBytes": 32768,
+                "receivedBytes": 2485,
+                "retainedBytes": 2485
+              },
+              "startedAt": "2026-10-09T12:46:51.496Z",
+              "wallMs": 353.6210050000009,
+              "headers": {
+                "x-ratelimit-limit": "60",
+                "x-ratelimit-remaining": "28",
+                "x-ratelimit-reset": "1791553188",
+                "x-ratelimit-used": "32",
+                "x-ratelimit-resource": "core",
+                "x-github-api-version-selected": "2026-03-10"
+              }
+            },
+            {
+              "request": {
+                "endpoint": "/repos/sindresorhus/yocto-queue",
+                "status": 200,
+                "outcome": "success",
+                "reason": null,
+                "reservedBytes": 32768,
+                "receivedBytes": 5562,
+                "retainedBytes": 5562
+              },
+              "startedAt": "2026-10-09T12:46:51.851Z",
+              "wallMs": 405.5216589999982,
+              "headers": {
+                "x-ratelimit-limit": "60",
+                "x-ratelimit-remaining": "27",
+                "x-ratelimit-reset": "1791553188",
+                "x-ratelimit-used": "33",
+                "x-ratelimit-resource": "core",
+                "x-github-api-version-selected": "2026-03-10"
+              }
+            },
+            {
+              "request": {
+                "endpoint": "/repositories/1168938776",
+                "status": 200,
+                "outcome": "success",
+                "reason": null,
+                "reservedBytes": 32768,
+                "receivedBytes": 5252,
+                "retainedBytes": 5252
+              },
+              "startedAt": "2026-10-09T12:46:52.256Z",
+              "wallMs": 881.456589999998,
+              "headers": {
+                "x-ratelimit-limit": "60",
+                "x-ratelimit-remaining": "26",
+                "x-ratelimit-reset": "1791553188",
+                "x-ratelimit-used": "34",
+                "x-ratelimit-resource": "core",
+                "x-github-api-version-selected": "2026-03-10"
+              }
+            },
+            {
+              "request": {
+                "endpoint": "/repos/munachi-n/yocto-queue/commits/master",
+                "status": 200,
+                "outcome": "success",
+                "reason": null,
+                "reservedBytes": 32768,
+                "receivedBytes": 20229,
+                "retainedBytes": 20229
+              },
+              "startedAt": "2026-10-09T12:46:53.138Z",
+              "wallMs": 738.3822959999998,
+              "headers": {
+                "x-ratelimit-limit": "60",
+                "x-ratelimit-remaining": "25",
+                "x-ratelimit-reset": "1791553188",
+                "x-ratelimit-used": "35",
+                "x-ratelimit-resource": "core",
+                "x-github-api-version-selected": "2026-03-10"
+              }
+            },
+            {
+              "request": {
+                "endpoint": "/repos/munachi-n/yocto-queue/git/trees/9925e53c997bf4590cbab809fc482b74093f3da8",
+                "status": 200,
+                "outcome": "success",
+                "reason": null,
+                "reservedBytes": 32768,
+                "receivedBytes": 2632,
+                "retainedBytes": 2632
+              },
+              "startedAt": "2026-10-09T12:46:53.876Z",
+              "wallMs": 455.01707800000077,
+              "headers": {
+                "x-ratelimit-limit": "60",
+                "x-ratelimit-remaining": "24",
+                "x-ratelimit-reset": "1791553188",
+                "x-ratelimit-used": "36",
+                "x-ratelimit-resource": "core",
+                "x-github-api-version-selected": "2026-03-10"
+              }
+            },
+            {
+              "request": {
+                "endpoint": "/repos/munachi-n/yocto-queue/git/blobs/627ed535f3163b37f2e3b208a23788fd0a715eba",
+                "status": 200,
+                "outcome": "success",
+                "reason": null,
+                "reservedBytes": 32768,
+                "receivedBytes": 2475,
+                "retainedBytes": 2475
+              },
+              "startedAt": "2026-10-09T12:46:54.332Z",
+              "wallMs": 498.6279460000005,
+              "headers": {
+                "x-ratelimit-limit": "60",
+                "x-ratelimit-remaining": "23",
+                "x-ratelimit-reset": "1791553188",
+                "x-ratelimit-used": "37",
+                "x-ratelimit-resource": "core",
+                "x-github-api-version-selected": "2026-03-10"
+              }
+            },
+            {
+              "request": {
+                "endpoint": "/repos/munachi-n/yocto-queue",
+                "status": 200,
+                "outcome": "success",
+                "reason": null,
+                "reservedBytes": 32768,
+                "receivedBytes": 5252,
+                "retainedBytes": 5252
+              },
+              "startedAt": "2026-10-09T12:46:54.831Z",
+              "wallMs": 548.099422000003,
+              "headers": {
+                "x-ratelimit-limit": "60",
+                "x-ratelimit-remaining": "22",
+                "x-ratelimit-reset": "1791553188",
+                "x-ratelimit-used": "38",
+                "x-ratelimit-resource": "core",
+                "x-github-api-version-selected": "2026-03-10"
+              }
+            }
+          ],
+          "observations": [
+            {
+              "expectedId": 315531538,
+              "bootstrap": null,
+              "resolution": [
+                {
+                  "repositoryId": 315531538,
+                  "fullName": "sindresorhus/yocto-queue",
+                  "htmlUrl": "https://github.com/sindresorhus/yocto-queue",
+                  "source": "repository_metadata",
+                  "observedAt": "2026-10-09T12:46:50.596Z"
+                }
+              ]
+            },
+            {
+              "expectedId": 1168938776,
+              "bootstrap": null,
+              "resolution": [
+                {
+                  "repositoryId": 1168938776,
+                  "fullName": "munachi-n/yocto-queue",
+                  "htmlUrl": "https://github.com/munachi-n/yocto-queue",
+                  "source": "repository_search",
+                  "observedAt": "2026-10-09T12:46:34.096Z"
+                },
+                {
+                  "repositoryId": 1168938776,
+                  "fullName": "munachi-n/yocto-queue",
+                  "htmlUrl": "https://github.com/munachi-n/yocto-queue",
+                  "source": "repository_metadata",
+                  "observedAt": "2026-10-09T12:46:53.138Z"
+                }
+              ]
+            }
+          ],
+          "node": "v24.21.0",
+          "platform": "linux"
+        }
+      }
+    }
+  ],
+  "text": "Deep Search\nReturn to Graph\n\nAuthorized local Alpha · deterministic comparison · no Graph writes\n\nSimilarity is a measurement, not proof of ancestry. Unknown stays pending.\n\nPublic GitHub repository\nSearch candidates\n\ncompare: partial\n\nEach task: ≤24 HTTP attempts · 30 s · ≤3 candidates · select ≤2 · four entry paths · 32 KiB/response · 1 MiB reserved. CPU hard budget unsupported.\n\nPinned source comparison\n\nFile-level measurements only. Normalized scores can be high for common patterns or templates; no repository-wide similarity or lineage probability.\n\nVerification: pending · Lineage claim: none\n\nmunachi-n/yocto-queue\n\nUnknown · no verified lineage claim\n\nCoverage: partial.\n\nindex.ts: selected path unavailable; src/index.js: selected path unavailable; src/index.ts: selected path unavailable\n\nexact_blob · git-blob-sha1@1: 100.00% (completed)\n\nindex.js ↔ index.js\n\nsindresorhus/yocto-queue/index.js @ 72a8fa96a9d389765cdf2bb9c6daba8302fc375d\nmunachi-n/yocto-queue/index.js @ db05e3dcd2aabd33b5b325aa7646f8d2c4b1ffd0\nSHA-256: 2eabf3096793c43934ef127fb50238dcba93074fb54f943fc62aeab616769dfc ↔ 2eabf3096793c43934ef127fb50238dcba93074fb54f943fc62aeab616769dfc\n\nTokens: 268 / 268 · bidirectional shingle coverage: Unavailable / Unavailable\n\nRaw measurement, matched token ranges and fingerprints\n\nstrict_token5 · token5-set@1: 100.00% (completed)\n\nindex.js ↔ index.js\n\nsindresorhus/yocto-queue/index.js @ 72a8fa96a9d389765cdf2bb9c6daba8302fc375d\nmunachi-n/yocto-queue/index.js @ db05e3dcd2aabd33b5b325aa7646f8d2c4b1ffd0\nSHA-256: 2eabf3096793c43934ef127fb50238dcba93074fb54f943fc62aeab616769dfc ↔ 2eabf3096793c43934ef127fb50238dcba93074fb54f943fc62aeab616769dfc\n\nTokens: 268 / 268 · bidirectional shingle coverage: 100.00% / 100.00%\n\nRaw measurement, matched token ranges and fingerprints\n\nnormalized_token5 · token5-set@1: 100.00% (completed)\n\nindex.js ↔ index.js\n\nsindresorhus/yocto-queue/index.js @ 72a8fa96a9d389765cdf2bb9c6daba8302fc375d\nmunachi-n/yocto-queue/index.js @ db05e3dcd2aabd33b5b325aa7646f8d2c4b1ffd0\nSHA-256: 2eabf3096793c43934ef127fb50238dcba93074fb54f943fc62aeab616769dfc ↔ 2eabf3096793c43934ef127fb50238dcba93074fb54f943fc62aeab616769dfc\n\nTokens: 268 / 268 · bidirectional shingle coverage: 100.00% / 100.00%\n\nRaw measurement, matched token ranges and fingerprints\nPinned snapshots, Git blob SHA, file bindings and incomplete paths\nCoverage, requests and resource receipt\nDownload Sidecar + receipt",
+  "errors": [],
+  "cacheBefore": [
+    {
+      "path": "jobs/f6520ecf-6129-4b4f-9ee5-99a32e4d2ae7.json",
+      "sha256": "bb555fb370a214403926bb01c6324c3ec8530d57dc380b5088c6f7493522877a"
+    },
+    {
+      "path": "public/graphs/public/github/kuddev/pebrel@51514bd50094/v2.0.0/graph.json",
+      "sha256": "7b182465c71c711938bde5c971206ac41158c511b2e0a7b84514cdf246289edf"
+    }
+  ],
+  "cacheAfter": [
+    {
+      "path": "jobs/f6520ecf-6129-4b4f-9ee5-99a32e4d2ae7.json",
+      "sha256": "bb555fb370a214403926bb01c6324c3ec8530d57dc380b5088c6f7493522877a"
+    },
+    {
+      "path": "public/graphs/public/github/kuddev/pebrel@51514bd50094/v2.0.0/graph.json",
+      "sha256": "7b182465c71c711938bde5c971206ac41158c511b2e0a7b84514cdf246289edf"
+    }
+  ],
+  "cacheUnchanged": true
+}
