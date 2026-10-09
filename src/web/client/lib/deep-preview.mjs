@@ -49,7 +49,7 @@ export async function mountDeepPreview(getRepository) {
    }
    card.append(details('Pinned snapshots, Git blob SHA, file bindings and incomplete paths',{target,source,summary:result.summary,coverage:result.candidate?.coverage}));results.append(card);
   }usage(task);
-  const download=button('deep-download','Download Sidecar + receipt',()=>{const url=URL.createObjectURL(new Blob([JSON.stringify(probe,null,2)],{type:'application/json'})),a=el('a');a.href=url;a.download='gitlineage-deep-sidecar.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});results.append(download);
+  const download=button('deep-download','Download Sidecar + receipt',()=>{const url=URL.createObjectURL(new Blob([JSON.stringify(task.export??probe,null,2)],{type:'application/json'})),a=el('a');a.href=url;a.download='gitlineage-deep-sidecar.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});results.append(download);
  }
  async function watch(task){current=task;polling=true;busy(true);try{while(current.state==='running'){status.textContent=`${current.kind}: ${current.phase} · real task progress`;await new Promise(r=>setTimeout(r,250));current=await request(`/tasks/${task.id}`);}status.textContent=`${current.kind}: ${current.state}${current.error?' · '+current.error:''}`;current.kind==='search'?showSearch(current):showComparison(current);}catch(error){status.textContent=error.message;}finally{polling=false;busy(false);}}
  form.addEventListener('submit',async event=>{event.preventDefault();if(polling)return;try{const task=await request('/search',{repository:input.value});candidates.replaceChildren();results.replaceChildren();parent=null;selected.clear();compare.hidden=true;await watch(task);}catch(error){status.textContent=error.message;}});

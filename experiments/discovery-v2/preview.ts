@@ -7,6 +7,10 @@ import {RepositorySnapshotResolver,SNAPSHOT_PROFILE,SNAPSHOT_NETWORK} from '../.
 import type {Resolution} from '../../src/discovery/resolution.ts';
 import {parseObservation} from '../../src/discovery/search-contract.ts';
 import {buildQueryPlan,discoverRepositories} from '../../src/discovery/search.ts';
+import {sealPreviewExport,searchDiscoveries} from './preview-contract.ts';
+import type {PreviewExport} from './preview-contract.ts';
+import {stableJSON} from '../../src/discovery/offline.ts';
+import {sha256} from '../../src/discovery/snapshot.ts';
 import {runPinnedProbe} from '../../src/discovery/pinned-probe.ts';
 import type {Transport} from '../../src/discovery/search-provider.ts';
 import type {SnapshotReceipt} from '../../src/discovery/snapshot-provider.ts';
@@ -14,7 +18,7 @@ import type {SnapshotReceipt} from '../../src/discovery/snapshot-provider.ts';
 export const PREVIEW_PROFILE=Object.freeze({...SNAPSHOT_PROFILE,searchAttempts:2});
 const selections=[{path:'index.js',reason:'fixed root JavaScript entry'}, {path:'index.ts',reason:'fixed root TypeScript entry'}, {path:'src/index.js',reason:'fixed src JavaScript entry'}, {path:'src/index.ts',reason:'fixed src TypeScript entry'}];
 type SearchOutput={target:Resolution|null;result:Awaited<ReturnType<typeof discoverRepositories>>|null;requests:SnapshotReceipt[];usage:ReturnType<BudgetLedger['usage']>;network:ReturnType<NetworkLedger['usage']>;scope:string};
-export interface PreviewTask {id:string;kind:'search'|'compare';state:'running'|'completed'|'partial'|'cancelled';phase:string;createdAt:string;error:string|null;search?:SearchOutput;comparison?:Awaited<ReturnType<typeof runPinnedProbe>>}
+export interface PreviewTask {id:string;kind:'search'|'compare';state:'running'|'completed'|'partial'|'cancelled';phase:string;createdAt:string;error:string|null;search?:SearchOutput;comparison?:Awaited<ReturnType<typeof runPinnedProbe>>;export?:PreviewExport}
 export interface PreviewOptions {transport?:Transport;cooldownMs?:number}
 export function repositoryInput(value:unknown):string {
  if(typeof value!=='string'||value.length>180)throw new Error('invalid repository');
@@ -60,7 +64,8 @@ export function createPreview(options:PreviewOptions={}) {
   const candidates=ids.map(id=>{const c=search.result!.candidates.find(c=>c.candidate.repositoryId===id);if(!c||c.candidate.conflicts.includes('name_id_collision'))throw new Error('only unambiguous discovered IDs can be compared');return c;});
   const target=search.target.identity;
   return begin('compare',async(task,signal)=>{
-   task.comparison=await runPinnedProbe([{name:target.fullName,repositoryId:target.repositoryId,revision:target.revision,selections},...candidates.map(c=>({name:c.candidate.fullName,repositoryId:c.candidate.repositoryId,observations:c.candidate.observations,selections}))],{transport:tracked(task),profile:PREVIEW_PROFILE,signal});
+   task.comparison=await runPinnedProbe([{name:target.fullName,repositoryId:target.repositoryId,revision:target.revision,selections},...candidates.map(c=>({name:c.candidate.fullName,repositoryId:c.candidate.repositoryId,observations:c.candidate.observations,selections}))],{transport:tracked(task),profile:PREVIEW_PROFILE,signal,discoveryById:new Map(candidates.map(c=>[c.candidate.repositoryId,searchDiscoveries(c)]))});
+   task.export=sealPreviewExport({schemaVersion:'discovery-preview-provenance@1',searchTaskId:parent.id,compareTaskId:task.id,searchContentDigest:sha256(stableJSON(search.result)),target:{repositoryId:target.repositoryId!,revision:target.revision},candidates:candidates.map((c,i)=>({repositoryId:c.candidate.repositoryId,revision:task.comparison!.content.snapshots[i+1]?.resolution?.identity?.revision??null,searchCandidate:structuredClone(c)})),status:'search_observation_only'},task.comparison);
    return task.comparison.content.coverage.state==='completed';
   });
  }

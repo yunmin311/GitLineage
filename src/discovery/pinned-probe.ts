@@ -19,7 +19,7 @@ import type {compareSnapshots} from './similarity.ts';
 import {stableJSON} from './offline.ts';
 import {sha256} from './snapshot.ts';
 export interface ProbeControl {name:string;repositoryId:number|null;revision?:string;selections:SourceSelection[];observations?:IdentityObservation[]}
-export interface ProbeOptions extends ProviderOptions {now?:()=>string;profile?:BudgetProfile;signal?:AbortSignal}
+export interface ProbeOptions extends ProviderOptions {now?:()=>string;profile?:BudgetProfile;signal?:AbortSignal;discoveryById?:Map<number,DiscoveryCandidate['discoveries']>}
 type Check={state:'matched'|'not_attempted'|'unavailable'|'id_conflict'|'name_changed';repositoryId:number|null;fullName:string|null;reason:string|null};
 function view(source:Awaited<ReturnType<typeof collectSources>>){return {...source,snapshot:source.snapshot?{identity:source.snapshot.identity,files:source.snapshot.files,state:source.snapshot.state,pending:source.snapshot.pending,reasons:source.snapshot.reasons}:null};}
 function timeless(r:Resolution){return {...r,observations:r.observations.map(({observedAt,...o})=>o)};}
@@ -50,7 +50,7 @@ export async function runPinnedProbe(controls:ProbeControl[],options:ProbeOption
  const comparisons:{name:string;candidate:DiscoveryCandidate|null;summary:ReturnType<typeof compareSnapshots>['summary']|null;reason:string|null;label:string}[]=[];
  for(const item of snapshots.slice(1)){let candidate:DiscoveryCandidate|null=null,summary:ReturnType<typeof compareSnapshots>['summary']|null=null,reason:string|null=null;const first=snapshots[0]!;
   try{if(first.identityCheck.state!=='matched'||item.identityCheck.state!=='matched'||!first.resolution||!item.resolution||!first.source?.snapshot?.sources.length||!item.source?.snapshot?.sources.length)throw new Error('no eligible identity-checked pinned source');ledger.candidate(`github:${item.expectedId}`);
-   candidate=pinnedCandidate([{source:'explicit_public_probe',version:'phase1d-controls@1',reason:'explicit bounded controls; no Search or inferred lineage',locator:`https://github.com/${item.control.name}`}],first.resolution,item.resolution,first.source,item.source,ledger);
+   candidate=pinnedCandidate(options.discoveryById?.get(item.expectedId!)??[{source:'explicit_public_probe',version:'phase1d-controls@1',reason:'explicit bounded controls; no Search or inferred lineage',locator:`https://github.com/${item.control.name}`}],first.resolution,item.resolution,first.source,item.source,ledger);
    const result=await runComparison(first.source.snapshot,item.source.snapshot,ledger);summary=result.summary;candidate.similarity=result.measurements;candidate.coverage.state=summary.state==='completed'?'completed':'partial';candidate.coverage.comparedPairs=summary.comparedPairs;candidate.coverage.reasons.push(...summary.failures);candidate.coverage.pending.push(...summary.failures);
   }catch(error){reason=error instanceof Error?error.message:'comparison failed';if(candidate){candidate.coverage.state='partial';candidate.coverage.reasons.push(reason);candidate.coverage.pending.push(reason);}}
   if(candidate){candidate.usage=ledger.usage();validateCandidate(candidate);}comparisons.push({name:item.control.name,candidate,summary,reason,label:item.control.name==='jucke/p-limit'?'known public Fork control; metadata observation only':'unknown; unjudged'});
