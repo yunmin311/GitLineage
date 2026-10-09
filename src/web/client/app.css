@@ -1997,3 +1997,53 @@ a { color: inherit; }
 /* Programmatic node focus returns to its existing visual primitive. */
 .node:focus-visible { outline: none; }
 .node:focus-visible .node-box { stroke: var(--ink); stroke-width: 1; }
+
+/* Commit B: persistent phone views. Only the graph owns custom touch gestures. */
+#mobile-nav { display: flex; flex: none; background: var(--surface); border-top: var(--rule-heavy); padding: var(--s1) max(var(--s2), env(safe-area-inset-right)) max(var(--s1), env(safe-area-inset-bottom)) max(var(--s2), env(safe-area-inset-left)); }
+#mobile-nav[hidden], .mobile-heading[hidden], .mobile-relations[hidden], .mobile-empty[hidden], #mobile-search-results[hidden] { display: none; }
+#mobile-nav button { flex: 1; min-height: 44px; font-family: var(--sans); background: transparent; border: 0; color: var(--ink-2); }
+#mobile-nav button[aria-current=page] { color: var(--brand); background: var(--brand-wash); font-weight: 600; border-top: 2px solid var(--brand); }
+.mobile-relations { position: absolute; inset: 0; display: flex; flex-direction: column; background: var(--paper); min-height: 0; }
+.mobile-heading { display: flex; align-items: center; gap: var(--s2); min-height: 44px; padding: 0 var(--s3); background: var(--surface); border-bottom: var(--rule-firm); }
+.mobile-heading h2 { flex: 1; font-size: var(--t-plate-size); margin: 0; }
+.mobile-heading .mono { font-size: var(--t-meta-size); }
+.mobile-heading button, .mobile-empty button, .mobile-locate { min-height: 44px; border: var(--rule-firm); background: var(--surface-hi); padding: var(--s2) var(--s3); color: var(--ink); }
+#mobile-evidence-heading { position: absolute; inset: 0 0 auto; z-index: 26; }
+.mobile-search { padding: var(--s2) var(--s3); font-size: var(--t-body-size); display: flex; flex-direction: column; gap: var(--s1); }
+.mobile-search input { min-width: 0; min-height: 44px; width: 100%; background: var(--surface-hi); border: var(--rule-firm); padding: var(--s2); font-size: 16px; }
+#mobile-relation-list { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; touch-action: pan-y; overscroll-behavior: contain; padding: var(--s2) var(--s3); }
+.mobile-family { border-bottom: var(--rule-heavy); margin-bottom: var(--s3); }
+.mobile-family summary { min-height: 44px; padding: var(--s3) var(--s2); font-size: var(--t-plate-size); cursor: pointer; overflow-wrap: anywhere; }
+.mobile-group { border-top: var(--rule-firm); margin-left: var(--s2); }
+.mobile-group summary { font-family: var(--mono); font-size: var(--t-secondary-size); }
+.mobile-relation { padding: var(--s3) var(--s2); border-top: var(--rule-firm); }
+.mobile-relation-evidence { width: 100%; min-height: 44px; text-align: left; padding: var(--s2); color: var(--brand); background: var(--surface); border: var(--rule-firm); font-size: var(--t-body-size); overflow-wrap: anywhere; }
+.mobile-relation p { font-size: var(--t-secondary-size); overflow-wrap: anywhere; }
+.mobile-empty { position: absolute; inset: 44px 0 0; padding: var(--s6); background: var(--paper); }
+.mobile-empty p { font-size: var(--t-body-size); line-height: var(--t-body-lh); }
+body.mobile-explorer .appbar { min-height: 88px; height: auto; padding-top: max(var(--s1), env(safe-area-inset-top)); flex-wrap: wrap; gap: var(--s1) var(--s2); }
+body.mobile-explorer .appbar-mid { order: 3; flex: 1 0 100%; width: 100%; }
+body.mobile-explorer #rail-toggle, body.mobile-explorer #layers-btn, body.mobile-explorer #open-source { display: none; }
+body.mobile-explorer .appbar-right { margin-left: auto; }
+body.mobile-explorer .appbar .icon-btn { width: 44px; height: 44px; }
+body.mobile-explorer .crumb-ctx, body.mobile-explorer .crumb-sep { display: none; }
+body.mobile-explorer .drawer { inset: 44px 0 0; width: 100%; border-left: 0; }
+body.mobile-explorer .drawer-inner { padding: var(--s4) var(--s4) var(--s6); overflow-wrap: anywhere; }
+body.mobile-explorer .drawer-close { display: none; }
+body.mobile-explorer .d-block-head { top: calc(var(--s4) * -1); margin-left: calc(var(--s4) * -1); margin-right: calc(var(--s4) * -1); padding-left: var(--s4); padding-right: var(--s4); }
+body.mobile-explorer .d-action, body.mobile-explorer .d-src { min-height: 44px; display: inline-flex; align-items: center; overflow-wrap: anywhere; }
+body.mobile-explorer .viewport-hud { height: 56px; padding: var(--s1) var(--s2); }
+body.mobile-explorer .band .key { display: none; }
+body.mobile-explorer .vp-btn { width: 44px; height: 44px; }
+body.mobile-explorer .searchbar { position: relative; flex-wrap: wrap; min-height: 52px; }
+body.mobile-explorer #search-input { font-size: 16px; min-width: 0; }
+body.mobile-explorer .search-count { display: none; }
+body.mobile-explorer #search-close { width: 44px; height: 44px; }
+#mobile-search-results { width: 100%; max-height: 30dvh; overflow-y: auto; touch-action: pan-y; }
+#mobile-search-results button { display: block; width: 100%; min-height: 44px; text-align: left; border: var(--rule-firm); background: var(--surface); color: var(--brand); padding: var(--s2); overflow-wrap: anywhere; }
+@media (max-height: 500px) and (min-width: 768px) {
+  body.mobile-explorer .appbar { min-height: 48px; flex-wrap: nowrap; }
+  body.mobile-explorer .appbar-mid { order: initial; flex: 1; width: auto; }
+}
+
+body.mobile-explorer .band-note { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }

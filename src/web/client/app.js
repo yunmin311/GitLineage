@@ -76,7 +76,11 @@ import { DRAWABLE_CAPACITY } from './lib/regime.mjs';
 
 import { initialPanels, transitionPanels, visiblePanels, protectionPan } from './lib/panels.mjs';
 
+import { phoneViewport, relationGroups, installTouchCamera } from './lib/mobile.mjs';
 let panels = initialPanels(window.innerWidth);
+const mobile = { view: 'graph', previous: 'graph', graph: null, drawerGraph: null, resetGesture: () => {} };
+const isPhone = () => phoneViewport(window.innerWidth, window.innerHeight) && window.matchMedia('(pointer: coarse)').matches;
+
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const ZOOM_STEP = 1.25;
@@ -174,9 +178,11 @@ function syncUrl(replace = true) {
     bundles: [...state.expandedBundles].join(','),
     depth: String(state.depth),
   });
-  const next = `${repositoryPath(state.repository)}${query}`;
+  const params = new URLSearchParams(query);
+  if (isPhone()) params.set('mobile', mobile.view);
+  const next = `${repositoryPath(state.repository)}${params.size ? '?' + params : ''}`;
   if (window.location.pathname + window.location.search === next) return;
-  if (replace) window.history.replaceState({}, '', next);
+  if (replace) window.history.replaceState(window.history.state || {}, '', next);
   else window.history.pushState({}, '', next);
 }
 
@@ -1481,6 +1487,8 @@ function draw() {
   const composition = currentComposition(view);
   state.composition = composition;
   const loose = new Set(composition.looseEdgeIds);
+  // Phone navigation also exposes the composition's already-promoted real relationships.
+  if (isPhone()) for (const id of composition.promotedEdgeIds) loose.add(id);
   const edges = visibleCandidates(view).filter((edge) => loose.has(edge.id));
   // Authored composition, not a content fit. The subject sits where the design
   // puts it, the data mass stacks down the right zone, and loose relationships
@@ -1509,7 +1517,7 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
     //
     // It goes through `setCamera` like every other camera write, so the clamp and the
     // world's HTML layer are remapped here too rather than only on interaction.
-    setCamera(canvas, initialViewBox(viewport).viewBox, 1);
+    if (isPhone()) phoneFit(); else setCamera(canvas, initialViewBox(viewport).viewBox, 1);
     state.hasFitted = true;
     state.refitPending = false;
   }
@@ -2242,7 +2250,7 @@ function toggleSearch(force) {
   $('search-btn').classList.toggle('on', show);
   $('search-btn').setAttribute('aria-expanded', String(show));
   if (show) $('search-input').focus();
-  else clearSearch();
+  else { setHidden($('mobile-search-results'),true); clearSearch(); }
 }
 
 /** Closing search with a query active clears it, so dimming never survives. */
@@ -2257,22 +2265,152 @@ function clearSearch() {
   draw();
 }
 
+// ------------------------------------------------------------ mobile views
+function mobileSnapshot() {
+  return { url: location.pathname + location.search, camera: $('canvas').getAttribute('viewBox'),
+    zoom: state.zoom, relationsScroll: $('mobile-relation-list').scrollTop,
+    evidenceScroll: $('drawer-inner').scrollTop, previous: mobile.previous };
+}
+function switchMobile(view, push = true, previous = null) {
+  if (!isPhone() || !['graph','relations','evidence'].includes(view)) return;
+  mobile.resetGesture();
+  const old = previous || mobileSnapshot();
+  const nextParams = new URLSearchParams(location.search);
+  if (mobile.view !== 'evidence' && view === 'evidence') mobile.previous = mobile.view;
+  if (push) history.replaceState({ mobileSnapshot: old, previous: old.previous }, '', old.url);
+  mobile.view = view;
+  const params = nextParams; params.set('mobile', view);
+  const url = location.pathname + '?' + params;
+  if (push) history.pushState({ previous: mobile.previous }, '', url);
+  applyMobile();
+  if (view === 'evidence') $('mobile-evidence-back').focus({ preventScroll: true });
+  else document.querySelector(`#mobile-nav [data-mobile-view="${view}"]`).focus({ preventScroll: true });
+}
+function applyMobile() {
+  const focused = document.activeElement;
+  document.body.classList.add('mobile-explorer');
+  if (!['graph','relations','evidence'].includes(mobile.view)) mobile.view = 'graph';
+  const body = $('explorer-body'); body.dataset.mobileView = mobile.view;
+  body.classList.remove('rail-open','with-drawer'); body.classList.add('rail-closed');
+  setHidden($('rail'),true); setHidden($('drawer-scrim'),true);
+  // Visibility (rather than display:none) retains stage geometry and its CTM.
+  $('stage').style.visibility = mobile.view === 'graph' ? '' : 'hidden';
+  $('stage').inert = mobile.view !== 'graph';
+  setHidden($('mobile-nav'),false);
+  setHidden($('mobile-relations'),mobile.view !== 'relations');
+  setHidden($('mobile-evidence-heading'),mobile.view !== 'evidence');
+  const selected = Boolean(state.selectedEdgeId || state.selectedNodeId);
+  setHidden($('drawer'),mobile.view !== 'evidence' || !selected);
+  setHidden($('mobile-evidence-empty'),mobile.view !== 'evidence' || selected);
+  for (const button of document.querySelectorAll('#mobile-nav [data-mobile-view]')) button.setAttribute('aria-current',button.dataset.mobileView === mobile.view ? 'page' : 'false');
+  if (mobile.graph !== state.view) renderMobileRelations();
+  if (focused && focused !== document.body && (!focused.getClientRects().length || getComputedStyle(focused).visibility === 'hidden' || focused.closest('[inert]'))) {
+    document.querySelector(`#mobile-nav [data-mobile-view="${mobile.view}"]`).focus({preventScroll:true});
+  }
+}
+function renderMobileRelations() {
+  mobile.graph = state.view;
+  const list = $('mobile-relation-list'); list.replaceChildren();
+  $('mobile-relation-query').value = '';
+  $('mobile-relations-count').textContent = `${state.view.edges.length} relationships`;
+  for (const family of relationGroups(state.view)) {
+    const familyDetails = el('details', { class:'mobile-family', 'data-family':family.family });
+    familyDetails.append(el('summary', { text: `${family.family} · ${family.groups.length} groups · ${family.count} relationships` }));
+    for (const group of family.groups) {
+      const details = el('details', { class:'mobile-group' });
+      details.append(el('summary', { text: `${group.label} · ${group.edges.length} relationships · ${group.evidenceCount} evidence records` }));
+      for (const edge of group.edges) {
+        const source = nameOf(edge.source), target = nameOf(edge.target);
+        const row = el('div', { class:'mobile-relation', 'data-relation-id':edge.id });
+        row.dataset.search = `${source} ${target} ${edge.relationshipType} ${edge.status} ${group.label}`.toLowerCase();
+        row.append(el('button',{ class:'mobile-relation-evidence', text: `${source} ${edge.directed ? '→' : '⇄'} ${target}`, onclick: () => {
+          if (state.selectedEdgeId === edge.id) switchMobile('evidence'); else selectEdge(edge.id);
+        }}),el('p',{class:'mono',text:`${edge.relationshipType} · ${edge.status} · ${edge.evidenceCount} evidence records`}),
+        el('button',{class:'mobile-locate',text:'View in Graph',onclick:()=>locateMobile(edge.id,'edge')}));
+        details.append(row);
+      }
+      familyDetails.append(details);
+    }
+    list.append(familyDetails);
+  }
+  list.scrollTop = 0;
+}
+function filterMobileRelations() {
+  const query = $('mobile-relation-query').value.trim().toLowerCase();
+  for (const row of $('mobile-relation-list').querySelectorAll('.mobile-relation')) setHidden(row, query && !row.dataset.search.includes(query));
+  for (const details of $('mobile-relation-list').querySelectorAll('details')) {
+    const match = [...details.querySelectorAll('.mobile-relation')].some(row=>!row.hidden);
+    setHidden(details,!match);
+    if (query && match) details.open = true;
+  }
+}
+function phoneFit() {
+  const canvas = $('canvas'), { x,y } = subjectPosition();
+  setCamera(canvas, `${x-canvas.clientWidth/2} ${y-canvas.clientHeight/2} ${canvas.clientWidth} ${canvas.clientHeight}`,1);
+}
+function locateMobile(id,kind) {
+  if (kind === 'edge') {
+    const edge = state.view.edges.find(e=>e.id===id);
+    state.selectedEdgeId=id;state.selectedNodeId='';
+    if (edge) state.layers[edge.family]=true;
+  } else { state.selectedNodeId=id;state.selectedEdgeId=''; }
+  syncUrl(); draw(); renderDrawer(); switchMobile('graph');
+  const canvas=$('canvas');
+  let target = kind === 'node' ? [...canvas.querySelectorAll('.node')].find(e=>e.dataset.nodeId===id)?.querySelector('.node-box') : selectedTarget();
+  let grouped = false;
+  if (!target) {
+    const ids = kind === 'edge' ? [id] : state.view.edges.filter(e=>e.source===id || e.target===id).map(e=>e.id);
+    const plate=state.composition.plates.find(p=>ids.some(edgeId=>p.memberEdgeIds.includes(edgeId)));
+    target=[...canvas.querySelectorAll('[data-bundle-key]')].find(e=>e.dataset.bundleKey===plate?.key)?.querySelector('.bundle-card-box');
+    grouped = Boolean(target);
+  }
+  for (const previous of canvas.querySelectorAll('[data-mobile-located]')) previous.removeAttribute('data-mobile-located');
+  if (target) {
+    target.setAttribute('data-mobile-located',id);
+    if (grouped) { const note=$('band').querySelector('.band-note'); if (note) { note.textContent = `${kind === 'node' ? nameOf(id) : nameOf(state.view.edges.find(e=>e.id===id)?.target)} · grouped here; read Evidence for this member`; note.title=note.textContent; } }
+    const r=target.getBoundingClientRect(), c=canvas.getScreenCTM();
+    const point=new DOMPoint(r.x+r.width/2,r.y+r.height/2).matrixTransform(c.inverse());
+    // Explicit location fits the actual target above the HUD, including short landscape.
+    const hudHeight = $('viewport-hud').getBoundingClientRect().height;
+    const availableHeight = Math.max(44,canvas.clientHeight-hudHeight-24);
+    const zoom = Math.max(.25,Math.min(state.zoom,state.zoom*(canvas.clientWidth-24)/r.width,state.zoom*availableHeight/r.height));
+    const w=canvas.clientWidth/zoom,h=canvas.clientHeight/zoom;
+    setCamera(canvas,`${point.x-w/2} ${point.y-(canvas.clientHeight-hudHeight)/2/zoom} ${w} ${h}`,zoom);
+    (target.closest('[tabindex]') || $('zoom-fit')).focus({preventScroll:true});
+  }
+}
+function renderMobileSearch() {
+  const box=$('mobile-search-results');box.replaceChildren();
+  setHidden(box,!isPhone() || !state.query);
+  if (!isPhone() || !state.query) return;
+  for (const id of searchNodes(state.view,state.query)) {
+    box.append(el('button',{text:nameOf(id),onclick:()=>{ toggleSearch(false);locateMobile(id,'node'); }}));
+  }
+  if (!box.childElementCount) box.append(el('p',{text:'No matching nodes. Browse Relations for relationship search.'}));
+}
+
 // ------------------------------------------------------------------ drawer
 
 function selectEdge(id) {
+  if (isPhone() && state.selectedEdgeId === id) { switchMobile('evidence'); return; }
+  const previous = isPhone() ? mobileSnapshot() : null;
   state.selectedEdgeId = state.selectedEdgeId === id ? '' : id;
   state.selectedNodeId = '';
   syncUrl();
   draw();
   renderDrawer();
+  if (isPhone() && (state.selectedEdgeId || state.selectedNodeId)) switchMobile('evidence', true, previous);
 }
 
 function selectNode(id) {
+  if (isPhone() && state.selectedNodeId === id) { switchMobile('evidence'); return; }
+  const previous = isPhone() ? mobileSnapshot() : null;
   state.selectedNodeId = state.selectedNodeId === id ? '' : id;
   if (state.selectedNodeId) state.selectedEdgeId = '';
   syncUrl();
   draw();
   renderDrawer();
+  if (isPhone() && (state.selectedEdgeId || state.selectedNodeId)) switchMobile('evidence', true, previous);
 }
 
 function clearSelection() {
@@ -2284,6 +2422,7 @@ function clearSelection() {
 }
 
 function closeDrawer() {
+  if (isPhone()) { switchMobile(mobile.previous); return; }
   const edge = state.selectedEdgeId, nodeId = state.selectedNodeId;
   clearSelection();
   const node = Array.from($('canvas').querySelectorAll('[data-node-id]')).find(node => node.getAttribute('data-node-id') === nodeId);
@@ -2294,6 +2433,10 @@ function closeDrawer() {
 function renderDrawer() {
   const drawer = $('drawer');
   const inner = $('drawer-inner');
+  const key = state.selectedEdgeId + '|' + state.selectedNodeId + '|' + (isPhone() ? 'phone' : 'desktop') + '|' + state.view?.revision.commit;
+  if (isPhone() && mobile.drawerGraph === state.view && inner.dataset.selectionKey === key) { applyPanels(); return; }
+  mobile.drawerGraph = state.view;
+  inner.dataset.selectionKey = key;
   inner.replaceChildren();
 
   const view = state.view;
@@ -2474,11 +2617,11 @@ function renderEvidenceCard(record, edge) {
   for (const [key, value] of Object.entries(record.data || {})) {
     if (value === null || value === undefined || key === 'relationship_semantics') continue;
     const rendered = Array.isArray(value)
-      ? value.map((item) => (typeof item === 'string' && item.length > 14 ? `${item.slice(0, 12)}…` : String(item))).join(', ')
+      ? value.map((item) => (!isPhone() && typeof item === 'string' && item.length > 14 ? `${item.slice(0, 12)}…` : String(item))).join(', ')
       : typeof value === 'object'
         ? JSON.stringify(value)
         : String(value);
-    data.append(el('dt', { text: key }), el('dd', { text: truncate(rendered, 140) }));
+    data.append(el('dt', { text: key }), el('dd', { text: isPhone() ? rendered : truncate(rendered, 140) }));
   }
   card.append(data);
 
@@ -2683,9 +2826,15 @@ function setCamera(canvas, viewBox, zoom) {
 
 /** The only writer of Rail/Drawer visibility. Hiding evidence retains its DOM/scroll. */
 function applyPanels() {
+  const mobileFocus = document.activeElement?.closest('#mobile-nav, #mobile-relations, #mobile-evidence-heading, #mobile-evidence-empty');
+  if (isPhone() && state.view) { applyMobile(); return; }
+  document.body.classList.remove('mobile-explorer');
+  for (const id of ['mobile-nav','mobile-relations','mobile-evidence-heading','mobile-evidence-empty']) setHidden($(id),true);
+  $('stage').style.visibility = '';
+  $('stage').inert = false;
   const visible = visiblePanels(panels);
   const body = $('explorer-body');
-  const hiddenFocus = (!visible.rail && $('rail').contains(document.activeElement))
+  const hiddenFocus = mobileFocus || (!visible.rail && $('rail').contains(document.activeElement))
     || (!visible.drawer && $('drawer').contains(document.activeElement));
   setHidden($('rail'), !visible.rail);
   setHidden($('drawer'), !visible.drawer);
@@ -2710,7 +2859,7 @@ function selectedTarget() {
   return edge?.querySelector('.edge-label');
 }
 function protectSelectedTarget() {
-  if (panels.mode === 'legacy-mobile' || !state.view) return;
+  if (isPhone() || panels.mode === 'legacy-mobile' || !state.view) return;
   const target = selectedTarget();
   if (!target) return; // Unexpanded aggregate members have no current visible row.
   const stage = $('stage').getBoundingClientRect();
@@ -2734,6 +2883,18 @@ function toggleRail(force) {
 function setupViewport() {
   const canvas = $('canvas');
 
+  mobile.resetGesture = installTouchCamera(canvas, { active: isPhone,
+    read: () => ({ viewBox: canvas.getAttribute('viewBox'), zoom: state.zoom }),
+    write: (box, zoom) => setCamera(canvas, box, zoom) });
+  canvas.addEventListener('mobile-tap', event => {
+    const edge = event.target.closest('[data-edge-id], [data-relationship-id]');
+    const node = event.target.closest('[data-node-id]');
+    const plate = event.target.closest('[data-bundle-key]');
+    if (edge) selectEdge(edge.dataset.edgeId || edge.dataset.relationshipId);
+    else if (node) selectNode(node.dataset.nodeId);
+    else if (plate) toggleBundle(plate.dataset.bundleKey);
+    else if (event.target === canvas) clearSelection();
+  });
   // Node hover styling is pure CSS (`.node:hover`), deliberately not a redraw:
   // rebuilding the canvas under the pointer would re-fire hover and loop.
 
@@ -2750,6 +2911,7 @@ function setupViewport() {
   let suppressClick = false;
   const DRAG_THRESHOLD = 5;
   canvas.addEventListener('pointerdown', event => {
+    if (isPhone() && event.pointerType === 'touch') return;
     if (event.button !== 0 || !event.isPrimary) return;
     suppressClick = false;
     panState = { pointerId: event.pointerId, x: event.clientX, y: event.clientY,
@@ -2789,12 +2951,21 @@ function setupViewport() {
   $('zoom-out').addEventListener('click', () => zoomBy(1 / ZOOM_STEP));
   $('zoom-fit').addEventListener('click', () => fit());
   window.addEventListener('resize', () => {
+    mobile.resetGesture();
     panels = transitionPanels(panels, { type: 'resize', width: window.innerWidth });
     applyPanels();
     if (state.view) {
       const canvas = $('canvas');
       setCamera(canvas, canvas.getAttribute('viewBox'), state.zoom);
       draw();
+      const readingOffset = $('drawer-inner').scrollTop;
+      const readingFocus = $('drawer-inner').contains(document.activeElement);
+      renderDrawer();
+      $('drawer-inner').scrollTop = readingOffset;
+      // A mode change rebuilds evidence cards; retain a visible reading exit.
+      if (readingFocus && document.activeElement === document.body) {
+        (isPhone() ? $('mobile-evidence-back') : $('rail-toggle')).focus({preventScroll:true});
+      }
       protectSelectedTarget();
     }
     // A resize changes how much of each list fits, which changes whether there is more
@@ -2826,7 +2997,7 @@ function fit() {
   if (!state.view) return;
   const canvas = $('canvas');
   const viewport = { width: canvas.clientWidth || 1200, height: canvas.clientHeight || 700 };
-  setCamera(canvas, initialViewBox(viewport).viewBox, 1);
+  if (isPhone()) phoneFit(); else setCamera(canvas, initialViewBox(viewport).viewBox, 1);
 }
 
 // --------------------------------------------------------------------- boot
@@ -2843,7 +3014,13 @@ function showLanding() {
 }
 
 function boot() {
+  mobile.view = new URLSearchParams(location.search).get('mobile') || 'graph';
   setupViewport();
+  for (const button of document.querySelectorAll('#mobile-nav [data-mobile-view]')) button.addEventListener('click', () => switchMobile(button.dataset.mobileView));
+  $('mobile-evidence-back').addEventListener('click', () => switchMobile(mobile.previous));
+  $('mobile-evidence-close').addEventListener('click', () => switchMobile(mobile.previous));
+  $('mobile-browse-relations').addEventListener('click', () => switchMobile('relations'));
+  $('mobile-relation-query').addEventListener('input', filterMobileRelations);
 
   $('form').addEventListener('submit', (event) => {
     event.preventDefault();
@@ -2904,12 +3081,14 @@ $('layers-btn').addEventListener('click', () => toggleLayers());
     state.query = event.target.value;
     syncUrl();
     draw();
+    renderMobileSearch();
   });
 
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
       if (!$('layers-pop').hasAttribute('hidden')) toggleLayers(false);
       else if (!$('searchbar').hasAttribute('hidden')) toggleSearch(false);
+      else if (isPhone() && mobile.view !== 'graph') switchMobile(mobile.view === 'evidence' ? mobile.previous : 'graph');
       else if (panels.rail && panels.mode !== 'wide') toggleRail(false);
       else if (state.selectedEdgeId || state.selectedNodeId) closeDrawer();
     }
@@ -2957,7 +3136,25 @@ $('layers-btn').addEventListener('click', () => toggleLayers());
 
   window.addEventListener('popstate', () => {
     const repository = parseRepositoryPath(window.location.pathname);
-    if (repository) {
+    if (repository && state.view && repository.owner.toLowerCase() === state.repository.owner.toLowerCase() && repository.name.toLowerCase() === state.repository.name.toLowerCase()) {
+      const old = state.selectedEdgeId + state.selectedNodeId;
+      const oldDepth = state.depth;
+      state.depth = 200;
+      readUrlState();
+      mobile.view = new URLSearchParams(location.search).get('mobile') || 'graph';
+      mobile.previous = history.state?.previous || 'graph';
+      if (state.depth !== oldDepth) { state.refitPending = true; void load(); return; }
+      renderChrome(state.view);
+      draw();
+      if (old !== state.selectedEdgeId + state.selectedNodeId) renderDrawer();
+      applyPanels();
+      const snapshot = history.state?.mobileSnapshot;
+      if (snapshot) {
+        setCamera($('canvas'), snapshot.camera, snapshot.zoom);
+        $('mobile-relation-list').scrollTop = snapshot.relationsScroll;
+        $('drawer-inner').scrollTop = snapshot.evidenceScroll;
+      }
+    } else if (repository) {
       state.repository = repository;
       // Navigating to another repository is a dataset change.
       state.refitPending = true;

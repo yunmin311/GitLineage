@@ -41,6 +41,30 @@ try {
     await page.goto(`${app.url}/${B}`);
     await page.locator('.plate-row[role=button]').first().waitFor({timeout:60000});
     await page.evaluate(()=>document.fonts.ready);
+    // Commit B replaces the obsolete 844x390 temporary desktop-panel expectations.
+    if(width===844) {
+      const base=await measure(page);
+      check('844 landscape phone navigation',await page.locator('#mobile-nav').isVisible());
+      await page.locator('#mobile-nav [data-mobile-view=relations]').click();
+      check('844 complete real relation index',await page.locator('[data-relation-id]').count()>0);
+      await page.locator('.mobile-family > summary').first().click();
+      await page.locator('.mobile-group > summary').first().click();
+      await page.locator('.mobile-relation-evidence').first().click();
+      const selected=await measure(page);
+      check('844 Evidence opens without resizing stage',selected.drawer&&same(base.stage,selected.stage)&&same(base.ctm,selected.ctm));
+      check('844 retained relationship selected',new URLSearchParams(selected.selection).has('edge'));
+      await page.screenshot({path:`${out}/844-evidence.png`});
+      await page.locator('#mobile-evidence-back').click();
+      check('844 Back returns Relations with selection',!await page.locator('#drawer').isVisible()&&(await measure(page)).selection.includes('edge='));
+      await page.locator('#mobile-nav [data-mobile-view=graph]').click();
+      const restored=await measure(page);
+      check('844 camera preserved through three views',same(base.ctm,restored.ctm)&&same(base.stage,restored.stage));
+      check('844 graph HUD has real hit target',await page.locator('#zoom-fit').evaluate(e=>{const r=e.getBoundingClientRect();return e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));}));
+      await page.locator('#mobile-nav [data-mobile-view=evidence]').click();await page.keyboard.press('Escape');
+      check('844 Escape restores graph navigation focus',await page.locator('#mobile-nav [data-mobile-view=graph]').evaluate(e=>e===document.activeElement));
+      check('844 no overflow or runtime failures',!(await measure(page)).overflow&&errors.length===0,errors);
+      evidence['844x390']={base,selected,restored};await page.close();continue;
+    }
     if(await page.locator('#rail').isVisible()) await page.locator('#rail-toggle').click();
     const base=await measure(page);
     await page.locator('.plate-row[role=button]').first().click();

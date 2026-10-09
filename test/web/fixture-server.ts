@@ -7,13 +7,15 @@ import type { LineageGraph } from '../../src/core/model.ts';
 
 export const A = 'Kuddev/pebrel';
 export const B = 'yunmin311/obsidian-config';
+export const C = 'grpc/grpc';
 export async function fixtureServer() {
   const paths = [
     '.cache/public/graphs/public/github/kuddev/pebrel@51514bd50094/v2.0.0/graph.json',
     '.cache/public/graphs/public/github/yunmin311/obsidian-config@3982a219c102/v2.0.0/graph.json',
   ];
+  paths.push('.cache/public/graphs/public/github/grpc/grpc@724b3ccb608b/v2.0.0/graph.json');
   const graphs = new Map<string, LineageGraph>();
-  for (const [i, path] of paths.entries()) graphs.set([A, B][i]!.toLowerCase(), JSON.parse(await readFile(path, 'utf8')));
+  for (const [i, path] of paths.entries()) graphs.set([A, B, C][i]!.toLowerCase(), JSON.parse(await readFile(path, 'utf8')));
   const graphFor = (target: string) => {
     const graph = graphs.get(target.replace(/^https:\/\/github.com\//, '').toLowerCase());
     if (!graph) throw new Error(`missing fixture: ${target}`);

@@ -62,6 +62,31 @@ try {
     await page.evaluate(() => document.fonts.ready);
     await page.mouse.move(1, 1);
     await shot(page, `${width}-default`);
+    // At 640px coarse-pointer input now owns persistent phone views, not legacy dual panels.
+    if(width===640) {
+      const base=await geometry(page);
+      check('640 three-view navigation visible',await page.locator('#mobile-nav').isVisible());
+      check('640 phone controls meet touch size',await page.locator('#mobile-nav button').evaluateAll(es=>es.every(e=>e.getBoundingClientRect().height>=44)));
+      check('640 subject painted and hittable',await page.locator('.node-box.is-subject').evaluate(e=>{const r=e.getBoundingClientRect();return e.closest('.node')!.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));}));
+      await page.locator('#mobile-nav [data-mobile-view=relations]').click();
+      check('640 complete list available',await page.locator('[data-relation-id]').count()>0);
+      await page.locator('.mobile-family > summary').first().click();
+      await page.locator('.mobile-group > summary').first().click();
+      check('640 structural group expands actual rows',await page.locator('.mobile-relation-evidence').first().isVisible());
+      await page.locator('.mobile-relation-evidence').first().click();const selected=await geometry(page);
+      check('640 relationship Evidence selected',selected.drawer&&!!selected.selection && !selected.selection.startsWith('?'));
+      check('640 reading keeps actual stage and CTM',same(base.stage,selected.stage)&&same(base.ctm,selected.ctm));
+      check('640 pinned back is hittable',await page.locator('#mobile-evidence-back').evaluate(e=>{const r=e.getBoundingClientRect();return e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));}));
+      await page.locator('#mobile-evidence-back').click();
+      check('640 reading return retains selection',!await page.locator('#drawer').isVisible()&&!(await geometry(page)).selection.startsWith('?'));
+      await page.locator('#mobile-nav [data-mobile-view=graph]').click();const restored=await geometry(page);
+      check('640 graph camera restored',same(base.ctm,restored.ctm));
+      await page.locator('#zoom-in').click();check('640 graph zoom changes camera only',same(restored.stage,(await geometry(page)).stage)&&restored.viewBox!==(await geometry(page)).viewBox);
+      await page.locator('#zoom-fit').click();
+      check('640 Fit keeps HUD fixed',same(restored.hud,(await geometry(page)).hud));
+      check('640 no overflow or runtime failures',await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)&&errors.length===0,errors);
+      evidence['640-mobile']={base,selected,restored};await shot(page,'640-mobile');await page.close();continue;
+    }
     const initial = await geometry(page);
     // A long real-world name exercises flex constraints without changing graph semantics.
     await page.evaluate(() => { const repo = document.querySelector('#crumb-repo')!; repo.textContent = 'organization-with-a-long-name/repository-with-an-extremely-long-descriptive-name'; });

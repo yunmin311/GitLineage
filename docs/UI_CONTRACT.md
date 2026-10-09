@@ -52,8 +52,8 @@ mutually call panel open/close handlers. Selection and camera remain Explorer st
 Closing Context restores retained evidence and its exact scroll offset. Closing evidence
 clears selection and returns focus to its rendered node/row target (Fit fallback when absent). Temporary Context supports Escape,
 Back/Close and its disclosure toggle. Panels scroll independently; transitions must not
-rebuild retained evidence. The <768 legacy shell is not Mobile Explorer acceptance:
-Graph/Relations/Evidence navigation and pinch require the separate Commit B gate.
+rebuild retained evidence. Fine-pointer compact desktop windows retain this panel policy, including native browser
+200% zoom. Coarse-pointer phones use the Commit B policy below.
 
 ## Viewport Visibility Contract
 Panels overlay the unchanged stage, above the graph and below the dedicated HUD lane.
@@ -128,3 +128,38 @@ assertions must cite the obsolete invariant and the replacement; never delete fa
 
 Taste `redesign-existing-projects` is not installed in the supplied skill catalog/local
 skills. No installation is needed for this correctness pass; V3.3 remains the design authority.
+
+
+## Commit B: Mobile Explorer
+Coarse-pointer viewports below 768 CSS px, or <=900px wide and <=500px tall, own
+persistent Graph / Relations / Evidence views. Landscape height participates in the
+policy. Graph stays mounted with unchanged bounds/CTM while reading views hide it;
+selection and camera are shared with the existing Explorer, not separate data sources.
+
+Relations is a total disjoint index of production ViewGraph edges: canonical family,
+then primary evidence declaration form/site, then every relationship/entity. Unknown
+structure is explicitly named. Paths indicate where claims were declared, never family
+semantics. Group, relationship and evidence counts remain distinct. No member limit.
+All provided evidence cards and long data values are readable in the standalone Evidence
+view. Model identity and rendering mode participate in evidence reuse. Back/Close/Escape
+return to the preceding view without clearing the selected object. Native reading/list
+scroll remains independent; view changes preserve scroll and expanded groups. Breakpoint
+changes return focus from hidden controls to visible navigation. Evidence card rebuilds
+return a focused source link to the visible reading/navigation control.
+
+Opening/Fit centres the existing subject at zoom 1. Explicit search/list location centres
+its rendered node/row, or its actual declaring plate for aggregated members. Explicit
+location fits the target within the uncovered stage above the HUD when needed. The HUD
+states when a member is grouped; Evidence remains the member-level reading surface.
+The frozen world and its density limits remain intact. Primary HTML controls have 44px
+hit targets and safe-area padding; search supports content-resizing keyboard viewports.
+
+Acceptance: mobile-acceptance.ts uses real cached production ViewGraphs for
+Kuddev/pebrel (97 edges), yunmin311/obsidian-config and grpc/grpc at 375x667, 390x844,
+430x932 and 844x390. It records actual stage, CTM, focal point, native CDP touch events,
+scroll, selection/history and screenshots. A separate explicitly labelled presentation
+stress fixture checks long values across desktop/phone transitions. UI Contract's 640px
+coarse-pointer branch and Responsive's 844x390 branch replace obsolete legacy panel
+assertions with phone ownership checks; suite sizes remain 75 and 71. Native Chromium
+200% zoom and desktop/tablet assertions remain unchanged. Chromium touch/keyboard
+viewport reduction is simulation; it does not certify physical devices or Safari.

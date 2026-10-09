@@ -14,8 +14,7 @@ This gate defines state and invariants; it adds no entrance or layout animation.
   the minimal bounded camera pan through the existing writer; no implicit fit or reset.
   Closing/reopening must not accumulate camera movement. Hover never triggers protection.
 - Native vertical touch scroll belongs to panel content and cannot pan or deselect the
-  graph. Canvas single-pointer drag retains selection and overlays on release. This gate
-  does not implement phone multi-pointer/pinch or sheet-drag feedback.
+  graph. Canvas single-pointer drag retains selection and overlays on release. Phone multi-pointer ownership is specified below; sheet drag is not used.
 - Hover changes a background layer only; glyphs and selected markers remain visible.
 - Existing short surface transitions use existing duration/easing tokens. Reduced-motion
   preference removes transitions; acceptance tests exercise it alongside keyboard focus.
@@ -26,3 +25,22 @@ policies, whole-target occlusion/hit tests, repeated transitions, native touch s
 scroll retention and live breakpoint reconciliation. panels.test.ts verifies pure policy
 and idempotent protection. Canvas retains scroll/focus and composition coverage.
 Reduced-motion remains executable in ui-contract.ts; no new animation is added.
+
+
+## Commit B phone pointer ownership
+Only the SVG canvas owns phone pan/pinch. One pointer starts pending; >5px motion
+becomes pan, two pointers become pinch. The inverse CTM world point beneath the initial
+midpoint follows the moving midpoint; zoom is clamped through the existing camera
+writer. Finger-count changes rebase the remaining pointer from the current camera.
+Pan, pinch and cancellation suppress synthetic click activation. A fresh pending tap
+routes once to the real painted hit owner. Document capture suppresses the following
+touch compatibility click even if newly opened Evidence retargets it. A fresh pointer
+outside the canvas restores ordinary reading interactions. Cancel/view-switch/resize releases captures
+and clears pointer state. Native Relations/Evidence scrolling cannot move the graph.
+
+Three views preserve their DOM, camera and selection without entrance animation or
+implicit Fit. Returning to Graph restores navigation focus; Evidence focuses its pinned
+Back control. Same-repository history restores camera/scroll without analysis requests;
+returning from Landing restores the Explorer shell. Reduced-motion has no new motion
+to suppress. mobile-acceptance.ts checks pinch midpoint geometry, pinch-to-one-finger,
+three-pointer cancellation, subsequent tap, native list/evidence scroll and history.
