@@ -258,8 +258,7 @@ export interface ShallowHistory {
   /**
    * Fetch facts as actually used, for the shared-history diagnostics sidecar.
    *
-   * Additive and observational: nothing here participates in the analysis, and
-   * the values are recorded rather than enforced. `isShallow` and
+   * Fetch completeness facts also conservatively constrain history containment. `isShallow` and
    * `shallowBoundary` exist because a bounded fetch can land its shallow
    * boundary differently between runs, which is the plausible mechanism behind a
    * `shares_history_with` signal that appeared once and never again.
@@ -363,7 +362,8 @@ export async function fetchShallowHistory(options: {
   let isShallow: boolean | undefined;
   let shallowBoundary: string[] | undefined;
   try {
-    isShallow = (await runGit(['rev-parse', '--is-shallow-repository'], { cwd: repoDir, sandboxHome })).trim() === 'true';
+    const shallowState = (await runGit(['rev-parse', '--is-shallow-repository'], { cwd: repoDir, sandboxHome })).trim();
+    isShallow = shallowState === 'true' ? true : shallowState === 'false' ? false : undefined;
     const shallowFile = join(repoDir, 'shallow');
     const raw = await readFile(shallowFile, 'utf8').catch(() => '');
     shallowBoundary = raw.split('\n').map((l) => l.trim()).filter((l) => /^[0-9a-f]{40}$/.test(l));
@@ -374,7 +374,7 @@ export async function fetchShallowHistory(options: {
 
   return {
     commits,
-    truncated: commits.length >= requested,
+    truncated: isShallow !== false || (shallowBoundary?.length ?? 0) > 0 || commits.length >= requested,
     head,
     fetchDepth: boundedDepth,
     fetchRefspec: refspec,

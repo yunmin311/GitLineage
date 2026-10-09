@@ -342,7 +342,7 @@ export async function analyze(options: AnalyzeOptions): Promise<AnalyzeResult> {
           truncated: history.truncated,
           createdAt: repositoryMetadata.created_at,
           htmlUrl: repositoryMetadata.html_url,
-          // Recorded for the diagnostics sidecar only; never read by the comparison.
+          // Fetch completeness facts also constrain history containment.
           fetch: {
             depth: history.fetchDepth,
             refspec: history.fetchRefspec,
