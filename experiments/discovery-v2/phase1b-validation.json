@@ -1,0 +1,307 @@
+{
+  "schemaVersion": "phase1b-validation@1",
+  "testedHead": "783a6087caeec7250b16efabc7ee7a8497a8519c",
+  "startedAt": "2026-10-09T06:40:13.322903+00:00",
+  "executionOrder": "typecheck -> unit -> build -> Phase0 -> Phase1A -> provider -> offline mock -> serial browser suites",
+  "suites": [
+    {
+      "suite": "typecheck",
+      "command": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 5.033,
+      "log": "artifacts/discovery-v2/phase1b-validation/typecheck.log",
+      "logDigest": "a9b9f7f787f5f67cf960e83b4e0fd3e5ee8a2c063adec9c910917b9015c4b81e"
+    },
+    {
+      "suite": "unit",
+      "command": [
+        "npm",
+        "test"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 8.504,
+      "log": "artifacts/discovery-v2/phase1b-validation/unit.log",
+      "logDigest": "929a2536b56d3368d7010c065f9e25cce229ae172c33596a46a4461e0da07eee",
+      "tests": 499,
+      "passed": 496,
+      "failed": 0,
+      "skipped": 3,
+      "skipReason": "three existing live integration tests are not enabled"
+    },
+    {
+      "suite": "build",
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.32,
+      "log": "artifacts/discovery-v2/phase1b-validation/build.log",
+      "logDigest": "f5895c633ccc3755618b484be359cac401b91150e0b9d86aa63abc1793390b4b"
+    },
+    {
+      "suite": "phase0",
+      "command": [
+        "node",
+        "--test",
+        "experiments/discovery-v2/benchmark.test.mjs"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 1.074,
+      "log": "artifacts/discovery-v2/phase1b-validation/phase0.log",
+      "logDigest": "209312debb694586084d44b61b1975c58dd73f0d829868a376884ffa272b0b87",
+      "tests": 6,
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "phase1a",
+      "command": [
+        "node",
+        "--test",
+        "test/discovery/budget.test.ts",
+        "test/discovery/contract.test.ts",
+        "test/discovery/integrity.test.ts",
+        "test/discovery/offline.test.ts",
+        "test/discovery/boundary.test.ts"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 7.142,
+      "log": "artifacts/discovery-v2/phase1b-validation/phase1a.log",
+      "logDigest": "98e70d8dd6a07baebf9761021d4ad7dc0dc7de092120e33c33a83808dc953f6b",
+      "tests": 20,
+      "passed": 20,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "provider",
+      "command": [
+        "node",
+        "--test",
+        "test/discovery/search.test.ts",
+        "test/discovery/search-budget.test.ts"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.271,
+      "log": "artifacts/discovery-v2/phase1b-validation/provider.log",
+      "logDigest": "ae109a6b8f74bd267e5c3ef6f55ad60a0a006d61086aa8db5b60d97b9acadb76",
+      "tests": 32,
+      "passed": 32,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "mock",
+      "command": [
+        "node",
+        "experiments/discovery-v2/run-search.ts"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.169,
+      "log": "artifacts/discovery-v2/phase1b-validation/mock.log",
+      "logDigest": "cbf8e786371e7776456af36efe5b6a21c72f64e67e87c2fea1ee164daab0ec7e",
+      "evidence": "artifacts/discovery-v2/mock-search/search-sidecar.json",
+      "evidenceDigest": "2b4c0b068225d83b032ee74b59d1f3ee040351e7377be2487bba2d0f6f55c3ae"
+    },
+    {
+      "suite": "canvas",
+      "command": [
+        "npm",
+        "run",
+        "test:canvas"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 76.026,
+      "log": "artifacts/discovery-v2/phase1b-validation/canvas.log",
+      "logDigest": "ddcb534cf08df51140619290f644bcedcf5ee03f6b2c6ef38d3af71ed75ed06b",
+      "evidence": "artifacts/shots/v2/report.json",
+      "evidenceDigest": "bf3c1da27c05e4f7a000ee9acea0b1c4b8775f1ec4ded959e9c1038eb7729b07",
+      "checksPassed": 113,
+      "checksFailed": 0
+    },
+    {
+      "suite": "landing",
+      "command": [
+        "npm",
+        "run",
+        "test:landing"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 20.528,
+      "log": "artifacts/discovery-v2/phase1b-validation/landing.log",
+      "logDigest": "6a4b6ac2aa8b64c789088cd4dbcc3ef3b184c264e01c430201f8682f86943c78",
+      "evidence": "artifacts/shots/slice2/results.json",
+      "evidenceDigest": "bc7b9684057d800e1d3e8b6ac56aa44fab66fec9c58bd74c4154d214353a7005",
+      "checksPassed": 40,
+      "checksFailed": 0
+    },
+    {
+      "suite": "analysis",
+      "command": [
+        "npm",
+        "run",
+        "test:analysis"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 20.983,
+      "log": "artifacts/discovery-v2/phase1b-validation/analysis.log",
+      "logDigest": "84fe1c00b80730a4bdd89a084313b26a137f55eb8225dbb3093f7291c73c8166",
+      "evidence": "artifacts/slice3/fsm-report.json",
+      "evidenceDigest": "3852b67943355a1a50e24e80b6f2245408a2301f7e1a575231b54ee7a16c3352",
+      "stateSamples": 16
+    },
+    {
+      "suite": "preflight",
+      "command": [
+        "npm",
+        "run",
+        "test:preflight"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 43.809,
+      "log": "artifacts/discovery-v2/phase1b-validation/preflight.log",
+      "logDigest": "3fe9c95e862731cda7e0103457fdc940d3cc55aeeff16fa3b06e7d3737fa0ebf",
+      "evidence": "artifacts/preflight/results.json",
+      "evidenceDigest": "bf8c01d02c0e84a98766af6c5b6c82563afb61b0f6bf94745ebba07a6c563650",
+      "checksPassed": 45,
+      "checksFailed": 0
+    },
+    {
+      "suite": "stale",
+      "command": [
+        "npm",
+        "run",
+        "test:stale"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 26.471,
+      "log": "artifacts/discovery-v2/phase1b-validation/stale.log",
+      "logDigest": "3cbe4f3a94e224e2669fcab7ba69ca87385b42f931d24af3227a0081e07c3f8e",
+      "evidence": "artifacts/slice3/stale-report.json",
+      "evidenceDigest": "290d8901cba5ea4cfac660798fc2e65fb6720606d8979430d3b17059579a6ac4",
+      "samples": 6
+    },
+    {
+      "suite": "ui-contract",
+      "command": [
+        "npm",
+        "run",
+        "test:ui-contract"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 20.361,
+      "log": "artifacts/discovery-v2/phase1b-validation/ui-contract.log",
+      "logDigest": "27e16fc23b99748941a8e5145e52c7ca82f50bef861ac618a4f823bc694b6b38",
+      "evidence": "artifacts/ui-contract/after/results.json",
+      "evidenceDigest": "1a15237ea402265c6ec220e56913207f54f02811c2a64f1f86ac6be153f73fbf",
+      "checksPassed": 75,
+      "checksFailed": 0
+    },
+    {
+      "suite": "responsive",
+      "command": [
+        "npm",
+        "run",
+        "test:responsive"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 28.518,
+      "log": "artifacts/discovery-v2/phase1b-validation/responsive.log",
+      "logDigest": "5a27acd3e5517d2811138d383db05825fde0804b5d56f3d1e755a669a3c7d5a9",
+      "evidence": "artifacts/responsive/after/results.json",
+      "evidenceDigest": "58ff2be289cf08bb72d4dd309e21272604f1d1ca07f7c9f0b96c478a549a3b90",
+      "checksPassed": 71,
+      "checksFailed": 0
+    },
+    {
+      "suite": "mobile",
+      "command": [
+        "npm",
+        "run",
+        "test:mobile"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 49.234,
+      "log": "artifacts/discovery-v2/phase1b-validation/mobile.log",
+      "logDigest": "bbee73ed5189e75de9568c61d590092823e7610619003416afc434172e77e86d",
+      "evidence": "artifacts/mobile/after/results.json",
+      "evidenceDigest": "21fd58ab42d775d1aff0fa34d3d34b3156f84b57453afc9da91ae30a4988c5b0",
+      "checksPassed": 133,
+      "checksFailed": 0
+    }
+  ],
+  "finishedAt": "2026-10-09T06:45:21.831479+00:00",
+  "baseline": {
+    "actualHead": "ae9acf0cd127a856836902b348c45e0f16f33cd0",
+    "oldTestedHead": "2abdfa6d000f3922559871effdb0e225ed538c64",
+    "oldReceiptGap": [
+      "docs/DISCOVERY_V2_PHASE1A_REPORT.md",
+      "experiments/discovery-v2/phase1-validation.json"
+    ],
+    "oldGapExecutableChanges": false,
+    "commitChainAfter95d6550": [
+      "8efc1d85ac317e2b88cc7610a4cc8b1142cc6384 discovery: add candidate contract and budget ledger",
+      "dba4eaf8624f60d6e648c7ba86b350f20fe369dd discovery: add pinned offline similarity sidecar",
+      "5016978324aa506535608450713f5f59f0c50730 fix: require complete fetched history for lineage containment",
+      "2abdfa6d000f3922559871effdb0e225ed538c64 fix: resolve unscoped npm packages at their actual registry URL",
+      "ae9acf0cd127a856836902b348c45e0f16f33cd0 docs: record Phase 1A evidence and full regression results"
+    ],
+    "originalUntracked": "tools/ preserved unstaged"
+  },
+  "productionSourceChanges": [],
+  "discoverySourceChanges": [
+    "src/discovery/network.ts",
+    "src/discovery/query.ts",
+    "src/discovery/search-contract.ts",
+    "src/discovery/search-output.ts",
+    "src/discovery/search-provider.ts",
+    "src/discovery/search.ts"
+  ],
+  "phase1Compatibility": {
+    "existingTestsPassed": 17,
+    "additionalBoundaryTestsPassed": 3,
+    "providerTestsPassed": 32,
+    "candidateV1Modified": false,
+    "comparisonAutoExecuted": false,
+    "graphWrite": "none; isolated filesystem permission and import boundary tests passed",
+    "standardCacheIntegration": "none"
+  },
+  "liveProbe": {
+    "execution": "explicit anonymous, one transport attempt, before final diagnostic/retry-after additions",
+    "receipt": "experiments/discovery-v2/phase1b-live-probe.json",
+    "receiptDigest": "d32c28095f14fed63382069ec544b8b3665f5dc0b44f6e7bca4bcfe0e90ff9b0",
+    "status": 200,
+    "candidates": 4,
+    "verification": "pending; revision unresolved; no lineage labels",
+    "wallMs": 947.751647,
+    "receivedBytes": 26785,
+    "searchHeaders": {
+      "limit": 10,
+      "remaining": 9,
+      "used": 1
+    },
+    "coverage": "partial_provider"
+  },
+  "limitations": {
+    "mobileEnvironment": "Chromium CDP touch simulation",
+    "webkit": "Error: browserType.launch: Executable doesn't exist at /home/lqy/.cache/ms-playwright/webkit-2359/pw_run.sh",
+    "physicalDevice": "not verified",
+    "cpuHardBudget": "unsupported",
+    "networkCap": "hard retained/parsed body reservation; delivered overflow recorded; no hard wire-transfer or RSS cap",
+    "metadataLookup": "not implemented; only pure observation reconciliation",
+    "globalDiscoveryRecall": "not measurable; no human labels for live candidates"
+  },
+  "finalReceiptCommitPolicy": "only docs/DISCOVERY_V2_PHASE1B_REPORT.md and this static validation JSON follow testedHead; final HEAD supplied in delivery, git diff must show no executable changes",
+  "implementationCommits": [
+    "c7630b1a98737c322cbad557891b43ca2b404ab5",
+    "783a6087caeec7250b16efabc7ee7a8497a8519c"
+  ],
+  "ignoredLogsAndEvidence": "artifacts/discovery-v2/phase1b-validation"
+}

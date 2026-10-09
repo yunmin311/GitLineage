@@ -1,6 +1,6 @@
 # Discovery V2 Phase 1B 本地交付报告
 
-本阶段增加独立、有界的外部仓库候选发现实验。Standard、Graph Schema 2.0.0、生产 API、缓存与 V3.3 UI 未接入。候选不等于相似代码，更不等于派生关系。完整回归收据将在验收后追加。
+本阶段增加独立、有界的外部仓库候选发现实验。Standard、Graph Schema 2.0.0、生产 API、缓存与 V3.3 UI 未接入。候选不等于相似代码，更不等于派生关系。所有要求的本地回归已完成，实际结果与提交关系如下。
 
 ## 1. 基线与最终 HEAD
 
@@ -60,11 +60,11 @@ topic:concurrency language:javascript is:public fork:true
 
 顶层和 query 收据区分有限范围内完成、预算不足、provider/indexing部分、不可用、取消与未尝试。分别保存 query、requested/completed pages、returned items、unique observed、admitted/rejected candidates、身份拒绝位置、total_count、incomplete_results、1000窗口及窗口外数量、未获取/未完成页面、失败/重试与实际资源。
 
-空结果仅写“在本次查询范围与预算下，未发现候选。”total_count 是元数据匹配数，不是关联真值。认证/网络失败不会冒充无关联。
+空结果仅写“在本次查询范围与预算下，未发现候选。”total_count 是元数据匹配数，不是关联真值。认证/网络失败不会冒充无关联。requestedPages表示调度页，包含预算拒绝的页；实际发出的HTTP次数依据usage.attempts及reservedBytes>0的attempt收据，预算拒绝条目不代表HTTP已发出。
 
 ## 9. Mock 测试
 
-先执行失败行为测试，再完成实现。新增 provider 测试覆盖身份、HTTP、预算、限流/分页/覆盖/取消，以及字节和凭据边界；既有 Phase 1A 全部保留。当前针对性 Discovery 52项通过（原17、新provider32、新隔离3），0失败、0跳过；mock入口3次请求、4个候选、网络保留744字节、保守预留786432字节、源字节0。补查发现旧实验断言只禁止503的当前重试，却允许后续query；新失败测试证明继续请求会绕过服务等待。现收紧为Retry-After>0全局停止，原3次请求期望改为1次，不放宽任何门槛。mock费率头是测试夹具，不能当作真实 API 用量。
+先执行失败行为测试，再完成实现。新增 provider 测试覆盖身份、HTTP、预算、限流/分页/覆盖/取消，以及字节和凭据边界；既有 Phase 1A 全部保留。当前针对性 Discovery 52项通过（原17、新provider32、新隔离3），0失败、0跳过；mock入口3次Transport尝试（真实GitHub API调用0次）、4个候选、网络保留744字节、保守预留786432字节、源字节0。补查发现旧实验断言只禁止503的当前重试，却允许后续query；新失败测试证明继续请求会绕过服务等待。现收紧为Retry-After>0全局停止，原3次请求期望改为1次，不放宽任何门槛。mock费率头是测试夹具，不能当作真实 API 用量。
 
 ## 10. Live Probe
 
@@ -80,11 +80,30 @@ AST 检查 Discovery 只引用允许的内部/内置依赖，生产源码无 Dis
 
 ## 12. 完整回归
 
-待在实现提交上依序运行 Typecheck → Unit → Build → Phase0 → Discovery → 串行浏览器8套件，并在收据追加实际计数、时间和产物 hashes。不复用旧轮成绩，不覆盖历史实验结果。
+本轮最终 testedHead=`783a6087caeec7250b16efabc7ee7a8497a8519c`，顺序为 Typecheck → Unit → Build → Phase0 → Phase1A → Provider → Mock → 串行浏览器8套件。所有15项命令退出码均0。初始实现的一轮回归也通过，但Retry-After修正后重新执行整轮，最终收据只使用修正后的结果。未删除断言、放宽容差或刷新旧数据。
+
+| 套件 | 实际结果 |
+|---|---|
+| Typecheck / Build | PASS / PASS |
+| Unit | 499项：496 pass、0 fail、3 skip |
+| Phase0 Benchmark | 6/6 |
+| Phase1A + 边界 | 20/20（原17 + 新边界3） |
+| Repository Search Provider | 32/32 |
+| Offline Mock | PASS，3次mock尝试、4候选、实际API调用0 |
+| Canvas | 113/113 |
+| Landing | 40/40 |
+| Analysis | PASS，16状态样本 |
+| Preflight | 45/45 |
+| Stale A→B | PASS，6采样 |
+| UI Contract | 75/75 |
+| Responsive | 71/71 |
+| Mobile | 133/133，Chromium CDP模拟触摸 |
+
+3 skip是未启用的既有live integration测试。WebKit运行程序缺失，实体设备未验证；不得由Mobile通过推断Safari/实体设备通过。日志、截图、几何和实际结果位置及SHA-256见 [本轮验收收据](../experiments/discovery-v2/phase1b-validation.json)。浏览器产物留在现有artifacts目录；没有重建与浏览器测试并行。
 
 ## 13. 提交与文件
 
-实现提交及最终文档/收据提交将在验收后记录；最终静态提交的自身 SHA 以交付消息/HEAD 为准，避免自引用 SHA。主要文件为 src/discovery/{query,network,search-contract,search-provider,search,search-output}.ts、test/discovery/search*.test.ts、boundary.test.ts、run-search.ts、PHASE1B_README.md、RFC补充和本报告。
+实现提交：`c7630b1a98737c322cbad557891b43ca2b404ab5`（独立provider/合同/测试/文档）；修正及最终可执行验收提交：`783a6087caeec7250b16efabc7ee7a8497a8519c`（503 Retry-After停止后续查询）。最后追加本报告及静态phase1b-validation.json，没有可执行修改；其自身SHA以交付消息/HEAD为准，避免自引用SHA。最终HEAD与testedHead仅静态文档/收据差异，不能把未跑的新代码藏在报告提交中。主要文件为 src/discovery/{query,network,search-contract,search-provider,search,search-output}.ts、test/discovery/search*.test.ts、boundary.test.ts、run-search.ts、PHASE1B_README.md、RFC补充和本报告。
 
 ## 14. Phase 1C 最小建议
 
