@@ -14,11 +14,12 @@ export const SEARCH_PROFILE:Readonly<BudgetProfile>=Object.freeze({...OFFLINE_PR
 export interface SearchOptions {transport?:Transport;profile?:BudgetProfile;token?:string;signal?:AbortSignal;timeoutMs?:number;network?:NetworkProfile;now?:()=>string}
 export type CoverageState='complete_within_requested'|'partial_budget'|'partial_provider'|'unavailable'|'cancelled'|'not_attempted';
 export interface QueryReceipt {state:CoverageState;query:number;requestedPages:number[];completedPages:number[];totalCount:number|null;incompleteResults:boolean;returnedItems:number;unfetchedAccessiblePages:number|null;beyondWindow:number|null}
-export async function discoverRepositories(inputPlan:QueryPlan,options:SearchOptions={}) {
- validatePlan(inputPlan);if(options.token&&JSON.stringify(inputPlan).includes(options.token))throw new TypeError('credential present in query inputs');const plan=structuredClone(inputPlan),profile=options.profile??SEARCH_PROFILE;
+export async function discoverRepositories(inputPlan:QueryPlan,options:SearchOptions={},shared?:NetworkLedger) {
+ validatePlan(inputPlan);if(options.token&&JSON.stringify(inputPlan).includes(options.token))throw new TypeError('credential present in query inputs');const plan=structuredClone(inputPlan),profile=shared?.budget.profile??options.profile??SEARCH_PROFILE;
  // Experimental maxima cannot be silently lifted by a caller.
  for(const key of ['attempts','searchAttempts','candidates','wallMs','concurrency'] as const)if(profile[key]>SEARCH_PROFILE[key])throw new TypeError('profile exceeds experimental ceiling');
- const ledger=new BudgetLedger(profile,options.signal),network=new NetworkLedger(ledger,options.network??NETWORK_PROFILE),provider=new RepositorySearchProvider(options);
+ if(shared&&(options.profile||options.network||options.signal))throw new TypeError('shared ledger owns budgets and cancellation');
+ const ledger=shared?.budget??new BudgetLedger(profile,options.signal),network=shared??new NetworkLedger(ledger,options.network??NETWORK_PROFILE),provider=new RepositorySearchProvider(options);
  const started=performance.now(),attempts:AttemptReceipt[]=[],queries:QueryReceipt[]=plan.queries.map((_,query)=>({state:'not_attempted',query,requestedPages:[],completedPages:[],totalCount:null,incompleteResults:false,returnedItems:0,unfetchedAccessiblePages:null,beyondWindow:null}));
  const records=new Map<number,{observations:IdentityObservation[];discoveries:SearchDiscovery[]}>(),buckets=plan.queries.map(()=>[] as number[]);
  const rejectedIdentities:{query:number;page:number;rank:number;reason:'invalid_or_missing_identity'|'credential_reflection'}[]=[];
@@ -59,7 +60,7 @@ export async function discoverRepositories(inputPlan:QueryPlan,options:SearchOpt
  const names=new Map<string,Set<number>>();if(plan.target.repositoryId!==null)names.set(plan.target.fullName.toLowerCase(),new Set([plan.target.repositoryId]));for(const [id,r]of records)for(const o of r.observations){let ids=names.get(o.fullName);if(!ids){ids=new Set();names.set(o.fullName,ids);}ids.add(id);}
  for(const c of candidates)if(c.candidate.observations.some(o=>names.get(o.fullName)!.size>1)){c.candidate.conflicts.push('name_id_collision');c.candidate.completeness='incomplete';providerPartial=true;}
  for(const qr of queries)if(qr.totalCount!==null){qr.unfetchedAccessiblePages=Math.max(0,Math.ceil(Math.min(qr.totalCount,1000)/plan.perPage)-qr.completedPages.length);qr.beyondWindow=Math.max(0,qr.totalCount-1000);if(qr.unfetchedAccessiblePages||qr.beyondWindow)providerPartial=true;}
- cancelled ||= options.signal?.aborted??false;
+ cancelled ||= ledger.signal?.aborted??false;
  const completedPages=queries.reduce((n,q)=>n+q.completedPages.length,0);
  const state:CoverageState=cancelled?'cancelled':budgetPartial?'partial_budget':completedPages===0?(attempts.some(a=>a.reservedBytes>0)?'unavailable':'not_attempted'):providerPartial||stopped?'partial_provider':'complete_within_requested';
  for(const qr of queries){
