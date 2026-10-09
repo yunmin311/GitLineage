@@ -21,3 +21,7 @@ test('cancellation and deadline deny all new scheduling; hard CPU unavailable pr
   assert.throws(() => new BudgetLedger({...OFFLINE_PROFILE,cpuMs:1 as never}), /CPU/);
   assert.throws(() => new BudgetLedger({...OFFLINE_PROFILE,totalBytes:NaN}));
 });
+test('missing caps and prototype-like bucket names cannot bypass accounting',()=>{
+ assert.throws(()=>new BudgetLedger({cpuMs:null} as never));
+ const l=new BudgetLedger({...OFFLINE_PROFILE,filesPerCandidate:1});l.file('__proto__','x');assert.throws(()=>l.file('__proto__','y'));assert.equal(l.usage().files['__proto__'],1);
+});

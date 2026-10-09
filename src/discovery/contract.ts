@@ -44,7 +44,7 @@ const object=(fields:Record<string,Rule>):Rule=>(v,p)=>{
   for(const k of Object.keys(record))if(!Object.hasOwn(fields,k))fail(`${p}.${k}`);
   for(const [k,r] of Object.entries(fields))r(record[k],`${p}.${k}`);
 };
-const dict:Rule=(v,p)=>{if(!v||typeof v!=='object'||Array.isArray(v))fail(p);for(const [k,x]of Object.entries(v!))count(x,`${p}.${k}`);};
+const dict:Rule=(v,p)=>{if(!v||typeof v!=='object'||Array.isArray(v)||Object.getPrototypeOf(v)!==Object.prototype)fail(p);for(const [k,x]of Object.entries(v!))count(x,`${p}.${k}`);};
 const regex=(expression:RegExp):Rule=>(v,p)=>{string(v,p);if(!expression.test(v as string))fail(p);};
 const revision=regex(/^[a-f0-9]{40}$/), digest=regex(/^[a-f0-9]{64}$/);
 const path:Rule=(v,p)=>{string(v,p);if((v as string).startsWith('/')||(v as string).includes('\\')||(v as string).split('/').some(x=>!x||x==='.'||x==='..'))fail(p);};
@@ -75,7 +75,7 @@ export function validateCandidate(v:unknown):asserts v is DiscoveryCandidate {
     const a=c.files.target.find(f=>f.path===m.firstPath),b=c.files.candidate.find(f=>f.path===m.secondPath);
     if(!a||!b||a.digest!==m.firstDigest||b.digest!==m.secondDigest||a.classification!=='application_source'||b.classification!=='application_source')fail('measurement file binding');
     if(m.state!=='completed' ? m.score!==null||m.ranges.length>0 : m.score===null)fail('score completion');
-    if(m.method==='exact_blob'&&m.score!==null&&m.score!==0&&m.score!==1)fail('exact score');
+    if(m.method==='exact_blob'&&m.score!==null&&m.score!==Number(a!.blob===b!.blob))fail('exact score');
     if(m.state==='completed'&&m.method!=='exact_blob'){
       if(m.firstTokens===null||m.secondTokens===null||m.sharedShingles===null||!m.firstShingles||!m.secondShingles)fail('missing denominator');
       const shared=m.sharedShingles!,first=m.firstShingles!,second=m.secondShingles!;
@@ -86,5 +86,6 @@ export function validateCandidate(v:unknown):asserts v is DiscoveryCandidate {
   if(c.coverage.comparedPairs>c.coverage.expectedPairs||c.coverage.state==='completed'&&(c.coverage.comparedPairs!==c.coverage.expectedPairs||c.coverage.pending.length))fail('coverage');
   if(c.verification.canonicalEvidenceIds.length)fail('Phase 1A has no canonical evidence adapter');
   if(c.verification.state==='checked'&&(!c.verification.checks.length||c.verification.checks.some(x=>x.state!=='completed')))fail('checks unfinished');
+  if(Object.values(c.usage.bytesByFile).reduce((sum,x)=>sum+x,0)!==c.usage.totalBytes)fail('byte accounting');
   if(c.usage.searchAttempts>c.usage.attempts||c.usage.activeWorkers>c.usage.peakWorkers)fail('usage');
 }

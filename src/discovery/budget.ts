@@ -18,10 +18,12 @@ export class BudgetLedger {
   readonly signal: AbortSignal | undefined;
   readonly deadline: number;
   private clock: () => number;
-  private counts: BudgetUsage = {attempts:0,searchAttempts:0,candidates:0,files:{},bytesByFile:{},totalBytes:0,activeWorkers:0,peakWorkers:0};
+  private counts: BudgetUsage = {attempts:0,searchAttempts:0,candidates:0,files:Object.create(null),bytesByFile:Object.create(null),totalBytes:0,activeWorkers:0,peakWorkers:0};
   private candidateKeys = new Set<string>();
   private fileKeys = new Set<string>();
   constructor(profile: BudgetProfile, signal?: AbortSignal, clock = () => performance.now()) {
+    const fields=Object.keys(OFFLINE_PROFILE);
+    if(!profile||typeof profile!=='object'||Object.keys(profile).length!==fields.length||fields.some(k=>!Object.hasOwn(profile,k)))throw new BudgetError('invalid budget shape');
     if (profile.cpuMs !== null) throw new BudgetError('hard worker CPU budget unsupported; use interruptible wall deadline');
     for (const [key,value] of Object.entries(profile)) if (key !== 'cpuMs' && (!Number.isSafeInteger(value) || value! < 0)) throw new BudgetError(`invalid budget: ${key}`);
     if (profile.concurrency < 1 || profile.wallMs < 1) throw new BudgetError('concurrency and wallMs must be positive');
