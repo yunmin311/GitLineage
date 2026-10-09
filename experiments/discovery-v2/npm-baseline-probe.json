@@ -1,0 +1,54 @@
+{
+  "observedAt": "2026-10-09T05:57:19.392Z",
+  "attempts": 4,
+  "retries": 0,
+  "input": "fixed package p-limit, frozen 7.1.1 and resolver latest endpoint comparison",
+  "receipts": [
+    {
+      "url": "https://registry.npmjs.org/_p-limit/7.1.1",
+      "status": 404,
+      "bytes": 11,
+      "digest": "57aefd8046010e86f09187427e21bad3376b25a2f9a46ce20452ac7d5448298d",
+      "version": null,
+      "repository": null,
+      "error": null,
+      "wallMs": 752.060446
+    },
+    {
+      "url": "https://registry.npmjs.org/p-limit/7.1.1",
+      "status": 200,
+      "bytes": 1954,
+      "digest": "3cd7fb930730912e592b88f9b47ffdb21cc6e2427af1a862d33e5ac0c834e3e8",
+      "version": "7.1.1",
+      "repository": {
+        "url": "git+https://github.com/sindresorhus/p-limit.git",
+        "type": "git"
+      },
+      "error": null,
+      "wallMs": 444.922102
+    },
+    {
+      "url": "https://registry.npmjs.org/_p-limit/latest",
+      "status": 404,
+      "bytes": 11,
+      "digest": "57aefd8046010e86f09187427e21bad3376b25a2f9a46ce20452ac7d5448298d",
+      "version": null,
+      "repository": null,
+      "error": null,
+      "wallMs": 288.521833
+    },
+    {
+      "url": "https://registry.npmjs.org/p-limit/latest",
+      "status": 200,
+      "bytes": 2105,
+      "digest": "c19a77f322f60f0b9e6e637982ff3ca0596bf98303eed6733777b8cd7e857ed4",
+      "version": "7.3.3",
+      "repository": {
+        "url": "git+https://github.com/sindresorhus/p-limit.git",
+        "type": "git"
+      },
+      "error": null,
+      "wallMs": 329.1855640000001
+    }
+  ]
+}
