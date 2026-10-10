@@ -9,11 +9,11 @@ import {officialFixture} from '../../experiments/discovery-v2/phase1d-mock.ts';
 import {validatePreviewExport} from '../../experiments/discovery-v2/preview-contract.ts';
 const password='test-private-credential',salt='a'.repeat(32);
 const admins=['alice','bob'].map(id=>({id,salt,passwordHash:passwordHash(password,salt)}));
-async function setup(opts:{enabled?:boolean;sessionMs?:number;hang?:boolean;limit?:number;rateLimit?:boolean}={}){
+async function setup(opts:{enabled?:boolean;sessionMs?:number;hang?:boolean;limit?:number;rateLimit?:boolean;useDefaultCooldown?:boolean}={}){
  const root=await mkdtemp(join(tmpdir(),'gl-beta-')),fixture=officialFixture();let clock=Date.now();
  let gate:ReturnType<typeof createBetaGate>;
  const server=createServer((req,res)=>void gate.handler(req,res));await new Promise<void>(r=>server.listen(0,'127.0.0.1',r));const address=server.address() as {port:number},origin=`http://127.0.0.1:${address.port}`;
- gate=createBetaGate({enabled:opts.enabled??true,origin,administrators:admins,storeRoot:join(root,'private'),protectedRoots:[join(root,'canonical')],cooldownMs:0,sessionMs:opts.sessionMs,now:()=>clock,limits:{globalActive:opts.limit??2,userActive:1,attemptsPerHour:24,searchesPerUserHour:1,requestsPerMinute:90},transport:opts.hang?async(_u,init)=>new Promise((_r,reject)=>{init?.signal?.addEventListener('abort',()=>reject(new Error('aborted')),{once:true});}):async(url,init)=>{const response=await fixture.transport(url,init);return opts.rateLimit?new Response('{}',{status:403,headers:{'x-ratelimit-remaining':'0','x-ratelimit-reset':String(Math.ceil(Date.now()/1000)+3600),'retry-after':'3600'}}):response;}});
+ gate=createBetaGate({enabled:opts.enabled??true,origin,administrators:admins,storeRoot:join(root,'private'),protectedRoots:[join(root,'canonical')],cooldownMs:opts.useDefaultCooldown?undefined:0,sessionMs:opts.sessionMs,now:()=>clock,limits:{globalActive:opts.limit??2,userActive:1,attemptsPerHour:24,searchesPerUserHour:1,requestsPerMinute:90},transport:opts.hang?async(_u,init)=>new Promise((_r,reject)=>{init?.signal?.addEventListener('abort',()=>reject(new Error('aborted')),{once:true});}):async(url,init)=>{const response=await fixture.transport(url,init);return opts.rateLimit?new Response('{}',{status:403,headers:{'x-ratelimit-remaining':'0','x-ratelimit-reset':String(Math.ceil(Date.now()/1000)+3600),'retry-after':'3600'}}):response;}});
  async function request(path:string,data?:unknown,cookie='',headers:Record<string,string>={}){return fetch(origin+path,{method:data===undefined?'GET':'POST',headers:{...(data===undefined?{}:{origin,'content-type':'application/json','x-gitlineage-csrf':'1'}),cookie,...headers},...(data===undefined?{}:{body:JSON.stringify(data)})});}
  async function login(identity='alice'){const r=await request('/api/private-beta/login',{identity,password});assert.equal(r.status,200);return r.headers.get('set-cookie')!.split(';')[0]!;}
  async function done(id:string,cookie:string){for(let i=0;i<100;i++){const r=await request('/api/deep-search/tasks/'+id,undefined,cookie),task=await r.json() as any;if(task.state!=='running')return task;await new Promise(r=>setTimeout(r,15));}throw new Error('task did not finish');}
@@ -30,7 +30,7 @@ test('CSRF, origin, forged proxy and duplicate cookie fail before allocation; se
  }finally{await s.close();}
 });
 test('real engine bounded multi-file flow exports pending/none with no secrets; identity isolation and durable shared quota',async()=>{
- const s=await setup();try{const alice=await s.login(),bob=await s.login('bob');const response=await s.request('/api/deep-search/search',{repository:'root/example'},alice);assert.equal(response.status,202);const search=await response.json() as any;await s.done(search.id,alice);
+ const s=await setup();try{const alice=await s.login(),bob=await s.login('bob');assert.equal((await(await s.request('/api/deep-search/capabilities',undefined,alice)).json() as any).cooldownMs,0);const response=await s.request('/api/deep-search/search',{repository:'root/example'},alice);assert.equal(response.status,202);const search=await response.json() as any;await s.done(search.id,alice);
  assert.equal((await s.request('/api/deep-search/tasks/'+search.id,undefined,bob)).status,400);
  assert.equal((await s.request('/api/deep-search/sources',{searchId:search.id,candidateIds:[4]},bob)).status,400);
  const calls=s.fixture.calls.length;assert.equal((await s.request('/api/deep-search/search',{repository:'root/example'},bob)).status,429);assert.equal(s.fixture.calls.length,calls);
@@ -70,4 +70,12 @@ test('provider exhaustion blocks all identities before another reservation or re
 
 test('private storage rejects shared permissions before writing state',async()=>{
  const root=await mkdtemp(join(tmpdir(),'gl-beta-permissions-'));try{const store=join(root,'private');await mkdir(store);await chmod(store,0o755);assert.throws(()=>createBetaGate({enabled:true,origin:'http://127.0.0.1:8083',administrators:admins,storeRoot:store,protectedRoots:[join(root,'canonical')]}),/owner-only/);}finally{await rm(root,{recursive:true,force:true});}
+});
+
+test('simultaneous identities cannot race past shared task or reservation admission',async()=>{
+ const s=await setup({hang:true,limit:1});try{const alice=await s.login(),bob=await s.login('bob');const responses=await Promise.all([s.request('/api/deep-search/search',{repository:'root/example'},alice),s.request('/api/deep-search/search',{repository:'root/example'},bob)]);assert.deepEqual(responses.map(r=>r.status).sort(),[202,429]);assert.equal(s.gate.usage().reservedAttempts,24);assert.equal(s.gate.usage().active,1);}finally{await s.close();}
+});
+
+test('default private capabilities expose the real engine cooldown before source admission',async()=>{
+ const s=await setup({useDefaultCooldown:true});try{const cookie=await s.login(),caps=await(await s.request('/api/deep-search/capabilities',undefined,cookie)).json() as any;assert.equal(caps.cooldownMs,15000);const task=await(await s.request('/api/deep-search/search',{repository:'root/example'},cookie)).json() as any;await s.done(task.id,cookie);const calls=s.fixture.calls.length,response=await s.request('/api/deep-search/sources',{searchId:task.id,candidateIds:[4]},cookie);assert.equal(response.status,429);assert.match(JSON.stringify(await response.json()),/cooldown/);assert.equal(s.fixture.calls.length,calls);}finally{await s.close();}
 });

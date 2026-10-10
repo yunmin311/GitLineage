@@ -3,7 +3,7 @@ import {randomBytes, scryptSync, timingSafeEqual} from 'node:crypto';
 import {readFileSync, writeFileSync, renameSync, mkdirSync, existsSync, realpathSync, openSync, closeSync, unlinkSync, statSync} from 'node:fs';
 import {resolve, join, dirname, basename} from 'node:path';
 import type {IncomingMessage, ServerResponse} from 'node:http';
-import {createPreview, PREVIEW_PROFILE} from '../discovery-v2/preview.ts';
+import {createPreview, PREVIEW_PROFILE, repositoryInput} from '../discovery-v2/preview.ts';
 import type {PreviewTask, FileChoice} from '../discovery-v2/preview.ts';
 import type {Transport} from '../../src/discovery/search-provider.ts';
 import {SNAPSHOT_NETWORK} from '../../src/discovery/resolution.ts';
@@ -48,7 +48,7 @@ export function createBetaGate(options:BetaOptions){
  function engine(owner:string){let e=engines.get(owner);if(!e){e=createPreview({cooldownMs:options.cooldownMs,transport:async(url,init)=>{
    if(now()<state.blockedUntil)throw new Error('shared GitHub quota unavailable');
    const response=await (options.transport??fetch)(url,init);const remaining=response.headers.get('x-ratelimit-remaining'),reset=Number(response.headers.get('x-ratelimit-reset'))*1000;
-   if(response.headers.get('x-ratelimit-resource')==='core'&&remaining!==null&&/^\d+$/.test(remaining))state.coreRemaining=Number(remaining);
+   if(response.headers.get('x-ratelimit-resource')==='core'&&remaining!==null&&/^\d+$/.test(remaining))state.coreRemaining=state.coreRemaining===null?Number(remaining):Math.min(state.coreRemaining,Number(remaining));
    const retry=response.headers.get('retry-after'),retryAt=retry?(/^\d+$/.test(retry)?now()+Number(retry)*1000:Date.parse(retry)):0;
    if([403,429].includes(response.status)||remaining==='0'||retry)state.blockedUntil=Math.max(now()+60000,Number.isFinite(reset)?reset:0,Number.isFinite(retryAt)?retryAt:0);
    save();return response;
@@ -79,7 +79,7 @@ export function createBetaGate(options:BetaOptions){
    // Session revocation remains available even after this identity exhausts its request allowance.
    if(mutating&&path==='/api/private-beta/logout'){sessions.delete(token);send(200,{authorized:false});return;}
    rate('identity:'+owner,limits.requestsPerMinute);
-   if(req.method==='GET'&&path==='/api/deep-search/capabilities'){send(200,{enabled:true,scope:'private beta',budget:PREVIEW_PROFILE,network:SNAPSHOT_NETWORK,verification:'pending',lineageClaim:'none',serviceLimits:limits,serviceUsage:{reservedAttempts:state.reserved,activeTasks:active.size}});return;}
+   if(req.method==='GET'&&path==='/api/deep-search/capabilities'){send(200,{enabled:true,scope:'private beta',cooldownMs:options.cooldownMs??15000,budget:PREVIEW_PROFILE,network:SNAPSHOT_NETWORK,verification:'pending',lineageClaim:'none',serviceLimits:limits,serviceUsage:{reservedAttempts:state.reserved,activeTasks:active.size}});return;}
    const taskRoute=path.match(/^\/api\/deep-search\/tasks\/([a-f0-9]{24})(\/cancel)?$/);
    if(taskRoute){const stored=owned(owner,taskRoute[1]);if(req.method==='GET'&&!taskRoute[2]){send(200,stored.task);return;}if(mutating&&taskRoute[2]){await body(req);engines.get(owner)?.cancel(stored.task.id);send(200,stored.task);return;}}
    if(!mutating){send(404,{error:'private route unavailable'});return;}
@@ -99,7 +99,7 @@ export function createBetaGate(options:BetaOptions){
     if(state.coreRemaining!==null&&state.coreRemaining<24)throw new Error('shared GitHub quota insufficient for bounded search');
     if(state.reserved+24>limits.attemptsPerHour||(state.searches[owner]??0)>=limits.searchesPerUserHour)throw new Error('shared search budget exhausted');
     // Validate before reservation; failed admitted searches remain charged across login/restart.
-    const {repositoryInput}=await import('../discovery-v2/preview.ts');repositoryInput(data.repository);
+    repositoryInput(data.repository);
     state.reserved+=24;state.searches[owner]=(state.searches[owner]??0)+1;save();task=e.startSearch(data.repository);
    }else if(path.endsWith('/sources'))task=e.startSources(String(data.searchId),data.candidateIds);
    else task=e.startCompare(String(data.searchId),data.candidateIds,data.selection as FileChoice);
