@@ -1,0 +1,43 @@
+{
+  "ok": true,
+  "data": {
+    "schemaVersion": "2.0.0",
+    "graph": {
+      "rootEntityId": "repo:github:yunmin311/GitLineage",
+      "provider": "github",
+      "revision": {
+        "commit": "1300ee991bd3eb028e2e716cdef707b9cf98be2d",
+        "resolvedAt": "2026-10-10T00:00:00.000Z"
+      },
+      "generatedAt": "2026-10-10T00:00:00.000Z",
+      "analyzer": {
+        "name": "gitlineage-test-fixture",
+        "version": "1.0.0",
+        "schemaVersion": "2.0.0",
+        "namespace": "public",
+        "extractors": [],
+        "adapters": [],
+        "limitsApplied": {}
+      }
+    },
+    "entities": [
+      {
+        "id": "repo:github:yunmin311/GitLineage",
+        "type": "Repository",
+        "display": {
+          "name": "GitLineage",
+          "fullName": "yunmin311/GitLineage",
+          "url": "https://github.com/yunmin311/GitLineage"
+        },
+        "attributes": {
+          "provider": "github",
+          "url": "https://github.com/yunmin311/GitLineage"
+        },
+        "sourceUrl": "https://github.com/yunmin311/GitLineage"
+      }
+    ],
+    "relationships": [],
+    "evidence": [],
+    "diagnostics": []
+  }
+}

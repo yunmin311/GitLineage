@@ -20,7 +20,14 @@
     "test:canvas": "node test/web/canvas-acceptance.ts",
     "shots": "node build.mjs && node test/web/screenshots.ts",
     "analyze": "node src/cli/main.ts analyze",
-    "check": "npm run typecheck && npm test"
+    "check": "npm run typecheck && npm test",
+    "test:ui-contract": "node test/web/ui-contract.ts",
+    "test:landing": "node test/web/landing-acceptance.ts",
+    "test:analysis": "node test/web/analysis-acceptance.ts",
+    "test:preflight": "node test/web/preflight-acceptance.ts",
+    "test:responsive": "node test/web/responsive-acceptance.ts",
+    "test:mobile": "node test/web/mobile-acceptance.ts",
+    "test:stale": "node test/web/stale-acceptance.ts"
   },
   "dependencies": {
     "smol-toml": "^1.4.2"

@@ -75,7 +75,7 @@ test('a selected plate draws the selected tier, and a shut plate has no rows', (
    * disagree -- which is the property this test has always been about.
    */
   assert.match(body, /function plateRowsFor\(/, 'one function bounds a plate');
-  assert.match(body, /const allRows = plateRows\(plate\)/);
+  assert.match(body, /const rows = plateRows\(plate\)/);
   assert.match(body, /const hiddenRows = plateHiddenRows\(plate\)/);
   assert.match(body, /plateRowsFor\(plate, top, hiddenRows\)/, 'the renderer uses it');
   /*
@@ -205,44 +205,22 @@ test('no selection or Drawer path requests a camera change', () => {
   }
 });
 
-test('the Drawer is a shell column, so opening it cannot move the world', () => {
-  const body = code(APP);
-  /*
-   * The Drawer used to be a grid column, and the cost was invisible until the reader
-   * used it: opening it deleted the context column and the bottom band and narrowed the
-   * stage by its own width, so the SVG rescaled and the subject changed size and
-   * position at the exact moment someone chose to read a relationship. A layout that
-   * moves the scene is a camera change however the viewBox is spelled.
-   *
-   * So it is still a grid column -- a *shell* one. The shell is allowed to change
-   * shape; the world is not, because the world never scales. The Drawer therefore has
-   * its own column at every width, and the graph simply begins after it.
-   */
-  assert.match(CSS, /\.drawer\s*\{[^}]*grid-column:\s*3/,
-    'the Drawer owns the third column, which is a shell property');
-  // The third track is zero until the Drawer is opened, and `--drawer-w` after. That
-  // is a shell track, not a canvas scale: the stage is `minmax(0, 1fr)`, so it takes
-  // whatever is left rather than asking the world to compress.
-  assert.match(CSS, /\.explorer-body\s*\{[^}]*grid-template-columns:\s*var\(--rail-w\) minmax\(0, 1fr\) 0/);
-  assert.match(CSS, /\.explorer-body\.with-drawer\s*\{[^}]*grid-template-columns:[^}]*var\(--drawer-w\)/);
-  assert.equal(/minmax\(0, 1fr\)/.test(CSS), true, 'the stage is the flexible track');
-  // At the frozen breakpoint it becomes an overlay on the world\'s reserved gutter,
-  // because by then there is no room for a third column. That is still shell-only.
-  assert.match(CSS, /@media \(max-width:\s*1340px\)/,
-    'the overlay breakpoint is the frozen one');
-  assert.match(CSS, /@media \(max-width:\s*1340px\)[\s\S]{0,900}?\.drawer\s*\{[^}]*position:\s*absolute/,
-    'the Drawer becomes an overlay only at that breakpoint');
+test('the Drawer is a shell overlay that cannot resize the SVG viewport', () => {
+  assert.match(CSS, /\.drawer\s*\{[^}]*position:\s*absolute/);
+  assert.match(CSS, /\.explorer-body\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/);
+  assert.doesNotMatch(CSS, /\.explorer-body\.with-drawer\s*\{[^}]*grid-template-columns/);
+  assert.match(CSS, /\.drawer\s*\{[^}]*bottom:\s*var\(--hud-h\)/);
 });
 
-test('the rail is a shell column that collapses to a disclosure, never a reflow of the world', () => {
+test('the rail is a shell overlay with responsive disclosure', () => {
   const body = code(APP);
   assert.match(CSS, /\.explorer-body\s*\{[^}]*grid-template-columns/, 'the shell is a grid');
-  assert.match(CSS, /\.rail\s*\{/, 'the rail is one of its columns');
-  // Below 1500 the rail collapses to zero width and comes back as a disclosure. The
+  assert.match(CSS, /\.rail\s*\{[^}]*position:\s*absolute/, 'the rail overlays the stage');
+  // Below 1600 the rail collapses to zero width and comes back as a disclosure. The
   // world does not move: it is 1920 x 1720 at every viewport, and only the window over
   // it changes.
-  assert.match(CSS, /@media \(max-width:\s*1500px\)/, 'the rail breakpoint is the frozen one');
-  assert.match(CSS, /@media \(max-width:\s*1500px\)[\s\S]{0,600}?\.rail\s*\{\s*display:\s*none/,
+  assert.match(CSS, /@media \(max-width:\s*1599px\)/, 'P0.5 uses the explicit single-panel breakpoint below 1600');
+  assert.match(CSS, /@media \(max-width:\s*1599px\)[\s\S]{0,600}?\.rail\s*\{\s*display:\s*none/,
     'and the rail is hidden there rather than reflowed');
   assert.match(body, /function toggleRail\(/, 'the disclosure is wired');
   assert.match(body, /rail-toggle/, 'to the shell\'s own button');
@@ -251,40 +229,17 @@ test('the rail is a shell column that collapses to a disclosure, never a reflow 
   assert.doesNotMatch(body, /\$\('gutter'\)/, 'the old world gutter is gone from the renderer');
 });
 
-test('the world layer carries its overlays through the camera\'s own transform', () => {
-  // The band is authored in world units, so it is put through the same mapping the
-  // SVG's viewBox performs. Positioned in raw pixels it was correct only at a viewport
-  // whose scale happened to be about one: at 1280 the canvas scaled to 0.69, the band
-  // stayed at world y 876, and it landed below the fold with a scrollbar on a canvas
-  // that must not scroll.
-  assert.match(CSS, /\.frame\s*\{[^}]*transform:\s*translate\(var\(--frame-x[^{]*scale\(var\(--frame-scale/);
-  // Sized from the world, not from the old fitted frame. The renderer writes the real
-  // numbers in; the fallbacks are the world itself, so a stylesheet read on its own
-  // still says 1920 x 1720.
-  assert.match(CSS, /\.frame\s*\{[^}]*width:\s*var\(--world-w,\s*1920px\)/);
-  assert.match(CSS, /\.frame\s*\{[^}]*height:\s*var\(--world-h,\s*1720px\)/);
-  assert.match(CSS, /\.frame\s*\{[^}]*transform-origin:\s*0 0/,
-    'the transform scales from the world origin, not from its centre');
-  // It spans the whole world, so it must never intercept a click meant for the canvas.
-  assert.match(CSS, /\.frame\s*\{[^}]*pointer-events:\s*none/);
+test('the HUD stays in screen space and only the SVG owns camera transforms', () => {
+  assert.match(CSS, /\.viewport-hud\s*\{[^}]*position:\s*absolute/);
+  assert.match(CSS, /\.viewport-hud\s*\{[^}]*inset:\s*auto 0 0/);
+  assert.match(CSS, /\.viewport-hud\s*\{[^}]*pointer-events:\s*none/);
+  assert.doesNotMatch(CSS, /--frame-scale|--frame-x|--frame-y/);
   const app = code(APP);
-  assert.match(app, /function applyFrameTransform\(/);
-  assert.match(app, /--frame-scale/);
-  assert.match(app, /--frame-x/);
-  assert.match(app, /--frame-y/);
-  // The transform takes the live viewBox, so a pan moves the band with the canvas. It
-  // used to read only the viewport, which left the band behind at the world's origin
-  // the first time a reader dragged.
-  assert.match(app, /function applyFrameTransform\(viewport, viewBox\)/);
-  assert.match(app, /frameTransform\(viewport, viewBox\)/);
-  // And every camera write goes through the one clamped path.
+  assert.doesNotMatch(app, /applyFrameTransform/);
   assert.match(app, /function setCamera\(/);
-  assert.match(app, /viewBoxFor\(/, 'which clamps the window inside the world');
-  assert.equal(
-    /canvas\.setAttribute\('viewBox',/.test(app.replace(/function setCamera\([\s\S]*?\n}/, '')),
-    false,
-    'no other code writes the viewBox directly',
-  );
+  assert.match(app, /viewBoxFor\(/);
+  assert.equal(/canvas\.setAttribute\('viewBox',/.test(app.replace(/function setCamera\([\s\S]*?\n}/, '')), false,
+    'all camera writes use the same clamped path');
 });
 
 test('long content is contained rather than overflowing the drawer', () => {

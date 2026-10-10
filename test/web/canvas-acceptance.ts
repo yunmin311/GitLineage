@@ -25,14 +25,14 @@
  *   3. A geometry assertion is supporting evidence, never the verdict. The visual
  *      judgement is made by looking at the captures.
  *
- * No repository code is executed: the server only reads public GitHub data, and it is
- * served from the same artifact cache the rest of the suite uses.
+ * No repository code is executed: the server reads committed, pinned graph fixtures
+ * and uses an isolated temporary cache, keeping this acceptance offline.
  */
 import { chromium, type Browser, type Page } from 'playwright';
 import assert from 'node:assert/strict';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { serve } from '../../src/web/serve.ts';
+import { fixtureServer } from './fixture-server.ts';
 
 /** The three repositories the acceptance set is defined against. No substitutions. */
 const SUBJECT_REPO = 'yunmin311/obsidian-config';
@@ -45,7 +45,6 @@ const EVIDENCE_REPO = 'Kuddev/pebrel';
 const MEMBER_NAME = 'Templater';
 
 const OUT = resolve('artifacts/shots/v2');
-const ROOT = resolve('.');
 const DESKTOP = { width: 1920, height: 1080 };
 const SMALL = { width: 1280, height: 800 };
 
@@ -61,9 +60,6 @@ function check(name: string, ok: boolean, detail = ''): void {
   process.stdout.write(`${ok ? 'ok  ' : 'FAIL'} ${name}${detail ? ` — ${detail}` : ''}\n`);
 }
 
-/** Overridable so a warm cache can be reused: a cold analysis of grpc takes minutes. */
-const CACHE_ROOT = resolve(process.env.GITLINEAGE_CANVAS_CACHE ?? '.cache');
-
 interface Camera {
   viewBox: string | null;
   /** CSS pixels per world unit, measured from the rendered canvas. */
@@ -71,7 +67,7 @@ interface Camera {
   /** World-space. These four must not move when the shell changes. */
   centre: [number, number] | null;
   worldFocal: [number, number] | null;
-  /** Screen-space. Shell-dependent by design: a column appearing moves it. */
+  /** Screen-space. Panel visibility must preserve it. */
   subjectScreen: { x: number; y: number; w: number; h: number } | null;
 }
 
@@ -389,13 +385,13 @@ async function scrollbarPixels(browser: Browser, selector: string, repo: string,
       content: `${selector} * { visibility: hidden !important; }
                 .drawer-more, .rail-more { display: none !important; }`,
     });
-const clip = await page.evaluate(`(() => {
+    const clip = await page.evaluate(`(() => {
       const n = document.querySelector(${JSON.stringify(selector)});
       const frame = n.closest('.drawer, .rail');
       n.scrollTop = 999999;
       const r = n.getBoundingClientRect();
-      return { x: Math.max(0, Math.round(r.right - 20)), y: Math.round(r.top),
-               width: 20, height: Math.round(r.height),
+      return { x: Math.max(0, Math.floor(r.right) - 20), y: Math.ceil(r.top),
+               width: 20, height: Math.floor(r.bottom) - Math.ceil(r.top),
                drawerHidden: !!document.querySelector('.drawer')?.hasAttribute('hidden'),
                frameRect: frame ? [Math.round(frame.getBoundingClientRect().width),
                                    Math.round(frame.getBoundingClientRect().height)] : null,
@@ -407,6 +403,7 @@ const clip = await page.evaluate(`(() => {
     })()`) as { x: number; y: number; width: number; height: number;
       drawerHidden: boolean; frameRect: number[] | null; explorerH: number; bodyRows: number };
     const png = await page.screenshot({ clip });
+    await writeFile(`${OUT}/scrollbar-${selector.replace(/[^a-z]/g, '')}.png`, png);
     /*
      * The colour the panel is *painted*, not the one it is declared with.
      *
@@ -420,7 +417,7 @@ const clip = await page.evaluate(`(() => {
       let el = document.querySelector(${JSON.stringify(selector)});
       while (el) {
         const c = getComputedStyle(el).backgroundColor;
-        const p = (c.match(/[\d.]+/g) || []).map(Number);
+        const p = (c.match(/[\\d.]+/g) || []).map(Number);
         if (p.length >= 3 && (p[3] === undefined || p[3] > 0.5)) return c;
         el = el.parentElement;
       }
@@ -440,7 +437,7 @@ const clip = await page.evaluate(`(() => {
       const d = Math.max(Math.abs(raw[i]! - sr), Math.abs(raw[i + 1]! - sg), Math.abs(raw[i + 2]! - sb));
       if (d > TOLERANCE) {
         bad += 1;
-        if (!worst) worst = `${raw[i]},${raw[i + 1]},${raw[i + 2]} vs ${sr},${sg},${sb}`;
+        if (!worst) worst = `pixel ${(i/4)%clip.width},${Math.floor(i/4/clip.width)}: ${raw[i]},${raw[i + 1]},${raw[i + 2]} vs ${sr},${sg},${sb}`;
       }
     }
     return { gutterPixels: bad, gutterWidth: clip.width, height: clip.height, worst,
@@ -673,18 +670,9 @@ async function shadowProbe(page: Page, ownerSelector: string): Promise<{
 
 async function main(): Promise<void> {
   await mkdir(OUT, { recursive: true });
-  const { server, url } = await serve(
-    {
-      port: 0,
-      clientDir: resolve(ROOT, 'dist/web'),
-      cacheRoot: CACHE_ROOT,
-      enableGit: true,
-      enableRegistry: true,
-    },
-    { GITLINEAGE_NO_CLIENT: '' },
-  );
+  const { url, cleanup } = await fixtureServer({ phaseDelayMs: 0 });
   process.stdout.write(`canvas acceptance server ${url}\n`);
-  process.stdout.write(`cache ${CACHE_ROOT}\n`);
+  process.stdout.write('canonical graph fixtures: committed and pinned\n');
 
   const report: Record<string, unknown> = { viewport: DESKTOP };
   let browser: Browser | undefined;
@@ -869,7 +857,7 @@ check('02 expanding reveals the held-back members',
     check('03 the rail and the bottom band survive the Drawer',
       fSelected.rails.rail === 'shown' && fSelected.rails.band === 'shown',
       `rail ${fSelected.rails.rail}, band ${fSelected.rails.band}`);
-    check('03 the Drawer is its own column, so nothing is switched out to make room',
+    check('03 the Drawer overlay preserves the rail and graph',
       fSelected.rails.drawer === 'shown' && fDefault.rails.rail === 'shown',
       'the rail was already the left column and stays it');
     check('03 selecting a member moves nothing in the world',
@@ -1330,16 +1318,11 @@ check('02 expanding reveals the held-back members',
     check('12 the window is identical before and after reading a relationship',
       worldCamera(camDefault.camera) === worldCamera(camSelected.camera),
       `${worldCamera(camDefault.camera)} vs ${worldCamera(camSelected.camera)}`);
-    /*
-     * The subject's *screen* box may differ here, and that is the new design working:
-     * the Drawer is a shell column, so the stage got narrower and the window over the
-     * same world got narrower with it. What must not change is where the subject is in
-     * the world. Asserting the screen box instead is what forced the old Drawer to be
-     * an overlay -- the check was protecting the symptom, not the invariant.
-     */
-    check('12 the subject keeps its world position while the shell changes',
-      JSON.stringify(camDefault.camera.worldFocal) === JSON.stringify(camSelected.camera.worldFocal),
-      `world focal ${JSON.stringify(camSelected.camera.worldFocal)}`);
+    check('12 the subject keeps its world focal and actual screen position/scale',
+      JSON.stringify(camDefault.camera.worldFocal) === JSON.stringify(camSelected.camera.worldFocal)
+        && JSON.stringify(camDefault.camera.subjectScreen) === JSON.stringify(camSelected.camera.subjectScreen)
+        && camDefault.camera.scale === camSelected.camera.scale,
+      JSON.stringify({before:camDefault.camera, after:camSelected.camera}));
 
     // ==================================== 13 · hierarchy without any text at all
     await open(page, url, `/${DENSE_REPO}`);
@@ -1490,7 +1473,7 @@ check('02 expanding reveals the held-back members',
     report['19-scrollbar-rail'] = railPixels;
     check('19 no native scrollbar is painted in the rail gutter',
       railPixels.gutterPixels === 0,
-      `${railPixels.gutterPixels} non-surface pixel(s) in ${railPixels.gutterWidth}px x ${railPixels.height}px`);
+      `${railPixels.gutterPixels} non-surface pixel(s) in ${railPixels.gutterWidth}px x ${railPixels.height}px ${railPixels.worst}`);
 
     // And the same panel on its own page, scrolled: an affordance that only holds at the
     // top is not an affordance.
@@ -1820,7 +1803,7 @@ check('02 expanding reveals the held-back members',
     await writeFile(`${OUT}/report.json`, JSON.stringify(report, null, 1));
   } finally {
     if (browser) await browser.close();
-    server.close();
+    await cleanup();
   }
 
   const failed = checks.filter((c) => !c.ok);

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
 <title>GitLineage — evidence-backed repository lineage</title>
 <meta name="description" content="Paste a GitHub repository. GitLineage traces its ancestry, dependencies and declared attribution — and shows the evidence behind every relationship it draws." />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='4' cy='12' r='2' fill='%2317150F'/%3E%3Ccircle cx='12' cy='4' r='2' fill='%23486884'/%3E%3Cpath d='M4 12 L12 4' stroke='%2317150F' stroke-width='1.2'/%3E%3C/svg%3E" />
@@ -28,6 +28,7 @@
     <span class="brand-mark" aria-hidden="true"></span>
     <span>GitLineage</span>
   </a>
+  <a class="text-btn project-source" id="project-source" href="https://github.com/yunmin311/GitLineage" target="_blank" rel="noreferrer noopener" aria-label="GitLineage project on GitHub">Project GitHub</a>
   <button class="rail-toggle" id="rail-toggle" aria-expanded="false" aria-controls="rail">Context</button>
   <div class="appbar-mid" id="appbar-mid" hidden>
     <span class="crumb-repo" id="crumb-repo"></span>
@@ -42,13 +43,14 @@
       <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.2"/><path d="M10.2 10.2 L14 14"/></svg>
     </button>
     <button class="text-btn" id="layers-btn" aria-expanded="false">Layers</button>
-    <a class="text-btn" id="open-source" href="#" target="_blank" rel="noreferrer noopener">GitHub</a>
+    <a class="text-btn" id="open-source" aria-label="Analysed repository on GitHub" href="#" target="_blank" rel="noreferrer noopener">GitHub</a>
   </div>
 </header>
 
 <div class="searchbar" id="searchbar" hidden>
   <svg viewBox="0 0 16 16" aria-hidden="true" class="search-icon"><circle cx="7" cy="7" r="4.2"/><path d="M10.2 10.2 L14 14"/></svg>
   <input id="search-input" placeholder="Search nodes and relationships" spellcheck="false" autocomplete="off" />
+  <div id="mobile-search-results" hidden></div>
   <span class="mono search-count" id="search-count"></span>
   <button class="icon-btn" id="search-close" aria-label="Close search">✕</button>
 </div>
@@ -375,26 +377,9 @@
     </div>
 
     <div class="explorer-body" id="explorer-body">
-      <!--
-        The context rail. A real grid column, not an overlay: an overlay can only
-        ever sit on top of the graph, so the graph has to be kept clear of it, and
-        at a narrow viewport there is nothing left to keep it clear of. As a column
-        the graph simply starts after it, and the legend lives here rather than
-        floating across the canvas.
-      -->
-      <!--
-        The context rail.
-
-        The frame clips; an inner box scrolls. A padding box that scrolls takes its own
-        padding with it, so the rail's padding lives on `.rail-scroll` instead -- on the
-        frame it would be consumed by the first scroll and the content would end up
-        touching the app bar.
-
-        `tabindex="0"` is not optional decoration: a scrollable region a keyboard cannot
-        focus is a scrollable region a keyboard cannot scroll. With it, Tab reaches the
-        rail and the arrow keys, Page Up/Down, Home and End all work inside it.
-      -->
+      <!-- Context is a shell overlay; it never resizes the graph stage. -->
       <aside class="rail" id="rail" aria-label="Context">
+        <button class="rail-close text-btn" id="rail-close" type="button" aria-label="Close context and return to graph or evidence">← Back · Close context</button>
         <div class="rail-scroll gl-scroll" id="rail-scroll" tabindex="0"></div>
         <span class="rail-more" aria-hidden="true"></span>
       </aside>
@@ -411,45 +396,43 @@
           <button class="d-action" id="retry-analysis" type="button" hidden>Try again</button>
         </div>
 
-        <svg id="canvas" class="canvas" role="img" aria-label="Repository lineage graph"></svg>
+        <svg id="canvas" class="canvas" role="group" aria-label="Repository lineage graph"></svg>
 
-        <!--
-          The world's HTML layer.
-
-          Authored in the same world units as the canvas geometry and put through
-          the identical transform the camera applies, so an overlay lands on the
-          world coordinate it annotates at every zoom.
-        -->
-        <div class="frame" id="frame">
-          <!--
-            Bottom band: the edge key, on the world rather than in the shell, so it
-            sits with the composition instead of colliding with a rail at some width.
-          -->
+        <!-- HUD owns screen pixels; the camera transforms SVG world content only. -->
+        <div class="viewport-hud" id="viewport-hud">
           <div class="band" id="band" hidden></div>
-        </div>
-
         <div class="viewport-controls">
           <button class="vp-btn" id="zoom-out" aria-label="Zoom out">−</button>
           <button class="vp-btn" id="zoom-in" aria-label="Zoom in">+</button>
           <button class="vp-btn vp-fit" id="zoom-fit" aria-label="Fit to view">⤢</button>
         </div>
 
+        </div>
+
         <div class="bundles" id="bundles" hidden></div>
       </div>
 
-      <!--
-        The Drawer: the third column of the shell.
-
-        It shares one rail with the graph's reserved gutter, and at the frozen
-        breakpoint it becomes an overlay on that same gutter. Either way the world
-        never moves, so reading a relationship cannot relocate the scene.
-      -->
+      <!-- Non-modal Shell overlay; scrolls independently of the graph camera. -->
       <aside class="drawer" id="drawer" hidden aria-live="polite">
         <div class="drawer-inner gl-scroll" id="drawer-inner" tabindex="0"></div>
         <span class="drawer-more" aria-hidden="true"></span>
       </aside>
+      <section id="mobile-relations" class="mobile-relations" aria-label="Relationships" hidden>
+        <header class="mobile-heading"><h2>Relations</h2><span id="mobile-relations-count" class="mono"></span></header>
+        <label class="mobile-search">Search relationships or entities<input id="mobile-relation-query" type="search" placeholder="Name, type, status or declaring path" /></label>
+        <div id="mobile-relation-list" class="gl-scroll" tabindex="0"></div>
+      </section>
+      <header id="mobile-evidence-heading" class="mobile-heading" hidden>
+        <button id="mobile-evidence-back" type="button">← Back</button><h2>Evidence</h2><button id="mobile-evidence-close" type="button" aria-label="Close evidence reading view">✕</button>
+      </header>
+      <div id="mobile-evidence-empty" class="mobile-empty" hidden><h2>No object selected</h2><p>Select a node or relationship in Graph or Relations to read its actual evidence.</p><button id="mobile-browse-relations" type="button">Browse Relations</button></div>
       <button class="drawer-scrim" id="drawer-scrim" hidden aria-label="Close evidence drawer"></button>
     </div>
+    <nav id="mobile-nav" aria-label="Explorer views" hidden>
+      <button type="button" data-mobile-view="graph">Graph</button>
+      <button type="button" data-mobile-view="relations">Relations</button>
+      <button type="button" data-mobile-view="evidence">Evidence</button>
+    </nav>
   </section>
   <!--
     The landing's continuation rule, on `#main` rather than on the scroller: a

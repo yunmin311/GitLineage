@@ -8,12 +8,13 @@
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 
 import type { MassReservations, MassSlot } from '../src/web/client/lib/compose.mjs';
 import { layoutMassStacks, ZONES, subjectPosition } from '../src/web/client/lib/compose.mjs';
 import { buildComposition, plateRows } from '../src/web/client/lib/aggregate.mjs';
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { canonicalView, type CanonicalFixtureName } from './helpers/canonical-fixtures.ts';
 
 const UPPER = 200;
 const LOWER = 852;
@@ -215,16 +216,11 @@ test('expanding one mass does not move a stack that has nothing to do with it', 
 
 interface FixtureView {
   edges: unknown[];
-  [key: string]: unknown;
 }
 
-const FIXTURES = resolve(import.meta.dirname, '..', 'artifacts/acceptance');
-const viewOf = (slug: string): FixtureView => {
-  const raw = JSON.parse(readFileSync(resolve(FIXTURES, `${slug}.view.json`), 'utf8'));
-  return ((raw.data && raw.data.view) || raw.data || raw) as FixtureView;
-};
+const viewOf = (slug: CanonicalFixtureName): FixtureView => canonicalView(slug);
 
-const composeOf = (slug: string) => {
+const composeOf = (slug: CanonicalFixtureName) => {
   const view = viewOf(slug);
   return buildComposition(view as never, { edges: view.edges as never });
 };
@@ -252,7 +248,7 @@ test('the largest non-remainder mass opens, and it is the largest by member coun
 });
 
 test('every shut mass is still reachable, so shutting one strands nothing', () => {
-  const fixtures = ['Kuddev__pebrel', 'yunmin311__obsidian-config', 'nachocebey__is', 'grpc__grpc'];
+  const fixtures = ['Kuddev__pebrel', 'yunmin311__obsidian-config', 'nachocebey__is', 'grpc__grpc'] as const;
   for (const slug of fixtures) {
     const composition = composeOf(slug);
     /*
