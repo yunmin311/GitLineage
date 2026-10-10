@@ -25,7 +25,7 @@
 | Private Beta 浏览器 | 390 / 430 / 1280 / 1920px 全部 PASS |
 | 正式构建一致性 | dist/web 全文件 SHA-256 前后相同 |
 
-新增 10 个安全测试覆盖默认关闭、匿名与错误认证、CSRF/Origin/转发头、重复 Cookie、会话轮换/过期/退出、跨身份结果隔离、共享额度及重复登录、活动并发、取消、实际 provider 超时、重启与私有目录权限。非法选择与拒绝请求不增加真实 HTTP 调用；provider 限流跨身份阻断；秘密不进入保存结果及导出。
+新增 10 个安全测试覆盖默认关闭、匿名与错误认证、CSRF/Origin/转发头、重复 Cookie、会话轮换/过期/退出、跨身份结果隔离、共享额度及重复登录、活动并发、取消、实际 provider 超时、重启与私有目录权限。身份频率耗尽后仍可成功退出并撤销会话，前端检查退出响应；非法选择与拒绝请求不增加真实 HTTP 调用；provider 限流跨身份阻断；秘密不进入保存结果及导出。
 
 四种尺寸分别实际完成登录 → Graph → Deep Search → 搜索 → 源码选择 → 比较 → 证据 → 下载并重新校验 → 返回 Graph → 退出授权。每种尺寸固定 Mock 14 次请求，verification=pending / lineageClaim=none；Graph URL/viewBox 与缓存摘要保持一致，无页面异常。[截图与浏览器收据](screenshots/private-beta/index.html)。本轮未执行真实 GitHub 实验，以上不是公开仓库 Benchmark 成绩。WebKit、实体设备和公网/TLS 运行未验收。
 

@@ -75,8 +75,10 @@ export function createBetaGate(options:BetaOptions){
    }
    const cookies=(req.headers.cookie??'').split(';').map(x=>x.trim()).filter(x=>x.startsWith(cookieName+'='));const token=cookies.length===1?cookies[0]!.slice(cookieName.length+1):'',session=sessions.get(token);
    if(!session||session.expires<=now()){sessions.delete(token);send(401,{error:'authorization required or expired'});return;}
-   const owner=session.owner;rate('identity:'+owner,limits.requestsPerMinute);
+   const owner=session.owner;
+   // Session revocation remains available even after this identity exhausts its request allowance.
    if(mutating&&path==='/api/private-beta/logout'){sessions.delete(token);send(200,{authorized:false});return;}
+   rate('identity:'+owner,limits.requestsPerMinute);
    if(req.method==='GET'&&path==='/api/deep-search/capabilities'){send(200,{enabled:true,scope:'private beta',budget:PREVIEW_PROFILE,network:SNAPSHOT_NETWORK,verification:'pending',lineageClaim:'none',serviceLimits:limits,serviceUsage:{reservedAttempts:state.reserved,activeTasks:active.size}});return;}
    const taskRoute=path.match(/^\/api\/deep-search\/tasks\/([a-f0-9]{24})(\/cancel)?$/);
    if(taskRoute){const stored=owned(owner,taskRoute[1]);if(req.method==='GET'&&!taskRoute[2]){send(200,stored.task);return;}if(mutating&&taskRoute[2]){await body(req);engines.get(owner)?.cancel(stored.task.id);send(200,stored.task);return;}}
