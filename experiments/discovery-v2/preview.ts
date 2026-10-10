@@ -7,8 +7,8 @@ import {RepositorySnapshotResolver,SNAPSHOT_PROFILE,SNAPSHOT_NETWORK} from '../.
 import type {Resolution} from '../../src/discovery/resolution.ts';
 import {parseObservation} from '../../src/discovery/search-contract.ts';
 import {buildQueryPlan,discoverRepositories} from '../../src/discovery/search.ts';
-import {sealPreviewExport,searchDiscoveries} from './preview-contract.ts';
-import type {PreviewExport} from './preview-contract.ts';
+import {sealPreviewExport,searchDiscoveries,sealSourceExport} from './preview-contract.ts';
+import type {PreviewExport,SourcePreviewExport} from './preview-contract.ts';
 import {stableJSON} from '../../src/discovery/offline.ts';
 import {sha256} from '../../src/discovery/snapshot.ts';
 import {listSources} from './source-selection.ts';
@@ -22,7 +22,7 @@ import type {SnapshotReceipt} from '../../src/discovery/snapshot-provider.ts';
 export const PREVIEW_PROFILE=Object.freeze({...SNAPSHOT_PROFILE,searchAttempts:2});
 const selections=[{path:'index.js',reason:'fixed root JavaScript entry'}, {path:'index.ts',reason:'fixed root TypeScript entry'}, {path:'src/index.js',reason:'fixed src JavaScript entry'}, {path:'src/index.ts',reason:'fixed src TypeScript entry'}];
 type SearchOutput={target:Resolution|null;result:Awaited<ReturnType<typeof discoverRepositories>>|null;requests:SnapshotReceipt[];usage:ReturnType<BudgetLedger['usage']>;network:ReturnType<NetworkLedger['usage']>;scope:string};
-export interface PreviewTask {id:string;kind:'search'|'sources'|'compare';state:'running'|'completed'|'partial'|'cancelled';phase:string;createdAt:string;error:string|null;search?:SearchOutput;comparison?:Awaited<ReturnType<typeof runPinnedProbe>>;export?:PreviewExport;sources?:{searchTaskId:string;requests:SnapshotReceipt[];repositories:SourceDirectory[];usage:ReturnType<BudgetLedger['usage']>;network:ReturnType<NetworkLedger['usage']>}}
+export interface PreviewTask {id:string;kind:'search'|'sources'|'compare';state:'running'|'completed'|'partial'|'cancelled';phase:string;createdAt:string;error:string|null;search?:SearchOutput;comparison?:Awaited<ReturnType<typeof runPinnedProbe>>;export?:PreviewExport;sourceExport?:SourcePreviewExport;sources?:{searchTaskId:string;targetId:number;candidateIds:number[];requests:SnapshotReceipt[];repositories:SourceDirectory[];usage:ReturnType<BudgetLedger['usage']>;network:ReturnType<NetworkLedger['usage']>}}
 export interface FileChoice {sourceTaskId:string;files:{repositoryId:number;paths:string[]}[]}
 interface Session {ledger:BudgetLedger;network:NetworkLedger;resolver:RepositorySnapshotResolver;resolutions:Map<number,Resolution>;trees:TreeCache;controller:AbortController;spent:number;started:number|null;task:PreviewTask|null;sourcesStarted:boolean;compareStarted:boolean;sourceTaskId:string|null;stages:{taskId:string;kind:string;wallMs:number;attempts:number;reservedBytes:number}[]}
 export interface PreviewOptions {transport?:Transport;cooldownMs?:number}
@@ -63,6 +63,7 @@ export function createPreview(options:PreviewOptions={}) {
      if(context){
       const wallMs=performance.now()-phaseStarted;context.spent+=wallMs;context.started=null;
       context.stages.push({taskId:task.id,kind,wallMs,attempts:context.ledger.usage().attempts-before,reservedBytes:context.network.usage().reservedBytes-reserved});
+      if(task.sources)task.sourceExport=sealSourceExport({schemaVersion:'discovery-source-preview-export@1',searchTaskId:task.sources.searchTaskId,sourceTaskId:task.id,search:get(task.sources.searchTaskId).search,sources:task.sources,stages:context.stages,verification:'pending',lineageClaim:'none'});
       if(task.export&&context.sourceTaskId){
        const sources=get(context.sourceTaskId).sources!;
        task.export=sealPreviewExport(task.export.provenance,task.export.probe,{
@@ -101,15 +102,17 @@ export function createPreview(options:PreviewOptions={}) {
   const task=begin('sources',async(task)=>{const repositories:SourceDirectory[]=[];const target=context.resolutions.values().next().value!;
    const resolutions=[target];for(const c of candidates){const r=await context.resolver.resolve(c.candidate.repositoryId,c.candidate.observations);context.resolutions.set(r.requestedId,r);resolutions.push(r);}
    for(const r of resolutions){const listing=await listSources(r,context.resolver,context.trees);
-    if(r.identity){const raw=await context.resolver.provider.get(`/repos/${r.identity.fullName}`,context.network),post=raw?parseObservation(raw,new Date().toISOString(),'repository_metadata'):null;if(!post||post.repositoryId!==r.requestedId||post.fullName!==r.identity.fullName){r.state='inconclusive';r.identity=null;r.tree=null;r.reasons.push('source listing final identity unavailable or changed');listing.files=[];listing.coverage.state='unavailable';listing.coverage.reasons.push(...r.reasons);}}
+    if(r.identity){const raw=await context.resolver.provider.get(`/repos/${r.identity.fullName}`,context.network),post=raw?parseObservation(raw,new Date().toISOString(),'repository_metadata'):null;if(!post||post.repositoryId!==r.requestedId||post.fullName!==r.identity.fullName){r.state='inconclusive';r.identity=null;r.tree=null;r.reasons.push('source listing final identity unavailable or changed');listing.files=[];listing.coverage.state='unavailable';listing.coverage.enumeration='unavailable';listing.coverage.eligibleFiles=0;listing.coverage.reasons.push(...r.reasons);}}
     repositories.push(listing);
-   }task.sources={searchTaskId:searchId,requests:structuredClone(context.resolver.provider.receipts),repositories,usage:context.ledger.usage(),network:context.network.usage()};return repositories.every(r=>r.coverage.state==='listed');
+   }task.sources={searchTaskId:searchId,targetId:target.requestedId,candidateIds:candidates.map(c=>c.candidate.repositoryId),requests:structuredClone(context.resolver.provider.receipts),repositories,usage:context.ledger.usage(),network:context.network.usage()};return repositories.every(r=>r.coverage.state==='listed'&&r.coverage.eligibleFiles>0);
   },context);context.sourcesStarted=true;context.sourceTaskId=task.id;return task;
  }
  function startCompare(searchId:string,ids:unknown,choice?:FileChoice){
   const {parent,search,candidates,target}=selectedCandidates(searchId,ids),context=sessions.get(searchId)!;if(context.compareStarted)throw new Error('comparison already started; session closed');
   let paths=new Map<number,typeof selections>();
-  if(choice){if(!choice||Object.keys(choice).sort().join()!=='files,sourceTaskId')throw new Error('invalid source selection');const sources=get(choice.sourceTaskId);if(context.sourceTaskId!==choice.sourceTaskId||sources.state==='running'||sources.sources?.searchTaskId!==searchId||!Array.isArray(choice.files)||choice.files.length!==candidates.length+1)throw new Error('matching completed source task required');
+  if(choice){if(!choice||Object.keys(choice).sort().join()!=='files,sourceTaskId')throw new Error('invalid source selection');const sources=get(choice.sourceTaskId);if(context.sourceTaskId!==choice.sourceTaskId||sources.state==='running'||sources.sources?.searchTaskId!==searchId||!Array.isArray(choice.files)||choice.files.length!==candidates.length+1)throw new Error('matching completed source task and candidate set required');
+   const fixed=sources.sources;if(fixed.targetId!==target.repositoryId||fixed.candidateIds.length!==candidates.length||!fixed.candidateIds.every(id=>candidates.some(c=>c.candidate.repositoryId===id))||new Set(fixed.candidateIds).size!==fixed.candidateIds.length)throw new Error('source task candidate set mismatch');
+   candidates.sort((a,b)=>fixed.candidateIds.indexOf(a.candidate.repositoryId)-fixed.candidateIds.indexOf(b.candidate.repositoryId));
    for(const c of choice.files){if(!c||Object.keys(c).sort().join()!=='paths,repositoryId')throw new Error('invalid source choice');if(!Array.isArray(c.paths)||!c.paths.length||c.paths.length>8||paths.has(c.repositoryId))throw new Error('one to eight distinct source paths per repository required');const listed=sources.sources.repositories.find(r=>r.repositoryId===c.repositoryId);if(!listed||!context.resolutions.get(c.repositoryId)?.identity||c.paths.some(p=>!listed.files.some(f=>f.path===p&&f.selectable)))throw new Error('only verified selectable listed paths allowed');const selected=c.paths.map(path=>({path,reason:'explicit user selection from pinned bounded tree'}));validateSelections(selected);paths.set(c.repositoryId,selected);}
    if(![target.repositoryId!,...candidates.map(c=>c.candidate.repositoryId)].every(id=>paths.has(id)))throw new Error('selection identity mismatch');
   }else if(context.sourcesStarted)throw new Error('visible source selection required');

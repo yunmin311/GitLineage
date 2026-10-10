@@ -18,7 +18,7 @@ test('fixed tree exposes non-entry JS/TS paths and binds explicit selections acr
  assert.throws(()=>p.startCompare(s.id,[4],{sourceTaskId:t.id,files:[{repositoryId:1,paths:['../bad']},{repositoryId:4,paths:['lib/core.ts']}]}));
 });
 
-import {validatePreviewExport} from '../../experiments/discovery-v2/preview-contract.ts';
+import {validatePreviewExport,validateSourceExport} from '../../experiments/discovery-v2/preview-contract.ts';
 
 test('multiple files remain finite samples with selected, read, filtered and pending paths distinct',async()=>{
  const f=treeFixture();const content=Buffer.from('export function map(values) { return values.map(value => value + 1); }\n');
@@ -88,4 +88,37 @@ test('post-listing identity conflict withholds all candidate files',async()=>{
  }}),s=p.startSearch('root/example');await p.wait(s.id);const t=p.startSources(s.id,[4]);await p.wait(t.id);
  assert.equal(t.sources!.repositories[1]!.coverage.state,'unavailable');assert.deepEqual(t.sources!.repositories[1]!.files,[]);
  assert.throws(()=>p.startCompare(s.id,[4],{sourceTaskId:t.id,files:[1,4].map(repositoryId=>({repositoryId,paths:['index.js']}))}),/verified selectable/);
+});
+
+test('filtered-only listing distinguishes successful enumeration from source availability',async()=>{
+ const f=treeFixture();f.repos[3]!.files={'README.md':Buffer.from('Documentation only, no executable source')};f.rebuild();
+ const p=createPreview({transport:f.transport,cooldownMs:0}),s=p.startSearch('root/example');await p.wait(s.id);const t=p.startSources(s.id,[4]);await p.wait(t.id);
+ const r=t.sources!.repositories[1]!;
+ assert.equal(r.coverage.state,'listed');assert.equal(r.coverage.eligibleFiles,0);assert.equal(r.coverage.enumeration,'complete');assert.equal(t.state,'partial');
+ assert.ok(r.coverage.filtered.some(f=>f.path==='README.md'));
+ assert.ok(t.sourceExport,'partial listing must have a downloadable independent receipt');
+ const receipt=JSON.parse(JSON.stringify(t.sourceExport));validateSourceExport(receipt);assert.deepEqual(receipt.sources.repositories[1]!.coverage,r.coverage);receipt.sources.repositories[1]!.coverage.eligibleFiles=1;assert.throws(()=>validateSourceExport(receipt));
+});
+
+test('compare refuses changed fixed candidate set before any resource consumption',async()=>{
+ const f=treeFixture(),p=createPreview({transport:f.transport,cooldownMs:0}),s=p.startSearch('root/example');await p.wait(s.id);const t=p.startSources(s.id,[2,4]);await p.wait(t.id);
+ const before=f.calls.length,usage=JSON.stringify(t.sources!.usage);
+ assert.throws(()=>p.startCompare(s.id,[4],{sourceTaskId:t.id,files:[1,4].map(repositoryId=>({repositoryId,paths:['index.js']}))}),/candidate set/);
+ assert.equal(f.calls.length,before);assert.equal(JSON.stringify(t.sources!.usage),usage);
+});
+
+test('duplicate, missing, cross-session and invalid file choices are rejected without requests or workers',async()=>{
+ const f=treeFixture(),p=createPreview({transport:f.transport,cooldownMs:0}),s=p.startSearch('root/example');await p.wait(s.id);const t=p.startSources(s.id,[4]);await p.wait(t.id);
+ const other=p.startSearch('root/example');await p.wait(other.id);
+ const before=f.calls.length,usage=JSON.stringify(t.sources!.usage),files=[1,4].map(repositoryId=>({repositoryId,paths:['index.js']}));
+ for(const [ids,choice] of [
+  [[4,4],{sourceTaskId:t.id,files}],
+  [[4],{sourceTaskId:t.id,files:files.slice(1)}],
+  [[4],{sourceTaskId:other.id,files}],
+  [[4],{sourceTaskId:t.id,files:[files[0],files[0]]}],
+  [[4],{sourceTaskId:t.id,files:[files[0],{repositoryId:4,paths:['../escape.js']}]}]
+ ] as const)assert.throws(()=>p.startCompare(s.id,ids,choice as never));
+ assert.equal(f.calls.length,before);assert.equal(JSON.stringify(t.sources!.usage),usage);
+ assert.throws(()=>p.startCompare(other.id,[4],{sourceTaskId:t.id,files}));
+ const c=p.startCompare(s.id,[4],{sourceTaskId:t.id,files});await p.wait(c.id);assert.equal(c.state,'completed');assert.equal(c.comparison!.content.usage.peakWorkers,1);assert.equal(Object.values(c.comparison!.content.usage.files).reduce((a,b)=>a+b,0),2);assert.equal(c.comparison!.content.usage.attempts,f.calls.length-other.search!.usage.attempts);
 });

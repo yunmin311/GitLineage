@@ -31,3 +31,22 @@ export function validatePreviewExport(value:unknown):asserts value is PreviewExp
  }
  const {contentDigest,...payload}=c;if(contentDigest!==sha256(stableJSON(payload)))throw new TypeError('preview digest mismatch');
 }
+
+/** A listing receipt is downloadable even when no file can be compared. */
+export interface SourcePreviewExport {
+ schemaVersion:'discovery-source-preview-export@1';searchTaskId:string;sourceTaskId:string;
+ search:unknown;sources:{searchTaskId:string;targetId:number;candidateIds:number[];repositories:SourceDirectory[];usage:BudgetUsage;network:NetworkUsage};
+ stages:{taskId:string;kind:string;wallMs:number;attempts:number;reservedBytes:number}[];
+ verification:'pending';lineageClaim:'none';contentDigest:string;
+}
+export function sealSourceExport(payload:Omit<SourcePreviewExport,'contentDigest'>):SourcePreviewExport {
+ const out={...structuredClone(payload),contentDigest:sha256(stableJSON(payload))};validateSourceExport(out);return out;
+}
+export function validateSourceExport(value:unknown):asserts value is SourcePreviewExport {
+ const c=value as SourcePreviewExport;
+ if(!c||c.schemaVersion!=='discovery-source-preview-export@1'||c.verification!=='pending'||c.lineageClaim!=='none'||! /^[a-f0-9]{24}$/.test(c.searchTaskId)||! /^[a-f0-9]{24}$/.test(c.sourceTaskId)||c.sources.searchTaskId!==c.searchTaskId)throw new TypeError('invalid source receipt');
+ const ids=[c.sources.targetId,...c.sources.candidateIds];
+ if(new Set(ids).size!==ids.length||ids.length!==c.sources.repositories.length||c.sources.usage.attempts>24||c.sources.network.reservedBytes>1048576||c.stages.reduce((n,s)=>n+s.attempts,0)!==c.sources.usage.attempts)throw new TypeError('invalid source receipt resources or identities');
+ for(const [i,r]of c.sources.repositories.entries())if(r.repositoryId!==ids[i]||r.coverage.eligibleFiles!==r.files.filter(f=>f.selectable).length||!['complete','partial','failed','unavailable'].includes(r.coverage.enumeration))throw new TypeError('invalid listing coverage');
+ const {contentDigest,...payload}=c;if(contentDigest!==sha256(stableJSON(payload)))throw new TypeError('source receipt digest mismatch');
+}
