@@ -11,7 +11,7 @@ export const B = 'yunmin311/obsidian-config';
 export const C = 'grpc/grpc';
 export const D = 'nachocebey/is';
 export const E = 'yunmin311/GitLineage';
-type FixtureServerOptions = Pick<ServeOptions, 'previewHandler'> & { phaseDelayMs?: number };
+type FixtureServerOptions = Pick<ServeOptions, 'previewHandler' | 'privateBetaHandler'> & { phaseDelayMs?: number };
 export async function fixtureServer(previewOptions: FixtureServerOptions = {}) {
   const { phaseDelayMs = 4000, ...serveOptions } = previewOptions;
   const graphs = new Map<string, LineageGraph>();
