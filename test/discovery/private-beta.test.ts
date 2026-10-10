@@ -9,11 +9,11 @@ import {officialFixture} from '../../experiments/discovery-v2/phase1d-mock.ts';
 import {validatePreviewExport} from '../../experiments/discovery-v2/preview-contract.ts';
 const password='test-private-credential',salt='a'.repeat(32);
 const admins=['alice','bob'].map(id=>({id,salt,passwordHash:passwordHash(password,salt)}));
-async function setup(opts:{enabled?:boolean;sessionMs?:number;hang?:boolean;limit?:number;rateLimit?:boolean;useDefaultCooldown?:boolean}={}){
+async function setup(opts:{enabled?:boolean;sessionMs?:number;hang?:boolean;limit?:number;rateLimit?:boolean;useDefaultCooldown?:boolean;proxyKey?:string}={}){
  const root=await mkdtemp(join(tmpdir(),'gl-beta-')),fixture=officialFixture();let clock=Date.now();
  let gate:ReturnType<typeof createBetaGate>;
  const server=createServer((req,res)=>void gate.handler(req,res));await new Promise<void>(r=>server.listen(0,'127.0.0.1',r));const address=server.address() as {port:number},origin=`http://127.0.0.1:${address.port}`;
- gate=createBetaGate({enabled:opts.enabled??true,origin,administrators:admins,storeRoot:join(root,'private'),protectedRoots:[join(root,'canonical')],cooldownMs:opts.useDefaultCooldown?undefined:0,sessionMs:opts.sessionMs,now:()=>clock,limits:{globalActive:opts.limit??2,userActive:1,attemptsPerHour:24,searchesPerUserHour:1,requestsPerMinute:90},transport:opts.hang?async(_u,init)=>new Promise((_r,reject)=>{init?.signal?.addEventListener('abort',()=>reject(new Error('aborted')),{once:true});}):async(url,init)=>{const response=await fixture.transport(url,init);return opts.rateLimit?new Response('{}',{status:403,headers:{'x-ratelimit-remaining':'0','x-ratelimit-reset':String(Math.ceil(Date.now()/1000)+3600),'retry-after':'3600'}}):response;}});
+ gate=createBetaGate({enabled:opts.enabled??true,origin,proxyKey:opts.proxyKey,administrators:admins,storeRoot:join(root,'private'),protectedRoots:[join(root,'canonical')],cooldownMs:opts.useDefaultCooldown?undefined:0,sessionMs:opts.sessionMs,now:()=>clock,limits:{globalActive:opts.limit??2,userActive:1,attemptsPerHour:24,searchesPerUserHour:1,requestsPerMinute:90},transport:opts.hang?async(_u,init)=>new Promise((_r,reject)=>{init?.signal?.addEventListener('abort',()=>reject(new Error('aborted')),{once:true});}):async(url,init)=>{const response=await fixture.transport(url,init);return opts.rateLimit?new Response('{}',{status:403,headers:{'x-ratelimit-remaining':'0','x-ratelimit-reset':String(Math.ceil(Date.now()/1000)+3600),'retry-after':'3600'}}):response;}});
  async function request(path:string,data?:unknown,cookie='',headers:Record<string,string>={}){return fetch(origin+path,{method:data===undefined?'GET':'POST',headers:{...(data===undefined?{}:{origin,'content-type':'application/json','x-gitlineage-csrf':'1'}),cookie,...headers},...(data===undefined?{}:{body:JSON.stringify(data)})});}
  async function login(identity='alice'){const r=await request('/api/private-beta/login',{identity,password});assert.equal(r.status,200);return r.headers.get('set-cookie')!.split(';')[0]!;}
  async function done(id:string,cookie:string){for(let i=0;i<100;i++){const r=await request('/api/deep-search/tasks/'+id,undefined,cookie),task=await r.json() as any;if(task.state!=='running')return task;await new Promise(r=>setTimeout(r,15));}throw new Error('task did not finish');}
@@ -95,4 +95,17 @@ test('body has an absolute deadline despite continuous chunks; oversized lengths
 
 test('durable reservation failure refuses network work and further admission',async()=>{
  const s=await setup();try{const cookie=await s.login();await rm(join(s.root,'private/state.json'));await mkdir(join(s.root,'private/state.json'));assert.equal((await s.request('/api/deep-search/search',{repository:'root/example'},cookie)).status,400);assert.equal((await s.request('/api/deep-search/search',{repository:'root/example'},cookie)).status,400);assert.equal(s.fixture.calls.length,0);assert.equal(s.gate.usage().active,0);await assert.rejects(s.gate.close(),/persistence unavailable/);}finally{await s.close().catch(()=>{});await rm(s.root,{recursive:true,force:true});}
+});
+
+// This marker belongs to a dedicated reverse proxy, never to browser JavaScript.
+test('dedicated proxy marker rejects direct and malformed requests before auth or engine work',async()=>{
+ const key='c'.repeat(64),s=await setup({proxyKey:key});try{
+ for(const marker of [undefined,'d'.repeat(64),'é'.repeat(64)]){const headers:Record<string,string>=marker===undefined?{}:{'x-gitlineage-proxy':marker};assert.equal((await s.request('/api/private-beta/login',{identity:'alice',password},'',headers)).status,403);}
+ const headers={'x-gitlineage-proxy':key};const response=await s.request('/api/private-beta/login',{identity:'alice',password},'',headers);assert.equal(response.status,200);const cookie=response.headers.get('set-cookie')!.split(';')[0]!;
+ assert.equal((await s.request('/api/deep-search/capabilities',undefined,cookie,headers)).status,200);assert.equal((await s.request('/api/deep-search/capabilities',undefined,cookie,{...headers,'x-forwarded-host':'localhost'})).status,403);assert.equal(s.fixture.calls.length,0);assert.equal(s.gate.usage().reservedAttempts,0);assert.ok(!(await readFile(join(s.root,'private/state.json'),'utf8')).includes(key));
+ }finally{await s.close();}
+});
+
+test('explicit HTTPS service entry refuses a missing proxy key before creating storage',async()=>{
+ const {spawnSync}=await import('node:child_process');const result=spawnSync(process.execPath,['experiments/discovery-v2/serve-private-beta.ts'],{encoding:'utf8',env:{PATH:process.env.PATH,GITLINEAGE_PRIVATE_BETA:'1',GITLINEAGE_BETA_ORIGIN:'https://localhost:8443'}});assert.notEqual(result.status,0);assert.match(result.stderr,/requires a dedicated proxy key/);
 });

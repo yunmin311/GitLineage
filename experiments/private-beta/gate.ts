@@ -12,7 +12,7 @@ export interface Administrator {id:string;salt:string;passwordHash:string}
 export function passwordHash(password:string,salt:string):string {return scryptSync(password,salt,64).toString('hex');}
 export interface BetaOptions {
  enabled:boolean;origin:string;administrators:Administrator[];storeRoot:string;protectedRoots:string[];
- transport?:Transport;sessionMs?:number;cooldownMs?:number;
+ proxyKey?:string;transport?:Transport;sessionMs?:number;cooldownMs?:number;
  limits?:{globalActive:number;userActive:number;attemptsPerHour:number;searchesPerUserHour:number;requestsPerMinute:number};
  now?:()=>number;
 }
@@ -28,6 +28,7 @@ export function createBetaGate(options:BetaOptions){
  if(options.enabled&&(!options.administrators.length||options.administrators.length>16))throw new Error('explicit administrators required');
  if(options.sessionMs!==undefined&&(!Number.isSafeInteger(options.sessionMs)||options.sessionMs<1||options.sessionMs>900000))throw new Error('session lifetime exceeds ceiling');
  const ids=new Set<string>();for(const a of options.administrators){if(!/^[a-zA-Z0-9_-]{1,48}$/.test(a.id)||Object.hasOwn(Object.prototype,a.id)||ids.has(a.id)||!/^[a-f0-9]{32,128}$/.test(a.salt)||!/^[a-f0-9]{128}$/.test(a.passwordHash))throw new Error('invalid administrator configuration');ids.add(a.id);}
+ if(options.proxyKey!==undefined&&!/^[a-f0-9]{64}$/.test(options.proxyKey))throw new Error('invalid private proxy configuration');
  const sessions=new Map<string,{owner:string;expires:number}>(),engines=new Map<string,ReturnType<typeof createPreview>>(),active=new Map<string,string>(),rates=new Map<string,number[]>();
  const cookieName=origin.protocol==='https:'?'__Host-gl_beta':'gl_beta';
  const file=join(resolve(options.storeRoot),'state.json'),lock=join(resolve(options.storeRoot),'instance.lock');let closed=false, persistenceFailed=false;
@@ -51,7 +52,7 @@ export function createBetaGate(options:BetaOptions){
  }
  function window(){if(now()-state.window>=3600000){state.window=now();state.reserved=0;state.coreRemaining=null;state.searches={};save();}}
  function rate(key:string,max:number){const list=(rates.get(key)??[]).filter(t=>now()-t<60000);if(list.length>=max)throw new Error('request frequency exhausted');list.push(now());rates.set(key,list);}
- function clean<T>(value:T):T {let text=JSON.stringify(value);for(const secret of [...sessions.keys(),...options.administrators.map(a=>a.passwordHash)])text=text.split(secret).join('[redacted]');return JSON.parse(text);}
+ function clean<T>(value:T):T {let text=JSON.stringify(value);for(const secret of [...sessions.keys(),...options.administrators.map(a=>a.passwordHash),...(options.proxyKey?[options.proxyKey]:[])])text=text.split(secret).join('[redacted]');return JSON.parse(text);}
  function engine(owner:string){let e=engines.get(owner);if(!e){e=createPreview({cooldownMs:options.cooldownMs,transport:async(url,init)=>{
    if(now()<state.blockedUntil)throw new Error('shared GitHub quota unavailable');
    const response=await (options.transport??fetch)(url,init);const remaining=response.headers.get('x-ratelimit-remaining'),reset=Number(response.headers.get('x-ratelimit-reset'))*1000;
@@ -77,7 +78,7 @@ export function createBetaGate(options:BetaOptions){
 
  async function handler(req:IncomingMessage,res:ServerResponse){
   const send=(status:number,data:unknown)=>{if(res.destroyed)return;res.writeHead(status,{'content-type':'application/json','cache-control':'no-store','x-content-type-options':'nosniff','referrer-policy':'no-referrer'});res.end(JSON.stringify(clean(data)));};
-  const path=req.url??'/';if(!options.enabled||closed){if(path==='/api/deep-search/capabilities')send(200,{enabled:false});else send(404,{error:'private beta disabled'});return;}
+  const path=req.url??'/';if(options.proxyKey){const marker=req.headers['x-gitlineage-proxy'];if(typeof marker!=='string'||!/^[a-f0-9]{64}$/.test(marker)||!timingSafeEqual(Buffer.from(marker),Buffer.from(options.proxyKey))){send(403,{error:'controlled proxy required'});return;}}if(!options.enabled||closed){if(path==='/api/deep-search/capabilities')send(200,{enabled:false});else send(404,{error:'private beta disabled'});return;}
   if(req.headers.host!==origin.host||Object.keys(req.headers).some(k=>k==='forwarded'||k.startsWith('x-forwarded-'))||path.includes('?')||req.headers['sec-fetch-site']==='cross-site'){send(403,{error:'untrusted request context'});return;}
   if(req.method==='GET'&&path==='/private-beta'){
    res.writeHead(200,{'x-frame-options':'DENY','content-type':'text/html','cache-control':'no-store','referrer-policy':'no-referrer','content-security-policy':"default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; form-action 'self'; frame-ancestors 'none'"});res.end('<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1"><title>GitLineage Private Beta</title><link rel="stylesheet" href="/private-beta/style.css"><main><h1>Private Beta</h1><p>Administrator authorization. Public Graph remains available.</p><form id="login"><label>Identity<input name="identity" autocomplete="username" required></label><label>Password<input name="password" type="password" autocomplete="current-password" required></label><button>Authorize</button></form><p id="status" role="status"></p><a href="/">Public Graph</a></main><script src="/private-beta/login.js"></script>');return;

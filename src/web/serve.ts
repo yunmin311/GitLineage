@@ -1,3 +1,4 @@
+import { timingSafeEqual } from 'node:crypto';
 import { createServer, type Server, type IncomingMessage, type ServerResponse } from 'node:http';
 import { GitLineageServer } from './server.ts';
 import { loadConfig, type ServerConfig } from './config.ts';
@@ -10,6 +11,8 @@ export interface ServeOptions {
   previewHandler?: (request: IncomingMessage, response: ServerResponse) => Promise<void>;
   /** Explicit private service seam; normal CLI does not install it. */
   privateBetaHandler?: (request: IncomingMessage, response: ServerResponse) => Promise<void>;
+  /** Dedicated private proxy authentication; never enabled by the public CLI. */
+  privateBetaProxyKey?: string;
   port?: number;
   host?: string;
   cacheRoot?: string;
@@ -50,6 +53,7 @@ export async function serve(
   env: NodeJS.ProcessEnv = process.env,
   overrides: Partial<ServerConfig> = {},
 ): Promise<{ server: Server; url: string; app: GitLineageServer }> {
+  if (options.privateBetaProxyKey !== undefined && (!options.privateBetaHandler || !/^[a-f0-9]{64}$/.test(options.privateBetaProxyKey))) throw new Error('Invalid dedicated private proxy configuration');
   // One effective configuration, resolved once.
   //
   // This used to keep two: `loadConfig(env)` for the server and a separate
@@ -94,6 +98,14 @@ export async function serve(
   );
 
 const server = createServer((request, response) => {
+      if (options.privateBetaProxyKey) {
+        const marker = request.headers['x-gitlineage-proxy'];
+        if (typeof marker !== 'string' || !/^[a-f0-9]{64}$/.test(marker) || !timingSafeEqual(Buffer.from(marker), Buffer.from(options.privateBetaProxyKey)) || Object.keys(request.headers).some(key => key === 'forwarded' || key.startsWith('x-forwarded-'))) {
+          response.writeHead(403, { 'content-type': 'application/json', 'cache-control': 'no-store' });
+          response.end('{"error":"controlled proxy required"}');
+          return;
+        }
+      }
       // Only the explicitly installed private service receives frame protection.
       if (options.privateBetaHandler) {
         response.setHeader('Content-Security-Policy', "frame-ancestors 'none'");

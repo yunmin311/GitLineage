@@ -89,5 +89,7 @@ jobs:
       - name: Private Beta authorization browser acceptance
         run: npm run test:private-beta
 
+      - name: Trusted loopback TLS and Caddy Private Beta staging
+        run: npm run test:private-beta-tls
       - name: Confirm browser tests used the unchanged production bundle
         run: sha256sum --check "$RUNNER_TEMP/gitlineage-web-build.sha256"
