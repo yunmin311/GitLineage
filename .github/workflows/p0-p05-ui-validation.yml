@@ -1,0 +1,106 @@
+name: P0/P0.5 stable UI validation
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - '.github/workflows/p0-p05-ui-validation.yml'
+      - 'src/web/**'
+      - 'test/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'build.mjs'
+      - 'tsconfig*.json'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: p0-p05-ui-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  arm64-node24:
+    name: ARM64 Node 24 · stable UI regression
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Verify native ARM64 and Node 24
+        run: |
+          test "$(uname -m)" = "aarch64"
+          node -e 'if (process.versions.node.split(".")[0] !== "24" || process.arch !== "arm64") process.exit(1); console.log(process.version, process.arch)'
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Production build
+        run: |
+          npm run build
+          test -s dist/web/index.html
+          test -s dist/web/assets/app.js
+
+      - name: Production Deep Search remains disabled
+        run: |
+          test ! -e src/discovery
+          test ! -e test/discovery
+          test ! -e experiments/discovery-v2/preview.ts
+          if rg -n --glob '*.ts' '(/api/(discovery|deep-search)|/discovery-v2)' src/web; then
+            echo 'Unexpected production Discovery endpoint in the stable UI release prefix' >&2
+            exit 1
+          fi
+
+      - name: Install Chromium for Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Record the exact production bundle used by browser tests
+        run: find dist/web -type f -print0 | sort -z | xargs -0 sha256sum > "$RUNNER_TEMP/gitlineage-web-build.sha256"
+
+      - name: Canvas browser acceptance
+        run: npm run test:canvas
+
+      - name: Landing browser acceptance
+        run: npm run test:landing
+
+      - name: Analysis browser acceptance
+        run: npm run test:analysis
+
+      - name: Preflight browser acceptance
+        run: npm run test:preflight
+
+      - name: Stale A to B browser acceptance
+        run: npm run test:stale
+
+      - name: UI contract browser acceptance
+        run: npm run test:ui-contract
+
+      - name: Responsive browser acceptance
+        run: npm run test:responsive
+
+      - name: Mobile browser acceptance
+        run: npm run test:mobile
+
+      - name: Confirm browser tests used the unchanged production bundle
+        run: sha256sum --check "$RUNNER_TEMP/gitlineage-web-build.sha256"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p0-p05-ui-browser-evidence-${{ github.sha }}
+          path: artifacts/
+          if-no-files-found: ignore
+          retention-days: 14
