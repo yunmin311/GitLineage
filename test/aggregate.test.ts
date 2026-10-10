@@ -14,6 +14,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { canonicalView } from './helpers/canonical-fixtures.ts';
 
 import {
   VISIBLE_OBJECT_BUDGET,
@@ -27,11 +28,7 @@ import {
   PLATE_MEMBER_ROWS,
 } from '../src/web/client/lib/aggregate.mjs';
 
-const FIXTURES = resolve(import.meta.dirname, '..', 'artifacts/acceptance');
-const viewOf = (slug: string) => {
-  const raw = JSON.parse(readFileSync(resolve(FIXTURES, `${slug}.view.json`), 'utf8'));
-  return (raw.data && raw.data.view) || raw.data || raw;
-};
+const viewOf = canonicalView;
 // The composition decides how the one-hop relationships are drawn, so it is given
 // all of them. The view-model's own primary/bundled split is the mechanism this
 // policy replaces, not an input to it.
@@ -164,7 +161,7 @@ test('obsidian-config: the 12/2 split comes from real evidence, not from the rul
 test('obsidian-config: every table subgroup member really is a table row', () => {
   // Guards against the classifier drifting into claiming provenance it cannot see.
   const view = viewOf(OBSIDIAN);
-  const evidence = view.evidenceByRelationship as Record<string, Array<Record<string, unknown>>>;
+  const evidence = view.evidenceByRelationship;
   const composition = buildComposition(view as never, { edges: visible(view as never) as never });
   const table = composition.plates.find((p) => p.form === 'table-row')!;
   const prose = composition.plates.find((p) => p.form === 'prose')!;
@@ -330,7 +327,7 @@ test('canonical direction and status survive aggregation untouched', () => {
 });
 
 test('aggregation never drops or invents a relationship', () => {
-  for (const slug of [OBSIDIAN, GRPC, SPARSE]) {
+  for (const slug of [OBSIDIAN, GRPC, SPARSE] as const) {
     const view = viewOf(slug);
     const edges = visible(view as never) as Array<{ id: string }>;
     const composition = buildComposition(view as never, { edges: edges as never });
@@ -446,7 +443,7 @@ test('pebrel: a one-family dense graph becomes structural masses, never one gian
   for (const plate of dependencyPlates) {
     if (plate.form !== DeclarationForm.Manifest) continue;
     for (const edgeId of plate.memberEdgeIds) {
-      const cards = (view.evidenceByRelationship?.[edgeId] ?? []) as Array<Record<string, unknown>>;
+      const cards = view.evidenceByRelationship?.[edgeId] ?? [];
       const names = cards.some((card) => {
         const data = (card.data ?? {}) as Record<string, unknown>;
         const inner = (data.data && typeof data.data === 'object') ? (data.data as Record<string, unknown>) : data;
@@ -465,7 +462,7 @@ test('REACHABILITY: union(plate members) == every one-hop relationship, exactly 
    * one-hop relationship appears in exactly one plate or as exactly one loose edge, so
    * grouping can never quietly drop a member and no "+N more" can be a fiction.
    */
-  for (const slug of [PEBREL, GRPC, SPARSE, OBSIDIAN]) {
+  for (const slug of [PEBREL, GRPC, SPARSE, OBSIDIAN] as const) {
     const view = viewOf(slug);
     const composition = buildComposition(view as never, { edges: visible(view as never) as never });
 
@@ -481,7 +478,7 @@ test('REACHABILITY: union(plate members) == every one-hop relationship, exactly 
       seen.set(edgeId, 'loose');
     }
 
-    const expected = new Set(view.edges.map((e: { id: string }) => e.id));
+    const expected = new Set(view.edges.map((e) => e.id));
     assert.deepEqual(
       [...seen.keys()].sort(),
       [...expected].sort(),
@@ -500,7 +497,7 @@ test('sparse data is not over-grouped: nachocebey/is keeps its shape', () => {
   const view = viewOf(SPARSE);
   const composition = buildComposition(view as never, { edges: visible(view as never) as never });
 
-  const families = new Set(view.edges.map((e: Record<string, unknown>) => e.family as string));
+  const families = new Set(view.edges.map((e) => e.family));
   assert.ok(families.size >= 3, 'this is a mixed-family graph to begin with');
   // Every family that had loose relationships keeps some, so sparsity is not erased.
   assert.ok(

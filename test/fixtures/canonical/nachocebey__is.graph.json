@@ -1,0 +1,1589 @@
+{
+  "ok": true,
+  "data": {
+    "schemaVersion": "2.0.0",
+    "graph": {
+      "rootEntityId": "repo:github:nachocebey/is",
+      "provider": "github",
+      "revision": {
+        "commit": "e9c026c611c1160eaad50da00be4e676b626018f",
+        "defaultBranch": "main",
+        "resolvedAt": "2026-10-03T05:04:59.002Z"
+      },
+      "generatedAt": "2026-10-03T05:04:59.002Z",
+      "analyzer": {
+        "name": "gitlineage-analyzer",
+        "version": "0.2.0",
+        "schemaVersion": "2.0.0",
+        "namespace": "public",
+        "extractors": [
+          "explicit-attribution@1",
+          "explicit-reference@1",
+          "git-blob-identity@1",
+          "git-history-containment@1",
+          "git-shared-commits@1",
+          "github-fork-metadata@1",
+          "github-repository-identity@1",
+          "lockfile-dependency@1",
+          "manifest-dependency@1",
+          "package-registry-metadata@1"
+        ],
+        "adapters": [
+          "package-registry"
+        ],
+        "limitsApplied": {
+          "history_depth": 200,
+          "tree_entries": 120000,
+          "document_bytes": 262144,
+          "manifest_bytes": 2097152,
+          "dependency_facts": 400,
+          "registry_lookups": 25,
+          "candidate_count": 12
+        }
+      }
+    },
+    "entities": [
+      {
+        "id": "pkg:npm:del-cli",
+        "type": "Package",
+        "display": {
+          "name": "del-cli",
+          "fullName": "npm:del-cli"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:npm:expect-type",
+        "type": "Package",
+        "display": {
+          "name": "expect-type",
+          "fullName": "npm:expect-type"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:npm:jsdom",
+        "type": "Package",
+        "display": {
+          "name": "jsdom",
+          "fullName": "npm:jsdom"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:npm:rxjs",
+        "type": "Package",
+        "display": {
+          "name": "rxjs",
+          "fullName": "npm:rxjs"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:npm:tempy",
+        "type": "Package",
+        "display": {
+          "name": "tempy",
+          "fullName": "npm:tempy"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:npm:typescript",
+        "type": "Package",
+        "display": {
+          "name": "typescript",
+          "fullName": "npm:typescript"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:npm:xo",
+        "type": "Package",
+        "display": {
+          "name": "xo",
+          "fullName": "npm:xo"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:npm:zen-observable",
+        "type": "Package",
+        "display": {
+          "name": "zen-observable",
+          "fullName": "npm:zen-observable"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "repo:github:nachocebey/is",
+        "type": "Repository",
+        "display": {
+          "name": "is",
+          "fullName": "nachocebey/is",
+          "url": "https://github.com/nachocebey/is"
+        },
+        "attributes": {
+          "archived": false,
+          "created_at": "2026-09-25T13:06:30Z",
+          "default_branch": "main",
+          "description": "Type check values",
+          "full_name": "nachocebey/is",
+          "homepage": "",
+          "is_fork": true,
+          "license_spdx": "MIT",
+          "name": "is",
+          "owner": "nachocebey",
+          "provider": "github",
+          "pushed_at": "2026-09-18T19:10:10Z",
+          "repository_size_kb": 1201,
+          "topics": [],
+          "updated_at": "2026-09-25T13:06:30Z",
+          "url": "https://github.com/nachocebey/is"
+        },
+        "sourceUrl": "https://github.com/nachocebey/is"
+      },
+      {
+        "id": "repo:github:sindresorhus/environment",
+        "type": "Repository",
+        "display": {
+          "name": "environment",
+          "fullName": "sindresorhus/environment",
+          "url": "https://github.com/sindresorhus/environment"
+        },
+        "attributes": {
+          "created_at": "2024-04-28T16:48:10Z",
+          "default_branch": "main",
+          "full_name": "sindresorhus/environment",
+          "is_fork": false,
+          "provider": "github",
+          "url": "https://github.com/sindresorhus/environment"
+        },
+        "sourceUrl": "https://github.com/sindresorhus/environment"
+      },
+      {
+        "id": "repo:github:sindresorhus/file-type",
+        "type": "Repository",
+        "display": {
+          "name": "file-type",
+          "fullName": "sindresorhus/file-type",
+          "url": "https://github.com/sindresorhus/file-type"
+        },
+        "attributes": {
+          "created_at": "2014-04-24T10:58:09Z",
+          "default_branch": "main",
+          "full_name": "sindresorhus/file-type",
+          "is_fork": false,
+          "provider": "github",
+          "url": "https://github.com/sindresorhus/file-type"
+        },
+        "sourceUrl": "https://github.com/sindresorhus/file-type"
+      },
+      {
+        "id": "repo:github:sindresorhus/has-emoji",
+        "type": "Repository",
+        "display": {
+          "name": "has-emoji",
+          "fullName": "sindresorhus/has-emoji",
+          "url": "https://github.com/sindresorhus/has-emoji"
+        },
+        "attributes": {
+          "created_at": "2017-11-08T10:05:55Z",
+          "default_branch": "main",
+          "full_name": "sindresorhus/has-emoji",
+          "is_fork": false,
+          "provider": "github",
+          "url": "https://github.com/sindresorhus/has-emoji"
+        },
+        "sourceUrl": "https://github.com/sindresorhus/has-emoji"
+      },
+      {
+        "id": "repo:github:sindresorhus/is",
+        "type": "Repository",
+        "display": {
+          "name": "is",
+          "fullName": "sindresorhus/is",
+          "url": "https://github.com/sindresorhus/is"
+        },
+        "attributes": {
+          "provider": "github",
+          "url": "https://github.com/sindresorhus/is",
+          "created_at": "2017-09-21T17:46:08Z",
+          "default_branch": "main",
+          "full_name": "sindresorhus/is",
+          "is_fork": false
+        },
+        "sourceUrl": "https://github.com/sindresorhus/is"
+      },
+      {
+        "id": "repo:github:sindresorhus/is-array-sorted",
+        "type": "Repository",
+        "display": {
+          "name": "is-array-sorted",
+          "fullName": "sindresorhus/is-array-sorted",
+          "url": "https://github.com/sindresorhus/is-array-sorted"
+        },
+        "attributes": {
+          "created_at": "2017-01-23T13:02:41Z",
+          "default_branch": "main",
+          "full_name": "sindresorhus/is-array-sorted",
+          "is_fork": false,
+          "provider": "github",
+          "url": "https://github.com/sindresorhus/is-array-sorted"
+        },
+        "sourceUrl": "https://github.com/sindresorhus/is-array-sorted"
+      },
+      {
+        "id": "repo:github:sindresorhus/is-blob",
+        "type": "Repository",
+        "display": {
+          "name": "is-blob",
+          "fullName": "sindresorhus/is-blob",
+          "url": "https://github.com/sindresorhus/is-blob"
+        },
+        "attributes": {
+          "created_at": "2015-10-21T19:55:35Z",
+          "default_branch": "main",
+          "full_name": "sindresorhus/is-blob",
+          "is_fork": false,
+          "provider": "github",
+          "url": "https://github.com/sindresorhus/is-blob"
+        },
+        "sourceUrl": "https://github.com/sindresorhus/is-blob"
+      },
+      {
+        "id": "repo:github:sindresorhus/is-empty-iterable",
+        "type": "Repository",
+        "display": {
+          "name": "is-empty-iterable",
+          "fullName": "sindresorhus/is-empty-iterable",
+          "url": "https://github.com/sindresorhus/is-empty-iterable"
+        },
+        "attributes": {
+          "created_at": "2016-09-20T05:18:00Z",
+          "default_branch": "main",
+          "full_name": "sindresorhus/is-empty-iterable",
+          "is_fork": false,
+          "provider": "github",
+          "url": "https://github.com/sindresorhus/is-empty-iterable"
+        },
+        "sourceUrl": "https://github.com/sindresorhus/is-empty-iterable"
+      },
+      {
+        "id": "repo:github:sindresorhus/is-error-constructor",
+        "type": "Repository",
+        "display": {
+          "name": "is-error-constructor",
+          "fullName": "sindresorhus/is-error-constructor",
+          "url": "https://github.com/sindresorhus/is-error-constructor"
+        },
+        "attributes": {
+          "created_at": "2016-10-22T15:36:09Z",
+          "default_branch": "main",
+          "full_name": "sindresorhus/is-error-constructor",
+          "is_fork": false,
+          "provider": "github",
+          "url": "https://github.com/sindresorhus/is-error-constructor"
+        },
+        "sourceUrl": "https://github.com/sindresorhus/is-error-constructor"
+      },
+      {
+        "id": "repo:github:sindresorhus/is-ip",
+        "type": "Repository",
+        "display": {
+          "name": "is-ip",
+          "fullName": "sindresorhus/is-ip",
+          "url": "https://github.com/sindresorhus/is-ip"
+        },
+        "attributes": {
+          "created_at": "2014-09-06T11:52:15Z",
+          "default_branch": "main",
+          "full_name": "sindresorhus/is-ip",
+          "is_fork": false,
+          "provider": "github",
+          "url": "https://github.com/sindresorhus/is-ip"
+        },
+        "sourceUrl": "https://github.com/sindresorhus/is-ip"
+      },
+      {
+        "id": "repo:github:sindresorhus/is-observable",
+        "type": "Repository",
+        "display": {
+          "name": "is-observable",
+          "fullName": "sindresorhus/is-observable",
+          "url": "https://github.com/sindresorhus/is-observable"
+        },
+        "attributes": {
+          "created_at": "2015-11-19T13:40:25Z",
+          "default_branch": "main",
+          "full_name": "sindresorhus/is-observable",
+          "is_fork": false,
+          "provider": "github",
+          "url": "https://github.com/sindresorhus/is-observable"
+        },
+        "sourceUrl": "https://github.com/sindresorhus/is-observable"
+      },
+      {
+        "id": "repo:github:sindresorhus/is-stream",
+        "type": "Repository",
+        "display": {
+          "name": "is-stream",
+          "fullName": "sindresorhus/is-stream",
+          "url": "https://github.com/sindresorhus/is-stream"
+        },
+        "attributes": {
+          "created_at": "2015-01-18T18:55:15Z",
+          "default_branch": "main",
+          "full_name": "sindresorhus/is-stream",
+          "is_fork": false,
+          "provider": "github",
+          "url": "https://github.com/sindresorhus/is-stream"
+        },
+        "sourceUrl": "https://github.com/sindresorhus/is-stream"
+      }
+    ],
+    "relationships": [
+      {
+        "id": "rel_dd64dbfac960e447",
+        "type": "depends_on",
+        "source": "repo:github:nachocebey/is",
+        "target": "pkg:npm:del-cli",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_cae0da666a5ad7cb"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_a69fc757750db7aa",
+        "type": "depends_on",
+        "source": "repo:github:nachocebey/is",
+        "target": "pkg:npm:expect-type",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_1b824d6d503f711e"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_72c825f4badaa356",
+        "type": "depends_on",
+        "source": "repo:github:nachocebey/is",
+        "target": "pkg:npm:jsdom",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_37effeb319acc9c8"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_bed7480a1fcfa363",
+        "type": "depends_on",
+        "source": "repo:github:nachocebey/is",
+        "target": "pkg:npm:rxjs",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_9940c6bb1efaf55f"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_01f1227d2ad10241",
+        "type": "depends_on",
+        "source": "repo:github:nachocebey/is",
+        "target": "pkg:npm:tempy",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_e64f5e4935908e6d"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_5caeaa26519f05ae",
+        "type": "depends_on",
+        "source": "repo:github:nachocebey/is",
+        "target": "pkg:npm:typescript",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_002685977fa9c0c1"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_da35f602b99f2e0c",
+        "type": "depends_on",
+        "source": "repo:github:nachocebey/is",
+        "target": "pkg:npm:xo",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_ee76dc9d1dfa31f6"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_a69a9e3c8537008d",
+        "type": "depends_on",
+        "source": "repo:github:nachocebey/is",
+        "target": "pkg:npm:zen-observable",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_27a792f2d4671131"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_0650192de92c7a9b",
+        "type": "forked_from",
+        "source": "repo:github:nachocebey/is",
+        "target": "repo:github:sindresorhus/is",
+        "directed": true,
+        "status": "VERIFIED",
+        "evidenceIds": [
+          "ev_c0eeed3b6d7b2961"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_4865a6956721fa86",
+        "type": "references",
+        "source": "repo:github:nachocebey/is",
+        "target": "repo:github:sindresorhus/environment",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_48fa918af4e26081"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_040b4751f4ea461b",
+        "type": "references",
+        "source": "repo:github:nachocebey/is",
+        "target": "repo:github:sindresorhus/file-type",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_67936a95aa8ac327"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_d0fe17c84a09d59d",
+        "type": "references",
+        "source": "repo:github:nachocebey/is",
+        "target": "repo:github:sindresorhus/has-emoji",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_99f68191590596ba"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_62a838a4009025dd",
+        "type": "references",
+        "source": "repo:github:nachocebey/is",
+        "target": "repo:github:sindresorhus/is-array-sorted",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_2d5a2cd5fea62cd7"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_86db8dc29ccab736",
+        "type": "references",
+        "source": "repo:github:nachocebey/is",
+        "target": "repo:github:sindresorhus/is-blob",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_9e7e1a4b6d95c688"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_0c1dd4ffbf477403",
+        "type": "references",
+        "source": "repo:github:nachocebey/is",
+        "target": "repo:github:sindresorhus/is-empty-iterable",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_855ff896c3e74556"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_025f1e40f10c224c",
+        "type": "references",
+        "source": "repo:github:nachocebey/is",
+        "target": "repo:github:sindresorhus/is-error-constructor",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_028153ff38eb028c"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_2b0c14050dcbf87e",
+        "type": "references",
+        "source": "repo:github:nachocebey/is",
+        "target": "repo:github:sindresorhus/is-ip",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_7a3ac66e718d9bc5"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_fcaa1443f8234db8",
+        "type": "references",
+        "source": "repo:github:nachocebey/is",
+        "target": "repo:github:sindresorhus/is-observable",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_c30b6a64e9f82edf"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_3588ec2ce2956086",
+        "type": "references",
+        "source": "repo:github:nachocebey/is",
+        "target": "repo:github:sindresorhus/is-stream",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_26dfce7ba73a744c"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_3b0344d5890f0179",
+        "type": "shares_exact_content_with",
+        "source": "repo:github:nachocebey/is",
+        "target": "repo:github:sindresorhus/is",
+        "directed": false,
+        "status": "VERIFIED",
+        "evidenceIds": [
+          "ev_0005d121e3999826",
+          "ev_099c33b717554148",
+          "ev_18239098d97d7f8c",
+          "ev_21a96a6ccabf9fb0",
+          "ev_2328396c5bd6c1cb",
+          "ev_2929a89068e5a7ff",
+          "ev_48ef67e2d0dc490a",
+          "ev_48fee38c46f8eb36",
+          "ev_4f035ab3b2070821",
+          "ev_54b2fe00454a7069",
+          "ev_75fa3467fdd0b604",
+          "ev_8c1d2a65c9ba662f",
+          "ev_a6515dc52a8d15f5",
+          "ev_ab3a92f39dabb031",
+          "ev_b1dd90899c441ae1",
+          "ev_bd776e94e19c7f2f",
+          "ev_bfcf71d06a3f4600",
+          "ev_e1f613f4a6d17425",
+          "ev_f85794981e4de84e"
+        ],
+        "attributes": {
+          "candidate_index_truncated": false,
+          "evidence_truncated": false,
+          "first_blob_count": 19,
+          "matched_blob_count": 19,
+          "second_blob_count": 19
+        }
+      },
+      {
+        "id": "rel_db2892b35b44e6a1",
+        "type": "shares_history_with",
+        "source": "repo:github:nachocebey/is",
+        "target": "repo:github:sindresorhus/is",
+        "directed": false,
+        "status": "VERIFIED",
+        "evidenceIds": [
+          "ev_0b94f0d9058e9e5b"
+        ],
+        "attributes": {
+          "candidate_history_truncated": false,
+          "evidence_truncated": true,
+          "root_history_truncated": false,
+          "shared_commit_count": 200
+        }
+      }
+    ],
+    "evidence": [
+      {
+        "id": "ev_0005d121e3999826",
+        "type": "git_blob_identity",
+        "status": "VERIFIED",
+        "collector": "git-blob-analyzer",
+        "extractor": "git-blob-identity@1",
+        "repository": "repo:github:nachocebey/is",
+        "sourceUrl": "https://github.com/nachocebey/is/blob/e9c026c611c1160eaad50da00be4e676b626018f/readme.md",
+        "locator": {
+          "path": "readme.md",
+          "field": "509f75fc162053037b834ddb86c12a674a31619a"
+        },
+        "observedText": "identical git blob 509f75fc162053037b834ddb86c12a674a31619a",
+        "data": {
+          "first_blob": "509f75fc162053037b834ddb86c12a674a31619a",
+          "second_blob": "509f75fc162053037b834ddb86c12a674a31619a",
+          "first_path": "readme.md",
+          "second_path": "readme.md",
+          "first_commit": "e9c026c611c1160eaad50da00be4e676b626018f",
+          "second_commit": "e9c026c611c1160eaad50da00be4e676b626018f",
+          "direction": "symmetric: identical content establishes no order of origin"
+        },
+        "observedAt": "2026-10-03T05:04:59.002Z"
+      },
+      {
+        "id": "ev_002685977fa9c0c1",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:nachocebey/is",
+        "sourceUrl": "https://github.com/nachocebey/is/blob/e9c026c611c1160eaad50da00be4e676b626018f/package.json",
+        "locator": {
+          "path": "package.json",
+          "field": "typescript",
+          "spec": "npm"
+        },
+        "observedText": "\"typescript\": \"6.0.2\"",
+        "data": {
+          "ecosystem": "npm",
+          "package_name": "typescript",
+          "range": "6.0.2",
+          "manifest_path": "package.json",
+          "scope": "dev"
+        },
+        "observedAt": "2026-10-03T05:04:59.002Z"
+      },
+      {
+        "id": "ev_028153ff38eb028c",
+        "type": "document_reference",
+        "status": "DECLARED",
+        "collector": "documents",
+        "extractor": "explicit-reference@1",
+        "repository": "repo:github:nachocebey/is",
+        "sourceUrl": "https://github.com/nachocebey/is/blob/e9c026c611c1160eaad50da00be4e676b626018f/readme.md",
+        "locator": {
+          "path": "readme.md",
+          "lineStart": 915,
+          "lineEnd": 915
+        },
+        "observedText": "- [is-error-constructor](https://github.com/sindresorhus/is-error-constructor) - Check if a value is an error constructor",
+        "data": {
+          "matched_text": "- [is-error-constructor](https://github.com/sindresorhus/is-error-constructor) - Check if a value is an error constructor",
+          "path": "readme.md",
+          "line_start": 915,
+          "line_end": 915,
+          "phrase": "link"
+        },
+        "observedAt": "2026-10-03T05:04:59.002Z"
+      },
+      {
+        "id": "ev_099c33b717554148",
+        "type": "git_blob_identity",
+        "status": "VERIFIED",
+        "collector": "git-blob-analyzer",
+        "extractor": "git-blob-identity@1",
+        "repository": "repo:github:nachocebey/is",
+        "sourceUrl": "https://github.com/nachocebey/is/blob/e9c026c611c1160eaad50da00be4e676b626018f/source/types.ts",
+        "locator": {
+          "path": "source/types.ts",
+          "field": "92550724c9de6f190a78836110b3b65bda7a61e5"
+        },
+        "observedText": "identical git blob 92550724c9de6f190a78836110b3b65bda7a61e5",
+        "data": {
+          "first_blob": "92550724c9de6f190a78836110b3b65bda7a61e5",
+          "second_blob": "92550724c9de6f190a78836110b3b65bda7a61e5",
+          "first_path": "source/types.ts",
+          "second_path": "source/types.ts",
+          "first_commit": "e9c026c611c1160eaad50da00be4e676b626018f",
+          "second_commit": "e9c026c611c1160eaad50da00be4e676b626018f",
+          "direction": "symmetric: identical content establishes no order of origin"
+        },
+        "observedAt": "2026-10-03T05:04:59.002Z"
+      },
+      {
+        "id": "ev_0b94f0d9058e9e5b",
+        "type": "git_shared_commits",
+        "status": "VERIFIED",
+        "collector": "git-analyzer",
+        "extractor": "git-shared-commits@1",
+        "repository": "repo:github:nachocebey/is",
+        "sourceUrl": "https://github.com/sindresorhus/is",
+        "observedText": "200 identical commit object(s)",
+        "data": {
+          "shared_commit_count": 200,
+          "shared_commit_samples": [
+            "e9c026c611c1160eaad50da00be4e676b626018f",
+            "7821031c66cdeb7256a0feb2d506535f9e84fcaf",
+            "a4393055546c2d90aa386dd6f6f9cde80b9e6338",
+            "2d4956e6349182b5c8421e8a4b54033bd964e7b1",
+            "48df5c429ced9b65fc788aa17ab8b9004d46a772",
+            "13febb6b01e24863ced3847a7ee112a48c154e0e",
+            "cb4ee0e92cd3bff8353bb6738bd1f54db87dc293",
+            "54fc09406a5e8edf44726fdea02ed4658d6b3db2",
+            "63be5c0c1945c863c49341507ef52c29d40cbef9",
+            "ac46b5400d7ae00fcc001467ddfda5f9624c4ce8",
+            "47415dc46aaa27ad491393af87978e873cb9fbb1",
+            "3b40955b02fc9a55e55904e3e9bb82ef07c72442",
+            "faf700367e40af945def85224da9ab326c51374c",
+            "eff8e6b318d098317d5673b9d391f8e72cb15363",
+            "9bdcd9b57f0ef38f3f495f785aec830c138b0bac",
+            "fbcc68e139627bdc7728ef120607090e10727761",
+            "e7c84fcb797ea9857fa56750688440bf3f347589",
+            "d22ab629916392104a69b34387008ca2a2cc3ddd",
+            "1f2440ae0d964721d1eb87aa2c334a995757dd12",
+            "c68ad76062eafbd384badd7e96d09776307478c8",
+            "ef35cc350af879f5747ccfa9bde6343cc30b144d",
+            "882a91c54fb90ce265af9e6f9b9c4e7a65e6bf2f",
+            "e8e8124ba72e82d13cfb28e7359a4c1e823d4c07",
+            "47a5099325f959cf69522a50e75bb89c593d554c",
+            "e0976457e04ba5df210ca0c976844b580b62f741"
+          ],
+          "sampled_commit_count": 200,
+          "root_window_truncated": false,
+          "candidate_window_truncated": false,
+          "comparison": "commit-object-identity"
+        },
+        "observedAt": "2026-10-03T05:04:59.002Z"
+      },
+      {
+        "id": "ev_18239098d97d7f8c",
+        "type": "git_blob_identity",
+        "status": "VERIFIED",
+        "collector": "git-blob-analyzer",
+        "extractor": "git-blob-identity@1",
+        "repository": "repo:github:nachocebey/is",
+        "sourceUrl": "https://github.com/nachocebey/is/blob/e9c026c611c1160eaad50da00be4e676b626018f/source/index.ts",
+        "locator": {
+          "path": "source/index.ts",
+          "field": "6c2f42892e01d7d72b97c3d779fe0d23323de25c"
+        },
+        "observedText": "identical git blob 6c2f42892e01d7d72b97c3d779fe0d23323de25c",
+        "data": {
+          "first_blob": "6c2f42892e01d7d72b97c3d779fe0d23323de25c",
+          "second_blob": "6c2f42892e01d7d72b97c3d779fe0d23323de25c",
+          "first_path": "source/index.ts",
+          "second_path": "source/index.ts",
+          "first_commit": "e9c026c611c1160eaad50da00be4e676b626018f",
+          "second_commit": "e9c026c611c1160eaad50da00be4e676b626018f",
+          "direction": "symmetric: identical content establishes no order of origin"
+        },
+        "observedAt": "2026-10-03T05:04:59.002Z"
+      },
+      {
+        "id": "ev_1b824d6d503f711e",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:nachocebey/is",
+        "sourceUrl": "https://github.com/nachocebey/is/blob/e9c026c611c1160eaad50da00be4e676b626018f/package.json",
+        "locator": {
+          "path": "package.json",
+          "field": "expect-type",
+          "spec": "npm"
+        },
+        "observedText": "\"expect-type\": \"^1.3.0\"",
+        "data": {
+          "ecosystem": "npm",
+          "package_name": "expect-type",
+          "range": "^1.3.0",
+          "manifest_path": "package.json",
+          "scope": "dev"
+        },
+        "observedAt": "2026-10-03T05:04:59.002Z"
+      },
+      {
+        "id": "ev_21a96a6ccabf9fb0",
+        "type": "git_blob_identity",
+        "status": "VERIFIED",
+        "collector": "git-blob-analyzer",
+        "extractor": "git-blob-identity@1",
+        "repository": "repo:github:nachocebey/is",
+        "sourceUrl": "https://github.com/nachocebey/is/blob/e9c026c611c1160eaad50da00be4e676b626018f/CLAUDE.md",
+        "locator": {
+          "path": "CLAUDE.md",
+          "field": "47dc3e3d863cfb5727b87d785d09abf9743c0a72"
+        },
+        "observedText": "identical git blob 47dc3e3d863cfb5727b87d785d09abf9743c0a72",
+        "data": {
+          "first_blob": "47dc3e3d863cfb5727b87d785d09abf9743c0a72",
+          "second_blob": "47dc3e3d863cfb5727b87d785d09abf9743c0a72",
+          "first_path": "CLAUDE.md",
+          "second_path": "CLAUDE.md",
+          "first_commit": "e9c026c611c1160eaad50da00be4e676b626018f",
+          "second_commit": "e9c026c611c1160eaad50da00be4e676b626018f",
+          "direction": "symmetric: identical content establishes no order of origin"
+        },
+        "observedAt": "2026-10-03T05:04:59.002Z"
+      },
+      {
+        "id": "ev_2328396c5bd6c1cb",
+        "type": "git_blob_identity",
+        "status": "VERIFIED",
+        "collector": "git-blob-analyzer",
+        "extractor": "git-blob-identity@1",
+        "repository": "repo:github:nachocebey/is",
+        "sourceUrl": "https://github.com/nachocebey/is/blob/e9c026c611c1160eaad50da00be4e676b626018f/header.gif",
+        "locator": {
+          "path": "header.gif",
+          "field": "f957944126b13c7521f3e2df3cdfa5097ecfeb2b"
+        },
+        "observedText": "identical git blob f957944126b13c7521f3e2df3cdfa5097ecfeb2b",
+        "data": {
+          "first_blob": "f957944126b13c7521f3e2df3cdfa5097ecfeb2b",
+          "second_blob": "f957944126b13c7521f3e2df3cdfa5097ecfeb2b",
+          "first_path": "header.gif",
+          "second_path": "header.gif",
+          "first_commit": "e9c026c611c1160eaad50da00be4e676b626018f",
+          "second_commit": "e9c026c611c1160eaad50da00be4e676b626018f",
+          "direction": "symmetric: identical content establishes no order of origin"
+        },
+        "observedAt": "2026-10-03T05:04:59.002Z"
+      },
+      {
+        "id": "ev_26dfce7ba73a744c",
+        "type": "document_reference",
+        "status": "DECLARED",
+        "collector": "documents",
+        "extractor": "explicit-reference@1",
+        "repository": "repo:github:nachocebey/is",
+        "sourceUrl": "https://github.com/nachocebey/is/blob/e9c026c611c1160eaad50da00be4e676b626018f/readme.md",
+        "locator": {
+          "path": "readme.md",
+          "lineStart": 910,
+          "lineEnd": 910
+        },
+        "observedText": "- [is-stream](https://github.com/sindresorhus/is-stream) - Check if something is a Node.js stream",
+        "data": {
+          "matched_text": "- [is-stream](https://github.com/sindresorhus/is-stream) - Check if something is a Node.js stream",
+          "path": "readme.md",
+          "line_start": 910,
+          "line_end": 910,
+          "phrase": "link"
+        },
+        "observedAt": "2026-10-03T05:04:59.002Z"
+      },
+      {
+        "id": "ev_27a792f2d4671131",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:nachocebey/is",
+        "sourceUrl": "https://github.com/nachocebey/is/blob/e9c026c611c1160eaad50da00be4e676b626018f/package.json",
+        "locator": {
+          "path": "package.json",
+          "field": "zen-observable",
+          "spec": "npm"
+        },
+        "observedText": "\"zen-observable\": \"^0.10.0\"",
+        "data": {
+          "ecosystem": "npm",
+          "package_name": "zen-observable",
+          "range": "^0.10.0",
+          "manifest_path": "package.json",
+          "scope": "dev"
+        },
+        "observedAt": "2026-10-03T05:04:59.002Z"
+      },
+      {
+        "id": "ev_2929a89068e5a7ff",
+        "type": "git_blob_identity",
+        "status": "VERIFIED",
+        "collector": "git-blob-analyzer",
+        "extractor": "git-blob-identity@1",
+        "repository": "repo:github:nachocebey/is",
+        "sourceUrl": "https://github.com/nachocebey/is/blob/e9c026c611c1160eaad50da00be4e676b626018f/.npmrc",
+        "locator": {
+          "path": ".npmrc",
+          "field": "43c97e719a5a824700932f72e6e7e6748ce45d01"
+        },
+        "observedText": "identical git blob 43c97e719a5a824700932f72e6e7e6748ce45d01",
+        "data": {
+          "first_blob": "43c97e719a5a824700932f72e6e7e6748ce45d01",
+          "second_blob": "43c97e719a5a824700932f72e6e7e6748ce45d01",
+          "first_path": ".npmrc",
+          "second_path": ".npmrc",
+          "first_commit": "e9c026c611c1160eaad50da00be4e676b626018f",
+          "second_commit": "e9c026c611c1160eaad50da00be4e676b626018f",
+          "direction": "symmetric: identical content establishes no order of origin"
+        },
+        "observedAt": "2026-10-03T05:04:59.002Z"
+      },
+      {
+        "id": "ev_2d5a2cd5fea62cd7",
+        "type": "document_reference",
+        "status": "DECLARED",
+        "collector": "documents",
+        "extractor": "explicit-reference@1",
+        "repository": "repo:github:nachocebey/is",
+        "sourceUrl": "https://github.com/nachocebey/is/blob/e9c026c611c1160eaad50da00be4e676b626018f/readme.md",
+        "locator": {
+          "path": "readme.md",
+          "lineStart": 914,
+          "lineEnd": 914
+        },
+        "observedText": "- [is-array-sorted](https://github.com/sindresorhus/is-array-sorted) - Check if an Array is sorted",
+        "data": {
+          "matched_text": "- [is-array-sorted](https://github.com/sindresorhus/is-array-sorted) - Check if an Array is sorted",
+          "path": "readme.md",
+          "line_start": 914,
+          "line_end": 914,
+          "phrase": "link"
+        },
+        "observedAt": "2026-10-03T05:04:59.002Z"
+      },
+      {
+        "id": "ev_37effeb319acc9c8",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:nachocebey/is",
+        "sourceUrl": "https://github.com/nachocebey/is/blob/e9c026c611c1160eaad50da00be4e676b626018f/package.json",
+        "locator": {
+          "path": "package.json",
+          "field": "jsdom",
+          "spec": "npm"
+        },
+        "observedText": "\"jsdom\": \"^29.0.2\"",
+        "data": {
+          "ecosystem": "npm",
+          "package_name": "jsdom",
+          "range": "^29.0.2",
+          "manifest_path": "package.json",
+          "scope": "dev"
+        },
+        "observedAt": "2026-10-03T05:04:59.002Z"
+      },
+      {
+        "id": "ev_48ef67e2d0dc490a",
+        "type": "git_blob_identity",
+        "status": "VERIFIED",
+        "collector": "git-blob-analyzer",
+        "extractor": "git-blob-identity@1",
+        "repository": "repo:github:nachocebey/is",
+        "sourceUrl": "https://github.com/nachocebey/is/blob/e9c026c611c1160eaad50da00be4e676b626018f/package.json",
+        "locator": {
+          "path": "package.json",
+          "field": "d7a386f1d2e7d3b4a02634e83e81feb502803750"
+        },
+        "observedText": "identical git blob d7a386f1d2e7d3b4a02634e83e81feb502803750",
+        "data": {
+          "first_blob": "d7a386f1d2e7d3b4a02634e83e81feb502803750",
+          "second_blob": "d7a386f1d2e7d3b4a02634e83e81feb502803750",
+          "first_path": "package.json",
+          "second_path": "package.json",
+          "first_commit": "e9c026c611c1160eaad50da00be4e676b626018f",
+          "second_commit": "e9c026c611c1160eaad50da00be4e676b626018f",
+          "direction": "symmetric: identical content establishes no order of origin"
+        },
+        "observedAt": "2026-10-03T05:04:59.002Z"
+      },
+      {
+        "id": "ev_48fa918af4e26081",
+        "type": "document_reference",
+        "status": "DECLARED",
+        "collector": "documents",
+        "extractor": "explicit-reference@1",
+        "repository": "repo:github:nachocebey/is",
+        "sourceUrl": "https://github.com/nachocebey/is/blob/e9c026c611c1160eaad50da00be4e676b626018f/readme.md",
+        "locator": {
+          "path": "readme.md",
+          "lineStart": 909,
+          "lineEnd": 909
+        },
+        "observedText": "- [environment](https://github.com/sindresorhus/environment) - Check which JavaScript environment your code is running in at runtime",
+        "data": {
+          "matched_text": "- [environment](https://github.com/sindresorhus/environment) - Check which JavaScript environment your code is running in at runtime",
+          "path": "readme.md",
+          "line_start": 909,
+          "line_end": 909,
+          "phrase": "link"
+        },
+        "observedAt": "2026-10-03T05:04:59.002Z"
+      },
+      {
+        "id": "ev_48fee38c46f8eb36",
+        "type": "git_blob_identity",
+        "status": "VERIFIED",
+        "collector": "git-blob-analyzer",
+        "extractor": "git-blob-identity@1",
+        "repository": "repo:github:nachocebey/is",
+        "sourceUrl": "https://github.com/nachocebey/is/blob/e9c026c611c1160eaad50da00be4e676b626018f/test/test.ts",
+        "locator": {
+          "path": "test/test.ts",
+          "field": "2f98bfb24c8c7c91bc13af51ba10d56a3c8d0132"
+        },
+        "observedText": "identical git blob 2f98bfb24c8c7c91bc13af51ba10d56a3c8d0132",
+        "data": {
+          "first_blob": "2f98bfb24c8c7c91bc13af51ba10d56a3c8d0132",
+          "second_blob": "2f98bfb24c8c7c91bc13af51ba10d56a3c8d0132",
+          "first_path": "test/test.ts",
+          "second_path": "test/test.ts",
+          "first_commit": "e9c026c611c1160eaad50da00be4e676b626018f",
+          "second_commit": "e9c026c611c1160eaad50da00be4e676b626018f",
+          "direction": "symmetric: identical content establishes no order of origin"
+        },
+        "observedAt": "2026-10-03T05:04:59.002Z"
+      },
+      {
+        "id": "ev_4f035ab3b2070821",
+        "type": "git_blob_identity",
+        "status": "VERIFIED",
+        "collector": "git-blob-analyzer",
+        "extractor": "git-blob-identity@1",
+        "repository": "repo:github:nachocebey/is",
+        "sourceUrl": "https://github.com/nachocebey/is/blob/e9c026c611c1160eaad50da00be4e676b626018f/.editorconfig",
+        "locator": {
+          "path": ".editorconfig",
+          "field": "1c6314a31833395fd5ff016a6506bdd51860657c"
+        },
+        "observedText": "identical git blob 1c6314a31833395fd5ff016a6506bdd51860657c",
+        "data": {
+          "first_blob": "1c6314a31833395fd5ff016a6506bdd51860657c",
+          "second_blob": "1c6314a31833395fd5ff016a6506bdd51860657c",
+          "first_path": ".editorconfig",
+          "second_path": ".editorconfig",
+          "first_commit": "e9c026c611c1160eaad50da00be4e676b626018f",
+          "second_commit": "e9c026c611c1160eaad50da00be4e676b626018f",
+          "direction": "symmetric: identical content establishes no order of origin"
+        },
+        "observedAt": "2026-10-03T05:04:59.002Z"
+      },
+      {
+        "id": "ev_54b2fe00454a7069",
+        "type": "git_blob_identity",
+        "status": "VERIFIED",
+        "collector": "git-blob-analyzer",
+        "extractor": "git-blob-identity@1",
+        "repository": "repo:github:nachocebey/is",
+        "sourceUrl": "https://github.com/nachocebey/is/blob/e9c026c611c1160eaad50da00be4e676b626018f/.gitattributes",
+        "locator": {
+          "path": ".gitattributes",
+          "field": "6313b56c57848efce05faa7aa7e901ccfc2886ea"
+        },
+        "observedText": "identical git blob 6313b56c57848efce05faa7aa7e901ccfc2886ea",
+        "data": {
+          "first_blob": "6313b56c57848efce05faa7aa7e901ccfc2886ea",
+          "second_blob": "6313b56c57848efce05faa7aa7e901ccfc2886ea",
+          "first_path": ".gitattributes",
+          "second_path": ".gitattributes",
+          "first_commit": "e9c026c611c1160eaad50da00be4e676b626018f",
+          "second_commit": "e9c026c611c1160eaad50da00be4e676b626018f",
+          "direction": "symmetric: identical content establishes no order of origin"
+        },
+        "observedAt": "2026-10-03T05:04:59.002Z"
+      },
+      {
+        "id": "ev_67936a95aa8ac327",
+        "type": "document_reference",
+        "status": "DECLARED",
+        "collector": "documents",
+        "extractor": "explicit-reference@1",
+        "repository": "repo:github:nachocebey/is",
+        "sourceUrl": "https://github.com/nachocebey/is/blob/e9c026c611c1160eaad50da00be4e676b626018f/readme.md",
+        "locator": {
+          "path": "readme.md",
+          "lineStart": 912,
+          "lineEnd": 912
+        },
+        "observedText": "- [file-type](https://github.com/sindresorhus/file-type) - Detect the file type of a Buffer/Uint8Array",
+        "data": {
+          "matched_text": "- [file-type](https://github.com/sindresorhus/file-type) - Detect the file type of a Buffer/Uint8Array",
+          "path": "readme.md",
+          "line_start": 912,
+          "line_end": 912,
+          "phrase": "link"
+        },
+        "observedAt": "2026-10-03T05:04:59.002Z"
+      },
+      {
+        "id": "ev_75fa3467fdd0b604",
+        "type": "git_blob_identity",
+        "status": "VERIFIED",
+        "collector": "git-blob-analyzer",
+        "extractor": "git-blob-identity@1",
+        "repository": "repo:github:nachocebey/is",
+        "sourceUrl": "https://github.com/nachocebey/is/blob/e9c026c611c1160eaad50da00be4e676b626018f/license",
+        "locator": {
+          "path": "license",
+          "field": "fa7ceba3eb4a9657a9db7f3ffca4e4e97a9019de"
+        },
+        "observedText": "identical git blob fa7ceba3eb4a9657a9db7f3ffca4e4e97a9019de",
+        "data": {
+          "first_blob": "fa7ceba3eb4a9657a9db7f3ffca4e4e97a9019de",
+          "second_blob": "fa7ceba3eb4a9657a9db7f3ffca4e4e97a9019de",
+          "first_path": "license",
+          "second_path": "license",
+          "first_commit": "e9c026c611c1160eaad50da00be4e676b626018f",
+          "second_commit": "e9c026c611c1160eaad50da00be4e676b626018f",
+          "direction": "symmetric: identical content establishes no order of origin"
+        },
+        "observedAt": "2026-10-03T05:04:59.002Z"
+      },
+      {
+        "id": "ev_7a3ac66e718d9bc5",
+        "type": "document_reference",
+        "status": "DECLARED",
+        "collector": "documents",
+        "extractor": "explicit-reference@1",
+        "repository": "repo:github:nachocebey/is",
+        "sourceUrl": "https://github.com/nachocebey/is/blob/e9c026c611c1160eaad50da00be4e676b626018f/readme.md",
+        "locator": {
+          "path": "readme.md",
+          "lineStart": 913,
+          "lineEnd": 913
+        },
+        "observedText": "- [is-ip](https://github.com/sindresorhus/is-ip) - Check if a string is an IP address",
+        "data": {
+          "matched_text": "- [is-ip](https://github.com/sindresorhus/is-ip) - Check if a string is an IP address",
+          "path": "readme.md",
+          "line_start": 913,
+          "line_end": 913,
+          "phrase": "link"
+        },
+        "observedAt": "2026-10-03T05:04:59.002Z"
+      },
+      {
+        "id": "ev_855ff896c3e74556",
+        "type": "document_reference",
+        "status": "DECLARED",
+        "collector": "documents",
+        "extractor": "explicit-reference@1",
+        "repository": "repo:github:nachocebey/is",
+        "sourceUrl": "https://github.com/nachocebey/is/blob/e9c026c611c1160eaad50da00be4e676b626018f/readme.md",
+        "locator": {
+          "path": "readme.md",
+          "lineStart": 916,
+          "lineEnd": 916
+        },
+        "observedText": "- [is-empty-iterable](https://github.com/sindresorhus/is-empty-iterable) - Check if an Iterable is empty",
+        "data": {
+          "matched_text": "- [is-empty-iterable](https://github.com/sindresorhus/is-empty-iterable) - Check if an Iterable is empty",
+          "path": "readme.md",
+          "line_start": 916,
+          "line_end": 916,
+          "phrase": "link"
+        },
+        "observedAt": "2026-10-03T05:04:59.002Z"
+      },
+      {
+        "id": "ev_8c1d2a65c9ba662f",
+        "type": "git_blob_identity",
+        "status": "VERIFIED",
+        "collector": "git-blob-analyzer",
+        "extractor": "git-blob-identity@1",
+        "repository": "repo:github:nachocebey/is",
+        "sourceUrl": "https://github.com/nachocebey/is/blob/e9c026c611c1160eaad50da00be4e676b626018f/test/type-tests.ts",
+        "locator": {
+          "path": "test/type-tests.ts",
+          "field": "f08fa25f25acc8f289f788c380fef96855bd88a7"
+        },
+        "observedText": "identical git blob f08fa25f25acc8f289f788c380fef96855bd88a7",
+        "data": {
+          "first_blob": "f08fa25f25acc8f289f788c380fef96855bd88a7",
+          "second_blob": "f08fa25f25acc8f289f788c380fef96855bd88a7",
+          "first_path": "test/type-tests.ts",
+          "second_path": "test/type-tests.ts",
+          "first_commit": "e9c026c611c1160eaad50da00be4e676b626018f",
+          "second_commit": "e9c026c611c1160eaad50da00be4e676b626018f",
+          "direction": "symmetric: identical content establishes no order of origin"
+        },
+        "observedAt": "2026-10-03T05:04:59.002Z"
+      },
+      {
+        "id": "ev_9940c6bb1efaf55f",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:nachocebey/is",
+        "sourceUrl": "https://github.com/nachocebey/is/blob/e9c026c611c1160eaad50da00be4e676b626018f/package.json",
+        "locator": {
+          "path": "package.json",
+          "field": "rxjs",
+          "spec": "npm"
+        },
+        "observedText": "\"rxjs\": \"^7.8.2\"",
+        "data": {
+          "ecosystem": "npm",
+          "package_name": "rxjs",
+          "range": "^7.8.2",
+          "manifest_path": "package.json",
+          "scope": "dev"
+        },
+        "observedAt": "2026-10-03T05:04:59.002Z"
+      },
+      {
+        "id": "ev_99f68191590596ba",
+        "type": "document_reference",
+        "status": "DECLARED",
+        "collector": "documents",
+        "extractor": "explicit-reference@1",
+        "repository": "repo:github:nachocebey/is",
+        "sourceUrl": "https://github.com/nachocebey/is/blob/e9c026c611c1160eaad50da00be4e676b626018f/readme.md",
+        "locator": {
+          "path": "readme.md",
+          "lineStart": 918,
+          "lineEnd": 918
+        },
+        "observedText": "- [has-emoji](https://github.com/sindresorhus/has-emoji) - Check whether a string has any emoji",
+        "data": {
+          "matched_text": "- [has-emoji](https://github.com/sindresorhus/has-emoji) - Check whether a string has any emoji",
+          "path": "readme.md",
+          "line_start": 918,
+          "line_end": 918,
+          "phrase": "link"
+        },
+        "observedAt": "2026-10-03T05:04:59.002Z"
+      },
+      {
+        "id": "ev_9e7e1a4b6d95c688",
+        "type": "document_reference",
+        "status": "DECLARED",
+        "collector": "documents",
+        "extractor": "explicit-reference@1",
+        "repository": "repo:github:nachocebey/is",
+        "sourceUrl": "https://github.com/nachocebey/is/blob/e9c026c611c1160eaad50da00be4e676b626018f/readme.md",
+        "locator": {
+          "path": "readme.md",
+          "lineStart": 917,
+          "lineEnd": 917
+        },
+        "observedText": "- [is-blob](https://github.com/sindresorhus/is-blob) - Check if a value is a Blob - File-like object of immutable, raw data",
+        "data": {
+          "matched_text": "- [is-blob](https://github.com/sindresorhus/is-blob) - Check if a value is a Blob - File-like object of immutable, raw data",
+          "path": "readme.md",
+          "line_start": 917,
+          "line_end": 917,
+          "phrase": "link"
+        },
+        "observedAt": "2026-10-03T05:04:59.002Z"
+      },
+      {
+        "id": "ev_a6515dc52a8d15f5",
+        "type": "git_blob_identity",
+        "status": "VERIFIED",
+        "collector": "git-blob-analyzer",
+        "extractor": "git-blob-identity@1",
+        "repository": "repo:github:nachocebey/is",
+        "sourceUrl": "https://github.com/nachocebey/is/blob/e9c026c611c1160eaad50da00be4e676b626018f/test/tsconfig.json",
+        "locator": {
+          "path": "test/tsconfig.json",
+          "field": "1f492d315db44c498dd50edb645ef3f3ad7822c5"
+        },
+        "observedText": "identical git blob 1f492d315db44c498dd50edb645ef3f3ad7822c5",
+        "data": {
+          "first_blob": "1f492d315db44c498dd50edb645ef3f3ad7822c5",
+          "second_blob": "1f492d315db44c498dd50edb645ef3f3ad7822c5",
+          "first_path": "test/tsconfig.json",
+          "second_path": "test/tsconfig.json",
+          "first_commit": "e9c026c611c1160eaad50da00be4e676b626018f",
+          "second_commit": "e9c026c611c1160eaad50da00be4e676b626018f",
+          "direction": "symmetric: identical content establishes no order of origin"
+        },
+        "observedAt": "2026-10-03T05:04:59.002Z"
+      },
+      {
+        "id": "ev_ab3a92f39dabb031",
+        "type": "git_blob_identity",
+        "status": "VERIFIED",
+        "collector": "git-blob-analyzer",
+        "extractor": "git-blob-identity@1",
+        "repository": "repo:github:nachocebey/is",
+        "sourceUrl": "https://github.com/nachocebey/is/blob/e9c026c611c1160eaad50da00be4e676b626018f/.github/security.md",
+        "locator": {
+          "path": ".github/security.md",
+          "field": "34a527ba6b8ef13393330073af5ec736b2e7393a"
+        },
+        "observedText": "identical git blob 34a527ba6b8ef13393330073af5ec736b2e7393a",
+        "data": {
+          "first_blob": "34a527ba6b8ef13393330073af5ec736b2e7393a",
+          "second_blob": "34a527ba6b8ef13393330073af5ec736b2e7393a",
+          "first_path": ".github/security.md",
+          "second_path": ".github/security.md",
+          "first_commit": "e9c026c611c1160eaad50da00be4e676b626018f",
+          "second_commit": "e9c026c611c1160eaad50da00be4e676b626018f",
+          "direction": "symmetric: identical content establishes no order of origin"
+        },
+        "observedAt": "2026-10-03T05:04:59.002Z"
+      },
+      {
+        "id": "ev_b1dd90899c441ae1",
+        "type": "git_blob_identity",
+        "status": "VERIFIED",
+        "collector": "git-blob-analyzer",
+        "extractor": "git-blob-identity@1",
+        "repository": "repo:github:nachocebey/is",
+        "sourceUrl": "https://github.com/nachocebey/is/blob/e9c026c611c1160eaad50da00be4e676b626018f/AGENTS.md",
+        "locator": {
+          "path": "AGENTS.md",
+          "field": "2996cf5a36aab4c3067cd8bd0f8286229759f1dd"
+        },
+        "observedText": "identical git blob 2996cf5a36aab4c3067cd8bd0f8286229759f1dd",
+        "data": {
+          "first_blob": "2996cf5a36aab4c3067cd8bd0f8286229759f1dd",
+          "second_blob": "2996cf5a36aab4c3067cd8bd0f8286229759f1dd",
+          "first_path": "AGENTS.md",
+          "second_path": "AGENTS.md",
+          "first_commit": "e9c026c611c1160eaad50da00be4e676b626018f",
+          "second_commit": "e9c026c611c1160eaad50da00be4e676b626018f",
+          "direction": "symmetric: identical content establishes no order of origin"
+        },
+        "observedAt": "2026-10-03T05:04:59.002Z"
+      },
+      {
+        "id": "ev_bd776e94e19c7f2f",
+        "type": "git_blob_identity",
+        "status": "VERIFIED",
+        "collector": "git-blob-analyzer",
+        "extractor": "git-blob-identity@1",
+        "repository": "repo:github:nachocebey/is",
+        "sourceUrl": "https://github.com/nachocebey/is/blob/e9c026c611c1160eaad50da00be4e676b626018f/source/utilities.ts",
+        "locator": {
+          "path": "source/utilities.ts",
+          "field": "686edb134216bc3a770d63716a73a9d21d8af43d"
+        },
+        "observedText": "identical git blob 686edb134216bc3a770d63716a73a9d21d8af43d",
+        "data": {
+          "first_blob": "686edb134216bc3a770d63716a73a9d21d8af43d",
+          "second_blob": "686edb134216bc3a770d63716a73a9d21d8af43d",
+          "first_path": "source/utilities.ts",
+          "second_path": "source/utilities.ts",
+          "first_commit": "e9c026c611c1160eaad50da00be4e676b626018f",
+          "second_commit": "e9c026c611c1160eaad50da00be4e676b626018f",
+          "direction": "symmetric: identical content establishes no order of origin"
+        },
+        "observedAt": "2026-10-03T05:04:59.002Z"
+      },
+      {
+        "id": "ev_bfcf71d06a3f4600",
+        "type": "git_blob_identity",
+        "status": "VERIFIED",
+        "collector": "git-blob-analyzer",
+        "extractor": "git-blob-identity@1",
+        "repository": "repo:github:nachocebey/is",
+        "sourceUrl": "https://github.com/nachocebey/is/blob/e9c026c611c1160eaad50da00be4e676b626018f/tsconfig.json",
+        "locator": {
+          "path": "tsconfig.json",
+          "field": "46013a6301e6ab180770daeea8a1d9917af52cc0"
+        },
+        "observedText": "identical git blob 46013a6301e6ab180770daeea8a1d9917af52cc0",
+        "data": {
+          "first_blob": "46013a6301e6ab180770daeea8a1d9917af52cc0",
+          "second_blob": "46013a6301e6ab180770daeea8a1d9917af52cc0",
+          "first_path": "tsconfig.json",
+          "second_path": "tsconfig.json",
+          "first_commit": "e9c026c611c1160eaad50da00be4e676b626018f",
+          "second_commit": "e9c026c611c1160eaad50da00be4e676b626018f",
+          "direction": "symmetric: identical content establishes no order of origin"
+        },
+        "observedAt": "2026-10-03T05:04:59.002Z"
+      },
+      {
+        "id": "ev_c0eeed3b6d7b2961",
+        "type": "github_fork_metadata",
+        "status": "VERIFIED",
+        "collector": "github-metadata",
+        "extractor": "github-fork-metadata@1",
+        "repository": "repo:github:nachocebey/is",
+        "sourceUrl": "https://github.com/sindresorhus/is",
+        "locator": {
+          "field": "parent.full_name"
+        },
+        "observedText": "fork: false",
+        "data": {
+          "fork": true,
+          "source_full_name": "sindresorhus/is",
+          "source_url": "https://github.com/sindresorhus/is",
+          "parent_full_name": "sindresorhus/is",
+          "root_full_name": "sindresorhus/is",
+          "recorded_by": "github-rest-api"
+        },
+        "observedAt": "2026-10-03T05:04:59.002Z"
+      },
+      {
+        "id": "ev_c30b6a64e9f82edf",
+        "type": "document_reference",
+        "status": "DECLARED",
+        "collector": "documents",
+        "extractor": "explicit-reference@1",
+        "repository": "repo:github:nachocebey/is",
+        "sourceUrl": "https://github.com/nachocebey/is/blob/e9c026c611c1160eaad50da00be4e676b626018f/readme.md",
+        "locator": {
+          "path": "readme.md",
+          "lineStart": 911,
+          "lineEnd": 911
+        },
+        "observedText": "- [is-observable](https://github.com/sindresorhus/is-observable) - Check if a value is an Observable",
+        "data": {
+          "matched_text": "- [is-observable](https://github.com/sindresorhus/is-observable) - Check if a value is an Observable",
+          "path": "readme.md",
+          "line_start": 911,
+          "line_end": 911,
+          "phrase": "link"
+        },
+        "observedAt": "2026-10-03T05:04:59.002Z"
+      },
+      {
+        "id": "ev_cae0da666a5ad7cb",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:nachocebey/is",
+        "sourceUrl": "https://github.com/nachocebey/is/blob/e9c026c611c1160eaad50da00be4e676b626018f/package.json",
+        "locator": {
+          "path": "package.json",
+          "field": "del-cli",
+          "spec": "npm"
+        },
+        "observedText": "\"del-cli\": \"^7.0.0\"",
+        "data": {
+          "ecosystem": "npm",
+          "package_name": "del-cli",
+          "range": "^7.0.0",
+          "manifest_path": "package.json",
+          "scope": "dev"
+        },
+        "observedAt": "2026-10-03T05:04:59.002Z"
+      },
+      {
+        "id": "ev_e1f613f4a6d17425",
+        "type": "git_blob_identity",
+        "status": "VERIFIED",
+        "collector": "git-blob-analyzer",
+        "extractor": "git-blob-identity@1",
+        "repository": "repo:github:nachocebey/is",
+        "sourceUrl": "https://github.com/nachocebey/is/blob/e9c026c611c1160eaad50da00be4e676b626018f/.gitignore",
+        "locator": {
+          "path": ".gitignore",
+          "field": "eb99a216c72231aed4756cf99d429de7d2022fa3"
+        },
+        "observedText": "identical git blob eb99a216c72231aed4756cf99d429de7d2022fa3",
+        "data": {
+          "first_blob": "eb99a216c72231aed4756cf99d429de7d2022fa3",
+          "second_blob": "eb99a216c72231aed4756cf99d429de7d2022fa3",
+          "first_path": ".gitignore",
+          "second_path": ".gitignore",
+          "first_commit": "e9c026c611c1160eaad50da00be4e676b626018f",
+          "second_commit": "e9c026c611c1160eaad50da00be4e676b626018f",
+          "direction": "symmetric: identical content establishes no order of origin"
+        },
+        "observedAt": "2026-10-03T05:04:59.002Z"
+      },
+      {
+        "id": "ev_e64f5e4935908e6d",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:nachocebey/is",
+        "sourceUrl": "https://github.com/nachocebey/is/blob/e9c026c611c1160eaad50da00be4e676b626018f/package.json",
+        "locator": {
+          "path": "package.json",
+          "field": "tempy",
+          "spec": "npm"
+        },
+        "observedText": "\"tempy\": \"^3.2.0\"",
+        "data": {
+          "ecosystem": "npm",
+          "package_name": "tempy",
+          "range": "^3.2.0",
+          "manifest_path": "package.json",
+          "scope": "dev"
+        },
+        "observedAt": "2026-10-03T05:04:59.002Z"
+      },
+      {
+        "id": "ev_ee76dc9d1dfa31f6",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:nachocebey/is",
+        "sourceUrl": "https://github.com/nachocebey/is/blob/e9c026c611c1160eaad50da00be4e676b626018f/package.json",
+        "locator": {
+          "path": "package.json",
+          "field": "xo",
+          "spec": "npm"
+        },
+        "observedText": "\"xo\": \"^2.0.2\"",
+        "data": {
+          "ecosystem": "npm",
+          "package_name": "xo",
+          "range": "^2.0.2",
+          "manifest_path": "package.json",
+          "scope": "dev"
+        },
+        "observedAt": "2026-10-03T05:04:59.002Z"
+      },
+      {
+        "id": "ev_f85794981e4de84e",
+        "type": "git_blob_identity",
+        "status": "VERIFIED",
+        "collector": "git-blob-analyzer",
+        "extractor": "git-blob-identity@1",
+        "repository": "repo:github:nachocebey/is",
+        "sourceUrl": "https://github.com/nachocebey/is/blob/e9c026c611c1160eaad50da00be4e676b626018f/.github/workflows/main.yml",
+        "locator": {
+          "path": ".github/workflows/main.yml",
+          "field": "33db2341787feaf16ef04754065fd6d5a928c87d"
+        },
+        "observedText": "identical git blob 33db2341787feaf16ef04754065fd6d5a928c87d",
+        "data": {
+          "first_blob": "33db2341787feaf16ef04754065fd6d5a928c87d",
+          "second_blob": "33db2341787feaf16ef04754065fd6d5a928c87d",
+          "first_path": ".github/workflows/main.yml",
+          "second_path": ".github/workflows/main.yml",
+          "first_commit": "e9c026c611c1160eaad50da00be4e676b626018f",
+          "second_commit": "e9c026c611c1160eaad50da00be4e676b626018f",
+          "direction": "symmetric: identical content establishes no order of origin"
+        },
+        "observedAt": "2026-10-03T05:04:59.002Z"
+      }
+    ],
+    "diagnostics": [
+      {
+        "code": "exact_content_detected",
+        "level": "info",
+        "message": "19 identical blob(s) shared with sindresorhus/is",
+        "context": {
+          "target": "sindresorhus/is",
+          "matched_blob_count": 19,
+          "evidence_truncated": false
+        }
+      }
+    ]
+  },
+  "meta": {
+    "endpoint": "canonical-graph",
+    "note": "canonical LineageGraph, unmodified",
+    "cacheHit": true,
+    "resolvedRevision": "e9c026c611c1160eaad50da00be4e676b626018f",
+    "resolvedRef": null,
+    "defaultBranch": null,
+    "elapsedMs": 576
+  }
+}

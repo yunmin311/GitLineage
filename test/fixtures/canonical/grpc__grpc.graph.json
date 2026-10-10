@@ -1,0 +1,2493 @@
+{
+  "ok": true,
+  "data": {
+    "schemaVersion": "2.0.0",
+    "graph": {
+      "rootEntityId": "repo:github:grpc/grpc",
+      "provider": "github",
+      "revision": {
+        "commit": "724b3ccb608b8ac7e51482a15113edfd94bb28ba",
+        "defaultBranch": "master",
+        "resolvedAt": "2026-10-03T05:05:17.837Z"
+      },
+      "generatedAt": "2026-10-03T05:05:17.837Z",
+      "analyzer": {
+        "name": "gitlineage-analyzer",
+        "version": "0.2.0",
+        "schemaVersion": "2.0.0",
+        "namespace": "public",
+        "extractors": [
+          "explicit-attribution@1",
+          "explicit-reference@1",
+          "git-blob-identity@1",
+          "github-fork-metadata@1",
+          "github-repository-identity@1",
+          "gitmodules-entry@1",
+          "lockfile-dependency@1",
+          "manifest-dependency@1",
+          "package-registry-metadata@1"
+        ],
+        "adapters": [
+          "package-registry"
+        ],
+        "limitsApplied": {
+          "history_depth": 200,
+          "tree_entries": 120000,
+          "document_bytes": 262144,
+          "manifest_bytes": 2097152,
+          "dependency_facts": 400,
+          "registry_lookups": 25,
+          "candidate_count": 12
+        }
+      }
+    },
+    "entities": [
+      {
+        "id": "pkg:pypi:build",
+        "type": "Package",
+        "display": {
+          "name": "build",
+          "fullName": "pypi:build"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:pypi:coverage",
+        "type": "Package",
+        "display": {
+          "name": "coverage",
+          "fullName": "pypi:coverage"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:pypi:cython",
+        "type": "Package",
+        "display": {
+          "name": "cython",
+          "fullName": "pypi:cython"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:pypi:setuptools",
+        "type": "Package",
+        "display": {
+          "name": "setuptools",
+          "fullName": "pypi:setuptools"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:pypi:typing-extensions",
+        "type": "Package",
+        "display": {
+          "name": "typing-extensions",
+          "fullName": "pypi:typing-extensions"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:pypi:wheel",
+        "type": "Package",
+        "display": {
+          "name": "wheel",
+          "fullName": "pypi:wheel"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "repo:github:abseil/abseil-cpp",
+        "type": "Repository",
+        "display": {
+          "name": "abseil-cpp",
+          "fullName": "abseil/abseil-cpp",
+          "url": "https://github.com/abseil/abseil-cpp"
+        },
+        "attributes": {
+          "created_at": "2017-09-20T15:10:30Z",
+          "default_branch": "master",
+          "full_name": "abseil/abseil-cpp",
+          "is_fork": false,
+          "provider": "github",
+          "url": "https://github.com/abseil/abseil-cpp"
+        },
+        "sourceUrl": "https://github.com/abseil/abseil-cpp"
+      },
+      {
+        "id": "repo:github:c-ares/c-ares",
+        "type": "Repository",
+        "display": {
+          "name": "c-ares",
+          "fullName": "c-ares/c-ares",
+          "url": "https://github.com/c-ares/c-ares"
+        },
+        "attributes": {
+          "created_at": "2010-03-20T19:30:23Z",
+          "default_branch": "main",
+          "full_name": "c-ares/c-ares",
+          "is_fork": false,
+          "provider": "github",
+          "url": "https://github.com/c-ares/c-ares"
+        },
+        "sourceUrl": "https://github.com/c-ares/c-ares"
+      },
+      {
+        "id": "repo:github:cel-expr/cel-c",
+        "type": "Repository",
+        "display": {
+          "name": "cel-c",
+          "fullName": "cel-expr/cel-c",
+          "url": "https://github.com/cel-expr/cel-c"
+        },
+        "attributes": {
+          "created_at": "2026-05-15T20:44:44Z",
+          "default_branch": "master",
+          "full_name": "cel-expr/cel-c",
+          "is_fork": false,
+          "provider": "github",
+          "url": "https://github.com/cel-expr/cel-c"
+        },
+        "sourceUrl": "https://github.com/cel-expr/cel-c"
+      },
+      {
+        "id": "repo:github:census-instrumentation/opencensus-proto",
+        "type": "Repository",
+        "display": {
+          "name": "opencensus-proto",
+          "fullName": "census-instrumentation/opencensus-proto",
+          "url": "https://github.com/census-instrumentation/opencensus-proto"
+        },
+        "attributes": {
+          "created_at": "2016-09-01T17:16:10Z",
+          "default_branch": "master",
+          "full_name": "census-instrumentation/opencensus-proto",
+          "is_fork": false,
+          "provider": "github",
+          "url": "https://github.com/census-instrumentation/opencensus-proto"
+        },
+        "sourceUrl": "https://github.com/census-instrumentation/opencensus-proto"
+      },
+      {
+        "id": "repo:github:cncf/xds",
+        "type": "Repository",
+        "display": {
+          "name": "xds",
+          "fullName": "cncf/xds",
+          "url": "https://github.com/cncf/xds"
+        },
+        "attributes": {
+          "created_at": "2020-11-19T16:01:59Z",
+          "default_branch": "main",
+          "full_name": "cncf/xds",
+          "is_fork": false,
+          "provider": "github",
+          "url": "https://github.com/cncf/xds"
+        },
+        "sourceUrl": "https://github.com/cncf/xds"
+      },
+      {
+        "id": "repo:github:coveragepy/coveragepy",
+        "type": "Repository",
+        "display": {
+          "name": "coveragepy",
+          "fullName": "coveragepy/coveragepy",
+          "url": "https://github.com/coveragepy/coveragepy"
+        },
+        "attributes": {
+          "created_at": "2018-06-23T17:44:53Z",
+          "default_branch": "main",
+          "full_name": "coveragepy/coveragepy",
+          "is_fork": false,
+          "provider": "github",
+          "url": "https://github.com/coveragepy/coveragepy"
+        },
+        "sourceUrl": "https://github.com/coveragepy/coveragepy"
+      },
+      {
+        "id": "repo:github:cython/cython",
+        "type": "Repository",
+        "display": {
+          "name": "cython",
+          "fullName": "cython/cython",
+          "url": "https://github.com/cython/cython"
+        },
+        "attributes": {
+          "created_at": "2010-11-21T07:44:20Z",
+          "default_branch": "master",
+          "full_name": "cython/cython",
+          "is_fork": false,
+          "provider": "github",
+          "url": "https://github.com/cython/cython"
+        },
+        "sourceUrl": "https://github.com/cython/cython"
+      },
+      {
+        "id": "repo:github:envoyproxy/data-plane-api",
+        "type": "Repository",
+        "display": {
+          "name": "data-plane-api",
+          "fullName": "envoyproxy/data-plane-api",
+          "url": "https://github.com/envoyproxy/data-plane-api"
+        },
+        "attributes": {
+          "created_at": "2017-05-08T21:50:29Z",
+          "default_branch": "main",
+          "full_name": "envoyproxy/data-plane-api",
+          "is_fork": false,
+          "provider": "github",
+          "url": "https://github.com/envoyproxy/data-plane-api"
+        },
+        "sourceUrl": "https://github.com/envoyproxy/data-plane-api"
+      },
+      {
+        "id": "repo:github:envoyproxy/protoc-gen-validate",
+        "type": "Repository",
+        "display": {
+          "name": "protoc-gen-validate",
+          "fullName": "bufbuild/protoc-gen-validate",
+          "url": "https://github.com/bufbuild/protoc-gen-validate"
+        },
+        "attributes": {
+          "created_at": "2017-10-03T22:51:17Z",
+          "default_branch": "main",
+          "full_name": "bufbuild/protoc-gen-validate",
+          "is_fork": false,
+          "provider": "github",
+          "url": "https://github.com/bufbuild/protoc-gen-validate"
+        },
+        "sourceUrl": "https://github.com/bufbuild/protoc-gen-validate"
+      },
+      {
+        "id": "repo:github:fullstorydev/grpcurl",
+        "type": "Repository",
+        "display": {
+          "name": "grpcurl",
+          "fullName": "fullstorydev/grpcurl",
+          "url": "https://github.com/fullstorydev/grpcurl"
+        },
+        "attributes": {
+          "created_at": "2017-11-20T15:53:31Z",
+          "default_branch": "master",
+          "full_name": "fullstorydev/grpcurl",
+          "is_fork": false,
+          "provider": "github",
+          "url": "https://github.com/fullstorydev/grpcurl"
+        },
+        "sourceUrl": "https://github.com/fullstorydev/grpcurl"
+      },
+      {
+        "id": "repo:github:google/benchmark",
+        "type": "Repository",
+        "display": {
+          "name": "benchmark",
+          "fullName": "google/benchmark",
+          "url": "https://github.com/google/benchmark"
+        },
+        "attributes": {
+          "created_at": "2013-12-12T00:10:48Z",
+          "default_branch": "main",
+          "full_name": "google/benchmark",
+          "is_fork": false,
+          "provider": "github",
+          "url": "https://github.com/google/benchmark"
+        },
+        "sourceUrl": "https://github.com/google/benchmark"
+      },
+      {
+        "id": "repo:github:google/bloaty",
+        "type": "Repository",
+        "display": {
+          "name": "bloaty",
+          "fullName": "google/bloaty",
+          "url": "https://github.com/google/bloaty"
+        },
+        "attributes": {
+          "created_at": "2016-11-07T17:04:01Z",
+          "default_branch": "main",
+          "full_name": "google/bloaty",
+          "is_fork": false,
+          "provider": "github",
+          "url": "https://github.com/google/bloaty"
+        },
+        "sourceUrl": "https://github.com/google/bloaty"
+      },
+      {
+        "id": "repo:github:google/boringssl",
+        "type": "Repository",
+        "display": {
+          "name": "boringssl",
+          "fullName": "google/boringssl"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "repo:github:google/cel-spec",
+        "type": "Repository",
+        "display": {
+          "name": "cel-spec",
+          "fullName": "google/cel-spec"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "repo:github:google/googletest",
+        "type": "Repository",
+        "display": {
+          "name": "googletest",
+          "fullName": "google/googletest"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "repo:github:google/re2",
+        "type": "Repository",
+        "display": {
+          "name": "re2",
+          "fullName": "google/re2"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "repo:github:googleapis/googleapis",
+        "type": "Repository",
+        "display": {
+          "name": "googleapis",
+          "fullName": "googleapis/googleapis"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "repo:github:googlecloudplatform/autosharding",
+        "type": "Repository",
+        "display": {
+          "name": "autosharding",
+          "fullName": "googlecloudplatform/autosharding"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "repo:github:grpc/grpc",
+        "type": "Repository",
+        "display": {
+          "name": "grpc",
+          "fullName": "grpc/grpc",
+          "url": "https://github.com/grpc/grpc"
+        },
+        "attributes": {
+          "archived": false,
+          "created_at": "2014-12-08T18:58:53Z",
+          "default_branch": "master",
+          "description": "C++ based gRPC (C++, Python, Ruby, Objective-C, PHP, C#)",
+          "full_name": "grpc/grpc",
+          "homepage": "https://grpc.io",
+          "is_fork": false,
+          "license_spdx": "Apache-2.0",
+          "name": "grpc",
+          "owner": "grpc",
+          "provider": "github",
+          "pushed_at": "2026-10-03T03:42:26Z",
+          "repository_size_kb": 626404,
+          "topics": [],
+          "updated_at": "2026-10-03T03:41:47Z",
+          "url": "https://github.com/grpc/grpc"
+        },
+        "sourceUrl": "https://github.com/grpc/grpc"
+      },
+      {
+        "id": "repo:github:grpc/grpc-dart",
+        "type": "Repository",
+        "display": {
+          "name": "grpc-dart",
+          "fullName": "grpc/grpc-dart"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "repo:github:grpc/grpc-dotnet",
+        "type": "Repository",
+        "display": {
+          "name": "grpc-dotnet",
+          "fullName": "grpc/grpc-dotnet"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "repo:github:grpc/grpc-go",
+        "type": "Repository",
+        "display": {
+          "name": "grpc-go",
+          "fullName": "grpc/grpc-go"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "repo:github:grpc/grpc-java",
+        "type": "Repository",
+        "display": {
+          "name": "grpc-java",
+          "fullName": "grpc/grpc-java"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "repo:github:grpc/grpc-kotlin",
+        "type": "Repository",
+        "display": {
+          "name": "grpc-kotlin",
+          "fullName": "grpc/grpc-kotlin"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "repo:github:grpc/grpc-node",
+        "type": "Repository",
+        "display": {
+          "name": "grpc-node",
+          "fullName": "grpc/grpc-node"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "repo:github:grpc/grpc-proto",
+        "type": "Repository",
+        "display": {
+          "name": "grpc-proto",
+          "fullName": "grpc/grpc-proto"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "repo:github:grpc/grpc-swift",
+        "type": "Repository",
+        "display": {
+          "name": "grpc-swift",
+          "fullName": "grpc/grpc-swift"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "repo:github:grpc/grpc-web",
+        "type": "Repository",
+        "display": {
+          "name": "grpc-web",
+          "fullName": "grpc/grpc-web"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "repo:github:madler/zlib",
+        "type": "Repository",
+        "display": {
+          "name": "zlib",
+          "fullName": "madler/zlib"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "repo:github:open-telemetry/opentelemetry-cpp",
+        "type": "Repository",
+        "display": {
+          "name": "opentelemetry-cpp",
+          "fullName": "open-telemetry/opentelemetry-cpp"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "repo:github:open-telemetry/opentelemetry-proto",
+        "type": "Repository",
+        "display": {
+          "name": "opentelemetry-proto",
+          "fullName": "open-telemetry/opentelemetry-proto"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "repo:github:protocolbuffers/protobuf",
+        "type": "Repository",
+        "display": {
+          "name": "protobuf",
+          "fullName": "protocolbuffers/protobuf"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "repo:github:pypa/setuptools",
+        "type": "Repository",
+        "display": {
+          "name": "setuptools",
+          "fullName": "pypa/setuptools"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "repo:github:pypa/wheel",
+        "type": "Repository",
+        "display": {
+          "name": "wheel",
+          "fullName": "pypa/wheel"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "repo:github:python/typing_extensions",
+        "type": "Repository",
+        "display": {
+          "name": "typing_extensions",
+          "fullName": "python/typing_extensions"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "repo:github:whatwg/fetch",
+        "type": "Repository",
+        "display": {
+          "name": "fetch",
+          "fullName": "whatwg/fetch"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "repo:github:whatwg/streams",
+        "type": "Repository",
+        "display": {
+          "name": "streams",
+          "fullName": "whatwg/streams"
+        },
+        "attributes": {}
+      }
+    ],
+    "relationships": [
+      {
+        "id": "rel_0784be2964a0b69c",
+        "type": "depends_on",
+        "source": "repo:github:grpc/grpc",
+        "target": "pkg:pypi:build",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_fee332ad652e90fd"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_b881c2528bfbce5e",
+        "type": "depends_on",
+        "source": "repo:github:grpc/grpc",
+        "target": "pkg:pypi:coverage",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_d623972b8d856311"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_7c138a90404970a3",
+        "type": "depends_on",
+        "source": "repo:github:grpc/grpc",
+        "target": "pkg:pypi:cython",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_ac638af69a96eb35"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_6f54920bb6a4c30f",
+        "type": "depends_on",
+        "source": "repo:github:grpc/grpc",
+        "target": "pkg:pypi:setuptools",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_a590b0183180eab0"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_f93955d309900bf0",
+        "type": "depends_on",
+        "source": "repo:github:grpc/grpc",
+        "target": "pkg:pypi:typing-extensions",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_aaee522f941fba24"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_4e58cb04da4fe9a0",
+        "type": "depends_on",
+        "source": "repo:github:grpc/grpc",
+        "target": "pkg:pypi:wheel",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_9575c52f99d7d939"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_cfdcc65205a824e3",
+        "type": "references",
+        "source": "pkg:pypi:coverage",
+        "target": "repo:github:coveragepy/coveragepy",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_8198fd1813934323"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_8f9504dc8b4aab53",
+        "type": "references",
+        "source": "pkg:pypi:cython",
+        "target": "repo:github:cython/cython",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_7828a0d26836c3c8"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_de3915357ea3f7da",
+        "type": "references",
+        "source": "pkg:pypi:setuptools",
+        "target": "repo:github:pypa/setuptools",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_8276f6286810d527"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_0d830fefc4e27807",
+        "type": "references",
+        "source": "pkg:pypi:typing-extensions",
+        "target": "repo:github:python/typing_extensions",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_f7d78da26f1077b8"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_cd27b201dec5f040",
+        "type": "references",
+        "source": "pkg:pypi:wheel",
+        "target": "repo:github:pypa/wheel",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_0829d943f9c5a11b"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_f7767ed88c8a788e",
+        "type": "references",
+        "source": "repo:github:grpc/grpc",
+        "target": "repo:github:fullstorydev/grpcurl",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_0f5b1d9d0e23f21c"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_b543cf5c0a2ed4f6",
+        "type": "references",
+        "source": "repo:github:grpc/grpc",
+        "target": "repo:github:grpc/grpc-dart",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_9310f1613c6f553f"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_f9cffbf0ce656bef",
+        "type": "references",
+        "source": "repo:github:grpc/grpc",
+        "target": "repo:github:grpc/grpc-dotnet",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_4a2f215682dfbda4"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_86ef73523e644661",
+        "type": "references",
+        "source": "repo:github:grpc/grpc",
+        "target": "repo:github:grpc/grpc-go",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_8ba853388bad95d5"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_acfebc3cfa0dc287",
+        "type": "references",
+        "source": "repo:github:grpc/grpc",
+        "target": "repo:github:grpc/grpc-java",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_f1ccc4fae1508219"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_4b489a095a4b5661",
+        "type": "references",
+        "source": "repo:github:grpc/grpc",
+        "target": "repo:github:grpc/grpc-kotlin",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_141d6b10b19cf5b2"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_f57a526e29822b6d",
+        "type": "references",
+        "source": "repo:github:grpc/grpc",
+        "target": "repo:github:grpc/grpc-node",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_e56caa10ea8baa41"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_3b49349e8f8ade3e",
+        "type": "references",
+        "source": "repo:github:grpc/grpc",
+        "target": "repo:github:grpc/grpc-swift",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_e8d927d43750798b"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_4ac0d2e4325193d5",
+        "type": "references",
+        "source": "repo:github:grpc/grpc",
+        "target": "repo:github:grpc/grpc-web",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_e07c9db897361937"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_f42446f1b2fb3ae5",
+        "type": "references",
+        "source": "repo:github:grpc/grpc",
+        "target": "repo:github:whatwg/fetch",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_9b0429c91fca8a07"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_17ab3933af485df6",
+        "type": "references",
+        "source": "repo:github:grpc/grpc",
+        "target": "repo:github:whatwg/streams",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_f6ef484931a4e82c"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_60f71f0e20b2bb21",
+        "type": "shares_exact_content_with",
+        "source": "repo:github:cel-expr/cel-c",
+        "target": "repo:github:grpc/grpc",
+        "directed": false,
+        "status": "VERIFIED",
+        "evidenceIds": [
+          "ev_4b3eefd242d7e2b4",
+          "ev_dfdd2b3b747132f4"
+        ],
+        "attributes": {
+          "candidate_index_truncated": true,
+          "evidence_truncated": false,
+          "first_blob_count": 7785,
+          "matched_blob_count": 2,
+          "second_blob_count": 309
+        }
+      },
+      {
+        "id": "rel_42e4c8402a2e205f",
+        "type": "shares_exact_content_with",
+        "source": "repo:github:census-instrumentation/opencensus-proto",
+        "target": "repo:github:grpc/grpc",
+        "directed": false,
+        "status": "VERIFIED",
+        "evidenceIds": [
+          "ev_1610d2896e60452c"
+        ],
+        "attributes": {
+          "candidate_index_truncated": true,
+          "evidence_truncated": false,
+          "first_blob_count": 7785,
+          "matched_blob_count": 1,
+          "second_blob_count": 75
+        }
+      },
+      {
+        "id": "rel_d014790214d49ecc",
+        "type": "shares_exact_content_with",
+        "source": "repo:github:envoyproxy/protoc-gen-validate",
+        "target": "repo:github:grpc/grpc",
+        "directed": false,
+        "status": "VERIFIED",
+        "evidenceIds": [
+          "ev_77edeb7ea4f4a866"
+        ],
+        "attributes": {
+          "candidate_index_truncated": true,
+          "evidence_truncated": false,
+          "first_blob_count": 7785,
+          "matched_blob_count": 1,
+          "second_blob_count": 270
+        }
+      },
+      {
+        "id": "rel_06633e40ca1ac029",
+        "type": "shares_exact_content_with",
+        "source": "repo:github:google/benchmark",
+        "target": "repo:github:grpc/grpc",
+        "directed": false,
+        "status": "VERIFIED",
+        "evidenceIds": [
+          "ev_4153b4aeb0094f2a"
+        ],
+        "attributes": {
+          "candidate_index_truncated": true,
+          "evidence_truncated": false,
+          "first_blob_count": 7785,
+          "matched_blob_count": 1,
+          "second_blob_count": 222
+        }
+      },
+      {
+        "id": "rel_778910531fb783dd",
+        "type": "shares_exact_content_with",
+        "source": "repo:github:google/bloaty",
+        "target": "repo:github:grpc/grpc",
+        "directed": false,
+        "status": "VERIFIED",
+        "evidenceIds": [
+          "ev_c2e70f228e866427"
+        ],
+        "attributes": {
+          "candidate_index_truncated": true,
+          "evidence_truncated": false,
+          "first_blob_count": 7785,
+          "matched_blob_count": 1,
+          "second_blob_count": 286
+        }
+      },
+      {
+        "id": "rel_90ffbe4becd1d045",
+        "type": "uses_submodule",
+        "source": "repo:github:grpc/grpc",
+        "target": "repo:github:abseil/abseil-cpp",
+        "directed": true,
+        "status": "VERIFIED",
+        "evidenceIds": [
+          "ev_0fa2900fe9d54b59"
+        ],
+        "attributes": {
+          "pinned_commit": "5650e9cf76d3be4318d5fa3af38ee483ddfd5e4a",
+          "submodule_path": "third_party/abseil-cpp"
+        }
+      },
+      {
+        "id": "rel_9d5417dcb0c6ce23",
+        "type": "uses_submodule",
+        "source": "repo:github:grpc/grpc",
+        "target": "repo:github:c-ares/c-ares",
+        "directed": true,
+        "status": "VERIFIED",
+        "evidenceIds": [
+          "ev_b7755d6412a6771a"
+        ],
+        "attributes": {
+          "pinned_commit": "d3a507e920e7af18a5efb7f9f1d8044ed4750013",
+          "submodule_path": "third_party/cares/cares"
+        }
+      },
+      {
+        "id": "rel_14af79e70c6d11f8",
+        "type": "uses_submodule",
+        "source": "repo:github:grpc/grpc",
+        "target": "repo:github:cel-expr/cel-c",
+        "directed": true,
+        "status": "VERIFIED",
+        "evidenceIds": [
+          "ev_74d23b2b856e1094"
+        ],
+        "attributes": {
+          "pinned_commit": "bbdb358f202b275731a0d7ee3162fd211886c945",
+          "submodule_path": "third_party/cel-c"
+        }
+      },
+      {
+        "id": "rel_f754310ae0bc9d84",
+        "type": "uses_submodule",
+        "source": "repo:github:grpc/grpc",
+        "target": "repo:github:census-instrumentation/opencensus-proto",
+        "directed": true,
+        "status": "VERIFIED",
+        "evidenceIds": [
+          "ev_b02a5d4bafb905aa"
+        ],
+        "attributes": {
+          "pinned_commit": "4aa53e15cbf1a47bc9087e6cfdca214c1eea4e89",
+          "submodule_path": "third_party/opencensus-proto"
+        }
+      },
+      {
+        "id": "rel_22d2028d74ff2d34",
+        "type": "uses_submodule",
+        "source": "repo:github:grpc/grpc",
+        "target": "repo:github:cncf/xds",
+        "directed": true,
+        "status": "VERIFIED",
+        "evidenceIds": [
+          "ev_aebac824c71895ec"
+        ],
+        "attributes": {
+          "pinned_commit": "ee656c7534f5d7dc23d44dd611689568f72017a6",
+          "submodule_path": "third_party/xds"
+        }
+      },
+      {
+        "id": "rel_4e3b184e30a14644",
+        "type": "uses_submodule",
+        "source": "repo:github:grpc/grpc",
+        "target": "repo:github:envoyproxy/data-plane-api",
+        "directed": true,
+        "status": "VERIFIED",
+        "evidenceIds": [
+          "ev_2b84ab93e1750c2d"
+        ],
+        "attributes": {
+          "pinned_commit": "6ef568cf4a67362849911d1d2a546fd9f35db2ff",
+          "submodule_path": "third_party/envoy-api"
+        }
+      },
+      {
+        "id": "rel_c61c90b520bcd34f",
+        "type": "uses_submodule",
+        "source": "repo:github:grpc/grpc",
+        "target": "repo:github:envoyproxy/protoc-gen-validate",
+        "directed": true,
+        "status": "VERIFIED",
+        "evidenceIds": [
+          "ev_10ff2b6583683249"
+        ],
+        "attributes": {
+          "pinned_commit": "7b06248484ceeaa947e93ca2747eccf336a88ecc",
+          "submodule_path": "third_party/protoc-gen-validate"
+        }
+      },
+      {
+        "id": "rel_f333c31720b38869",
+        "type": "uses_submodule",
+        "source": "repo:github:grpc/grpc",
+        "target": "repo:github:google/benchmark",
+        "directed": true,
+        "status": "VERIFIED",
+        "evidenceIds": [
+          "ev_1047a86d83f960e6"
+        ],
+        "attributes": {
+          "pinned_commit": "12235e24652fc7f809373e7c11a5f73c5763fc4c",
+          "submodule_path": "third_party/benchmark"
+        }
+      },
+      {
+        "id": "rel_4972c06cc9efa195",
+        "type": "uses_submodule",
+        "source": "repo:github:grpc/grpc",
+        "target": "repo:github:google/bloaty",
+        "directed": true,
+        "status": "VERIFIED",
+        "evidenceIds": [
+          "ev_6aa4a4db51fc16a7"
+        ],
+        "attributes": {
+          "pinned_commit": "60209eb1ccc34d5deefb002d1b7f37545204f7f2",
+          "submodule_path": "third_party/bloaty"
+        }
+      },
+      {
+        "id": "rel_73e05d9518debcb3",
+        "type": "uses_submodule",
+        "source": "repo:github:grpc/grpc",
+        "target": "repo:github:google/boringssl",
+        "directed": true,
+        "status": "VERIFIED",
+        "evidenceIds": [
+          "ev_b7af7afe486f12be"
+        ],
+        "attributes": {
+          "pinned_commit": "3adc3d1aba162a578e2547f329fcce8659b8e89c",
+          "submodule_path": "third_party/boringssl-with-bazel"
+        }
+      },
+      {
+        "id": "rel_7b741c64215c1adc",
+        "type": "uses_submodule",
+        "source": "repo:github:grpc/grpc",
+        "target": "repo:github:google/cel-spec",
+        "directed": true,
+        "status": "VERIFIED",
+        "evidenceIds": [
+          "ev_10b316b570341bdf"
+        ],
+        "attributes": {
+          "pinned_commit": "9f069b3ee58b02d6f6736c5ebd6587075c1a1b22",
+          "submodule_path": "third_party/cel-spec"
+        }
+      },
+      {
+        "id": "rel_2923fed50c5183a2",
+        "type": "uses_submodule",
+        "source": "repo:github:grpc/grpc",
+        "target": "repo:github:google/googletest",
+        "directed": true,
+        "status": "VERIFIED",
+        "evidenceIds": [
+          "ev_4d4c2e33c4f654ee"
+        ],
+        "attributes": {
+          "pinned_commit": "52eb8108c5bdec04579160ae17225d66034bd723",
+          "submodule_path": "third_party/googletest"
+        }
+      },
+      {
+        "id": "rel_f439417bb8cd5857",
+        "type": "uses_submodule",
+        "source": "repo:github:grpc/grpc",
+        "target": "repo:github:google/re2",
+        "directed": true,
+        "status": "VERIFIED",
+        "evidenceIds": [
+          "ev_8a9be8fe0582beec"
+        ],
+        "attributes": {
+          "pinned_commit": "0c5616df9c0aaa44c9440d87422012423d91c7d1",
+          "submodule_path": "third_party/re2"
+        }
+      },
+      {
+        "id": "rel_809e0a8cd87677d3",
+        "type": "uses_submodule",
+        "source": "repo:github:grpc/grpc",
+        "target": "repo:github:googleapis/googleapis",
+        "directed": true,
+        "status": "VERIFIED",
+        "evidenceIds": [
+          "ev_438bcb0b8fd1f224"
+        ],
+        "attributes": {
+          "pinned_commit": "2193a2bfcecb92b92aad7a4d81baa428cafd7dfd",
+          "submodule_path": "third_party/googleapis"
+        }
+      },
+      {
+        "id": "rel_1ed725cad0e81a12",
+        "type": "uses_submodule",
+        "source": "repo:github:grpc/grpc",
+        "target": "repo:github:googlecloudplatform/autosharding",
+        "directed": true,
+        "status": "VERIFIED",
+        "evidenceIds": [
+          "ev_070bdb6e5bc038d3"
+        ],
+        "attributes": {
+          "pinned_commit": "3a21f69fe5516fe340af29ef68e327381473ecc7",
+          "submodule_path": "third_party/autosharding"
+        }
+      },
+      {
+        "id": "rel_c23b0ad39c3368d9",
+        "type": "uses_submodule",
+        "source": "repo:github:grpc/grpc",
+        "target": "repo:github:grpc/grpc-proto",
+        "directed": true,
+        "status": "VERIFIED",
+        "evidenceIds": [
+          "ev_42f7e54d815de0ae"
+        ],
+        "attributes": {
+          "pinned_commit": "dd549fc4ed04b60b0fdd3866b82ef0a7c87c6e4f",
+          "submodule_path": "third_party/grpc-proto"
+        }
+      },
+      {
+        "id": "rel_82c7302b50b2b9c2",
+        "type": "uses_submodule",
+        "source": "repo:github:grpc/grpc",
+        "target": "repo:github:madler/zlib",
+        "directed": true,
+        "status": "VERIFIED",
+        "evidenceIds": [
+          "ev_0d35d252023f7a91"
+        ],
+        "attributes": {
+          "pinned_commit": "f1f503da85d52e56aae11557b4d79a42bcaa2b86",
+          "submodule_path": "third_party/zlib"
+        }
+      },
+      {
+        "id": "rel_7bea94af8a7930c1",
+        "type": "uses_submodule",
+        "source": "repo:github:grpc/grpc",
+        "target": "repo:github:open-telemetry/opentelemetry-cpp",
+        "directed": true,
+        "status": "VERIFIED",
+        "evidenceIds": [
+          "ev_64148ffb71bd5b97"
+        ],
+        "attributes": {
+          "pinned_commit": "ced79860f8c8a091a2eabfee6d47783f828a9b59",
+          "submodule_path": "third_party/opentelemetry-cpp"
+        }
+      },
+      {
+        "id": "rel_e898f967391f54e8",
+        "type": "uses_submodule",
+        "source": "repo:github:grpc/grpc",
+        "target": "repo:github:open-telemetry/opentelemetry-proto",
+        "directed": true,
+        "status": "VERIFIED",
+        "evidenceIds": [
+          "ev_3a0db2a5263914a8"
+        ],
+        "attributes": {
+          "pinned_commit": "60fa8754d890b5c55949a8c68dcfd7ab5c2395df",
+          "submodule_path": "third_party/opentelemetry"
+        }
+      },
+      {
+        "id": "rel_aa8fcdd639ef56d2",
+        "type": "uses_submodule",
+        "source": "repo:github:grpc/grpc",
+        "target": "repo:github:protocolbuffers/protobuf",
+        "directed": true,
+        "status": "VERIFIED",
+        "evidenceIds": [
+          "ev_071442254b1654e9"
+        ],
+        "attributes": {
+          "pinned_commit": "35cd01f9fe9afbeea38cc7b979a3b6bfcde82c03",
+          "submodule_path": "third_party/protobuf"
+        }
+      }
+    ],
+    "evidence": [
+      {
+        "id": "ev_070bdb6e5bc038d3",
+        "type": "git_submodule_entry",
+        "status": "VERIFIED",
+        "collector": "submodules",
+        "extractor": "gitmodules-entry@1",
+        "repository": "repo:github:grpc/grpc",
+        "sourceUrl": "https://github.com/grpc/grpc/blob/724b3ccb608b8ac7e51482a15113edfd94bb28ba/.gitmodules",
+        "locator": {
+          "path": ".gitmodules",
+          "field": "submodule.third_party/autosharding.path"
+        },
+        "observedText": "submodule \"third_party/autosharding\" at third_party/autosharding -> https://github.com/GoogleCloudPlatform/autosharding",
+        "data": {
+          "submodule_name": "third_party/autosharding",
+          "path": "third_party/autosharding",
+          "url": "https://github.com/GoogleCloudPlatform/autosharding",
+          "pinned_commit": "3a21f69fe5516fe340af29ef68e327381473ecc7"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      },
+      {
+        "id": "ev_071442254b1654e9",
+        "type": "git_submodule_entry",
+        "status": "VERIFIED",
+        "collector": "submodules",
+        "extractor": "gitmodules-entry@1",
+        "repository": "repo:github:grpc/grpc",
+        "sourceUrl": "https://github.com/grpc/grpc/blob/724b3ccb608b8ac7e51482a15113edfd94bb28ba/.gitmodules",
+        "locator": {
+          "path": ".gitmodules",
+          "field": "submodule.third_party/protobuf.path"
+        },
+        "observedText": "submodule \"third_party/protobuf\" at third_party/protobuf -> https://github.com/protocolbuffers/protobuf.git",
+        "data": {
+          "submodule_name": "third_party/protobuf",
+          "path": "third_party/protobuf",
+          "url": "https://github.com/protocolbuffers/protobuf.git",
+          "pinned_commit": "35cd01f9fe9afbeea38cc7b979a3b6bfcde82c03"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      },
+      {
+        "id": "ev_0829d943f9c5a11b",
+        "type": "package_registry_metadata",
+        "status": "DECLARED",
+        "collector": "package-registry",
+        "extractor": "package-registry-metadata@1",
+        "sourceUrl": "https://pypi.org/project/wheel/",
+        "locator": {
+          "field": "wheel",
+          "spec": "pypi"
+        },
+        "observedText": "pypi:wheel -> pypa/wheel",
+        "data": {
+          "ecosystem": "pypi",
+          "package_name": "wheel",
+          "registry_url": "https://pypi.org/project/wheel/",
+          "resolved_repository": "pypa/wheel",
+          "relationship_semantics": "registry metadata records a source repository; this is not a lineage claim"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      },
+      {
+        "id": "ev_0d35d252023f7a91",
+        "type": "git_submodule_entry",
+        "status": "VERIFIED",
+        "collector": "submodules",
+        "extractor": "gitmodules-entry@1",
+        "repository": "repo:github:grpc/grpc",
+        "sourceUrl": "https://github.com/grpc/grpc/blob/724b3ccb608b8ac7e51482a15113edfd94bb28ba/.gitmodules",
+        "locator": {
+          "path": ".gitmodules",
+          "field": "submodule.third_party/zlib.path"
+        },
+        "observedText": "submodule \"third_party/zlib\" at third_party/zlib -> https://github.com/madler/zlib",
+        "data": {
+          "submodule_name": "third_party/zlib",
+          "path": "third_party/zlib",
+          "url": "https://github.com/madler/zlib",
+          "pinned_commit": "f1f503da85d52e56aae11557b4d79a42bcaa2b86"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      },
+      {
+        "id": "ev_0f5b1d9d0e23f21c",
+        "type": "document_reference",
+        "status": "DECLARED",
+        "collector": "documents",
+        "extractor": "explicit-reference@1",
+        "repository": "repo:github:grpc/grpc",
+        "sourceUrl": "https://github.com/grpc/grpc/blob/724b3ccb608b8ac7e51482a15113edfd94bb28ba/doc/command_line_tool.md",
+        "locator": {
+          "path": "doc/command_line_tool.md",
+          "lineStart": 14,
+          "lineEnd": 14
+        },
+        "observedText": "> [grpcurl](https://github.com/fullstorydev/grpcurl) are better maintained.",
+        "data": {
+          "matched_text": "> [grpcurl](https://github.com/fullstorydev/grpcurl) are better maintained.",
+          "path": "doc/command_line_tool.md",
+          "line_start": 14,
+          "line_end": 14,
+          "phrase": "link"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      },
+      {
+        "id": "ev_0fa2900fe9d54b59",
+        "type": "git_submodule_entry",
+        "status": "VERIFIED",
+        "collector": "submodules",
+        "extractor": "gitmodules-entry@1",
+        "repository": "repo:github:grpc/grpc",
+        "sourceUrl": "https://github.com/grpc/grpc/blob/724b3ccb608b8ac7e51482a15113edfd94bb28ba/.gitmodules",
+        "locator": {
+          "path": ".gitmodules",
+          "field": "submodule.third_party/abseil-cpp.path"
+        },
+        "observedText": "submodule \"third_party/abseil-cpp\" at third_party/abseil-cpp -> https://github.com/abseil/abseil-cpp.git",
+        "data": {
+          "submodule_name": "third_party/abseil-cpp",
+          "path": "third_party/abseil-cpp",
+          "url": "https://github.com/abseil/abseil-cpp.git",
+          "pinned_commit": "5650e9cf76d3be4318d5fa3af38ee483ddfd5e4a"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      },
+      {
+        "id": "ev_1047a86d83f960e6",
+        "type": "git_submodule_entry",
+        "status": "VERIFIED",
+        "collector": "submodules",
+        "extractor": "gitmodules-entry@1",
+        "repository": "repo:github:grpc/grpc",
+        "sourceUrl": "https://github.com/grpc/grpc/blob/724b3ccb608b8ac7e51482a15113edfd94bb28ba/.gitmodules",
+        "locator": {
+          "path": ".gitmodules",
+          "field": "submodule.third_party/benchmark.path"
+        },
+        "observedText": "submodule \"third_party/benchmark\" at third_party/benchmark -> https://github.com/google/benchmark",
+        "data": {
+          "submodule_name": "third_party/benchmark",
+          "path": "third_party/benchmark",
+          "url": "https://github.com/google/benchmark",
+          "pinned_commit": "12235e24652fc7f809373e7c11a5f73c5763fc4c"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      },
+      {
+        "id": "ev_10b316b570341bdf",
+        "type": "git_submodule_entry",
+        "status": "VERIFIED",
+        "collector": "submodules",
+        "extractor": "gitmodules-entry@1",
+        "repository": "repo:github:grpc/grpc",
+        "sourceUrl": "https://github.com/grpc/grpc/blob/724b3ccb608b8ac7e51482a15113edfd94bb28ba/.gitmodules",
+        "locator": {
+          "path": ".gitmodules",
+          "field": "submodule.third_party/cel-spec.path"
+        },
+        "observedText": "submodule \"third_party/cel-spec\" at third_party/cel-spec -> https://github.com/google/cel-spec",
+        "data": {
+          "submodule_name": "third_party/cel-spec",
+          "path": "third_party/cel-spec",
+          "url": "https://github.com/google/cel-spec",
+          "pinned_commit": "9f069b3ee58b02d6f6736c5ebd6587075c1a1b22"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      },
+      {
+        "id": "ev_10ff2b6583683249",
+        "type": "git_submodule_entry",
+        "status": "VERIFIED",
+        "collector": "submodules",
+        "extractor": "gitmodules-entry@1",
+        "repository": "repo:github:grpc/grpc",
+        "sourceUrl": "https://github.com/grpc/grpc/blob/724b3ccb608b8ac7e51482a15113edfd94bb28ba/.gitmodules",
+        "locator": {
+          "path": ".gitmodules",
+          "field": "submodule.third_party/protoc-gen-validate.path"
+        },
+        "observedText": "submodule \"third_party/protoc-gen-validate\" at third_party/protoc-gen-validate -> https://github.com/envoyproxy/protoc-gen-validate.git",
+        "data": {
+          "submodule_name": "third_party/protoc-gen-validate",
+          "path": "third_party/protoc-gen-validate",
+          "url": "https://github.com/envoyproxy/protoc-gen-validate.git",
+          "pinned_commit": "7b06248484ceeaa947e93ca2747eccf336a88ecc"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      },
+      {
+        "id": "ev_141d6b10b19cf5b2",
+        "type": "document_reference",
+        "status": "DECLARED",
+        "collector": "documents",
+        "extractor": "explicit-reference@1",
+        "repository": "repo:github:grpc/grpc",
+        "sourceUrl": "https://github.com/grpc/grpc/blob/724b3ccb608b8ac7e51482a15113edfd94bb28ba/README.md",
+        "locator": {
+          "path": "README.md",
+          "lineStart": 36,
+          "lineEnd": 36
+        },
+        "observedText": "-   [Kotlin](https://github.com/grpc/grpc-kotlin): Use JARs from Maven Central",
+        "data": {
+          "matched_text": "-   [Kotlin](https://github.com/grpc/grpc-kotlin): Use JARs from Maven Central",
+          "path": "README.md",
+          "line_start": 36,
+          "line_end": 36,
+          "phrase": "link"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      },
+      {
+        "id": "ev_1610d2896e60452c",
+        "type": "git_blob_identity",
+        "status": "VERIFIED",
+        "collector": "git-blob-analyzer",
+        "extractor": "git-blob-identity@1",
+        "repository": "repo:github:grpc/grpc",
+        "sourceUrl": "https://github.com/grpc/grpc/blob/724b3ccb608b8ac7e51482a15113edfd94bb28ba/src/php/ext/grpc/LICENSE",
+        "locator": {
+          "path": "src/php/ext/grpc/LICENSE",
+          "field": "d645695673349e3947e8e5ae42332d0ac3164cd7"
+        },
+        "observedText": "identical git blob d645695673349e3947e8e5ae42332d0ac3164cd7",
+        "data": {
+          "first_blob": "d645695673349e3947e8e5ae42332d0ac3164cd7",
+          "second_blob": "d645695673349e3947e8e5ae42332d0ac3164cd7",
+          "first_path": "src/php/ext/grpc/LICENSE",
+          "second_path": "LICENSE",
+          "first_commit": "724b3ccb608b8ac7e51482a15113edfd94bb28ba",
+          "second_commit": "1664cc961550be8f3058ddd29390350242f44f1f",
+          "direction": "symmetric: identical content establishes no order of origin"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      },
+      {
+        "id": "ev_2b84ab93e1750c2d",
+        "type": "git_submodule_entry",
+        "status": "VERIFIED",
+        "collector": "submodules",
+        "extractor": "gitmodules-entry@1",
+        "repository": "repo:github:grpc/grpc",
+        "sourceUrl": "https://github.com/grpc/grpc/blob/724b3ccb608b8ac7e51482a15113edfd94bb28ba/.gitmodules",
+        "locator": {
+          "path": ".gitmodules",
+          "field": "submodule.third_party/envoy-api.path"
+        },
+        "observedText": "submodule \"third_party/envoy-api\" at third_party/envoy-api -> https://github.com/envoyproxy/data-plane-api.git",
+        "data": {
+          "submodule_name": "third_party/envoy-api",
+          "path": "third_party/envoy-api",
+          "url": "https://github.com/envoyproxy/data-plane-api.git",
+          "pinned_commit": "6ef568cf4a67362849911d1d2a546fd9f35db2ff"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      },
+      {
+        "id": "ev_3a0db2a5263914a8",
+        "type": "git_submodule_entry",
+        "status": "VERIFIED",
+        "collector": "submodules",
+        "extractor": "gitmodules-entry@1",
+        "repository": "repo:github:grpc/grpc",
+        "sourceUrl": "https://github.com/grpc/grpc/blob/724b3ccb608b8ac7e51482a15113edfd94bb28ba/.gitmodules",
+        "locator": {
+          "path": ".gitmodules",
+          "field": "submodule.third_party/opentelemetry.path"
+        },
+        "observedText": "submodule \"third_party/opentelemetry\" at third_party/opentelemetry -> https://github.com/open-telemetry/opentelemetry-proto.git",
+        "data": {
+          "submodule_name": "third_party/opentelemetry",
+          "path": "third_party/opentelemetry",
+          "url": "https://github.com/open-telemetry/opentelemetry-proto.git",
+          "pinned_commit": "60fa8754d890b5c55949a8c68dcfd7ab5c2395df"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      },
+      {
+        "id": "ev_4153b4aeb0094f2a",
+        "type": "git_blob_identity",
+        "status": "VERIFIED",
+        "collector": "git-blob-analyzer",
+        "extractor": "git-blob-identity@1",
+        "repository": "repo:github:grpc/grpc",
+        "sourceUrl": "https://github.com/grpc/grpc/blob/724b3ccb608b8ac7e51482a15113edfd94bb28ba/src/php/ext/grpc/LICENSE",
+        "locator": {
+          "path": "src/php/ext/grpc/LICENSE",
+          "field": "d645695673349e3947e8e5ae42332d0ac3164cd7"
+        },
+        "observedText": "identical git blob d645695673349e3947e8e5ae42332d0ac3164cd7",
+        "data": {
+          "first_blob": "d645695673349e3947e8e5ae42332d0ac3164cd7",
+          "second_blob": "d645695673349e3947e8e5ae42332d0ac3164cd7",
+          "first_path": "src/php/ext/grpc/LICENSE",
+          "second_path": "LICENSE",
+          "first_commit": "724b3ccb608b8ac7e51482a15113edfd94bb28ba",
+          "second_commit": "f1714c3fc43866f4f0dcdafb94beff9d1eef263c",
+          "direction": "symmetric: identical content establishes no order of origin"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      },
+      {
+        "id": "ev_42f7e54d815de0ae",
+        "type": "git_submodule_entry",
+        "status": "VERIFIED",
+        "collector": "submodules",
+        "extractor": "gitmodules-entry@1",
+        "repository": "repo:github:grpc/grpc",
+        "sourceUrl": "https://github.com/grpc/grpc/blob/724b3ccb608b8ac7e51482a15113edfd94bb28ba/.gitmodules",
+        "locator": {
+          "path": ".gitmodules",
+          "field": "submodule.third_party/grpc-proto.path"
+        },
+        "observedText": "submodule \"third_party/grpc-proto\" at third_party/grpc-proto -> https://github.com/grpc/grpc-proto.git",
+        "data": {
+          "submodule_name": "third_party/grpc-proto",
+          "path": "third_party/grpc-proto",
+          "url": "https://github.com/grpc/grpc-proto.git",
+          "pinned_commit": "dd549fc4ed04b60b0fdd3866b82ef0a7c87c6e4f"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      },
+      {
+        "id": "ev_438bcb0b8fd1f224",
+        "type": "git_submodule_entry",
+        "status": "VERIFIED",
+        "collector": "submodules",
+        "extractor": "gitmodules-entry@1",
+        "repository": "repo:github:grpc/grpc",
+        "sourceUrl": "https://github.com/grpc/grpc/blob/724b3ccb608b8ac7e51482a15113edfd94bb28ba/.gitmodules",
+        "locator": {
+          "path": ".gitmodules",
+          "field": "submodule.third_party/googleapis.path"
+        },
+        "observedText": "submodule \"third_party/googleapis\" at third_party/googleapis -> https://github.com/googleapis/googleapis.git",
+        "data": {
+          "submodule_name": "third_party/googleapis",
+          "path": "third_party/googleapis",
+          "url": "https://github.com/googleapis/googleapis.git",
+          "pinned_commit": "2193a2bfcecb92b92aad7a4d81baa428cafd7dfd"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      },
+      {
+        "id": "ev_4a2f215682dfbda4",
+        "type": "document_reference",
+        "status": "DECLARED",
+        "collector": "documents",
+        "extractor": "explicit-reference@1",
+        "repository": "repo:github:grpc/grpc",
+        "sourceUrl": "https://github.com/grpc/grpc/blob/724b3ccb608b8ac7e51482a15113edfd94bb28ba/README.md",
+        "locator": {
+          "path": "README.md",
+          "lineStart": 30,
+          "lineEnd": 30
+        },
+        "observedText": "-   [C#/.NET](https://github.com/grpc/grpc-dotnet): NuGet packages",
+        "data": {
+          "matched_text": "-   [C#/.NET](https://github.com/grpc/grpc-dotnet): NuGet packages",
+          "path": "README.md",
+          "line_start": 30,
+          "line_end": 30,
+          "phrase": "link"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      },
+      {
+        "id": "ev_4b3eefd242d7e2b4",
+        "type": "git_blob_identity",
+        "status": "VERIFIED",
+        "collector": "git-blob-analyzer",
+        "extractor": "git-blob-identity@1",
+        "repository": "repo:github:grpc/grpc",
+        "sourceUrl": "https://github.com/grpc/grpc/blob/724b3ccb608b8ac7e51482a15113edfd94bb28ba/.bazelversion",
+        "locator": {
+          "path": ".bazelversion",
+          "field": "df5119ec64e603aecde9bc15b7e392a204b9667c"
+        },
+        "observedText": "identical git blob df5119ec64e603aecde9bc15b7e392a204b9667c",
+        "data": {
+          "first_blob": "df5119ec64e603aecde9bc15b7e392a204b9667c",
+          "second_blob": "df5119ec64e603aecde9bc15b7e392a204b9667c",
+          "first_path": ".bazelversion",
+          "second_path": ".bazelversion",
+          "first_commit": "724b3ccb608b8ac7e51482a15113edfd94bb28ba",
+          "second_commit": "bbdb358f202b275731a0d7ee3162fd211886c945",
+          "direction": "symmetric: identical content establishes no order of origin"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      },
+      {
+        "id": "ev_4d4c2e33c4f654ee",
+        "type": "git_submodule_entry",
+        "status": "VERIFIED",
+        "collector": "submodules",
+        "extractor": "gitmodules-entry@1",
+        "repository": "repo:github:grpc/grpc",
+        "sourceUrl": "https://github.com/grpc/grpc/blob/724b3ccb608b8ac7e51482a15113edfd94bb28ba/.gitmodules",
+        "locator": {
+          "path": ".gitmodules",
+          "field": "submodule.third_party/googletest.path"
+        },
+        "observedText": "submodule \"third_party/googletest\" at third_party/googletest -> https://github.com/google/googletest.git",
+        "data": {
+          "submodule_name": "third_party/googletest",
+          "path": "third_party/googletest",
+          "url": "https://github.com/google/googletest.git",
+          "pinned_commit": "52eb8108c5bdec04579160ae17225d66034bd723"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      },
+      {
+        "id": "ev_64148ffb71bd5b97",
+        "type": "git_submodule_entry",
+        "status": "VERIFIED",
+        "collector": "submodules",
+        "extractor": "gitmodules-entry@1",
+        "repository": "repo:github:grpc/grpc",
+        "sourceUrl": "https://github.com/grpc/grpc/blob/724b3ccb608b8ac7e51482a15113edfd94bb28ba/.gitmodules",
+        "locator": {
+          "path": ".gitmodules",
+          "field": "submodule.third_party/opentelemetry-cpp.path"
+        },
+        "observedText": "submodule \"third_party/opentelemetry-cpp\" at third_party/opentelemetry-cpp -> https://github.com/open-telemetry/opentelemetry-cpp",
+        "data": {
+          "submodule_name": "third_party/opentelemetry-cpp",
+          "path": "third_party/opentelemetry-cpp",
+          "url": "https://github.com/open-telemetry/opentelemetry-cpp",
+          "pinned_commit": "ced79860f8c8a091a2eabfee6d47783f828a9b59"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      },
+      {
+        "id": "ev_6aa4a4db51fc16a7",
+        "type": "git_submodule_entry",
+        "status": "VERIFIED",
+        "collector": "submodules",
+        "extractor": "gitmodules-entry@1",
+        "repository": "repo:github:grpc/grpc",
+        "sourceUrl": "https://github.com/grpc/grpc/blob/724b3ccb608b8ac7e51482a15113edfd94bb28ba/.gitmodules",
+        "locator": {
+          "path": ".gitmodules",
+          "field": "submodule.third_party/bloaty.path"
+        },
+        "observedText": "submodule \"third_party/bloaty\" at third_party/bloaty -> https://github.com/google/bloaty.git",
+        "data": {
+          "submodule_name": "third_party/bloaty",
+          "path": "third_party/bloaty",
+          "url": "https://github.com/google/bloaty.git",
+          "pinned_commit": "60209eb1ccc34d5deefb002d1b7f37545204f7f2"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      },
+      {
+        "id": "ev_74d23b2b856e1094",
+        "type": "git_submodule_entry",
+        "status": "VERIFIED",
+        "collector": "submodules",
+        "extractor": "gitmodules-entry@1",
+        "repository": "repo:github:grpc/grpc",
+        "sourceUrl": "https://github.com/grpc/grpc/blob/724b3ccb608b8ac7e51482a15113edfd94bb28ba/.gitmodules",
+        "locator": {
+          "path": ".gitmodules",
+          "field": "submodule.third_party/cel-c.path"
+        },
+        "observedText": "submodule \"third_party/cel-c\" at third_party/cel-c -> https://github.com/cel-expr/cel-c.git",
+        "data": {
+          "submodule_name": "third_party/cel-c",
+          "path": "third_party/cel-c",
+          "url": "https://github.com/cel-expr/cel-c.git",
+          "pinned_commit": "bbdb358f202b275731a0d7ee3162fd211886c945"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      },
+      {
+        "id": "ev_77edeb7ea4f4a866",
+        "type": "git_blob_identity",
+        "status": "VERIFIED",
+        "collector": "git-blob-analyzer",
+        "extractor": "git-blob-identity@1",
+        "repository": "repo:github:grpc/grpc",
+        "sourceUrl": "https://github.com/grpc/grpc/blob/724b3ccb608b8ac7e51482a15113edfd94bb28ba/src/php/ext/grpc/LICENSE",
+        "locator": {
+          "path": "src/php/ext/grpc/LICENSE",
+          "field": "d645695673349e3947e8e5ae42332d0ac3164cd7"
+        },
+        "observedText": "identical git blob d645695673349e3947e8e5ae42332d0ac3164cd7",
+        "data": {
+          "first_blob": "d645695673349e3947e8e5ae42332d0ac3164cd7",
+          "second_blob": "d645695673349e3947e8e5ae42332d0ac3164cd7",
+          "first_path": "src/php/ext/grpc/LICENSE",
+          "second_path": "LICENSE",
+          "first_commit": "724b3ccb608b8ac7e51482a15113edfd94bb28ba",
+          "second_commit": "414042a5ff2e98dc47f8161937316a25b1da5bba",
+          "direction": "symmetric: identical content establishes no order of origin"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      },
+      {
+        "id": "ev_7828a0d26836c3c8",
+        "type": "package_registry_metadata",
+        "status": "DECLARED",
+        "collector": "package-registry",
+        "extractor": "package-registry-metadata@1",
+        "sourceUrl": "https://pypi.org/project/cython/",
+        "locator": {
+          "field": "cython",
+          "spec": "pypi"
+        },
+        "observedText": "pypi:cython -> cython/cython",
+        "data": {
+          "ecosystem": "pypi",
+          "package_name": "cython",
+          "registry_url": "https://pypi.org/project/cython/",
+          "resolved_repository": "cython/cython",
+          "relationship_semantics": "registry metadata records a source repository; this is not a lineage claim"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      },
+      {
+        "id": "ev_8198fd1813934323",
+        "type": "package_registry_metadata",
+        "status": "DECLARED",
+        "collector": "package-registry",
+        "extractor": "package-registry-metadata@1",
+        "sourceUrl": "https://pypi.org/project/coverage/",
+        "locator": {
+          "field": "coverage",
+          "spec": "pypi"
+        },
+        "observedText": "pypi:coverage -> coveragepy/coveragepy",
+        "data": {
+          "ecosystem": "pypi",
+          "package_name": "coverage",
+          "registry_url": "https://pypi.org/project/coverage/",
+          "resolved_repository": "coveragepy/coveragepy",
+          "relationship_semantics": "registry metadata records a source repository; this is not a lineage claim"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      },
+      {
+        "id": "ev_8276f6286810d527",
+        "type": "package_registry_metadata",
+        "status": "DECLARED",
+        "collector": "package-registry",
+        "extractor": "package-registry-metadata@1",
+        "sourceUrl": "https://pypi.org/project/setuptools/",
+        "locator": {
+          "field": "setuptools",
+          "spec": "pypi"
+        },
+        "observedText": "pypi:setuptools -> pypa/setuptools",
+        "data": {
+          "ecosystem": "pypi",
+          "package_name": "setuptools",
+          "registry_url": "https://pypi.org/project/setuptools/",
+          "resolved_repository": "pypa/setuptools",
+          "relationship_semantics": "registry metadata records a source repository; this is not a lineage claim"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      },
+      {
+        "id": "ev_8a9be8fe0582beec",
+        "type": "git_submodule_entry",
+        "status": "VERIFIED",
+        "collector": "submodules",
+        "extractor": "gitmodules-entry@1",
+        "repository": "repo:github:grpc/grpc",
+        "sourceUrl": "https://github.com/grpc/grpc/blob/724b3ccb608b8ac7e51482a15113edfd94bb28ba/.gitmodules",
+        "locator": {
+          "path": ".gitmodules",
+          "field": "submodule.third_party/re2.path"
+        },
+        "observedText": "submodule \"third_party/re2\" at third_party/re2 -> https://github.com/google/re2.git",
+        "data": {
+          "submodule_name": "third_party/re2",
+          "path": "third_party/re2",
+          "url": "https://github.com/google/re2.git",
+          "pinned_commit": "0c5616df9c0aaa44c9440d87422012423d91c7d1"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      },
+      {
+        "id": "ev_8ba853388bad95d5",
+        "type": "document_reference",
+        "status": "DECLARED",
+        "collector": "documents",
+        "extractor": "explicit-reference@1",
+        "repository": "repo:github:grpc/grpc",
+        "sourceUrl": "https://github.com/grpc/grpc/blob/724b3ccb608b8ac7e51482a15113edfd94bb28ba/README.md",
+        "locator": {
+          "path": "README.md",
+          "lineStart": 33,
+          "lineEnd": 33
+        },
+        "observedText": "-   [Go](https://github.com/grpc/grpc-go): `go get google.golang.org/grpc`",
+        "data": {
+          "matched_text": "-   [Go](https://github.com/grpc/grpc-go): `go get google.golang.org/grpc`",
+          "path": "README.md",
+          "line_start": 33,
+          "line_end": 33,
+          "phrase": "link"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      },
+      {
+        "id": "ev_9310f1613c6f553f",
+        "type": "document_reference",
+        "status": "DECLARED",
+        "collector": "documents",
+        "extractor": "explicit-reference@1",
+        "repository": "repo:github:grpc/grpc",
+        "sourceUrl": "https://github.com/grpc/grpc/blob/724b3ccb608b8ac7e51482a15113edfd94bb28ba/README.md",
+        "locator": {
+          "path": "README.md",
+          "lineStart": 32,
+          "lineEnd": 32
+        },
+        "observedText": "-   [Dart](https://github.com/grpc/grpc-dart): pub package `grpc`",
+        "data": {
+          "matched_text": "-   [Dart](https://github.com/grpc/grpc-dart): pub package `grpc`",
+          "path": "README.md",
+          "line_start": 32,
+          "line_end": 32,
+          "phrase": "link"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      },
+      {
+        "id": "ev_9575c52f99d7d939",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:grpc/grpc",
+        "sourceUrl": "https://github.com/grpc/grpc/blob/724b3ccb608b8ac7e51482a15113edfd94bb28ba/requirements.txt",
+        "locator": {
+          "path": "requirements.txt",
+          "field": "wheel",
+          "spec": "pypi"
+        },
+        "observedText": "\"wheel\": \">=0.29\"",
+        "data": {
+          "ecosystem": "pypi",
+          "package_name": "wheel",
+          "range": ">=0.29",
+          "manifest_path": "requirements.txt",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      },
+      {
+        "id": "ev_9b0429c91fca8a07",
+        "type": "document_reference",
+        "status": "DECLARED",
+        "collector": "documents",
+        "extractor": "explicit-reference@1",
+        "repository": "repo:github:grpc/grpc",
+        "sourceUrl": "https://github.com/grpc/grpc/blob/724b3ccb608b8ac7e51482a15113edfd94bb28ba/doc/PROTOCOL-WEB.md",
+        "locator": {
+          "path": "doc/PROTOCOL-WEB.md",
+          "lineStart": 128,
+          "lineEnd": 128
+        },
+        "observedText": "* Pending on [whatwg fetch/streams](https://github.com/whatwg/fetch) to be",
+        "data": {
+          "matched_text": "* Pending on [whatwg fetch/streams](https://github.com/whatwg/fetch) to be",
+          "path": "doc/PROTOCOL-WEB.md",
+          "line_start": 128,
+          "line_end": 128,
+          "phrase": "link"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      },
+      {
+        "id": "ev_a590b0183180eab0",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:grpc/grpc",
+        "sourceUrl": "https://github.com/grpc/grpc/blob/724b3ccb608b8ac7e51482a15113edfd94bb28ba/requirements.txt",
+        "locator": {
+          "path": "requirements.txt",
+          "field": "setuptools",
+          "spec": "pypi"
+        },
+        "observedText": "\"setuptools\": \">=77.0.1\"",
+        "data": {
+          "ecosystem": "pypi",
+          "package_name": "setuptools",
+          "range": ">=77.0.1",
+          "manifest_path": "requirements.txt",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      },
+      {
+        "id": "ev_aaee522f941fba24",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:grpc/grpc",
+        "sourceUrl": "https://github.com/grpc/grpc/blob/724b3ccb608b8ac7e51482a15113edfd94bb28ba/requirements.txt",
+        "locator": {
+          "path": "requirements.txt",
+          "field": "typing-extensions",
+          "spec": "pypi"
+        },
+        "observedText": "\"typing-extensions\": \"==4.12.2\"",
+        "data": {
+          "ecosystem": "pypi",
+          "package_name": "typing-extensions",
+          "range": "==4.12.2",
+          "manifest_path": "requirements.txt",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      },
+      {
+        "id": "ev_ac638af69a96eb35",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:grpc/grpc",
+        "sourceUrl": "https://github.com/grpc/grpc/blob/724b3ccb608b8ac7e51482a15113edfd94bb28ba/requirements.txt",
+        "locator": {
+          "path": "requirements.txt",
+          "field": "cython",
+          "spec": "pypi"
+        },
+        "observedText": "\"cython\": \"==3.2.8\"",
+        "data": {
+          "ecosystem": "pypi",
+          "package_name": "cython",
+          "range": "==3.2.8",
+          "manifest_path": "requirements.txt",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      },
+      {
+        "id": "ev_aebac824c71895ec",
+        "type": "git_submodule_entry",
+        "status": "VERIFIED",
+        "collector": "submodules",
+        "extractor": "gitmodules-entry@1",
+        "repository": "repo:github:grpc/grpc",
+        "sourceUrl": "https://github.com/grpc/grpc/blob/724b3ccb608b8ac7e51482a15113edfd94bb28ba/.gitmodules",
+        "locator": {
+          "path": ".gitmodules",
+          "field": "submodule.third_party/xds.path"
+        },
+        "observedText": "submodule \"third_party/xds\" at third_party/xds -> https://github.com/cncf/xds.git",
+        "data": {
+          "submodule_name": "third_party/xds",
+          "path": "third_party/xds",
+          "url": "https://github.com/cncf/xds.git",
+          "pinned_commit": "ee656c7534f5d7dc23d44dd611689568f72017a6"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      },
+      {
+        "id": "ev_b02a5d4bafb905aa",
+        "type": "git_submodule_entry",
+        "status": "VERIFIED",
+        "collector": "submodules",
+        "extractor": "gitmodules-entry@1",
+        "repository": "repo:github:grpc/grpc",
+        "sourceUrl": "https://github.com/grpc/grpc/blob/724b3ccb608b8ac7e51482a15113edfd94bb28ba/.gitmodules",
+        "locator": {
+          "path": ".gitmodules",
+          "field": "submodule.third_party/opencensus-proto.path"
+        },
+        "observedText": "submodule \"third_party/opencensus-proto\" at third_party/opencensus-proto -> https://github.com/census-instrumentation/opencensus-proto.git",
+        "data": {
+          "submodule_name": "third_party/opencensus-proto",
+          "path": "third_party/opencensus-proto",
+          "url": "https://github.com/census-instrumentation/opencensus-proto.git",
+          "pinned_commit": "4aa53e15cbf1a47bc9087e6cfdca214c1eea4e89"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      },
+      {
+        "id": "ev_b7755d6412a6771a",
+        "type": "git_submodule_entry",
+        "status": "VERIFIED",
+        "collector": "submodules",
+        "extractor": "gitmodules-entry@1",
+        "repository": "repo:github:grpc/grpc",
+        "sourceUrl": "https://github.com/grpc/grpc/blob/724b3ccb608b8ac7e51482a15113edfd94bb28ba/.gitmodules",
+        "locator": {
+          "path": ".gitmodules",
+          "field": "submodule.third_party/cares/cares.path"
+        },
+        "observedText": "submodule \"third_party/cares/cares\" at third_party/cares/cares -> https://github.com/c-ares/c-ares.git",
+        "data": {
+          "submodule_name": "third_party/cares/cares",
+          "path": "third_party/cares/cares",
+          "url": "https://github.com/c-ares/c-ares.git",
+          "pinned_commit": "d3a507e920e7af18a5efb7f9f1d8044ed4750013"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      },
+      {
+        "id": "ev_b7af7afe486f12be",
+        "type": "git_submodule_entry",
+        "status": "VERIFIED",
+        "collector": "submodules",
+        "extractor": "gitmodules-entry@1",
+        "repository": "repo:github:grpc/grpc",
+        "sourceUrl": "https://github.com/grpc/grpc/blob/724b3ccb608b8ac7e51482a15113edfd94bb28ba/.gitmodules",
+        "locator": {
+          "path": ".gitmodules",
+          "field": "submodule.third_party/boringssl-with-bazel.path"
+        },
+        "observedText": "submodule \"third_party/boringssl-with-bazel\" at third_party/boringssl-with-bazel -> https://github.com/google/boringssl.git",
+        "data": {
+          "submodule_name": "third_party/boringssl-with-bazel",
+          "path": "third_party/boringssl-with-bazel",
+          "url": "https://github.com/google/boringssl.git",
+          "pinned_commit": "3adc3d1aba162a578e2547f329fcce8659b8e89c"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      },
+      {
+        "id": "ev_c2e70f228e866427",
+        "type": "git_blob_identity",
+        "status": "VERIFIED",
+        "collector": "git-blob-analyzer",
+        "extractor": "git-blob-identity@1",
+        "repository": "repo:github:grpc/grpc",
+        "sourceUrl": "https://github.com/grpc/grpc/blob/724b3ccb608b8ac7e51482a15113edfd94bb28ba/src/php/ext/grpc/LICENSE",
+        "locator": {
+          "path": "src/php/ext/grpc/LICENSE",
+          "field": "d645695673349e3947e8e5ae42332d0ac3164cd7"
+        },
+        "observedText": "identical git blob d645695673349e3947e8e5ae42332d0ac3164cd7",
+        "data": {
+          "first_blob": "d645695673349e3947e8e5ae42332d0ac3164cd7",
+          "second_blob": "d645695673349e3947e8e5ae42332d0ac3164cd7",
+          "first_path": "src/php/ext/grpc/LICENSE",
+          "second_path": "LICENSE",
+          "first_commit": "724b3ccb608b8ac7e51482a15113edfd94bb28ba",
+          "second_commit": "f1a83e63f36beb628dcf022e1201a2eb391a22a6",
+          "direction": "symmetric: identical content establishes no order of origin"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      },
+      {
+        "id": "ev_d623972b8d856311",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:grpc/grpc",
+        "sourceUrl": "https://github.com/grpc/grpc/blob/724b3ccb608b8ac7e51482a15113edfd94bb28ba/requirements.txt",
+        "locator": {
+          "path": "requirements.txt",
+          "field": "coverage",
+          "spec": "pypi"
+        },
+        "observedText": "\"coverage\": \">=7.9.0\"",
+        "data": {
+          "ecosystem": "pypi",
+          "package_name": "coverage",
+          "range": ">=7.9.0",
+          "manifest_path": "requirements.txt",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      },
+      {
+        "id": "ev_dfdd2b3b747132f4",
+        "type": "git_blob_identity",
+        "status": "VERIFIED",
+        "collector": "git-blob-analyzer",
+        "extractor": "git-blob-identity@1",
+        "repository": "repo:github:grpc/grpc",
+        "sourceUrl": "https://github.com/grpc/grpc/blob/724b3ccb608b8ac7e51482a15113edfd94bb28ba/src/php/ext/grpc/LICENSE",
+        "locator": {
+          "path": "src/php/ext/grpc/LICENSE",
+          "field": "d645695673349e3947e8e5ae42332d0ac3164cd7"
+        },
+        "observedText": "identical git blob d645695673349e3947e8e5ae42332d0ac3164cd7",
+        "data": {
+          "first_blob": "d645695673349e3947e8e5ae42332d0ac3164cd7",
+          "second_blob": "d645695673349e3947e8e5ae42332d0ac3164cd7",
+          "first_path": "src/php/ext/grpc/LICENSE",
+          "second_path": "LICENSE",
+          "first_commit": "724b3ccb608b8ac7e51482a15113edfd94bb28ba",
+          "second_commit": "bbdb358f202b275731a0d7ee3162fd211886c945",
+          "direction": "symmetric: identical content establishes no order of origin"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      },
+      {
+        "id": "ev_e07c9db897361937",
+        "type": "document_reference",
+        "status": "DECLARED",
+        "collector": "documents",
+        "extractor": "explicit-reference@1",
+        "repository": "repo:github:grpc/grpc",
+        "sourceUrl": "https://github.com/grpc/grpc/blob/724b3ccb608b8ac7e51482a15113edfd94bb28ba/README.md",
+        "locator": {
+          "path": "README.md",
+          "lineStart": 43,
+          "lineEnd": 43
+        },
+        "observedText": "-   [WebJS](https://github.com/grpc/grpc-web): follow the grpc-web instructions",
+        "data": {
+          "matched_text": "-   [WebJS](https://github.com/grpc/grpc-web): follow the grpc-web instructions",
+          "path": "README.md",
+          "line_start": 43,
+          "line_end": 43,
+          "phrase": "link"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      },
+      {
+        "id": "ev_e56caa10ea8baa41",
+        "type": "document_reference",
+        "status": "DECLARED",
+        "collector": "documents",
+        "extractor": "explicit-reference@1",
+        "repository": "repo:github:grpc/grpc",
+        "sourceUrl": "https://github.com/grpc/grpc/blob/724b3ccb608b8ac7e51482a15113edfd94bb28ba/README.md",
+        "locator": {
+          "path": "README.md",
+          "lineStart": 38,
+          "lineEnd": 38
+        },
+        "observedText": "-   [Node](https://github.com/grpc/grpc-node): `npm install @grpc/grpc-js`",
+        "data": {
+          "matched_text": "-   [Node](https://github.com/grpc/grpc-node): `npm install @grpc/grpc-js`",
+          "path": "README.md",
+          "line_start": 38,
+          "line_end": 38,
+          "phrase": "link"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      },
+      {
+        "id": "ev_e8d927d43750798b",
+        "type": "document_reference",
+        "status": "DECLARED",
+        "collector": "documents",
+        "extractor": "explicit-reference@1",
+        "repository": "repo:github:grpc/grpc",
+        "sourceUrl": "https://github.com/grpc/grpc/blob/724b3ccb608b8ac7e51482a15113edfd94bb28ba/README.md",
+        "locator": {
+          "path": "README.md",
+          "lineStart": 105,
+          "lineEnd": 105
+        },
+        "observedText": "Swift                | [grpc-swift](https://github.com/grpc/grpc-swift)",
+        "data": {
+          "matched_text": "Swift                | [grpc-swift](https://github.com/grpc/grpc-swift)",
+          "path": "README.md",
+          "line_start": 105,
+          "line_end": 105,
+          "phrase": "link"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      },
+      {
+        "id": "ev_f1ccc4fae1508219",
+        "type": "document_reference",
+        "status": "DECLARED",
+        "collector": "documents",
+        "extractor": "explicit-reference@1",
+        "repository": "repo:github:grpc/grpc",
+        "sourceUrl": "https://github.com/grpc/grpc/blob/724b3ccb608b8ac7e51482a15113edfd94bb28ba/README.md",
+        "locator": {
+          "path": "README.md",
+          "lineStart": 34,
+          "lineEnd": 34
+        },
+        "observedText": "-   [Java](https://github.com/grpc/grpc-java): Use JARs from Maven Central",
+        "data": {
+          "matched_text": "-   [Java](https://github.com/grpc/grpc-java): Use JARs from Maven Central",
+          "path": "README.md",
+          "line_start": 34,
+          "line_end": 34,
+          "phrase": "link"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      },
+      {
+        "id": "ev_f6ef484931a4e82c",
+        "type": "document_reference",
+        "status": "DECLARED",
+        "collector": "documents",
+        "extractor": "explicit-reference@1",
+        "repository": "repo:github:grpc/grpc",
+        "sourceUrl": "https://github.com/grpc/grpc/blob/724b3ccb608b8ac7e51482a15113edfd94bb28ba/doc/PROTOCOL-WEB.md",
+        "locator": {
+          "path": "doc/PROTOCOL-WEB.md",
+          "lineStart": 32,
+          "lineEnd": 32
+        },
+        "observedText": "gRPC protocol via the new [whatwg streams API](https://github.com/whatwg/streams)",
+        "data": {
+          "matched_text": "gRPC protocol via the new [whatwg streams API](https://github.com/whatwg/streams)",
+          "path": "doc/PROTOCOL-WEB.md",
+          "line_start": 32,
+          "line_end": 32,
+          "phrase": "link"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      },
+      {
+        "id": "ev_f7d78da26f1077b8",
+        "type": "package_registry_metadata",
+        "status": "DECLARED",
+        "collector": "package-registry",
+        "extractor": "package-registry-metadata@1",
+        "sourceUrl": "https://pypi.org/project/typing-extensions/",
+        "locator": {
+          "field": "typing-extensions",
+          "spec": "pypi"
+        },
+        "observedText": "pypi:typing-extensions -> python/typing_extensions",
+        "data": {
+          "ecosystem": "pypi",
+          "package_name": "typing-extensions",
+          "registry_url": "https://pypi.org/project/typing-extensions/",
+          "resolved_repository": "python/typing_extensions",
+          "relationship_semantics": "registry metadata records a source repository; this is not a lineage claim"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      },
+      {
+        "id": "ev_fee332ad652e90fd",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:grpc/grpc",
+        "sourceUrl": "https://github.com/grpc/grpc/blob/724b3ccb608b8ac7e51482a15113edfd94bb28ba/requirements.txt",
+        "locator": {
+          "path": "requirements.txt",
+          "field": "build",
+          "spec": "pypi"
+        },
+        "observedText": "\"build\": \">=1.3.0\"",
+        "data": {
+          "ecosystem": "pypi",
+          "package_name": "build",
+          "range": ">=1.3.0",
+          "manifest_path": "requirements.txt",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-03T05:05:17.837Z"
+      }
+    ],
+    "diagnostics": [
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in CONTRIBUTING.md:62 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "CONTRIBUTING.md",
+          "line": 62,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in CONTRIBUTING.md:150 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "CONTRIBUTING.md",
+          "line": 150,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in LICENSE:231 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "LICENSE",
+          "line": 231,
+          "phrases": [
+            "derived from"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in doc/PROTOCOL-HTTP2.md:62 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "doc/PROTOCOL-HTTP2.md",
+          "line": 62,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in doc/PROTOCOL-HTTP2.md:251 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "doc/PROTOCOL-HTTP2.md",
+          "line": 251,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in doc/c-style-guide.md:36 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "doc/c-style-guide.md",
+          "line": 36,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in doc/compression_cookbook.md:17 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "doc/compression_cookbook.md",
+          "line": 17,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in doc/compression_cookbook.md:107 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "doc/compression_cookbook.md",
+          "line": 107,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in doc/core/default_http_proxy_mapper.md:16 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "doc/core/default_http_proxy_mapper.md",
+          "line": 16,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in doc/core/default_http_proxy_mapper.md:37 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "doc/core/default_http_proxy_mapper.md",
+          "line": 37,
+          "phrases": [
+            "port of"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in doc/core/grpc-polling-engines.md:114 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "doc/core/grpc-polling-engines.md",
+          "line": 114,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in doc/grpc_xds_features.md:58 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "doc/grpc_xds_features.md",
+          "line": 58,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "candidate_limit_applied",
+        "level": "warning",
+        "message": "only the first 12 of 36 candidate repositories were analysed",
+        "context": {
+          "dropped": 24
+        }
+      },
+      {
+        "code": "exact_content_detected",
+        "level": "info",
+        "message": "2 identical blob(s) shared with cel-expr/cel-c",
+        "context": {
+          "target": "cel-expr/cel-c",
+          "matched_blob_count": 2,
+          "evidence_truncated": false
+        }
+      },
+      {
+        "code": "exact_content_detected",
+        "level": "info",
+        "message": "1 identical blob(s) shared with census-instrumentation/opencensus-proto",
+        "context": {
+          "target": "census-instrumentation/opencensus-proto",
+          "matched_blob_count": 1,
+          "evidence_truncated": false
+        }
+      },
+      {
+        "code": "exact_content_detected",
+        "level": "info",
+        "message": "1 identical blob(s) shared with envoyproxy/protoc-gen-validate",
+        "context": {
+          "target": "envoyproxy/protoc-gen-validate",
+          "matched_blob_count": 1,
+          "evidence_truncated": false
+        }
+      },
+      {
+        "code": "exact_content_detected",
+        "level": "info",
+        "message": "1 identical blob(s) shared with google/benchmark",
+        "context": {
+          "target": "google/benchmark",
+          "matched_blob_count": 1,
+          "evidence_truncated": false
+        }
+      },
+      {
+        "code": "exact_content_detected",
+        "level": "info",
+        "message": "1 identical blob(s) shared with google/bloaty",
+        "context": {
+          "target": "google/bloaty",
+          "matched_blob_count": 1,
+          "evidence_truncated": false
+        }
+      }
+    ]
+  },
+  "meta": {
+    "endpoint": "canonical-graph",
+    "note": "canonical LineageGraph, unmodified",
+    "cacheHit": true,
+    "resolvedRevision": "724b3ccb608b8ac7e51482a15113edfd94bb28ba",
+    "resolvedRef": null,
+    "defaultBranch": null,
+    "elapsedMs": 578
+  }
+}

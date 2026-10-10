@@ -1,0 +1,809 @@
+{
+  "ok": true,
+  "data": {
+    "schemaVersion": "2.0.0",
+    "graph": {
+      "rootEntityId": "repo:github:yunmin311/obsidian-config",
+      "provider": "github",
+      "revision": {
+        "commit": "3982a219c1027a7128b2dc0d056d211e7f7e5b96",
+        "defaultBranch": "master",
+        "resolvedAt": "2026-10-03T05:04:57.531Z"
+      },
+      "generatedAt": "2026-10-03T05:04:57.531Z",
+      "analyzer": {
+        "name": "gitlineage-analyzer",
+        "version": "0.2.0",
+        "schemaVersion": "2.0.0",
+        "namespace": "public",
+        "extractors": [
+          "explicit-attribution@1",
+          "explicit-reference@1",
+          "github-fork-metadata@1",
+          "github-repository-identity@1"
+        ],
+        "adapters": [],
+        "limitsApplied": {
+          "history_depth": 200,
+          "tree_entries": 120000,
+          "document_bytes": 262144,
+          "manifest_bytes": 2097152,
+          "dependency_facts": 400,
+          "registry_lookups": 25,
+          "candidate_count": 12
+        }
+      }
+    },
+    "entities": [
+      {
+        "id": "project:settings/profile",
+        "type": "ExternalProject",
+        "display": {
+          "name": "settings/profile"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "project:sponsors/yunmin311",
+        "type": "ExternalProject",
+        "display": {
+          "name": "sponsors/yunmin311"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "repo:github:blacksmithgu/obsidian-dataview",
+        "type": "Repository",
+        "display": {
+          "name": "obsidian-dataview",
+          "fullName": "blacksmithgu/obsidian-dataview",
+          "url": "https://github.com/blacksmithgu/obsidian-dataview"
+        },
+        "attributes": {
+          "created_at": "2021-01-13T05:23:45Z",
+          "default_branch": "master",
+          "full_name": "blacksmithgu/obsidian-dataview",
+          "is_fork": false,
+          "provider": "github",
+          "url": "https://github.com/blacksmithgu/obsidian-dataview"
+        },
+        "sourceUrl": "https://github.com/blacksmithgu/obsidian-dataview"
+      },
+      {
+        "id": "repo:github:cumany/obsidian-editing-toolbar",
+        "type": "Repository",
+        "display": {
+          "name": "obsidian-editing-toolbar",
+          "fullName": "PKM-er/obsidian-editing-toolbar",
+          "url": "https://github.com/PKM-er/obsidian-editing-toolbar"
+        },
+        "attributes": {
+          "created_at": "2022-09-05T07:51:46Z",
+          "default_branch": "master",
+          "full_name": "PKM-er/obsidian-editing-toolbar",
+          "is_fork": false,
+          "provider": "github",
+          "url": "https://github.com/PKM-er/obsidian-editing-toolbar"
+        },
+        "sourceUrl": "https://github.com/PKM-er/obsidian-editing-toolbar"
+      },
+      {
+        "id": "repo:github:iblinkq/immersive-folder",
+        "type": "Repository",
+        "display": {
+          "name": "immersive-folder",
+          "fullName": "iBlinkQ/immersive-folder",
+          "url": "https://github.com/iBlinkQ/immersive-folder"
+        },
+        "attributes": {
+          "created_at": "2026-08-31T08:35:57Z",
+          "default_branch": "main",
+          "full_name": "iBlinkQ/immersive-folder",
+          "is_fork": false,
+          "provider": "github",
+          "url": "https://github.com/iBlinkQ/immersive-folder"
+        },
+        "sourceUrl": "https://github.com/iBlinkQ/immersive-folder"
+      },
+      {
+        "id": "repo:github:kh4f/flexplorer",
+        "type": "Repository",
+        "display": {
+          "name": "flexplorer",
+          "fullName": "kh4f/flexplorer",
+          "url": "https://github.com/kh4f/flexplorer"
+        },
+        "attributes": {
+          "created_at": "2025-02-10T05:42:13Z",
+          "default_branch": "main",
+          "full_name": "kh4f/flexplorer",
+          "is_fork": false,
+          "provider": "github",
+          "url": "https://github.com/kh4f/flexplorer"
+        },
+        "sourceUrl": "https://github.com/kh4f/flexplorer"
+      },
+      {
+        "id": "repo:github:liamcain/obsidian-calendar-plugin",
+        "type": "Repository",
+        "display": {
+          "name": "obsidian-calendar-plugin",
+          "fullName": "liamcain/obsidian-calendar-plugin",
+          "url": "https://github.com/liamcain/obsidian-calendar-plugin"
+        },
+        "attributes": {
+          "created_at": "2020-08-20T01:58:31Z",
+          "default_branch": "master",
+          "full_name": "liamcain/obsidian-calendar-plugin",
+          "is_fork": false,
+          "provider": "github",
+          "url": "https://github.com/liamcain/obsidian-calendar-plugin"
+        },
+        "sourceUrl": "https://github.com/liamcain/obsidian-calendar-plugin"
+      },
+      {
+        "id": "repo:github:mgmeyers/obsidian-style-settings",
+        "type": "Repository",
+        "display": {
+          "name": "obsidian-style-settings",
+          "fullName": "community-archive/obsidian-style-settings",
+          "url": "https://github.com/community-archive/obsidian-style-settings"
+        },
+        "attributes": {
+          "created_at": "2021-03-28T20:17:29Z",
+          "default_branch": "main",
+          "full_name": "community-archive/obsidian-style-settings",
+          "is_fork": false,
+          "provider": "github",
+          "url": "https://github.com/community-archive/obsidian-style-settings"
+        },
+        "sourceUrl": "https://github.com/community-archive/obsidian-style-settings"
+      },
+      {
+        "id": "repo:github:obsidian-tasks-group/obsidian-tasks",
+        "type": "Repository",
+        "display": {
+          "name": "obsidian-tasks",
+          "fullName": "obsidian-tasks-group/obsidian-tasks",
+          "url": "https://github.com/obsidian-tasks-group/obsidian-tasks"
+        },
+        "attributes": {
+          "created_at": "2021-03-19T19:42:53Z",
+          "default_branch": "main",
+          "full_name": "obsidian-tasks-group/obsidian-tasks",
+          "is_fork": false,
+          "provider": "github",
+          "url": "https://github.com/obsidian-tasks-group/obsidian-tasks"
+        },
+        "sourceUrl": "https://github.com/obsidian-tasks-group/obsidian-tasks"
+      },
+      {
+        "id": "repo:github:scambier/obsidian-omnisearch",
+        "type": "Repository",
+        "display": {
+          "name": "obsidian-omnisearch",
+          "fullName": "scambier/obsidian-omnisearch",
+          "url": "https://github.com/scambier/obsidian-omnisearch"
+        },
+        "attributes": {
+          "created_at": "2022-04-10T11:29:50Z",
+          "default_branch": "master",
+          "full_name": "scambier/obsidian-omnisearch",
+          "is_fork": false,
+          "provider": "github",
+          "url": "https://github.com/scambier/obsidian-omnisearch"
+        },
+        "sourceUrl": "https://github.com/scambier/obsidian-omnisearch"
+      },
+      {
+        "id": "repo:github:shabegom/buttons",
+        "type": "Repository",
+        "display": {
+          "name": "buttons",
+          "fullName": "shabegom/buttons",
+          "url": "https://github.com/shabegom/buttons"
+        },
+        "attributes": {
+          "created_at": "2021-03-27T13:05:01Z",
+          "default_branch": "main",
+          "full_name": "shabegom/buttons",
+          "is_fork": false,
+          "provider": "github",
+          "url": "https://github.com/shabegom/buttons"
+        },
+        "sourceUrl": "https://github.com/shabegom/buttons"
+      },
+      {
+        "id": "repo:github:silentvoid13/templater",
+        "type": "Repository",
+        "display": {
+          "name": "Templater",
+          "fullName": "SilentVoid13/Templater",
+          "url": "https://github.com/SilentVoid13/Templater"
+        },
+        "attributes": {
+          "created_at": "2020-11-04T15:50:33Z",
+          "default_branch": "master",
+          "full_name": "SilentVoid13/Templater",
+          "is_fork": false,
+          "provider": "github",
+          "url": "https://github.com/SilentVoid13/Templater"
+        },
+        "sourceUrl": "https://github.com/SilentVoid13/Templater"
+      },
+      {
+        "id": "repo:github:tfthacker/obsidian42-brat",
+        "type": "Repository",
+        "display": {
+          "name": "obsidian42-brat",
+          "fullName": "TfTHacker/obsidian42-brat",
+          "url": "https://github.com/TfTHacker/obsidian42-brat"
+        },
+        "attributes": {
+          "created_at": "2021-10-01T04:49:10Z",
+          "default_branch": "main",
+          "full_name": "TfTHacker/obsidian42-brat",
+          "is_fork": false,
+          "provider": "github",
+          "url": "https://github.com/TfTHacker/obsidian42-brat"
+        },
+        "sourceUrl": "https://github.com/TfTHacker/obsidian42-brat"
+      },
+      {
+        "id": "repo:github:vinzent03/obsidian-git",
+        "type": "Repository",
+        "display": {
+          "name": "obsidian-git",
+          "fullName": "Vinzent03/obsidian-git",
+          "url": "https://github.com/Vinzent03/obsidian-git"
+        },
+        "attributes": {
+          "created_at": "2020-10-27T16:08:16Z",
+          "default_branch": "master",
+          "full_name": "Vinzent03/obsidian-git",
+          "is_fork": false,
+          "provider": "github",
+          "url": "https://github.com/Vinzent03/obsidian-git"
+        },
+        "sourceUrl": "https://github.com/Vinzent03/obsidian-git"
+      },
+      {
+        "id": "repo:github:yunmin311/obsidian-config",
+        "type": "Repository",
+        "display": {
+          "name": "obsidian-config",
+          "fullName": "yunmin311/obsidian-config",
+          "url": "https://github.com/yunmin311/obsidian-config"
+        },
+        "attributes": {
+          "archived": false,
+          "created_at": "2026-09-03T08:55:48Z",
+          "default_branch": "master",
+          "description": "Obsidian 外壳配置包：Border 主题 + 灰青蓝配色（letschips CSS）+ 插件设置与恢复文档。仅配置，不含笔记。",
+          "full_name": "yunmin311/obsidian-config",
+          "is_fork": false,
+          "license_spdx": "NOASSERTION",
+          "name": "obsidian-config",
+          "owner": "yunmin311",
+          "provider": "github",
+          "pushed_at": "2026-10-02T03:52:12Z",
+          "repository_size_kb": 613,
+          "topics": [
+            "css-snippets",
+            "obsidian",
+            "obsidian-config",
+            "obsidian-css",
+            "obsidian-theme"
+          ],
+          "updated_at": "2026-10-02T03:52:15Z",
+          "url": "https://github.com/yunmin311/obsidian-config"
+        },
+        "sourceUrl": "https://github.com/yunmin311/obsidian-config"
+      }
+    ],
+    "relationships": [
+      {
+        "id": "rel_40f552093fec8600",
+        "type": "references",
+        "source": "repo:github:yunmin311/obsidian-config",
+        "target": "project:settings/profile",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_7d4de5ceea44c277"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_d576260cc603a135",
+        "type": "references",
+        "source": "repo:github:yunmin311/obsidian-config",
+        "target": "project:sponsors/yunmin311",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_7a760f3a9b640c18"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_13e3eb83a3ee4110",
+        "type": "references",
+        "source": "repo:github:yunmin311/obsidian-config",
+        "target": "repo:github:blacksmithgu/obsidian-dataview",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_56fcbadf1cfbe79f"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_c1ab586fc2531c59",
+        "type": "references",
+        "source": "repo:github:yunmin311/obsidian-config",
+        "target": "repo:github:cumany/obsidian-editing-toolbar",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_d0bc3f1241a20607"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_3278a7617530fc03",
+        "type": "references",
+        "source": "repo:github:yunmin311/obsidian-config",
+        "target": "repo:github:iblinkq/immersive-folder",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_f6ed114cebc333e5"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_9516fac4b811642f",
+        "type": "references",
+        "source": "repo:github:yunmin311/obsidian-config",
+        "target": "repo:github:kh4f/flexplorer",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_fad9561ab50e1073"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_82c97b9caaa0996d",
+        "type": "references",
+        "source": "repo:github:yunmin311/obsidian-config",
+        "target": "repo:github:liamcain/obsidian-calendar-plugin",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_f30fbeafafd7ea33"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_13fd9165452b24ef",
+        "type": "references",
+        "source": "repo:github:yunmin311/obsidian-config",
+        "target": "repo:github:mgmeyers/obsidian-style-settings",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_5b8d5d1b9194c124"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_531d1cba9f384816",
+        "type": "references",
+        "source": "repo:github:yunmin311/obsidian-config",
+        "target": "repo:github:obsidian-tasks-group/obsidian-tasks",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_9f007efb6b625538"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_2b2a463928a0957d",
+        "type": "references",
+        "source": "repo:github:yunmin311/obsidian-config",
+        "target": "repo:github:scambier/obsidian-omnisearch",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_4388b42c3c412fb5"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_4b526dae5ce9cfd1",
+        "type": "references",
+        "source": "repo:github:yunmin311/obsidian-config",
+        "target": "repo:github:shabegom/buttons",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_e2f7ab525e63de0d"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_d2f788778e0af5af",
+        "type": "references",
+        "source": "repo:github:yunmin311/obsidian-config",
+        "target": "repo:github:silentvoid13/templater",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_e83706ad3de00072"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_9eb08e6b8789d27f",
+        "type": "references",
+        "source": "repo:github:yunmin311/obsidian-config",
+        "target": "repo:github:tfthacker/obsidian42-brat",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_6f832ec02136cc32"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_eb6cb0c7145bf8c0",
+        "type": "references",
+        "source": "repo:github:yunmin311/obsidian-config",
+        "target": "repo:github:vinzent03/obsidian-git",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_c6b3a37d0f5479f7"
+        ],
+        "attributes": {}
+      }
+    ],
+    "evidence": [
+      {
+        "id": "ev_4388b42c3c412fb5",
+        "type": "document_reference",
+        "status": "DECLARED",
+        "collector": "documents",
+        "extractor": "explicit-reference@1",
+        "repository": "repo:github:yunmin311/obsidian-config",
+        "sourceUrl": "https://github.com/yunmin311/obsidian-config/blob/3982a219c1027a7128b2dc0d056d211e7f7e5b96/docs/plugins.md",
+        "locator": {
+          "path": "docs/plugins.md",
+          "lineStart": 25,
+          "lineEnd": 25
+        },
+        "observedText": "| [Omnisearch](https://github.com/scambier/obsidian-omnisearch) | 1.31.0 | 全文搜索 | Simon Cambier |",
+        "data": {
+          "matched_text": "| [Omnisearch](https://github.com/scambier/obsidian-omnisearch) | 1.31.0 | 全文搜索 | Simon Cambier |",
+          "path": "docs/plugins.md",
+          "line_start": 25,
+          "line_end": 25,
+          "phrase": "link"
+        },
+        "observedAt": "2026-10-03T05:04:57.531Z"
+      },
+      {
+        "id": "ev_56fcbadf1cfbe79f",
+        "type": "document_reference",
+        "status": "DECLARED",
+        "collector": "documents",
+        "extractor": "explicit-reference@1",
+        "repository": "repo:github:yunmin311/obsidian-config",
+        "sourceUrl": "https://github.com/yunmin311/obsidian-config/blob/3982a219c1027a7128b2dc0d056d211e7f7e5b96/docs/plugins.md",
+        "locator": {
+          "path": "docs/plugins.md",
+          "lineStart": 21,
+          "lineEnd": 21
+        },
+        "observedText": "| [Dataview](https://github.com/blacksmithgu/obsidian-dataview) | 0.5.68 | 笔记查询/索引 | blacksmithgu |",
+        "data": {
+          "matched_text": "| [Dataview](https://github.com/blacksmithgu/obsidian-dataview) | 0.5.68 | 笔记查询/索引 | blacksmithgu |",
+          "path": "docs/plugins.md",
+          "line_start": 21,
+          "line_end": 21,
+          "phrase": "link"
+        },
+        "observedAt": "2026-10-03T05:04:57.531Z"
+      },
+      {
+        "id": "ev_5b8d5d1b9194c124",
+        "type": "document_reference",
+        "status": "DECLARED",
+        "collector": "documents",
+        "extractor": "explicit-reference@1",
+        "repository": "repo:github:yunmin311/obsidian-config",
+        "sourceUrl": "https://github.com/yunmin311/obsidian-config/blob/3982a219c1027a7128b2dc0d056d211e7f7e5b96/docs/plugins.md",
+        "locator": {
+          "path": "docs/plugins.md",
+          "lineStart": 17,
+          "lineEnd": 17
+        },
+        "observedText": "| [Style Settings](https://github.com/mgmeyers/obsidian-style-settings) | 1.0.9 | 主题可视化调参（色系微调唯一入口） | mgmeyers |",
+        "data": {
+          "matched_text": "| [Style Settings](https://github.com/mgmeyers/obsidian-style-settings) | 1.0.9 | 主题可视化调参（色系微调唯一入口） | mgmeyers |",
+          "path": "docs/plugins.md",
+          "line_start": 17,
+          "line_end": 17,
+          "phrase": "link"
+        },
+        "observedAt": "2026-10-03T05:04:57.531Z"
+      },
+      {
+        "id": "ev_6f832ec02136cc32",
+        "type": "document_reference",
+        "status": "DECLARED",
+        "collector": "documents",
+        "extractor": "explicit-reference@1",
+        "repository": "repo:github:yunmin311/obsidian-config",
+        "sourceUrl": "https://github.com/yunmin311/obsidian-config/blob/3982a219c1027a7128b2dc0d056d211e7f7e5b96/docs/plugins.md",
+        "locator": {
+          "path": "docs/plugins.md",
+          "lineStart": 24,
+          "lineEnd": 24
+        },
+        "observedText": "| [BRAT](https://github.com/TfTHacker/obsidian42-brat) | 2.2.0 | 安装未上架插件 | TfTHacker |",
+        "data": {
+          "matched_text": "| [BRAT](https://github.com/TfTHacker/obsidian42-brat) | 2.2.0 | 安装未上架插件 | TfTHacker |",
+          "path": "docs/plugins.md",
+          "line_start": 24,
+          "line_end": 24,
+          "phrase": "link"
+        },
+        "observedAt": "2026-10-03T05:04:57.531Z"
+      },
+      {
+        "id": "ev_7a760f3a9b640c18",
+        "type": "document_reference",
+        "status": "DECLARED",
+        "collector": "documents",
+        "extractor": "explicit-reference@1",
+        "repository": "repo:github:yunmin311/obsidian-config",
+        "sourceUrl": "https://github.com/yunmin311/obsidian-config/blob/3982a219c1027a7128b2dc0d056d211e7f7e5b96/docs/plugins.md",
+        "locator": {
+          "path": "docs/plugins.md",
+          "lineStart": 107,
+          "lineEnd": 107
+        },
+        "observedText": "> 和 Toolbar Pin Toggle 的设置页均指向 `https://github.com/sponsors/yunmin311`，但公开访问会",
+        "data": {
+          "matched_text": "> 和 Toolbar Pin Toggle 的设置页均指向 `https://github.com/sponsors/yunmin311`，但公开访问会",
+          "path": "docs/plugins.md",
+          "line_start": 107,
+          "line_end": 107,
+          "phrase": "link"
+        },
+        "observedAt": "2026-10-03T05:04:57.531Z"
+      },
+      {
+        "id": "ev_7d4de5ceea44c277",
+        "type": "document_reference",
+        "status": "DECLARED",
+        "collector": "documents",
+        "extractor": "explicit-reference@1",
+        "repository": "repo:github:yunmin311/obsidian-config",
+        "sourceUrl": "https://github.com/yunmin311/obsidian-config/blob/3982a219c1027a7128b2dc0d056d211e7f7e5b96/docs/pre-publish-audit.md",
+        "locator": {
+          "path": "docs/pre-publish-audit.md",
+          "lineStart": 244,
+          "lineEnd": 244
+        },
+        "observedText": "去 https://github.com/settings/profile ：",
+        "data": {
+          "matched_text": "去 https://github.com/settings/profile ：",
+          "path": "docs/pre-publish-audit.md",
+          "line_start": 244,
+          "line_end": 244,
+          "phrase": "link"
+        },
+        "observedAt": "2026-10-03T05:04:57.531Z"
+      },
+      {
+        "id": "ev_9f007efb6b625538",
+        "type": "document_reference",
+        "status": "DECLARED",
+        "collector": "documents",
+        "extractor": "explicit-reference@1",
+        "repository": "repo:github:yunmin311/obsidian-config",
+        "sourceUrl": "https://github.com/yunmin311/obsidian-config/blob/3982a219c1027a7128b2dc0d056d211e7f7e5b96/docs/plugins.md",
+        "locator": {
+          "path": "docs/plugins.md",
+          "lineStart": 22,
+          "lineEnd": 22
+        },
+        "observedText": "| [Tasks](https://github.com/obsidian-tasks-group/obsidian-tasks) | 8.4.0 | 任务管理 | Clare Macrae / Ilya Landikov |",
+        "data": {
+          "matched_text": "| [Tasks](https://github.com/obsidian-tasks-group/obsidian-tasks) | 8.4.0 | 任务管理 | Clare Macrae / Ilya Landikov |",
+          "path": "docs/plugins.md",
+          "line_start": 22,
+          "line_end": 22,
+          "phrase": "link"
+        },
+        "observedAt": "2026-10-03T05:04:57.531Z"
+      },
+      {
+        "id": "ev_c6b3a37d0f5479f7",
+        "type": "document_reference",
+        "status": "DECLARED",
+        "collector": "documents",
+        "extractor": "explicit-reference@1",
+        "repository": "repo:github:yunmin311/obsidian-config",
+        "sourceUrl": "https://github.com/yunmin311/obsidian-config/blob/3982a219c1027a7128b2dc0d056d211e7f7e5b96/docs/plugins.md",
+        "locator": {
+          "path": "docs/plugins.md",
+          "lineStart": 23,
+          "lineEnd": 23
+        },
+        "observedText": "| [Git](https://github.com/Vinzent03/obsidian-git) | 2.39.0 | vault 自动备份 | Vinzent03 |",
+        "data": {
+          "matched_text": "| [Git](https://github.com/Vinzent03/obsidian-git) | 2.39.0 | vault 自动备份 | Vinzent03 |",
+          "path": "docs/plugins.md",
+          "line_start": 23,
+          "line_end": 23,
+          "phrase": "link"
+        },
+        "observedAt": "2026-10-03T05:04:57.531Z"
+      },
+      {
+        "id": "ev_d0bc3f1241a20607",
+        "type": "document_reference",
+        "status": "DECLARED",
+        "collector": "documents",
+        "extractor": "explicit-reference@1",
+        "repository": "repo:github:yunmin311/obsidian-config",
+        "sourceUrl": "https://github.com/yunmin311/obsidian-config/blob/3982a219c1027a7128b2dc0d056d211e7f7e5b96/docs/plugins.md",
+        "locator": {
+          "path": "docs/plugins.md",
+          "lineStart": 18,
+          "lineEnd": 18
+        },
+        "observedText": "| [Editing Toolbar](https://github.com/cumany/obsidian-editing-toolbar) | 4.1.3 | 编辑工具条 + 自定义 AI（GLM） | Cumany |",
+        "data": {
+          "matched_text": "| [Editing Toolbar](https://github.com/cumany/obsidian-editing-toolbar) | 4.1.3 | 编辑工具条 + 自定义 AI（GLM） | Cumany |",
+          "path": "docs/plugins.md",
+          "line_start": 18,
+          "line_end": 18,
+          "phrase": "link"
+        },
+        "observedAt": "2026-10-03T05:04:57.531Z"
+      },
+      {
+        "id": "ev_e2f7ab525e63de0d",
+        "type": "document_reference",
+        "status": "DECLARED",
+        "collector": "documents",
+        "extractor": "explicit-reference@1",
+        "repository": "repo:github:yunmin311/obsidian-config",
+        "sourceUrl": "https://github.com/yunmin311/obsidian-config/blob/3982a219c1027a7128b2dc0d056d211e7f7e5b96/docs/plugins.md",
+        "locator": {
+          "path": "docs/plugins.md",
+          "lineStart": 26,
+          "lineEnd": 26
+        },
+        "observedText": "| [Buttons](https://github.com/shabegom/buttons) | 0.9.13 | 笔记内按钮 | shabegom |",
+        "data": {
+          "matched_text": "| [Buttons](https://github.com/shabegom/buttons) | 0.9.13 | 笔记内按钮 | shabegom |",
+          "path": "docs/plugins.md",
+          "line_start": 26,
+          "line_end": 26,
+          "phrase": "link"
+        },
+        "observedAt": "2026-10-03T05:04:57.531Z"
+      },
+      {
+        "id": "ev_e83706ad3de00072",
+        "type": "document_reference",
+        "status": "DECLARED",
+        "collector": "documents",
+        "extractor": "explicit-reference@1",
+        "repository": "repo:github:yunmin311/obsidian-config",
+        "sourceUrl": "https://github.com/yunmin311/obsidian-config/blob/3982a219c1027a7128b2dc0d056d211e7f7e5b96/docs/plugins.md",
+        "locator": {
+          "path": "docs/plugins.md",
+          "lineStart": 20,
+          "lineEnd": 20
+        },
+        "observedText": "| [Templater](https://github.com/SilentVoid13/Templater) | 2.25.0 | 模板引擎 | SilentVoid |",
+        "data": {
+          "matched_text": "| [Templater](https://github.com/SilentVoid13/Templater) | 2.25.0 | 模板引擎 | SilentVoid |",
+          "path": "docs/plugins.md",
+          "line_start": 20,
+          "line_end": 20,
+          "phrase": "link"
+        },
+        "observedAt": "2026-10-03T05:04:57.531Z"
+      },
+      {
+        "id": "ev_f30fbeafafd7ea33",
+        "type": "document_reference",
+        "status": "DECLARED",
+        "collector": "documents",
+        "extractor": "explicit-reference@1",
+        "repository": "repo:github:yunmin311/obsidian-config",
+        "sourceUrl": "https://github.com/yunmin311/obsidian-config/blob/3982a219c1027a7128b2dc0d056d211e7f7e5b96/docs/plugins.md",
+        "locator": {
+          "path": "docs/plugins.md",
+          "lineStart": 19,
+          "lineEnd": 19
+        },
+        "observedText": "| [Calendar](https://github.com/liamcain/obsidian-calendar-plugin) | 1.5.10 | 日历面板 | Liam Cain |",
+        "data": {
+          "matched_text": "| [Calendar](https://github.com/liamcain/obsidian-calendar-plugin) | 1.5.10 | 日历面板 | Liam Cain |",
+          "path": "docs/plugins.md",
+          "line_start": 19,
+          "line_end": 19,
+          "phrase": "link"
+        },
+        "observedAt": "2026-10-03T05:04:57.531Z"
+      },
+      {
+        "id": "ev_f6ed114cebc333e5",
+        "type": "document_reference",
+        "status": "DECLARED",
+        "collector": "documents",
+        "extractor": "explicit-reference@1",
+        "repository": "repo:github:yunmin311/obsidian-config",
+        "sourceUrl": "https://github.com/yunmin311/obsidian-config/blob/3982a219c1027a7128b2dc0d056d211e7f7e5b96/docs/plugins.md",
+        "locator": {
+          "path": "docs/plugins.md",
+          "lineStart": 28,
+          "lineEnd": 28
+        },
+        "observedText": "| [Immersive Folder](https://github.com/iBlinkQ/immersive-folder) | 0.4.2 | 单文件夹沉浸视图 | iBlinkQ |",
+        "data": {
+          "matched_text": "| [Immersive Folder](https://github.com/iBlinkQ/immersive-folder) | 0.4.2 | 单文件夹沉浸视图 | iBlinkQ |",
+          "path": "docs/plugins.md",
+          "line_start": 28,
+          "line_end": 28,
+          "phrase": "link"
+        },
+        "observedAt": "2026-10-03T05:04:57.531Z"
+      },
+      {
+        "id": "ev_fad9561ab50e1073",
+        "type": "document_reference",
+        "status": "DECLARED",
+        "collector": "documents",
+        "extractor": "explicit-reference@1",
+        "repository": "repo:github:yunmin311/obsidian-config",
+        "sourceUrl": "https://github.com/yunmin311/obsidian-config/blob/3982a219c1027a7128b2dc0d056d211e7f7e5b96/docs/plugins.md",
+        "locator": {
+          "path": "docs/plugins.md",
+          "lineStart": 27,
+          "lineEnd": 27
+        },
+        "observedText": "| [Flexplorer](https://github.com/kh4f/flexplorer) | 4.0.5 | 自定义排序 / 固定 / 隐藏文件 | kh4f |",
+        "data": {
+          "matched_text": "| [Flexplorer](https://github.com/kh4f/flexplorer) | 4.0.5 | 自定义排序 / 固定 / 隐藏文件 | kh4f |",
+          "path": "docs/plugins.md",
+          "line_start": 27,
+          "line_end": 27,
+          "phrase": "link"
+        },
+        "observedAt": "2026-10-03T05:04:57.531Z"
+      }
+    ],
+    "diagnostics": []
+  },
+  "meta": {
+    "endpoint": "canonical-graph",
+    "note": "canonical LineageGraph, unmodified",
+    "cacheHit": true,
+    "resolvedRevision": "3982a219c1027a7128b2dc0d056d211e7f7e5b96",
+    "resolvedRef": null,
+    "defaultBranch": null,
+    "elapsedMs": 499
+  }
+}

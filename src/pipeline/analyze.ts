@@ -301,7 +301,21 @@ export async function analyze(options: AnalyzeOptions): Promise<AnalyzeResult> {
     });
   }
 
-  const rootLoad = await loadHistory(cache, rootRef, options.ref, depth);
+  const gitEnabled = options.enableGit !== false && (await isGitAvailable());
+  if (!gitEnabled) {
+    diagnostics.push({
+      code: 'git_analysis_unavailable',
+      level: 'info',
+      message: 'git analysis was skipped because the git executable is unavailable or disabled',
+    });
+  }
+
+  // `enableGit: false` is the documented metadata-only mode. Do not perform
+  // even the root shallow fetch before checking that switch: this keeps callers
+  // that disable Git genuinely offline and avoids network-dependent diagnostics.
+  const rootLoad: { history: ShallowHistory | null; error?: string } = gitEnabled
+    ? await loadHistory(cache, rootRef, options.ref, depth)
+    : { history: null };
   const rootHistory = rootLoad.history;
   if (rootLoad.error) {
     diagnostics.push({
@@ -312,14 +326,6 @@ export async function analyze(options: AnalyzeOptions): Promise<AnalyzeResult> {
   }
   const candidateSamples: HistorySample[] = [];
   const candidateTrees = new Map<string, { commit: string; index: ReturnType<typeof buildBlobIndex> }>();
-  const gitEnabled = options.enableGit !== false && (await isGitAvailable());
-  if (!gitEnabled) {
-    diagnostics.push({
-      code: 'git_analysis_unavailable',
-      level: 'info',
-      message: 'git analysis was skipped because the git executable is unavailable or disabled',
-    });
-  }
 
   if (gitEnabled && rootHistory) {
     for (const candidate of boundedCandidates) {

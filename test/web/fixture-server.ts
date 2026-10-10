@@ -1,35 +1,43 @@
-/** Existing real cache artifacts, with a controlled scheduler clock for FSM assertions. */
+/** Pinned canonical fixtures with a controlled scheduler clock for FSM assertions. */
 import { serve, type ServeOptions } from '../../src/web/serve.ts';
-import { readFile, mkdtemp, rm } from 'node:fs/promises';
+import { mkdtemp, rm } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import type { LineageGraph } from '../../src/core/model.ts';
+import { canonicalGraph } from '../helpers/canonical-fixtures.ts';
 
 export const A = 'Kuddev/pebrel';
 export const B = 'yunmin311/obsidian-config';
 export const C = 'grpc/grpc';
-export async function fixtureServer(previewOptions: Pick<ServeOptions, 'previewHandler'> = {}) {
-  const paths = [
-    '.cache/public/graphs/public/github/kuddev/pebrel@51514bd50094/v2.0.0/graph.json',
-    '.cache/public/graphs/public/github/yunmin311/obsidian-config@3982a219c102/v2.0.0/graph.json',
-  ];
-  paths.push('.cache/public/graphs/public/github/grpc/grpc@724b3ccb608b/v2.0.0/graph.json');
+export const D = 'nachocebey/is';
+export const E = 'yunmin311/GitLineage';
+type FixtureServerOptions = Pick<ServeOptions, 'previewHandler'> & { phaseDelayMs?: number };
+export async function fixtureServer(previewOptions: FixtureServerOptions = {}) {
+  const { phaseDelayMs = 4000, ...serveOptions } = previewOptions;
   const graphs = new Map<string, LineageGraph>();
-  for (const [i, path] of paths.entries()) graphs.set([A, B, C][i]!.toLowerCase(), JSON.parse(await readFile(path, 'utf8')));
+  for (const [repo, name] of [
+    [A, 'mobile-kuddev-pebrel-51514bd'],
+    [B, 'mobile-yunmin311-obsidian-config-3982a219'],
+    [C, 'mobile-grpc-grpc-724b3ccb'],
+    [D, 'nachocebey__is'],
+    [E, 'gitlineage-root'],
+  ] as const) graphs.set(repo.toLowerCase(), canonicalGraph(name));
   const graphFor = (target: string) => {
     const graph = graphs.get(target.replace(/^https:\/\/github.com\//, '').toLowerCase());
     if (!graph) throw new Error(`missing fixture: ${target}`);
     return graph;
   };
   const root = await mkdtemp(resolve(tmpdir(), 'gitlineage-ui-'));
-  const app = await serve({ ...previewOptions, port: 0, clientDir: resolve('dist/web'), cacheRoot: root, jobStoreRoot: resolve(root, 'jobs'),
+  const app = await serve({ ...serveOptions, port: 0, clientDir: resolve('dist/web'), cacheRoot: root, jobStoreRoot: resolve(root, 'jobs'),
     probeRevisionOverride: async repo => ({ commit: graphFor(`${repo.owner}/${repo.name}`).graph.revision.commit }),
     analyzeOverride: async target => graphFor(target),
     schedulerAnalyzeOverride: async options => {
       const graph = graphFor(options.target);
       for (const phase of ['resolving', 'collecting', 'resolving_relationships', 'validating', 'publishing'] as const) {
         options.onPhase?.(phase);
-        if (graph.graph.rootEntityId === graphFor(B).graph.rootEntityId) await new Promise(r => setTimeout(r, 4000));
+        if (phaseDelayMs > 0 && graph.graph.rootEntityId === graphFor(B).graph.rootEntityId) {
+          await new Promise(r => setTimeout(r, phaseDelayMs));
+        }
       }
       return { graph, cacheHit: false };
     },

@@ -1,0 +1,5402 @@
+{
+  "ok": true,
+  "data": {
+    "schemaVersion": "2.0.0",
+    "graph": {
+      "rootEntityId": "repo:github:kuddev/pebrel",
+      "provider": "github",
+      "revision": {
+        "commit": "9dd3d6491bfaaf902a4a3a248c02f36a47abae2d",
+        "defaultBranch": "main",
+        "resolvedAt": "2026-10-04T06:30:34.438Z"
+      },
+      "generatedAt": "2026-10-04T06:30:34.438Z",
+      "analyzer": {
+        "name": "gitlineage-analyzer",
+        "version": "0.2.0",
+        "schemaVersion": "2.0.0",
+        "namespace": "public",
+        "extractors": [
+          "explicit-attribution@1",
+          "explicit-reference@1",
+          "github-fork-metadata@1",
+          "github-repository-identity@1",
+          "lockfile-dependency@1",
+          "manifest-dependency@1",
+          "package-registry-metadata@1"
+        ],
+        "adapters": [
+          "package-registry"
+        ],
+        "limitsApplied": {
+          "history_depth": 200,
+          "tree_entries": 120000,
+          "document_bytes": 262144,
+          "manifest_bytes": 2097152,
+          "dependency_facts": 400,
+          "registry_lookups": 25,
+          "candidate_count": 12
+        }
+      }
+    },
+    "entities": [
+      {
+        "id": "pkg:cargo:ab_glyph_rasterizer",
+        "type": "Package",
+        "display": {
+          "name": "ab_glyph_rasterizer",
+          "fullName": "cargo:ab_glyph_rasterizer"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:aes-gcm",
+        "type": "Package",
+        "display": {
+          "name": "aes-gcm",
+          "fullName": "cargo:aes-gcm"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:ahash",
+        "type": "Package",
+        "display": {
+          "name": "ahash",
+          "fullName": "cargo:ahash"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:argon2",
+        "type": "Package",
+        "display": {
+          "name": "argon2",
+          "fullName": "cargo:argon2"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:axum",
+        "type": "Package",
+        "display": {
+          "name": "axum",
+          "fullName": "cargo:axum"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:base64",
+        "type": "Package",
+        "display": {
+          "name": "base64",
+          "fullName": "cargo:base64"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:bitflags",
+        "type": "Package",
+        "display": {
+          "name": "bitflags",
+          "fullName": "cargo:bitflags"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:cfg_aliases",
+        "type": "Package",
+        "display": {
+          "name": "cfg_aliases",
+          "fullName": "cargo:cfg_aliases"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:chematic-depict",
+        "type": "Package",
+        "display": {
+          "name": "chematic-depict",
+          "fullName": "cargo:chematic-depict"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:chematic-smiles",
+        "type": "Package",
+        "display": {
+          "name": "chematic-smiles",
+          "fullName": "cargo:chematic-smiles"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:chrono",
+        "type": "Package",
+        "display": {
+          "name": "chrono",
+          "fullName": "cargo:chrono"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:clap",
+        "type": "Package",
+        "display": {
+          "name": "clap",
+          "fullName": "cargo:clap"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:clap_complete",
+        "type": "Package",
+        "display": {
+          "name": "clap_complete",
+          "fullName": "cargo:clap_complete"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:copypasta",
+        "type": "Package",
+        "display": {
+          "name": "copypasta",
+          "fullName": "cargo:copypasta"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:crossfont",
+        "type": "Package",
+        "display": {
+          "name": "crossfont",
+          "fullName": "cargo:crossfont"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:cursor-icon",
+        "type": "Package",
+        "display": {
+          "name": "cursor-icon",
+          "fullName": "cargo:cursor-icon"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:dpi",
+        "type": "Package",
+        "display": {
+          "name": "dpi",
+          "fullName": "cargo:dpi"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:futures",
+        "type": "Package",
+        "display": {
+          "name": "futures",
+          "fullName": "cargo:futures"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:futures-util",
+        "type": "Package",
+        "display": {
+          "name": "futures-util",
+          "fullName": "cargo:futures-util"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:getrandom",
+        "type": "Package",
+        "display": {
+          "name": "getrandom",
+          "fullName": "cargo:getrandom"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:gl_generator",
+        "type": "Package",
+        "display": {
+          "name": "gl_generator",
+          "fullName": "cargo:gl_generator"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:glob",
+        "type": "Package",
+        "display": {
+          "name": "glob",
+          "fullName": "cargo:glob"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:global-hotkey",
+        "type": "Package",
+        "display": {
+          "name": "global-hotkey",
+          "fullName": "cargo:global-hotkey"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:glutin",
+        "type": "Package",
+        "display": {
+          "name": "glutin",
+          "fullName": "cargo:glutin"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:gpui",
+        "type": "Package",
+        "display": {
+          "name": "gpui",
+          "fullName": "cargo:gpui"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:gpui-component",
+        "type": "Package",
+        "display": {
+          "name": "gpui-component",
+          "fullName": "cargo:gpui-component"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:gpui-component-assets",
+        "type": "Package",
+        "display": {
+          "name": "gpui-component-assets",
+          "fullName": "cargo:gpui-component-assets"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:gpui_platform",
+        "type": "Package",
+        "display": {
+          "name": "gpui_platform",
+          "fullName": "cargo:gpui_platform"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:hmac",
+        "type": "Package",
+        "display": {
+          "name": "hmac",
+          "fullName": "cargo:hmac"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:home",
+        "type": "Package",
+        "display": {
+          "name": "home",
+          "fullName": "cargo:home"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:html-escape",
+        "type": "Package",
+        "display": {
+          "name": "html-escape",
+          "fullName": "cargo:html-escape"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:hyper-util",
+        "type": "Package",
+        "display": {
+          "name": "hyper-util",
+          "fullName": "cargo:hyper-util"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:if-addrs",
+        "type": "Package",
+        "display": {
+          "name": "if-addrs",
+          "fullName": "cargo:if-addrs"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:image",
+        "type": "Package",
+        "display": {
+          "name": "image",
+          "fullName": "cargo:image"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:jni",
+        "type": "Package",
+        "display": {
+          "name": "jni",
+          "fullName": "cargo:jni"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:libc",
+        "type": "Package",
+        "display": {
+          "name": "libc",
+          "fullName": "cargo:libc"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:log",
+        "type": "Package",
+        "display": {
+          "name": "log",
+          "fullName": "cargo:log"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:lscolors",
+        "type": "Package",
+        "display": {
+          "name": "lscolors",
+          "fullName": "cargo:lscolors"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:markdown",
+        "type": "Package",
+        "display": {
+          "name": "markdown",
+          "fullName": "cargo:markdown"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:mdns-sd",
+        "type": "Package",
+        "display": {
+          "name": "mdns-sd",
+          "fullName": "cargo:mdns-sd"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:mlua",
+        "type": "Package",
+        "display": {
+          "name": "mlua",
+          "fullName": "cargo:mlua"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:notify",
+        "type": "Package",
+        "display": {
+          "name": "notify",
+          "fullName": "cargo:notify"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:nu-ansi-term",
+        "type": "Package",
+        "display": {
+          "name": "nu-ansi-term",
+          "fullName": "cargo:nu-ansi-term"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:nucleo-matcher",
+        "type": "Package",
+        "display": {
+          "name": "nucleo-matcher",
+          "fullName": "cargo:nucleo-matcher"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:parking_lot",
+        "type": "Package",
+        "display": {
+          "name": "parking_lot",
+          "fullName": "cargo:parking_lot"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:polling",
+        "type": "Package",
+        "display": {
+          "name": "polling",
+          "fullName": "cargo:polling"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:proc-macro2",
+        "type": "Package",
+        "display": {
+          "name": "proc-macro2",
+          "fullName": "cargo:proc-macro2"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:pulldown-cmark",
+        "type": "Package",
+        "display": {
+          "name": "pulldown-cmark",
+          "fullName": "cargo:pulldown-cmark"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:pulldown-latex",
+        "type": "Package",
+        "display": {
+          "name": "pulldown-latex",
+          "fullName": "cargo:pulldown-latex"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:qrcode",
+        "type": "Package",
+        "display": {
+          "name": "qrcode",
+          "fullName": "cargo:qrcode"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:quote",
+        "type": "Package",
+        "display": {
+          "name": "quote",
+          "fullName": "cargo:quote"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:rand",
+        "type": "Package",
+        "display": {
+          "name": "rand",
+          "fullName": "cargo:rand"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:rcgen",
+        "type": "Package",
+        "display": {
+          "name": "rcgen",
+          "fullName": "cargo:rcgen"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:regex",
+        "type": "Package",
+        "display": {
+          "name": "regex",
+          "fullName": "cargo:regex"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:regex-automata",
+        "type": "Package",
+        "display": {
+          "name": "regex-automata",
+          "fullName": "cargo:regex-automata"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:rsa",
+        "type": "Package",
+        "display": {
+          "name": "rsa",
+          "fullName": "cargo:rsa"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:rusqlite",
+        "type": "Package",
+        "display": {
+          "name": "rusqlite",
+          "fullName": "cargo:rusqlite"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:russh",
+        "type": "Package",
+        "display": {
+          "name": "russh",
+          "fullName": "cargo:russh"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:russh-sftp",
+        "type": "Package",
+        "display": {
+          "name": "russh-sftp",
+          "fullName": "cargo:russh-sftp"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:rustls-pemfile",
+        "type": "Package",
+        "display": {
+          "name": "rustls-pemfile",
+          "fullName": "cargo:rustls-pemfile"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:rwh_04",
+        "type": "Package",
+        "display": {
+          "name": "rwh_04",
+          "fullName": "cargo:rwh_04"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:rwh_05",
+        "type": "Package",
+        "display": {
+          "name": "rwh_05",
+          "fullName": "cargo:rwh_05"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:rwh_06",
+        "type": "Package",
+        "display": {
+          "name": "rwh_06",
+          "fullName": "cargo:rwh_06"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:serde",
+        "type": "Package",
+        "display": {
+          "name": "serde",
+          "fullName": "cargo:serde"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:serde_json",
+        "type": "Package",
+        "display": {
+          "name": "serde_json",
+          "fullName": "cargo:serde_json"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:serde_path_to_error",
+        "type": "Package",
+        "display": {
+          "name": "serde_path_to_error",
+          "fullName": "cargo:serde_path_to_error"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:serde_yaml",
+        "type": "Package",
+        "display": {
+          "name": "serde_yaml",
+          "fullName": "cargo:serde_yaml"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:sha1",
+        "type": "Package",
+        "display": {
+          "name": "sha1",
+          "fullName": "cargo:sha1"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:sha2",
+        "type": "Package",
+        "display": {
+          "name": "sha2",
+          "fullName": "cargo:sha2"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:signal-hook",
+        "type": "Package",
+        "display": {
+          "name": "signal-hook",
+          "fullName": "cargo:signal-hook"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:smol_str",
+        "type": "Package",
+        "display": {
+          "name": "smol_str",
+          "fullName": "cargo:smol_str"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:snow",
+        "type": "Package",
+        "display": {
+          "name": "snow",
+          "fullName": "cargo:snow"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:subtle",
+        "type": "Package",
+        "display": {
+          "name": "subtle",
+          "fullName": "cargo:subtle"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:syn",
+        "type": "Package",
+        "display": {
+          "name": "syn",
+          "fullName": "cargo:syn"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:tempfile",
+        "type": "Package",
+        "display": {
+          "name": "tempfile",
+          "fullName": "cargo:tempfile"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:thiserror",
+        "type": "Package",
+        "display": {
+          "name": "thiserror",
+          "fullName": "cargo:thiserror"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:tokio",
+        "type": "Package",
+        "display": {
+          "name": "tokio",
+          "fullName": "cargo:tokio"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:tokio-rustls",
+        "type": "Package",
+        "display": {
+          "name": "tokio-rustls",
+          "fullName": "cargo:tokio-rustls"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:tokio-tungstenite",
+        "type": "Package",
+        "display": {
+          "name": "tokio-tungstenite",
+          "fullName": "cargo:tokio-tungstenite"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:tokio-util",
+        "type": "Package",
+        "display": {
+          "name": "tokio-util",
+          "fullName": "cargo:tokio-util"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:toml",
+        "type": "Package",
+        "display": {
+          "name": "toml",
+          "fullName": "cargo:toml"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:toml_edit",
+        "type": "Package",
+        "display": {
+          "name": "toml_edit",
+          "fullName": "cargo:toml_edit"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:tracing",
+        "type": "Package",
+        "display": {
+          "name": "tracing",
+          "fullName": "cargo:tracing"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:tracing-subscriber",
+        "type": "Package",
+        "display": {
+          "name": "tracing-subscriber",
+          "fullName": "cargo:tracing-subscriber"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:ttf-parser",
+        "type": "Package",
+        "display": {
+          "name": "ttf-parser",
+          "fullName": "cargo:ttf-parser"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:unicase",
+        "type": "Package",
+        "display": {
+          "name": "unicase",
+          "fullName": "cargo:unicase"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:unicode-segmentation",
+        "type": "Package",
+        "display": {
+          "name": "unicode-segmentation",
+          "fullName": "cargo:unicode-segmentation"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:unicode-width",
+        "type": "Package",
+        "display": {
+          "name": "unicode-width",
+          "fullName": "cargo:unicode-width"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:ureq",
+        "type": "Package",
+        "display": {
+          "name": "ureq",
+          "fullName": "cargo:ureq"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:vte",
+        "type": "Package",
+        "display": {
+          "name": "vte",
+          "fullName": "cargo:vte"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:winit",
+        "type": "Package",
+        "display": {
+          "name": "winit",
+          "fullName": "cargo:winit"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:x509-parser",
+        "type": "Package",
+        "display": {
+          "name": "x509-parser",
+          "fullName": "cargo:x509-parser"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:zeroize",
+        "type": "Package",
+        "display": {
+          "name": "zeroize",
+          "fullName": "cargo:zeroize"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:cargo:zip",
+        "type": "Package",
+        "display": {
+          "name": "zip",
+          "fullName": "cargo:zip"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:npm:qrcode",
+        "type": "Package",
+        "display": {
+          "name": "qrcode",
+          "fullName": "npm:qrcode"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:npm:selfsigned",
+        "type": "Package",
+        "display": {
+          "name": "selfsigned",
+          "fullName": "npm:selfsigned"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "pkg:npm:ws",
+        "type": "Package",
+        "display": {
+          "name": "ws",
+          "fullName": "npm:ws"
+        },
+        "attributes": {}
+      },
+      {
+        "id": "repo:github:kuddev/pebrel",
+        "type": "Repository",
+        "display": {
+          "name": "pebrel",
+          "fullName": "Kuddev/pebrel",
+          "url": "https://github.com/Kuddev/pebrel"
+        },
+        "attributes": {
+          "archived": false,
+          "created_at": "2026-07-05T12:17:36Z",
+          "default_branch": "main",
+          "description": "AI-native, GPU-accelerated terminal emulator for Windows with SSH, persistent sessions, split panes, and first-class AI CLI workflows.",
+          "full_name": "Kuddev/pebrel",
+          "homepage": "https://github.com/Kuddev/nebula/releases/latest",
+          "is_fork": false,
+          "license_spdx": "GPL-3.0",
+          "name": "pebrel",
+          "owner": "Kuddev",
+          "provider": "github",
+          "pushed_at": "2026-10-04T01:35:29Z",
+          "repository_size_kb": 31738,
+          "topics": [
+            "ai-cli",
+            "ai-terminal",
+            "claude-code",
+            "codex",
+            "conpty",
+            "developer-tools",
+            "gpu-accelerated",
+            "opengl",
+            "powershell",
+            "rust",
+            "session-persistence",
+            "split-panes",
+            "ssh",
+            "ssh-client",
+            "terminal",
+            "terminal-emulator",
+            "windows"
+          ],
+          "updated_at": "2026-10-04T06:30:28Z",
+          "url": "https://github.com/Kuddev/pebrel"
+        },
+        "sourceUrl": "https://github.com/Kuddev/pebrel"
+      }
+    ],
+    "relationships": [
+      {
+        "id": "rel_c607c766a52b2e14",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:ab_glyph_rasterizer",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_4abd8f0a16e04161"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_ea9a5eb2d97b949c",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:aes-gcm",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_0e413c1bb563216c"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_8504573f403c63d4",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:ahash",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_ef7b2636720ff9d4"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_8336fcd21ed07631",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:argon2",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_51da27a620f7ef58"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_0fe2b223f2cc88af",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:axum",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_e8c0f3e8c0d5c389"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_82b93e5f0f0e682a",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:base64",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_19042ca9a437c5b6",
+          "ev_565d35238b77d936",
+          "ev_6570462a019f755f",
+          "ev_9e4dd78df5ecb496"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_d77ea0f76fe46251",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:bitflags",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_08d314c104df534e",
+          "ev_65164cc9f792b5c2",
+          "ev_f3b72f85f050d10d"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_116a59a3361c259a",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:cfg_aliases",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_a168b53585972558"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_6cfd76a6d99563da",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:chematic-depict",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_36503289dab8cbf9"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_2cb86eb5cff5d678",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:chematic-smiles",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_bffc057cd450a4f6"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_3e9e9937b33aaa99",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:chrono",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_ebb05d224ab140c8"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_ebcd557d64be2f41",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:clap",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_99d1cad7e66ad606"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_3e922bb8c604d23b",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:clap_complete",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_42f32ec72f9f38e9"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_98480e32fabad743",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:copypasta",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_adb4cb876c8222e0"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_37c604aeb314175c",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:crossfont",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_fe1d3a9a40b60bfb"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_93fb476c664120b9",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:cursor-icon",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_a92333c8f147546c"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_7066bba224f09697",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:dpi",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_b56907aca638dc31"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_90abf28da032a2d3",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:futures",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_f125769e42f62da5"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_ee2cda5351249781",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:futures-util",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_e1633dcd4c164304"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_51051203c0ea79b8",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:getrandom",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_4144536c991c1ff3",
+          "ev_ff2fa6c976ec11fd"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_773a691cca991136",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:gl_generator",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_acb6b43f8a557e7d"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_b057c927ad3f8afd",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:glob",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_15dc1fe3f47ee561"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_bab1716626dfcc0f",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:global-hotkey",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_ceeafacd51b3e5eb"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_c32704161c52e284",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:glutin",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_e65aaf472fe9886a"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_059bc9d94688e31d",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:gpui",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_0be17bf6b1471ee4",
+          "ev_58544ae9d21624b9"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_bd49307ce37e7183",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:gpui-component",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_1b2ffe20623be338",
+          "ev_cbcf8fcf57c77c5a"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_16e19b61acc51ef2",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:gpui-component-assets",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_85cfb22d8416aeec",
+          "ev_cbb02b9bfeedf618"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_fc3d0826b6321e2d",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:gpui_platform",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_93d51356cc90db6e",
+          "ev_c39e985d087f70e6"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_e0e6e991331aa27e",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:hmac",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_952cdd3d4e809b59"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_187a6fa43f5586ee",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:home",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_c8c928c9058df12c",
+          "ev_cf1ea517a92ac42d"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_8c726d148573455a",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:html-escape",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_5cba6cde270ce39d"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_896e890eda2ee0a8",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:hyper-util",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_149cd0bc9d3da3d6"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_7a5de1cf83aef977",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:if-addrs",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_edfe3d8c2886801d"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_121ccf1f0871e507",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:image",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_aad73830f7a03107",
+          "ev_bf0b3686ae5bd2b5"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_3f7bd989fc0becca",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:jni",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_b59ee3776835678b"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_d4f619a175036704",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:libc",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_b1ad5d828fb2bb45",
+          "ev_d0e4af797db88e30"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_ee9522bf32ac2d1b",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:log",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_1add3870724a900c",
+          "ev_ba8530ed851c61d0",
+          "ev_dad3da895a1779df",
+          "ev_fc15207a41652cca"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_703fe708c09cd143",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:lscolors",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_24e0d321be89d4e1"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_7c163cba150d4b40",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:markdown",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_4bde43b8d1575ef9"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_a608c308861d5c26",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:mdns-sd",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_d417b97a9e011700"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_ab785ecf01aaf9db",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:mlua",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_beaee726f8805c55"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_e1d23582084aa941",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:notify",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_4db00197a35b7467"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_26e5b21fe5090485",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:nu-ansi-term",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_9e3d356ee48cdb16"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_15a01bf386dc37a9",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:nucleo-matcher",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_d36ad05a7d10acc5"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_bf6b2eb15070ef0f",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:parking_lot",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_35299c2ad1befb12",
+          "ev_a7c186f21970ff40"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_b005095abbc1026b",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:polling",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_33041a12d1e3ed04",
+          "ev_83d7f41921a6b8ff"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_887bcbdb5492c254",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:proc-macro2",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_9d3dcb0d458715b7"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_588c6deaed278cef",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:pulldown-cmark",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_450309d8d0dc3f58"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_0ab5482e151c5032",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:pulldown-latex",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_2dc7fdf0df1e4208"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_46bb66a24cdf8e29",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:qrcode",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_1b6225e343639258"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_e201f6de2385bc27",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:quote",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_c095a755570de436"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_3376089a7eb741e3",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:rand",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_bde3ebd2f34d0550"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_bff3e54df7c435c3",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:rcgen",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_f5f391dd9fdbd58e"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_7817b492e09b3277",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:regex",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_b0c107913ece5c73"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_c32bb54afa4c9867",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:regex-automata",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_d37d8700cd79d9b3"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_8620a9a7a98ebde6",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:rsa",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_1653e8777a91a000"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_2b33864e4e23a281",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:rusqlite",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_5bbc05e8b12be128"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_49ebe564d4625bf4",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:russh",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_ebd5d4dbcc417cd0",
+          "ev_fcb9e57d0c682c75"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_98385169a65ca2ab",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:russh-sftp",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_2ee752f6eb919dde",
+          "ev_f3233dc2d6a05eb3"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_4b9ae06d743b9340",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:rustls-pemfile",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_02046e56d9951b41"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_40f1baf5ddbd453a",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:rwh_04",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_ca24a4bbcc3893ce"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_264efa8f7dd9cbbb",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:rwh_05",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_3795c717cf3e8334"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_6d2ed2e2bec51ea6",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:rwh_06",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_44b86c0087f6c066"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_bc0e7d2dfdf057d6",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:serde",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_6bdda5d43852c37d",
+          "ev_72e77139f3a0bcdf",
+          "ev_a3138ef6fecbfe81",
+          "ev_a6a5ac8ee6e6a3f6",
+          "ev_b792345628364249",
+          "ev_b7e642e61f772771",
+          "ev_daf3783dafb046c0",
+          "ev_ddf03f7821d31037"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_b2b105af10681391",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:serde_json",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_806b6721e5467b21",
+          "ev_bac72d3050d7b10f",
+          "ev_cbe417974f55209f",
+          "ev_da1021f4d80a94ab",
+          "ev_e1b5c28ca4f294e5"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_01179512ffae4b84",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:serde_path_to_error",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_a315066efab513d0"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_c17a6178edc0b826",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:serde_yaml",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_cd028000eb6550d4"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_018a6876e812f540",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:sha1",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_6557ffb9cc2e39f8"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_021aad5f800b8986",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:sha2",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_5df8d355e8e5ef83",
+          "ev_cd57dd5a78280f0c"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_342bc5df29989240",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:signal-hook",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_a1844414de86699a"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_565623f164676db0",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:smol_str",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_b997379f855dcdae"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_1f601aee2775798a",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:snow",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_2e9ec95066c58ee3"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_994f8ae630a28ecc",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:subtle",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_434d9da64cf144e6"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_2c72cde991d09b2e",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:syn",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_ef7ee9fa9654a939"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_ed88205ab9c1f177",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:tempfile",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_6cb502108bc0578b"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_293f8e03baa321cd",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:thiserror",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_d216be1a61542582"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_3ec8b69f9e83f257",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:tokio",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_74653aee40220eb0",
+          "ev_aa556b0ea18bdc37",
+          "ev_da5c984ef18ffa4d"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_a37cc438cc720252",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:tokio-rustls",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_957c5d9989fa122b"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_198a2876db200490",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:tokio-tungstenite",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_ffc7a252e25ad8ef"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_3b07248b5178cea8",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:tokio-util",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_43b0fe3a2c152d34",
+          "ev_6dab2a4e472e19f4"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_93412971f7d70bac",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:toml",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_32356cb147fbfda3",
+          "ev_9ba4ebce0144b9ba",
+          "ev_d21ded652b0735d8"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_9048a11040d398b3",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:toml_edit",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_ccf8f4ddd5f7febe"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_1b8a347b962fbfbe",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:tracing",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_3dcd54bb00af502d"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_cdd294a7da22fbfa",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:tracing-subscriber",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_58db17561793393c"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_167a686e53247d18",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:ttf-parser",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_355840dd6feba8f3"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_5d1ffcb7b41ccff7",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:unicase",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_d1fdf9fbb01b48de"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_23c733ddf5c81d96",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:unicode-segmentation",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_58ffe83c2544989d"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_a106459cec45c681",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:unicode-width",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_325e5e7b5cc363d1",
+          "ev_e750d9fe8b9cf66a"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_07d00be0d113cd9c",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:ureq",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_8f2b506b4f7ede91"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_23c7d6cea56cabb7",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:vte",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_f4f70d006d0ade5e"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_70d7b942b0ecbb87",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:winit",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_d25d837856545712"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_c96afb2b5d02ce0e",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:x509-parser",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_f905e7e425005e88"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_2689db33ecbd1748",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:zeroize",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_13db33f8008e5c41",
+          "ev_58c3882f1df7c683",
+          "ev_6c63e3a5d5e8377f"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_10b3613e3c377ddb",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:cargo:zip",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_1bdb97fcede5eefb"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_97fafb6bc81bf682",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:npm:qrcode",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_8966aea57b6f4a70"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_2c75bd4930e7c928",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:npm:selfsigned",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_409a69c19bd4216c"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_d09192b64769180d",
+        "type": "depends_on",
+        "source": "repo:github:kuddev/pebrel",
+        "target": "pkg:npm:ws",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_bf20b7f34de2feb4"
+        ],
+        "attributes": {}
+      }
+    ],
+    "evidence": [
+      {
+        "id": "ev_02046e56d9951b41",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/mobile/link/Cargo.toml",
+        "locator": {
+          "path": "mobile/link/Cargo.toml",
+          "field": "rustls-pemfile",
+          "spec": "cargo"
+        },
+        "observedText": "\"rustls-pemfile\": \"2\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "rustls-pemfile",
+          "range": "2",
+          "manifest_path": "mobile/link/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_08d314c104df534e",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "bitflags",
+          "spec": "cargo"
+        },
+        "observedText": "\"bitflags\": \"2.2.1\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "bitflags",
+          "range": "2.2.1",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_0be17bf6b1471ee4",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_gpui/Cargo.toml",
+        "locator": {
+          "path": "nebula_gpui/Cargo.toml",
+          "field": "gpui",
+          "spec": "cargo"
+        },
+        "observedText": "\"gpui\": \"=0.2.2\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "gpui",
+          "range": "=0.2.2",
+          "manifest_path": "nebula_gpui/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_0e413c1bb563216c",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "aes-gcm",
+          "spec": "cargo"
+        },
+        "observedText": "\"aes-gcm\": \"0.11\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "aes-gcm",
+          "range": "0.11",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_13db33f8008e5c41",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/mobile/ssh/Cargo.toml",
+        "locator": {
+          "path": "mobile/ssh/Cargo.toml",
+          "field": "zeroize",
+          "spec": "cargo"
+        },
+        "observedText": "\"zeroize\": \"1\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "zeroize",
+          "range": "1",
+          "manifest_path": "mobile/ssh/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_149cd0bc9d3da3d6",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/mobile/link/Cargo.toml",
+        "locator": {
+          "path": "mobile/link/Cargo.toml",
+          "field": "hyper-util",
+          "spec": "cargo"
+        },
+        "observedText": "\"hyper-util\": \"0.1\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "hyper-util",
+          "range": "0.1",
+          "manifest_path": "mobile/link/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_15dc1fe3f47ee561",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "glob",
+          "spec": "cargo"
+        },
+        "observedText": "\"glob\": \"0.3.4\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "glob",
+          "range": "0.3.4",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_1653e8777a91a000",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "rsa",
+          "spec": "cargo"
+        },
+        "observedText": "\"rsa\": \"0.10.0-rc.18\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "rsa",
+          "range": "0.10.0-rc.18",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "dev"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_19042ca9a437c5b6",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "base64",
+          "spec": "cargo"
+        },
+        "observedText": "\"base64\": \"0.22.0\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "base64",
+          "range": "0.22.0",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_1add3870724a900c",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "log",
+          "spec": "cargo"
+        },
+        "observedText": "\"log\": \"0.4\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "log",
+          "range": "0.4",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_1b2ffe20623be338",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_gpui/Cargo.toml",
+        "locator": {
+          "path": "nebula_gpui/Cargo.toml",
+          "field": "gpui-component",
+          "spec": "cargo"
+        },
+        "observedText": "\"gpui-component\": \"=0.5.2\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "gpui-component",
+          "range": "=0.5.2",
+          "manifest_path": "nebula_gpui/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_1b6225e343639258",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/mobile/link/Cargo.toml",
+        "locator": {
+          "path": "mobile/link/Cargo.toml",
+          "field": "qrcode",
+          "spec": "cargo"
+        },
+        "observedText": "\"qrcode\": \"0.14\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "qrcode",
+          "range": "0.14",
+          "manifest_path": "mobile/link/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_1bdb97fcede5eefb",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "zip",
+          "spec": "cargo"
+        },
+        "observedText": "\"zip\": \"=4.6.1\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "zip",
+          "range": "=4.6.1",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_24e0d321be89d4e1",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula-completions/Cargo.toml",
+        "locator": {
+          "path": "nebula-completions/Cargo.toml",
+          "field": "lscolors",
+          "spec": "cargo"
+        },
+        "observedText": "\"lscolors\": \"0.21\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "lscolors",
+          "range": "0.21",
+          "manifest_path": "nebula-completions/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_2dc7fdf0df1e4208",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "pulldown-latex",
+          "spec": "cargo"
+        },
+        "observedText": "\"pulldown-latex\": \"=0.7.1\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "pulldown-latex",
+          "range": "=0.7.1",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_2e9ec95066c58ee3",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/mobile/link/Cargo.toml",
+        "locator": {
+          "path": "mobile/link/Cargo.toml",
+          "field": "snow",
+          "spec": "cargo"
+        },
+        "observedText": "\"snow\": \"=0.10.0\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "snow",
+          "range": "=0.10.0",
+          "manifest_path": "mobile/link/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_2ee752f6eb919dde",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "russh-sftp",
+          "spec": "cargo"
+        },
+        "observedText": "\"russh-sftp\": \"2.3.0\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "russh-sftp",
+          "range": "2.3.0",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_32356cb147fbfda3",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "toml",
+          "spec": "cargo"
+        },
+        "observedText": "\"toml\": \"*\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "toml",
+          "range": "*",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_325e5e7b5cc363d1",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "unicode-width",
+          "spec": "cargo"
+        },
+        "observedText": "\"unicode-width\": \"0.2.0\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "unicode-width",
+          "range": "0.2.0",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_33041a12d1e3ed04",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_terminal/Cargo.toml",
+        "locator": {
+          "path": "nebula_terminal/Cargo.toml",
+          "field": "polling",
+          "spec": "cargo"
+        },
+        "observedText": "\"polling\": \"3.8.0\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "polling",
+          "range": "3.8.0",
+          "manifest_path": "nebula_terminal/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_35299c2ad1befb12",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "parking_lot",
+          "spec": "cargo"
+        },
+        "observedText": "\"parking_lot\": \"0.12.0\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "parking_lot",
+          "range": "0.12.0",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_355840dd6feba8f3",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "ttf-parser",
+          "spec": "cargo"
+        },
+        "observedText": "\"ttf-parser\": \"=0.25.1\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "ttf-parser",
+          "range": "=0.25.1",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_36503289dab8cbf9",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "chematic-depict",
+          "spec": "cargo"
+        },
+        "observedText": "\"chematic-depict\": \"=1.0.9\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "chematic-depict",
+          "range": "=1.0.9",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_3795c717cf3e8334",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/third_party/winit-0.30.13/Cargo.toml",
+        "locator": {
+          "path": "third_party/winit-0.30.13/Cargo.toml",
+          "field": "rwh_05",
+          "spec": "cargo"
+        },
+        "observedText": "\"rwh_05\": \"0.5.2\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "rwh_05",
+          "range": "0.5.2",
+          "manifest_path": "third_party/winit-0.30.13/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_3dcd54bb00af502d",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/third_party/winit-0.30.13/Cargo.toml",
+        "locator": {
+          "path": "third_party/winit-0.30.13/Cargo.toml",
+          "field": "tracing",
+          "spec": "cargo"
+        },
+        "observedText": "\"tracing\": \"0.1.40\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "tracing",
+          "range": "0.1.40",
+          "manifest_path": "third_party/winit-0.30.13/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_409a69c19bd4216c",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/mobile/relay/package.json",
+        "locator": {
+          "path": "mobile/relay/package.json",
+          "field": "selfsigned",
+          "spec": "npm"
+        },
+        "observedText": "\"selfsigned\": \"2.4.1\"",
+        "data": {
+          "ecosystem": "npm",
+          "package_name": "selfsigned",
+          "range": "2.4.1",
+          "manifest_path": "mobile/relay/package.json",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_4144536c991c1ff3",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/mobile/link/Cargo.toml",
+        "locator": {
+          "path": "mobile/link/Cargo.toml",
+          "field": "getrandom",
+          "spec": "cargo"
+        },
+        "observedText": "\"getrandom\": \"0.3\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "getrandom",
+          "range": "0.3",
+          "manifest_path": "mobile/link/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_42f32ec72f9f38e9",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "clap_complete",
+          "spec": "cargo"
+        },
+        "observedText": "\"clap_complete\": \"4.2.3\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "clap_complete",
+          "range": "4.2.3",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "dev"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_434d9da64cf144e6",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/mobile/link/Cargo.toml",
+        "locator": {
+          "path": "mobile/link/Cargo.toml",
+          "field": "subtle",
+          "spec": "cargo"
+        },
+        "observedText": "\"subtle\": \"2.6\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "subtle",
+          "range": "2.6",
+          "manifest_path": "mobile/link/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_43b0fe3a2c152d34",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/mobile/ssh/Cargo.toml",
+        "locator": {
+          "path": "mobile/ssh/Cargo.toml",
+          "field": "tokio-util",
+          "spec": "cargo"
+        },
+        "observedText": "\"tokio-util\": \"0.7\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "tokio-util",
+          "range": "0.7",
+          "manifest_path": "mobile/ssh/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_44b86c0087f6c066",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/third_party/winit-0.30.13/Cargo.toml",
+        "locator": {
+          "path": "third_party/winit-0.30.13/Cargo.toml",
+          "field": "rwh_06",
+          "spec": "cargo"
+        },
+        "observedText": "\"rwh_06\": \"0.6\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "rwh_06",
+          "range": "0.6",
+          "manifest_path": "third_party/winit-0.30.13/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_450309d8d0dc3f58",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "pulldown-cmark",
+          "spec": "cargo"
+        },
+        "observedText": "\"pulldown-cmark\": \"0.13\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "pulldown-cmark",
+          "range": "0.13",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_4abd8f0a16e04161",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "ab_glyph_rasterizer",
+          "spec": "cargo"
+        },
+        "observedText": "\"ab_glyph_rasterizer\": \"=0.1.10\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "ab_glyph_rasterizer",
+          "range": "=0.1.10",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_4bde43b8d1575ef9",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "markdown",
+          "spec": "cargo"
+        },
+        "observedText": "\"markdown\": \"=1.0.0\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "markdown",
+          "range": "=1.0.0",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_4db00197a35b7467",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "notify",
+          "spec": "cargo"
+        },
+        "observedText": "\"notify\": \"8.0.0\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "notify",
+          "range": "8.0.0",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_51da27a620f7ef58",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "argon2",
+          "spec": "cargo"
+        },
+        "observedText": "\"argon2\": \"0.6.0-rc.8\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "argon2",
+          "range": "0.6.0-rc.8",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_565d35238b77d936",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/mobile/ssh/Cargo.toml",
+        "locator": {
+          "path": "mobile/ssh/Cargo.toml",
+          "field": "base64",
+          "spec": "cargo"
+        },
+        "observedText": "\"base64\": \"0.22\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "base64",
+          "range": "0.22",
+          "manifest_path": "mobile/ssh/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_58544ae9d21624b9",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "gpui",
+          "spec": "cargo"
+        },
+        "observedText": "\"gpui\": \"=0.2.2\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "gpui",
+          "range": "=0.2.2",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_58c3882f1df7c683",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/mobile/link/Cargo.toml",
+        "locator": {
+          "path": "mobile/link/Cargo.toml",
+          "field": "zeroize",
+          "spec": "cargo"
+        },
+        "observedText": "\"zeroize\": \"1\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "zeroize",
+          "range": "1",
+          "manifest_path": "mobile/link/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_58db17561793393c",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/third_party/winit-0.30.13/Cargo.toml",
+        "locator": {
+          "path": "third_party/winit-0.30.13/Cargo.toml",
+          "field": "tracing-subscriber",
+          "spec": "cargo"
+        },
+        "observedText": "\"tracing-subscriber\": \"0.3.18\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "tracing-subscriber",
+          "range": "0.3.18",
+          "manifest_path": "third_party/winit-0.30.13/Cargo.toml",
+          "scope": "dev"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_58ffe83c2544989d",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula-completions/Cargo.toml",
+        "locator": {
+          "path": "nebula-completions/Cargo.toml",
+          "field": "unicode-segmentation",
+          "spec": "cargo"
+        },
+        "observedText": "\"unicode-segmentation\": \"1.13\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "unicode-segmentation",
+          "range": "1.13",
+          "manifest_path": "nebula-completions/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_5bbc05e8b12be128",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "rusqlite",
+          "spec": "cargo"
+        },
+        "observedText": "\"rusqlite\": \"0.40.2\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "rusqlite",
+          "range": "0.40.2",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_5cba6cde270ce39d",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "html-escape",
+          "spec": "cargo"
+        },
+        "observedText": "\"html-escape\": \"0.2.14\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "html-escape",
+          "range": "0.2.14",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_5df8d355e8e5ef83",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/mobile/link/Cargo.toml",
+        "locator": {
+          "path": "mobile/link/Cargo.toml",
+          "field": "sha2",
+          "spec": "cargo"
+        },
+        "observedText": "\"sha2\": \"0.10\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "sha2",
+          "range": "0.10",
+          "manifest_path": "mobile/link/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_65164cc9f792b5c2",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_terminal/Cargo.toml",
+        "locator": {
+          "path": "nebula_terminal/Cargo.toml",
+          "field": "bitflags",
+          "spec": "cargo"
+        },
+        "observedText": "\"bitflags\": \"2.4.1\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "bitflags",
+          "range": "2.4.1",
+          "manifest_path": "nebula_terminal/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_6557ffb9cc2e39f8",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "sha1",
+          "spec": "cargo"
+        },
+        "observedText": "\"sha1\": \"0.11.0\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "sha1",
+          "range": "0.11.0",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_6570462a019f755f",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_terminal/Cargo.toml",
+        "locator": {
+          "path": "nebula_terminal/Cargo.toml",
+          "field": "base64",
+          "spec": "cargo"
+        },
+        "observedText": "\"base64\": \"0.22.0\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "base64",
+          "range": "0.22.0",
+          "manifest_path": "nebula_terminal/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_6bdda5d43852c37d",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_config_derive/Cargo.toml",
+        "locator": {
+          "path": "nebula_config_derive/Cargo.toml",
+          "field": "serde",
+          "spec": "cargo"
+        },
+        "observedText": "\"serde\": \"1.0.117\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "serde",
+          "range": "1.0.117",
+          "manifest_path": "nebula_config_derive/Cargo.toml",
+          "scope": "dev"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_6c63e3a5d5e8377f",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "zeroize",
+          "spec": "cargo"
+        },
+        "observedText": "\"zeroize\": \"1\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "zeroize",
+          "range": "1",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_6cb502108bc0578b",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "tempfile",
+          "spec": "cargo"
+        },
+        "observedText": "\"tempfile\": \"3.12.0\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "tempfile",
+          "range": "3.12.0",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_6dab2a4e472e19f4",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/mobile/link/Cargo.toml",
+        "locator": {
+          "path": "mobile/link/Cargo.toml",
+          "field": "tokio-util",
+          "spec": "cargo"
+        },
+        "observedText": "\"tokio-util\": \"0.7\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "tokio-util",
+          "range": "0.7",
+          "manifest_path": "mobile/link/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_72e77139f3a0bcdf",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/tools/i18n-contract/Cargo.toml",
+        "locator": {
+          "path": "tools/i18n-contract/Cargo.toml",
+          "field": "serde",
+          "spec": "cargo"
+        },
+        "observedText": "\"serde\": \"1\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "serde",
+          "range": "1",
+          "manifest_path": "tools/i18n-contract/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_74653aee40220eb0",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "tokio",
+          "spec": "cargo"
+        },
+        "observedText": "\"tokio\": \"1\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "tokio",
+          "range": "1",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_806b6721e5467b21",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_terminal/Cargo.toml",
+        "locator": {
+          "path": "nebula_terminal/Cargo.toml",
+          "field": "serde_json",
+          "spec": "cargo"
+        },
+        "observedText": "\"serde_json\": \"1.0.0\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "serde_json",
+          "range": "1.0.0",
+          "manifest_path": "nebula_terminal/Cargo.toml",
+          "scope": "dev"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_83d7f41921a6b8ff",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "polling",
+          "spec": "cargo"
+        },
+        "observedText": "\"polling\": \"3.11.0\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "polling",
+          "range": "3.11.0",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_85cfb22d8416aeec",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "gpui-component-assets",
+          "spec": "cargo"
+        },
+        "observedText": "\"gpui-component-assets\": \"=0.5.1\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "gpui-component-assets",
+          "range": "=0.5.1",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_8966aea57b6f4a70",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/mobile/relay/package.json",
+        "locator": {
+          "path": "mobile/relay/package.json",
+          "field": "qrcode",
+          "spec": "npm"
+        },
+        "observedText": "\"qrcode\": \"1.5.4\"",
+        "data": {
+          "ecosystem": "npm",
+          "package_name": "qrcode",
+          "range": "1.5.4",
+          "manifest_path": "mobile/relay/package.json",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_8f2b506b4f7ede91",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "ureq",
+          "spec": "cargo"
+        },
+        "observedText": "\"ureq\": \"3\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "ureq",
+          "range": "3",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_93d51356cc90db6e",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "gpui_platform",
+          "spec": "cargo"
+        },
+        "observedText": "\"gpui_platform\": \"*\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "gpui_platform",
+          "range": "*",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_952cdd3d4e809b59",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "hmac",
+          "spec": "cargo"
+        },
+        "observedText": "\"hmac\": \"0.13\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "hmac",
+          "range": "0.13",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_957c5d9989fa122b",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/mobile/link/Cargo.toml",
+        "locator": {
+          "path": "mobile/link/Cargo.toml",
+          "field": "tokio-rustls",
+          "spec": "cargo"
+        },
+        "observedText": "\"tokio-rustls\": \"0.26\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "tokio-rustls",
+          "range": "0.26",
+          "manifest_path": "mobile/link/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_99d1cad7e66ad606",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "clap",
+          "spec": "cargo"
+        },
+        "observedText": "\"clap\": \"4.2.7\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "clap",
+          "range": "4.2.7",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_9ba4ebce0144b9ba",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_config_derive/Cargo.toml",
+        "locator": {
+          "path": "nebula_config_derive/Cargo.toml",
+          "field": "toml",
+          "spec": "cargo"
+        },
+        "observedText": "\"toml\": \"*\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "toml",
+          "range": "*",
+          "manifest_path": "nebula_config_derive/Cargo.toml",
+          "scope": "dev"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_9d3dcb0d458715b7",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_config_derive/Cargo.toml",
+        "locator": {
+          "path": "nebula_config_derive/Cargo.toml",
+          "field": "proc-macro2",
+          "spec": "cargo"
+        },
+        "observedText": "\"proc-macro2\": \"1.0.24\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "proc-macro2",
+          "range": "1.0.24",
+          "manifest_path": "nebula_config_derive/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_9e3d356ee48cdb16",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula-completions/Cargo.toml",
+        "locator": {
+          "path": "nebula-completions/Cargo.toml",
+          "field": "nu-ansi-term",
+          "spec": "cargo"
+        },
+        "observedText": "\"nu-ansi-term\": \"0.50\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "nu-ansi-term",
+          "range": "0.50",
+          "manifest_path": "nebula-completions/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_9e4dd78df5ecb496",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/mobile/link/Cargo.toml",
+        "locator": {
+          "path": "mobile/link/Cargo.toml",
+          "field": "base64",
+          "spec": "cargo"
+        },
+        "observedText": "\"base64\": \"0.22\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "base64",
+          "range": "0.22",
+          "manifest_path": "mobile/link/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_a168b53585972558",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/third_party/winit-0.30.13/Cargo.toml",
+        "locator": {
+          "path": "third_party/winit-0.30.13/Cargo.toml",
+          "field": "cfg_aliases",
+          "spec": "cargo"
+        },
+        "observedText": "\"cfg_aliases\": \"0.2.1\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "cfg_aliases",
+          "range": "0.2.1",
+          "manifest_path": "third_party/winit-0.30.13/Cargo.toml",
+          "scope": "build"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_a1844414de86699a",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "signal-hook",
+          "spec": "cargo"
+        },
+        "observedText": "\"signal-hook\": \"0.4.3\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "signal-hook",
+          "range": "0.4.3",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_a3138ef6fecbfe81",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/mobile/link/Cargo.toml",
+        "locator": {
+          "path": "mobile/link/Cargo.toml",
+          "field": "serde",
+          "spec": "cargo"
+        },
+        "observedText": "\"serde\": \"1\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "serde",
+          "range": "1",
+          "manifest_path": "mobile/link/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_a315066efab513d0",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "serde_path_to_error",
+          "spec": "cargo"
+        },
+        "observedText": "\"serde_path_to_error\": \"*\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "serde_path_to_error",
+          "range": "*",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_a6a5ac8ee6e6a3f6",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/third_party/winit-0.30.13/Cargo.toml",
+        "locator": {
+          "path": "third_party/winit-0.30.13/Cargo.toml",
+          "field": "serde",
+          "spec": "cargo"
+        },
+        "observedText": "\"serde\": \"1\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "serde",
+          "range": "1",
+          "manifest_path": "third_party/winit-0.30.13/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_a7c186f21970ff40",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_terminal/Cargo.toml",
+        "locator": {
+          "path": "nebula_terminal/Cargo.toml",
+          "field": "parking_lot",
+          "spec": "cargo"
+        },
+        "observedText": "\"parking_lot\": \"0.12.0\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "parking_lot",
+          "range": "0.12.0",
+          "manifest_path": "nebula_terminal/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_a92333c8f147546c",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/third_party/winit-0.30.13/Cargo.toml",
+        "locator": {
+          "path": "third_party/winit-0.30.13/Cargo.toml",
+          "field": "cursor-icon",
+          "spec": "cargo"
+        },
+        "observedText": "\"cursor-icon\": \"1.1.0\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "cursor-icon",
+          "range": "1.1.0",
+          "manifest_path": "third_party/winit-0.30.13/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_aa556b0ea18bdc37",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/mobile/link/Cargo.toml",
+        "locator": {
+          "path": "mobile/link/Cargo.toml",
+          "field": "tokio",
+          "spec": "cargo"
+        },
+        "observedText": "\"tokio\": \"1\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "tokio",
+          "range": "1",
+          "manifest_path": "mobile/link/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_aad73830f7a03107",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "image",
+          "spec": "cargo"
+        },
+        "observedText": "\"image\": \"0.25.8\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "image",
+          "range": "0.25.8",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_acb6b43f8a557e7d",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "gl_generator",
+          "spec": "cargo"
+        },
+        "observedText": "\"gl_generator\": \"0.14.0\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "gl_generator",
+          "range": "0.14.0",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "build"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_adb4cb876c8222e0",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "copypasta",
+          "spec": "cargo"
+        },
+        "observedText": "\"copypasta\": \"0.10.1\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "copypasta",
+          "range": "0.10.1",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_b0c107913ece5c73",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "regex",
+          "spec": "cargo"
+        },
+        "observedText": "\"regex\": \"1.13.1\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "regex",
+          "range": "1.13.1",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_b1ad5d828fb2bb45",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "libc",
+          "spec": "cargo"
+        },
+        "observedText": "\"libc\": \"0.2\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "libc",
+          "range": "0.2",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_b56907aca638dc31",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/third_party/winit-0.30.13/Cargo.toml",
+        "locator": {
+          "path": "third_party/winit-0.30.13/Cargo.toml",
+          "field": "dpi",
+          "spec": "cargo"
+        },
+        "observedText": "\"dpi\": \"0.1.1\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "dpi",
+          "range": "0.1.1",
+          "manifest_path": "third_party/winit-0.30.13/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_b59ee3776835678b",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/mobile/ssh/Cargo.toml",
+        "locator": {
+          "path": "mobile/ssh/Cargo.toml",
+          "field": "jni",
+          "spec": "cargo"
+        },
+        "observedText": "\"jni\": \"=0.21.1\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "jni",
+          "range": "=0.21.1",
+          "manifest_path": "mobile/ssh/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_b792345628364249",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_config/Cargo.toml",
+        "locator": {
+          "path": "nebula_config/Cargo.toml",
+          "field": "serde",
+          "spec": "cargo"
+        },
+        "observedText": "\"serde\": \"1.0.163\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "serde",
+          "range": "1.0.163",
+          "manifest_path": "nebula_config/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_b7e642e61f772771",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_terminal/Cargo.toml",
+        "locator": {
+          "path": "nebula_terminal/Cargo.toml",
+          "field": "serde",
+          "spec": "cargo"
+        },
+        "observedText": "\"serde\": \"1\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "serde",
+          "range": "1",
+          "manifest_path": "nebula_terminal/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_b997379f855dcdae",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/third_party/winit-0.30.13/Cargo.toml",
+        "locator": {
+          "path": "third_party/winit-0.30.13/Cargo.toml",
+          "field": "smol_str",
+          "spec": "cargo"
+        },
+        "observedText": "\"smol_str\": \"0.2.0\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "smol_str",
+          "range": "0.2.0",
+          "manifest_path": "third_party/winit-0.30.13/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_ba8530ed851c61d0",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_terminal/Cargo.toml",
+        "locator": {
+          "path": "nebula_terminal/Cargo.toml",
+          "field": "log",
+          "spec": "cargo"
+        },
+        "observedText": "\"log\": \"0.4\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "log",
+          "range": "0.4",
+          "manifest_path": "nebula_terminal/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_bac72d3050d7b10f",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/mobile/link/Cargo.toml",
+        "locator": {
+          "path": "mobile/link/Cargo.toml",
+          "field": "serde_json",
+          "spec": "cargo"
+        },
+        "observedText": "\"serde_json\": \"1\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "serde_json",
+          "range": "1",
+          "manifest_path": "mobile/link/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_bde3ebd2f34d0550",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "rand",
+          "spec": "cargo"
+        },
+        "observedText": "\"rand\": \"0.10\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "rand",
+          "range": "0.10",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "dev"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_beaee726f8805c55",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "mlua",
+          "spec": "cargo"
+        },
+        "observedText": "\"mlua\": \"*\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "mlua",
+          "range": "*",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_bf0b3686ae5bd2b5",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/third_party/winit-0.30.13/Cargo.toml",
+        "locator": {
+          "path": "third_party/winit-0.30.13/Cargo.toml",
+          "field": "image",
+          "spec": "cargo"
+        },
+        "observedText": "\"image\": \"0.25.0\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "image",
+          "range": "0.25.0",
+          "manifest_path": "third_party/winit-0.30.13/Cargo.toml",
+          "scope": "dev"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_bf20b7f34de2feb4",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/mobile/relay/package.json",
+        "locator": {
+          "path": "mobile/relay/package.json",
+          "field": "ws",
+          "spec": "npm"
+        },
+        "observedText": "\"ws\": \"8.18.3\"",
+        "data": {
+          "ecosystem": "npm",
+          "package_name": "ws",
+          "range": "8.18.3",
+          "manifest_path": "mobile/relay/package.json",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_bffc057cd450a4f6",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "chematic-smiles",
+          "spec": "cargo"
+        },
+        "observedText": "\"chematic-smiles\": \"=1.0.9\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "chematic-smiles",
+          "range": "=1.0.9",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_c095a755570de436",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_config_derive/Cargo.toml",
+        "locator": {
+          "path": "nebula_config_derive/Cargo.toml",
+          "field": "quote",
+          "spec": "cargo"
+        },
+        "observedText": "\"quote\": \"1.0.7\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "quote",
+          "range": "1.0.7",
+          "manifest_path": "nebula_config_derive/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_c39e985d087f70e6",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_gpui/Cargo.toml",
+        "locator": {
+          "path": "nebula_gpui/Cargo.toml",
+          "field": "gpui_platform",
+          "spec": "cargo"
+        },
+        "observedText": "\"gpui_platform\": \"*\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "gpui_platform",
+          "range": "*",
+          "manifest_path": "nebula_gpui/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_c8c928c9058df12c",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "home",
+          "spec": "cargo"
+        },
+        "observedText": "\"home\": \"0.5.5\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "home",
+          "range": "0.5.5",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_ca24a4bbcc3893ce",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/third_party/winit-0.30.13/Cargo.toml",
+        "locator": {
+          "path": "third_party/winit-0.30.13/Cargo.toml",
+          "field": "rwh_04",
+          "spec": "cargo"
+        },
+        "observedText": "\"rwh_04\": \"0.4\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "rwh_04",
+          "range": "0.4",
+          "manifest_path": "third_party/winit-0.30.13/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_cbb02b9bfeedf618",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_gpui/Cargo.toml",
+        "locator": {
+          "path": "nebula_gpui/Cargo.toml",
+          "field": "gpui-component-assets",
+          "spec": "cargo"
+        },
+        "observedText": "\"gpui-component-assets\": \"=0.5.1\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "gpui-component-assets",
+          "range": "=0.5.1",
+          "manifest_path": "nebula_gpui/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_cbcf8fcf57c77c5a",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "gpui-component",
+          "spec": "cargo"
+        },
+        "observedText": "\"gpui-component\": \"=0.5.2\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "gpui-component",
+          "range": "=0.5.2",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_cbe417974f55209f",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/tools/i18n-contract/Cargo.toml",
+        "locator": {
+          "path": "tools/i18n-contract/Cargo.toml",
+          "field": "serde_json",
+          "spec": "cargo"
+        },
+        "observedText": "\"serde_json\": \"1\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "serde_json",
+          "range": "1",
+          "manifest_path": "tools/i18n-contract/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_ccf8f4ddd5f7febe",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "toml_edit",
+          "spec": "cargo"
+        },
+        "observedText": "\"toml_edit\": \"*\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "toml_edit",
+          "range": "*",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_cd028000eb6550d4",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "serde_yaml",
+          "spec": "cargo"
+        },
+        "observedText": "\"serde_yaml\": \"0.9.25\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "serde_yaml",
+          "range": "0.9.25",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_cd57dd5a78280f0c",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "sha2",
+          "spec": "cargo"
+        },
+        "observedText": "\"sha2\": \"0.11\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "sha2",
+          "range": "0.11",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_ceeafacd51b3e5eb",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "global-hotkey",
+          "spec": "cargo"
+        },
+        "observedText": "\"global-hotkey\": \"0.8.0\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "global-hotkey",
+          "range": "0.8.0",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_cf1ea517a92ac42d",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_terminal/Cargo.toml",
+        "locator": {
+          "path": "nebula_terminal/Cargo.toml",
+          "field": "home",
+          "spec": "cargo"
+        },
+        "observedText": "\"home\": \"0.5.5\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "home",
+          "range": "0.5.5",
+          "manifest_path": "nebula_terminal/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_d0e4af797db88e30",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_terminal/Cargo.toml",
+        "locator": {
+          "path": "nebula_terminal/Cargo.toml",
+          "field": "libc",
+          "spec": "cargo"
+        },
+        "observedText": "\"libc\": \"0.2\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "libc",
+          "range": "0.2",
+          "manifest_path": "nebula_terminal/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_d1fdf9fbb01b48de",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula-completions/Cargo.toml",
+        "locator": {
+          "path": "nebula-completions/Cargo.toml",
+          "field": "unicase",
+          "spec": "cargo"
+        },
+        "observedText": "\"unicase\": \"2.9\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "unicase",
+          "range": "2.9",
+          "manifest_path": "nebula-completions/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_d216be1a61542582",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/mobile/link/Cargo.toml",
+        "locator": {
+          "path": "mobile/link/Cargo.toml",
+          "field": "thiserror",
+          "spec": "cargo"
+        },
+        "observedText": "\"thiserror\": \"2\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "thiserror",
+          "range": "2",
+          "manifest_path": "mobile/link/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_d21ded652b0735d8",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_config/Cargo.toml",
+        "locator": {
+          "path": "nebula_config/Cargo.toml",
+          "field": "toml",
+          "spec": "cargo"
+        },
+        "observedText": "\"toml\": \"*\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "toml",
+          "range": "*",
+          "manifest_path": "nebula_config/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_d25d837856545712",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "winit",
+          "spec": "cargo"
+        },
+        "observedText": "\"winit\": \"0.30.9\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "winit",
+          "range": "0.30.9",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_d36ad05a7d10acc5",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula-completions/Cargo.toml",
+        "locator": {
+          "path": "nebula-completions/Cargo.toml",
+          "field": "nucleo-matcher",
+          "spec": "cargo"
+        },
+        "observedText": "\"nucleo-matcher\": \"0.3\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "nucleo-matcher",
+          "range": "0.3",
+          "manifest_path": "nebula-completions/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_d37d8700cd79d9b3",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_terminal/Cargo.toml",
+        "locator": {
+          "path": "nebula_terminal/Cargo.toml",
+          "field": "regex-automata",
+          "spec": "cargo"
+        },
+        "observedText": "\"regex-automata\": \"0.4.3\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "regex-automata",
+          "range": "0.4.3",
+          "manifest_path": "nebula_terminal/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_d417b97a9e011700",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/mobile/link/Cargo.toml",
+        "locator": {
+          "path": "mobile/link/Cargo.toml",
+          "field": "mdns-sd",
+          "spec": "cargo"
+        },
+        "observedText": "\"mdns-sd\": \"=0.21.4\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "mdns-sd",
+          "range": "=0.21.4",
+          "manifest_path": "mobile/link/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_da1021f4d80a94ab",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "serde_json",
+          "spec": "cargo"
+        },
+        "observedText": "\"serde_json\": \"1\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "serde_json",
+          "range": "1",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_da5c984ef18ffa4d",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/mobile/ssh/Cargo.toml",
+        "locator": {
+          "path": "mobile/ssh/Cargo.toml",
+          "field": "tokio",
+          "spec": "cargo"
+        },
+        "observedText": "\"tokio\": \"1\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "tokio",
+          "range": "1",
+          "manifest_path": "mobile/ssh/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_dad3da895a1779df",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_config/Cargo.toml",
+        "locator": {
+          "path": "nebula_config/Cargo.toml",
+          "field": "log",
+          "spec": "cargo"
+        },
+        "observedText": "\"log\": \"0.4.17\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "log",
+          "range": "0.4.17",
+          "manifest_path": "nebula_config/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_daf3783dafb046c0",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "serde",
+          "spec": "cargo"
+        },
+        "observedText": "\"serde\": \"1\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "serde",
+          "range": "1",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_ddf03f7821d31037",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/mobile/ssh/Cargo.toml",
+        "locator": {
+          "path": "mobile/ssh/Cargo.toml",
+          "field": "serde",
+          "spec": "cargo"
+        },
+        "observedText": "\"serde\": \"1\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "serde",
+          "range": "1",
+          "manifest_path": "mobile/ssh/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_e1633dcd4c164304",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/mobile/link/Cargo.toml",
+        "locator": {
+          "path": "mobile/link/Cargo.toml",
+          "field": "futures-util",
+          "spec": "cargo"
+        },
+        "observedText": "\"futures-util\": \"0.3\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "futures-util",
+          "range": "0.3",
+          "manifest_path": "mobile/link/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_e1b5c28ca4f294e5",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/mobile/ssh/Cargo.toml",
+        "locator": {
+          "path": "mobile/ssh/Cargo.toml",
+          "field": "serde_json",
+          "spec": "cargo"
+        },
+        "observedText": "\"serde_json\": \"1\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "serde_json",
+          "range": "1",
+          "manifest_path": "mobile/ssh/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_e65aaf472fe9886a",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "glutin",
+          "spec": "cargo"
+        },
+        "observedText": "\"glutin\": \"0.32.2\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "glutin",
+          "range": "0.32.2",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_e750d9fe8b9cf66a",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_terminal/Cargo.toml",
+        "locator": {
+          "path": "nebula_terminal/Cargo.toml",
+          "field": "unicode-width",
+          "spec": "cargo"
+        },
+        "observedText": "\"unicode-width\": \"0.2.0\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "unicode-width",
+          "range": "0.2.0",
+          "manifest_path": "nebula_terminal/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_e8c0f3e8c0d5c389",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/mobile/link/Cargo.toml",
+        "locator": {
+          "path": "mobile/link/Cargo.toml",
+          "field": "axum",
+          "spec": "cargo"
+        },
+        "observedText": "\"axum\": \"0.8\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "axum",
+          "range": "0.8",
+          "manifest_path": "mobile/link/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_ebb05d224ab140c8",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "chrono",
+          "spec": "cargo"
+        },
+        "observedText": "\"chrono\": \"0.4.45\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "chrono",
+          "range": "0.4.45",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_ebd5d4dbcc417cd0",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "russh",
+          "spec": "cargo"
+        },
+        "observedText": "\"russh\": \"0.62.2\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "russh",
+          "range": "0.62.2",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_edfe3d8c2886801d",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/mobile/link/Cargo.toml",
+        "locator": {
+          "path": "mobile/link/Cargo.toml",
+          "field": "if-addrs",
+          "spec": "cargo"
+        },
+        "observedText": "\"if-addrs\": \"0.14\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "if-addrs",
+          "range": "0.14",
+          "manifest_path": "mobile/link/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_ef7b2636720ff9d4",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "ahash",
+          "spec": "cargo"
+        },
+        "observedText": "\"ahash\": \"0.8.6\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "ahash",
+          "range": "0.8.6",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_ef7ee9fa9654a939",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_config_derive/Cargo.toml",
+        "locator": {
+          "path": "nebula_config_derive/Cargo.toml",
+          "field": "syn",
+          "spec": "cargo"
+        },
+        "observedText": "\"syn\": \"2.0.16\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "syn",
+          "range": "2.0.16",
+          "manifest_path": "nebula_config_derive/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_f125769e42f62da5",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "futures",
+          "spec": "cargo"
+        },
+        "observedText": "\"futures\": \"0.3\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "futures",
+          "range": "0.3",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_f3233dc2d6a05eb3",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/mobile/ssh/Cargo.toml",
+        "locator": {
+          "path": "mobile/ssh/Cargo.toml",
+          "field": "russh-sftp",
+          "spec": "cargo"
+        },
+        "observedText": "\"russh-sftp\": \"=2.3.0\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "russh-sftp",
+          "range": "=2.3.0",
+          "manifest_path": "mobile/ssh/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_f3b72f85f050d10d",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/third_party/winit-0.30.13/Cargo.toml",
+        "locator": {
+          "path": "third_party/winit-0.30.13/Cargo.toml",
+          "field": "bitflags",
+          "spec": "cargo"
+        },
+        "observedText": "\"bitflags\": \"2\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "bitflags",
+          "range": "2",
+          "manifest_path": "third_party/winit-0.30.13/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_f4f70d006d0ade5e",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_terminal/Cargo.toml",
+        "locator": {
+          "path": "nebula_terminal/Cargo.toml",
+          "field": "vte",
+          "spec": "cargo"
+        },
+        "observedText": "\"vte\": \"0.15.0\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "vte",
+          "range": "0.15.0",
+          "manifest_path": "nebula_terminal/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_f5f391dd9fdbd58e",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/mobile/link/Cargo.toml",
+        "locator": {
+          "path": "mobile/link/Cargo.toml",
+          "field": "rcgen",
+          "spec": "cargo"
+        },
+        "observedText": "\"rcgen\": \"0.14\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "rcgen",
+          "range": "0.14",
+          "manifest_path": "mobile/link/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_f905e7e425005e88",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/mobile/link/Cargo.toml",
+        "locator": {
+          "path": "mobile/link/Cargo.toml",
+          "field": "x509-parser",
+          "spec": "cargo"
+        },
+        "observedText": "\"x509-parser\": \"0.18.1\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "x509-parser",
+          "range": "0.18.1",
+          "manifest_path": "mobile/link/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_fc15207a41652cca",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_config_derive/Cargo.toml",
+        "locator": {
+          "path": "nebula_config_derive/Cargo.toml",
+          "field": "log",
+          "spec": "cargo"
+        },
+        "observedText": "\"log\": \"0.4.11\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "log",
+          "range": "0.4.11",
+          "manifest_path": "nebula_config_derive/Cargo.toml",
+          "scope": "dev"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_fcb9e57d0c682c75",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/mobile/ssh/Cargo.toml",
+        "locator": {
+          "path": "mobile/ssh/Cargo.toml",
+          "field": "russh",
+          "spec": "cargo"
+        },
+        "observedText": "\"russh\": \"=0.62.2\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "russh",
+          "range": "=0.62.2",
+          "manifest_path": "mobile/ssh/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_fe1d3a9a40b60bfb",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "crossfont",
+          "spec": "cargo"
+        },
+        "observedText": "\"crossfont\": \"0.9.0\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "crossfont",
+          "range": "0.9.0",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_ff2fa6c976ec11fd",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/nebula_app/Cargo.toml",
+        "locator": {
+          "path": "nebula_app/Cargo.toml",
+          "field": "getrandom",
+          "spec": "cargo"
+        },
+        "observedText": "\"getrandom\": \"0.3.3\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "getrandom",
+          "range": "0.3.3",
+          "manifest_path": "nebula_app/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      },
+      {
+        "id": "ev_ffc7a252e25ad8ef",
+        "type": "package_manifest",
+        "status": "DECLARED",
+        "collector": "packages",
+        "extractor": "manifest-dependency@1",
+        "repository": "repo:github:kuddev/pebrel",
+        "sourceUrl": "https://github.com/kuddev/pebrel/blob/9dd3d6491bfaaf902a4a3a248c02f36a47abae2d/mobile/link/Cargo.toml",
+        "locator": {
+          "path": "mobile/link/Cargo.toml",
+          "field": "tokio-tungstenite",
+          "spec": "cargo"
+        },
+        "observedText": "\"tokio-tungstenite\": \"0.29\"",
+        "data": {
+          "ecosystem": "cargo",
+          "package_name": "tokio-tungstenite",
+          "range": "0.29",
+          "manifest_path": "mobile/link/Cargo.toml",
+          "scope": "runtime"
+        },
+        "observedAt": "2026-10-04T06:30:34.438Z"
+      }
+    ],
+    "diagnostics": [
+      {
+        "code": "dependency_limit_applied",
+        "level": "warning",
+        "message": "dependency facts were truncated to 137 entries",
+        "context": {
+          "dropped": 7
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in LICENSE:87 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "LICENSE",
+          "line": 87,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in LICENSE:210 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "LICENSE",
+          "line": 210,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in LICENSE:519 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "LICENSE",
+          "line": 519,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in LICENSE:527 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "LICENSE",
+          "line": 527,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/release-notes/v2.0.0.md:261 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/release-notes/v2.0.0.md",
+          "line": 261,
+          "phrases": [
+            "thanks to"
+          ]
+        }
+      }
+    ]
+  },
+  "meta": {
+    "endpoint": "canonical-graph",
+    "note": "canonical LineageGraph, unmodified",
+    "cacheHit": true,
+    "resolvedRevision": "9dd3d6491bfaaf902a4a3a248c02f36a47abae2d",
+    "resolvedRef": null,
+    "defaultBranch": null,
+    "elapsedMs": 558
+  }
+}
