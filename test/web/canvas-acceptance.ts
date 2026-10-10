@@ -25,14 +25,14 @@
  *   3. A geometry assertion is supporting evidence, never the verdict. The visual
  *      judgement is made by looking at the captures.
  *
- * No repository code is executed: the server only reads public GitHub data, and it is
- * served from the same artifact cache the rest of the suite uses.
+ * No repository code is executed: the server reads committed, pinned graph fixtures
+ * and uses an isolated temporary cache, keeping this acceptance offline.
  */
 import { chromium, type Browser, type Page } from 'playwright';
 import assert from 'node:assert/strict';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { serve } from '../../src/web/serve.ts';
+import { fixtureServer } from './fixture-server.ts';
 
 /** The three repositories the acceptance set is defined against. No substitutions. */
 const SUBJECT_REPO = 'yunmin311/obsidian-config';
@@ -45,7 +45,6 @@ const EVIDENCE_REPO = 'Kuddev/pebrel';
 const MEMBER_NAME = 'Templater';
 
 const OUT = resolve('artifacts/shots/v2');
-const ROOT = resolve('.');
 const DESKTOP = { width: 1920, height: 1080 };
 const SMALL = { width: 1280, height: 800 };
 
@@ -60,9 +59,6 @@ function check(name: string, ok: boolean, detail = ''): void {
   checks.push({ name, ok, detail });
   process.stdout.write(`${ok ? 'ok  ' : 'FAIL'} ${name}${detail ? ` — ${detail}` : ''}\n`);
 }
-
-/** Overridable so a warm cache can be reused: a cold analysis of grpc takes minutes. */
-const CACHE_ROOT = resolve(process.env.GITLINEAGE_CANVAS_CACHE ?? '.cache');
 
 interface Camera {
   viewBox: string | null;
@@ -674,18 +670,9 @@ async function shadowProbe(page: Page, ownerSelector: string): Promise<{
 
 async function main(): Promise<void> {
   await mkdir(OUT, { recursive: true });
-  const { server, url } = await serve(
-    {
-      port: 0,
-      clientDir: resolve(ROOT, 'dist/web'),
-      cacheRoot: CACHE_ROOT,
-      enableGit: true,
-      enableRegistry: true,
-    },
-    { GITLINEAGE_NO_CLIENT: '' },
-  );
+  const { url, cleanup } = await fixtureServer({ phaseDelayMs: 0 });
   process.stdout.write(`canvas acceptance server ${url}\n`);
-  process.stdout.write(`cache ${CACHE_ROOT}\n`);
+  process.stdout.write('canonical graph fixtures: committed and pinned\n');
 
   const report: Record<string, unknown> = { viewport: DESKTOP };
   let browser: Browser | undefined;
@@ -1816,7 +1803,7 @@ check('02 expanding reveals the held-back members',
     await writeFile(`${OUT}/report.json`, JSON.stringify(report, null, 1));
   } finally {
     if (browser) await browser.close();
-    server.close();
+    await cleanup();
   }
 
   const failed = checks.filter((c) => !c.ok);

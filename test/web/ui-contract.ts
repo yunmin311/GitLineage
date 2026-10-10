@@ -1,9 +1,9 @@
-/** UI_CONTRACT browser acceptance. Real bundle/server/cache; no screenshot baseline updates. */
+/** UI_CONTRACT browser acceptance. Production bundle, pinned fixtures, no baseline updates. */
 import { chromium, type Page } from 'playwright';
-import { serve } from '../../src/web/serve.ts';
 import { resolve } from 'node:path';
 import { mkdir, writeFile, mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
+import { fixtureServer } from './fixture-server.ts';
 
 const phase = process.env.UI_EVIDENCE_PHASE ?? 'after';
 const out = resolve('artifacts/ui-contract', phase);
@@ -14,7 +14,7 @@ const check = (name: string, ok: boolean, detail: unknown = '') => {
   checks.push({ name, ok, detail });
   console.log(`${ok ? 'PASS' : 'FAIL'} ${name} ${JSON.stringify(detail)}`);
 };
-const { server, url } = await serve({ port: 0, clientDir: resolve('dist/web'), cacheRoot: resolve('.cache'), enableGit: true, enableRegistry: true }, { GITLINEAGE_NO_CLIENT: '' });
+const { url, cleanup } = await fixtureServer({ phaseDelayMs: 0 });
 const browser = await chromium.launch({ ignoreDefaultArgs: ['--hide-scrollbars'] });
 async function geometry(page: Page) {
   return page.evaluate(() => {
@@ -281,7 +281,7 @@ try {
 
 } finally {
   await writeFile(`${out}/results.json`, JSON.stringify({ checks, evidence }, null, 2));
-  await browser.close(); await new Promise<void>((r,j) => server.close(e => e ? j(e) : r()));
+  await browser.close(); await cleanup();
 }
 console.log(`${checks.filter(c=>c.ok).length}/${checks.length} UI contract checks passed`);
 if (checks.some(c=>!c.ok)) process.exitCode=1;

@@ -11,9 +11,9 @@
  * evidence rather than a claim about the evidence.
  */
 import { chromium, type Page, type Browser } from 'playwright';
-import { serve } from '../../src/web/serve.ts';
 import { resolve } from 'node:path';
 import { mkdirSync, writeFileSync } from 'node:fs';
+import { fixtureServer } from './fixture-server.ts';
 
 const OUT = 'artifacts/preflight';
 mkdirSync(OUT, { recursive: true });
@@ -24,13 +24,7 @@ const check = (name: string, ok: boolean, detail = '') => {
   console.log(`${ok ? 'ok  ' : 'FAIL'}  ${name}${detail ? '  -- ' + detail : ''}`);
 };
 
-const { server, url } = await serve({
-  port: 0,
-  clientDir: resolve('dist/web'),
-  cacheRoot: resolve('.cache'),
-  enableGit: true,
-  enableRegistry: true,
-}, { GITLINEAGE_NO_CLIENT: '' });
+const { url, cleanup } = await fixtureServer({ phaseDelayMs: 0 });
 
 /*
  * `--hide-scrollbars` is dropped on purpose.
@@ -481,7 +475,7 @@ for (const [label, width, height] of [['1920x1080', 1920, 1080], ['1280x800', 12
 
 
 await browser.close();
-server.close();
+await cleanup();
 
 const failed = results.filter((r) => !r.ok);
 writeFileSync(`${OUT}/results.json`, JSON.stringify(results, null, 1));

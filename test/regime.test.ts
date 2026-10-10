@@ -9,6 +9,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { canonicalView } from './helpers/canonical-fixtures.ts';
+import type { CanonicalFixtureName } from './helpers/canonical-fixtures.ts';
 
 import {
   Regime,
@@ -26,14 +28,10 @@ import {
   loosePositions, WORLD, ZONES,
 } from '../src/web/client/lib/compose.mjs';
 
-const FIXTURES = resolve(import.meta.dirname, '..', 'artifacts/acceptance');
-const viewOf = (slug: string) => {
-  const raw = JSON.parse(readFileSync(resolve(FIXTURES, `${slug}.view.json`), 'utf8'));
-  return (raw.data && raw.data.view) || raw.data || raw;
-};
+const viewOf = canonicalView;
 
 /** Mirrors the renderer's peer derivation, so the tests exercise the real input. */
-function peersOf(view: { subject: { id: string }; edges: Array<Record<string, unknown>> }) {
+function peersOf(view: { subject: { id: string }; edges: Array<{ source: string; target: string; status: string }> }) {
   const byPeer = new Map<string, { id: string; relationshipCount: number; verified: number }>();
   for (const edge of view.edges) {
     const peerId = (edge.source === view.subject.id ? edge.target : edge.source) as string;
@@ -49,12 +47,11 @@ function peersOf(view: { subject: { id: string }; edges: Array<Record<string, un
 interface TestView {
   subject: { id: string };
   edges: Array<{ id: string; source: string; target: string; status: string }>;
-  [key: string]: unknown;
 }
 
 /** The full pipeline the renderer runs. */
-function compose(slug: string) {
-  const view = viewOf(slug) as TestView;
+function compose(slug: CanonicalFixtureName) {
+  const view = viewOf(slug);
   const peers = peersOf(view);
   const regime = regimeFor(peers.length);
   const { direct } = partitionPeers(peers, regime);
@@ -258,11 +255,7 @@ test('a references plate is never labelled as a dependency, at any capacity', ()
   // Asserted directly on the real fixture rather than through whatever the
   // composition happens to do today, so shrinking the field cannot quietly relabel a
   // document reference as a declared dependency.
-  const view = readFileSync(
-    resolve(import.meta.dirname, '..', 'artifacts/acceptance/grpc__grpc.view.json'),
-    'utf8',
-  );
-  const edges = (JSON.parse(view).data as { edges: Array<{ relationshipType: string }> }).edges;
+  const edges = canonicalView('grpc__grpc').edges as Array<{ relationshipType: string }>;
   const references = edges.filter((e) => e.relationshipType === 'references');
   assert.ok(references.length > 0, 'the fixture really does contain references');
   assert.equal(
@@ -273,7 +266,7 @@ test('a references plate is never labelled as a dependency, at any capacity', ()
 });
 
 test('every relationship is accounted for in all three frozen cases', () => {
-  for (const slug of ['yunmin311__obsidian-config', 'nachocebey/is', 'grpc/grpc'].map((s) => s.replace('/', '__'))) {
+  for (const slug of ['yunmin311__obsidian-config', 'nachocebey__is', 'grpc__grpc'] as const) {
     const { view, composition } = compose(slug);
     assert.deepEqual(
       composition.drawnEdgeIds,
@@ -319,7 +312,7 @@ test('subgroup vocabulary is only used where the evidence names the declaration'
    */
   const { composition } = compose('grpc__grpc');
   const view = viewOf('grpc__grpc');
-  const evidence = (view.evidenceByRelationship ?? {}) as Record<string, Array<Record<string, unknown>>>;
+  const evidence = view.evidenceByRelationship ?? {};
   const namesManifest = (edgeId: string): boolean => {
     const cards = evidence[edgeId] ?? [];
     return cards.some((card) => {
