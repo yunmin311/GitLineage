@@ -8,6 +8,8 @@ import type { LineageGraph } from './types.ts';
 export interface ServeOptions {
   /** Opt-in local experiment seam. Normal CLI never installs a handler. */
   previewHandler?: (request: IncomingMessage, response: ServerResponse) => Promise<void>;
+  /** Explicit private service seam; normal CLI does not install it. */
+  privateBetaHandler?: (request: IncomingMessage, response: ServerResponse) => Promise<void>;
   port?: number;
   host?: string;
   cacheRoot?: string;
@@ -92,6 +94,13 @@ export async function serve(
   );
 
 const server = createServer((request, response) => {
+      if (options.privateBetaHandler && /^\/(?:api\/(?:deep-search|private-beta)(?:\/|$)|private-beta(?:\/|$))/.test(request.url ?? '')) {
+        void options.privateBetaHandler(request, response).catch(() => {
+          if (!response.headersSent) response.writeHead(500, {'content-type':'application/json'});
+          response.end('{"error":"private_beta_unavailable"}');
+        });
+        return;
+      }
       if (!options.previewHandler && request.method === 'GET' && request.url === '/api/deep-search/capabilities') {
         response.writeHead(200, { 'content-type': 'application/json', 'cache-control': 'no-store' });
         response.end('{"enabled":false}');
