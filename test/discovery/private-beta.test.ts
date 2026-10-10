@@ -17,7 +17,7 @@ async function setup(opts:{enabled?:boolean;sessionMs?:number;hang?:boolean;limi
  async function request(path:string,data?:unknown,cookie='',headers:Record<string,string>={}){return fetch(origin+path,{method:data===undefined?'GET':'POST',headers:{...(data===undefined?{}:{origin,'content-type':'application/json','x-gitlineage-csrf':'1'}),cookie,...headers},...(data===undefined?{}:{body:JSON.stringify(data)})});}
  async function login(identity='alice'){const r=await request('/api/private-beta/login',{identity,password});assert.equal(r.status,200);return r.headers.get('set-cookie')!.split(';')[0]!;}
  async function done(id:string,cookie:string){for(let i=0;i<100;i++){const r=await request('/api/deep-search/tasks/'+id,undefined,cookie),task=await r.json() as any;if(task.state!=='running')return task;await new Promise(r=>setTimeout(r,15));}throw new Error('task did not finish');}
- return {root,fixture,origin,gate,request,login,done,tick:(ms:number)=>{clock+=ms;},close:async()=>{await gate.close();await new Promise<void>(r=>server.close(()=>r()));await rm(root,{recursive:true,force:true});}};
+ return {root,fixture,origin,gate,request,login,done,tick:(ms:number)=>{clock+=ms;},close:async()=>{try{await gate.close();}finally{await new Promise<void>(r=>server.close(()=>r()));await rm(root,{recursive:true,force:true});}}};
 }
 test('private gate default-off and anonymous/invalid authentication allocate no tasks or requests',async()=>{
  const off=await setup({enabled:false});try{assert.deepEqual(await(await off.request('/api/deep-search/capabilities')).json(),{enabled:false});assert.equal((await off.request('/api/private-beta/login',{identity:'alice',password})).status,404);}finally{await off.close();}
@@ -78,4 +78,21 @@ test('simultaneous identities cannot race past shared task or reservation admiss
 
 test('default private capabilities expose the real engine cooldown before source admission',async()=>{
  const s=await setup({useDefaultCooldown:true});try{const cookie=await s.login(),caps=await(await s.request('/api/deep-search/capabilities',undefined,cookie)).json() as any;assert.equal(caps.cooldownMs,15000);const task=await(await s.request('/api/deep-search/search',{repository:'root/example'},cookie)).json() as any;await s.done(task.id,cookie);const calls=s.fixture.calls.length,response=await s.request('/api/deep-search/sources',{searchId:task.id,candidateIds:[4]},cookie);assert.equal(response.status,429);assert.match(JSON.stringify(await response.json()),/cooldown/);assert.equal(s.fixture.calls.length,calls);}finally{await s.close();}
+});
+
+test('body has an absolute deadline despite continuous chunks; oversized lengths and disconnects allocate nothing',async()=>{
+ const {connect}=await import('node:net');const s=await setup();
+ async function raw(length:string|undefined,slow=false,abort=false){
+  const started=Date.now();await new Promise<void>((resolve,reject)=>{
+   const socket=connect(Number(new URL(s.origin).port),'127.0.0.1');let interval:ReturnType<typeof setInterval>|undefined;
+   const guard=setTimeout(()=>{socket.destroy();reject(new Error('body deadline did not close connection'));},6500);
+   socket.resume();socket.on('error',()=>{});socket.on('close',()=>{clearTimeout(guard);if(interval)clearInterval(interval);resolve();});
+   socket.on('connect',()=>{socket.write(`POST /api/private-beta/login HTTP/1.1\r\nHost: ${new URL(s.origin).host}\r\nOrigin: ${s.origin}\r\nContent-Type: application/json\r\nX-Gitlineage-CSRF: 1\r\n${length===undefined?'Transfer-Encoding: chunked':'Content-Length: '+length}\r\n\r\n`);if(abort){socket.destroy();return;}if(slow){socket.write('1\r\n{\r\n');interval=setInterval(()=>socket.write('1\r\n \r\n'),200);}});
+  });return Date.now()-started;
+ }
+ try{const elapsed=await raw(undefined,true);assert.ok(elapsed>=4800&&elapsed<6500,`elapsed ${elapsed}`);assert.ok(await raw('4097')<1500);assert.ok(await raw('999999999999999999999999')<1500);await raw('100',false,true);assert.equal(s.fixture.calls.length,0);assert.equal(s.gate.usage().reservedAttempts,0);assert.equal((await s.request('/api/private-beta/login',{identity:'alice',password})).status,200);}finally{await s.close();}
+});
+
+test('durable reservation failure refuses network work and further admission',async()=>{
+ const s=await setup();try{const cookie=await s.login();await rm(join(s.root,'private/state.json'));await mkdir(join(s.root,'private/state.json'));assert.equal((await s.request('/api/deep-search/search',{repository:'root/example'},cookie)).status,400);assert.equal((await s.request('/api/deep-search/search',{repository:'root/example'},cookie)).status,400);assert.equal(s.fixture.calls.length,0);assert.equal(s.gate.usage().active,0);await assert.rejects(s.gate.close(),/persistence unavailable/);}finally{await s.close().catch(()=>{});await rm(s.root,{recursive:true,force:true});}
 });

@@ -1,3 +1,4 @@
+import {createServer} from 'node:http';
 import {chromium} from 'playwright';
 import assert from 'node:assert/strict';
 import {mkdtemp,rm,mkdir,readFile,writeFile} from 'node:fs/promises';
@@ -17,8 +18,10 @@ try{for(const width of [390,430,1280,1920]){
  try{
  await page.goto(app.url+'/'+A);await page.locator('#canvas .node-hit').first().waitFor();assert.equal(await page.locator('#deep-launch').count(),0);
  const cache=await cacheProof(app.fixtureCacheRoot);assert.equal((await page.request.post(app.url+'/api/deep-search/search',{data:{repository:'root/example'}})).status(),403);assert.equal(fixture.calls.length,0);
- await page.goto(app.url+'/private-beta');await page.locator('[name=identity]').fill('admin');await page.locator('[name=password]').fill('browser-only-secret');await page.locator('#login button').click();await page.waitForURL(app.url+'/');
- await page.goto(app.url+'/'+A);await page.locator('#deep-launch').waitFor();const url=page.url(),viewBox=await page.locator('#canvas').getAttribute('viewBox');
+ const loginResponse=await page.goto(app.url+'/private-beta');assert.match(loginResponse!.headers()['content-security-policy']!,/frame-ancestors 'none'/);assert.equal(loginResponse!.headers()['x-frame-options'],'DENY');await page.locator('[name=identity]').fill('admin');await page.locator('[name=password]').fill('browser-only-secret');await page.locator('#login button').click();await page.waitForURL(app.url+'/');
+ const workspaceResponse=await page.goto(app.url+'/'+A);assert.match(workspaceResponse!.headers()['content-security-policy']!,/frame-ancestors 'none'/);assert.equal(workspaceResponse!.headers()['x-frame-options'],'DENY');
+ const attacker=createServer((_req,res)=>res.end(`<iframe src="${app.url}/${A}"></iframe><iframe src="${app.url}/private-beta"></iframe>`));await new Promise<void>(r=>attacker.listen(0,'127.0.0.1',r));const embedded=await context.newPage();try{await embedded.goto(`http://127.0.0.1:${(attacker.address() as {port:number}).port}`);await embedded.waitForTimeout(500);for(const frame of embedded.frames().slice(1))assert.equal(await frame.locator('#login, #canvas, #deep-launch').count(),0);}finally{await embedded.close();await new Promise<void>(r=>attacker.close(()=>r()));}
+ await page.locator('#deep-launch').waitFor();const url=page.url(),viewBox=await page.locator('#canvas').getAttribute('viewBox');
  await page.locator('#deep-launch').click();await page.locator('#deep-repository').fill('root/example');await page.locator('#deep-search-submit').click();await page.locator('#deep-candidates input').first().waitFor();await page.locator('#deep-candidates input').last().check();await page.locator('#deep-source-preview').click();await page.locator('#deep-files input').first().waitFor();
  await page.locator('#deep-compare').click();await page.locator('#deep-results .deep-measurement').first().waitFor({timeout:10000});assert.match(await page.locator('#deep-results').innerText(),/pending/);
  const [download]=await Promise.all([page.waitForEvent('download'),page.locator('#deep-download').click()]);const path=join(out,width+'-sidecar.json');await download.saveAs(path);const exported=JSON.parse(await readFile(path,'utf8'));validatePreviewExport(exported);assert.ok(!(await readFile(path,'utf8')).includes('browser-only-secret'));

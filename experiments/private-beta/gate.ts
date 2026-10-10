@@ -1,6 +1,6 @@
 /** Explicit single-instance private gate. Never installed by normal production startup. */
 import {randomBytes, scryptSync, timingSafeEqual} from 'node:crypto';
-import {readFileSync, writeFileSync, renameSync, mkdirSync, existsSync, realpathSync, openSync, closeSync, unlinkSync, statSync} from 'node:fs';
+import {readFileSync, writeFileSync, renameSync, mkdirSync, existsSync, realpathSync, openSync, closeSync, unlinkSync, statSync, fsyncSync} from 'node:fs';
 import {resolve, join, dirname, basename} from 'node:path';
 import type {IncomingMessage, ServerResponse} from 'node:http';
 import {createPreview, PREVIEW_PROFILE, repositoryInput} from '../discovery-v2/preview.ts';
@@ -30,9 +30,16 @@ export function createBetaGate(options:BetaOptions){
  const ids=new Set<string>();for(const a of options.administrators){if(!/^[a-zA-Z0-9_-]{1,48}$/.test(a.id)||Object.hasOwn(Object.prototype,a.id)||ids.has(a.id)||!/^[a-f0-9]{32,128}$/.test(a.salt)||!/^[a-f0-9]{128}$/.test(a.passwordHash))throw new Error('invalid administrator configuration');ids.add(a.id);}
  const sessions=new Map<string,{owner:string;expires:number}>(),engines=new Map<string,ReturnType<typeof createPreview>>(),active=new Map<string,string>(),rates=new Map<string,number[]>();
  const cookieName=origin.protocol==='https:'?'__Host-gl_beta':'gl_beta';
- const file=join(resolve(options.storeRoot),'state.json'),lock=join(resolve(options.storeRoot),'instance.lock');let closed=false;
+ const file=join(resolve(options.storeRoot),'state.json'),lock=join(resolve(options.storeRoot),'instance.lock');let closed=false, persistenceFailed=false;
  let state:State={version:1,window:now(),reserved:0,blockedUntil:0,coreRemaining:null,searches:{},tasks:{}};
- function save(){if(!options.enabled)return;const temporary=file+'.'+randomBytes(12).toString('hex')+'.tmp';writeFileSync(temporary,JSON.stringify(state),{mode:0o600,flag:'wx'});renameSync(temporary,file);}
+ function save(){
+  if(!options.enabled)return;
+  if(persistenceFailed)throw new Error('private persistence unavailable');
+  const temporary=file+'.'+randomBytes(12).toString('hex')+'.tmp';let fd:number|undefined;
+  try{fd=openSync(temporary,'wx',0o600);writeFileSync(fd,JSON.stringify(state));fsyncSync(fd);closeSync(fd);fd=undefined;renameSync(temporary,file);fd=openSync(dirname(file),'r');fsyncSync(fd);closeSync(fd);fd=undefined;}
+  catch(error){persistenceFailed=true;throw error;}finally{if(fd!==undefined)closeSync(fd);if(existsSync(temporary))unlinkSync(temporary);}
+ }
+
  if(options.enabled){
   const root=physical(options.storeRoot);
   if(!options.protectedRoots.length||options.protectedRoots.some(p=>{const protectedRoot=physical(p);return inside(root,protectedRoot)||inside(protectedRoot,root);}))throw new Error('Beta store must be physically separate from checkout, cache and jobs');
@@ -54,13 +61,26 @@ export function createBetaGate(options:BetaOptions){
    save();return response;
   }});engines.set(owner,e);}return e;}
  function owned(owner:string,id:unknown){if(typeof id!=='string'||state.tasks[id]?.owner!==owner)throw new Error('task unavailable');return state.tasks[id]!;}
- async function body(req:IncomingMessage){req.setTimeout(5000,()=>req.destroy());let size=0;const parts:Buffer[]=[];for await(const chunk of req){size+=chunk.length;if(size>4096)throw new Error('invalid request');parts.push(chunk);}const data=JSON.parse(Buffer.concat(parts).toString());if(!data||typeof data!=='object'||Array.isArray(data))throw new Error('invalid request');return data as Record<string,unknown>;}
+ async function body(req:IncomingMessage){
+  const length=req.headers['content-length'];
+  if(length!==undefined&&(!/^\d+$/.test(length)||!Number.isSafeInteger(Number(length))||Number(length)>4096)){req.destroy();throw new Error('invalid request');}
+  const parts:Buffer[]=[];let size=0;
+  await new Promise<void>((resolve,reject)=>{
+   const finish=(error?:Error)=>{clearTimeout(timer);req.off('data',data);req.off('end',end);req.off('error',fail);req.off('aborted',abort);req.off('close',closed);if(error){req.destroy();reject(error);}else resolve();};
+   const data=(chunk:Buffer)=>{size+=chunk.length;if(size>4096)finish(new Error('invalid request'));else parts.push(chunk);};
+   const end=()=>finish(),fail=(error:Error)=>finish(error),abort=()=>finish(new Error('request aborted')),closed=()=>{if(!req.complete)abort();};
+   const timer=setTimeout(()=>finish(new Error('request body deadline exceeded')),5000);
+   req.on('data',data);req.once('end',end);req.once('error',fail);req.once('aborted',abort);req.once('close',closed);
+  });
+  const data=JSON.parse(Buffer.concat(parts).toString());if(!data||typeof data!=='object'||Array.isArray(data))throw new Error('invalid request');return data as Record<string,unknown>;
+ }
+
  async function handler(req:IncomingMessage,res:ServerResponse){
-  const send=(status:number,data:unknown)=>{res.writeHead(status,{'content-type':'application/json','cache-control':'no-store','x-content-type-options':'nosniff','referrer-policy':'no-referrer'});res.end(JSON.stringify(clean(data)));};
+  const send=(status:number,data:unknown)=>{if(res.destroyed)return;res.writeHead(status,{'content-type':'application/json','cache-control':'no-store','x-content-type-options':'nosniff','referrer-policy':'no-referrer'});res.end(JSON.stringify(clean(data)));};
   const path=req.url??'/';if(!options.enabled||closed){if(path==='/api/deep-search/capabilities')send(200,{enabled:false});else send(404,{error:'private beta disabled'});return;}
   if(req.headers.host!==origin.host||Object.keys(req.headers).some(k=>k==='forwarded'||k.startsWith('x-forwarded-'))||path.includes('?')||req.headers['sec-fetch-site']==='cross-site'){send(403,{error:'untrusted request context'});return;}
   if(req.method==='GET'&&path==='/private-beta'){
-   res.writeHead(200,{'content-type':'text/html','cache-control':'no-store','referrer-policy':'no-referrer','content-security-policy':"default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; form-action 'self'; frame-ancestors 'none'"});res.end('<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1"><title>GitLineage Private Beta</title><link rel="stylesheet" href="/private-beta/style.css"><main><h1>Private Beta</h1><p>Administrator authorization. Public Graph remains available.</p><form id="login"><label>Identity<input name="identity" autocomplete="username" required></label><label>Password<input name="password" type="password" autocomplete="current-password" required></label><button>Authorize</button></form><p id="status" role="status"></p><a href="/">Public Graph</a></main><script src="/private-beta/login.js"></script>');return;
+   res.writeHead(200,{'x-frame-options':'DENY','content-type':'text/html','cache-control':'no-store','referrer-policy':'no-referrer','content-security-policy':"default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; form-action 'self'; frame-ancestors 'none'"});res.end('<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1"><title>GitLineage Private Beta</title><link rel="stylesheet" href="/private-beta/style.css"><main><h1>Private Beta</h1><p>Administrator authorization. Public Graph remains available.</p><form id="login"><label>Identity<input name="identity" autocomplete="username" required></label><label>Password<input name="password" type="password" autocomplete="current-password" required></label><button>Authorize</button></form><p id="status" role="status"></p><a href="/">Public Graph</a></main><script src="/private-beta/login.js"></script>');return;
   }
   if(req.method==='GET'&&path==='/private-beta/style.css'){res.writeHead(200,{'content-type':'text/css'});res.end('body{background:#111;color:#eee;font:16px system-ui}main{max-width:420px;margin:10vh auto;padding:24px}label{display:block;margin:16px 0}input,button{display:block;box-sizing:border-box;width:100%;min-height:44px;font:inherit}a{color:#afd}');return;}
   if(req.method==='GET'&&path==='/private-beta/login.js'){res.writeHead(200,{'content-type':'text/javascript','cache-control':'no-store'});res.end(`document.querySelector('#login').addEventListener('submit',async e=>{e.preventDefault();const f=e.target,s=document.querySelector('#status');try{const r=await fetch('/api/private-beta/login',{method:'POST',headers:{'content-type':'application/json','x-gitlineage-csrf':'1'},body:JSON.stringify({identity:f.identity.value,password:f.password.value})});f.password.value='';if(!r.ok){s.textContent=(await r.json()).error;return;}location.replace('/');}catch{s.textContent='Authorization unavailable';}});`);return;}
@@ -83,7 +103,7 @@ export function createBetaGate(options:BetaOptions){
    const taskRoute=path.match(/^\/api\/deep-search\/tasks\/([a-f0-9]{24})(\/cancel)?$/);
    if(taskRoute){const stored=owned(owner,taskRoute[1]);if(req.method==='GET'&&!taskRoute[2]){send(200,stored.task);return;}if(mutating&&taskRoute[2]){await body(req);engines.get(owner)?.cancel(stored.task.id);send(200,stored.task);return;}}
    if(!mutating){send(404,{error:'private route unavailable'});return;}
-   const data=await body(req);let task:PreviewTask;const e=engine(owner);
+   const data=await body(req);if(persistenceFailed)throw new Error('private persistence unavailable');let task:PreviewTask;const e=engine(owner);
    // Ownership and shape validation precede task admission and all network/worker budget allocation.
    if(path==='/api/deep-search/search'){if(Object.keys(data).join()!=='repository')throw new Error('invalid search');}
    else if(path==='/api/deep-search/sources'||path==='/api/deep-search/compare'){
@@ -104,7 +124,7 @@ export function createBetaGate(options:BetaOptions){
    }else if(path.endsWith('/sources'))task=e.startSources(String(data.searchId),data.candidateIds);
    else task=e.startCompare(String(data.searchId),data.candidateIds,data.selection as FileChoice);
    state.tasks[task.id]={owner,task};active.set(task.id,owner);save();
-   void e.wait(task.id).then(()=>{state.tasks[task.id]={owner,task:clean(task)};}).finally(()=>{active.delete(task.id);save();});send(202,task);
+   void e.wait(task.id).then(()=>{state.tasks[task.id]={owner,task:clean(task)};}).finally(()=>{active.delete(task.id);save();}).catch(()=>{persistenceFailed=true;});send(202,task);
   }catch(error){const message=error instanceof Error?error.message:'';send(/limit|frequency|budget|quota|busy|cooldown/.test(message)?429:400,{error:/task unavailable/.test(message)?'task unavailable':/limit|frequency|budget|quota|busy|cooldown/.test(message)?message:'invalid private beta request'});}
  }
  return {handler,usage:()=>({reservedAttempts:state.reserved,active:active.size,blockedUntil:state.blockedUntil}),close:async()=>{closed=true;await Promise.all([...engines.values()].map(e=>e.close()));save();if(options.enabled)unlinkSync(lock);}};

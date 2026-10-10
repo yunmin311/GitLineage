@@ -94,6 +94,11 @@ export async function serve(
   );
 
 const server = createServer((request, response) => {
+      // Only the explicitly installed private service receives frame protection.
+      if (options.privateBetaHandler) {
+        response.setHeader('Content-Security-Policy', "frame-ancestors 'none'");
+        response.setHeader('X-Frame-Options', 'DENY');
+      }
       if (options.privateBetaHandler && /^\/(?:api\/(?:deep-search|private-beta)(?:\/|$)|private-beta(?:\/|$))/.test(request.url ?? '')) {
         void options.privateBetaHandler(request, response).catch(() => {
           if (!response.headersSent) response.writeHead(500, {'content-type':'application/json'});
