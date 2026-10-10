@@ -1,0 +1,105 @@
+{
+  "schemaVersion": "phase1-validation@1",
+  "observedAt": "2026-10-09T06:05:42.806428+00:00",
+  "testedHead": "2abdfa6d000f3922559871effdb0e225ed538c64",
+  "executionOrder": "typecheck -> unit -> build -> Phase 0 -> serial browser suites",
+  "suites": [
+    {
+      "suite": "typecheck",
+      "exitCode": 0,
+      "logDigest": "a9b9f7f787f5f67cf960e83b4e0fd3e5ee8a2c063adec9c910917b9015c4b81e"
+    },
+    {
+      "suite": "test",
+      "exitCode": 0,
+      "logDigest": "d408b477eb9cdc0ef3137855262356c7c49a8c531de25cb9e527781955e2f070",
+      "tests": 464,
+      "passed": 461,
+      "failed": 0,
+      "skipped": 3,
+      "skipReason": "existing live integration suites not enabled"
+    },
+    {
+      "suite": "build",
+      "exitCode": 0,
+      "logDigest": "88d515101844e3fc3b3a5121bbab0b3cc8e3117dc5461997ce81d2228394ff9b"
+    },
+    {
+      "suite": "phase0",
+      "exitCode": 0,
+      "logDigest": "5c816c556dc87138b27d7d9e8274fd9cb4c6227f5086b222be9dbf7fbae37fbd",
+      "tests": 6,
+      "passed": 6,
+      "failed": 0
+    },
+    {
+      "suite": "canvas",
+      "exitCode": 0,
+      "logDigest": "f84be666a51284a20185e4fd64c8b905d74fd7f977cfd799115a2940fefcf6d3",
+      "checksPassed": 113,
+      "evidence": "artifacts/shots/v2/report.json",
+      "evidenceDigest": "bf3c1da27c05e4f7a000ee9acea0b1c4b8775f1ec4ded959e9c1038eb7729b07"
+    },
+    {
+      "suite": "landing",
+      "exitCode": 0,
+      "logDigest": "e77daa7a93afc0fe3be826cd4f4bacded8b6cd5155ca9e7600ee878426bda3ca",
+      "checksPassed": 40,
+      "evidence": "artifacts/shots/slice2/results.json",
+      "evidenceDigest": "bc7b9684057d800e1d3e8b6ac56aa44fab66fec9c58bd74c4154d214353a7005"
+    },
+    {
+      "suite": "analysis",
+      "exitCode": 0,
+      "logDigest": "69beaf94e55fc111f0f885c78d6a7cec3aa44da18acf8e56a706baa85f549c7f",
+      "evidence": "artifacts/slice3/fsm-report.json",
+      "evidenceDigest": "3852b67943355a1a50e24e80b6f2245408a2301f7e1a575231b54ee7a16c3352"
+    },
+    {
+      "suite": "preflight",
+      "exitCode": 0,
+      "logDigest": "91b0b0ba677b7e5f9510a85438bfbd925852a613233e2ad4b72c9248c0afc16c",
+      "checksPassed": 45,
+      "evidence": "artifacts/preflight/results.json",
+      "evidenceDigest": "bf8c01d02c0e84a98766af6c5b6c82563afb61b0f6bf94745ebba07a6c563650"
+    },
+    {
+      "suite": "stale",
+      "exitCode": 0,
+      "logDigest": "63dbf1bcbf8042827ecfcf6d0dca5cfdcc0891874876bcaca3ddbb10c7b1f742",
+      "evidence": "artifacts/slice3/stale-report.json",
+      "evidenceDigest": "290d8901cba5ea4cfac660798fc2e65fb6720606d8979430d3b17059579a6ac4"
+    },
+    {
+      "suite": "ui-contract",
+      "exitCode": 0,
+      "logDigest": "1bb30fa4feed663d727c11b7cc617db5bf56b133d21fa1cc88fb9b988e252172",
+      "checksPassed": 75,
+      "evidence": "artifacts/ui-contract/after/results.json",
+      "evidenceDigest": "7badf3efb2a3ef757e9f37426b30f86d438c535ce87d479606f10e00128f2e2c"
+    },
+    {
+      "suite": "responsive",
+      "exitCode": 0,
+      "logDigest": "b280e9fb9dca854bff454c37ee81fc170da2a306b4182d48585702cbb1b67aa5",
+      "checksPassed": 71,
+      "evidence": "artifacts/responsive/after/results.json",
+      "evidenceDigest": "344dcbb85b9ae7cbaef4cc387ace1de255925ad436ff131403d45ee7af6e6022"
+    },
+    {
+      "suite": "mobile",
+      "exitCode": 0,
+      "logDigest": "e06973756688d52d7cc526955fd942c9a83e7acfefac2c56392fbc618c2610c0",
+      "checksPassed": 133,
+      "evidence": "artifacts/mobile/after/results.json",
+      "evidenceDigest": "78a577b5a8693faf7c60e0150966f6e6df887cc7b5e8b8202e1beda5325c57f9"
+    }
+  ],
+  "limitations": {
+    "webkit": "Error: browserType.launch: Executable doesn't exist at /home/lqy/.cache/ms-playwright/webkit-2359/pw_run.sh",
+    "physicalDevice": "not verified",
+    "cpuHardBudget": "unsupported",
+    "sourceByteUsage": "pre-reserved source bytes; not network transfer bytes"
+  },
+  "fixtureReconstruction": "PASS byte-identical SHA256=09229980d03e17982e2d88f68ec7ccfba6ed04ec207a6994a926ae378a695f3f"
+}

@@ -1,0 +1,1709 @@
+{
+  "schemaVersion": "discovery-preview-export@2",
+  "selection": {
+    "schemaVersion": "bounded-tree-selection@1",
+    "sourceTaskId": "d1033390061e052ca3607de0",
+    "searchReceipt": {
+      "coverage": {
+        "state": "complete_within_requested",
+        "scope": "bounded public repository metadata search; never all GitHub",
+        "plannedQueries": 1,
+        "attemptedQueries": 1,
+        "requestedPages": 1,
+        "completedPages": 1,
+        "returnedItems": 3,
+        "uniqueObserved": 3,
+        "processedCandidates": 3,
+        "rejectedIdentity": 0,
+        "rejectedBudget": 0,
+        "excludedTarget": 0,
+        "accessibleWindow": 1000,
+        "uncompletedPlanned": []
+      },
+      "attempts": [
+        {
+          "query": 0,
+          "page": 1,
+          "retry": 0,
+          "status": 200,
+          "outcome": "success",
+          "headers": {},
+          "receivedBytes": 303,
+          "retainedBytes": 303,
+          "reservedBytes": 32768
+        }
+      ],
+      "queries": [
+        {
+          "state": "complete_within_requested",
+          "query": 0,
+          "requestedPages": [
+            1
+          ],
+          "completedPages": [
+            1
+          ],
+          "totalCount": 3,
+          "incompleteResults": false,
+          "returnedItems": 3,
+          "unfetchedAccessiblePages": 0,
+          "beyondWindow": 0
+        }
+      ],
+      "usage": {
+        "attempts": 4,
+        "searchAttempts": 1,
+        "candidates": 3,
+        "files": {},
+        "bytesByFile": {},
+        "totalBytes": 0,
+        "activeWorkers": 0,
+        "peakWorkers": 1
+      },
+      "network": {
+        "reservedBytes": 131072,
+        "receivedBytes": 669,
+        "retainedBytes": 669,
+        "overflowBytes": 0
+      }
+    },
+    "repositories": [
+      {
+        "repositoryId": 1,
+        "revision": "69a704b039403f5ca622c50ff7621abfa5c15a8a",
+        "tree": "aed30681df6fbfdd7a1f0d69004756f72ee203e3",
+        "fullName": "root/example",
+        "files": [
+          {
+            "path": "helper.ts",
+            "type": "blob",
+            "bytes": 52,
+            "blob": "b3702e3ca12f841b4af73add227a0fa415ed9a90",
+            "selectable": true,
+            "reason": "supported JS/TS; content filters run after digest-checked read",
+            "language": "typescript"
+          },
+          {
+            "path": "index.js",
+            "type": "blob",
+            "bytes": 90,
+            "blob": "6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+            "selectable": true,
+            "reason": "supported JS/TS; content filters run after digest-checked read",
+            "language": "javascript"
+          }
+        ],
+        "coverage": {
+          "scope": "bounded tree listing, not a repository scan",
+          "state": "listed",
+          "enumeration": "complete",
+          "eligibleFiles": 2,
+          "visitedTrees": 1,
+          "unlistedDirectories": [],
+          "filtered": [],
+          "reasons": []
+        }
+      },
+      {
+        "repositoryId": 4,
+        "revision": "a09a67d0ede3629feb39071b831fd0e4a4320c77",
+        "tree": "aed30681df6fbfdd7a1f0d69004756f72ee203e3",
+        "fullName": "unknown/example",
+        "files": [
+          {
+            "path": "helper.ts",
+            "type": "blob",
+            "bytes": 52,
+            "blob": "b3702e3ca12f841b4af73add227a0fa415ed9a90",
+            "selectable": true,
+            "reason": "supported JS/TS; content filters run after digest-checked read",
+            "language": "typescript"
+          },
+          {
+            "path": "index.js",
+            "type": "blob",
+            "bytes": 90,
+            "blob": "6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+            "selectable": true,
+            "reason": "supported JS/TS; content filters run after digest-checked read",
+            "language": "javascript"
+          }
+        ],
+        "coverage": {
+          "scope": "bounded tree listing, not a repository scan",
+          "state": "listed",
+          "enumeration": "complete",
+          "eligibleFiles": 2,
+          "visitedTrees": 1,
+          "unlistedDirectories": [],
+          "filtered": [],
+          "reasons": []
+        }
+      }
+    ],
+    "selected": [
+      {
+        "repositoryId": 1,
+        "paths": [
+          "index.js"
+        ]
+      },
+      {
+        "repositoryId": 4,
+        "paths": [
+          "helper.ts",
+          "index.js"
+        ]
+      }
+    ],
+    "stages": [
+      {
+        "taskId": "a8252e8aa517e11282ed5fd6",
+        "kind": "search",
+        "wallMs": 8.368334999999206,
+        "attempts": 4,
+        "reservedBytes": 131072
+      },
+      {
+        "taskId": "d1033390061e052ca3607de0",
+        "kind": "sources",
+        "wallMs": 14.178568000001178,
+        "attempts": 6,
+        "reservedBytes": 196608
+      },
+      {
+        "taskId": "29217b949ebd1c5c16c0c040",
+        "kind": "compare",
+        "wallMs": 296.16891899999973,
+        "attempts": 5,
+        "reservedBytes": 163840
+      }
+    ],
+    "combined": {
+      "usage": {
+        "attempts": 15,
+        "searchAttempts": 1,
+        "candidates": 3,
+        "files": {
+          "github:1@69a704b039403f5ca622c50ff7621abfa5c15a8a": 1,
+          "github:4@a09a67d0ede3629feb39071b831fd0e4a4320c77": 2
+        },
+        "bytesByFile": {
+          "[\"github:1@69a704b039403f5ca622c50ff7621abfa5c15a8a\",\"index.js\"]": 90,
+          "[\"github:4@a09a67d0ede3629feb39071b831fd0e4a4320c77\",\"helper.ts\"]": 52,
+          "[\"github:4@a09a67d0ede3629feb39071b831fd0e4a4320c77\",\"index.js\"]": 90
+        },
+        "totalBytes": 232,
+        "activeWorkers": 0,
+        "peakWorkers": 1
+      },
+      "network": {
+        "reservedBytes": 491520,
+        "receivedBytes": 2587,
+        "retainedBytes": 2587,
+        "overflowBytes": 0
+      },
+      "activeWallMs": 318.7158220000001,
+      "elapsedWallMs": 3093
+    },
+    "coverageScope": "selected files only; repository-wide coverage unknown"
+  },
+  "provenance": {
+    "schemaVersion": "discovery-preview-provenance@1",
+    "searchTaskId": "a8252e8aa517e11282ed5fd6",
+    "compareTaskId": "29217b949ebd1c5c16c0c040",
+    "searchContentDigest": "e3a3326c58cc485ad50f14f1a1cfacbaebdf1a3a2083d6987663fd3ae18c09cf",
+    "target": {
+      "repositoryId": 1,
+      "revision": "69a704b039403f5ca622c50ff7621abfa5c15a8a"
+    },
+    "candidates": [
+      {
+        "repositoryId": 4,
+        "revision": "a09a67d0ede3629feb39071b831fd0e4a4320c77",
+        "searchCandidate": {
+          "schemaVersion": "discovery-candidate@2",
+          "target": {
+            "provider": "github",
+            "repositoryId": 1,
+            "completeness": "provider_id",
+            "fullName": "root/example",
+            "aliases": [],
+            "revision": "69a704b039403f5ca622c50ff7621abfa5c15a8a"
+          },
+          "candidate": {
+            "provider": "github",
+            "repositoryId": 4,
+            "completeness": "provider_id",
+            "fullName": "unknown/example",
+            "aliases": [],
+            "htmlUrl": "https://github.com/unknown/example",
+            "observations": [
+              {
+                "repositoryId": 4,
+                "fullName": "unknown/example",
+                "htmlUrl": "https://github.com/unknown/example",
+                "source": "repository_search",
+                "observedAt": "2026-10-10T13:36:19.708Z"
+              }
+            ],
+            "conflicts": [],
+            "revision": {
+              "state": "unresolved",
+              "sha": null
+            }
+          },
+          "discoveries": [
+            {
+              "source": "repository_search",
+              "version": "github-rest-repository-search@1",
+              "query": "example in:name is:public fork:true",
+              "querySource": "repository_name",
+              "reason": "fixed target repository name",
+              "page": 1,
+              "rank": 3,
+              "observedAt": "2026-10-10T13:36:19.708Z"
+            }
+          ],
+          "similarity": [],
+          "supportingFiles": [],
+          "verification": {
+            "state": "pending",
+            "canonicalEvidenceIds": []
+          },
+          "lineageClaim": "none",
+          "comparison": {
+            "state": "unexecuted",
+            "reason": "revision unresolved"
+          }
+        }
+      }
+    ],
+    "status": "search_observation_only"
+  },
+  "probe": {
+    "content": {
+      "schemaVersion": "discovery-pinned-probe@1",
+      "scope": "bounded search preview and user-selected paths only; search observations are not verified evidence",
+      "snapshots": [
+        {
+          "control": {
+            "name": "root/example",
+            "repositoryId": 1,
+            "revision": "69a704b039403f5ca622c50ff7621abfa5c15a8a",
+            "selections": [
+              {
+                "path": "index.js",
+                "reason": "explicit user selection from pinned bounded tree"
+              }
+            ]
+          },
+          "expectedId": 1,
+          "bootstrap": null,
+          "resolution": {
+            "schemaVersion": "repository-snapshot@1",
+            "requestedId": 1,
+            "state": "resolved",
+            "identity": {
+              "provider": "github",
+              "repositoryId": 1,
+              "completeness": "provider_id",
+              "fullName": "root/example",
+              "aliases": [],
+              "revision": "69a704b039403f5ca622c50ff7621abfa5c15a8a"
+            },
+            "observations": [
+              {
+                "repositoryId": 1,
+                "fullName": "root/example",
+                "htmlUrl": "https://github.com/root/example",
+                "source": "repository_metadata"
+              },
+              {
+                "repositoryId": 1,
+                "fullName": "root/example",
+                "htmlUrl": "https://github.com/root/example",
+                "source": "repository_metadata"
+              }
+            ],
+            "defaultBranch": "main",
+            "tree": "aed30681df6fbfdd7a1f0d69004756f72ee203e3",
+            "parents": [],
+            "metadata": {
+              "fork": false,
+              "parentId": null
+            },
+            "reasons": [],
+            "requestSource": "github-rest-verified-name@1"
+          },
+          "source": {
+            "snapshot": {
+              "identity": {
+                "provider": "github",
+                "repositoryId": 1,
+                "completeness": "provider_id",
+                "fullName": "root/example",
+                "aliases": [],
+                "revision": "69a704b039403f5ca622c50ff7621abfa5c15a8a"
+              },
+              "files": [
+                {
+                  "path": "index.js",
+                  "digest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+                  "blob": "6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+                  "bytes": 90,
+                  "language": "javascript",
+                  "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                  "filterVersion": "source-filter@1",
+                  "classification": "application_source",
+                  "reasons": [
+                    "supported source; no exclusion heuristic matched"
+                  ]
+                }
+              ],
+              "state": "completed",
+              "pending": [],
+              "reasons": []
+            },
+            "selections": [
+              {
+                "path": "index.js",
+                "reason": "explicit user selection from pinned bounded tree"
+              }
+            ],
+            "bindings": [
+              {
+                "repositoryId": 1,
+                "revision": "69a704b039403f5ca622c50ff7621abfa5c15a8a",
+                "path": "index.js",
+                "blob": "6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+                "digest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+                "bytes": 90,
+                "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                "filterVersion": "source-filter@1"
+              }
+            ],
+            "materializedBytes": 90,
+            "coverage": {
+              "scope": "explicit selected paths only",
+              "state": "completed",
+              "treeTruncated": false,
+              "reasons": [],
+              "pending": []
+            }
+          },
+          "identityCheck": {
+            "state": "matched",
+            "repositoryId": 1,
+            "fullName": "root/example",
+            "reason": null
+          },
+          "state": "completed"
+        },
+        {
+          "control": {
+            "name": "unknown/example",
+            "repositoryId": 4,
+            "revision": "a09a67d0ede3629feb39071b831fd0e4a4320c77",
+            "selections": [
+              {
+                "path": "helper.ts",
+                "reason": "explicit user selection from pinned bounded tree"
+              },
+              {
+                "path": "index.js",
+                "reason": "explicit user selection from pinned bounded tree"
+              }
+            ]
+          },
+          "expectedId": 4,
+          "bootstrap": null,
+          "resolution": {
+            "schemaVersion": "repository-snapshot@1",
+            "requestedId": 4,
+            "state": "resolved",
+            "identity": {
+              "provider": "github",
+              "repositoryId": 4,
+              "completeness": "provider_id",
+              "fullName": "unknown/example",
+              "aliases": [],
+              "revision": "a09a67d0ede3629feb39071b831fd0e4a4320c77"
+            },
+            "observations": [
+              {
+                "repositoryId": 4,
+                "fullName": "unknown/example",
+                "htmlUrl": "https://github.com/unknown/example",
+                "source": "repository_search"
+              },
+              {
+                "repositoryId": 4,
+                "fullName": "unknown/example",
+                "htmlUrl": "https://github.com/unknown/example",
+                "source": "repository_metadata"
+              }
+            ],
+            "defaultBranch": "main",
+            "tree": "aed30681df6fbfdd7a1f0d69004756f72ee203e3",
+            "parents": [],
+            "metadata": {
+              "fork": false,
+              "parentId": null
+            },
+            "reasons": [],
+            "requestSource": "github-rest-verified-name@1"
+          },
+          "source": {
+            "snapshot": {
+              "identity": {
+                "provider": "github",
+                "repositoryId": 4,
+                "completeness": "provider_id",
+                "fullName": "unknown/example",
+                "aliases": [],
+                "revision": "a09a67d0ede3629feb39071b831fd0e4a4320c77"
+              },
+              "files": [
+                {
+                  "path": "helper.ts",
+                  "digest": "04ee315f9317537c6683fd0c1b3846f6603505d0855ee072ca48d3a354503879",
+                  "blob": "b3702e3ca12f841b4af73add227a0fa415ed9a90",
+                  "bytes": 52,
+                  "language": "typescript",
+                  "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                  "filterVersion": "source-filter@1",
+                  "classification": "application_source",
+                  "reasons": [
+                    "supported source; no exclusion heuristic matched"
+                  ]
+                },
+                {
+                  "path": "index.js",
+                  "digest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+                  "blob": "6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+                  "bytes": 90,
+                  "language": "javascript",
+                  "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                  "filterVersion": "source-filter@1",
+                  "classification": "application_source",
+                  "reasons": [
+                    "supported source; no exclusion heuristic matched"
+                  ]
+                }
+              ],
+              "state": "completed",
+              "pending": [],
+              "reasons": []
+            },
+            "selections": [
+              {
+                "path": "helper.ts",
+                "reason": "explicit user selection from pinned bounded tree"
+              },
+              {
+                "path": "index.js",
+                "reason": "explicit user selection from pinned bounded tree"
+              }
+            ],
+            "bindings": [
+              {
+                "repositoryId": 4,
+                "revision": "a09a67d0ede3629feb39071b831fd0e4a4320c77",
+                "path": "helper.ts",
+                "blob": "b3702e3ca12f841b4af73add227a0fa415ed9a90",
+                "digest": "04ee315f9317537c6683fd0c1b3846f6603505d0855ee072ca48d3a354503879",
+                "bytes": 52,
+                "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                "filterVersion": "source-filter@1"
+              },
+              {
+                "repositoryId": 4,
+                "revision": "a09a67d0ede3629feb39071b831fd0e4a4320c77",
+                "path": "index.js",
+                "blob": "6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+                "digest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+                "bytes": 90,
+                "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                "filterVersion": "source-filter@1"
+              }
+            ],
+            "materializedBytes": 142,
+            "coverage": {
+              "scope": "explicit selected paths only",
+              "state": "completed",
+              "treeTruncated": false,
+              "reasons": [],
+              "pending": []
+            }
+          },
+          "identityCheck": {
+            "state": "matched",
+            "repositoryId": 4,
+            "fullName": "unknown/example",
+            "reason": null
+          },
+          "state": "completed"
+        }
+      ],
+      "comparisons": [
+        {
+          "name": "unknown/example",
+          "candidate": {
+            "schemaVersion": "discovery-candidate@1",
+            "target": {
+              "provider": "github",
+              "repositoryId": 1,
+              "completeness": "provider_id",
+              "fullName": "root/example",
+              "aliases": [],
+              "revision": "69a704b039403f5ca622c50ff7621abfa5c15a8a"
+            },
+            "candidate": {
+              "provider": "github",
+              "repositoryId": 4,
+              "completeness": "provider_id",
+              "fullName": "unknown/example",
+              "aliases": [],
+              "revision": "a09a67d0ede3629feb39071b831fd0e4a4320c77"
+            },
+            "discoveries": [
+              {
+                "source": "repository_search",
+                "version": "github-rest-repository-search@1",
+                "reason": "fixed target repository name",
+                "locator": "https://api.github.com/search/repositories?query=example%20in%3Aname%20is%3Apublic%20fork%3Atrue&page=1&rank=3"
+              }
+            ],
+            "similarity": [
+              {
+                "version": "git-blob-sha1@1",
+                "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                "filterVersion": "source-filter@1",
+                "firstPath": "index.js",
+                "secondPath": "helper.ts",
+                "firstDigest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+                "secondDigest": "04ee315f9317537c6683fd0c1b3846f6603505d0855ee072ca48d3a354503879",
+                "firstTokens": 26,
+                "secondTokens": 14,
+                "rangesTruncated": false,
+                "reasons": [],
+                "method": "exact_blob",
+                "state": "completed",
+                "score": 0,
+                "sharedShingles": null,
+                "firstShingles": null,
+                "secondShingles": null,
+                "firstCoverage": null,
+                "secondCoverage": null,
+                "ranges": []
+              },
+              {
+                "version": "token5-set@1",
+                "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                "filterVersion": "source-filter@1",
+                "firstPath": "index.js",
+                "secondPath": "helper.ts",
+                "firstDigest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+                "secondDigest": "04ee315f9317537c6683fd0c1b3846f6603505d0855ee072ca48d3a354503879",
+                "firstTokens": 26,
+                "secondTokens": 14,
+                "rangesTruncated": false,
+                "reasons": [],
+                "method": "strict_token5",
+                "state": "completed",
+                "score": 0,
+                "sharedShingles": 0,
+                "firstShingles": 22,
+                "secondShingles": 10,
+                "firstCoverage": 0,
+                "secondCoverage": 0,
+                "ranges": []
+              },
+              {
+                "version": "token5-set@1",
+                "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                "filterVersion": "source-filter@1",
+                "firstPath": "index.js",
+                "secondPath": "helper.ts",
+                "firstDigest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+                "secondDigest": "04ee315f9317537c6683fd0c1b3846f6603505d0855ee072ca48d3a354503879",
+                "firstTokens": 26,
+                "secondTokens": 14,
+                "rangesTruncated": false,
+                "reasons": [],
+                "method": "normalized_token5",
+                "state": "completed",
+                "score": 0,
+                "sharedShingles": 0,
+                "firstShingles": 22,
+                "secondShingles": 10,
+                "firstCoverage": 0,
+                "secondCoverage": 0,
+                "ranges": []
+              },
+              {
+                "version": "git-blob-sha1@1",
+                "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                "filterVersion": "source-filter@1",
+                "firstPath": "index.js",
+                "secondPath": "index.js",
+                "firstDigest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+                "secondDigest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+                "firstTokens": 26,
+                "secondTokens": 26,
+                "rangesTruncated": false,
+                "reasons": [],
+                "method": "exact_blob",
+                "state": "completed",
+                "score": 1,
+                "sharedShingles": null,
+                "firstShingles": null,
+                "secondShingles": null,
+                "firstCoverage": null,
+                "secondCoverage": null,
+                "ranges": []
+              },
+              {
+                "version": "token5-set@1",
+                "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                "filterVersion": "source-filter@1",
+                "firstPath": "index.js",
+                "secondPath": "index.js",
+                "firstDigest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+                "secondDigest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+                "firstTokens": 26,
+                "secondTokens": 26,
+                "rangesTruncated": true,
+                "reasons": [],
+                "method": "strict_token5",
+                "state": "completed",
+                "score": 1,
+                "sharedShingles": 22,
+                "firstShingles": 22,
+                "secondShingles": 22,
+                "firstCoverage": 1,
+                "secondCoverage": 1,
+                "ranges": [
+                  {
+                    "first": [
+                      18,
+                      23
+                    ],
+                    "second": [
+                      18,
+                      23
+                    ],
+                    "firstChars": [
+                      69,
+                      85
+                    ],
+                    "secondChars": [
+                      69,
+                      85
+                    ],
+                    "fingerprint": "108ba48d7c84ec1d913ec77af2a6e2710dacd1ef86d6a6f194a5f6211ba3ff8c"
+                  },
+                  {
+                    "first": [
+                      1,
+                      6
+                    ],
+                    "second": [
+                      1,
+                      6
+                    ],
+                    "firstChars": [
+                      7,
+                      27
+                    ],
+                    "secondChars": [
+                      7,
+                      27
+                    ],
+                    "fingerprint": "1962aa23fbc696fce14d35bebe15eb99eb7a94a56ed34845a2811cdee3f88575"
+                  },
+                  {
+                    "first": [
+                      16,
+                      21
+                    ],
+                    "second": [
+                      16,
+                      21
+                    ],
+                    "firstChars": [
+                      64,
+                      82
+                    ],
+                    "secondChars": [
+                      64,
+                      82
+                    ],
+                    "fingerprint": "1bca3ffe71a3714c8ced5cbc8ce6fde5726c715eac242cff3c0bfe4d9036ba70"
+                  },
+                  {
+                    "first": [
+                      6,
+                      11
+                    ],
+                    "second": [
+                      6,
+                      11
+                    ],
+                    "firstChars": [
+                      28,
+                      50
+                    ],
+                    "secondChars": [
+                      28,
+                      50
+                    ],
+                    "fingerprint": "20c2bd0c95d817a79ee599493359289d6bf70bab2909649f549c0a97b10e1b3f"
+                  },
+                  {
+                    "first": [
+                      8,
+                      13
+                    ],
+                    "second": [
+                      8,
+                      13
+                    ],
+                    "firstChars": [
+                      37,
+                      52
+                    ],
+                    "secondChars": [
+                      37,
+                      52
+                    ],
+                    "fingerprint": "361d650f92bd3a947289dfd0d3201d79c2c12dbf209b705ea013cea843919ec6"
+                  },
+                  {
+                    "first": [
+                      21,
+                      26
+                    ],
+                    "second": [
+                      21,
+                      26
+                    ],
+                    "firstChars": [
+                      82,
+                      89
+                    ],
+                    "secondChars": [
+                      82,
+                      89
+                    ],
+                    "fingerprint": "37584f1a7aa1894424805babfe0e4be0be1860c9a5d908408c46a8c1c613e70a"
+                  },
+                  {
+                    "first": [
+                      9,
+                      14
+                    ],
+                    "second": [
+                      9,
+                      14
+                    ],
+                    "firstChars": [
+                      43,
+                      57
+                    ],
+                    "secondChars": [
+                      43,
+                      57
+                    ],
+                    "fingerprint": "4579856b198ff4ab2695fb0ee5236125d2b13004ffc640ac85b2981ee0f37153"
+                  },
+                  {
+                    "first": [
+                      17,
+                      22
+                    ],
+                    "second": [
+                      17,
+                      22
+                    ],
+                    "firstChars": [
+                      66,
+                      83
+                    ],
+                    "secondChars": [
+                      66,
+                      83
+                    ],
+                    "fingerprint": "4603e535bbbcfb34aecbe921c9e08bb49d1e6cd6cffeb8a1a14ae33d231c37f0"
+                  },
+                  {
+                    "first": [
+                      11,
+                      16
+                    ],
+                    "second": [
+                      11,
+                      16
+                    ],
+                    "firstChars": [
+                      50,
+                      64
+                    ],
+                    "secondChars": [
+                      50,
+                      64
+                    ],
+                    "fingerprint": "4c794b0311491c3cd097dc4990702b87bc2c82b8f76425b95edb287390d4491a"
+                  },
+                  {
+                    "first": [
+                      7,
+                      12
+                    ],
+                    "second": [
+                      7,
+                      12
+                    ],
+                    "firstChars": [
+                      30,
+                      51
+                    ],
+                    "secondChars": [
+                      30,
+                      51
+                    ],
+                    "fingerprint": "56de93cdb473877b4c88e85520fcc117078753b4d4ef4b924ce28d27de92944e"
+                  },
+                  {
+                    "first": [
+                      3,
+                      8
+                    ],
+                    "second": [
+                      3,
+                      8
+                    ],
+                    "firstChars": [
+                      19,
+                      36
+                    ],
+                    "secondChars": [
+                      19,
+                      36
+                    ],
+                    "fingerprint": "5b84d8a4d3705abd9b2b95b6f2dda42144feba203124d66371a1147060c9957f"
+                  },
+                  {
+                    "first": [
+                      12,
+                      17
+                    ],
+                    "second": [
+                      12,
+                      17
+                    ],
+                    "firstChars": [
+                      51,
+                      65
+                    ],
+                    "secondChars": [
+                      51,
+                      65
+                    ],
+                    "fingerprint": "7edf20d8ceedc29046cb6caee28eb86389a32a96124b6cf946659fff15229244"
+                  }
+                ]
+              },
+              {
+                "version": "token5-set@1",
+                "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                "filterVersion": "source-filter@1",
+                "firstPath": "index.js",
+                "secondPath": "index.js",
+                "firstDigest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+                "secondDigest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+                "firstTokens": 26,
+                "secondTokens": 26,
+                "rangesTruncated": true,
+                "reasons": [],
+                "method": "normalized_token5",
+                "state": "completed",
+                "score": 1,
+                "sharedShingles": 22,
+                "firstShingles": 22,
+                "secondShingles": 22,
+                "firstCoverage": 1,
+                "secondCoverage": 1,
+                "ranges": [
+                  {
+                    "first": [
+                      12,
+                      17
+                    ],
+                    "second": [
+                      12,
+                      17
+                    ],
+                    "firstChars": [
+                      51,
+                      65
+                    ],
+                    "secondChars": [
+                      51,
+                      65
+                    ],
+                    "fingerprint": "0e69bfe5aeb2ba2b3f424f743310d676260157d23cc4c3e41f5bfd2062eed022"
+                  },
+                  {
+                    "first": [
+                      4,
+                      9
+                    ],
+                    "second": [
+                      4,
+                      9
+                    ],
+                    "firstChars": [
+                      20,
+                      43
+                    ],
+                    "secondChars": [
+                      20,
+                      43
+                    ],
+                    "fingerprint": "2a142c337ce35984f433cfd66a45766716a789161caa07b8258752dfd3588bd9"
+                  },
+                  {
+                    "first": [
+                      21,
+                      26
+                    ],
+                    "second": [
+                      21,
+                      26
+                    ],
+                    "firstChars": [
+                      82,
+                      89
+                    ],
+                    "secondChars": [
+                      82,
+                      89
+                    ],
+                    "fingerprint": "37584f1a7aa1894424805babfe0e4be0be1860c9a5d908408c46a8c1c613e70a"
+                  },
+                  {
+                    "first": [
+                      3,
+                      8
+                    ],
+                    "second": [
+                      3,
+                      8
+                    ],
+                    "firstChars": [
+                      19,
+                      36
+                    ],
+                    "secondChars": [
+                      19,
+                      36
+                    ],
+                    "fingerprint": "37bdbdc0c8589b7dac9a5213216cd56c07165c772cfb0fccc12790ca6b98a476"
+                  },
+                  {
+                    "first": [
+                      7,
+                      12
+                    ],
+                    "second": [
+                      7,
+                      12
+                    ],
+                    "firstChars": [
+                      30,
+                      51
+                    ],
+                    "secondChars": [
+                      30,
+                      51
+                    ],
+                    "fingerprint": "43c2aa3c560ea492326a98c1d337b92f5ebe8d0c06c13c18e650f2c611a4b5bc"
+                  },
+                  {
+                    "first": [
+                      13,
+                      18
+                    ],
+                    "second": [
+                      13,
+                      18
+                    ],
+                    "firstChars": [
+                      52,
+                      68
+                    ],
+                    "secondChars": [
+                      52,
+                      68
+                    ],
+                    "fingerprint": "4a7d6e75fb4e071fb735b404266acb7a76e0c27e18153eb334321918d0f662ca"
+                  },
+                  {
+                    "first": [
+                      9,
+                      14
+                    ],
+                    "second": [
+                      9,
+                      14
+                    ],
+                    "firstChars": [
+                      43,
+                      57
+                    ],
+                    "secondChars": [
+                      43,
+                      57
+                    ],
+                    "fingerprint": "4e32b53bd19cc48a122610ceaf6705b79b77ef20e5cd2618a5eca790f791854b"
+                  },
+                  {
+                    "first": [
+                      0,
+                      5
+                    ],
+                    "second": [
+                      0,
+                      5
+                    ],
+                    "firstChars": [
+                      0,
+                      26
+                    ],
+                    "secondChars": [
+                      0,
+                      26
+                    ],
+                    "fingerprint": "56adedfd5a9824622ab470bf3d965a257e491f9b7de4c143e67884ff347ea7e3"
+                  },
+                  {
+                    "first": [
+                      15,
+                      20
+                    ],
+                    "second": [
+                      15,
+                      20
+                    ],
+                    "firstChars": [
+                      59,
+                      76
+                    ],
+                    "secondChars": [
+                      59,
+                      76
+                    ],
+                    "fingerprint": "5dff5973dafb78f35457a627f24b803f9bdc708ba9d42ebfbd165eea4d6c5a0b"
+                  },
+                  {
+                    "first": [
+                      10,
+                      15
+                    ],
+                    "second": [
+                      10,
+                      15
+                    ],
+                    "firstChars": [
+                      44,
+                      58
+                    ],
+                    "secondChars": [
+                      44,
+                      58
+                    ],
+                    "fingerprint": "5eb92ba653719d2781211c9273416ffa00e98849f6b0afd4ed4f6c501643670c"
+                  },
+                  {
+                    "first": [
+                      19,
+                      24
+                    ],
+                    "second": [
+                      19,
+                      24
+                    ],
+                    "firstChars": [
+                      75,
+                      86
+                    ],
+                    "secondChars": [
+                      75,
+                      86
+                    ],
+                    "fingerprint": "5ebd832672ad7d1bcf9ce15438f17597f115257caeea3537124bcddb62c68435"
+                  },
+                  {
+                    "first": [
+                      2,
+                      7
+                    ],
+                    "second": [
+                      2,
+                      7
+                    ],
+                    "firstChars": [
+                      16,
+                      29
+                    ],
+                    "secondChars": [
+                      16,
+                      29
+                    ],
+                    "fingerprint": "7a3e2affcdcffde121a71e01b90cabb5bb0cb1221ca66c7fb0d48f422ca37666"
+                  }
+                ]
+              }
+            ],
+            "files": {
+              "target": [
+                {
+                  "path": "index.js",
+                  "digest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+                  "blob": "6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+                  "bytes": 90,
+                  "language": "javascript",
+                  "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                  "filterVersion": "source-filter@1",
+                  "classification": "application_source",
+                  "reasons": [
+                    "supported source; no exclusion heuristic matched"
+                  ]
+                }
+              ],
+              "candidate": [
+                {
+                  "path": "helper.ts",
+                  "digest": "04ee315f9317537c6683fd0c1b3846f6603505d0855ee072ca48d3a354503879",
+                  "blob": "b3702e3ca12f841b4af73add227a0fa415ed9a90",
+                  "bytes": 52,
+                  "language": "typescript",
+                  "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                  "filterVersion": "source-filter@1",
+                  "classification": "application_source",
+                  "reasons": [
+                    "supported source; no exclusion heuristic matched"
+                  ]
+                },
+                {
+                  "path": "index.js",
+                  "digest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+                  "blob": "6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+                  "bytes": 90,
+                  "language": "javascript",
+                  "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                  "filterVersion": "source-filter@1",
+                  "classification": "application_source",
+                  "reasons": [
+                    "supported source; no exclusion heuristic matched"
+                  ]
+                }
+              ]
+            },
+            "checks": [],
+            "verification": {
+              "state": "pending",
+              "checks": [],
+              "canonicalEvidenceIds": []
+            },
+            "lineageClaim": "none",
+            "coverage": {
+              "state": "completed",
+              "expectedPairs": 2,
+              "comparedPairs": 2,
+              "pending": [],
+              "reasons": []
+            },
+            "usage": {
+              "attempts": 15,
+              "searchAttempts": 1,
+              "candidates": 3,
+              "files": {
+                "github:1@69a704b039403f5ca622c50ff7621abfa5c15a8a": 1,
+                "github:4@a09a67d0ede3629feb39071b831fd0e4a4320c77": 2
+              },
+              "bytesByFile": {
+                "[\"github:1@69a704b039403f5ca622c50ff7621abfa5c15a8a\",\"index.js\"]": 90,
+                "[\"github:4@a09a67d0ede3629feb39071b831fd0e4a4320c77\",\"helper.ts\"]": 52,
+                "[\"github:4@a09a67d0ede3629feb39071b831fd0e4a4320c77\",\"index.js\"]": 90
+              },
+              "totalBytes": 232,
+              "activeWorkers": 0,
+              "peakWorkers": 1
+            }
+          },
+          "summary": {
+            "state": "completed",
+            "strict": {
+              "shared": 22,
+              "first": 22,
+              "second": 32,
+              "score": 0.6875,
+              "firstCoverage": 1,
+              "secondCoverage": 0.6875
+            },
+            "normalized": {
+              "shared": 22,
+              "first": 22,
+              "second": 32,
+              "score": 0.6875,
+              "firstCoverage": 1,
+              "secondCoverage": 0.6875
+            },
+            "firstTokens": 26,
+            "secondTokens": 40,
+            "firstIncluded": 1,
+            "secondIncluded": 2,
+            "firstFiltered": 0,
+            "secondFiltered": 0,
+            "exactPairs": 1,
+            "expectedPairs": 2,
+            "comparedPairs": 2,
+            "failures": []
+          },
+          "reason": null,
+          "label": "unknown; unjudged"
+        }
+      ],
+      "requests": [
+        {
+          "endpoint": "/repos/root/example",
+          "status": 200,
+          "outcome": "success",
+          "reason": null,
+          "reservedBytes": 32768,
+          "receivedBytes": 117,
+          "retainedBytes": 117
+        },
+        {
+          "endpoint": "/repositories/1",
+          "status": 200,
+          "outcome": "success",
+          "reason": null,
+          "reservedBytes": 32768,
+          "receivedBytes": 117,
+          "retainedBytes": 117
+        },
+        {
+          "endpoint": "/repos/root/example/commits/main",
+          "status": 200,
+          "outcome": "success",
+          "reason": null,
+          "reservedBytes": 32768,
+          "receivedBytes": 132,
+          "retainedBytes": 132
+        },
+        {
+          "endpoint": "/repositories/4",
+          "status": 200,
+          "outcome": "success",
+          "reason": null,
+          "reservedBytes": 32768,
+          "receivedBytes": 123,
+          "retainedBytes": 123
+        },
+        {
+          "endpoint": "/repos/unknown/example/commits/main",
+          "status": 200,
+          "outcome": "success",
+          "reason": null,
+          "reservedBytes": 32768,
+          "receivedBytes": 132,
+          "retainedBytes": 132
+        },
+        {
+          "endpoint": "/repos/root/example/git/trees/aed30681df6fbfdd7a1f0d69004756f72ee203e3",
+          "status": 200,
+          "outcome": "success",
+          "reason": null,
+          "reservedBytes": 32768,
+          "receivedBytes": 296,
+          "retainedBytes": 296
+        },
+        {
+          "endpoint": "/repos/root/example",
+          "status": 200,
+          "outcome": "success",
+          "reason": null,
+          "reservedBytes": 32768,
+          "receivedBytes": 117,
+          "retainedBytes": 117
+        },
+        {
+          "endpoint": "/repos/unknown/example/git/trees/aed30681df6fbfdd7a1f0d69004756f72ee203e3",
+          "status": 200,
+          "outcome": "success",
+          "reason": null,
+          "reservedBytes": 32768,
+          "receivedBytes": 296,
+          "retainedBytes": 296
+        },
+        {
+          "endpoint": "/repos/unknown/example",
+          "status": 200,
+          "outcome": "success",
+          "reason": null,
+          "reservedBytes": 32768,
+          "receivedBytes": 123,
+          "retainedBytes": 123
+        },
+        {
+          "endpoint": "/repos/root/example/git/blobs/6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+          "status": 200,
+          "outcome": "success",
+          "reason": null,
+          "reservedBytes": 32768,
+          "receivedBytes": 213,
+          "retainedBytes": 213
+        },
+        {
+          "endpoint": "/repos/root/example",
+          "status": 200,
+          "outcome": "success",
+          "reason": null,
+          "reservedBytes": 32768,
+          "receivedBytes": 117,
+          "retainedBytes": 117
+        },
+        {
+          "endpoint": "/repos/unknown/example/git/blobs/b3702e3ca12f841b4af73add227a0fa415ed9a90",
+          "status": 200,
+          "outcome": "success",
+          "reason": null,
+          "reservedBytes": 32768,
+          "receivedBytes": 165,
+          "retainedBytes": 165
+        },
+        {
+          "endpoint": "/repos/unknown/example/git/blobs/6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+          "status": 200,
+          "outcome": "success",
+          "reason": null,
+          "reservedBytes": 32768,
+          "receivedBytes": 213,
+          "retainedBytes": 213
+        },
+        {
+          "endpoint": "/repos/unknown/example",
+          "status": 200,
+          "outcome": "success",
+          "reason": null,
+          "reservedBytes": 32768,
+          "receivedBytes": 123,
+          "retainedBytes": 123
+        }
+      ],
+      "budget": {
+        "attempts": 24,
+        "searchAttempts": 2,
+        "candidates": 3,
+        "filesPerCandidate": 8,
+        "bytesPerFile": 131072,
+        "totalBytes": 2097152,
+        "wallMs": 30000,
+        "concurrency": 2,
+        "cpuMs": null
+      },
+      "networkProfile": {
+        "perResponseBytes": 32768,
+        "totalResponseBytes": 1048576
+      },
+      "usage": {
+        "attempts": 15,
+        "searchAttempts": 1,
+        "candidates": 3,
+        "files": {
+          "github:1@69a704b039403f5ca622c50ff7621abfa5c15a8a": 1,
+          "github:4@a09a67d0ede3629feb39071b831fd0e4a4320c77": 2
+        },
+        "bytesByFile": {
+          "[\"github:1@69a704b039403f5ca622c50ff7621abfa5c15a8a\",\"index.js\"]": 90,
+          "[\"github:4@a09a67d0ede3629feb39071b831fd0e4a4320c77\",\"helper.ts\"]": 52,
+          "[\"github:4@a09a67d0ede3629feb39071b831fd0e4a4320c77\",\"index.js\"]": 90
+        },
+        "totalBytes": 232,
+        "activeWorkers": 0,
+        "peakWorkers": 1
+      },
+      "network": {
+        "reservedBytes": 491520,
+        "receivedBytes": 2587,
+        "retainedBytes": 2587,
+        "overflowBytes": 0
+      },
+      "sourceMaterializedBytes": 232,
+      "coverage": {
+        "state": "completed",
+        "completed": 1,
+        "inconclusive": 0
+      },
+      "verification": "pending",
+      "lineageClaim": "none",
+      "cpuBudget": "unsupported"
+    },
+    "receipt": {
+      "schemaVersion": "discovery-pinned-probe-receipt@1",
+      "contentDigest": "0ded60f902979acdc7a224468293fee6016e6b42e88948d2642ef08a96dd27fe",
+      "startedAt": "2026-10-10T13:36:22.497Z",
+      "wallMs": 293.82151899999917,
+      "processCpuMs": 247.273,
+      "cpuBudget": "unsupported",
+      "cpuScope": "process including workers; observational only",
+      "requests": [
+        {
+          "request": {
+            "endpoint": "/repos/root/example",
+            "status": 200,
+            "outcome": "success",
+            "reason": null,
+            "reservedBytes": 32768,
+            "receivedBytes": 117,
+            "retainedBytes": 117
+          },
+          "startedAt": "2026-10-10T13:36:19.700Z",
+          "wallMs": 3.4118990000006306,
+          "headers": {}
+        },
+        {
+          "request": {
+            "endpoint": "/repositories/1",
+            "status": 200,
+            "outcome": "success",
+            "reason": null,
+            "reservedBytes": 32768,
+            "receivedBytes": 117,
+            "retainedBytes": 117
+          },
+          "startedAt": "2026-10-10T13:36:19.703Z",
+          "wallMs": 1.2482120000004215,
+          "headers": {}
+        },
+        {
+          "request": {
+            "endpoint": "/repos/root/example/commits/main",
+            "status": 200,
+            "outcome": "success",
+            "reason": null,
+            "reservedBytes": 32768,
+            "receivedBytes": 132,
+            "retainedBytes": 132
+          },
+          "startedAt": "2026-10-10T13:36:19.704Z",
+          "wallMs": 1.4481899999991583,
+          "headers": {}
+        },
+        {
+          "request": {
+            "endpoint": "/repositories/4",
+            "status": 200,
+            "outcome": "success",
+            "reason": null,
+            "reservedBytes": 32768,
+            "receivedBytes": 123,
+            "retainedBytes": 123
+          },
+          "startedAt": "2026-10-10T13:36:21.047Z",
+          "wallMs": 5.145103000000745,
+          "headers": {}
+        },
+        {
+          "request": {
+            "endpoint": "/repos/unknown/example/commits/main",
+            "status": 200,
+            "outcome": "success",
+            "reason": null,
+            "reservedBytes": 32768,
+            "receivedBytes": 132,
+            "retainedBytes": 132
+          },
+          "startedAt": "2026-10-10T13:36:21.052Z",
+          "wallMs": 1.740008000000671,
+          "headers": {}
+        },
+        {
+          "request": {
+            "endpoint": "/repos/root/example/git/trees/aed30681df6fbfdd7a1f0d69004756f72ee203e3",
+            "status": 200,
+            "outcome": "success",
+            "reason": null,
+            "reservedBytes": 32768,
+            "receivedBytes": 296,
+            "retainedBytes": 296
+          },
+          "startedAt": "2026-10-10T13:36:21.054Z",
+          "wallMs": 1.4446729999999661,
+          "headers": {}
+        },
+        {
+          "request": {
+            "endpoint": "/repos/root/example",
+            "status": 200,
+            "outcome": "success",
+            "reason": null,
+            "reservedBytes": 32768,
+            "receivedBytes": 117,
+            "retainedBytes": 117
+          },
+          "startedAt": "2026-10-10T13:36:21.056Z",
+          "wallMs": 1.5103330000001733,
+          "headers": {}
+        },
+        {
+          "request": {
+            "endpoint": "/repos/unknown/example/git/trees/aed30681df6fbfdd7a1f0d69004756f72ee203e3",
+            "status": 200,
+            "outcome": "success",
+            "reason": null,
+            "reservedBytes": 32768,
+            "receivedBytes": 296,
+            "retainedBytes": 296
+          },
+          "startedAt": "2026-10-10T13:36:21.057Z",
+          "wallMs": 1.7802489999994577,
+          "headers": {}
+        },
+        {
+          "request": {
+            "endpoint": "/repos/unknown/example",
+            "status": 200,
+            "outcome": "success",
+            "reason": null,
+            "reservedBytes": 32768,
+            "receivedBytes": 123,
+            "retainedBytes": 123
+          },
+          "startedAt": "2026-10-10T13:36:21.059Z",
+          "wallMs": 1.713051999999152,
+          "headers": {}
+        },
+        {
+          "request": {
+            "endpoint": "/repos/root/example/git/blobs/6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+            "status": 200,
+            "outcome": "success",
+            "reason": null,
+            "reservedBytes": 32768,
+            "receivedBytes": 213,
+            "retainedBytes": 213
+          },
+          "startedAt": "2026-10-10T13:36:22.500Z",
+          "wallMs": 2.1592410000012023,
+          "headers": {}
+        },
+        {
+          "request": {
+            "endpoint": "/repos/root/example",
+            "status": 200,
+            "outcome": "success",
+            "reason": null,
+            "reservedBytes": 32768,
+            "receivedBytes": 117,
+            "retainedBytes": 117
+          },
+          "startedAt": "2026-10-10T13:36:22.502Z",
+          "wallMs": 2.1790840000012395,
+          "headers": {}
+        },
+        {
+          "request": {
+            "endpoint": "/repos/unknown/example/git/blobs/b3702e3ca12f841b4af73add227a0fa415ed9a90",
+            "status": 200,
+            "outcome": "success",
+            "reason": null,
+            "reservedBytes": 32768,
+            "receivedBytes": 165,
+            "retainedBytes": 165
+          },
+          "startedAt": "2026-10-10T13:36:22.505Z",
+          "wallMs": 1.8900269999994634,
+          "headers": {}
+        },
+        {
+          "request": {
+            "endpoint": "/repos/unknown/example/git/blobs/6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+            "status": 200,
+            "outcome": "success",
+            "reason": null,
+            "reservedBytes": 32768,
+            "receivedBytes": 213,
+            "retainedBytes": 213
+          },
+          "startedAt": "2026-10-10T13:36:22.507Z",
+          "wallMs": 3.206068999999843,
+          "headers": {}
+        },
+        {
+          "request": {
+            "endpoint": "/repos/unknown/example",
+            "status": 200,
+            "outcome": "success",
+            "reason": null,
+            "reservedBytes": 32768,
+            "receivedBytes": 123,
+            "retainedBytes": 123
+          },
+          "startedAt": "2026-10-10T13:36:22.510Z",
+          "wallMs": 2.000976000001174,
+          "headers": {}
+        }
+      ],
+      "observations": [
+        {
+          "expectedId": 1,
+          "bootstrap": null,
+          "resolution": [
+            {
+              "repositoryId": 1,
+              "fullName": "root/example",
+              "htmlUrl": "https://github.com/root/example",
+              "source": "repository_metadata",
+              "observedAt": "2026-10-10T13:36:19.703Z"
+            },
+            {
+              "repositoryId": 1,
+              "fullName": "root/example",
+              "htmlUrl": "https://github.com/root/example",
+              "source": "repository_metadata",
+              "observedAt": "2026-10-10T13:36:19.704Z"
+            }
+          ]
+        },
+        {
+          "expectedId": 4,
+          "bootstrap": null,
+          "resolution": [
+            {
+              "repositoryId": 4,
+              "fullName": "unknown/example",
+              "htmlUrl": "https://github.com/unknown/example",
+              "source": "repository_search",
+              "observedAt": "2026-10-10T13:36:19.708Z"
+            },
+            {
+              "repositoryId": 4,
+              "fullName": "unknown/example",
+              "htmlUrl": "https://github.com/unknown/example",
+              "source": "repository_metadata",
+              "observedAt": "2026-10-10T13:36:21.052Z"
+            }
+          ]
+        }
+      ],
+      "node": "v24.21.0",
+      "platform": "linux"
+    }
+  },
+  "contentDigest": "55296577acc4aff3ca4d453f669913d5df39348adc2270c61fc30542daa5a8a4"
+}

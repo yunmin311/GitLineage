@@ -1,0 +1,359 @@
+{
+  "baseline": "ab425b6807fc7fdfc3b8c61cf02849b0336c0d49",
+  "execution": "WSL2 Ubuntu-24.04 Linux",
+  "scope": "documentation and isolated offline experiment; no production code changes",
+  "order": "typecheck, unit, build completed before sequential browser suites",
+  "typecheck": "PASS",
+  "unit": {
+    "total": 444,
+    "pass": 441,
+    "skip": 3,
+    "fail": 0
+  },
+  "build": "PASS",
+  "experiment": {
+    "pass": 6,
+    "fail": 0
+  },
+  "browserSuites": [
+    {
+      "suite": "canvas",
+      "exitCode": 0,
+      "seconds": 69.23
+    },
+    {
+      "suite": "landing",
+      "exitCode": 0,
+      "seconds": 16.95
+    },
+    {
+      "suite": "analysis",
+      "exitCode": 0,
+      "seconds": 20.94
+    },
+    {
+      "suite": "preflight",
+      "exitCode": 0,
+      "seconds": 41.64
+    },
+    {
+      "suite": "stale",
+      "exitCode": 0,
+      "seconds": 24.15
+    },
+    {
+      "suite": "ui-contract",
+      "exitCode": 0,
+      "seconds": 23.45
+    },
+    {
+      "suite": "responsive",
+      "exitCode": 0,
+      "seconds": 28.45
+    },
+    {
+      "suite": "mobile",
+      "exitCode": 0,
+      "seconds": 49.43
+    }
+  ],
+  "browserArtifacts": [
+    {
+      "path": "artifacts/shots/v2/report.json",
+      "sha256": "bf3c1da27c05e4f7a000ee9acea0b1c4b8775f1ec4ded959e9c1038eb7729b07",
+      "bytes": 29540,
+      "topLevelFields": [
+        "viewport",
+        "01-default",
+        "01-band",
+        "02-expanded",
+        "03-member-selected",
+        "03-rows",
+        "12-camera-after-close",
+        "04-sparse",
+        "05-dense",
+        "06-primitives",
+        "07-tracer-collecting",
+        "08-tracer-publishing",
+        "09-tracer-complete",
+        "10-shell",
+        "10-composition",
+        "10-typing",
+        "11-responsive",
+        "11b-1280-drawer",
+        "12-camera-proof",
+        "13-masked",
+        "15-evidence-default",
+        "16-evidence-expanded",
+        "17-evidence-selected",
+        "18-selected-hover",
+        "19-scrollbar-drawer",
+        "19-scrollbar-rail",
+        "19-drawer-scroll",
+        "19-dense-groups-expected",
+        "19-dense-groups",
+        "19-sticky-heading",
+        "19-rail-scroll",
+        "19-scrollers",
+        "19-document-shell",
+        "14-depth",
+        "errors"
+      ]
+    },
+    {
+      "path": "artifacts/shots/slice2/results.json",
+      "sha256": "bc7b9684057d800e1d3e8b6ac56aa44fab66fec9c58bd74c4154d214353a7005",
+      "bytes": 5550,
+      "topLevelFields": [
+        "array"
+      ]
+    },
+    {
+      "path": "artifacts/slice3/fsm-report.json",
+      "sha256": "3852b67943355a1a50e24e80b6f2245408a2301f7e1a575231b54ee7a16c3352",
+      "bytes": 16180,
+      "topLevelFields": [
+        "array"
+      ]
+    },
+    {
+      "path": "artifacts/preflight/results.json",
+      "sha256": "bf8c01d02c0e84a98766af6c5b6c82563afb61b0f6bf94745ebba07a6c563650",
+      "bytes": 5371,
+      "topLevelFields": [
+        "array"
+      ]
+    },
+    {
+      "path": "artifacts/slice3/stale-report.json",
+      "sha256": "290d8901cba5ea4cfac660798fc2e65fb6720606d8979430d3b17059579a6ac4",
+      "bytes": 1158,
+      "topLevelFields": [
+        "array"
+      ]
+    },
+    {
+      "path": "artifacts/ui-contract/after/results.json",
+      "sha256": "e30d997d07bdd300b3232477fcf0c3b0643c90f523aae69ea3f8c31c992bb8e9",
+      "bytes": 65512,
+      "topLevelFields": [
+        "checks",
+        "evidence"
+      ]
+    },
+    {
+      "path": "artifacts/responsive/after/results.json",
+      "sha256": "fe8fc9c278cfa965c3452856407a49778a0238709d5b6a65118b35f62436d376",
+      "bytes": 107246,
+      "topLevelFields": [
+        "checks",
+        "evidence"
+      ]
+    },
+    {
+      "path": "artifacts/mobile/after/results.json",
+      "sha256": "c8ad730d4c0a8440959f64aec0ac4feb4a74792cc6c05776ecb12080b2a8148b",
+      "bytes": 169956,
+      "topLevelFields": [
+        "environment",
+        "webkit",
+        "physicalDevice",
+        "checks",
+        "evidence",
+        "events"
+      ]
+    }
+  ],
+  "logs": {
+    "typecheck": {
+      "sha256": "a9b9f7f787f5f67cf960e83b4e0fd3e5ee8a2c063adec9c910917b9015c4b81e",
+      "tail": [
+        "",
+        "> gitlineage@0.1.0 typecheck",
+        "> tsc --noEmit && tsc --noEmit -p tsconfig.web-scripts.json",
+        ""
+      ]
+    },
+    "unit": {
+      "sha256": "06927617eb84e47198069878e9bcbf730119ee165501d7662fb683dd65ec32d7",
+      "tail": [
+        "{\"ts\":\"2026-10-09T05:04:50.373Z\",\"event\":\"http.request\",\"method\":\"GET\",\"path\":\"/api/analysis/jobs/99999999-8888-7777-6666-555555555555\",\"status\":404,\"requestMs\":0,\"queued\":0,\"running\":0,\"queueDepth\":0}",
+        "✔ an unknown job id is a typed 404 (2.534402ms)",
+        "ℹ tests 444",
+        "ℹ suites 0",
+        "ℹ pass 441",
+        "ℹ fail 0",
+        "ℹ cancelled 0",
+        "ℹ skipped 3",
+        "ℹ todo 0",
+        "ℹ duration_ms 7442.195204"
+      ]
+    },
+    "build": {
+      "sha256": "f5895c633ccc3755618b484be359cac401b91150e0b9d86aa63abc1793390b4b",
+      "tail": [
+        "",
+        "  dist/web/assets/app.js  73.9kb",
+        "",
+        "⚡ Done in 71ms",
+        "",
+        "production build written to /mnt/e/1project/gitlineage/dist/web",
+        "  assets/app.js  73.9 KB",
+        "  app.css  104.3 KB",
+        "  fonts.css  91.2 KB",
+        "  index.html  22.0 KB"
+      ]
+    },
+    "final-experiment-tests": {
+      "sha256": "96dec5faeda1b7bfbe6f1b43ecb7a7134b26c7c58f1958d497ff57327ad3dd67",
+      "tail": [
+        "✔ pinned corpus has legal files and intentionally unknown real projects (33.097777ms)",
+        "✔ benchmark recovers transformed source, exposes template confounds, reinitializes history offline (616.430673ms)",
+        "ℹ tests 6",
+        "ℹ suites 0",
+        "ℹ pass 6",
+        "ℹ fail 0",
+        "ℹ cancelled 0",
+        "ℹ skipped 0",
+        "ℹ todo 0",
+        "ℹ duration_ms 1038.514775"
+      ]
+    },
+    "canvas": {
+      "sha256": "0c93bad516b93d9b10d6624a129ec6fc2e168b4de3987bf61ae56f5cc97ae01b",
+      "tail": [
+        "ok   14 the subject tier throws exactly 6px — world offset 6/6 at scale 1 (6px on screen)",
+        "ok   14 the subject tier's shadow is actually painted — shadow 188,187,180,255 vs face 253,252,250,255",
+        "ok   14 the selected plate tier throws exactly 5px — world offset 5/5 at scale 1 (5px on screen)",
+        "ok   14 the selected plate tier's shadow is actually painted — shadow 188,187,180,255 vs face 119,139,188,255",
+        "ok   14 the connected plate tier throws exactly 4px — world offset 4/4 at scale 1 (4px on screen)",
+        "ok   14 the connected plate tier's shadow is actually painted — shadow 213,212,206,255 vs face 253,252,250,255",
+        "ok   14 flat surfaces throw no depth shadow — 6 rows, 0 shadows",
+        "ok   14 the client logged no errors during the whole pass",
+        "",
+        "113 checks, 113 pass, 0 fail"
+      ]
+    },
+    "landing": {
+      "sha256": "eff04659210faa845b15ec9aa5be326fa93b8c0ed8be459b6932daecb116a612",
+      "tail": [
+        "{\"ts\":\"2026-10-09T05:07:02.897Z\",\"event\":\"http.request\",\"method\":\"GET\",\"path\":\"/api/analysis/jobs/dd67c9c5-5901-45e9-ad4c-843bf129af96\",\"status\":200,\"requestMs\":1,\"queued\":0,\"running\":1,\"queueDepth\":0}",
+        "{\"ts\":\"2026-10-09T05:07:02.900Z\",\"event\":\"analysis.started\",\"jobId\":\"dd67c9c5-5901-45e9-ad4c-843bf129af96\",\"repository\":\"not-a-real-repository-xyz/nope\",\"resolvedRevision\":null,\"queueDepth\":0,\"running\":1}",
+        "{\"ts\":\"2026-10-09T05:07:03.667Z\",\"event\":\"analysis.failed\",\"jobId\":\"dd67c9c5-5901-45e9-ad4c-843bf129af96\",\"repository\":\"not-a-real-repository-xyz/nope\",\"code\":\"upstream_http_404\",\"message\":\"unexpected status 404 for https://api.github.com/repos/not-a-real-repository-xyz/nope\",\"durationMs\":781,\"queueDepth\":0,\"running\":1}",
+        "{\"ts\":\"2026-10-09T05:07:04.900Z\",\"event\":\"http.request\",\"method\":\"GET\",\"path\":\"/api/analysis/jobs/dd67c9c5-5901-45e9-ad4c-843bf129af96\",\"status\":200,\"requestMs\":0,\"queued\":0,\"running\":0,\"queueDepth\":0}",
+        "ok    [1280x800] an invalid repository reaches a real failure or empty state  -- Could not analyse this repository. unexpected status 404 for https://api.github.com/repos/",
+        "ok    [1280x800] the invalid-repository path raises no page error",
+        "ok    [1280x800] no console errors across the whole run",
+        "ok    [1280x800] no failed or 4xx/5xx requests",
+        "",
+        "40/40 landing acceptance checks passed"
+      ]
+    },
+    "analysis": {
+      "sha256": "f90058c70a8f067860a54ce8be525c943868d59b90ca02b53101815b61f2f7e2",
+      "tail": [
+        "      Publishing",
+        "      src=\"repositoryyunmin311/obsidian-configrevision3982a219c102\"",
+        "  complete                 key=\"terminal state · complete\"  segs=5 now=0 done=5",
+        "      Analysis complete",
+        "      src=\"repositoryyunmin311/obsidian-configrevision3982a219c102\"",
+        "  failed                   key=\"terminal state · failed\"  segs=5 now=0 done=5",
+        "      Analysis failed",
+        "      src=\"repositoryyunmin311/obsidian-configrevision3982a219c102\"",
+        "",
+        "page errors: none"
+      ]
+    },
+    "preflight": {
+      "sha256": "d833814283b70da8ec965825970ddd517a6f11d2e08076d9292d902533997b0a",
+      "tail": [
+        "{\"ts\":\"2026-10-09T05:08:03.205Z\",\"event\":\"http.request\",\"method\":\"GET\",\"path\":\"/Kuddev/pebrel\",\"status\":200,\"requestMs\":2,\"queued\":0,\"running\":0,\"queueDepth\":0}",
+        "{\"ts\":\"2026-10-09T05:08:03.214Z\",\"event\":\"http.request\",\"method\":\"GET\",\"path\":\"/fonts.css\",\"status\":200,\"requestMs\":3,\"queued\":0,\"running\":0,\"queueDepth\":0}",
+        "{\"ts\":\"2026-10-09T05:08:04.361Z\",\"event\":\"analysis.cacheHit\",\"repository\":\"kuddev/pebrel\",\"resolvedRevision\":\"51514bd50094f6d3f417294c9204976e6a19a35a\",\"durationMs\":1088}",
+        "{\"ts\":\"2026-10-09T05:08:04.361Z\",\"event\":\"http.request\",\"method\":\"POST\",\"path\":\"/api/analysis/kuddev/pebrel\",\"status\":200,\"requestMs\":1088,\"queued\":0,\"running\":0,\"queueDepth\":0}",
+        "{\"ts\":\"2026-10-09T05:08:05.226Z\",\"event\":\"analysis.cacheHit\",\"repository\":\"kuddev/pebrel\",\"resolvedRevision\":\"51514bd50094f6d3f417294c9204976e6a19a35a\",\"durationMs\":862}",
+        "{\"ts\":\"2026-10-09T05:08:05.229Z\",\"event\":\"http.request\",\"method\":\"GET\",\"path\":\"/api/view/kuddev/pebrel\",\"status\":200,\"requestMs\":865,\"queued\":0,\"running\":0,\"queueDepth\":0}",
+        "ok    [1600x620] the rail scrolls when it overflows  -- scrollTop 0 -> 369 of 369px",
+        "ok    [1600x620] the rail edge paints no native scrollbar  -- ink at column(s) [] of 0..15; interior clear",
+        "",
+        "45/45 checks passed"
+      ]
+    },
+    "stale": {
+      "sha256": "ad9f59576a34002f2d40aad7d4a6b7f9e77a995d35fed5dedf1603e756fe3537",
+      "tail": [
+        "  \"staleIdentity\": false,",
+        "  \"staleCounts\": false,",
+        "  \"staleEvidence\": false,",
+        "  \"staleRevision\": false,",
+        "  \"graphBehindSurface\": false,",
+        "  \"repo\": \"\"",
+        " }",
+        "]",
+        "page errors: none",
+        "STALE verdict { failed: false, complete: true, observed: true, errors: [] }"
+      ]
+    },
+    "ui-contract": {
+      "sha256": "23f062035cd931381d8f8d35ab4e287e2fcf05968289b86e13d8d6bf32d6a4a8",
+      "tail": [
+        "{\"ts\":\"2026-10-09T05:08:53.420Z\",\"event\":\"analysis.cacheHit\",\"repository\":\"yunmin311/obsidian-config\",\"resolvedRevision\":\"3982a219c1027a7128b2dc0d056d211e7f7e5b96\",\"durationMs\":929}",
+        "{\"ts\":\"2026-10-09T05:08:53.420Z\",\"event\":\"http.request\",\"method\":\"POST\",\"path\":\"/api/analysis/yunmin311/obsidian-config\",\"status\":200,\"requestMs\":929,\"queued\":0,\"running\":0,\"queueDepth\":0}",
+        "{\"ts\":\"2026-10-09T05:08:54.733Z\",\"event\":\"analysis.cacheHit\",\"repository\":\"yunmin311/obsidian-config\",\"resolvedRevision\":\"3982a219c1027a7128b2dc0d056d211e7f7e5b96\",\"durationMs\":1310}",
+        "{\"ts\":\"2026-10-09T05:08:54.733Z\",\"event\":\"http.request\",\"method\":\"GET\",\"path\":\"/api/view/yunmin311/obsidian-config\",\"status\":200,\"requestMs\":1310,\"queued\":0,\"running\":0,\"queueDepth\":0}",
+        "PASS native 200% primary actions accessible without horizontal overflow \"\"",
+        "PASS native 200% exclusive panels preserve screen mapping and selection \"\"",
+        "PASS native 200% zoom retains HUD and panel selection \"\"",
+        "PASS native 200% Escape closes drawer \"\"",
+        "PASS native 200% runtime errors []",
+        "75/75 UI contract checks passed"
+      ]
+    },
+    "responsive": {
+      "sha256": "c63de3594cc8bfcea609ff06bbc15eb3fed1902edb6344d041da2688858c0d2e",
+      "tail": [
+        "{\"ts\":\"2026-10-09T05:09:21.646Z\",\"event\":\"http.request\",\"method\":\"GET\",\"path\":\"/api/view/kuddev/pebrel\",\"status\":200,\"requestMs\":2,\"queued\":0,\"running\":0,\"queueDepth\":0}",
+        "PASS 1280 selected node protected from context overlay {\"nodeSelected\":{\"stage\":{\"x\":0,\"y\":44,\"w\":1280,\"h\":756,\"right\":1280,\"bottom\":800},\"hud\":{\"x\":0,\"y\":736,\"w\":1280,\"h\":64,\"right\":1280,\"bottom\":800},\"rail\":false,\"drawer\":true,\"panels\":[{\"x\":840,\"y\":44,\"w\":440,\"h\":692,\"right\":1280,\"bottom\":736}],\"target\":{\"x\":102,\"y\":396,\"w\":216,\"h\":52,\"right\":318,\"bottom\":448},\"free\":{\"left\":0,\"right\":840,\"top\":44,\"bottom\":736},\"intersections\":[0],\"hudConflicts\":[0],\"contained\":true,\"hittable\":true,\"ctm\":{\"a\":1,\"b\":0,\"c\":0,\"d\":1,\"e\":-320,\"f\":-138},\"viewBox\":\"320 182 1280 756\",\"selection\":\"?node=repo%3Agithub%3Akuddev%2Fpebrel\",\"subject\":{\"x\":102,\"y\":396,\"w\":216,\"h\":52,\"right\":318,\"bottom\":448},\"overflow\":false},\"nodeContext\":{\"stage\":{\"x\":0,\"y\":44,\"w\":1280,\"h\":756,\"right\":1280,\"bottom\":800},\"hud\":{\"x\":0,\"y\":736,\"w\":1280,\"h\":64,\"right\":1280,\"bottom\":800},\"rail\":true,\"drawer\":false,\"panels\":[{\"x\":0,\"y\":44,\"w\":264,\"h\":692,\"right\":264,\"bottom\":736}],\"target\":{\"x\":272,\"y\":396,\"w\":216,\"h\":52,\"right\":488,\"bottom\":448},\"free\":{\"left\":264,\"right\":1280,\"top\":44,\"bottom\":736},\"intersections\":[0],\"hudConflicts\":[0],\"contained\":true,\"hittable\":true,\"ctm\":{\"a\":1,\"b\":0,\"c\":0,\"d\":1,\"e\":-150,\"f\":-138},\"viewBox\":\"150 182 1280 756\",\"selection\":\"?node=repo%3Agithub%3Akuddev%2Fpebrel\",\"subject\":{\"x\":272,\"y\":396,\"w\":216,\"h\":52,\"right\":488,\"bottom\":448},\"overflow\":false}}",
+        "PASS native touch evidence scroll never pans graph or clears selection {\"scrollBefore\":{\"top\":0,\"total\":3030,\"height\":692},\"scrollAfter\":1143,\"reading\":{\"stage\":{\"x\":0,\"y\":44,\"w\":1280,\"h\":756,\"right\":1280,\"bottom\":800},\"hud\":{\"x\":0,\"y\":736,\"w\":1280,\"h\":64,\"right\":1280,\"bottom\":800},\"rail\":false,\"drawer\":true,\"panels\":[{\"x\":840,\"y\":44,\"w\":440,\"h\":692,\"right\":1280,\"bottom\":736}],\"target\":{\"x\":272,\"y\":396,\"w\":216,\"h\":52,\"right\":488,\"bottom\":448},\"free\":{\"left\":0,\"right\":840,\"top\":44,\"bottom\":736},\"intersections\":[0],\"hudConflicts\":[0],\"contained\":true,\"hittable\":true,\"ctm\":{\"a\":1,\"b\":0,\"c\":0,\"d\":1,\"e\":-150,\"f\":-138},\"viewBox\":\"150 182 1280 756\",\"selection\":\"?node=repo%3Agithub%3Akuddev%2Fpebrel\",\"subject\":{\"x\":272,\"y\":396,\"w\":216,\"h\":52,\"right\":488,\"bottom\":448},\"overflow\":false},\"scrolled\":{\"stage\":{\"x\":0,\"y\":44,\"w\":1280,\"h\":756,\"right\":1280,\"bottom\":800},\"hud\":{\"x\":0,\"y\":736,\"w\":1280,\"h\":64,\"right\":1280,\"bottom\":800},\"rail\":false,\"drawer\":true,\"panels\":[{\"x\":840,\"y\":44,\"w\":440,\"h\":692,\"right\":1280,\"bottom\":736}],\"target\":{\"x\":272,\"y\":396,\"w\":216,\"h\":52,\"right\":488,\"bottom\":448},\"free\":{\"left\":0,\"right\":840,\"top\":44,\"bottom\":736},\"intersections\":[0],\"hudConflicts\":[0],\"contained\":true,\"hittable\":true,\"ctm\":{\"a\":1,\"b\":0,\"c\":0,\"d\":1,\"e\":-150,\"f\":-138},\"viewBox\":\"150 182 1280 756\",\"selection\":\"?node=repo%3Agithub%3Akuddev%2Fpebrel\",\"subject\":{\"x\":272,\"y\":396,\"w\":216,\"h\":52,\"right\":488,\"bottom\":448},\"overflow\":false}}",
+        "PASS hidden evidence retains exact native scroll offset {\"scrollAfter\":1143,\"restoredScroll\":1143}",
+        "PASS native touch canvas pan keeps evidence and selection \"\"",
+        "PASS live breakpoint reconciliation keeps zoom selection and one overlay {\"wide\":{\"stage\":{\"x\":0,\"y\":44,\"w\":1600,\"h\":856,\"right\":1600,\"bottom\":900},\"hud\":{\"x\":0,\"y\":836,\"w\":1600,\"h\":64,\"right\":1600,\"bottom\":900},\"rail\":false,\"drawer\":true,\"panels\":[{\"x\":1160,\"y\":44,\"w\":440,\"h\":792,\"right\":1600,\"bottom\":836}],\"target\":{\"x\":422,\"y\":401,\"w\":216,\"h\":52,\"right\":638,\"bottom\":453},\"free\":{\"left\":0,\"right\":1160,\"top\":44,\"bottom\":836},\"intersections\":[0],\"hudConflicts\":[0],\"contained\":true,\"hittable\":true,\"ctm\":{\"a\":1,\"b\":0,\"c\":0,\"d\":1,\"e\":0,\"f\":-133},\"viewBox\":\"0 177 1600 856\",\"selection\":\"?node=repo%3Agithub%3Akuddev%2Fpebrel\",\"subject\":{\"x\":422,\"y\":401,\"w\":216,\"h\":52,\"right\":638,\"bottom\":453},\"overflow\":false},\"narrow\":{\"stage\":{\"x\":0,\"y\":44,\"w\":1024,\"h\":724,\"right\":1024,\"bottom\":768},\"hud\":{\"x\":0,\"y\":704,\"w\":1024,\"h\":64,\"right\":1024,\"bottom\":768},\"rail\":false,\"drawer\":true,\"panels\":[{\"x\":584,\"y\":44,\"w\":440,\"h\":660,\"right\":1024,\"bottom\":704}],\"target\":{\"x\":134,\"y\":335,\"w\":216,\"h\":52,\"right\":350,\"bottom\":387},\"free\":{\"left\":0,\"right\":584,\"top\":44,\"bottom\":704},\"intersections\":[0],\"hudConflicts\":[0],\"contained\":true,\"hittable\":true,\"ctm\":{\"a\":1,\"b\":0,\"c\":0,\"d\":1,\"e\":-288,\"f\":-199},\"viewBox\":\"288 243 1024 724\",\"selection\":\"?node=repo%3Agithub%3Akuddev%2Fpebrel\",\"subject\":{\"x\":134,\"y\":335,\"w\":216,\"h\":52,\"right\":350,\"bottom\":387},\"overflow\":false}}",
+        "PASS breakpoint hiding focused Context returns focus to disclosure \"\"",
+        "PASS node evidence close returns focus to selected graph node \"\"",
+        "PASS graph redraw preserves returned node focus \"\"",
+        "71/71 responsive checks passed"
+      ]
+    },
+    "mobile": {
+      "sha256": "e336ebb46f743120f8c5737da2063237047c0ce89d2e452bf24d8b4095ba411b",
+      "tail": [
+        "{\"ts\":\"2026-10-09T05:10:12.714Z\",\"event\":\"http.request\",\"method\":\"POST\",\"path\":\"/api/analysis/kuddev/pebrel\",\"status\":200,\"requestMs\":1,\"queued\":0,\"running\":0,\"queueDepth\":0}",
+        "{\"ts\":\"2026-10-09T05:10:12.732Z\",\"event\":\"http.request\",\"method\":\"GET\",\"path\":\"/api/view/kuddev/pebrel\",\"status\":200,\"requestMs\":4,\"queued\":0,\"running\":0,\"queueDepth\":0}",
+        "PASS controlled long-data desktop fixture is truncated before phone transition \"\"",
+        "PASS phone breakpoint restores focus from hidden desktop close \"\"",
+        "PASS desktop-to-phone rerenders full long evidence without overflow \"\"",
+        "PASS desktop breakpoint restores focus from hidden mobile heading \"\"",
+        "PASS phone-desktop-phone cache retains full evidence \"\"",
+        "PASS phone evidence link focus survives desktop card rebuild \"\"",
+        "PASS desktop evidence link focus survives phone card rebuild \"\"",
+        "Mobile: 133/133"
+      ]
+    }
+  },
+  "physicalDeviceAcceptance": "not performed in this task",
+  "pushOrDeploy": false,
+  "screenshots": [
+    {
+      "path": "artifacts/responsive/after/1920-evidence.png",
+      "sha256": "ce1a0213d179877fc52480c70bb7b917c7e29a6c894ab77267543ac41c0b4548"
+    },
+    {
+      "path": "artifacts/responsive/after/1280-evidence.png",
+      "sha256": "5884371c0fd46a9640cf558a32b3708fcb3f8305950625b36c9dafc68b56bee9"
+    },
+    {
+      "path": "artifacts/mobile/after/390-graph.png",
+      "sha256": "9c3c66ecfd1c2ecf5508078f2ce8e3f1465163195643348ec675525921536098"
+    }
+  ]
+}

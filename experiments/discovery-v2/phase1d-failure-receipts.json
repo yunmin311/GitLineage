@@ -1,0 +1,4677 @@
+{
+  "cases": [
+    {
+      "content": {
+        "budget": {
+          "attempts": 24,
+          "bytesPerFile": 131072,
+          "candidates": 3,
+          "concurrency": 2,
+          "cpuMs": null,
+          "filesPerCandidate": 8,
+          "searchAttempts": 4,
+          "totalBytes": 2097152,
+          "wallMs": 30000
+        },
+        "comparisons": [
+          {
+            "candidate": null,
+            "label": "unknown; unjudged",
+            "name": "old/example",
+            "reason": "no eligible identity-checked pinned source",
+            "summary": null
+          },
+          {
+            "candidate": {
+              "candidate": {
+                "aliases": [],
+                "completeness": "provider_id",
+                "fullName": "other/example",
+                "provider": "github",
+                "repositoryId": 3,
+                "revision": "828ee9fa75dfd9b925c19fc27eed09c087b8cdc3"
+              },
+              "checks": [],
+              "coverage": {
+                "comparedPairs": 1,
+                "expectedPairs": 1,
+                "pending": [],
+                "reasons": [],
+                "state": "completed"
+              },
+              "discoveries": [
+                {
+                  "locator": "https://github.com/other/example",
+                  "reason": "explicit bounded controls; no Search or inferred lineage",
+                  "source": "explicit_public_probe",
+                  "version": "phase1d-controls@1"
+                }
+              ],
+              "files": {
+                "candidate": [
+                  {
+                    "blob": "b57e980fa8065f44e6bd32654a8258630ee394fb",
+                    "bytes": 29,
+                    "classification": "application_source",
+                    "digest": "251ea9cc653094a6cb9d50cfed3d5f1971d33a98ca8b57cbc31ce44180db3cc3",
+                    "filterVersion": "source-filter@1",
+                    "language": "javascript",
+                    "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                    "path": "index.js",
+                    "reasons": [
+                      "supported source; no exclusion heuristic matched"
+                    ]
+                  }
+                ],
+                "target": [
+                  {
+                    "blob": "6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+                    "bytes": 90,
+                    "classification": "application_source",
+                    "digest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+                    "filterVersion": "source-filter@1",
+                    "language": "javascript",
+                    "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                    "path": "index.js",
+                    "reasons": [
+                      "supported source; no exclusion heuristic matched"
+                    ]
+                  }
+                ]
+              },
+              "lineageClaim": "none",
+              "schemaVersion": "discovery-candidate@1",
+              "similarity": [
+                {
+                  "filterVersion": "source-filter@1",
+                  "firstCoverage": null,
+                  "firstDigest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+                  "firstPath": "index.js",
+                  "firstShingles": null,
+                  "firstTokens": 26,
+                  "method": "exact_blob",
+                  "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                  "ranges": [],
+                  "rangesTruncated": false,
+                  "reasons": [],
+                  "score": 0,
+                  "secondCoverage": null,
+                  "secondDigest": "251ea9cc653094a6cb9d50cfed3d5f1971d33a98ca8b57cbc31ce44180db3cc3",
+                  "secondPath": "index.js",
+                  "secondShingles": null,
+                  "secondTokens": 6,
+                  "sharedShingles": null,
+                  "state": "completed",
+                  "version": "git-blob-sha1@1"
+                },
+                {
+                  "filterVersion": "source-filter@1",
+                  "firstCoverage": 0,
+                  "firstDigest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+                  "firstPath": "index.js",
+                  "firstShingles": 22,
+                  "firstTokens": 26,
+                  "method": "strict_token5",
+                  "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                  "ranges": [],
+                  "rangesTruncated": false,
+                  "reasons": [],
+                  "score": 0,
+                  "secondCoverage": 0,
+                  "secondDigest": "251ea9cc653094a6cb9d50cfed3d5f1971d33a98ca8b57cbc31ce44180db3cc3",
+                  "secondPath": "index.js",
+                  "secondShingles": 2,
+                  "secondTokens": 6,
+                  "sharedShingles": 0,
+                  "state": "completed",
+                  "version": "token5-set@1"
+                },
+                {
+                  "filterVersion": "source-filter@1",
+                  "firstCoverage": 0,
+                  "firstDigest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+                  "firstPath": "index.js",
+                  "firstShingles": 22,
+                  "firstTokens": 26,
+                  "method": "normalized_token5",
+                  "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                  "ranges": [],
+                  "rangesTruncated": false,
+                  "reasons": [],
+                  "score": 0,
+                  "secondCoverage": 0,
+                  "secondDigest": "251ea9cc653094a6cb9d50cfed3d5f1971d33a98ca8b57cbc31ce44180db3cc3",
+                  "secondPath": "index.js",
+                  "secondShingles": 2,
+                  "secondTokens": 6,
+                  "sharedShingles": 0,
+                  "state": "completed",
+                  "version": "token5-set@1"
+                }
+              ],
+              "target": {
+                "aliases": [],
+                "completeness": "provider_id",
+                "fullName": "root/example",
+                "provider": "github",
+                "repositoryId": 1,
+                "revision": "cac1a6416a877d091954f52cae3f640c61a4e011"
+              },
+              "usage": {
+                "activeWorkers": 0,
+                "attempts": 11,
+                "bytesByFile": {
+                  "[\"github:1@cac1a6416a877d091954f52cae3f640c61a4e011\",\"index.js\"]": 90,
+                  "[\"github:3@828ee9fa75dfd9b925c19fc27eed09c087b8cdc3\",\"index.js\"]": 29
+                },
+                "candidates": 1,
+                "files": {
+                  "github:1@cac1a6416a877d091954f52cae3f640c61a4e011": 1,
+                  "github:3@828ee9fa75dfd9b925c19fc27eed09c087b8cdc3": 1
+                },
+                "peakWorkers": 1,
+                "searchAttempts": 0,
+                "totalBytes": 119
+              },
+              "verification": {
+                "canonicalEvidenceIds": [],
+                "checks": [],
+                "state": "pending"
+              }
+            },
+            "label": "unknown; unjudged",
+            "name": "other/example",
+            "reason": null,
+            "summary": {
+              "comparedPairs": 1,
+              "exactPairs": 0,
+              "expectedPairs": 1,
+              "failures": [],
+              "firstFiltered": 0,
+              "firstIncluded": 1,
+              "firstTokens": 26,
+              "normalized": {
+                "first": 22,
+                "firstCoverage": 0,
+                "score": 0,
+                "second": 2,
+                "secondCoverage": 0,
+                "shared": 0
+              },
+              "secondFiltered": 0,
+              "secondIncluded": 1,
+              "secondTokens": 6,
+              "state": "completed",
+              "strict": {
+                "first": 22,
+                "firstCoverage": 0,
+                "score": 0,
+                "second": 2,
+                "secondCoverage": 0,
+                "shared": 0
+              }
+            }
+          }
+        ],
+        "coverage": {
+          "completed": 1,
+          "inconclusive": 1,
+          "state": "partial"
+        },
+        "cpuBudget": "unsupported",
+        "lineageClaim": "none",
+        "network": {
+          "overflowBytes": 0,
+          "receivedBytes": 1589,
+          "reservedBytes": 360448,
+          "retainedBytes": 1589
+        },
+        "networkProfile": {
+          "perResponseBytes": 32768,
+          "totalResponseBytes": 1048576
+        },
+        "requests": [
+          {
+            "endpoint": "/repositories/1",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 117,
+            "reservedBytes": 32768,
+            "retainedBytes": 117,
+            "status": 200
+          },
+          {
+            "endpoint": "/repos/root/example/commits/cac1a6416a877d091954f52cae3f640c61a4e011",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 132,
+            "reservedBytes": 32768,
+            "retainedBytes": 132,
+            "status": 200
+          },
+          {
+            "endpoint": "/repos/root/example/git/trees/1f71f9ac9237086831306ba771dfc2ac8bd299d9",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 186,
+            "reservedBytes": 32768,
+            "retainedBytes": 186,
+            "status": 200
+          },
+          {
+            "endpoint": "/repos/root/example/git/blobs/6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 213,
+            "reservedBytes": 32768,
+            "retainedBytes": 213,
+            "status": 200
+          },
+          {
+            "endpoint": "/repos/root/example",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 117,
+            "reservedBytes": 32768,
+            "retainedBytes": 117,
+            "status": 200
+          },
+          {
+            "endpoint": "/repositories/2",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 135,
+            "reservedBytes": 32768,
+            "retainedBytes": 135,
+            "status": 200
+          },
+          {
+            "endpoint": "/repositories/3",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 119,
+            "reservedBytes": 32768,
+            "retainedBytes": 119,
+            "status": 200
+          },
+          {
+            "endpoint": "/repos/other/example/commits/828ee9fa75dfd9b925c19fc27eed09c087b8cdc3",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 132,
+            "reservedBytes": 32768,
+            "retainedBytes": 132,
+            "status": 200
+          },
+          {
+            "endpoint": "/repos/other/example/git/trees/f067ff3135c3d39b2b39190c1cb5d37642f8c2d7",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 186,
+            "reservedBytes": 32768,
+            "retainedBytes": 186,
+            "status": 200
+          },
+          {
+            "endpoint": "/repos/other/example/git/blobs/b57e980fa8065f44e6bd32654a8258630ee394fb",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 133,
+            "reservedBytes": 32768,
+            "retainedBytes": 133,
+            "status": 200
+          },
+          {
+            "endpoint": "/repos/other/example",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 119,
+            "reservedBytes": 32768,
+            "retainedBytes": 119,
+            "status": 200
+          }
+        ],
+        "schemaVersion": "discovery-pinned-probe@1",
+        "scope": "explicit controls and selected paths only; no discovery recall claim",
+        "snapshots": [
+          {
+            "bootstrap": null,
+            "control": {
+              "name": "root/example",
+              "repositoryId": 1,
+              "revision": "cac1a6416a877d091954f52cae3f640c61a4e011",
+              "selections": [
+                {
+                  "path": "index.js",
+                  "reason": "explicit mock entry"
+                }
+              ]
+            },
+            "expectedId": 1,
+            "identityCheck": {
+              "fullName": "root/example",
+              "reason": null,
+              "repositoryId": 1,
+              "state": "matched"
+            },
+            "resolution": {
+              "defaultBranch": "main",
+              "identity": {
+                "aliases": [],
+                "completeness": "provider_id",
+                "fullName": "root/example",
+                "provider": "github",
+                "repositoryId": 1,
+                "revision": "cac1a6416a877d091954f52cae3f640c61a4e011"
+              },
+              "metadata": {
+                "fork": false,
+                "parentId": null
+              },
+              "observations": [
+                {
+                  "fullName": "root/example",
+                  "htmlUrl": "https://github.com/root/example",
+                  "repositoryId": 1,
+                  "source": "repository_metadata"
+                }
+              ],
+              "parents": [],
+              "reasons": [],
+              "requestSource": "github-rest-verified-name@1",
+              "requestedId": 1,
+              "schemaVersion": "repository-snapshot@1",
+              "state": "resolved",
+              "tree": "1f71f9ac9237086831306ba771dfc2ac8bd299d9"
+            },
+            "source": {
+              "bindings": [
+                {
+                  "blob": "6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+                  "bytes": 90,
+                  "digest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+                  "filterVersion": "source-filter@1",
+                  "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                  "path": "index.js",
+                  "repositoryId": 1,
+                  "revision": "cac1a6416a877d091954f52cae3f640c61a4e011"
+                }
+              ],
+              "coverage": {
+                "pending": [],
+                "reasons": [],
+                "scope": "explicit selected paths only",
+                "state": "completed",
+                "treeTruncated": false
+              },
+              "materializedBytes": 90,
+              "selections": [
+                {
+                  "path": "index.js",
+                  "reason": "explicit mock entry"
+                }
+              ],
+              "snapshot": {
+                "files": [
+                  {
+                    "blob": "6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+                    "bytes": 90,
+                    "classification": "application_source",
+                    "digest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+                    "filterVersion": "source-filter@1",
+                    "language": "javascript",
+                    "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                    "path": "index.js",
+                    "reasons": [
+                      "supported source; no exclusion heuristic matched"
+                    ]
+                  }
+                ],
+                "identity": {
+                  "aliases": [],
+                  "completeness": "provider_id",
+                  "fullName": "root/example",
+                  "provider": "github",
+                  "repositoryId": 1,
+                  "revision": "cac1a6416a877d091954f52cae3f640c61a4e011"
+                },
+                "pending": [],
+                "reasons": [],
+                "state": "completed"
+              }
+            },
+            "state": "completed"
+          },
+          {
+            "bootstrap": null,
+            "control": {
+              "name": "old/example",
+              "repositoryId": 2,
+              "revision": "c7df49b85e4885242789c07867c56fba789e1929",
+              "selections": [
+                {
+                  "path": "index.js",
+                  "reason": "explicit mock entry"
+                }
+              ]
+            },
+            "expectedId": 2,
+            "identityCheck": {
+              "fullName": null,
+              "reason": "pre-resolution unavailable",
+              "repositoryId": null,
+              "state": "not_attempted"
+            },
+            "resolution": {
+              "defaultBranch": null,
+              "identity": null,
+              "metadata": {
+                "fork": null,
+                "parentId": null
+              },
+              "observations": [
+                {
+                  "fullName": "old/example",
+                  "htmlUrl": "https://github.com/old/example",
+                  "repositoryId": 2,
+                  "source": "repository_search"
+                }
+              ],
+              "parents": [],
+              "reasons": [
+                "repository ID mismatch"
+              ],
+              "requestSource": "github-rest-verified-name@1",
+              "requestedId": 2,
+              "schemaVersion": "repository-snapshot@1",
+              "state": "inconclusive",
+              "tree": null
+            },
+            "source": {
+              "bindings": [],
+              "coverage": {
+                "pending": [
+                  "index.js"
+                ],
+                "reasons": [
+                  "repository ID mismatch"
+                ],
+                "scope": "explicit selected paths only",
+                "state": "unavailable",
+                "treeTruncated": false
+              },
+              "materializedBytes": 0,
+              "selections": [
+                {
+                  "path": "index.js",
+                  "reason": "explicit mock entry"
+                }
+              ],
+              "snapshot": null
+            },
+            "state": "inconclusive"
+          },
+          {
+            "bootstrap": null,
+            "control": {
+              "name": "other/example",
+              "repositoryId": 3,
+              "revision": "828ee9fa75dfd9b925c19fc27eed09c087b8cdc3",
+              "selections": [
+                {
+                  "path": "index.js",
+                  "reason": "explicit mock entry"
+                }
+              ]
+            },
+            "expectedId": 3,
+            "identityCheck": {
+              "fullName": "other/example",
+              "reason": null,
+              "repositoryId": 3,
+              "state": "matched"
+            },
+            "resolution": {
+              "defaultBranch": "main",
+              "identity": {
+                "aliases": [],
+                "completeness": "provider_id",
+                "fullName": "other/example",
+                "provider": "github",
+                "repositoryId": 3,
+                "revision": "828ee9fa75dfd9b925c19fc27eed09c087b8cdc3"
+              },
+              "metadata": {
+                "fork": false,
+                "parentId": null
+              },
+              "observations": [
+                {
+                  "fullName": "other/example",
+                  "htmlUrl": "https://github.com/other/example",
+                  "repositoryId": 3,
+                  "source": "repository_metadata"
+                }
+              ],
+              "parents": [],
+              "reasons": [],
+              "requestSource": "github-rest-verified-name@1",
+              "requestedId": 3,
+              "schemaVersion": "repository-snapshot@1",
+              "state": "resolved",
+              "tree": "f067ff3135c3d39b2b39190c1cb5d37642f8c2d7"
+            },
+            "source": {
+              "bindings": [
+                {
+                  "blob": "b57e980fa8065f44e6bd32654a8258630ee394fb",
+                  "bytes": 29,
+                  "digest": "251ea9cc653094a6cb9d50cfed3d5f1971d33a98ca8b57cbc31ce44180db3cc3",
+                  "filterVersion": "source-filter@1",
+                  "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                  "path": "index.js",
+                  "repositoryId": 3,
+                  "revision": "828ee9fa75dfd9b925c19fc27eed09c087b8cdc3"
+                }
+              ],
+              "coverage": {
+                "pending": [],
+                "reasons": [],
+                "scope": "explicit selected paths only",
+                "state": "completed",
+                "treeTruncated": false
+              },
+              "materializedBytes": 29,
+              "selections": [
+                {
+                  "path": "index.js",
+                  "reason": "explicit mock entry"
+                }
+              ],
+              "snapshot": {
+                "files": [
+                  {
+                    "blob": "b57e980fa8065f44e6bd32654a8258630ee394fb",
+                    "bytes": 29,
+                    "classification": "application_source",
+                    "digest": "251ea9cc653094a6cb9d50cfed3d5f1971d33a98ca8b57cbc31ce44180db3cc3",
+                    "filterVersion": "source-filter@1",
+                    "language": "javascript",
+                    "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                    "path": "index.js",
+                    "reasons": [
+                      "supported source; no exclusion heuristic matched"
+                    ]
+                  }
+                ],
+                "identity": {
+                  "aliases": [],
+                  "completeness": "provider_id",
+                  "fullName": "other/example",
+                  "provider": "github",
+                  "repositoryId": 3,
+                  "revision": "828ee9fa75dfd9b925c19fc27eed09c087b8cdc3"
+                },
+                "pending": [],
+                "reasons": [],
+                "state": "completed"
+              }
+            },
+            "state": "completed"
+          }
+        ],
+        "sourceMaterializedBytes": 119,
+        "usage": {
+          "activeWorkers": 0,
+          "attempts": 11,
+          "bytesByFile": {
+            "[\"github:1@cac1a6416a877d091954f52cae3f640c61a4e011\",\"index.js\"]": 90,
+            "[\"github:3@828ee9fa75dfd9b925c19fc27eed09c087b8cdc3\",\"index.js\"]": 29
+          },
+          "candidates": 1,
+          "files": {
+            "github:1@cac1a6416a877d091954f52cae3f640c61a4e011": 1,
+            "github:3@828ee9fa75dfd9b925c19fc27eed09c087b8cdc3": 1
+          },
+          "peakWorkers": 1,
+          "searchAttempts": 0,
+          "totalBytes": 119
+        },
+        "verification": "pending"
+      },
+      "evidenceKind": "synthetic Mock; not actual GitHub response",
+      "mode": "id_conflict",
+      "receipt": {
+        "contentDigest": "408f1e891dba1aecbecd9d57f023f66e42973429cc8aac1d02ca46a7d9ecf3ca",
+        "cpuBudget": "unsupported",
+        "cpuScope": "process including workers; observational only",
+        "node": "v24.21.0",
+        "observations": [
+          {
+            "bootstrap": null,
+            "expectedId": 1,
+            "resolution": [
+              {
+                "fullName": "root/example",
+                "htmlUrl": "https://github.com/root/example",
+                "observedAt": "2026-10-09T00:00:00.000Z",
+                "repositoryId": 1,
+                "source": "repository_metadata"
+              }
+            ]
+          },
+          {
+            "bootstrap": null,
+            "expectedId": 2,
+            "resolution": [
+              {
+                "fullName": "old/example",
+                "htmlUrl": "https://github.com/old/example",
+                "observedAt": "2026-10-09T00:00:00.000Z",
+                "repositoryId": 2,
+                "source": "repository_search"
+              }
+            ]
+          },
+          {
+            "bootstrap": null,
+            "expectedId": 3,
+            "resolution": [
+              {
+                "fullName": "other/example",
+                "htmlUrl": "https://github.com/other/example",
+                "observedAt": "2026-10-09T00:00:00.000Z",
+                "repositoryId": 3,
+                "source": "repository_metadata"
+              }
+            ]
+          }
+        ],
+        "platform": "linux",
+        "processCpuMs": 280.613,
+        "requests": [
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repositories/1",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 117,
+              "reservedBytes": 32768,
+              "retainedBytes": 117,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 14.802707999999996
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repos/root/example/commits/cac1a6416a877d091954f52cae3f640c61a4e011",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 132,
+              "reservedBytes": 32768,
+              "retainedBytes": 132,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.2873750000000541
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repos/root/example/git/trees/1f71f9ac9237086831306ba771dfc2ac8bd299d9",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 186,
+              "reservedBytes": 32768,
+              "retainedBytes": 186,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.23137099999996735
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repos/root/example/git/blobs/6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 213,
+              "reservedBytes": 32768,
+              "retainedBytes": 213,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.18608399999999392
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repos/root/example",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 117,
+              "reservedBytes": 32768,
+              "retainedBytes": 117,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.22804899999999861
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repositories/2",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 135,
+              "reservedBytes": 32768,
+              "retainedBytes": 135,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.5062019999999734
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repositories/3",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 119,
+              "reservedBytes": 32768,
+              "retainedBytes": 119,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.20468299999998862
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repos/other/example/commits/828ee9fa75dfd9b925c19fc27eed09c087b8cdc3",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 132,
+              "reservedBytes": 32768,
+              "retainedBytes": 132,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.13261199999999462
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repos/other/example/git/trees/f067ff3135c3d39b2b39190c1cb5d37642f8c2d7",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 186,
+              "reservedBytes": 32768,
+              "retainedBytes": 186,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.2545220000000086
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repos/other/example/git/blobs/b57e980fa8065f44e6bd32654a8258630ee394fb",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 133,
+              "reservedBytes": 32768,
+              "retainedBytes": 133,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.2884779999999978
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repos/other/example",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 119,
+              "reservedBytes": 32768,
+              "retainedBytes": 119,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.13107300000001487
+          }
+        ],
+        "schemaVersion": "discovery-pinned-probe-receipt@1",
+        "startedAt": "2026-10-09T00:00:00.000Z",
+        "wallMs": 310.362317
+      }
+    },
+    {
+      "content": {
+        "budget": {
+          "attempts": 24,
+          "bytesPerFile": 131072,
+          "candidates": 3,
+          "concurrency": 2,
+          "cpuMs": null,
+          "filesPerCandidate": 8,
+          "searchAttempts": 4,
+          "totalBytes": 2097152,
+          "wallMs": 30000
+        },
+        "comparisons": [
+          {
+            "candidate": null,
+            "label": "unknown; unjudged",
+            "name": "old/example",
+            "reason": "no eligible identity-checked pinned source",
+            "summary": null
+          },
+          {
+            "candidate": {
+              "candidate": {
+                "aliases": [],
+                "completeness": "provider_id",
+                "fullName": "other/example",
+                "provider": "github",
+                "repositoryId": 3,
+                "revision": "828ee9fa75dfd9b925c19fc27eed09c087b8cdc3"
+              },
+              "checks": [],
+              "coverage": {
+                "comparedPairs": 1,
+                "expectedPairs": 1,
+                "pending": [],
+                "reasons": [],
+                "state": "completed"
+              },
+              "discoveries": [
+                {
+                  "locator": "https://github.com/other/example",
+                  "reason": "explicit bounded controls; no Search or inferred lineage",
+                  "source": "explicit_public_probe",
+                  "version": "phase1d-controls@1"
+                }
+              ],
+              "files": {
+                "candidate": [
+                  {
+                    "blob": "b57e980fa8065f44e6bd32654a8258630ee394fb",
+                    "bytes": 29,
+                    "classification": "application_source",
+                    "digest": "251ea9cc653094a6cb9d50cfed3d5f1971d33a98ca8b57cbc31ce44180db3cc3",
+                    "filterVersion": "source-filter@1",
+                    "language": "javascript",
+                    "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                    "path": "index.js",
+                    "reasons": [
+                      "supported source; no exclusion heuristic matched"
+                    ]
+                  }
+                ],
+                "target": [
+                  {
+                    "blob": "6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+                    "bytes": 90,
+                    "classification": "application_source",
+                    "digest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+                    "filterVersion": "source-filter@1",
+                    "language": "javascript",
+                    "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                    "path": "index.js",
+                    "reasons": [
+                      "supported source; no exclusion heuristic matched"
+                    ]
+                  }
+                ]
+              },
+              "lineageClaim": "none",
+              "schemaVersion": "discovery-candidate@1",
+              "similarity": [
+                {
+                  "filterVersion": "source-filter@1",
+                  "firstCoverage": null,
+                  "firstDigest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+                  "firstPath": "index.js",
+                  "firstShingles": null,
+                  "firstTokens": 26,
+                  "method": "exact_blob",
+                  "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                  "ranges": [],
+                  "rangesTruncated": false,
+                  "reasons": [],
+                  "score": 0,
+                  "secondCoverage": null,
+                  "secondDigest": "251ea9cc653094a6cb9d50cfed3d5f1971d33a98ca8b57cbc31ce44180db3cc3",
+                  "secondPath": "index.js",
+                  "secondShingles": null,
+                  "secondTokens": 6,
+                  "sharedShingles": null,
+                  "state": "completed",
+                  "version": "git-blob-sha1@1"
+                },
+                {
+                  "filterVersion": "source-filter@1",
+                  "firstCoverage": 0,
+                  "firstDigest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+                  "firstPath": "index.js",
+                  "firstShingles": 22,
+                  "firstTokens": 26,
+                  "method": "strict_token5",
+                  "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                  "ranges": [],
+                  "rangesTruncated": false,
+                  "reasons": [],
+                  "score": 0,
+                  "secondCoverage": 0,
+                  "secondDigest": "251ea9cc653094a6cb9d50cfed3d5f1971d33a98ca8b57cbc31ce44180db3cc3",
+                  "secondPath": "index.js",
+                  "secondShingles": 2,
+                  "secondTokens": 6,
+                  "sharedShingles": 0,
+                  "state": "completed",
+                  "version": "token5-set@1"
+                },
+                {
+                  "filterVersion": "source-filter@1",
+                  "firstCoverage": 0,
+                  "firstDigest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+                  "firstPath": "index.js",
+                  "firstShingles": 22,
+                  "firstTokens": 26,
+                  "method": "normalized_token5",
+                  "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                  "ranges": [],
+                  "rangesTruncated": false,
+                  "reasons": [],
+                  "score": 0,
+                  "secondCoverage": 0,
+                  "secondDigest": "251ea9cc653094a6cb9d50cfed3d5f1971d33a98ca8b57cbc31ce44180db3cc3",
+                  "secondPath": "index.js",
+                  "secondShingles": 2,
+                  "secondTokens": 6,
+                  "sharedShingles": 0,
+                  "state": "completed",
+                  "version": "token5-set@1"
+                }
+              ],
+              "target": {
+                "aliases": [],
+                "completeness": "provider_id",
+                "fullName": "root/example",
+                "provider": "github",
+                "repositoryId": 1,
+                "revision": "cac1a6416a877d091954f52cae3f640c61a4e011"
+              },
+              "usage": {
+                "activeWorkers": 0,
+                "attempts": 15,
+                "bytesByFile": {
+                  "[\"github:1@cac1a6416a877d091954f52cae3f640c61a4e011\",\"index.js\"]": 90,
+                  "[\"github:2@c7df49b85e4885242789c07867c56fba789e1929\",\"index.js\"]": 90,
+                  "[\"github:3@828ee9fa75dfd9b925c19fc27eed09c087b8cdc3\",\"index.js\"]": 29
+                },
+                "candidates": 1,
+                "files": {
+                  "github:1@cac1a6416a877d091954f52cae3f640c61a4e011": 1,
+                  "github:2@c7df49b85e4885242789c07867c56fba789e1929": 1,
+                  "github:3@828ee9fa75dfd9b925c19fc27eed09c087b8cdc3": 1
+                },
+                "peakWorkers": 1,
+                "searchAttempts": 0,
+                "totalBytes": 209
+              },
+              "verification": {
+                "canonicalEvidenceIds": [],
+                "checks": [],
+                "state": "pending"
+              }
+            },
+            "label": "unknown; unjudged",
+            "name": "other/example",
+            "reason": null,
+            "summary": {
+              "comparedPairs": 1,
+              "exactPairs": 0,
+              "expectedPairs": 1,
+              "failures": [],
+              "firstFiltered": 0,
+              "firstIncluded": 1,
+              "firstTokens": 26,
+              "normalized": {
+                "first": 22,
+                "firstCoverage": 0,
+                "score": 0,
+                "second": 2,
+                "secondCoverage": 0,
+                "shared": 0
+              },
+              "secondFiltered": 0,
+              "secondIncluded": 1,
+              "secondTokens": 6,
+              "state": "completed",
+              "strict": {
+                "first": 22,
+                "firstCoverage": 0,
+                "score": 0,
+                "second": 2,
+                "secondCoverage": 0,
+                "shared": 0
+              }
+            }
+          }
+        ],
+        "coverage": {
+          "completed": 1,
+          "inconclusive": 1,
+          "state": "partial"
+        },
+        "cpuBudget": "unsupported",
+        "lineageClaim": "none",
+        "network": {
+          "overflowBytes": 0,
+          "receivedBytes": 2304,
+          "reservedBytes": 491520,
+          "retainedBytes": 2304
+        },
+        "networkProfile": {
+          "perResponseBytes": 32768,
+          "totalResponseBytes": 1048576
+        },
+        "requests": [
+          {
+            "endpoint": "/repositories/1",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 117,
+            "reservedBytes": 32768,
+            "retainedBytes": 117,
+            "status": 200
+          },
+          {
+            "endpoint": "/repos/root/example/commits/cac1a6416a877d091954f52cae3f640c61a4e011",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 132,
+            "reservedBytes": 32768,
+            "retainedBytes": 132,
+            "status": 200
+          },
+          {
+            "endpoint": "/repos/root/example/git/trees/1f71f9ac9237086831306ba771dfc2ac8bd299d9",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 186,
+            "reservedBytes": 32768,
+            "retainedBytes": 186,
+            "status": 200
+          },
+          {
+            "endpoint": "/repos/root/example/git/blobs/6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 213,
+            "reservedBytes": 32768,
+            "retainedBytes": 213,
+            "status": 200
+          },
+          {
+            "endpoint": "/repos/root/example",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 117,
+            "reservedBytes": 32768,
+            "retainedBytes": 117,
+            "status": 200
+          },
+          {
+            "endpoint": "/repositories/2",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 134,
+            "reservedBytes": 32768,
+            "retainedBytes": 134,
+            "status": 200
+          },
+          {
+            "endpoint": "/repos/fork/example/commits/c7df49b85e4885242789c07867c56fba789e1929",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 182,
+            "reservedBytes": 32768,
+            "retainedBytes": 182,
+            "status": 200
+          },
+          {
+            "endpoint": "/repos/fork/example/git/trees/1f71f9ac9237086831306ba771dfc2ac8bd299d9",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 186,
+            "reservedBytes": 32768,
+            "retainedBytes": 186,
+            "status": 200
+          },
+          {
+            "endpoint": "/repos/fork/example/git/blobs/6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 213,
+            "reservedBytes": 32768,
+            "retainedBytes": 213,
+            "status": 200
+          },
+          {
+            "endpoint": "/repos/fork/example",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 135,
+            "reservedBytes": 32768,
+            "retainedBytes": 135,
+            "status": 200
+          },
+          {
+            "endpoint": "/repositories/3",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 119,
+            "reservedBytes": 32768,
+            "retainedBytes": 119,
+            "status": 200
+          },
+          {
+            "endpoint": "/repos/other/example/commits/828ee9fa75dfd9b925c19fc27eed09c087b8cdc3",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 132,
+            "reservedBytes": 32768,
+            "retainedBytes": 132,
+            "status": 200
+          },
+          {
+            "endpoint": "/repos/other/example/git/trees/f067ff3135c3d39b2b39190c1cb5d37642f8c2d7",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 186,
+            "reservedBytes": 32768,
+            "retainedBytes": 186,
+            "status": 200
+          },
+          {
+            "endpoint": "/repos/other/example/git/blobs/b57e980fa8065f44e6bd32654a8258630ee394fb",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 133,
+            "reservedBytes": 32768,
+            "retainedBytes": 133,
+            "status": 200
+          },
+          {
+            "endpoint": "/repos/other/example",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 119,
+            "reservedBytes": 32768,
+            "retainedBytes": 119,
+            "status": 200
+          }
+        ],
+        "schemaVersion": "discovery-pinned-probe@1",
+        "scope": "explicit controls and selected paths only; no discovery recall claim",
+        "snapshots": [
+          {
+            "bootstrap": null,
+            "control": {
+              "name": "root/example",
+              "repositoryId": 1,
+              "revision": "cac1a6416a877d091954f52cae3f640c61a4e011",
+              "selections": [
+                {
+                  "path": "index.js",
+                  "reason": "explicit mock entry"
+                }
+              ]
+            },
+            "expectedId": 1,
+            "identityCheck": {
+              "fullName": "root/example",
+              "reason": null,
+              "repositoryId": 1,
+              "state": "matched"
+            },
+            "resolution": {
+              "defaultBranch": "main",
+              "identity": {
+                "aliases": [],
+                "completeness": "provider_id",
+                "fullName": "root/example",
+                "provider": "github",
+                "repositoryId": 1,
+                "revision": "cac1a6416a877d091954f52cae3f640c61a4e011"
+              },
+              "metadata": {
+                "fork": false,
+                "parentId": null
+              },
+              "observations": [
+                {
+                  "fullName": "root/example",
+                  "htmlUrl": "https://github.com/root/example",
+                  "repositoryId": 1,
+                  "source": "repository_metadata"
+                }
+              ],
+              "parents": [],
+              "reasons": [],
+              "requestSource": "github-rest-verified-name@1",
+              "requestedId": 1,
+              "schemaVersion": "repository-snapshot@1",
+              "state": "resolved",
+              "tree": "1f71f9ac9237086831306ba771dfc2ac8bd299d9"
+            },
+            "source": {
+              "bindings": [
+                {
+                  "blob": "6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+                  "bytes": 90,
+                  "digest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+                  "filterVersion": "source-filter@1",
+                  "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                  "path": "index.js",
+                  "repositoryId": 1,
+                  "revision": "cac1a6416a877d091954f52cae3f640c61a4e011"
+                }
+              ],
+              "coverage": {
+                "pending": [],
+                "reasons": [],
+                "scope": "explicit selected paths only",
+                "state": "completed",
+                "treeTruncated": false
+              },
+              "materializedBytes": 90,
+              "selections": [
+                {
+                  "path": "index.js",
+                  "reason": "explicit mock entry"
+                }
+              ],
+              "snapshot": {
+                "files": [
+                  {
+                    "blob": "6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+                    "bytes": 90,
+                    "classification": "application_source",
+                    "digest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+                    "filterVersion": "source-filter@1",
+                    "language": "javascript",
+                    "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                    "path": "index.js",
+                    "reasons": [
+                      "supported source; no exclusion heuristic matched"
+                    ]
+                  }
+                ],
+                "identity": {
+                  "aliases": [],
+                  "completeness": "provider_id",
+                  "fullName": "root/example",
+                  "provider": "github",
+                  "repositoryId": 1,
+                  "revision": "cac1a6416a877d091954f52cae3f640c61a4e011"
+                },
+                "pending": [],
+                "reasons": [],
+                "state": "completed"
+              }
+            },
+            "state": "completed"
+          },
+          {
+            "bootstrap": null,
+            "control": {
+              "name": "old/example",
+              "repositoryId": 2,
+              "revision": "c7df49b85e4885242789c07867c56fba789e1929",
+              "selections": [
+                {
+                  "path": "index.js",
+                  "reason": "explicit mock entry"
+                }
+              ]
+            },
+            "expectedId": 2,
+            "identityCheck": {
+              "fullName": "fork/example",
+              "reason": "final identity: id_conflict",
+              "repositoryId": 99,
+              "state": "id_conflict"
+            },
+            "resolution": {
+              "defaultBranch": "main",
+              "identity": null,
+              "metadata": {
+                "fork": true,
+                "parentId": 1
+              },
+              "observations": [
+                {
+                  "fullName": "old/example",
+                  "htmlUrl": "https://github.com/old/example",
+                  "repositoryId": 2,
+                  "source": "repository_search"
+                },
+                {
+                  "fullName": "fork/example",
+                  "htmlUrl": "https://github.com/fork/example",
+                  "repositoryId": 2,
+                  "source": "repository_metadata"
+                }
+              ],
+              "parents": [
+                "cac1a6416a877d091954f52cae3f640c61a4e011"
+              ],
+              "reasons": [
+                "search_metadata_name_disagreement",
+                "caller_name_metadata_disagreement",
+                "final identity: id_conflict"
+              ],
+              "requestSource": "github-rest-verified-name@1",
+              "requestedId": 2,
+              "schemaVersion": "repository-snapshot@1",
+              "state": "inconclusive",
+              "tree": null
+            },
+            "source": {
+              "bindings": [],
+              "coverage": {
+                "pending": [
+                  "index.js"
+                ],
+                "reasons": [
+                  "final identity: id_conflict"
+                ],
+                "scope": "explicit selected paths only",
+                "state": "unavailable",
+                "treeTruncated": false
+              },
+              "materializedBytes": 90,
+              "selections": [
+                {
+                  "path": "index.js",
+                  "reason": "explicit mock entry"
+                }
+              ],
+              "snapshot": null
+            },
+            "state": "inconclusive"
+          },
+          {
+            "bootstrap": null,
+            "control": {
+              "name": "other/example",
+              "repositoryId": 3,
+              "revision": "828ee9fa75dfd9b925c19fc27eed09c087b8cdc3",
+              "selections": [
+                {
+                  "path": "index.js",
+                  "reason": "explicit mock entry"
+                }
+              ]
+            },
+            "expectedId": 3,
+            "identityCheck": {
+              "fullName": "other/example",
+              "reason": null,
+              "repositoryId": 3,
+              "state": "matched"
+            },
+            "resolution": {
+              "defaultBranch": "main",
+              "identity": {
+                "aliases": [],
+                "completeness": "provider_id",
+                "fullName": "other/example",
+                "provider": "github",
+                "repositoryId": 3,
+                "revision": "828ee9fa75dfd9b925c19fc27eed09c087b8cdc3"
+              },
+              "metadata": {
+                "fork": false,
+                "parentId": null
+              },
+              "observations": [
+                {
+                  "fullName": "other/example",
+                  "htmlUrl": "https://github.com/other/example",
+                  "repositoryId": 3,
+                  "source": "repository_metadata"
+                }
+              ],
+              "parents": [],
+              "reasons": [],
+              "requestSource": "github-rest-verified-name@1",
+              "requestedId": 3,
+              "schemaVersion": "repository-snapshot@1",
+              "state": "resolved",
+              "tree": "f067ff3135c3d39b2b39190c1cb5d37642f8c2d7"
+            },
+            "source": {
+              "bindings": [
+                {
+                  "blob": "b57e980fa8065f44e6bd32654a8258630ee394fb",
+                  "bytes": 29,
+                  "digest": "251ea9cc653094a6cb9d50cfed3d5f1971d33a98ca8b57cbc31ce44180db3cc3",
+                  "filterVersion": "source-filter@1",
+                  "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                  "path": "index.js",
+                  "repositoryId": 3,
+                  "revision": "828ee9fa75dfd9b925c19fc27eed09c087b8cdc3"
+                }
+              ],
+              "coverage": {
+                "pending": [],
+                "reasons": [],
+                "scope": "explicit selected paths only",
+                "state": "completed",
+                "treeTruncated": false
+              },
+              "materializedBytes": 29,
+              "selections": [
+                {
+                  "path": "index.js",
+                  "reason": "explicit mock entry"
+                }
+              ],
+              "snapshot": {
+                "files": [
+                  {
+                    "blob": "b57e980fa8065f44e6bd32654a8258630ee394fb",
+                    "bytes": 29,
+                    "classification": "application_source",
+                    "digest": "251ea9cc653094a6cb9d50cfed3d5f1971d33a98ca8b57cbc31ce44180db3cc3",
+                    "filterVersion": "source-filter@1",
+                    "language": "javascript",
+                    "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                    "path": "index.js",
+                    "reasons": [
+                      "supported source; no exclusion heuristic matched"
+                    ]
+                  }
+                ],
+                "identity": {
+                  "aliases": [],
+                  "completeness": "provider_id",
+                  "fullName": "other/example",
+                  "provider": "github",
+                  "repositoryId": 3,
+                  "revision": "828ee9fa75dfd9b925c19fc27eed09c087b8cdc3"
+                },
+                "pending": [],
+                "reasons": [],
+                "state": "completed"
+              }
+            },
+            "state": "completed"
+          }
+        ],
+        "sourceMaterializedBytes": 209,
+        "usage": {
+          "activeWorkers": 0,
+          "attempts": 15,
+          "bytesByFile": {
+            "[\"github:1@cac1a6416a877d091954f52cae3f640c61a4e011\",\"index.js\"]": 90,
+            "[\"github:2@c7df49b85e4885242789c07867c56fba789e1929\",\"index.js\"]": 90,
+            "[\"github:3@828ee9fa75dfd9b925c19fc27eed09c087b8cdc3\",\"index.js\"]": 29
+          },
+          "candidates": 1,
+          "files": {
+            "github:1@cac1a6416a877d091954f52cae3f640c61a4e011": 1,
+            "github:2@c7df49b85e4885242789c07867c56fba789e1929": 1,
+            "github:3@828ee9fa75dfd9b925c19fc27eed09c087b8cdc3": 1
+          },
+          "peakWorkers": 1,
+          "searchAttempts": 0,
+          "totalBytes": 209
+        },
+        "verification": "pending"
+      },
+      "evidenceKind": "synthetic Mock; not actual GitHub response",
+      "mode": "post_id_conflict",
+      "receipt": {
+        "contentDigest": "4b3c917166b0b6f240d2f667a5b730d90590479e8245aba4338933d1f26a4477",
+        "cpuBudget": "unsupported",
+        "cpuScope": "process including workers; observational only",
+        "node": "v24.21.0",
+        "observations": [
+          {
+            "bootstrap": null,
+            "expectedId": 1,
+            "resolution": [
+              {
+                "fullName": "root/example",
+                "htmlUrl": "https://github.com/root/example",
+                "observedAt": "2026-10-09T00:00:00.000Z",
+                "repositoryId": 1,
+                "source": "repository_metadata"
+              }
+            ]
+          },
+          {
+            "bootstrap": null,
+            "expectedId": 2,
+            "resolution": [
+              {
+                "fullName": "old/example",
+                "htmlUrl": "https://github.com/old/example",
+                "observedAt": "2026-10-09T00:00:00.000Z",
+                "repositoryId": 2,
+                "source": "repository_search"
+              },
+              {
+                "fullName": "fork/example",
+                "htmlUrl": "https://github.com/fork/example",
+                "observedAt": "2026-10-09T00:00:00.000Z",
+                "repositoryId": 2,
+                "source": "repository_metadata"
+              }
+            ]
+          },
+          {
+            "bootstrap": null,
+            "expectedId": 3,
+            "resolution": [
+              {
+                "fullName": "other/example",
+                "htmlUrl": "https://github.com/other/example",
+                "observedAt": "2026-10-09T00:00:00.000Z",
+                "repositoryId": 3,
+                "source": "repository_metadata"
+              }
+            ]
+          }
+        ],
+        "platform": "linux",
+        "processCpuMs": 255.189,
+        "requests": [
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repositories/1",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 117,
+              "reservedBytes": 32768,
+              "retainedBytes": 117,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.19261300000005122
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repos/root/example/commits/cac1a6416a877d091954f52cae3f640c61a4e011",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 132,
+              "reservedBytes": 32768,
+              "retainedBytes": 132,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.09106199999996534
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repos/root/example/git/trees/1f71f9ac9237086831306ba771dfc2ac8bd299d9",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 186,
+              "reservedBytes": 32768,
+              "retainedBytes": 186,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.14873499999998785
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repos/root/example/git/blobs/6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 213,
+              "reservedBytes": 32768,
+              "retainedBytes": 213,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.08751700000004803
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repos/root/example",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 117,
+              "reservedBytes": 32768,
+              "retainedBytes": 117,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.0736580000000231
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repositories/2",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 134,
+              "reservedBytes": 32768,
+              "retainedBytes": 134,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.06251099999997223
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repos/fork/example/commits/c7df49b85e4885242789c07867c56fba789e1929",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 182,
+              "reservedBytes": 32768,
+              "retainedBytes": 182,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.11076200000002245
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repos/fork/example/git/trees/1f71f9ac9237086831306ba771dfc2ac8bd299d9",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 186,
+              "reservedBytes": 32768,
+              "retainedBytes": 186,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.1574479999999312
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repos/fork/example/git/blobs/6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 213,
+              "reservedBytes": 32768,
+              "retainedBytes": 213,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.10414500000001681
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repos/fork/example",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 135,
+              "reservedBytes": 32768,
+              "retainedBytes": 135,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.08245599999997921
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repositories/3",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 119,
+              "reservedBytes": 32768,
+              "retainedBytes": 119,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.11608000000001084
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repos/other/example/commits/828ee9fa75dfd9b925c19fc27eed09c087b8cdc3",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 132,
+              "reservedBytes": 32768,
+              "retainedBytes": 132,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.06864500000006046
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repos/other/example/git/trees/f067ff3135c3d39b2b39190c1cb5d37642f8c2d7",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 186,
+              "reservedBytes": 32768,
+              "retainedBytes": 186,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.08336600000006911
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repos/other/example/git/blobs/b57e980fa8065f44e6bd32654a8258630ee394fb",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 133,
+              "reservedBytes": 32768,
+              "retainedBytes": 133,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.11196900000004462
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repos/other/example",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 119,
+              "reservedBytes": 32768,
+              "retainedBytes": 119,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.09961199999997916
+          }
+        ],
+        "schemaVersion": "discovery-pinned-probe-receipt@1",
+        "startedAt": "2026-10-09T00:00:00.000Z",
+        "wallMs": 291.63124200000004
+      }
+    },
+    {
+      "content": {
+        "budget": {
+          "attempts": 24,
+          "bytesPerFile": 131072,
+          "candidates": 3,
+          "concurrency": 2,
+          "cpuMs": null,
+          "filesPerCandidate": 8,
+          "searchAttempts": 4,
+          "totalBytes": 2097152,
+          "wallMs": 30000
+        },
+        "comparisons": [
+          {
+            "candidate": null,
+            "label": "unknown; unjudged",
+            "name": "old/example",
+            "reason": "no eligible identity-checked pinned source",
+            "summary": null
+          },
+          {
+            "candidate": null,
+            "label": "unknown; unjudged",
+            "name": "other/example",
+            "reason": "no eligible identity-checked pinned source",
+            "summary": null
+          }
+        ],
+        "coverage": {
+          "completed": 0,
+          "inconclusive": 2,
+          "state": "partial"
+        },
+        "cpuBudget": "unsupported",
+        "lineageClaim": "none",
+        "network": {
+          "overflowBytes": 0,
+          "receivedBytes": 765,
+          "reservedBytes": 196608,
+          "retainedBytes": 765
+        },
+        "networkProfile": {
+          "perResponseBytes": 32768,
+          "totalResponseBytes": 1048576
+        },
+        "requests": [
+          {
+            "endpoint": "/repositories/1",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 117,
+            "reservedBytes": 32768,
+            "retainedBytes": 117,
+            "status": 200
+          },
+          {
+            "endpoint": "/repos/root/example/commits/cac1a6416a877d091954f52cae3f640c61a4e011",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 132,
+            "reservedBytes": 32768,
+            "retainedBytes": 132,
+            "status": 200
+          },
+          {
+            "endpoint": "/repos/root/example/git/trees/1f71f9ac9237086831306ba771dfc2ac8bd299d9",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 186,
+            "reservedBytes": 32768,
+            "retainedBytes": 186,
+            "status": 200
+          },
+          {
+            "endpoint": "/repos/root/example/git/blobs/6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 213,
+            "reservedBytes": 32768,
+            "retainedBytes": 213,
+            "status": 200
+          },
+          {
+            "endpoint": "/repos/root/example",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 117,
+            "reservedBytes": 32768,
+            "retainedBytes": 117,
+            "status": 200
+          },
+          {
+            "endpoint": "/repositories/2",
+            "outcome": "redirect_rejected",
+            "reason": null,
+            "receivedBytes": 0,
+            "reservedBytes": 32768,
+            "retainedBytes": 0,
+            "status": 301
+          },
+          {
+            "endpoint": "/repositories/3",
+            "outcome": "budget_denied",
+            "reason": "provider stopped by rate limit or redirect",
+            "receivedBytes": 0,
+            "reservedBytes": 0,
+            "retainedBytes": 0,
+            "status": null
+          }
+        ],
+        "schemaVersion": "discovery-pinned-probe@1",
+        "scope": "explicit controls and selected paths only; no discovery recall claim",
+        "snapshots": [
+          {
+            "bootstrap": null,
+            "control": {
+              "name": "root/example",
+              "repositoryId": 1,
+              "revision": "cac1a6416a877d091954f52cae3f640c61a4e011",
+              "selections": [
+                {
+                  "path": "index.js",
+                  "reason": "explicit mock entry"
+                }
+              ]
+            },
+            "expectedId": 1,
+            "identityCheck": {
+              "fullName": "root/example",
+              "reason": null,
+              "repositoryId": 1,
+              "state": "matched"
+            },
+            "resolution": {
+              "defaultBranch": "main",
+              "identity": {
+                "aliases": [],
+                "completeness": "provider_id",
+                "fullName": "root/example",
+                "provider": "github",
+                "repositoryId": 1,
+                "revision": "cac1a6416a877d091954f52cae3f640c61a4e011"
+              },
+              "metadata": {
+                "fork": false,
+                "parentId": null
+              },
+              "observations": [
+                {
+                  "fullName": "root/example",
+                  "htmlUrl": "https://github.com/root/example",
+                  "repositoryId": 1,
+                  "source": "repository_metadata"
+                }
+              ],
+              "parents": [],
+              "reasons": [],
+              "requestSource": "github-rest-verified-name@1",
+              "requestedId": 1,
+              "schemaVersion": "repository-snapshot@1",
+              "state": "resolved",
+              "tree": "1f71f9ac9237086831306ba771dfc2ac8bd299d9"
+            },
+            "source": {
+              "bindings": [
+                {
+                  "blob": "6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+                  "bytes": 90,
+                  "digest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+                  "filterVersion": "source-filter@1",
+                  "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                  "path": "index.js",
+                  "repositoryId": 1,
+                  "revision": "cac1a6416a877d091954f52cae3f640c61a4e011"
+                }
+              ],
+              "coverage": {
+                "pending": [],
+                "reasons": [],
+                "scope": "explicit selected paths only",
+                "state": "completed",
+                "treeTruncated": false
+              },
+              "materializedBytes": 90,
+              "selections": [
+                {
+                  "path": "index.js",
+                  "reason": "explicit mock entry"
+                }
+              ],
+              "snapshot": {
+                "files": [
+                  {
+                    "blob": "6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+                    "bytes": 90,
+                    "classification": "application_source",
+                    "digest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+                    "filterVersion": "source-filter@1",
+                    "language": "javascript",
+                    "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                    "path": "index.js",
+                    "reasons": [
+                      "supported source; no exclusion heuristic matched"
+                    ]
+                  }
+                ],
+                "identity": {
+                  "aliases": [],
+                  "completeness": "provider_id",
+                  "fullName": "root/example",
+                  "provider": "github",
+                  "repositoryId": 1,
+                  "revision": "cac1a6416a877d091954f52cae3f640c61a4e011"
+                },
+                "pending": [],
+                "reasons": [],
+                "state": "completed"
+              }
+            },
+            "state": "completed"
+          },
+          {
+            "bootstrap": null,
+            "control": {
+              "name": "old/example",
+              "repositoryId": 2,
+              "revision": "c7df49b85e4885242789c07867c56fba789e1929",
+              "selections": [
+                {
+                  "path": "index.js",
+                  "reason": "explicit mock entry"
+                }
+              ]
+            },
+            "expectedId": 2,
+            "identityCheck": {
+              "fullName": null,
+              "reason": "pre-resolution unavailable",
+              "repositoryId": null,
+              "state": "not_attempted"
+            },
+            "resolution": {
+              "defaultBranch": null,
+              "identity": null,
+              "metadata": {
+                "fork": null,
+                "parentId": null
+              },
+              "observations": [
+                {
+                  "fullName": "old/example",
+                  "htmlUrl": "https://github.com/old/example",
+                  "repositoryId": 2,
+                  "source": "repository_search"
+                }
+              ],
+              "parents": [],
+              "reasons": [
+                "metadata: redirect_rejected"
+              ],
+              "requestSource": "github-rest-verified-name@1",
+              "requestedId": 2,
+              "schemaVersion": "repository-snapshot@1",
+              "state": "inconclusive",
+              "tree": null
+            },
+            "source": {
+              "bindings": [],
+              "coverage": {
+                "pending": [
+                  "index.js"
+                ],
+                "reasons": [
+                  "metadata: redirect_rejected"
+                ],
+                "scope": "explicit selected paths only",
+                "state": "unavailable",
+                "treeTruncated": false
+              },
+              "materializedBytes": 0,
+              "selections": [
+                {
+                  "path": "index.js",
+                  "reason": "explicit mock entry"
+                }
+              ],
+              "snapshot": null
+            },
+            "state": "inconclusive"
+          },
+          {
+            "bootstrap": null,
+            "control": {
+              "name": "other/example",
+              "repositoryId": 3,
+              "revision": "828ee9fa75dfd9b925c19fc27eed09c087b8cdc3",
+              "selections": [
+                {
+                  "path": "index.js",
+                  "reason": "explicit mock entry"
+                }
+              ]
+            },
+            "expectedId": 3,
+            "identityCheck": {
+              "fullName": null,
+              "reason": "pre-resolution unavailable",
+              "repositoryId": null,
+              "state": "not_attempted"
+            },
+            "resolution": {
+              "defaultBranch": null,
+              "identity": null,
+              "metadata": {
+                "fork": null,
+                "parentId": null
+              },
+              "observations": [],
+              "parents": [],
+              "reasons": [
+                "metadata: budget_denied: provider stopped by rate limit or redirect"
+              ],
+              "requestSource": "github-rest-verified-name@1",
+              "requestedId": 3,
+              "schemaVersion": "repository-snapshot@1",
+              "state": "inconclusive",
+              "tree": null
+            },
+            "source": {
+              "bindings": [],
+              "coverage": {
+                "pending": [
+                  "index.js"
+                ],
+                "reasons": [
+                  "metadata: budget_denied: provider stopped by rate limit or redirect"
+                ],
+                "scope": "explicit selected paths only",
+                "state": "unavailable",
+                "treeTruncated": false
+              },
+              "materializedBytes": 0,
+              "selections": [
+                {
+                  "path": "index.js",
+                  "reason": "explicit mock entry"
+                }
+              ],
+              "snapshot": null
+            },
+            "state": "inconclusive"
+          }
+        ],
+        "sourceMaterializedBytes": 90,
+        "usage": {
+          "activeWorkers": 0,
+          "attempts": 6,
+          "bytesByFile": {
+            "[\"github:1@cac1a6416a877d091954f52cae3f640c61a4e011\",\"index.js\"]": 90
+          },
+          "candidates": 0,
+          "files": {
+            "github:1@cac1a6416a877d091954f52cae3f640c61a4e011": 1
+          },
+          "peakWorkers": 1,
+          "searchAttempts": 0,
+          "totalBytes": 90
+        },
+        "verification": "pending"
+      },
+      "evidenceKind": "synthetic Mock; not actual GitHub response",
+      "mode": "redirect_301",
+      "receipt": {
+        "contentDigest": "ec525e78b786e5c3b2b3e54b8b8a8381c7183c069c0f466d0bba17c6ad2152b4",
+        "cpuBudget": "unsupported",
+        "cpuScope": "process including workers; observational only",
+        "node": "v24.21.0",
+        "observations": [
+          {
+            "bootstrap": null,
+            "expectedId": 1,
+            "resolution": [
+              {
+                "fullName": "root/example",
+                "htmlUrl": "https://github.com/root/example",
+                "observedAt": "2026-10-09T00:00:00.000Z",
+                "repositoryId": 1,
+                "source": "repository_metadata"
+              }
+            ]
+          },
+          {
+            "bootstrap": null,
+            "expectedId": 2,
+            "resolution": [
+              {
+                "fullName": "old/example",
+                "htmlUrl": "https://github.com/old/example",
+                "observedAt": "2026-10-09T00:00:00.000Z",
+                "repositoryId": 2,
+                "source": "repository_search"
+              }
+            ]
+          },
+          {
+            "bootstrap": null,
+            "expectedId": 3,
+            "resolution": []
+          }
+        ],
+        "platform": "linux",
+        "processCpuMs": 4.247,
+        "requests": [
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repositories/1",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 117,
+              "reservedBytes": 32768,
+              "retainedBytes": 117,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.2998099999999795
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repos/root/example/commits/cac1a6416a877d091954f52cae3f640c61a4e011",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 132,
+              "reservedBytes": 32768,
+              "retainedBytes": 132,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.15012199999989662
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repos/root/example/git/trees/1f71f9ac9237086831306ba771dfc2ac8bd299d9",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 186,
+              "reservedBytes": 32768,
+              "retainedBytes": 186,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.11786399999994046
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repos/root/example/git/blobs/6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 213,
+              "reservedBytes": 32768,
+              "retainedBytes": 213,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.1050670000000764
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repos/root/example",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 117,
+              "reservedBytes": 32768,
+              "retainedBytes": 117,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.10205299999995532
+          },
+          {
+            "headers": {
+              "x-ratelimit-remaining": "10",
+              "x-ratelimit-reset": "1791545941"
+            },
+            "request": {
+              "endpoint": "/repositories/2",
+              "outcome": "redirect_rejected",
+              "reason": null,
+              "receivedBytes": 0,
+              "reservedBytes": 32768,
+              "retainedBytes": 0,
+              "status": 301
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.4860089999999673
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repositories/3",
+              "outcome": "budget_denied",
+              "reason": "provider stopped by rate limit or redirect",
+              "receivedBytes": 0,
+              "reservedBytes": 0,
+              "retainedBytes": 0,
+              "status": null
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.015548999999964508
+          }
+        ],
+        "schemaVersion": "discovery-pinned-probe-receipt@1",
+        "startedAt": "2026-10-09T00:00:00.000Z",
+        "wallMs": 2.3574049999999716
+      }
+    },
+    {
+      "content": {
+        "budget": {
+          "attempts": 24,
+          "bytesPerFile": 131072,
+          "candidates": 3,
+          "concurrency": 2,
+          "cpuMs": null,
+          "filesPerCandidate": 8,
+          "searchAttempts": 4,
+          "totalBytes": 2097152,
+          "wallMs": 30000
+        },
+        "comparisons": [
+          {
+            "candidate": null,
+            "label": "unknown; unjudged",
+            "name": "old/example",
+            "reason": "no eligible identity-checked pinned source",
+            "summary": null
+          },
+          {
+            "candidate": null,
+            "label": "unknown; unjudged",
+            "name": "other/example",
+            "reason": "no eligible identity-checked pinned source",
+            "summary": null
+          }
+        ],
+        "coverage": {
+          "completed": 0,
+          "inconclusive": 2,
+          "state": "partial"
+        },
+        "cpuBudget": "unsupported",
+        "lineageClaim": "none",
+        "network": {
+          "overflowBytes": 0,
+          "receivedBytes": 765,
+          "reservedBytes": 196608,
+          "retainedBytes": 765
+        },
+        "networkProfile": {
+          "perResponseBytes": 32768,
+          "totalResponseBytes": 1048576
+        },
+        "requests": [
+          {
+            "endpoint": "/repositories/1",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 117,
+            "reservedBytes": 32768,
+            "retainedBytes": 117,
+            "status": 200
+          },
+          {
+            "endpoint": "/repos/root/example/commits/cac1a6416a877d091954f52cae3f640c61a4e011",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 132,
+            "reservedBytes": 32768,
+            "retainedBytes": 132,
+            "status": 200
+          },
+          {
+            "endpoint": "/repos/root/example/git/trees/1f71f9ac9237086831306ba771dfc2ac8bd299d9",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 186,
+            "reservedBytes": 32768,
+            "retainedBytes": 186,
+            "status": 200
+          },
+          {
+            "endpoint": "/repos/root/example/git/blobs/6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 213,
+            "reservedBytes": 32768,
+            "retainedBytes": 213,
+            "status": 200
+          },
+          {
+            "endpoint": "/repos/root/example",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 117,
+            "reservedBytes": 32768,
+            "retainedBytes": 117,
+            "status": 200
+          },
+          {
+            "endpoint": "/repositories/2",
+            "outcome": "rate_limit",
+            "reason": null,
+            "receivedBytes": 0,
+            "reservedBytes": 32768,
+            "retainedBytes": 0,
+            "status": 403
+          },
+          {
+            "endpoint": "/repositories/3",
+            "outcome": "budget_denied",
+            "reason": "provider stopped by rate limit or redirect",
+            "receivedBytes": 0,
+            "reservedBytes": 0,
+            "retainedBytes": 0,
+            "status": null
+          }
+        ],
+        "schemaVersion": "discovery-pinned-probe@1",
+        "scope": "explicit controls and selected paths only; no discovery recall claim",
+        "snapshots": [
+          {
+            "bootstrap": null,
+            "control": {
+              "name": "root/example",
+              "repositoryId": 1,
+              "revision": "cac1a6416a877d091954f52cae3f640c61a4e011",
+              "selections": [
+                {
+                  "path": "index.js",
+                  "reason": "explicit mock entry"
+                }
+              ]
+            },
+            "expectedId": 1,
+            "identityCheck": {
+              "fullName": "root/example",
+              "reason": null,
+              "repositoryId": 1,
+              "state": "matched"
+            },
+            "resolution": {
+              "defaultBranch": "main",
+              "identity": {
+                "aliases": [],
+                "completeness": "provider_id",
+                "fullName": "root/example",
+                "provider": "github",
+                "repositoryId": 1,
+                "revision": "cac1a6416a877d091954f52cae3f640c61a4e011"
+              },
+              "metadata": {
+                "fork": false,
+                "parentId": null
+              },
+              "observations": [
+                {
+                  "fullName": "root/example",
+                  "htmlUrl": "https://github.com/root/example",
+                  "repositoryId": 1,
+                  "source": "repository_metadata"
+                }
+              ],
+              "parents": [],
+              "reasons": [],
+              "requestSource": "github-rest-verified-name@1",
+              "requestedId": 1,
+              "schemaVersion": "repository-snapshot@1",
+              "state": "resolved",
+              "tree": "1f71f9ac9237086831306ba771dfc2ac8bd299d9"
+            },
+            "source": {
+              "bindings": [
+                {
+                  "blob": "6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+                  "bytes": 90,
+                  "digest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+                  "filterVersion": "source-filter@1",
+                  "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                  "path": "index.js",
+                  "repositoryId": 1,
+                  "revision": "cac1a6416a877d091954f52cae3f640c61a4e011"
+                }
+              ],
+              "coverage": {
+                "pending": [],
+                "reasons": [],
+                "scope": "explicit selected paths only",
+                "state": "completed",
+                "treeTruncated": false
+              },
+              "materializedBytes": 90,
+              "selections": [
+                {
+                  "path": "index.js",
+                  "reason": "explicit mock entry"
+                }
+              ],
+              "snapshot": {
+                "files": [
+                  {
+                    "blob": "6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+                    "bytes": 90,
+                    "classification": "application_source",
+                    "digest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+                    "filterVersion": "source-filter@1",
+                    "language": "javascript",
+                    "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                    "path": "index.js",
+                    "reasons": [
+                      "supported source; no exclusion heuristic matched"
+                    ]
+                  }
+                ],
+                "identity": {
+                  "aliases": [],
+                  "completeness": "provider_id",
+                  "fullName": "root/example",
+                  "provider": "github",
+                  "repositoryId": 1,
+                  "revision": "cac1a6416a877d091954f52cae3f640c61a4e011"
+                },
+                "pending": [],
+                "reasons": [],
+                "state": "completed"
+              }
+            },
+            "state": "completed"
+          },
+          {
+            "bootstrap": null,
+            "control": {
+              "name": "old/example",
+              "repositoryId": 2,
+              "revision": "c7df49b85e4885242789c07867c56fba789e1929",
+              "selections": [
+                {
+                  "path": "index.js",
+                  "reason": "explicit mock entry"
+                }
+              ]
+            },
+            "expectedId": 2,
+            "identityCheck": {
+              "fullName": null,
+              "reason": "pre-resolution unavailable",
+              "repositoryId": null,
+              "state": "not_attempted"
+            },
+            "resolution": {
+              "defaultBranch": null,
+              "identity": null,
+              "metadata": {
+                "fork": null,
+                "parentId": null
+              },
+              "observations": [
+                {
+                  "fullName": "old/example",
+                  "htmlUrl": "https://github.com/old/example",
+                  "repositoryId": 2,
+                  "source": "repository_search"
+                }
+              ],
+              "parents": [],
+              "reasons": [
+                "metadata: rate_limit"
+              ],
+              "requestSource": "github-rest-verified-name@1",
+              "requestedId": 2,
+              "schemaVersion": "repository-snapshot@1",
+              "state": "inconclusive",
+              "tree": null
+            },
+            "source": {
+              "bindings": [],
+              "coverage": {
+                "pending": [
+                  "index.js"
+                ],
+                "reasons": [
+                  "metadata: rate_limit"
+                ],
+                "scope": "explicit selected paths only",
+                "state": "unavailable",
+                "treeTruncated": false
+              },
+              "materializedBytes": 0,
+              "selections": [
+                {
+                  "path": "index.js",
+                  "reason": "explicit mock entry"
+                }
+              ],
+              "snapshot": null
+            },
+            "state": "inconclusive"
+          },
+          {
+            "bootstrap": null,
+            "control": {
+              "name": "other/example",
+              "repositoryId": 3,
+              "revision": "828ee9fa75dfd9b925c19fc27eed09c087b8cdc3",
+              "selections": [
+                {
+                  "path": "index.js",
+                  "reason": "explicit mock entry"
+                }
+              ]
+            },
+            "expectedId": 3,
+            "identityCheck": {
+              "fullName": null,
+              "reason": "pre-resolution unavailable",
+              "repositoryId": null,
+              "state": "not_attempted"
+            },
+            "resolution": {
+              "defaultBranch": null,
+              "identity": null,
+              "metadata": {
+                "fork": null,
+                "parentId": null
+              },
+              "observations": [],
+              "parents": [],
+              "reasons": [
+                "metadata: budget_denied: provider stopped by rate limit or redirect"
+              ],
+              "requestSource": "github-rest-verified-name@1",
+              "requestedId": 3,
+              "schemaVersion": "repository-snapshot@1",
+              "state": "inconclusive",
+              "tree": null
+            },
+            "source": {
+              "bindings": [],
+              "coverage": {
+                "pending": [
+                  "index.js"
+                ],
+                "reasons": [
+                  "metadata: budget_denied: provider stopped by rate limit or redirect"
+                ],
+                "scope": "explicit selected paths only",
+                "state": "unavailable",
+                "treeTruncated": false
+              },
+              "materializedBytes": 0,
+              "selections": [
+                {
+                  "path": "index.js",
+                  "reason": "explicit mock entry"
+                }
+              ],
+              "snapshot": null
+            },
+            "state": "inconclusive"
+          }
+        ],
+        "sourceMaterializedBytes": 90,
+        "usage": {
+          "activeWorkers": 0,
+          "attempts": 6,
+          "bytesByFile": {
+            "[\"github:1@cac1a6416a877d091954f52cae3f640c61a4e011\",\"index.js\"]": 90
+          },
+          "candidates": 0,
+          "files": {
+            "github:1@cac1a6416a877d091954f52cae3f640c61a4e011": 1
+          },
+          "peakWorkers": 1,
+          "searchAttempts": 0,
+          "totalBytes": 90
+        },
+        "verification": "pending"
+      },
+      "evidenceKind": "synthetic Mock; not actual GitHub response",
+      "mode": "limit_403",
+      "receipt": {
+        "contentDigest": "126baf2b3921d99497d1a19a51b7a1f67f20527c17e8a87e028f6597ab5f844e",
+        "cpuBudget": "unsupported",
+        "cpuScope": "process including workers; observational only",
+        "node": "v24.21.0",
+        "observations": [
+          {
+            "bootstrap": null,
+            "expectedId": 1,
+            "resolution": [
+              {
+                "fullName": "root/example",
+                "htmlUrl": "https://github.com/root/example",
+                "observedAt": "2026-10-09T00:00:00.000Z",
+                "repositoryId": 1,
+                "source": "repository_metadata"
+              }
+            ]
+          },
+          {
+            "bootstrap": null,
+            "expectedId": 2,
+            "resolution": [
+              {
+                "fullName": "old/example",
+                "htmlUrl": "https://github.com/old/example",
+                "observedAt": "2026-10-09T00:00:00.000Z",
+                "repositoryId": 2,
+                "source": "repository_search"
+              }
+            ]
+          },
+          {
+            "bootstrap": null,
+            "expectedId": 3,
+            "resolution": []
+          }
+        ],
+        "platform": "linux",
+        "processCpuMs": 1.684,
+        "requests": [
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repositories/1",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 117,
+              "reservedBytes": 32768,
+              "retainedBytes": 117,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.13335799999993014
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repos/root/example/commits/cac1a6416a877d091954f52cae3f640c61a4e011",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 132,
+              "reservedBytes": 32768,
+              "retainedBytes": 132,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.07856900000001588
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repos/root/example/git/trees/1f71f9ac9237086831306ba771dfc2ac8bd299d9",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 186,
+              "reservedBytes": 32768,
+              "retainedBytes": 186,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.1306169999999156
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repos/root/example/git/blobs/6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 213,
+              "reservedBytes": 32768,
+              "retainedBytes": 213,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.08425599999998212
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repos/root/example",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 117,
+              "reservedBytes": 32768,
+              "retainedBytes": 117,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.14869099999998525
+          },
+          {
+            "headers": {
+              "x-ratelimit-remaining": "0",
+              "x-ratelimit-reset": "1791545941"
+            },
+            "request": {
+              "endpoint": "/repositories/2",
+              "outcome": "rate_limit",
+              "reason": null,
+              "receivedBytes": 0,
+              "reservedBytes": 32768,
+              "retainedBytes": 0,
+              "status": 403
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.11379499999998188
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repositories/3",
+              "outcome": "budget_denied",
+              "reason": "provider stopped by rate limit or redirect",
+              "receivedBytes": 0,
+              "reservedBytes": 0,
+              "retainedBytes": 0,
+              "status": null
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.013290999999981068
+          }
+        ],
+        "schemaVersion": "discovery-pinned-probe-receipt@1",
+        "startedAt": "2026-10-09T00:00:00.000Z",
+        "wallMs": 1.395228999999972
+      }
+    },
+    {
+      "content": {
+        "budget": {
+          "attempts": 24,
+          "bytesPerFile": 131072,
+          "candidates": 3,
+          "concurrency": 2,
+          "cpuMs": null,
+          "filesPerCandidate": 8,
+          "searchAttempts": 4,
+          "totalBytes": 2097152,
+          "wallMs": 30000
+        },
+        "comparisons": [
+          {
+            "candidate": null,
+            "label": "unknown; unjudged",
+            "name": "old/example",
+            "reason": "no eligible identity-checked pinned source",
+            "summary": null
+          },
+          {
+            "candidate": {
+              "candidate": {
+                "aliases": [],
+                "completeness": "provider_id",
+                "fullName": "other/example",
+                "provider": "github",
+                "repositoryId": 3,
+                "revision": "828ee9fa75dfd9b925c19fc27eed09c087b8cdc3"
+              },
+              "checks": [],
+              "coverage": {
+                "comparedPairs": 1,
+                "expectedPairs": 1,
+                "pending": [],
+                "reasons": [],
+                "state": "completed"
+              },
+              "discoveries": [
+                {
+                  "locator": "https://github.com/other/example",
+                  "reason": "explicit bounded controls; no Search or inferred lineage",
+                  "source": "explicit_public_probe",
+                  "version": "phase1d-controls@1"
+                }
+              ],
+              "files": {
+                "candidate": [
+                  {
+                    "blob": "b57e980fa8065f44e6bd32654a8258630ee394fb",
+                    "bytes": 29,
+                    "classification": "application_source",
+                    "digest": "251ea9cc653094a6cb9d50cfed3d5f1971d33a98ca8b57cbc31ce44180db3cc3",
+                    "filterVersion": "source-filter@1",
+                    "language": "javascript",
+                    "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                    "path": "index.js",
+                    "reasons": [
+                      "supported source; no exclusion heuristic matched"
+                    ]
+                  }
+                ],
+                "target": [
+                  {
+                    "blob": "6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+                    "bytes": 90,
+                    "classification": "application_source",
+                    "digest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+                    "filterVersion": "source-filter@1",
+                    "language": "javascript",
+                    "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                    "path": "index.js",
+                    "reasons": [
+                      "supported source; no exclusion heuristic matched"
+                    ]
+                  }
+                ]
+              },
+              "lineageClaim": "none",
+              "schemaVersion": "discovery-candidate@1",
+              "similarity": [
+                {
+                  "filterVersion": "source-filter@1",
+                  "firstCoverage": null,
+                  "firstDigest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+                  "firstPath": "index.js",
+                  "firstShingles": null,
+                  "firstTokens": 26,
+                  "method": "exact_blob",
+                  "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                  "ranges": [],
+                  "rangesTruncated": false,
+                  "reasons": [],
+                  "score": 0,
+                  "secondCoverage": null,
+                  "secondDigest": "251ea9cc653094a6cb9d50cfed3d5f1971d33a98ca8b57cbc31ce44180db3cc3",
+                  "secondPath": "index.js",
+                  "secondShingles": null,
+                  "secondTokens": 6,
+                  "sharedShingles": null,
+                  "state": "completed",
+                  "version": "git-blob-sha1@1"
+                },
+                {
+                  "filterVersion": "source-filter@1",
+                  "firstCoverage": 0,
+                  "firstDigest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+                  "firstPath": "index.js",
+                  "firstShingles": 22,
+                  "firstTokens": 26,
+                  "method": "strict_token5",
+                  "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                  "ranges": [],
+                  "rangesTruncated": false,
+                  "reasons": [],
+                  "score": 0,
+                  "secondCoverage": 0,
+                  "secondDigest": "251ea9cc653094a6cb9d50cfed3d5f1971d33a98ca8b57cbc31ce44180db3cc3",
+                  "secondPath": "index.js",
+                  "secondShingles": 2,
+                  "secondTokens": 6,
+                  "sharedShingles": 0,
+                  "state": "completed",
+                  "version": "token5-set@1"
+                },
+                {
+                  "filterVersion": "source-filter@1",
+                  "firstCoverage": 0,
+                  "firstDigest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+                  "firstPath": "index.js",
+                  "firstShingles": 22,
+                  "firstTokens": 26,
+                  "method": "normalized_token5",
+                  "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                  "ranges": [],
+                  "rangesTruncated": false,
+                  "reasons": [],
+                  "score": 0,
+                  "secondCoverage": 0,
+                  "secondDigest": "251ea9cc653094a6cb9d50cfed3d5f1971d33a98ca8b57cbc31ce44180db3cc3",
+                  "secondPath": "index.js",
+                  "secondShingles": 2,
+                  "secondTokens": 6,
+                  "sharedShingles": 0,
+                  "state": "completed",
+                  "version": "token5-set@1"
+                }
+              ],
+              "target": {
+                "aliases": [],
+                "completeness": "provider_id",
+                "fullName": "root/example",
+                "provider": "github",
+                "repositoryId": 1,
+                "revision": "cac1a6416a877d091954f52cae3f640c61a4e011"
+              },
+              "usage": {
+                "activeWorkers": 0,
+                "attempts": 11,
+                "bytesByFile": {
+                  "[\"github:1@cac1a6416a877d091954f52cae3f640c61a4e011\",\"index.js\"]": 90,
+                  "[\"github:3@828ee9fa75dfd9b925c19fc27eed09c087b8cdc3\",\"index.js\"]": 29
+                },
+                "candidates": 1,
+                "files": {
+                  "github:1@cac1a6416a877d091954f52cae3f640c61a4e011": 1,
+                  "github:3@828ee9fa75dfd9b925c19fc27eed09c087b8cdc3": 1
+                },
+                "peakWorkers": 1,
+                "searchAttempts": 0,
+                "totalBytes": 119
+              },
+              "verification": {
+                "canonicalEvidenceIds": [],
+                "checks": [],
+                "state": "pending"
+              }
+            },
+            "label": "unknown; unjudged",
+            "name": "other/example",
+            "reason": null,
+            "summary": {
+              "comparedPairs": 1,
+              "exactPairs": 0,
+              "expectedPairs": 1,
+              "failures": [],
+              "firstFiltered": 0,
+              "firstIncluded": 1,
+              "firstTokens": 26,
+              "normalized": {
+                "first": 22,
+                "firstCoverage": 0,
+                "score": 0,
+                "second": 2,
+                "secondCoverage": 0,
+                "shared": 0
+              },
+              "secondFiltered": 0,
+              "secondIncluded": 1,
+              "secondTokens": 6,
+              "state": "completed",
+              "strict": {
+                "first": 22,
+                "firstCoverage": 0,
+                "score": 0,
+                "second": 2,
+                "secondCoverage": 0,
+                "shared": 0
+              }
+            }
+          }
+        ],
+        "coverage": {
+          "completed": 1,
+          "inconclusive": 1,
+          "state": "partial"
+        },
+        "cpuBudget": "unsupported",
+        "lineageClaim": "none",
+        "network": {
+          "overflowBytes": 0,
+          "receivedBytes": 1454,
+          "reservedBytes": 360448,
+          "retainedBytes": 1454
+        },
+        "networkProfile": {
+          "perResponseBytes": 32768,
+          "totalResponseBytes": 1048576
+        },
+        "requests": [
+          {
+            "endpoint": "/repositories/1",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 117,
+            "reservedBytes": 32768,
+            "retainedBytes": 117,
+            "status": 200
+          },
+          {
+            "endpoint": "/repos/root/example/commits/cac1a6416a877d091954f52cae3f640c61a4e011",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 132,
+            "reservedBytes": 32768,
+            "retainedBytes": 132,
+            "status": 200
+          },
+          {
+            "endpoint": "/repos/root/example/git/trees/1f71f9ac9237086831306ba771dfc2ac8bd299d9",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 186,
+            "reservedBytes": 32768,
+            "retainedBytes": 186,
+            "status": 200
+          },
+          {
+            "endpoint": "/repos/root/example/git/blobs/6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 213,
+            "reservedBytes": 32768,
+            "retainedBytes": 213,
+            "status": 200
+          },
+          {
+            "endpoint": "/repos/root/example",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 117,
+            "reservedBytes": 32768,
+            "retainedBytes": 117,
+            "status": 200
+          },
+          {
+            "endpoint": "/repositories/2",
+            "outcome": "http_error",
+            "reason": null,
+            "receivedBytes": 0,
+            "reservedBytes": 32768,
+            "retainedBytes": 0,
+            "status": 404
+          },
+          {
+            "endpoint": "/repositories/3",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 119,
+            "reservedBytes": 32768,
+            "retainedBytes": 119,
+            "status": 200
+          },
+          {
+            "endpoint": "/repos/other/example/commits/828ee9fa75dfd9b925c19fc27eed09c087b8cdc3",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 132,
+            "reservedBytes": 32768,
+            "retainedBytes": 132,
+            "status": 200
+          },
+          {
+            "endpoint": "/repos/other/example/git/trees/f067ff3135c3d39b2b39190c1cb5d37642f8c2d7",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 186,
+            "reservedBytes": 32768,
+            "retainedBytes": 186,
+            "status": 200
+          },
+          {
+            "endpoint": "/repos/other/example/git/blobs/b57e980fa8065f44e6bd32654a8258630ee394fb",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 133,
+            "reservedBytes": 32768,
+            "retainedBytes": 133,
+            "status": 200
+          },
+          {
+            "endpoint": "/repos/other/example",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 119,
+            "reservedBytes": 32768,
+            "retainedBytes": 119,
+            "status": 200
+          }
+        ],
+        "schemaVersion": "discovery-pinned-probe@1",
+        "scope": "explicit controls and selected paths only; no discovery recall claim",
+        "snapshots": [
+          {
+            "bootstrap": null,
+            "control": {
+              "name": "root/example",
+              "repositoryId": 1,
+              "revision": "cac1a6416a877d091954f52cae3f640c61a4e011",
+              "selections": [
+                {
+                  "path": "index.js",
+                  "reason": "explicit mock entry"
+                }
+              ]
+            },
+            "expectedId": 1,
+            "identityCheck": {
+              "fullName": "root/example",
+              "reason": null,
+              "repositoryId": 1,
+              "state": "matched"
+            },
+            "resolution": {
+              "defaultBranch": "main",
+              "identity": {
+                "aliases": [],
+                "completeness": "provider_id",
+                "fullName": "root/example",
+                "provider": "github",
+                "repositoryId": 1,
+                "revision": "cac1a6416a877d091954f52cae3f640c61a4e011"
+              },
+              "metadata": {
+                "fork": false,
+                "parentId": null
+              },
+              "observations": [
+                {
+                  "fullName": "root/example",
+                  "htmlUrl": "https://github.com/root/example",
+                  "repositoryId": 1,
+                  "source": "repository_metadata"
+                }
+              ],
+              "parents": [],
+              "reasons": [],
+              "requestSource": "github-rest-verified-name@1",
+              "requestedId": 1,
+              "schemaVersion": "repository-snapshot@1",
+              "state": "resolved",
+              "tree": "1f71f9ac9237086831306ba771dfc2ac8bd299d9"
+            },
+            "source": {
+              "bindings": [
+                {
+                  "blob": "6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+                  "bytes": 90,
+                  "digest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+                  "filterVersion": "source-filter@1",
+                  "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                  "path": "index.js",
+                  "repositoryId": 1,
+                  "revision": "cac1a6416a877d091954f52cae3f640c61a4e011"
+                }
+              ],
+              "coverage": {
+                "pending": [],
+                "reasons": [],
+                "scope": "explicit selected paths only",
+                "state": "completed",
+                "treeTruncated": false
+              },
+              "materializedBytes": 90,
+              "selections": [
+                {
+                  "path": "index.js",
+                  "reason": "explicit mock entry"
+                }
+              ],
+              "snapshot": {
+                "files": [
+                  {
+                    "blob": "6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+                    "bytes": 90,
+                    "classification": "application_source",
+                    "digest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+                    "filterVersion": "source-filter@1",
+                    "language": "javascript",
+                    "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                    "path": "index.js",
+                    "reasons": [
+                      "supported source; no exclusion heuristic matched"
+                    ]
+                  }
+                ],
+                "identity": {
+                  "aliases": [],
+                  "completeness": "provider_id",
+                  "fullName": "root/example",
+                  "provider": "github",
+                  "repositoryId": 1,
+                  "revision": "cac1a6416a877d091954f52cae3f640c61a4e011"
+                },
+                "pending": [],
+                "reasons": [],
+                "state": "completed"
+              }
+            },
+            "state": "completed"
+          },
+          {
+            "bootstrap": null,
+            "control": {
+              "name": "old/example",
+              "repositoryId": 2,
+              "revision": "c7df49b85e4885242789c07867c56fba789e1929",
+              "selections": [
+                {
+                  "path": "index.js",
+                  "reason": "explicit mock entry"
+                }
+              ]
+            },
+            "expectedId": 2,
+            "identityCheck": {
+              "fullName": null,
+              "reason": "pre-resolution unavailable",
+              "repositoryId": null,
+              "state": "not_attempted"
+            },
+            "resolution": {
+              "defaultBranch": null,
+              "identity": null,
+              "metadata": {
+                "fork": null,
+                "parentId": null
+              },
+              "observations": [
+                {
+                  "fullName": "old/example",
+                  "htmlUrl": "https://github.com/old/example",
+                  "repositoryId": 2,
+                  "source": "repository_search"
+                }
+              ],
+              "parents": [],
+              "reasons": [
+                "metadata: http_error"
+              ],
+              "requestSource": "github-rest-verified-name@1",
+              "requestedId": 2,
+              "schemaVersion": "repository-snapshot@1",
+              "state": "inconclusive",
+              "tree": null
+            },
+            "source": {
+              "bindings": [],
+              "coverage": {
+                "pending": [
+                  "index.js"
+                ],
+                "reasons": [
+                  "metadata: http_error"
+                ],
+                "scope": "explicit selected paths only",
+                "state": "unavailable",
+                "treeTruncated": false
+              },
+              "materializedBytes": 0,
+              "selections": [
+                {
+                  "path": "index.js",
+                  "reason": "explicit mock entry"
+                }
+              ],
+              "snapshot": null
+            },
+            "state": "inconclusive"
+          },
+          {
+            "bootstrap": null,
+            "control": {
+              "name": "other/example",
+              "repositoryId": 3,
+              "revision": "828ee9fa75dfd9b925c19fc27eed09c087b8cdc3",
+              "selections": [
+                {
+                  "path": "index.js",
+                  "reason": "explicit mock entry"
+                }
+              ]
+            },
+            "expectedId": 3,
+            "identityCheck": {
+              "fullName": "other/example",
+              "reason": null,
+              "repositoryId": 3,
+              "state": "matched"
+            },
+            "resolution": {
+              "defaultBranch": "main",
+              "identity": {
+                "aliases": [],
+                "completeness": "provider_id",
+                "fullName": "other/example",
+                "provider": "github",
+                "repositoryId": 3,
+                "revision": "828ee9fa75dfd9b925c19fc27eed09c087b8cdc3"
+              },
+              "metadata": {
+                "fork": false,
+                "parentId": null
+              },
+              "observations": [
+                {
+                  "fullName": "other/example",
+                  "htmlUrl": "https://github.com/other/example",
+                  "repositoryId": 3,
+                  "source": "repository_metadata"
+                }
+              ],
+              "parents": [],
+              "reasons": [],
+              "requestSource": "github-rest-verified-name@1",
+              "requestedId": 3,
+              "schemaVersion": "repository-snapshot@1",
+              "state": "resolved",
+              "tree": "f067ff3135c3d39b2b39190c1cb5d37642f8c2d7"
+            },
+            "source": {
+              "bindings": [
+                {
+                  "blob": "b57e980fa8065f44e6bd32654a8258630ee394fb",
+                  "bytes": 29,
+                  "digest": "251ea9cc653094a6cb9d50cfed3d5f1971d33a98ca8b57cbc31ce44180db3cc3",
+                  "filterVersion": "source-filter@1",
+                  "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                  "path": "index.js",
+                  "repositoryId": 3,
+                  "revision": "828ee9fa75dfd9b925c19fc27eed09c087b8cdc3"
+                }
+              ],
+              "coverage": {
+                "pending": [],
+                "reasons": [],
+                "scope": "explicit selected paths only",
+                "state": "completed",
+                "treeTruncated": false
+              },
+              "materializedBytes": 29,
+              "selections": [
+                {
+                  "path": "index.js",
+                  "reason": "explicit mock entry"
+                }
+              ],
+              "snapshot": {
+                "files": [
+                  {
+                    "blob": "b57e980fa8065f44e6bd32654a8258630ee394fb",
+                    "bytes": 29,
+                    "classification": "application_source",
+                    "digest": "251ea9cc653094a6cb9d50cfed3d5f1971d33a98ca8b57cbc31ce44180db3cc3",
+                    "filterVersion": "source-filter@1",
+                    "language": "javascript",
+                    "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                    "path": "index.js",
+                    "reasons": [
+                      "supported source; no exclusion heuristic matched"
+                    ]
+                  }
+                ],
+                "identity": {
+                  "aliases": [],
+                  "completeness": "provider_id",
+                  "fullName": "other/example",
+                  "provider": "github",
+                  "repositoryId": 3,
+                  "revision": "828ee9fa75dfd9b925c19fc27eed09c087b8cdc3"
+                },
+                "pending": [],
+                "reasons": [],
+                "state": "completed"
+              }
+            },
+            "state": "completed"
+          }
+        ],
+        "sourceMaterializedBytes": 119,
+        "usage": {
+          "activeWorkers": 0,
+          "attempts": 11,
+          "bytesByFile": {
+            "[\"github:1@cac1a6416a877d091954f52cae3f640c61a4e011\",\"index.js\"]": 90,
+            "[\"github:3@828ee9fa75dfd9b925c19fc27eed09c087b8cdc3\",\"index.js\"]": 29
+          },
+          "candidates": 1,
+          "files": {
+            "github:1@cac1a6416a877d091954f52cae3f640c61a4e011": 1,
+            "github:3@828ee9fa75dfd9b925c19fc27eed09c087b8cdc3": 1
+          },
+          "peakWorkers": 1,
+          "searchAttempts": 0,
+          "totalBytes": 119
+        },
+        "verification": "pending"
+      },
+      "evidenceKind": "synthetic Mock; not actual GitHub response",
+      "mode": "missing_404",
+      "receipt": {
+        "contentDigest": "5981a5c6eeb1ef430e75be38250b0d1cc09eb520523a8061bf82b3dc2b7a0ec3",
+        "cpuBudget": "unsupported",
+        "cpuScope": "process including workers; observational only",
+        "node": "v24.21.0",
+        "observations": [
+          {
+            "bootstrap": null,
+            "expectedId": 1,
+            "resolution": [
+              {
+                "fullName": "root/example",
+                "htmlUrl": "https://github.com/root/example",
+                "observedAt": "2026-10-09T00:00:00.000Z",
+                "repositoryId": 1,
+                "source": "repository_metadata"
+              }
+            ]
+          },
+          {
+            "bootstrap": null,
+            "expectedId": 2,
+            "resolution": [
+              {
+                "fullName": "old/example",
+                "htmlUrl": "https://github.com/old/example",
+                "observedAt": "2026-10-09T00:00:00.000Z",
+                "repositoryId": 2,
+                "source": "repository_search"
+              }
+            ]
+          },
+          {
+            "bootstrap": null,
+            "expectedId": 3,
+            "resolution": [
+              {
+                "fullName": "other/example",
+                "htmlUrl": "https://github.com/other/example",
+                "observedAt": "2026-10-09T00:00:00.000Z",
+                "repositoryId": 3,
+                "source": "repository_metadata"
+              }
+            ]
+          }
+        ],
+        "platform": "linux",
+        "processCpuMs": 266.178,
+        "requests": [
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repositories/1",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 117,
+              "reservedBytes": 32768,
+              "retainedBytes": 117,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.1522580000000744
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repos/root/example/commits/cac1a6416a877d091954f52cae3f640c61a4e011",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 132,
+              "reservedBytes": 32768,
+              "retainedBytes": 132,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.08143599999993967
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repos/root/example/git/trees/1f71f9ac9237086831306ba771dfc2ac8bd299d9",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 186,
+              "reservedBytes": 32768,
+              "retainedBytes": 186,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.09180500000002212
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repos/root/example/git/blobs/6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 213,
+              "reservedBytes": 32768,
+              "retainedBytes": 213,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.08397200000001703
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repos/root/example",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 117,
+              "reservedBytes": 32768,
+              "retainedBytes": 117,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.06060500000000957
+          },
+          {
+            "headers": {
+              "x-ratelimit-remaining": "10",
+              "x-ratelimit-reset": "1791545941"
+            },
+            "request": {
+              "endpoint": "/repositories/2",
+              "outcome": "http_error",
+              "reason": null,
+              "receivedBytes": 0,
+              "reservedBytes": 32768,
+              "retainedBytes": 0,
+              "status": 404
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.10497699999996257
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repositories/3",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 119,
+              "reservedBytes": 32768,
+              "retainedBytes": 119,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.12569900000005418
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repos/other/example/commits/828ee9fa75dfd9b925c19fc27eed09c087b8cdc3",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 132,
+              "reservedBytes": 32768,
+              "retainedBytes": 132,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.0645680000000084
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repos/other/example/git/trees/f067ff3135c3d39b2b39190c1cb5d37642f8c2d7",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 186,
+              "reservedBytes": 32768,
+              "retainedBytes": 186,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.08449599999994462
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repos/other/example/git/blobs/b57e980fa8065f44e6bd32654a8258630ee394fb",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 133,
+              "reservedBytes": 32768,
+              "retainedBytes": 133,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.07876099999998587
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repos/other/example",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 119,
+              "reservedBytes": 32768,
+              "retainedBytes": 119,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.08219600000006722
+          }
+        ],
+        "schemaVersion": "discovery-pinned-probe-receipt@1",
+        "startedAt": "2026-10-09T00:00:00.000Z",
+        "wallMs": 331.34950600000013
+      }
+    },
+    {
+      "content": {
+        "budget": {
+          "attempts": 24,
+          "bytesPerFile": 131072,
+          "candidates": 3,
+          "concurrency": 2,
+          "cpuMs": null,
+          "filesPerCandidate": 8,
+          "searchAttempts": 4,
+          "totalBytes": 2097152,
+          "wallMs": 30000
+        },
+        "comparisons": [
+          {
+            "candidate": null,
+            "label": "unknown; unjudged",
+            "name": "old/example",
+            "reason": "no eligible identity-checked pinned source",
+            "summary": null
+          },
+          {
+            "candidate": {
+              "candidate": {
+                "aliases": [],
+                "completeness": "provider_id",
+                "fullName": "other/example",
+                "provider": "github",
+                "repositoryId": 3,
+                "revision": "828ee9fa75dfd9b925c19fc27eed09c087b8cdc3"
+              },
+              "checks": [],
+              "coverage": {
+                "comparedPairs": 1,
+                "expectedPairs": 1,
+                "pending": [],
+                "reasons": [],
+                "state": "completed"
+              },
+              "discoveries": [
+                {
+                  "locator": "https://github.com/other/example",
+                  "reason": "explicit bounded controls; no Search or inferred lineage",
+                  "source": "explicit_public_probe",
+                  "version": "phase1d-controls@1"
+                }
+              ],
+              "files": {
+                "candidate": [
+                  {
+                    "blob": "b57e980fa8065f44e6bd32654a8258630ee394fb",
+                    "bytes": 29,
+                    "classification": "application_source",
+                    "digest": "251ea9cc653094a6cb9d50cfed3d5f1971d33a98ca8b57cbc31ce44180db3cc3",
+                    "filterVersion": "source-filter@1",
+                    "language": "javascript",
+                    "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                    "path": "index.js",
+                    "reasons": [
+                      "supported source; no exclusion heuristic matched"
+                    ]
+                  }
+                ],
+                "target": [
+                  {
+                    "blob": "6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+                    "bytes": 90,
+                    "classification": "application_source",
+                    "digest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+                    "filterVersion": "source-filter@1",
+                    "language": "javascript",
+                    "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                    "path": "index.js",
+                    "reasons": [
+                      "supported source; no exclusion heuristic matched"
+                    ]
+                  }
+                ]
+              },
+              "lineageClaim": "none",
+              "schemaVersion": "discovery-candidate@1",
+              "similarity": [
+                {
+                  "filterVersion": "source-filter@1",
+                  "firstCoverage": null,
+                  "firstDigest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+                  "firstPath": "index.js",
+                  "firstShingles": null,
+                  "firstTokens": 26,
+                  "method": "exact_blob",
+                  "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                  "ranges": [],
+                  "rangesTruncated": false,
+                  "reasons": [],
+                  "score": 0,
+                  "secondCoverage": null,
+                  "secondDigest": "251ea9cc653094a6cb9d50cfed3d5f1971d33a98ca8b57cbc31ce44180db3cc3",
+                  "secondPath": "index.js",
+                  "secondShingles": null,
+                  "secondTokens": 6,
+                  "sharedShingles": null,
+                  "state": "completed",
+                  "version": "git-blob-sha1@1"
+                },
+                {
+                  "filterVersion": "source-filter@1",
+                  "firstCoverage": 0,
+                  "firstDigest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+                  "firstPath": "index.js",
+                  "firstShingles": 22,
+                  "firstTokens": 26,
+                  "method": "strict_token5",
+                  "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                  "ranges": [],
+                  "rangesTruncated": false,
+                  "reasons": [],
+                  "score": 0,
+                  "secondCoverage": 0,
+                  "secondDigest": "251ea9cc653094a6cb9d50cfed3d5f1971d33a98ca8b57cbc31ce44180db3cc3",
+                  "secondPath": "index.js",
+                  "secondShingles": 2,
+                  "secondTokens": 6,
+                  "sharedShingles": 0,
+                  "state": "completed",
+                  "version": "token5-set@1"
+                },
+                {
+                  "filterVersion": "source-filter@1",
+                  "firstCoverage": 0,
+                  "firstDigest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+                  "firstPath": "index.js",
+                  "firstShingles": 22,
+                  "firstTokens": 26,
+                  "method": "normalized_token5",
+                  "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                  "ranges": [],
+                  "rangesTruncated": false,
+                  "reasons": [],
+                  "score": 0,
+                  "secondCoverage": 0,
+                  "secondDigest": "251ea9cc653094a6cb9d50cfed3d5f1971d33a98ca8b57cbc31ce44180db3cc3",
+                  "secondPath": "index.js",
+                  "secondShingles": 2,
+                  "secondTokens": 6,
+                  "sharedShingles": 0,
+                  "state": "completed",
+                  "version": "token5-set@1"
+                }
+              ],
+              "target": {
+                "aliases": [],
+                "completeness": "provider_id",
+                "fullName": "root/example",
+                "provider": "github",
+                "repositoryId": 1,
+                "revision": "cac1a6416a877d091954f52cae3f640c61a4e011"
+              },
+              "usage": {
+                "activeWorkers": 0,
+                "attempts": 14,
+                "bytesByFile": {
+                  "[\"github:1@cac1a6416a877d091954f52cae3f640c61a4e011\",\"index.js\"]": 90,
+                  "[\"github:3@828ee9fa75dfd9b925c19fc27eed09c087b8cdc3\",\"index.js\"]": 29
+                },
+                "candidates": 1,
+                "files": {
+                  "github:1@cac1a6416a877d091954f52cae3f640c61a4e011": 1,
+                  "github:3@828ee9fa75dfd9b925c19fc27eed09c087b8cdc3": 1
+                },
+                "peakWorkers": 1,
+                "searchAttempts": 0,
+                "totalBytes": 119
+              },
+              "verification": {
+                "canonicalEvidenceIds": [],
+                "checks": [],
+                "state": "pending"
+              }
+            },
+            "label": "unknown; unjudged",
+            "name": "other/example",
+            "reason": null,
+            "summary": {
+              "comparedPairs": 1,
+              "exactPairs": 0,
+              "expectedPairs": 1,
+              "failures": [],
+              "firstFiltered": 0,
+              "firstIncluded": 1,
+              "firstTokens": 26,
+              "normalized": {
+                "first": 22,
+                "firstCoverage": 0,
+                "score": 0,
+                "second": 2,
+                "secondCoverage": 0,
+                "shared": 0
+              },
+              "secondFiltered": 0,
+              "secondIncluded": 1,
+              "secondTokens": 6,
+              "state": "completed",
+              "strict": {
+                "first": 22,
+                "firstCoverage": 0,
+                "score": 0,
+                "second": 2,
+                "secondCoverage": 0,
+                "shared": 0
+              }
+            }
+          }
+        ],
+        "coverage": {
+          "completed": 1,
+          "inconclusive": 1,
+          "state": "partial"
+        },
+        "cpuBudget": "unsupported",
+        "lineageClaim": "none",
+        "network": {
+          "overflowBytes": 0,
+          "receivedBytes": 2090,
+          "reservedBytes": 458752,
+          "retainedBytes": 2090
+        },
+        "networkProfile": {
+          "perResponseBytes": 32768,
+          "totalResponseBytes": 1048576
+        },
+        "requests": [
+          {
+            "endpoint": "/repositories/1",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 117,
+            "reservedBytes": 32768,
+            "retainedBytes": 117,
+            "status": 200
+          },
+          {
+            "endpoint": "/repos/root/example/commits/cac1a6416a877d091954f52cae3f640c61a4e011",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 132,
+            "reservedBytes": 32768,
+            "retainedBytes": 132,
+            "status": 200
+          },
+          {
+            "endpoint": "/repos/root/example/git/trees/1f71f9ac9237086831306ba771dfc2ac8bd299d9",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 186,
+            "reservedBytes": 32768,
+            "retainedBytes": 186,
+            "status": 200
+          },
+          {
+            "endpoint": "/repos/root/example/git/blobs/6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 213,
+            "reservedBytes": 32768,
+            "retainedBytes": 213,
+            "status": 200
+          },
+          {
+            "endpoint": "/repos/root/example",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 117,
+            "reservedBytes": 32768,
+            "retainedBytes": 117,
+            "status": 200
+          },
+          {
+            "endpoint": "/repositories/2",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 134,
+            "reservedBytes": 32768,
+            "retainedBytes": 134,
+            "status": 200
+          },
+          {
+            "endpoint": "/repos/fork/example/commits/c7df49b85e4885242789c07867c56fba789e1929",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 182,
+            "reservedBytes": 32768,
+            "retainedBytes": 182,
+            "status": 200
+          },
+          {
+            "endpoint": "/repos/fork/example/git/trees/1f71f9ac9237086831306ba771dfc2ac8bd299d9",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 186,
+            "reservedBytes": 32768,
+            "retainedBytes": 186,
+            "status": 200
+          },
+          {
+            "endpoint": "/repos/fork/example",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 134,
+            "reservedBytes": 32768,
+            "retainedBytes": 134,
+            "status": 200
+          },
+          {
+            "endpoint": "/repositories/3",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 119,
+            "reservedBytes": 32768,
+            "retainedBytes": 119,
+            "status": 200
+          },
+          {
+            "endpoint": "/repos/other/example/commits/828ee9fa75dfd9b925c19fc27eed09c087b8cdc3",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 132,
+            "reservedBytes": 32768,
+            "retainedBytes": 132,
+            "status": 200
+          },
+          {
+            "endpoint": "/repos/other/example/git/trees/f067ff3135c3d39b2b39190c1cb5d37642f8c2d7",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 186,
+            "reservedBytes": 32768,
+            "retainedBytes": 186,
+            "status": 200
+          },
+          {
+            "endpoint": "/repos/other/example/git/blobs/b57e980fa8065f44e6bd32654a8258630ee394fb",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 133,
+            "reservedBytes": 32768,
+            "retainedBytes": 133,
+            "status": 200
+          },
+          {
+            "endpoint": "/repos/other/example",
+            "outcome": "success",
+            "reason": null,
+            "receivedBytes": 119,
+            "reservedBytes": 32768,
+            "retainedBytes": 119,
+            "status": 200
+          }
+        ],
+        "schemaVersion": "discovery-pinned-probe@1",
+        "scope": "explicit controls and selected paths only; no discovery recall claim",
+        "snapshots": [
+          {
+            "bootstrap": null,
+            "control": {
+              "name": "root/example",
+              "repositoryId": 1,
+              "revision": "cac1a6416a877d091954f52cae3f640c61a4e011",
+              "selections": [
+                {
+                  "path": "index.js",
+                  "reason": "explicit mock entry"
+                }
+              ]
+            },
+            "expectedId": 1,
+            "identityCheck": {
+              "fullName": "root/example",
+              "reason": null,
+              "repositoryId": 1,
+              "state": "matched"
+            },
+            "resolution": {
+              "defaultBranch": "main",
+              "identity": {
+                "aliases": [],
+                "completeness": "provider_id",
+                "fullName": "root/example",
+                "provider": "github",
+                "repositoryId": 1,
+                "revision": "cac1a6416a877d091954f52cae3f640c61a4e011"
+              },
+              "metadata": {
+                "fork": false,
+                "parentId": null
+              },
+              "observations": [
+                {
+                  "fullName": "root/example",
+                  "htmlUrl": "https://github.com/root/example",
+                  "repositoryId": 1,
+                  "source": "repository_metadata"
+                }
+              ],
+              "parents": [],
+              "reasons": [],
+              "requestSource": "github-rest-verified-name@1",
+              "requestedId": 1,
+              "schemaVersion": "repository-snapshot@1",
+              "state": "resolved",
+              "tree": "1f71f9ac9237086831306ba771dfc2ac8bd299d9"
+            },
+            "source": {
+              "bindings": [
+                {
+                  "blob": "6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+                  "bytes": 90,
+                  "digest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+                  "filterVersion": "source-filter@1",
+                  "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                  "path": "index.js",
+                  "repositoryId": 1,
+                  "revision": "cac1a6416a877d091954f52cae3f640c61a4e011"
+                }
+              ],
+              "coverage": {
+                "pending": [],
+                "reasons": [],
+                "scope": "explicit selected paths only",
+                "state": "completed",
+                "treeTruncated": false
+              },
+              "materializedBytes": 90,
+              "selections": [
+                {
+                  "path": "index.js",
+                  "reason": "explicit mock entry"
+                }
+              ],
+              "snapshot": {
+                "files": [
+                  {
+                    "blob": "6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+                    "bytes": 90,
+                    "classification": "application_source",
+                    "digest": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f",
+                    "filterVersion": "source-filter@1",
+                    "language": "javascript",
+                    "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                    "path": "index.js",
+                    "reasons": [
+                      "supported source; no exclusion heuristic matched"
+                    ]
+                  }
+                ],
+                "identity": {
+                  "aliases": [],
+                  "completeness": "provider_id",
+                  "fullName": "root/example",
+                  "provider": "github",
+                  "repositoryId": 1,
+                  "revision": "cac1a6416a877d091954f52cae3f640c61a4e011"
+                },
+                "pending": [],
+                "reasons": [],
+                "state": "completed"
+              }
+            },
+            "state": "completed"
+          },
+          {
+            "bootstrap": null,
+            "control": {
+              "name": "old/example",
+              "repositoryId": 2,
+              "revision": "c7df49b85e4885242789c07867c56fba789e1929",
+              "selections": [
+                {
+                  "path": "absent.js",
+                  "reason": "explicit mock entry"
+                }
+              ]
+            },
+            "expectedId": 2,
+            "identityCheck": {
+              "fullName": "fork/example",
+              "reason": null,
+              "repositoryId": 2,
+              "state": "matched"
+            },
+            "resolution": {
+              "defaultBranch": "main",
+              "identity": {
+                "aliases": [
+                  "old/example"
+                ],
+                "completeness": "provider_id",
+                "fullName": "fork/example",
+                "provider": "github",
+                "repositoryId": 2,
+                "revision": "c7df49b85e4885242789c07867c56fba789e1929"
+              },
+              "metadata": {
+                "fork": true,
+                "parentId": 1
+              },
+              "observations": [
+                {
+                  "fullName": "old/example",
+                  "htmlUrl": "https://github.com/old/example",
+                  "repositoryId": 2,
+                  "source": "repository_search"
+                },
+                {
+                  "fullName": "fork/example",
+                  "htmlUrl": "https://github.com/fork/example",
+                  "repositoryId": 2,
+                  "source": "repository_metadata"
+                }
+              ],
+              "parents": [
+                "cac1a6416a877d091954f52cae3f640c61a4e011"
+              ],
+              "reasons": [
+                "search_metadata_name_disagreement",
+                "caller_name_metadata_disagreement"
+              ],
+              "requestSource": "github-rest-verified-name@1",
+              "requestedId": 2,
+              "schemaVersion": "repository-snapshot@1",
+              "state": "resolved",
+              "tree": "1f71f9ac9237086831306ba771dfc2ac8bd299d9"
+            },
+            "source": {
+              "bindings": [],
+              "coverage": {
+                "pending": [
+                  "absent.js"
+                ],
+                "reasons": [
+                  "absent.js: selected path unavailable",
+                  "no eligible selected source"
+                ],
+                "scope": "explicit selected paths only",
+                "state": "partial",
+                "treeTruncated": false
+              },
+              "materializedBytes": 0,
+              "selections": [
+                {
+                  "path": "absent.js",
+                  "reason": "explicit mock entry"
+                }
+              ],
+              "snapshot": {
+                "files": [],
+                "identity": {
+                  "aliases": [
+                    "old/example"
+                  ],
+                  "completeness": "provider_id",
+                  "fullName": "fork/example",
+                  "provider": "github",
+                  "repositoryId": 2,
+                  "revision": "c7df49b85e4885242789c07867c56fba789e1929"
+                },
+                "pending": [
+                  "absent.js"
+                ],
+                "reasons": [
+                  "absent.js: selected path unavailable"
+                ],
+                "state": "partial"
+              }
+            },
+            "state": "inconclusive"
+          },
+          {
+            "bootstrap": null,
+            "control": {
+              "name": "other/example",
+              "repositoryId": 3,
+              "revision": "828ee9fa75dfd9b925c19fc27eed09c087b8cdc3",
+              "selections": [
+                {
+                  "path": "index.js",
+                  "reason": "explicit mock entry"
+                }
+              ]
+            },
+            "expectedId": 3,
+            "identityCheck": {
+              "fullName": "other/example",
+              "reason": null,
+              "repositoryId": 3,
+              "state": "matched"
+            },
+            "resolution": {
+              "defaultBranch": "main",
+              "identity": {
+                "aliases": [],
+                "completeness": "provider_id",
+                "fullName": "other/example",
+                "provider": "github",
+                "repositoryId": 3,
+                "revision": "828ee9fa75dfd9b925c19fc27eed09c087b8cdc3"
+              },
+              "metadata": {
+                "fork": false,
+                "parentId": null
+              },
+              "observations": [
+                {
+                  "fullName": "other/example",
+                  "htmlUrl": "https://github.com/other/example",
+                  "repositoryId": 3,
+                  "source": "repository_metadata"
+                }
+              ],
+              "parents": [],
+              "reasons": [],
+              "requestSource": "github-rest-verified-name@1",
+              "requestedId": 3,
+              "schemaVersion": "repository-snapshot@1",
+              "state": "resolved",
+              "tree": "f067ff3135c3d39b2b39190c1cb5d37642f8c2d7"
+            },
+            "source": {
+              "bindings": [
+                {
+                  "blob": "b57e980fa8065f44e6bd32654a8258630ee394fb",
+                  "bytes": 29,
+                  "digest": "251ea9cc653094a6cb9d50cfed3d5f1971d33a98ca8b57cbc31ce44180db3cc3",
+                  "filterVersion": "source-filter@1",
+                  "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                  "path": "index.js",
+                  "repositoryId": 3,
+                  "revision": "828ee9fa75dfd9b925c19fc27eed09c087b8cdc3"
+                }
+              ],
+              "coverage": {
+                "pending": [],
+                "reasons": [],
+                "scope": "explicit selected paths only",
+                "state": "completed",
+                "treeTruncated": false
+              },
+              "materializedBytes": 29,
+              "selections": [
+                {
+                  "path": "index.js",
+                  "reason": "explicit mock entry"
+                }
+              ],
+              "snapshot": {
+                "files": [
+                  {
+                    "blob": "b57e980fa8065f44e6bd32654a8258630ee394fb",
+                    "bytes": 29,
+                    "classification": "application_source",
+                    "digest": "251ea9cc653094a6cb9d50cfed3d5f1971d33a98ca8b57cbc31ce44180db3cc3",
+                    "filterVersion": "source-filter@1",
+                    "language": "javascript",
+                    "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                    "path": "index.js",
+                    "reasons": [
+                      "supported source; no exclusion heuristic matched"
+                    ]
+                  }
+                ],
+                "identity": {
+                  "aliases": [],
+                  "completeness": "provider_id",
+                  "fullName": "other/example",
+                  "provider": "github",
+                  "repositoryId": 3,
+                  "revision": "828ee9fa75dfd9b925c19fc27eed09c087b8cdc3"
+                },
+                "pending": [],
+                "reasons": [],
+                "state": "completed"
+              }
+            },
+            "state": "completed"
+          }
+        ],
+        "sourceMaterializedBytes": 119,
+        "usage": {
+          "activeWorkers": 0,
+          "attempts": 14,
+          "bytesByFile": {
+            "[\"github:1@cac1a6416a877d091954f52cae3f640c61a4e011\",\"index.js\"]": 90,
+            "[\"github:3@828ee9fa75dfd9b925c19fc27eed09c087b8cdc3\",\"index.js\"]": 29
+          },
+          "candidates": 1,
+          "files": {
+            "github:1@cac1a6416a877d091954f52cae3f640c61a4e011": 1,
+            "github:3@828ee9fa75dfd9b925c19fc27eed09c087b8cdc3": 1
+          },
+          "peakWorkers": 1,
+          "searchAttempts": 0,
+          "totalBytes": 119
+        },
+        "verification": "pending"
+      },
+      "evidenceKind": "synthetic Mock; not actual GitHub response",
+      "mode": "file_unavailable",
+      "receipt": {
+        "contentDigest": "4831c4e8b401d69f25c8b957a1ffa2bc3d1ca61df0536b837e6a3dbf693c66ea",
+        "cpuBudget": "unsupported",
+        "cpuScope": "process including workers; observational only",
+        "node": "v24.21.0",
+        "observations": [
+          {
+            "bootstrap": null,
+            "expectedId": 1,
+            "resolution": [
+              {
+                "fullName": "root/example",
+                "htmlUrl": "https://github.com/root/example",
+                "observedAt": "2026-10-09T00:00:00.000Z",
+                "repositoryId": 1,
+                "source": "repository_metadata"
+              }
+            ]
+          },
+          {
+            "bootstrap": null,
+            "expectedId": 2,
+            "resolution": [
+              {
+                "fullName": "old/example",
+                "htmlUrl": "https://github.com/old/example",
+                "observedAt": "2026-10-09T00:00:00.000Z",
+                "repositoryId": 2,
+                "source": "repository_search"
+              },
+              {
+                "fullName": "fork/example",
+                "htmlUrl": "https://github.com/fork/example",
+                "observedAt": "2026-10-09T00:00:00.000Z",
+                "repositoryId": 2,
+                "source": "repository_metadata"
+              }
+            ]
+          },
+          {
+            "bootstrap": null,
+            "expectedId": 3,
+            "resolution": [
+              {
+                "fullName": "other/example",
+                "htmlUrl": "https://github.com/other/example",
+                "observedAt": "2026-10-09T00:00:00.000Z",
+                "repositoryId": 3,
+                "source": "repository_metadata"
+              }
+            ]
+          }
+        ],
+        "platform": "linux",
+        "processCpuMs": 281.748,
+        "requests": [
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repositories/1",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 117,
+              "reservedBytes": 32768,
+              "retainedBytes": 117,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.2309940000000097
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repos/root/example/commits/cac1a6416a877d091954f52cae3f640c61a4e011",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 132,
+              "reservedBytes": 32768,
+              "retainedBytes": 132,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.13776800000005096
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repos/root/example/git/trees/1f71f9ac9237086831306ba771dfc2ac8bd299d9",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 186,
+              "reservedBytes": 32768,
+              "retainedBytes": 186,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.11581500000011147
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repos/root/example/git/blobs/6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 213,
+              "reservedBytes": 32768,
+              "retainedBytes": 213,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.07863700000007157
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repos/root/example",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 117,
+              "reservedBytes": 32768,
+              "retainedBytes": 117,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.07663300000012896
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repositories/2",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 134,
+              "reservedBytes": 32768,
+              "retainedBytes": 134,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.061846000000059576
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repos/fork/example/commits/c7df49b85e4885242789c07867c56fba789e1929",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 182,
+              "reservedBytes": 32768,
+              "retainedBytes": 182,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.05460100000004786
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repos/fork/example/git/trees/1f71f9ac9237086831306ba771dfc2ac8bd299d9",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 186,
+              "reservedBytes": 32768,
+              "retainedBytes": 186,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.09075800000005074
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repos/fork/example",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 134,
+              "reservedBytes": 32768,
+              "retainedBytes": 134,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.06483400000001893
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repositories/3",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 119,
+              "reservedBytes": 32768,
+              "retainedBytes": 119,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.050882000000001426
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repos/other/example/commits/828ee9fa75dfd9b925c19fc27eed09c087b8cdc3",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 132,
+              "reservedBytes": 32768,
+              "retainedBytes": 132,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.1323019999999815
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repos/other/example/git/trees/f067ff3135c3d39b2b39190c1cb5d37642f8c2d7",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 186,
+              "reservedBytes": 32768,
+              "retainedBytes": 186,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.1312439999999242
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repos/other/example/git/blobs/b57e980fa8065f44e6bd32654a8258630ee394fb",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 133,
+              "reservedBytes": 32768,
+              "retainedBytes": 133,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.11373100000014347
+          },
+          {
+            "headers": {},
+            "request": {
+              "endpoint": "/repos/other/example",
+              "outcome": "success",
+              "reason": null,
+              "receivedBytes": 119,
+              "reservedBytes": 32768,
+              "retainedBytes": 119,
+              "status": 200
+            },
+            "startedAt": "2026-10-09T00:00:00.000Z",
+            "wallMs": 0.06466000000000349
+          }
+        ],
+        "schemaVersion": "discovery-pinned-probe-receipt@1",
+        "startedAt": "2026-10-09T00:00:00.000Z",
+        "wallMs": 340.9909090000001
+      }
+    }
+  ],
+  "schemaVersion": "discovery-pinned-failure-fixtures@1"
+}

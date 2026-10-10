@@ -1,0 +1,625 @@
+{
+  "schemaVersion": "phase1-summary@1",
+  "sidecarDigest": "546af0c31bc3434abca4f64ff8691457373a2c3449363b641f30eb53d637167c",
+  "metadata": {
+    "bytes": 36590,
+    "capBytes": 524288,
+    "digest": "5febc4f0ea19879adaac91c55c8449c88c35991870af0aeba0bbf1130f0a186f"
+  },
+  "state": "partial",
+  "coverage": {
+    "completed": 11,
+    "pending": [
+      "sindresorhus/p-limit|synthetic/broken"
+    ],
+    "planned": 13,
+    "scope": "fixed pool only; no external discovery",
+    "unavailable": 1
+  },
+  "budget": {
+    "attempts": 0,
+    "bytesPerFile": 262144,
+    "candidates": 32,
+    "concurrency": 2,
+    "cpuMs": null,
+    "filesPerCandidate": 32,
+    "searchAttempts": 0,
+    "totalBytes": 2097152,
+    "wallMs": 30000
+  },
+  "usage": {
+    "activeWorkers": 0,
+    "attempts": 0,
+    "bytesByFile": {
+      "[\"github:jucke/p-limit@e293f0b92536447f72ca818fcf07be8d287f1c24\",\"index.js\"]": 640,
+      "[\"github:jucke/p-limit@e293f0b92536447f72ca818fcf07be8d287f1c24\",\"license\"]": 1119,
+      "[\"github:sindresorhus/p-limit@a8a6fbec4e0e866d6d779b10889bb4f5567e70eb\",\"index.js\"]": 3868,
+      "[\"github:sindresorhus/p-limit@a8a6fbec4e0e866d6d779b10889bb4f5567e70eb\",\"license\"]": 1117,
+      "[\"github:sindresorhus/p-throttle@a0d20bf8c1a5f0067b1dce529b1ff013878591d3\",\"index.js\"]": 9716,
+      "[\"github:sindresorhus/p-throttle@a0d20bf8c1a5f0067b1dce529b1ff013878591d3\",\"license\"]": 1117,
+      "[\"github:sindresorhus/p-throttle@a0d20bf8c1a5f0067b1dce529b1ff013878591d3\",\"readme.md\"]": 5515,
+      "[\"github:sindresorhus/yocto-queue@72a8fa96a9d389765cdf2bb9c6daba8302fc375d\",\"index.js\"]": 1587,
+      "[\"github:sindresorhus/yocto-queue@72a8fa96a9d389765cdf2bb9c6daba8302fc375d\",\"license\"]": 1117,
+      "[\"github:sindresorhus/yocto-queue@72a8fa96a9d389765cdf2bb9c6daba8302fc375d\",\"readme.md\"]": 2573,
+      "[\"synthetic:synthetic/broken@82674ef4f32da901f44228a1eed8c8a4dc7031eb\",\"src/parse.js\"]": 43,
+      "[\"synthetic:synthetic/copy-reinit@73b5784566b6a35423425d434ac005f2ccb23b9e\",\"LICENSE\"]": 1117,
+      "[\"synthetic:synthetic/copy-reinit@73b5784566b6a35423425d434ac005f2ccb23b9e\",\"index.js\"]": 3868,
+      "[\"synthetic:synthetic/filtered-mix@cc46effd5ebd05c15fb45f4489db8576d0155084\",\"LICENSE\"]": 1117,
+      "[\"synthetic:synthetic/filtered-mix@cc46effd5ebd05c15fb45f4489db8576d0155084\",\"README.md\"]": 56,
+      "[\"synthetic:synthetic/filtered-mix@cc46effd5ebd05c15fb45f4489db8576d0155084\",\"generated/types.js\"]": 139,
+      "[\"synthetic:synthetic/filtered-mix@cc46effd5ebd05c15fb45f4489db8576d0155084\",\"lib/x.min.js\"]": 125,
+      "[\"synthetic:synthetic/filtered-mix@cc46effd5ebd05c15fb45f4489db8576d0155084\",\"package-lock.json\"]": 21,
+      "[\"synthetic:synthetic/filtered-mix@cc46effd5ebd05c15fb45f4489db8576d0155084\",\"src/app.js\"]": 71,
+      "[\"synthetic:synthetic/filtered-mix@cc46effd5ebd05c15fb45f4489db8576d0155084\",\"templates/scaffold.js\"]": 94,
+      "[\"synthetic:synthetic/filtered-mix@cc46effd5ebd05c15fb45f4489db8576d0155084\",\"thing.py\"]": 29,
+      "[\"synthetic:synthetic/filtered-mix@cc46effd5ebd05c15fb45f4489db8576d0155084\",\"tiny.js\"]": 1,
+      "[\"synthetic:synthetic/filtered-mix@cc46effd5ebd05c15fb45f4489db8576d0155084\",\"vendor/sdk.js\"]": 125,
+      "[\"synthetic:synthetic/format-path@867cc93ccf663f28fda1fd79e54b89580073bf5b\",\"LICENSE\"]": 1117,
+      "[\"synthetic:synthetic/format-path@867cc93ccf663f28fda1fd79e54b89580073bf5b\",\"lib/moved.js\"]": 4167,
+      "[\"synthetic:synthetic/generic-a@a235bc33ba98e1742675e49413ba427160195fbe\",\"src/app.js\"]": 90,
+      "[\"synthetic:synthetic/generic-a@a235bc33ba98e1742675e49413ba427160195fbe\",\"src/guard.js\"]": 125,
+      "[\"synthetic:synthetic/generic-b@69840649ce923adcf13016817982fbdc57e59c51\",\"lib/check.js\"]": 125,
+      "[\"synthetic:synthetic/generic-b@69840649ce923adcf13016817982fbdc57e59c51\",\"src/app.js\"]": 71,
+      "[\"synthetic:synthetic/large-shared@3db372d0239a097d7751a40d8737415ad0247ce1\",\"src/guard.js\"]": 125,
+      "[\"synthetic:synthetic/large-shared@3db372d0239a097d7751a40d8737415ad0247ce1\",\"src/module-0.js\"]": 137,
+      "[\"synthetic:synthetic/large-shared@3db372d0239a097d7751a40d8737415ad0247ce1\",\"src/module-1.js\"]": 137,
+      "[\"synthetic:synthetic/large-shared@3db372d0239a097d7751a40d8737415ad0247ce1\",\"src/module-10.js\"]": 140,
+      "[\"synthetic:synthetic/large-shared@3db372d0239a097d7751a40d8737415ad0247ce1\",\"src/module-11.js\"]": 140,
+      "[\"synthetic:synthetic/large-shared@3db372d0239a097d7751a40d8737415ad0247ce1\",\"src/module-12.js\"]": 140,
+      "[\"synthetic:synthetic/large-shared@3db372d0239a097d7751a40d8737415ad0247ce1\",\"src/module-13.js\"]": 140,
+      "[\"synthetic:synthetic/large-shared@3db372d0239a097d7751a40d8737415ad0247ce1\",\"src/module-14.js\"]": 140,
+      "[\"synthetic:synthetic/large-shared@3db372d0239a097d7751a40d8737415ad0247ce1\",\"src/module-15.js\"]": 140,
+      "[\"synthetic:synthetic/large-shared@3db372d0239a097d7751a40d8737415ad0247ce1\",\"src/module-2.js\"]": 137,
+      "[\"synthetic:synthetic/large-shared@3db372d0239a097d7751a40d8737415ad0247ce1\",\"src/module-3.js\"]": 137,
+      "[\"synthetic:synthetic/large-shared@3db372d0239a097d7751a40d8737415ad0247ce1\",\"src/module-4.js\"]": 137,
+      "[\"synthetic:synthetic/large-shared@3db372d0239a097d7751a40d8737415ad0247ce1\",\"src/module-5.js\"]": 137,
+      "[\"synthetic:synthetic/large-shared@3db372d0239a097d7751a40d8737415ad0247ce1\",\"src/module-6.js\"]": 137,
+      "[\"synthetic:synthetic/large-shared@3db372d0239a097d7751a40d8737415ad0247ce1\",\"src/module-7.js\"]": 137,
+      "[\"synthetic:synthetic/large-shared@3db372d0239a097d7751a40d8737415ad0247ce1\",\"src/module-8.js\"]": 137,
+      "[\"synthetic:synthetic/large-shared@3db372d0239a097d7751a40d8737415ad0247ce1\",\"src/module-9.js\"]": 137,
+      "[\"synthetic:synthetic/logic-renamed@90f3ebea663fa43f97cfa4c68463f0244ed90698\",\"src/add.js\"]": 98,
+      "[\"synthetic:synthetic/logic-root@a8ee1b28ce4ca23b9e35e33f77164b6b361792d7\",\"src/sum.js\"]": 90,
+      "[\"synthetic:synthetic/small-only@e14a2c09972ded7a8155f4aca6069de85ed587a8\",\"tiny.js\"]": 1,
+      "[\"synthetic:synthetic/small-shared@a2270925f017f3036395389bfa45043e63472bda\",\"src/guard.js\"]": 125,
+      "[\"synthetic:synthetic/template-app-a@0b5851bda9fc744bd0b5b14d1fdcae9315a5a359\",\"LICENSE\"]": 1117,
+      "[\"synthetic:synthetic/template-app-a@0b5851bda9fc744bd0b5b14d1fdcae9315a5a359\",\"README.md\"]": 56,
+      "[\"synthetic:synthetic/template-app-a@0b5851bda9fc744bd0b5b14d1fdcae9315a5a359\",\"src/app.js\"]": 90,
+      "[\"synthetic:synthetic/template-app-a@0b5851bda9fc744bd0b5b14d1fdcae9315a5a359\",\"templates/scaffold.js\"]": 94,
+      "[\"synthetic:synthetic/template-app-b@c2e8a257aaa5b0f730f5f5fad44fd4e2edf180fa\",\"LICENSE\"]": 1117,
+      "[\"synthetic:synthetic/template-app-b@c2e8a257aaa5b0f730f5f5fad44fd4e2edf180fa\",\"README.md\"]": 56,
+      "[\"synthetic:synthetic/template-app-b@c2e8a257aaa5b0f730f5f5fad44fd4e2edf180fa\",\"src/app.js\"]": 71,
+      "[\"synthetic:synthetic/template-app-b@c2e8a257aaa5b0f730f5f5fad44fd4e2edf180fa\",\"templates/scaffold.js\"]": 94
+    },
+    "candidates": 13,
+    "files": {
+      "github:jucke/p-limit@e293f0b92536447f72ca818fcf07be8d287f1c24": 2,
+      "github:sindresorhus/p-limit@a8a6fbec4e0e866d6d779b10889bb4f5567e70eb": 2,
+      "github:sindresorhus/p-throttle@a0d20bf8c1a5f0067b1dce529b1ff013878591d3": 3,
+      "github:sindresorhus/yocto-queue@72a8fa96a9d389765cdf2bb9c6daba8302fc375d": 3,
+      "synthetic:synthetic/broken@82674ef4f32da901f44228a1eed8c8a4dc7031eb": 1,
+      "synthetic:synthetic/copy-reinit@73b5784566b6a35423425d434ac005f2ccb23b9e": 2,
+      "synthetic:synthetic/filtered-mix@cc46effd5ebd05c15fb45f4489db8576d0155084": 10,
+      "synthetic:synthetic/format-path@867cc93ccf663f28fda1fd79e54b89580073bf5b": 2,
+      "synthetic:synthetic/generic-a@a235bc33ba98e1742675e49413ba427160195fbe": 2,
+      "synthetic:synthetic/generic-b@69840649ce923adcf13016817982fbdc57e59c51": 2,
+      "synthetic:synthetic/large-shared@3db372d0239a097d7751a40d8737415ad0247ce1": 17,
+      "synthetic:synthetic/logic-renamed@90f3ebea663fa43f97cfa4c68463f0244ed90698": 1,
+      "synthetic:synthetic/logic-root@a8ee1b28ce4ca23b9e35e33f77164b6b361792d7": 1,
+      "synthetic:synthetic/small-only@e14a2c09972ded7a8155f4aca6069de85ed587a8": 1,
+      "synthetic:synthetic/small-shared@a2270925f017f3036395389bfa45043e63472bda": 1,
+      "synthetic:synthetic/template-app-a@0b5851bda9fc744bd0b5b14d1fdcae9315a5a359": 4,
+      "synthetic:synthetic/template-app-b@c2e8a257aaa5b0f730f5f5fad44fd4e2edf180fa": 4
+    },
+    "peakWorkers": 1,
+    "searchAttempts": 0,
+    "totalBytes": 46214
+  },
+  "summaries": [
+    {
+      "candidate": "synthetic/copy-reinit",
+      "target": "sindresorhus/p-limit",
+      "value": {
+        "comparedPairs": 1,
+        "exactPairs": 1,
+        "expectedPairs": 1,
+        "failures": [],
+        "firstFiltered": 1,
+        "firstIncluded": 1,
+        "firstTokens": 633,
+        "normalized": {
+          "first": 450,
+          "firstCoverage": 1,
+          "score": 1,
+          "second": 450,
+          "secondCoverage": 1,
+          "shared": 450
+        },
+        "secondFiltered": 1,
+        "secondIncluded": 1,
+        "secondTokens": 633,
+        "state": "completed",
+        "strict": {
+          "first": 576,
+          "firstCoverage": 1,
+          "score": 1,
+          "second": 576,
+          "secondCoverage": 1,
+          "shared": 576
+        }
+      }
+    },
+    {
+      "candidate": "synthetic/format-path",
+      "target": "sindresorhus/p-limit",
+      "value": {
+        "comparedPairs": 1,
+        "exactPairs": 0,
+        "expectedPairs": 1,
+        "failures": [],
+        "firstFiltered": 1,
+        "firstIncluded": 1,
+        "firstTokens": 633,
+        "normalized": {
+          "first": 450,
+          "firstCoverage": 1,
+          "score": 1,
+          "second": 450,
+          "secondCoverage": 1,
+          "shared": 450
+        },
+        "secondFiltered": 1,
+        "secondIncluded": 1,
+        "secondTokens": 633,
+        "state": "completed",
+        "strict": {
+          "first": 576,
+          "firstCoverage": 1,
+          "score": 1,
+          "second": 576,
+          "secondCoverage": 1,
+          "shared": 576
+        }
+      }
+    },
+    {
+      "candidate": "jucke/p-limit",
+      "target": "sindresorhus/p-limit",
+      "value": {
+        "comparedPairs": 1,
+        "exactPairs": 0,
+        "expectedPairs": 1,
+        "failures": [],
+        "firstFiltered": 1,
+        "firstIncluded": 1,
+        "firstTokens": 633,
+        "normalized": {
+          "first": 450,
+          "firstCoverage": 0.1622222222222222,
+          "score": 0.14147286821705427,
+          "second": 139,
+          "secondCoverage": 0.5251798561151079,
+          "shared": 73
+        },
+        "secondFiltered": 1,
+        "secondIncluded": 1,
+        "secondTokens": 162,
+        "state": "completed",
+        "strict": {
+          "first": 576,
+          "firstCoverage": 0.06597222222222222,
+          "score": 0.05507246376811594,
+          "second": 152,
+          "secondCoverage": 0.25,
+          "shared": 38
+        }
+      }
+    },
+    {
+      "candidate": "sindresorhus/yocto-queue",
+      "target": "sindresorhus/p-limit",
+      "value": {
+        "comparedPairs": 1,
+        "exactPairs": 0,
+        "expectedPairs": 1,
+        "failures": [],
+        "firstFiltered": 1,
+        "firstIncluded": 1,
+        "firstTokens": 633,
+        "normalized": {
+          "first": 450,
+          "firstCoverage": 0.05555555555555555,
+          "score": 0.0390625,
+          "second": 215,
+          "secondCoverage": 0.11627906976744186,
+          "shared": 25
+        },
+        "secondFiltered": 2,
+        "secondIncluded": 1,
+        "secondTokens": 268,
+        "state": "completed",
+        "strict": {
+          "first": 576,
+          "firstCoverage": 0.006944444444444444,
+          "score": 0.004932182490752158,
+          "second": 239,
+          "secondCoverage": 0.016736401673640166,
+          "shared": 4
+        }
+      }
+    },
+    {
+      "candidate": "sindresorhus/p-throttle",
+      "target": "sindresorhus/p-limit",
+      "value": {
+        "comparedPairs": 1,
+        "exactPairs": 0,
+        "expectedPairs": 1,
+        "failures": [],
+        "firstFiltered": 1,
+        "firstIncluded": 1,
+        "firstTokens": 633,
+        "normalized": {
+          "first": 450,
+          "firstCoverage": 0.35555555555555557,
+          "score": 0.13479359730412804,
+          "second": 897,
+          "secondCoverage": 0.17837235228539577,
+          "shared": 160
+        },
+        "secondFiltered": 2,
+        "secondIncluded": 1,
+        "secondTokens": 1592,
+        "state": "completed",
+        "strict": {
+          "first": 576,
+          "firstCoverage": 0.057291666666666664,
+          "score": 0.01738672286617492,
+          "second": 1355,
+          "secondCoverage": 0.024354243542435424,
+          "shared": 33
+        }
+      }
+    },
+    {
+      "candidate": "synthetic/logic-renamed",
+      "target": "synthetic/logic-root",
+      "value": {
+        "comparedPairs": 1,
+        "exactPairs": 0,
+        "expectedPairs": 1,
+        "failures": [],
+        "firstFiltered": 0,
+        "firstIncluded": 1,
+        "firstTokens": 26,
+        "normalized": {
+          "first": 22,
+          "firstCoverage": 1,
+          "score": 1,
+          "second": 22,
+          "secondCoverage": 1,
+          "shared": 22
+        },
+        "secondFiltered": 0,
+        "secondIncluded": 1,
+        "secondTokens": 26,
+        "state": "completed",
+        "strict": {
+          "first": 22,
+          "firstCoverage": 0.045454545454545456,
+          "score": 0.023255813953488372,
+          "second": 22,
+          "secondCoverage": 0.045454545454545456,
+          "shared": 1
+        }
+      }
+    },
+    {
+      "candidate": "synthetic/template-app-b",
+      "target": "synthetic/template-app-a",
+      "value": {
+        "comparedPairs": 1,
+        "exactPairs": 0,
+        "expectedPairs": 1,
+        "failures": [],
+        "firstFiltered": 3,
+        "firstIncluded": 1,
+        "firstTokens": 26,
+        "normalized": {
+          "first": 22,
+          "firstCoverage": 0.18181818181818182,
+          "score": 0.10810810810810811,
+          "second": 19,
+          "secondCoverage": 0.21052631578947367,
+          "shared": 4
+        },
+        "secondFiltered": 3,
+        "secondIncluded": 1,
+        "secondTokens": 23,
+        "state": "completed",
+        "strict": {
+          "first": 22,
+          "firstCoverage": 0,
+          "score": 0,
+          "second": 19,
+          "secondCoverage": 0,
+          "shared": 0
+        }
+      }
+    },
+    {
+      "candidate": "synthetic/generic-b",
+      "target": "synthetic/generic-a",
+      "value": {
+        "comparedPairs": 4,
+        "exactPairs": 0,
+        "expectedPairs": 4,
+        "failures": [],
+        "firstFiltered": 0,
+        "firstIncluded": 2,
+        "firstTokens": 55,
+        "normalized": {
+          "first": 43,
+          "firstCoverage": 0.6046511627906976,
+          "score": 0.4482758620689655,
+          "second": 41,
+          "secondCoverage": 0.6341463414634146,
+          "shared": 26
+        },
+        "secondFiltered": 0,
+        "secondIncluded": 2,
+        "secondTokens": 52,
+        "state": "completed",
+        "strict": {
+          "first": 47,
+          "firstCoverage": 0.23404255319148937,
+          "score": 0.1375,
+          "second": 44,
+          "secondCoverage": 0.25,
+          "shared": 11
+        }
+      }
+    },
+    {
+      "candidate": "synthetic/large-shared",
+      "target": "synthetic/small-shared",
+      "value": {
+        "comparedPairs": 17,
+        "exactPairs": 1,
+        "expectedPairs": 17,
+        "failures": [],
+        "firstFiltered": 0,
+        "firstIncluded": 1,
+        "firstTokens": 29,
+        "normalized": {
+          "first": 25,
+          "firstCoverage": 1,
+          "score": 0.1179245283018868,
+          "second": 212,
+          "secondCoverage": 0.1179245283018868,
+          "shared": 25
+        },
+        "secondFiltered": 0,
+        "secondIncluded": 17,
+        "secondTokens": 669,
+        "state": "completed",
+        "strict": {
+          "first": 25,
+          "firstCoverage": 1,
+          "score": 0.0946969696969697,
+          "second": 264,
+          "secondCoverage": 0.0946969696969697,
+          "shared": 25
+        }
+      }
+    },
+    {
+      "candidate": "synthetic/small-shared",
+      "target": "synthetic/large-shared",
+      "value": {
+        "comparedPairs": 17,
+        "exactPairs": 1,
+        "expectedPairs": 17,
+        "failures": [],
+        "firstFiltered": 0,
+        "firstIncluded": 17,
+        "firstTokens": 669,
+        "normalized": {
+          "first": 212,
+          "firstCoverage": 0.1179245283018868,
+          "score": 0.1179245283018868,
+          "second": 25,
+          "secondCoverage": 1,
+          "shared": 25
+        },
+        "secondFiltered": 0,
+        "secondIncluded": 1,
+        "secondTokens": 29,
+        "state": "completed",
+        "strict": {
+          "first": 264,
+          "firstCoverage": 0.0946969696969697,
+          "score": 0.0946969696969697,
+          "second": 25,
+          "secondCoverage": 1,
+          "shared": 25
+        }
+      }
+    },
+    {
+      "candidate": "synthetic/filtered-mix",
+      "target": "sindresorhus/p-limit",
+      "value": {
+        "comparedPairs": 1,
+        "exactPairs": 0,
+        "expectedPairs": 1,
+        "failures": [],
+        "firstFiltered": 1,
+        "firstIncluded": 1,
+        "firstTokens": 633,
+        "normalized": {
+          "first": 450,
+          "firstCoverage": 0.013333333333333334,
+          "score": 0.012958963282937365,
+          "second": 19,
+          "secondCoverage": 0.3157894736842105,
+          "shared": 6
+        },
+        "secondFiltered": 9,
+        "secondIncluded": 1,
+        "secondTokens": 23,
+        "state": "completed",
+        "strict": {
+          "first": 576,
+          "firstCoverage": 0,
+          "score": 0,
+          "second": 19,
+          "secondCoverage": 0,
+          "shared": 0
+        }
+      }
+    },
+    {
+      "candidate": "synthetic/broken",
+      "target": "sindresorhus/p-limit",
+      "value": {
+        "comparedPairs": 1,
+        "exactPairs": 0,
+        "expectedPairs": 1,
+        "failures": [
+          "src/parse.js: parse_failed"
+        ],
+        "firstFiltered": 1,
+        "firstIncluded": 1,
+        "firstTokens": 633,
+        "normalized": {
+          "first": 450,
+          "firstCoverage": null,
+          "score": null,
+          "second": 0,
+          "secondCoverage": null,
+          "shared": 0
+        },
+        "secondFiltered": 0,
+        "secondIncluded": 1,
+        "secondTokens": 0,
+        "state": "partial",
+        "strict": {
+          "first": 576,
+          "firstCoverage": null,
+          "score": null,
+          "second": 0,
+          "secondCoverage": null,
+          "shared": 0
+        }
+      }
+    },
+    {
+      "candidate": "synthetic/small-only",
+      "target": "sindresorhus/p-limit",
+      "value": null
+    }
+  ],
+  "labels": [
+    {
+      "candidate": "synthetic/copy-reinit",
+      "label": "positive",
+      "reason": "Source copied into an independent initial Git commit; synthetic",
+      "target": "sindresorhus/p-limit"
+    },
+    {
+      "candidate": "synthetic/format-path",
+      "label": "positive",
+      "reason": "Only indentation, leading whitespace and path changed; synthetic",
+      "target": "sindresorhus/p-limit"
+    },
+    {
+      "candidate": "jucke/p-limit",
+      "label": "positive",
+      "reason": "Pinned Phase 0 public fork metadata and shared commit",
+      "target": "sindresorhus/p-limit"
+    },
+    {
+      "candidate": "sindresorhus/yocto-queue",
+      "label": "unknown",
+      "reason": "Real candidate without human lineage validation",
+      "target": "sindresorhus/p-limit"
+    },
+    {
+      "candidate": "sindresorhus/p-throttle",
+      "label": "unknown",
+      "reason": "Real candidate without human lineage validation",
+      "target": "sindresorhus/p-limit"
+    },
+    {
+      "candidate": "synthetic/logic-renamed",
+      "label": "positive",
+      "reason": "Manual lexical binding renames only; reduce property, literals and operators unchanged",
+      "target": "synthetic/logic-root"
+    },
+    {
+      "candidate": "synthetic/template-app-b",
+      "label": "negative",
+      "reason": "Independently constructed apps share only scaffold/license/README",
+      "target": "synthetic/template-app-a"
+    },
+    {
+      "candidate": "synthetic/generic-b",
+      "label": "negative",
+      "reason": "Independent apps with common guard; no lineage by construction",
+      "target": "synthetic/generic-a"
+    },
+    {
+      "candidate": "synthetic/large-shared",
+      "label": "negative",
+      "reason": "Independent large project includes the same generic guard",
+      "target": "synthetic/small-shared"
+    },
+    {
+      "candidate": "synthetic/small-shared",
+      "label": "negative",
+      "reason": "Reverse asymmetric pair; same shared generic guard",
+      "target": "synthetic/large-shared"
+    },
+    {
+      "candidate": "synthetic/filtered-mix",
+      "label": "negative",
+      "reason": "Independent application with deliberately non-source fixtures",
+      "target": "sindresorhus/p-limit"
+    },
+    {
+      "candidate": "synthetic/broken",
+      "label": "unknown",
+      "reason": "Parse failure cannot be negative",
+      "target": "sindresorhus/p-limit"
+    },
+    {
+      "candidate": "synthetic/small-only",
+      "label": "unknown",
+      "reason": "No eligible source cannot be negative",
+      "target": "sindresorhus/p-limit"
+    }
+  ],
+  "receipt": {
+    "contentDigest": "546af0c31bc3434abca4f64ff8691457373a2c3449363b641f30eb53d637167c",
+    "cpuBudget": "unsupported",
+    "cpuScope": "process including workers; observational only",
+    "metadataPreparationOutsideRun": true,
+    "node": "v24.21.0",
+    "platform": "linux",
+    "processCpuMs": 3077.465,
+    "schemaVersion": "discovery-receipt@1",
+    "wallMs": 3315.204378
+  },
+  "filters": {
+    "application_source": 59,
+    "license": 16,
+    "documentation": 5,
+    "template": 3,
+    "generated": 1,
+    "minified": 1,
+    "lockfile": 1,
+    "unsupported": 1,
+    "too_small": 2,
+    "vendor": 1
+  }
+}

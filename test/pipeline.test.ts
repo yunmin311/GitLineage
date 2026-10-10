@@ -34,29 +34,31 @@ const validateSchema = ajv.compile(schema);
  * Nothing here touches the network: the pipeline runs with git and registry
  * resolution disabled, which is also the documented "metadata only" mode.
  */
-test('end to end: a URL produces a validated graph artifact', async () => {
+test('end to end: an unavailable repository fails without a graph artifact', async () => {
   const outDir = await mkdtemp(join(tmpdir(), 'gitlineage-e2e-'));
-  const result = await analyze({
-    target: 'https://github.com/me/does-not-exist-offline',
-    cacheRoot: join(outDir, 'cache'),
-    outDir,
-    enableGit: false,
-    enableRegistry: false,
-  }).catch((error: unknown) => {
-    // A 404 is the expected outcome offline; the point of the test is that the
-    // failure is explicit rather than producing a partial graph.
-    assert.match(error instanceof Error ? error.message : String(error), /404/);
-    return null;
-  });
-
-  if (result) {
-    assert.ok(validateGraph(result.graph).valid);
-    const graphOnDisk = JSON.parse(await readFile(join(outDir, 'graph.json'), 'utf8')) as LineageGraph;
-    const metadata = JSON.parse(await readFile(join(outDir, 'analysis-metadata.json'), 'utf8')) as Record<string, unknown>;
-    assert.deepEqual(graphOnDisk, result.graph);
-    assert.equal(metadata.schemaVersion, result.graph.schemaVersion);
-    assert.equal(metadata.root, 'me/does-not-exist-offline');
-    assert.ok(validateSchema(graphOnDisk), `graph.json violates the JSON schema: ${JSON.stringify(validateSchema.errors?.slice(0, 3))}`);
+  const originalFetch = globalThis.fetch;
+  const requests: string[] = [];
+  globalThis.fetch = async (input) => {
+    const url = input instanceof URL ? input.href : input instanceof Request ? input.url : String(input);
+    requests.push(url);
+    assert.equal(url, 'https://api.github.com/repos/me/does-not-exist-offline');
+    return new Response(JSON.stringify({ message: 'Not Found' }), {
+      status: 404,
+      headers: { 'content-type': 'application/json' },
+    });
+  };
+  try {
+    await assert.rejects(analyze({
+      target: 'https://github.com/me/does-not-exist-offline',
+      cacheRoot: join(outDir, 'cache'),
+      outDir,
+      enableGit: false,
+      enableRegistry: false,
+    }), /404/);
+    assert.deepEqual(requests, ['https://api.github.com/repos/me/does-not-exist-offline']);
+    assert.equal(await readdir(outDir).then((entries) => entries.includes('graph.json')), false);
+  } finally {
+    globalThis.fetch = originalFetch;
   }
 });
 

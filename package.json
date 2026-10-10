@@ -27,7 +27,12 @@
     "test:preflight": "node test/web/preflight-acceptance.ts",
     "test:responsive": "node test/web/responsive-acceptance.ts",
     "test:mobile": "node test/web/mobile-acceptance.ts",
-    "test:stale": "node test/web/stale-acceptance.ts"
+    "test:stale": "node test/web/stale-acceptance.ts",
+    "preview:deep": "node experiments/discovery-v2/serve-preview.ts",
+    "test:deep-search": "node test/web/deep-search-acceptance.ts",
+    "preview:private-beta": "node experiments/discovery-v2/serve-private-beta.ts",
+    "test:private-beta": "node test/web/private-beta-acceptance.ts",
+    "test:private-beta-tls": "bash test/staging/run.sh"
   },
   "dependencies": {
     "smol-toml": "^1.4.2"

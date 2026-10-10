@@ -21,8 +21,8 @@ export interface HistorySample {
   createdAt: string;
   htmlUrl: string;
   /**
-   * Fetch facts, recorded for the diagnostics sidecar only. Absent when the
-   * caller did not collect them, and never consulted by the comparison itself.
+   * Fetch completeness facts. If supplied, unknown/shallow state cannot prove
+   * complete containment; callers without fetch facts retain the explicit truncated contract.
    */
   fetch?: {
     depth?: number;
@@ -147,7 +147,9 @@ export function compareHistories(input: HistoryComparisonInput): HistoryComparis
     const targetOnly = [...rootCommits].filter((sha) => !candidateCommits.has(sha)).length;
     const contained = targetOnly === 0 && sourceOnly > 0;
     const temporallyOrdered = Date.parse(candidate.createdAt) < Date.parse(rootSample.createdAt);
-    const complete = !rootSample.truncated && !candidate.truncated;
+    const completeWindow = (sample: HistorySample): boolean => !sample.truncated &&
+      (sample.fetch === undefined || (sample.fetch.isShallow === false && (sample.fetch.shallowBoundary?.length ?? 0) === 0));
+    const complete = completeWindow(rootSample) && completeWindow(candidate);
 
     if (contained && temporallyOrdered && complete) {
       observations.push({

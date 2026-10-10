@@ -1,0 +1,33 @@
+{
+  "engine": "Chromium simulation",
+  "results": [
+    {
+      "width": 390,
+      "status": "pass",
+      "requests": 14,
+      "verification": "pending",
+      "lineageClaim": "none"
+    },
+    {
+      "width": 430,
+      "status": "pass",
+      "requests": 14,
+      "verification": "pending",
+      "lineageClaim": "none"
+    },
+    {
+      "width": 1280,
+      "status": "pass",
+      "requests": 14,
+      "verification": "pending",
+      "lineageClaim": "none"
+    },
+    {
+      "width": 1920,
+      "status": "pass",
+      "requests": 14,
+      "verification": "pending",
+      "lineageClaim": "none"
+    }
+  ]
+}

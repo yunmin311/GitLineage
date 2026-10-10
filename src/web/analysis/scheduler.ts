@@ -350,7 +350,9 @@ export class AnalysisScheduler {
     const limit = this.options.limiter.settings.maxConcurrent;
     while (this.running < limit && this.queue.length > 0) {
       const jobId = this.queue.shift()!;
-      void this.run(jobId);
+      void this.run(jobId).catch(error => {
+        logEvent('analysis.failed', { jobId, code: 'job_persistence_failed', message: error instanceof Error ? error.message : String(error) });
+      });
     }
     if (this.running === 0 && this.queue.length === 0) {
       const waiters = this.idleWaiters;
@@ -369,6 +371,11 @@ export class AnalysisScheduler {
       return;
     }
 
+    let pendingWrites = Promise.resolve();
+    let persistenceError: unknown;
+    const enqueueWrite = (write: () => Promise<unknown>): void => {
+      pendingWrites = pendingWrites.then(write).then(() => {}, error => { persistenceError ??= error; });
+    };
     const timeout = setTimeout(() => {
       // The analyzer cannot be interrupted mid-flight, so the job is reported
       // failed and stops being tracked. If the computation later finishes it
@@ -376,10 +383,10 @@ export class AnalysisScheduler {
       // cannot publish anything unvouched-for.
       const current = store.get(jobId);
       if (current && !isTerminal(current.phase)) {
-        void store.markFailed(jobId, {
+        enqueueWrite(() => store.markFailed(jobId, {
           code: 'analysis_timeout',
           message: `analysis exceeded ${this.options.timeoutMs}ms`,
-        });
+        }));
         logEvent('analysis.failed', {
           jobId,
           repository: `${current.owner}/${current.name}`,
@@ -406,20 +413,14 @@ export class AnalysisScheduler {
       // Phases come from the analyzer itself, not from a timer, so a reported
       // phase has genuinely been reached.
       const onPhase = (phase: AnalysisPhase): void => {
-        const current = store.get(jobId);
-        if (!current || isTerminal(current.phase)) return;
-        // Idempotent: `resolving` is both the first real phase and the marked
-        // start state.
-        if (current.phase === phase) return;
-        if (!canAdvance(current.phase, phase)) return;
-        if (current.phase === phase) return;
-        void store.markPhase(jobId, phase);
-        logEvent('analysis.phase', {
-          jobId,
-          repository: `${current.owner}/${current.name}`,
-          phase,
-          queueDepth: this.queue.length,
-          running: this.running,
+        enqueueWrite(async () => {
+          const current = store.get(jobId);
+          if (!current || isTerminal(current.phase) || current.phase === phase || !canAdvance(current.phase, phase)) return;
+          await store.markPhase(jobId, phase);
+          logEvent('analysis.phase', {
+            jobId, repository: `${current.owner}/${current.name}`, phase,
+            queueDepth: this.queue.length, running: this.running,
+          });
         });
       };
 
@@ -472,11 +473,14 @@ export class AnalysisScheduler {
       // The artifact store is the last step and happens in `analyzeWithCache`,
       // not inside `analyze()`, so `publishing` is recorded here rather than
       // being inferred from a timer.
+      await pendingWrites;
+      if (persistenceError) throw persistenceError;
       const beforePublish = store.get(jobId);
       if (beforePublish && canTransition(beforePublish.phase, 'publishing')) {
         await store.markPhase(jobId, 'publishing');
       }
       const completed = await store.markComplete(jobId, result.graph.graph.revision.commit);
+      if (completed.phase !== 'complete') return;
       logEvent('analysis.completed', {
         jobId,
         repository: `${record.owner}/${record.name}`,
@@ -488,6 +492,7 @@ export class AnalysisScheduler {
         running: this.running,
       });
     } catch (error) {
+      await pendingWrites;
       const current = store.get(jobId);
       if (current && !isTerminal(current.phase)) {
         // The code used to be computed and then thrown away: `markFailed` was
@@ -515,6 +520,8 @@ export class AnalysisScheduler {
     } finally {
       clearTimeout(timeout);
       this.timers.delete(timeout);
+      await pendingWrites;
+      await store.whenIdle();
       this.running -= 1;
       this.pump();
     }
@@ -522,10 +529,12 @@ export class AnalysisScheduler {
 
   /** Resolves when nothing is running or queued. Used by tests and shutdown. */
   async whenIdle(): Promise<void> {
-    if (this.running === 0 && this.queue.length === 0) return;
-    await new Promise<void>((resolve) => {
-      this.idleWaiters.push(resolve);
-    });
+    await this.ready();
+    await Promise.all(this.creating.values());
+    if (this.running !== 0 || this.queue.length !== 0) {
+      await new Promise<void>((resolve) => { this.idleWaiters.push(resolve); });
+    }
+    await this.options.store.whenIdle();
   }
 
   /** Waits for one job to reach a terminal phase. Used by tests. */

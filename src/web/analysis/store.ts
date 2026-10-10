@@ -31,6 +31,8 @@ export interface JobStoreOptions {
   /** Analyzer version stamped on new jobs. */
   analyzerVersion: string;
   now?: () => Date;
+  /** Test seam for deterministic persistence stalls and failures. */
+  beforePersist?: (record: Readonly<JobRecord>) => Promise<void>;
 }
 
 function isAnalysisPhase(value: unknown): value is AnalysisPhase {
@@ -68,12 +70,15 @@ export class JobStore {
   private readonly schemaVersion: string;
   private readonly analyzerVersion: string;
   private readonly now: () => Date;
+  private readonly beforePersist: JobStoreOptions['beforePersist'];
+  private readonly writes = new Map<string, Promise<void>>();
   /** In-memory mirror. The files are the durable record; this avoids re-reading. */
   private readonly byId = new Map<string, JobRecord>();
   /** Active jobs by dedup key, so a duplicate request can join instead of fork. */
   private readonly activeByKey = new Map<string, string>();
 
   constructor(options: JobStoreOptions) {
+    this.beforePersist = options.beforePersist;
     this.dir = options.root;
     this.schemaVersion = options.schemaVersion;
     this.analyzerVersion = options.analyzerVersion;
@@ -92,6 +97,7 @@ export class JobStore {
   }
 
   private async persist(record: JobRecord): Promise<void> {
+    await this.beforePersist?.(record);
     const target = this.path(record.jobId);
     const temporary = `${target}.tmp`;
     await writeFile(temporary, `${JSON.stringify(record, null, 2)}\n`, 'utf8');
@@ -179,11 +185,28 @@ export class JobStore {
   }
 
   async update(jobId: string, patch: Partial<JobRecord>): Promise<JobRecord> {
-    const existing = this.byId.get(jobId);
-    if (!existing) throw new Error(`unknown job: ${jobId}`);
-    const record: JobRecord = { ...existing, ...patch, updatedAt: this.now().toISOString() };
-    await this.persist(record);
-    return record;
+    const previous = this.writes.get(jobId) ?? Promise.resolve();
+    const write = previous.then(async () => {
+      const existing = this.byId.get(jobId);
+      if (!existing) throw new Error(`unknown job: ${jobId}`);
+      // Read at execution time, not enqueue time. Late phase callbacks cannot
+      // regress a newer phase or replace a terminal outcome.
+      if (isTerminal(existing.phase) || (patch.phase && ANALYSIS_PHASES.indexOf(patch.phase) < ANALYSIS_PHASES.indexOf(existing.phase))) return existing;
+      const record: JobRecord = { ...existing, ...patch, updatedAt: this.now().toISOString() };
+      await this.persist(record);
+      return record;
+    });
+    // A failed write must not poison the queue. Its caller still receives
+    // the rejecting promise below; only the queue tail settles unconditionally.
+    const settled = write.then(() => {}, () => {});
+    this.writes.set(jobId, settled);
+    void settled.then(() => { if (this.writes.get(jobId) === settled) this.writes.delete(jobId); });
+    return write;
+  }
+
+  /** Drains queued writes; failures are reported by each update promise. */
+  async whenIdle(): Promise<void> {
+    while (this.writes.size) await Promise.all(this.writes.values());
   }
 
   async markStarted(jobId: string): Promise<JobRecord> {

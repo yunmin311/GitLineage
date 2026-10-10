@@ -1,5 +1,5 @@
 /** Pinned canonical fixtures with a controlled scheduler clock for FSM assertions. */
-import { serve } from '../../src/web/serve.ts';
+import { serve, type ServeOptions } from '../../src/web/serve.ts';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -11,9 +11,9 @@ export const B = 'yunmin311/obsidian-config';
 export const C = 'grpc/grpc';
 export const D = 'nachocebey/is';
 export const E = 'yunmin311/GitLineage';
-type FixtureServerOptions = { phaseDelayMs?: number };
+type FixtureServerOptions = Pick<ServeOptions, 'previewHandler' | 'privateBetaHandler' | 'privateBetaProxyKey'> & { phaseDelayMs?: number };
 export async function fixtureServer(previewOptions: FixtureServerOptions = {}) {
-  const { phaseDelayMs = 4000 } = previewOptions;
+  const { phaseDelayMs = 4000, ...serveOptions } = previewOptions;
   const graphs = new Map<string, LineageGraph>();
   for (const [repo, name] of [
     [A, 'mobile-kuddev-pebrel-51514bd'],
@@ -28,7 +28,7 @@ export async function fixtureServer(previewOptions: FixtureServerOptions = {}) {
     return graph;
   };
   const root = await mkdtemp(resolve(tmpdir(), 'gitlineage-ui-'));
-  const app = await serve({ port: 0, clientDir: resolve('dist/web'), cacheRoot: root, jobStoreRoot: resolve(root, 'jobs'),
+  const app = await serve({ ...serveOptions, port: 0, clientDir: resolve('dist/web'), cacheRoot: root, jobStoreRoot: resolve(root, 'jobs'),
     probeRevisionOverride: async repo => ({ commit: graphFor(`${repo.owner}/${repo.name}`).graph.revision.commit }),
     analyzeOverride: async target => graphFor(target),
     schedulerAnalyzeOverride: async options => {

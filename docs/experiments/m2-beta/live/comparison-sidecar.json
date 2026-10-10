@@ -1,0 +1,1317 @@
+{
+  "schemaVersion": "discovery-preview-export@2",
+  "selection": {
+    "schemaVersion": "bounded-tree-selection@1",
+    "sourceTaskId": "1fde8f3da1b0ba18dde54e75",
+    "searchReceipt": {
+      "coverage": {
+        "state": "partial_provider",
+        "scope": "bounded public repository metadata search; never all GitHub",
+        "plannedQueries": 1,
+        "attemptedQueries": 1,
+        "requestedPages": 1,
+        "completedPages": 1,
+        "returnedItems": 3,
+        "uniqueObserved": 2,
+        "processedCandidates": 2,
+        "rejectedIdentity": 0,
+        "rejectedBudget": 0,
+        "excludedTarget": 1,
+        "accessibleWindow": 1000,
+        "uncompletedPlanned": []
+      },
+      "attempts": [
+        {
+          "query": 0,
+          "page": 1,
+          "retry": 0,
+          "status": 200,
+          "outcome": "success",
+          "headers": {
+            "x-ratelimit-limit": "10",
+            "x-ratelimit-remaining": "8",
+            "x-ratelimit-reset": "1791554400",
+            "x-ratelimit-used": "2",
+            "x-ratelimit-resource": "search",
+            "x-github-api-version-selected": "2026-03-10"
+          },
+          "receivedBytes": 15910,
+          "retainedBytes": 15910,
+          "reservedBytes": 32768
+        }
+      ],
+      "queries": [
+        {
+          "state": "partial_provider",
+          "query": 0,
+          "requestedPages": [
+            1
+          ],
+          "completedPages": [
+            1
+          ],
+          "totalCount": 39,
+          "incompleteResults": false,
+          "returnedItems": 3,
+          "unfetchedAccessiblePages": 12,
+          "beyondWindow": 0
+        }
+      ],
+      "usage": {
+        "attempts": 4,
+        "searchAttempts": 1,
+        "candidates": 2,
+        "files": {},
+        "bytesByFile": {},
+        "totalBytes": 0,
+        "activeWorkers": 0,
+        "peakWorkers": 1
+      },
+      "network": {
+        "reservedBytes": 131072,
+        "receivedBytes": 31382,
+        "retainedBytes": 31382,
+        "overflowBytes": 0
+      }
+    },
+    "repositories": [
+      {
+        "repositoryId": 315531538,
+        "revision": "72a8fa96a9d389765cdf2bb9c6daba8302fc375d",
+        "tree": "0b81d56218d4a4ab1b9ec91109e7b5d493e123d7",
+        "fullName": "sindresorhus/yocto-queue",
+        "files": [
+          {
+            "path": ".editorconfig",
+            "type": "blob",
+            "bytes": 175,
+            "blob": "1c6314a31833395fd5ff016a6506bdd51860657c",
+            "selectable": false,
+            "reason": "only JS and TS supported",
+            "language": "unsupported"
+          },
+          {
+            "path": ".gitattributes",
+            "type": "blob",
+            "bytes": 19,
+            "blob": "6313b56c57848efce05faa7aa7e901ccfc2886ea",
+            "selectable": false,
+            "reason": "too small for supported source comparison",
+            "language": "unsupported"
+          },
+          {
+            "path": ".gitignore",
+            "type": "blob",
+            "bytes": 23,
+            "blob": "239ecff1372358a22aa99dcbb375fdad7abba817",
+            "selectable": false,
+            "reason": "only JS and TS supported",
+            "language": "unsupported"
+          },
+          {
+            "path": ".npmrc",
+            "type": "blob",
+            "bytes": 19,
+            "blob": "43c97e719a5a824700932f72e6e7e6748ce45d01",
+            "selectable": false,
+            "reason": "too small for supported source comparison",
+            "language": "unsupported"
+          },
+          {
+            "path": "index.d.ts",
+            "type": "blob",
+            "bytes": 1991,
+            "blob": "0475d9853a37ea304cac34ad41b1ac3736447ff3",
+            "selectable": true,
+            "reason": "supported JS/TS; content filters run after digest-checked read",
+            "language": "typescript"
+          },
+          {
+            "path": "index.js",
+            "type": "blob",
+            "bytes": 1587,
+            "blob": "627ed535f3163b37f2e3b208a23788fd0a715eba",
+            "selectable": true,
+            "reason": "supported JS/TS; content filters run after digest-checked read",
+            "language": "javascript"
+          },
+          {
+            "path": "index.test-d.ts",
+            "type": "blob",
+            "bytes": 173,
+            "blob": "7f413f89fc5f1710b2715df9f57bcf65974fe28d",
+            "selectable": true,
+            "reason": "supported JS/TS; content filters run after digest-checked read",
+            "language": "typescript"
+          },
+          {
+            "path": "license",
+            "type": "blob",
+            "bytes": 1117,
+            "blob": "fa7ceba3eb4a9657a9db7f3ffca4e4e97a9019de",
+            "selectable": false,
+            "reason": "license name",
+            "language": "unsupported"
+          },
+          {
+            "path": "package.json",
+            "type": "blob",
+            "bytes": 849,
+            "blob": "e9963ac06226563b55c958f9b925c996502771a9",
+            "selectable": false,
+            "reason": "only JS and TS supported",
+            "language": "unsupported"
+          },
+          {
+            "path": "readme.md",
+            "type": "blob",
+            "bytes": 2573,
+            "blob": "f94f98ef865f793b8e09c28e9d1a862fd088ae34",
+            "selectable": false,
+            "reason": "documentation name",
+            "language": "unsupported"
+          },
+          {
+            "path": "test.js",
+            "type": "blob",
+            "bytes": 1744,
+            "blob": "1ed25bfc91dc47f148a57838fd814bf790f3e007",
+            "selectable": true,
+            "reason": "supported JS/TS; content filters run after digest-checked read",
+            "language": "javascript"
+          },
+          {
+            "path": ".github/security.md",
+            "type": "blob",
+            "bytes": 179,
+            "blob": "930aea2eb560a83a3995a62f940c4effddfe877d",
+            "selectable": false,
+            "reason": "documentation name",
+            "language": "unsupported"
+          },
+          {
+            "path": ".github/workflows/main.yml",
+            "type": "blob",
+            "bytes": 406,
+            "blob": "5f816e231deed299c6482cea041906a009a2c207",
+            "selectable": false,
+            "reason": "only JS and TS supported",
+            "language": "unsupported"
+          }
+        ],
+        "coverage": {
+          "scope": "bounded tree listing, not a repository scan",
+          "state": "listed",
+          "enumeration": "complete",
+          "eligibleFiles": 4,
+          "visitedTrees": 3,
+          "unlistedDirectories": [],
+          "filtered": [
+            {
+              "path": ".editorconfig",
+              "reason": "only JS and TS supported"
+            },
+            {
+              "path": ".gitattributes",
+              "reason": "too small for supported source comparison"
+            },
+            {
+              "path": ".gitignore",
+              "reason": "only JS and TS supported"
+            },
+            {
+              "path": ".npmrc",
+              "reason": "too small for supported source comparison"
+            },
+            {
+              "path": "license",
+              "reason": "license name"
+            },
+            {
+              "path": "package.json",
+              "reason": "only JS and TS supported"
+            },
+            {
+              "path": "readme.md",
+              "reason": "documentation name"
+            },
+            {
+              "path": ".github/security.md",
+              "reason": "documentation name"
+            },
+            {
+              "path": ".github/workflows/main.yml",
+              "reason": "only JS and TS supported"
+            }
+          ],
+          "reasons": []
+        }
+      },
+      {
+        "repositoryId": 1168938776,
+        "revision": "db05e3dcd2aabd33b5b325aa7646f8d2c4b1ffd0",
+        "tree": "9925e53c997bf4590cbab809fc482b74093f3da8",
+        "fullName": "munachi-n/yocto-queue",
+        "files": [
+          {
+            "path": ".editorconfig",
+            "type": "blob",
+            "bytes": 175,
+            "blob": "1c6314a31833395fd5ff016a6506bdd51860657c",
+            "selectable": false,
+            "reason": "only JS and TS supported",
+            "language": "unsupported"
+          },
+          {
+            "path": ".gitattributes",
+            "type": "blob",
+            "bytes": 19,
+            "blob": "6313b56c57848efce05faa7aa7e901ccfc2886ea",
+            "selectable": false,
+            "reason": "too small for supported source comparison",
+            "language": "unsupported"
+          },
+          {
+            "path": ".gitignore",
+            "type": "blob",
+            "bytes": 23,
+            "blob": "239ecff1372358a22aa99dcbb375fdad7abba817",
+            "selectable": false,
+            "reason": "only JS and TS supported",
+            "language": "unsupported"
+          },
+          {
+            "path": ".npmrc",
+            "type": "blob",
+            "bytes": 19,
+            "blob": "43c97e719a5a824700932f72e6e7e6748ce45d01",
+            "selectable": false,
+            "reason": "too small for supported source comparison",
+            "language": "unsupported"
+          },
+          {
+            "path": "index.d.ts",
+            "type": "blob",
+            "bytes": 1991,
+            "blob": "0475d9853a37ea304cac34ad41b1ac3736447ff3",
+            "selectable": true,
+            "reason": "supported JS/TS; content filters run after digest-checked read",
+            "language": "typescript"
+          },
+          {
+            "path": "index.js",
+            "type": "blob",
+            "bytes": 1587,
+            "blob": "627ed535f3163b37f2e3b208a23788fd0a715eba",
+            "selectable": true,
+            "reason": "supported JS/TS; content filters run after digest-checked read",
+            "language": "javascript"
+          },
+          {
+            "path": "index.test-d.ts",
+            "type": "blob",
+            "bytes": 173,
+            "blob": "7f413f89fc5f1710b2715df9f57bcf65974fe28d",
+            "selectable": true,
+            "reason": "supported JS/TS; content filters run after digest-checked read",
+            "language": "typescript"
+          },
+          {
+            "path": "license",
+            "type": "blob",
+            "bytes": 1117,
+            "blob": "fa7ceba3eb4a9657a9db7f3ffca4e4e97a9019de",
+            "selectable": false,
+            "reason": "license name",
+            "language": "unsupported"
+          },
+          {
+            "path": "package.json",
+            "type": "blob",
+            "bytes": 849,
+            "blob": "e9963ac06226563b55c958f9b925c996502771a9",
+            "selectable": false,
+            "reason": "only JS and TS supported",
+            "language": "unsupported"
+          },
+          {
+            "path": "readme.md",
+            "type": "blob",
+            "bytes": 2573,
+            "blob": "f94f98ef865f793b8e09c28e9d1a862fd088ae34",
+            "selectable": false,
+            "reason": "documentation name",
+            "language": "unsupported"
+          },
+          {
+            "path": "test.js",
+            "type": "blob",
+            "bytes": 1744,
+            "blob": "1ed25bfc91dc47f148a57838fd814bf790f3e007",
+            "selectable": true,
+            "reason": "supported JS/TS; content filters run after digest-checked read",
+            "language": "javascript"
+          }
+        ],
+        "coverage": {
+          "scope": "bounded tree listing, not a repository scan",
+          "state": "listed",
+          "enumeration": "complete",
+          "eligibleFiles": 4,
+          "visitedTrees": 1,
+          "unlistedDirectories": [],
+          "filtered": [
+            {
+              "path": ".editorconfig",
+              "reason": "only JS and TS supported"
+            },
+            {
+              "path": ".gitattributes",
+              "reason": "too small for supported source comparison"
+            },
+            {
+              "path": ".gitignore",
+              "reason": "only JS and TS supported"
+            },
+            {
+              "path": ".npmrc",
+              "reason": "too small for supported source comparison"
+            },
+            {
+              "path": "license",
+              "reason": "license name"
+            },
+            {
+              "path": "package.json",
+              "reason": "only JS and TS supported"
+            },
+            {
+              "path": "readme.md",
+              "reason": "documentation name"
+            }
+          ],
+          "reasons": []
+        }
+      }
+    ],
+    "selected": [
+      {
+        "repositoryId": 315531538,
+        "paths": [
+          "index.d.ts",
+          "index.js"
+        ]
+      },
+      {
+        "repositoryId": 1168938776,
+        "paths": [
+          "index.d.ts",
+          "index.js"
+        ]
+      }
+    ],
+    "stages": [
+      {
+        "taskId": "c6c741e7b1ce2358a73d313f",
+        "kind": "search",
+        "wallMs": 2355.857253,
+        "attempts": 4,
+        "reservedBytes": 131072
+      },
+      {
+        "taskId": "1fde8f3da1b0ba18dde54e75",
+        "kind": "sources",
+        "wallMs": 4099.573442000001,
+        "attempts": 8,
+        "reservedBytes": 262144
+      },
+      {
+        "taskId": "4d9d85ee390a70a1e8c5a479",
+        "kind": "compare",
+        "wallMs": 1446.4000309999974,
+        "attempts": 2,
+        "reservedBytes": 65536
+      }
+    ],
+    "combined": {
+      "usage": {
+        "attempts": 14,
+        "searchAttempts": 1,
+        "candidates": 2,
+        "files": {
+          "github:315531538@72a8fa96a9d389765cdf2bb9c6daba8302fc375d": 2,
+          "github:1168938776@db05e3dcd2aabd33b5b325aa7646f8d2c4b1ffd0": 2
+        },
+        "bytesByFile": {
+          "[\"github:315531538@72a8fa96a9d389765cdf2bb9c6daba8302fc375d\",\"index.d.ts\"]": 1991,
+          "[\"github:315531538@72a8fa96a9d389765cdf2bb9c6daba8302fc375d\",\"index.js\"]": 1587,
+          "[\"github:1168938776@db05e3dcd2aabd33b5b325aa7646f8d2c4b1ffd0\",\"index.d.ts\"]": 1991,
+          "[\"github:1168938776@db05e3dcd2aabd33b5b325aa7646f8d2c4b1ffd0\",\"index.js\"]": 1587
+        },
+        "totalBytes": 7156,
+        "activeWorkers": 0,
+        "peakWorkers": 1
+      },
+      "network": {
+        "reservedBytes": 458752,
+        "receivedBytes": 79758,
+        "retainedBytes": 79758,
+        "overflowBytes": 0
+      },
+      "activeWallMs": 7901.830725999998,
+      "elapsedWallMs": 31878
+    },
+    "coverageScope": "selected files only; repository-wide coverage unknown"
+  },
+  "provenance": {
+    "schemaVersion": "discovery-preview-provenance@1",
+    "searchTaskId": "c6c741e7b1ce2358a73d313f",
+    "compareTaskId": "4d9d85ee390a70a1e8c5a479",
+    "searchContentDigest": "7f007c9c53e2481a26f8822ef5706164d89588bfef7a5b6b24cb68b7a54c35ba",
+    "target": {
+      "repositoryId": 315531538,
+      "revision": "72a8fa96a9d389765cdf2bb9c6daba8302fc375d"
+    },
+    "candidates": [
+      {
+        "repositoryId": 1168938776,
+        "revision": null,
+        "searchCandidate": {
+          "schemaVersion": "discovery-candidate@2",
+          "target": {
+            "provider": "github",
+            "repositoryId": 315531538,
+            "completeness": "provider_id",
+            "fullName": "sindresorhus/yocto-queue",
+            "aliases": [],
+            "revision": "72a8fa96a9d389765cdf2bb9c6daba8302fc375d"
+          },
+          "candidate": {
+            "provider": "github",
+            "repositoryId": 1168938776,
+            "completeness": "provider_id",
+            "fullName": "munachi-n/yocto-queue",
+            "aliases": [],
+            "htmlUrl": "https://github.com/munachi-n/yocto-queue",
+            "observations": [
+              {
+                "repositoryId": 1168938776,
+                "fullName": "munachi-n/yocto-queue",
+                "htmlUrl": "https://github.com/munachi-n/yocto-queue",
+                "source": "repository_search",
+                "observedAt": "2026-10-09T13:59:23.855Z"
+              }
+            ],
+            "conflicts": [],
+            "revision": {
+              "state": "unresolved",
+              "sha": null
+            }
+          },
+          "discoveries": [
+            {
+              "source": "repository_search",
+              "version": "github-rest-repository-search@1",
+              "query": "yocto-queue in:name is:public fork:true",
+              "querySource": "repository_name",
+              "reason": "fixed target repository name",
+              "page": 1,
+              "rank": 2,
+              "observedAt": "2026-10-09T13:59:23.855Z"
+            }
+          ],
+          "similarity": [],
+          "supportingFiles": [],
+          "verification": {
+            "state": "pending",
+            "canonicalEvidenceIds": []
+          },
+          "lineageClaim": "none",
+          "comparison": {
+            "state": "unexecuted",
+            "reason": "revision unresolved"
+          }
+        }
+      }
+    ],
+    "status": "search_observation_only"
+  },
+  "probe": {
+    "content": {
+      "schemaVersion": "discovery-pinned-probe@1",
+      "scope": "bounded search preview and user-selected paths only; search observations are not verified evidence",
+      "snapshots": [
+        {
+          "control": {
+            "name": "sindresorhus/yocto-queue",
+            "repositoryId": 315531538,
+            "revision": "72a8fa96a9d389765cdf2bb9c6daba8302fc375d",
+            "selections": [
+              {
+                "path": "index.d.ts",
+                "reason": "explicit user selection from pinned bounded tree"
+              },
+              {
+                "path": "index.js",
+                "reason": "explicit user selection from pinned bounded tree"
+              }
+            ]
+          },
+          "expectedId": 315531538,
+          "bootstrap": null,
+          "resolution": {
+            "schemaVersion": "repository-snapshot@1",
+            "requestedId": 315531538,
+            "state": "inconclusive",
+            "identity": null,
+            "observations": [
+              {
+                "repositoryId": 315531538,
+                "fullName": "sindresorhus/yocto-queue",
+                "htmlUrl": "https://github.com/sindresorhus/yocto-queue",
+                "source": "repository_metadata"
+              },
+              {
+                "repositoryId": 315531538,
+                "fullName": "sindresorhus/yocto-queue",
+                "htmlUrl": "https://github.com/sindresorhus/yocto-queue",
+                "source": "repository_metadata"
+              }
+            ],
+            "defaultBranch": "main",
+            "tree": null,
+            "parents": [
+              "b07eac099753833b29d06c614149904445739776"
+            ],
+            "metadata": {
+              "fork": false,
+              "parentId": null
+            },
+            "reasons": [
+              "final metadata: budget_denied: provider stopped by rate limit or redirect"
+            ],
+            "requestSource": "github-rest-verified-name@1"
+          },
+          "source": {
+            "snapshot": null,
+            "selections": [
+              {
+                "path": "index.d.ts",
+                "reason": "explicit user selection from pinned bounded tree"
+              },
+              {
+                "path": "index.js",
+                "reason": "explicit user selection from pinned bounded tree"
+              }
+            ],
+            "bindings": [],
+            "materializedBytes": 3578,
+            "coverage": {
+              "scope": "explicit selected paths only",
+              "state": "unavailable",
+              "treeTruncated": false,
+              "reasons": [
+                "final metadata: budget_denied: provider stopped by rate limit or redirect"
+              ],
+              "pending": [
+                "index.d.ts",
+                "index.js"
+              ]
+            }
+          },
+          "identityCheck": {
+            "state": "unavailable",
+            "repositoryId": null,
+            "fullName": null,
+            "reason": "final metadata: budget_denied: provider stopped by rate limit or redirect"
+          },
+          "state": "inconclusive"
+        },
+        {
+          "control": {
+            "name": "munachi-n/yocto-queue",
+            "repositoryId": 1168938776,
+            "revision": "db05e3dcd2aabd33b5b325aa7646f8d2c4b1ffd0",
+            "selections": [
+              {
+                "path": "index.d.ts",
+                "reason": "explicit user selection from pinned bounded tree"
+              },
+              {
+                "path": "index.js",
+                "reason": "explicit user selection from pinned bounded tree"
+              }
+            ]
+          },
+          "expectedId": 1168938776,
+          "bootstrap": null,
+          "resolution": {
+            "schemaVersion": "repository-snapshot@1",
+            "requestedId": 1168938776,
+            "state": "inconclusive",
+            "identity": null,
+            "observations": [
+              {
+                "repositoryId": 1168938776,
+                "fullName": "munachi-n/yocto-queue",
+                "htmlUrl": "https://github.com/munachi-n/yocto-queue",
+                "source": "repository_search"
+              },
+              {
+                "repositoryId": 1168938776,
+                "fullName": "munachi-n/yocto-queue",
+                "htmlUrl": "https://github.com/munachi-n/yocto-queue",
+                "source": "repository_metadata"
+              }
+            ],
+            "defaultBranch": "master",
+            "tree": null,
+            "parents": [],
+            "metadata": {
+              "fork": false,
+              "parentId": null
+            },
+            "reasons": [
+              "final metadata: budget_denied: provider stopped by rate limit or redirect"
+            ],
+            "requestSource": "github-rest-verified-name@1"
+          },
+          "source": {
+            "snapshot": null,
+            "selections": [
+              {
+                "path": "index.d.ts",
+                "reason": "explicit user selection from pinned bounded tree"
+              },
+              {
+                "path": "index.js",
+                "reason": "explicit user selection from pinned bounded tree"
+              }
+            ],
+            "bindings": [],
+            "materializedBytes": 0,
+            "coverage": {
+              "scope": "explicit selected paths only",
+              "state": "unavailable",
+              "treeTruncated": false,
+              "reasons": [
+                "index.d.ts: blob: budget_denied: provider stopped by rate limit or redirect",
+                "index.js: blob: budget_denied: provider stopped by rate limit or redirect",
+                "no eligible selected source",
+                "final metadata: budget_denied: provider stopped by rate limit or redirect"
+              ],
+              "pending": [
+                "index.d.ts",
+                "index.js"
+              ]
+            }
+          },
+          "identityCheck": {
+            "state": "unavailable",
+            "repositoryId": null,
+            "fullName": null,
+            "reason": "final metadata: budget_denied: provider stopped by rate limit or redirect"
+          },
+          "state": "inconclusive"
+        }
+      ],
+      "comparisons": [
+        {
+          "name": "munachi-n/yocto-queue",
+          "candidate": null,
+          "summary": null,
+          "reason": "no eligible identity-checked pinned source",
+          "label": "unknown; unjudged"
+        }
+      ],
+      "requests": [
+        {
+          "endpoint": "/repos/sindresorhus/yocto-queue",
+          "status": 200,
+          "outcome": "success",
+          "reason": null,
+          "reservedBytes": 32768,
+          "receivedBytes": 5562,
+          "retainedBytes": 5562
+        },
+        {
+          "endpoint": "/repositories/315531538",
+          "status": 200,
+          "outcome": "success",
+          "reason": null,
+          "reservedBytes": 32768,
+          "receivedBytes": 5562,
+          "retainedBytes": 5562
+        },
+        {
+          "endpoint": "/repos/sindresorhus/yocto-queue/commits/main",
+          "status": 200,
+          "outcome": "success",
+          "reason": null,
+          "reservedBytes": 32768,
+          "receivedBytes": 4348,
+          "retainedBytes": 4348
+        },
+        {
+          "endpoint": "/repositories/1168938776",
+          "status": 200,
+          "outcome": "success",
+          "reason": null,
+          "reservedBytes": 32768,
+          "receivedBytes": 5252,
+          "retainedBytes": 5252
+        },
+        {
+          "endpoint": "/repos/munachi-n/yocto-queue/commits/master",
+          "status": 200,
+          "outcome": "success",
+          "reason": null,
+          "reservedBytes": 32768,
+          "receivedBytes": 20229,
+          "retainedBytes": 20229
+        },
+        {
+          "endpoint": "/repos/sindresorhus/yocto-queue/git/trees/0b81d56218d4a4ab1b9ec91109e7b5d493e123d7",
+          "status": 200,
+          "outcome": "success",
+          "reason": null,
+          "reservedBytes": 32768,
+          "receivedBytes": 2879,
+          "retainedBytes": 2879
+        },
+        {
+          "endpoint": "/repos/sindresorhus/yocto-queue/git/trees/8396da1247b5dd9931670feb4ab37a0c367b92e6",
+          "status": 200,
+          "outcome": "success",
+          "reason": null,
+          "reservedBytes": 32768,
+          "receivedBytes": 629,
+          "retainedBytes": 629
+        },
+        {
+          "endpoint": "/repos/sindresorhus/yocto-queue/git/trees/a9c67974f2227184434b96cd1739383776d8dbc1",
+          "status": 200,
+          "outcome": "success",
+          "reason": null,
+          "reservedBytes": 32768,
+          "receivedBytes": 413,
+          "retainedBytes": 413
+        },
+        {
+          "endpoint": "/repos/sindresorhus/yocto-queue",
+          "status": 200,
+          "outcome": "success",
+          "reason": null,
+          "reservedBytes": 32768,
+          "receivedBytes": 5562,
+          "retainedBytes": 5562
+        },
+        {
+          "endpoint": "/repos/munachi-n/yocto-queue/git/trees/9925e53c997bf4590cbab809fc482b74093f3da8",
+          "status": 200,
+          "outcome": "success",
+          "reason": null,
+          "reservedBytes": 32768,
+          "receivedBytes": 2632,
+          "retainedBytes": 2632
+        },
+        {
+          "endpoint": "/repos/munachi-n/yocto-queue",
+          "status": 200,
+          "outcome": "success",
+          "reason": null,
+          "reservedBytes": 32768,
+          "receivedBytes": 5252,
+          "retainedBytes": 5252
+        },
+        {
+          "endpoint": "/repos/sindresorhus/yocto-queue/git/blobs/0475d9853a37ea304cac34ad41b1ac3736447ff3",
+          "status": 200,
+          "outcome": "success",
+          "reason": null,
+          "reservedBytes": 32768,
+          "receivedBytes": 3043,
+          "retainedBytes": 3043
+        },
+        {
+          "endpoint": "/repos/sindresorhus/yocto-queue/git/blobs/627ed535f3163b37f2e3b208a23788fd0a715eba",
+          "status": 200,
+          "outcome": "success",
+          "reason": null,
+          "reservedBytes": 32768,
+          "receivedBytes": 2485,
+          "retainedBytes": 2485
+        },
+        {
+          "endpoint": "/repos/sindresorhus/yocto-queue",
+          "status": null,
+          "outcome": "budget_denied",
+          "reason": "provider stopped by rate limit or redirect",
+          "reservedBytes": 0,
+          "receivedBytes": 0,
+          "retainedBytes": 0
+        },
+        {
+          "endpoint": "/repos/munachi-n/yocto-queue/git/blobs/0475d9853a37ea304cac34ad41b1ac3736447ff3",
+          "status": null,
+          "outcome": "budget_denied",
+          "reason": "provider stopped by rate limit or redirect",
+          "reservedBytes": 0,
+          "receivedBytes": 0,
+          "retainedBytes": 0
+        },
+        {
+          "endpoint": "/repos/munachi-n/yocto-queue/git/blobs/627ed535f3163b37f2e3b208a23788fd0a715eba",
+          "status": null,
+          "outcome": "budget_denied",
+          "reason": "provider stopped by rate limit or redirect",
+          "reservedBytes": 0,
+          "receivedBytes": 0,
+          "retainedBytes": 0
+        },
+        {
+          "endpoint": "/repos/munachi-n/yocto-queue",
+          "status": null,
+          "outcome": "budget_denied",
+          "reason": "provider stopped by rate limit or redirect",
+          "reservedBytes": 0,
+          "receivedBytes": 0,
+          "retainedBytes": 0
+        }
+      ],
+      "budget": {
+        "attempts": 24,
+        "searchAttempts": 2,
+        "candidates": 3,
+        "filesPerCandidate": 8,
+        "bytesPerFile": 131072,
+        "totalBytes": 2097152,
+        "wallMs": 30000,
+        "concurrency": 2,
+        "cpuMs": null
+      },
+      "networkProfile": {
+        "perResponseBytes": 32768,
+        "totalResponseBytes": 1048576
+      },
+      "usage": {
+        "attempts": 14,
+        "searchAttempts": 1,
+        "candidates": 2,
+        "files": {
+          "github:315531538@72a8fa96a9d389765cdf2bb9c6daba8302fc375d": 2,
+          "github:1168938776@db05e3dcd2aabd33b5b325aa7646f8d2c4b1ffd0": 2
+        },
+        "bytesByFile": {
+          "[\"github:315531538@72a8fa96a9d389765cdf2bb9c6daba8302fc375d\",\"index.d.ts\"]": 1991,
+          "[\"github:315531538@72a8fa96a9d389765cdf2bb9c6daba8302fc375d\",\"index.js\"]": 1587,
+          "[\"github:1168938776@db05e3dcd2aabd33b5b325aa7646f8d2c4b1ffd0\",\"index.d.ts\"]": 1991,
+          "[\"github:1168938776@db05e3dcd2aabd33b5b325aa7646f8d2c4b1ffd0\",\"index.js\"]": 1587
+        },
+        "totalBytes": 7156,
+        "activeWorkers": 0,
+        "peakWorkers": 1
+      },
+      "network": {
+        "reservedBytes": 458752,
+        "receivedBytes": 79758,
+        "retainedBytes": 79758,
+        "overflowBytes": 0
+      },
+      "sourceMaterializedBytes": 3578,
+      "coverage": {
+        "state": "partial",
+        "completed": 0,
+        "inconclusive": 1
+      },
+      "verification": "pending",
+      "lineageClaim": "none",
+      "cpuBudget": "unsupported"
+    },
+    "receipt": {
+      "schemaVersion": "discovery-pinned-probe-receipt@1",
+      "contentDigest": "77f352109eb02516d0cc343b27c4a54d68ec8dbfd5a2a5cbbed234e77f110dff",
+      "startedAt": "2026-10-09T13:59:51.931Z",
+      "wallMs": 1443.9807719999953,
+      "processCpuMs": 30.276,
+      "cpuBudget": "unsupported",
+      "cpuScope": "process including workers; observational only",
+      "requests": [
+        {
+          "request": {
+            "endpoint": "/repos/sindresorhus/yocto-queue",
+            "status": 200,
+            "outcome": "success",
+            "reason": null,
+            "reservedBytes": 32768,
+            "receivedBytes": 5562,
+            "retainedBytes": 5562
+          },
+          "startedAt": "2026-10-09T13:59:21.500Z",
+          "wallMs": 711.944043,
+          "headers": {
+            "x-ratelimit-limit": "60",
+            "x-ratelimit-remaining": "12",
+            "x-ratelimit-reset": "1791556829",
+            "x-ratelimit-used": "48",
+            "x-ratelimit-resource": "core",
+            "x-github-api-version-selected": "2026-03-10"
+          }
+        },
+        {
+          "request": {
+            "endpoint": "/repositories/315531538",
+            "status": 200,
+            "outcome": "success",
+            "reason": null,
+            "reservedBytes": 32768,
+            "receivedBytes": 5562,
+            "retainedBytes": 5562
+          },
+          "startedAt": "2026-10-09T13:59:22.212Z",
+          "wallMs": 589.4032429999997,
+          "headers": {
+            "x-ratelimit-limit": "60",
+            "x-ratelimit-remaining": "11",
+            "x-ratelimit-reset": "1791556829",
+            "x-ratelimit-used": "49",
+            "x-ratelimit-resource": "core",
+            "x-github-api-version-selected": "2026-03-10"
+          }
+        },
+        {
+          "request": {
+            "endpoint": "/repos/sindresorhus/yocto-queue/commits/main",
+            "status": 200,
+            "outcome": "success",
+            "reason": null,
+            "reservedBytes": 32768,
+            "receivedBytes": 4348,
+            "retainedBytes": 4348
+          },
+          "startedAt": "2026-10-09T13:59:22.802Z",
+          "wallMs": 368.68578499999967,
+          "headers": {
+            "x-ratelimit-limit": "60",
+            "x-ratelimit-remaining": "10",
+            "x-ratelimit-reset": "1791556829",
+            "x-ratelimit-used": "50",
+            "x-ratelimit-resource": "core",
+            "x-github-api-version-selected": "2026-03-10"
+          }
+        },
+        {
+          "request": {
+            "endpoint": "/repositories/1168938776",
+            "status": 200,
+            "outcome": "success",
+            "reason": null,
+            "reservedBytes": 32768,
+            "receivedBytes": 5252,
+            "retainedBytes": 5252
+          },
+          "startedAt": "2026-10-09T13:59:36.831Z",
+          "wallMs": 877.0284649999994,
+          "headers": {
+            "x-ratelimit-limit": "60",
+            "x-ratelimit-remaining": "9",
+            "x-ratelimit-reset": "1791556829",
+            "x-ratelimit-used": "51",
+            "x-ratelimit-resource": "core",
+            "x-github-api-version-selected": "2026-03-10"
+          }
+        },
+        {
+          "request": {
+            "endpoint": "/repos/munachi-n/yocto-queue/commits/master",
+            "status": 200,
+            "outcome": "success",
+            "reason": null,
+            "reservedBytes": 32768,
+            "receivedBytes": 20229,
+            "retainedBytes": 20229
+          },
+          "startedAt": "2026-10-09T13:59:37.708Z",
+          "wallMs": 814.7753669999984,
+          "headers": {
+            "x-ratelimit-limit": "60",
+            "x-ratelimit-remaining": "8",
+            "x-ratelimit-reset": "1791556829",
+            "x-ratelimit-used": "52",
+            "x-ratelimit-resource": "core",
+            "x-github-api-version-selected": "2026-03-10"
+          }
+        },
+        {
+          "request": {
+            "endpoint": "/repos/sindresorhus/yocto-queue/git/trees/0b81d56218d4a4ab1b9ec91109e7b5d493e123d7",
+            "status": 200,
+            "outcome": "success",
+            "reason": null,
+            "reservedBytes": 32768,
+            "receivedBytes": 2879,
+            "retainedBytes": 2879
+          },
+          "startedAt": "2026-10-09T13:59:38.524Z",
+          "wallMs": 412.1865600000019,
+          "headers": {
+            "x-ratelimit-limit": "60",
+            "x-ratelimit-remaining": "7",
+            "x-ratelimit-reset": "1791556829",
+            "x-ratelimit-used": "53",
+            "x-ratelimit-resource": "core",
+            "x-github-api-version-selected": "2026-03-10"
+          }
+        },
+        {
+          "request": {
+            "endpoint": "/repos/sindresorhus/yocto-queue/git/trees/8396da1247b5dd9931670feb4ab37a0c367b92e6",
+            "status": 200,
+            "outcome": "success",
+            "reason": null,
+            "reservedBytes": 32768,
+            "receivedBytes": 629,
+            "retainedBytes": 629
+          },
+          "startedAt": "2026-10-09T13:59:38.938Z",
+          "wallMs": 353.687162000002,
+          "headers": {
+            "x-ratelimit-limit": "60",
+            "x-ratelimit-remaining": "6",
+            "x-ratelimit-reset": "1791556829",
+            "x-ratelimit-used": "54",
+            "x-ratelimit-resource": "core",
+            "x-github-api-version-selected": "2026-03-10"
+          }
+        },
+        {
+          "request": {
+            "endpoint": "/repos/sindresorhus/yocto-queue/git/trees/a9c67974f2227184434b96cd1739383776d8dbc1",
+            "status": 200,
+            "outcome": "success",
+            "reason": null,
+            "reservedBytes": 32768,
+            "receivedBytes": 413,
+            "retainedBytes": 413
+          },
+          "startedAt": "2026-10-09T13:59:39.292Z",
+          "wallMs": 408.3361879999975,
+          "headers": {
+            "x-ratelimit-limit": "60",
+            "x-ratelimit-remaining": "5",
+            "x-ratelimit-reset": "1791556829",
+            "x-ratelimit-used": "55",
+            "x-ratelimit-resource": "core",
+            "x-github-api-version-selected": "2026-03-10"
+          }
+        },
+        {
+          "request": {
+            "endpoint": "/repos/sindresorhus/yocto-queue",
+            "status": 200,
+            "outcome": "success",
+            "reason": null,
+            "reservedBytes": 32768,
+            "receivedBytes": 5562,
+            "retainedBytes": 5562
+          },
+          "startedAt": "2026-10-09T13:59:39.701Z",
+          "wallMs": 342.01726899999994,
+          "headers": {
+            "x-ratelimit-limit": "60",
+            "x-ratelimit-remaining": "4",
+            "x-ratelimit-reset": "1791556829",
+            "x-ratelimit-used": "56",
+            "x-ratelimit-resource": "core",
+            "x-github-api-version-selected": "2026-03-10"
+          }
+        },
+        {
+          "request": {
+            "endpoint": "/repos/munachi-n/yocto-queue/git/trees/9925e53c997bf4590cbab809fc482b74093f3da8",
+            "status": 200,
+            "outcome": "success",
+            "reason": null,
+            "reservedBytes": 32768,
+            "receivedBytes": 2632,
+            "retainedBytes": 2632
+          },
+          "startedAt": "2026-10-09T13:59:40.043Z",
+          "wallMs": 447.0942360000008,
+          "headers": {
+            "x-ratelimit-limit": "60",
+            "x-ratelimit-remaining": "3",
+            "x-ratelimit-reset": "1791556829",
+            "x-ratelimit-used": "57",
+            "x-ratelimit-resource": "core",
+            "x-github-api-version-selected": "2026-03-10"
+          }
+        },
+        {
+          "request": {
+            "endpoint": "/repos/munachi-n/yocto-queue",
+            "status": 200,
+            "outcome": "success",
+            "reason": null,
+            "reservedBytes": 32768,
+            "receivedBytes": 5252,
+            "retainedBytes": 5252
+          },
+          "startedAt": "2026-10-09T13:59:40.490Z",
+          "wallMs": 440.12698399999863,
+          "headers": {
+            "x-ratelimit-limit": "60",
+            "x-ratelimit-remaining": "2",
+            "x-ratelimit-reset": "1791556829",
+            "x-ratelimit-used": "58",
+            "x-ratelimit-resource": "core",
+            "x-github-api-version-selected": "2026-03-10"
+          }
+        },
+        {
+          "request": {
+            "endpoint": "/repos/sindresorhus/yocto-queue/git/blobs/0475d9853a37ea304cac34ad41b1ac3736447ff3",
+            "status": 200,
+            "outcome": "success",
+            "reason": null,
+            "reservedBytes": 32768,
+            "receivedBytes": 3043,
+            "retainedBytes": 3043
+          },
+          "startedAt": "2026-10-09T13:59:51.932Z",
+          "wallMs": 1021.1691229999997,
+          "headers": {
+            "x-ratelimit-limit": "60",
+            "x-ratelimit-remaining": "1",
+            "x-ratelimit-reset": "1791556829",
+            "x-ratelimit-used": "59",
+            "x-ratelimit-resource": "core",
+            "x-github-api-version-selected": "2026-03-10"
+          }
+        },
+        {
+          "request": {
+            "endpoint": "/repos/sindresorhus/yocto-queue/git/blobs/627ed535f3163b37f2e3b208a23788fd0a715eba",
+            "status": 200,
+            "outcome": "success",
+            "reason": null,
+            "reservedBytes": 32768,
+            "receivedBytes": 2485,
+            "retainedBytes": 2485
+          },
+          "startedAt": "2026-10-09T13:59:52.954Z",
+          "wallMs": 419.581167999997,
+          "headers": {
+            "x-ratelimit-limit": "60",
+            "x-ratelimit-remaining": "0",
+            "x-ratelimit-reset": "1791556829",
+            "x-ratelimit-used": "60",
+            "x-ratelimit-resource": "core",
+            "x-github-api-version-selected": "2026-03-10"
+          }
+        },
+        {
+          "request": {
+            "endpoint": "/repos/sindresorhus/yocto-queue",
+            "status": null,
+            "outcome": "budget_denied",
+            "reason": "provider stopped by rate limit or redirect",
+            "reservedBytes": 0,
+            "receivedBytes": 0,
+            "retainedBytes": 0
+          },
+          "startedAt": "2026-10-09T13:59:53.374Z",
+          "wallMs": 0.03719999999884749,
+          "headers": {}
+        },
+        {
+          "request": {
+            "endpoint": "/repos/munachi-n/yocto-queue/git/blobs/0475d9853a37ea304cac34ad41b1ac3736447ff3",
+            "status": null,
+            "outcome": "budget_denied",
+            "reason": "provider stopped by rate limit or redirect",
+            "reservedBytes": 0,
+            "receivedBytes": 0,
+            "retainedBytes": 0
+          },
+          "startedAt": "2026-10-09T13:59:53.374Z",
+          "wallMs": 0.04592499999853317,
+          "headers": {}
+        },
+        {
+          "request": {
+            "endpoint": "/repos/munachi-n/yocto-queue/git/blobs/627ed535f3163b37f2e3b208a23788fd0a715eba",
+            "status": null,
+            "outcome": "budget_denied",
+            "reason": "provider stopped by rate limit or redirect",
+            "reservedBytes": 0,
+            "receivedBytes": 0,
+            "retainedBytes": 0
+          },
+          "startedAt": "2026-10-09T13:59:53.374Z",
+          "wallMs": 0.013602999999420717,
+          "headers": {}
+        },
+        {
+          "request": {
+            "endpoint": "/repos/munachi-n/yocto-queue",
+            "status": null,
+            "outcome": "budget_denied",
+            "reason": "provider stopped by rate limit or redirect",
+            "reservedBytes": 0,
+            "receivedBytes": 0,
+            "retainedBytes": 0
+          },
+          "startedAt": "2026-10-09T13:59:53.374Z",
+          "wallMs": 0.00809799999842653,
+          "headers": {}
+        }
+      ],
+      "observations": [
+        {
+          "expectedId": 315531538,
+          "bootstrap": null,
+          "resolution": [
+            {
+              "repositoryId": 315531538,
+              "fullName": "sindresorhus/yocto-queue",
+              "htmlUrl": "https://github.com/sindresorhus/yocto-queue",
+              "source": "repository_metadata",
+              "observedAt": "2026-10-09T13:59:22.212Z"
+            },
+            {
+              "repositoryId": 315531538,
+              "fullName": "sindresorhus/yocto-queue",
+              "htmlUrl": "https://github.com/sindresorhus/yocto-queue",
+              "source": "repository_metadata",
+              "observedAt": "2026-10-09T13:59:22.802Z"
+            }
+          ]
+        },
+        {
+          "expectedId": 1168938776,
+          "bootstrap": null,
+          "resolution": [
+            {
+              "repositoryId": 1168938776,
+              "fullName": "munachi-n/yocto-queue",
+              "htmlUrl": "https://github.com/munachi-n/yocto-queue",
+              "source": "repository_search",
+              "observedAt": "2026-10-09T13:59:23.855Z"
+            },
+            {
+              "repositoryId": 1168938776,
+              "fullName": "munachi-n/yocto-queue",
+              "htmlUrl": "https://github.com/munachi-n/yocto-queue",
+              "source": "repository_metadata",
+              "observedAt": "2026-10-09T13:59:37.708Z"
+            }
+          ]
+        }
+      ],
+      "node": "v24.21.0",
+      "platform": "linux"
+    }
+  },
+  "contentDigest": "ef3aa26835ce8b7486e5bab1562d6f9d5e314c686a635dfdedf1a80ad0fe1331"
+}

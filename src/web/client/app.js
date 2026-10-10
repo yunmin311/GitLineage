@@ -1,3 +1,4 @@
+import { mountDeepPreview } from './lib/deep-preview.mjs';
 /**
  * GitLineage Explorer application.
  *
@@ -3176,3 +3177,5 @@ $('layers-btn').addEventListener('click', () => toggleLayers());
 
 installTracerTestStepper();
 boot();
+
+void mountDeepPreview(() => state.repository);
