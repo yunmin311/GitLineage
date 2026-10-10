@@ -7,6 +7,8 @@ on:
     paths:
       - '.github/workflows/p0-p05-ui-validation.yml'
       - 'src/web/**'
+      - 'src/discovery/**'
+      - 'experiments/discovery-v2/**'
       - 'test/**'
       - 'package.json'
       - 'package-lock.json'
@@ -56,12 +58,28 @@ jobs:
 
       - name: Production Deep Search remains disabled
         run: |
-          test ! -e src/discovery
-          test ! -e test/discovery
-          test ! -e experiments/discovery-v2/preview.ts
-          if rg -n --glob '*.ts' '(/api/(discovery|deep-search)|/discovery-v2)' src/web; then
-            echo 'Unexpected production Discovery endpoint in the stable UI release prefix' >&2
-            exit 1
+          if test -e src/discovery || test -e test/discovery || test -e experiments/discovery-v2; then
+            if ! test -s test/production-preview-disabled.test.ts; then
+              echo 'Discovery requires the production preview-disabled runtime test' >&2
+              exit 1
+            fi
+            guard_report=$(mktemp)
+            trap 'rm -f "$guard_report"' EXIT
+            if ! node --test --test-reporter=tap test/production-preview-disabled.test.ts > "$guard_report" 2>&1; then
+              cat "$guard_report"
+              exit 1
+            fi
+            cat "$guard_report"
+            # Require the actual M2 safety test, not a synthetic file-only pass.
+            rg -q '^ok [0-9]+ - production server keeps Deep Search disabled and does not accept preview tasks$' "$guard_report"
+          else
+            test ! -e src/discovery
+            test ! -e test/discovery
+            test ! -e experiments/discovery-v2
+            if rg -n --glob '*.ts' '(/api/(discovery|deep-search)|/discovery-v2)' src/web; then
+              echo 'Unexpected production Discovery endpoint in the stable UI release prefix' >&2
+              exit 1
+            fi
           fi
 
       - name: Install Chromium for Playwright
