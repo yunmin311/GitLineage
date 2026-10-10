@@ -2085,3 +2085,8 @@ body.mobile-explorer .band-note { display: -webkit-box; -webkit-line-clamp: 2; -
 .deep-file-row { display: flex; align-items: center; gap: var(--s3); min-height: 44px; cursor: pointer; font-family: var(--mono); font-size: var(--t-secondary-size); }
 .deep-file-row input { width: 24px; height: 24px; flex-shrink: 0; accent-color: var(--brand); }
 .deep-file-row span { min-width: 0; overflow-wrap: anywhere; }
+
+/* Independent read-only discovery overlay; the SVG world remains mounted. */
+.deep-layer-launch { top: 124px; }
+.deep-layer-candidate { display: block; width: 100%; text-align: left; margin-block: var(--s2); white-space: normal; overflow-wrap: anywhere; }
+@media (max-width: 767px) { .deep-layer-launch { top: 162px; } }
