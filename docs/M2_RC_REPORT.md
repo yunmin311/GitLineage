@@ -1,7 +1,7 @@
 # M2 Release Candidate 验证报告
 
 日期：2026-10-10<br>
-验证基线：`801cefc8099365442e35727ae6b60d1a55a8d217`<br>
+任务指定基线：`801cefc8099365442e35727ae6b60d1a55a8d217`；实际开工 HEAD：`1300ee991bd3eb028e2e716cdef707b9cf98be2d`<br>
 分支：`review/gitlineage-development`<br>
 Draft PR：[#1](https://github.com/yunmin311/GitLineage/pull/1)
 
@@ -17,7 +17,7 @@ M2 仍适合显式授权的本地预览，不满足生产发布条件。常规�
 
 现有 `arm64-validate.yml` 保持不变：它仍由 main Push / 手动触发，包含不同的联网和构建路径。本工作流隔离 PR 验收，不替代原工作流。
 
-提交并 Push 后，应在最终 SHA 上检查本 PR 的 Actions 结果；具体运行 URL 与状态随交付报告一并提供。
+首次 PR CI 在 `1300ee991bd3eb028e2e716cdef707b9cf98be2d` 运行失败，失败发生于 Unit：多个图布局测试依赖本地忽略目录中的 `.cache` / `artifacts/acceptance/*.view.json`，干净 CI checkout 没有这些文件。修复已纳入当前工作：测试改读提交的固定公开 Graph 快照；Browser fixture server 不再读取 `.cache`；元数据模式下 `enableGit:false` 在任何浅克隆前生效；原来标为“离线”的 404 测试改用确定性 Mock Fetch。完整本地 Unit 已重跑通过。推送修复提交后仍需检查 CI 是否在最终 SHA 通过；最终运行 URL 和状态见本次交付说明。
 
 ## 真实公开多文件实验
 
@@ -54,20 +54,21 @@ M2 仍适合显式授权的本地预览，不满足生产发布条件。常规�
 
 ## 本地回归与浏览器兼容性
 
-最终基线上的本地回归记录：
+实际基线 `1300ee99` 加本轮稳定化改动后的本地回归记录：
 
 - Typecheck、Build、Unit：PASS；Unit 为 566 项（563 pass、3 个既有 skip、0 fail）。
 - 离线 Discovery：118/118 PASS。
-- Chromium 浏览器回归：Canvas、Landing（40/40）、Analysis、Preflight、Stale A→B、UI Contract（75/75）、Responsive、Mobile（133/133）、Deep Search 全部 PASS。
+- Chromium 浏览器回归：Canvas（113/113）、Landing（40/40）、Analysis（16 个状态、0 个 UI contract violation）、Preflight（45/45）、Stale A→B、UI Contract（75/75）、Responsive（71/71）、Mobile（133/133）、Deep Search / Candidate Overlay（21 个验证断言）全部 PASS。
 - 视口验收：390、430、1280、1920 px；属于 Chromium 模拟视口，不代表实体手机或触控设备认证。
 - 生产关闭检查：真实生产模式 server 的能力接口为 `enabled:false`，Search POST 为 404。
-- WebKit：未通过。Playwright 可下载 WebKit，但 launch 检查发现 WSL 缺少 `libgstreamer-plugins-bad1.0-0`、`libflite1`、`libavif16`；当前会话没有 sudo 权限安装系统依赖。验收脚本提供 `PLAYWRIGHT_BROWSER=webkit` 入口，但这不构成 WebKit 通过证据。
+- WebKit：未验证通过。实际运行 `PLAYWRIGHT_BROWSER=webkit npm run test:deep-search` 时，浏览器在测试开始前因 WSL 缺少 `libgstreamer-plugins-bad1.0-0`、`libflite1`、`libavif16` 而无法启动；不把 Chromium 结果外推为 WebKit 结果。
+- 本次本地生产构建的关键产物 `assets/app.js` SHA-256 为 `b7efe771a8bf3aadd23c5bd072c85c25cd6250a11e9625c696248a4a4e323d56`，`index.html` 为 `eb986da191714c99480449e78e7b9406d83d34b8fa1dfffbbd85cfde40c7c8ca`。PR CI 会在整组浏览器验收前后对 `dist/web` 全部文件执行 SHA-256 校验，作为浏览器使用正式构建产物的证据；生成时间不同的 build manifest 不用于跨构建比较。
 
 本地 Chromium Deep Search 端到端使用固定 Mock；真实 GitHub 实验材料单独存放，没有被混入 Mock 结果。浏览器测试构建前后 `dist/web` 哈希相同的断言已纳入 PR CI。
 
 ## 稳定 UI 与 M2 发布拆分
 
-当前 PR 相对 `origin/main` 有 30 个提交。P0/P0.5 稳定 UI 提交形成独立连续前缀，可从 `ab425b6807fc7fdfc3b8c61cf02849b0336c0d49` 建立稳定 UI 审查分支/PR；该点以 `origin/main` 为祖先，不需要重写现有提交。建议先审查并发布该独立前缀，回滚可用普通 revert。此轮没有创建第二 PR，也没有更改已有 30 笔历史。
+实测开工 HEAD `1300ee99` 相对 `origin/main` 有 31 个提交。P0/P0.5 稳定 UI 提交形成前 6 个提交的连续前缀，可从 `ab425b6807fc7fdfc3b8c61cf02849b0336c0d49` 建立稳定 UI 审查分支/PR；该点以 `origin/main` 为祖先，不需要重写现有提交。建议先审查并发布该独立前缀，回滚可用普通 revert。此轮没有创建第二 PR，也没有重写既有历史。
 
 M2 功能仍置于 Draft PR #1。常规部署入口不挂接预览处理器；代码中没有把 Deep Search 能力默认开放给生产服务。M2 可继续做本地显式授权预览，但在身份访问控制、WebKit/实体设备验证及 Review 完成前，不建议把实验预览部署到公开生产环境。
 
