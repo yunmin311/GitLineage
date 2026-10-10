@@ -21,3 +21,7 @@ Read-only production verification confirms `1c31c1ccbb4657c8c0773e29faeb0b87203f
 Public M2 release still requires reviewed production authentication/authorization, shared-user quota and abuse controls, production operational acceptance and release approval; local capability-gated preview is not a public access-control system. WebKit/physical-device coverage remains incomplete. Unknown comparisons remain pending/none, deterministic similarity is not a lineage verdict, and incomplete search/file coverage must remain explicit. This integration does not implement those future capabilities.
 
 Remote acceptance must use both applicable ARM64 PR workflow runs at the final integration SHA; their URLs and results are recorded in the final delivery and ignored local evidence, rather than treating the earlier RC SHA as current acceptance.
+
+## CI integration fix
+
+The first stable UI ARM64 run (38046812557, merge SHA 45ea1776) failed after the real production-disabled test passed: the runner lacked `rg` (exit 127). A minimal follow-up explicitly installs ripgrep before the existing safety guard; no assertion, test or business logic is removed. Both workflows must be revalidated on this follow-up SHA.
