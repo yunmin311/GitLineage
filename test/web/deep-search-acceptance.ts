@@ -1,4 +1,4 @@
-import {chromium} from 'playwright';
+import {chromium,webkit} from 'playwright';
 import {cacheProof} from './cache-proof.ts';
 import {mkdir,writeFile,readFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
@@ -13,7 +13,9 @@ fixture.repos[0]!.files={'src/main.ts':fixture.repos[0]!.files['index.js']!, 'sr
 fixture.repos[1]!.files={'lib/core.ts':Buffer.from('export const answer = 12345;\n')};
 fixture.repos[3]!.files={'lib/core.ts':fixture.repos[0]!.files['src/main.ts']!};fixture.rebuild();
 let preview:ReturnType<typeof createPreview>,app:Awaited<ReturnType<typeof fixtureServer>>;
-const browser=await chromium.launch(),out=resolve('artifacts/deep-search');await mkdir(out,{recursive:true});
+const engine=process.env.PLAYWRIGHT_BROWSER??'chromium';
+if(engine!=='chromium'&&engine!=='webkit')throw new Error(`Unsupported PLAYWRIGHT_BROWSER: ${engine}`);
+const browser=await (engine==='webkit'?webkit:chromium).launch(),out=resolve('artifacts',engine==='webkit'?'deep-search-webkit':'deep-search');await mkdir(out,{recursive:true});
 const checks:unknown[]=[];
 try{
  app=await fixtureServer();const anonymous=await browser.newPage();await anonymous.goto(app.url);assert.equal(await anonymous.locator('#deep-launch').count(),0);await anonymous.close();await app.cleanup();
@@ -44,7 +46,7 @@ try{
  const geometry=await page.locator('#deep-dialog').evaluate(el=>{const b=el.getBoundingClientRect();return {x:b.x,y:b.y,width:b.width,height:b.height,overflow:document.documentElement.scrollWidth>innerWidth};});
  assert.ok(geometry.x>=0&&geometry.width<=width&&!geometry.overflow);
  const textMetrics=await page.locator('#deep-results').evaluate(el=>({font:parseFloat(getComputedStyle(el.querySelector('p')!).fontSize),button:document.querySelector('#deep-back')!.getBoundingClientRect().height}));assert.ok(textMetrics.font>=10&&textMetrics.button>=44);
- if(width<768){const cdp=await page.context().newCDPSession(page);const touch=(y:number)=>[{x:width/2,y,id:1}];await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:touch(760)});await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:touch(500)});await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});await page.waitForTimeout(100);assert.ok(await page.locator('#deep-dialog').evaluate(el=>el.scrollTop)>0);assert.equal(await page.locator('#canvas').getAttribute('viewBox'),camera);await cdp.detach();}
+ if(width<768&&engine==='chromium'){const cdp=await page.context().newCDPSession(page);const touch=(y:number)=>[{x:width/2,y,id:1}];await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:touch(760)});await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:touch(500)});await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});await page.waitForTimeout(100);assert.ok(await page.locator('#deep-dialog').evaluate(el=>el.scrollTop)>0);assert.equal(await page.locator('#canvas').getAttribute('viewBox'),camera);await cdp.detach();}
  const raw=page.getByText('Raw measurement, matched token ranges and fingerprints',{exact:true}).first();await raw.click();assert.ok((await raw.locator('..').innerText()).includes('firstDigest'));
  const paths=page.getByText('Pinned snapshots, Git blob SHA, file bindings and incomplete paths',{exact:true}).first();await paths.click();assert.match(await paths.locator('..').innerText(),/explicit selected paths only/); // Entry-path failures are no longer manufactured by tree-derived selection.
  const [download]=await Promise.all([page.waitForEvent('download'),page.locator('#deep-download').click()]);assert.equal(download.suggestedFilename(),'gitlineage-deep-sidecar.json');const saved=resolve(out,`${width}-mock-sidecar.json`);await download.saveAs(saved);const exported=JSON.parse(await readFile(saved,'utf8'));validatePreviewExport(exported);assert.equal(exported.schemaVersion,'discovery-preview-export@2');assert.equal(exported.provenance.candidates.length,2);for(const candidate of exported.provenance.candidates){assert.equal(candidate.repositoryId,candidate.searchCandidate.candidate.repositoryId);for(const d of candidate.searchCandidate.discoveries){assert.equal(d.query,'example in:name is:public fork:true');assert.ok(d.rank>0&&d.page===1&&d.reason);}}assert.equal(exported.selection!.combined.usage.attempts,fixture.calls.length);fixture.calls.length=0;
@@ -111,5 +113,5 @@ try{
  assert.match(await page.locator('#deep-candidates').innerText(),/incomplete or unavailable/);assert.equal(await page.locator('#deep-results .deep-measurement').count(),0);
  await page.screenshot({path:resolve(out,`${mode}.png`)});checks.push({mode,width,status:'PASS',unavailableNotZero:true});await page.locator('#deep-back').click();await page.locator('#deep-candidate-layer').click();assert.equal(await page.locator('#deep-layer-dialog .deep-layer-candidate').count(),0);await page.locator('#deep-layer-close').click();assert.deepEqual(await page.locator('#canvas').evaluate(el=>{const m=(el as unknown as SVGSVGElement).getScreenCTM();return{viewBox:el.getAttribute('viewBox'),ctm:m?[m.a,m.b,m.c,m.d,m.e,m.f].map(v=>Number(v.toFixed(4))):null,url:location.href,selection:new URL(location.href).searchParams.get('node')}}),original);assert.deepEqual(await cacheProof(app.fixtureCacheRoot),cache);await page.close();await preview.close();await app.cleanup();app=undefined as never;
  }
- await writeFile(resolve(out,'validation.json'),JSON.stringify({checks,transport:'official fixed Mock, not live GitHub',calls:fixture.calls},null,2));
+ await writeFile(resolve(out,'validation.json'),JSON.stringify({checks,browser:engine,transport:'official fixed Mock, not live GitHub',calls:fixture.calls},null,2));
 }finally{await preview!.close();await browser.close();if(app!)await app.cleanup();}
