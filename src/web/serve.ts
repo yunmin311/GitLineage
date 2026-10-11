@@ -1,3 +1,5 @@
+import { createPublicExploration } from '../../experiments/public-exploration/service.ts';
+import type { Transport } from '../../experiments/public-exploration/service.ts';
 import { timingSafeEqual } from 'node:crypto';
 import { createServer, type Server, type IncomingMessage, type ServerResponse } from 'node:http';
 import { GitLineageServer } from './server.ts';
@@ -7,6 +9,10 @@ import { logEvent, logStartup } from './analysis/logging.ts';
 import type { LineageGraph } from './types.ts';
 
 export interface ServeOptions {
+  /** Anonymous exploration opt-in; production remains Standard until explicitly enabled. */
+  publicExploration?: boolean;
+  explorationTransport?: Transport;
+  explorationCooldownMs?: number;
   /** Opt-in local experiment seam. Normal CLI never installs a handler. */
   previewHandler?: (request: IncomingMessage, response: ServerResponse) => Promise<void>;
   /** Explicit private service seam; normal CLI does not install it. */
@@ -97,7 +103,16 @@ export async function serve(
     config,
   );
 
+const exploration = options.publicExploration || env.GITLINEAGE_PUBLIC_EXPLORATION === '1' ? createPublicExploration({transport: options.explorationTransport, cooldownMs: options.explorationCooldownMs, origin: env.GITLINEAGE_PUBLIC_ORIGIN}) : null;
+  if (exploration && (options.previewHandler || options.privateBetaHandler)) throw new Error('Choose one exploration entry');
 const server = createServer((request, response) => {
+      if (exploration && /^\/api\/(?:deep-search|explore)(?:\/|$)/.test(request.url ?? '')) {
+        void exploration.handler(request, response).catch(() => {
+          if (!response.headersSent) response.writeHead(500, {'content-type':'application/json'});
+          response.end('{"error":"exploration_unavailable"}');
+        });
+        return;
+      }
       if (options.privateBetaProxyKey) {
         const marker = request.headers['x-gitlineage-proxy'];
         if (typeof marker !== 'string' || !/^[a-f0-9]{64}$/.test(marker) || !timingSafeEqual(Buffer.from(marker), Buffer.from(options.privateBetaProxyKey)) || Object.keys(request.headers).some(key => key === 'forwarded' || key.startsWith('x-forwarded-'))) {
@@ -163,6 +178,7 @@ const server = createServer((request, response) => {
       });
     });
 
+  server.on('close', () => { void exploration?.close(); });
   await new Promise<void>((resolve) => server.listen(port, host, resolve));
   // Report the port the OS actually bound, which matters when port 0 was asked for.
   const address = server.address();

@@ -17,7 +17,8 @@ export class SnapshotProvider {
   this.token=options.token;this.transport=options.transport??((url,init)=>fetch(url,init));
  }
  async get(endpoint:string,network:NetworkLedger):Promise<unknown|null>{
-  if(!/^\/repositories\/[1-9]\d*(?:\/commits\/[^/?#]+|\/git\/(?:trees|blobs)\/[a-f0-9]{40})?$/.test(endpoint)&&!/^\/repos\/[a-zA-Z0-9][a-zA-Z0-9-]{0,38}\/[a-zA-Z0-9_.-]{1,100}(?:\/commits\/[^/?#]+|\/git\/(?:trees|blobs)\/[a-f0-9]{40})?$/.test(endpoint))throw new TypeError('endpoint not allowed');
+  const branchListing=/^\/repos\/[a-zA-Z0-9][a-zA-Z0-9-]{0,38}\/[a-zA-Z0-9_.-]{1,100}\/branches\?per_page=3&page=1$/.test(endpoint);
+  if(!branchListing&&!/^\/repositories\/[1-9]\d*(?:\/commits\/[^/?#]+|\/git\/(?:trees|blobs)\/[a-f0-9]{40})?$/.test(endpoint)&&!/^\/repos\/[a-zA-Z0-9][a-zA-Z0-9-]{0,38}\/[a-zA-Z0-9_.-]{1,100}(?:\/commits\/[^/?#]+|\/git\/(?:trees|blobs)\/[a-f0-9]{40})?$/.test(endpoint))throw new TypeError('endpoint not allowed');
   if(/^\/repositories\/\d+\//.test(endpoint)&&!this.historical)throw new TypeError('undocumented Git route prohibited');
   if(endpoint.split('/').some(p=>p==='.'||p==='..'))throw new TypeError('unsafe endpoint segment');
   const startedAt=this.now();if(!Number.isFinite(Date.parse(startedAt)))throw new TypeError('invalid receipt clock');
@@ -44,7 +45,7 @@ export class SnapshotProvider {
    let value:unknown;try{value=JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(Buffer.concat(chunks)));}catch{request.outcome='invalid_json';return null;}
    // Never persist reflected credentials or untrusted API error text.
    if(this.token&&JSON.stringify(value).includes(this.token)){request.outcome='invalid_response';request.reason='credential reflection rejected';return null;}
-   if(!value||typeof value!=='object'||Array.isArray(value)){request.outcome='invalid_response';return null;}request.outcome='success';return value;
+   if(!value||typeof value!=='object'||(branchListing?!Array.isArray(value):Array.isArray(value))){request.outcome='invalid_response';return null;}request.outcome='success';return value;
   }catch(error){request.outcome=network.budget.signal?.aborted?'cancelled':timedOut||error instanceof BudgetError&&error.message.includes('deadline')?'timeout':!release?'budget_denied':'network_error';request.reason=error instanceof BudgetError?error.message:null;return null;
   }finally{finished=true;clearTimeout(timer);network.budget.signal?.removeEventListener('abort',stop);controller.abort();if(reader)void reader.cancel().catch(()=>{});else if(body)void body.cancel().catch(()=>{});release?.();receipt.wallMs=performance.now()-started;}
  }
