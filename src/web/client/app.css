@@ -2188,3 +2188,5 @@ body.mobile-explorer .band-note { display: -webkit-box; -webkit-line-clamp: 2; -
 .workspace-discovery-controls button, .workspace-discovery-evidence button { font: 11px var(--mono); }
 .workspace-candidate-navigation { display: grid; gap: 8px; margin-top: 20px; }
 .workspace-candidate-navigation [aria-pressed="true"], .workspace-tree [aria-pressed="true"] { background: var(--brand-wash); border-color: var(--brand); }
+
+.workspace-fragment { white-space: pre-wrap; overflow-wrap: anywhere; font: 11px/1.6 var(--mono); background: var(--surface); border-left: 2px solid var(--brand); padding: 8px; margin: 8px 0 12px; }
