@@ -37,9 +37,10 @@ export class RepositorySearchProvider {
   void interrupted.catch(()=>{}); // Synchronous abort may precede the first guarded await.
   const stop=()=>{controller.abort();rejectStop(new Error('interrupted'));if(reader)void reader.cancel().catch(()=>{});else if(body)void body.cancel().catch(()=>{});};
   const external=()=>stop();network.budget.signal?.addEventListener('abort',external,{once:true});
-  const timer=setTimeout(()=>{timedOut=true;stop();},Math.max(1,Math.min(this.timeoutMs,Math.max(1,network.budget.deadline-performance.now()))));
+  let timer:ReturnType<typeof setTimeout>|undefined;
   const guarded=async<T>(promise:Promise<T>):Promise<T>=>{network.budget.guard();if(controller.signal.aborted)throw new Error('interrupted');const result=await Promise.race([promise,interrupted]);network.budget.guard();if(controller.signal.aborted)throw new Error('interrupted');return result;};
   try{
+   timer=setTimeout(()=>{timedOut=true;stop();},Math.max(1,Math.min(this.timeoutMs,network.budget.remainingMs())));
    const url=new URL('https://api.github.com/search/repositories');url.searchParams.set('q',q);url.searchParams.set('per_page',String(perPage));url.searchParams.set('page',String(page));
    const headers:Record<string,string>={Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2026-03-10','User-Agent':'GitLineage-Discovery-Experiment'};if(this.token)headers.Authorization=`Bearer ${this.token}`;
    network.budget.guard();const request=this.transport(url.href,{method:'GET',headers,redirect:'manual',signal:controller.signal});
@@ -59,7 +60,7 @@ export class RepositorySearchProvider {
    const data=raw as Partial<SearchPage>|null;
    if(!data||typeof data!=='object'||!Number.isSafeInteger(data.total_count)||data.total_count!<0||typeof data.incomplete_results!=='boolean'||!Array.isArray(data.items)||data.items.length>perPage||data.total_count!<data.items.length){receipt.outcome='invalid_response';return{data:null,receipt,stop:false,retryAfterMs:null};}
    receipt.outcome='success';return{data:data as SearchPage,receipt,stop:receipt.headers['x-ratelimit-remaining']==='0',retryAfterMs:null};
-  }catch(error){receipt.outcome=network.budget.signal?.aborted?'cancelled':timedOut||error instanceof BudgetError&&error.message.includes('deadline')||performance.now()>=network.budget.deadline?'timeout':'network_error';return{data:null,receipt,stop:receipt.outcome==='cancelled',retryAfterMs:null};}
+  }catch(error){receipt.outcome=network.budget.signal?.aborted?'cancelled':timedOut||error instanceof BudgetError&&error.message.includes('deadline')?'timeout':'network_error';return{data:null,receipt,stop:receipt.outcome==='cancelled',retryAfterMs:null};}
   finally{finished=true;clearTimeout(timer);network.budget.signal?.removeEventListener('abort',external);controller.abort();if(reader)void reader.cancel().catch(()=>{});else if(body)void body.cancel().catch(()=>{});release();}
  }
 }

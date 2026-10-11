@@ -9,6 +9,18 @@ import { buildQueryPlan, discoverRepositories } from '../../src/discovery/search
 const target={provider:'github',repositoryId:10,completeness:'provider_id',fullName:'root/project',aliases:[],revision:'a'.repeat(40)} as const;
 const fixed={...target,aliases:[]};
 const q=buildQueryPlan(fixed,{}).queries[0]!.q;
+test('search timeout uses the shared task clock instead of process uptime',async()=>{
+ const budget=new BudgetLedger({...SEARCH_PROFILE,wallMs:1000},undefined,()=>-100000),network=new NetworkLedger(budget);
+ const provider=new RepositorySearchProvider({transport:async()=>{await new Promise(r=>setTimeout(r,20));return new Response('{"total_count":0,"incomplete_results":false,"items":[]}');}});
+ const result=await provider.page(q,5,1,0,0,network);
+ assert.equal(result.receipt.outcome,'success');assert.deepEqual(result.data,{total_count:0,incomplete_results:false,items:[]});assert.equal(budget.usage().activeWorkers,0);
+});
+test('transport failure with an independent task clock remains a network error',async()=>{
+ const budget=new BudgetLedger({...SEARCH_PROFILE,wallMs:1000},undefined,()=>-100000),network=new NetworkLedger(budget);
+ const provider=new RepositorySearchProvider({transport:async()=>{throw new Error('transport unavailable');}});
+ const result=await provider.page(q,5,1,0,0,network);
+ assert.equal(result.receipt.outcome,'network_error');assert.equal(budget.usage().activeWorkers,0);
+});
 test('concurrent actual provider attempts atomically reserve caps before transport',async()=>{
  const budget=new BudgetLedger({...SEARCH_PROFILE,attempts:2,searchAttempts:2,concurrency:2}),network=new NetworkLedger(budget,{perResponseBytes:100,totalResponseBytes:200});let calls=0;
  const provider=new RepositorySearchProvider({transport:async()=>{calls++;await new Promise(r=>setTimeout(r,5));return new Response('{"total_count":0,"incomplete_results":false,"items":[]}');}});
