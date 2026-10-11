@@ -2110,3 +2110,81 @@ body.mobile-explorer .band-note { display: -webkit-box; -webkit-line-clamp: 2; -
 
 .repository-panel {position:fixed; inset:var(--repository-panel-top,110px) 12px 12px; margin:0; width:auto; max-width:none; height:auto; max-height:none; z-index:35; border:1px solid var(--rule-strong);}
 @media (max-width:767px) {.repository-panel {inset:var(--repository-panel-top,110px) 6px 6px; padding:14px;}}
+
+/* Repository instruments share Frozen V3.3 shell, paper and type; independent worlds. */
+.repository-navigation { padding: 8px 16px; gap: 8px; }
+.repository-navigation button { min-height: 36px; }
+.repository-navigation [aria-pressed="true"] { background: var(--brand); color: var(--surface-hi); border-color: var(--brand); }
+#explorer { position: relative; }
+.repository-workspace { position: absolute; inset: 53px 0 0; display: grid; grid-template-columns: 252px minmax(0,1fr) 336px; min-height: 0; background: var(--paper); }
+.repository-workspace[hidden] { display: none; }
+.workspace-rail.rail, .workspace-drawer.drawer { display: flex; position: relative; inset: auto; width: auto; min-height: 0; z-index: 1; }
+.workspace-drawer.drawer { border-left: 1px solid var(--ink-4); }
+.workspace-stage { position: relative; overflow: hidden; min-width: 0; background: var(--paper); }
+.workspace-stage > svg { width: 100%; height: 100%; touch-action: none; }
+.workspace-title { font: 650 var(--t-drawer-size)/1.3 var(--sans); margin: 0 0 12px; overflow-wrap: anywhere; }
+.workspace-rail .rail-scroll { gap: 12px; padding: 20px 16px; }
+.workspace-drawer .drawer-inner { padding: 20px; overflow-y: auto; }
+.workspace-rail button { text-align: left; }
+.workspace-form { display: flex; flex-direction: column; gap: 8px; }
+.workspace-form input { min-width: 0; width: 100%; box-sizing: border-box; padding: 9px; background: var(--surface-hi); color: var(--ink); border: 1px solid var(--rule-2); font: var(--t-secondary-size) var(--mono); }
+.workspace-tree { display: flex; flex-direction: column; gap: 4px; }
+#explore-content > button { display: block; width: 100%; margin: 6px 0; overflow-wrap: anywhere; }
+.workspace-tree button { border: 0; border-left: 2px solid var(--rule); background: transparent; min-height: 36px; overflow-wrap: anywhere; }
+.workspace-tree [aria-selected="true"], #explore-content [aria-pressed="true"] { background: var(--brand-wash); border-color: var(--brand); }
+.workspace-caption { position: absolute; top: 18px; left: 20px; right: 20px; pointer-events: none; display: flex; flex-direction: column; gap: 5px; font: 10px var(--mono); color: var(--ink-3); }
+.workspace-caption small { max-width: 100%; overflow-wrap: anywhere; }
+.workspace-controls { position: absolute; bottom: 18px; right: 18px; display: flex; gap: 4px; }
+.workspace-controls button { min-width: 44px; min-height: 44px; text-align: center; background: var(--surface); }
+.workspace-box { fill: var(--surface-hi); stroke: var(--rule-2); stroke-width: 1.5; }
+.workspace-node.directory .workspace-box, .workspace-node.target .workspace-box { stroke: var(--ink); stroke-width: 2; }
+.workspace-node.candidate .workspace-box, .workspace-node.pending .workspace-box { stroke-dasharray: 5 3; }
+.workspace-node { cursor: pointer; }
+.workspace-node:hover .workspace-box, .workspace-node:focus .workspace-box { stroke: var(--brand); fill: var(--brand-wash); }
+.workspace-node.is-selected .workspace-box { stroke: var(--brand); fill: var(--brand-wash); stroke-width: 3; }
+.workspace-node.merge .workspace-box { stroke-width: 3; }
+.workspace-link { fill: none; stroke: var(--rule-2); stroke-width: 1.5; }
+.observation-link { stroke-dasharray: 4 5; }
+.workspace-branch { fill: var(--brand); font: 11px var(--mono); }
+.workspace-empty { fill: var(--ink-3); font: 14px var(--sans); }
+.workspace-mobile { display: none; }
+.workspace-discovery-controls .deep-form { display: flex; flex-direction: column; align-items: stretch; gap: 8px; }
+.workspace-discovery-controls .deep-form input { width: 100%; min-width: 0; box-sizing: border-box; }
+.workspace-discovery-controls .deep-candidate { padding: 12px 0; border: 0; border-top: 1px solid var(--rule); }
+.workspace-discovery-controls .deep-candidate label { align-items: flex-start; overflow-wrap: anywhere; }
+.workspace-discovery-controls .deep-candidate .deep-note { display: none; }
+.workspace-discovery-controls .deep-action { width: 100%; margin-top: 8px; }
+.workspace-discovery-evidence details { display: none; }
+.workspace-discovery-evidence .deep-measurement { border-top: 1px solid var(--rule); padding: 12px 0; }
+.workspace-discovery-evidence .deep-measurement h4 { font: 600 12px/1.5 var(--mono); overflow-wrap: anywhere; }
+.workspace-discovery-evidence .deep-digest { display: block; overflow-wrap: anywhere; }
+.workspace-discovery-evidence .deep-file-card, .workspace-discovery-evidence .deep-result { border: 0; padding: 12px 0; border-top: 1px solid var(--rule); }
+.workspace-discovery-evidence .deep-file-row { align-items: flex-start; overflow-wrap: anywhere; }
+.workspace-active #mobile-nav { visibility: hidden; }
+@media (min-width:1600px) { .repository-workspace { grid-template-columns: 288px minmax(0,1fr) 380px; } }
+@media (max-width:1023px) and (min-width:768px) { .repository-workspace { grid-template-columns: 208px minmax(0,1fr) 264px; } }
+@media (max-width:767px) {
+ .repository-navigation { padding: 6px; gap: 4px; }
+ .repository-navigation button { flex: 1; padding: 6px; font-size: 12px; min-height: 44px; }
+ .repository-workspace { inset: 57px 0 0; grid-template-columns: minmax(0,1fr); grid-template-rows: minmax(0,1fr) 48px; }
+ .repository-workspace .workspace-rail, .repository-workspace .workspace-drawer, .repository-workspace .workspace-stage { grid-column: 1; grid-row: 1; }
+ .repository-workspace .workspace-rail, .repository-workspace .workspace-drawer { display: none; }
+ .repository-workspace[data-surface="navigation"] .workspace-rail { display: flex; }
+ .repository-workspace[data-surface="evidence"] .workspace-drawer { display: flex; }
+ .repository-workspace:not([data-surface="canvas"]) .workspace-stage { visibility: hidden; }
+ .workspace-mobile { grid-row: 2; display: flex; border-top: 1px solid var(--rule); background: var(--surface); z-index: 2; }
+ .workspace-mobile button { flex: 1; border: 0; background: transparent; min-height: 44px; text-align: center; }
+ .workspace-mobile [aria-pressed="true"] { color: var(--brand); background: var(--brand-wash); }
+ .workspace-rail button { min-height: 44px; }
+}
+.repository-workspace > .workspace-rail { grid-column: 1; grid-row: 1; }
+.repository-workspace > .workspace-stage { grid-column: 2; grid-row: 1; }
+.repository-workspace > .workspace-drawer { grid-column: 3; grid-row: 1; }
+.workspace-measurement-picker { display: flex; flex-direction: column; gap: 5px; margin: 12px 0; }
+.workspace-measurement-picker button { text-align: left; overflow-wrap: anywhere; font: 11px/1.4 var(--mono); padding: 8px; }
+.workspace-measurement-picker [aria-pressed="true"] { background: var(--brand-wash); border-color: var(--brand); }
+@media (max-width:767px) { .repository-workspace > .workspace-rail, .repository-workspace > .workspace-stage, .repository-workspace > .workspace-drawer { grid-column: 1; grid-row: 1; } }
+.workspace-discovery-controls .deep-form label { font: 500 12px var(--sans); }
+.workspace-discovery-controls button, .workspace-discovery-evidence button { font: 11px var(--mono); }
+.workspace-candidate-navigation { display: grid; gap: 8px; margin-top: 20px; }
+.workspace-candidate-navigation [aria-pressed="true"], .workspace-tree [aria-pressed="true"] { background: var(--brand-wash); border-color: var(--brand); }
