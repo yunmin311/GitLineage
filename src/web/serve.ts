@@ -103,7 +103,7 @@ export async function serve(
     config,
   );
 
-const exploration = options.publicExploration || env.GITLINEAGE_PUBLIC_EXPLORATION === '1' ? createPublicExploration({transport: options.explorationTransport, cooldownMs: options.explorationCooldownMs, origin: env.GITLINEAGE_PUBLIC_ORIGIN}) : null;
+const exploration = options.publicExploration || env.GITLINEAGE_PUBLIC_EXPLORATION === '1' ? createPublicExploration({transport: options.explorationTransport, cooldownMs: options.explorationCooldownMs, origin: env.GITLINEAGE_PUBLIC_ORIGIN,trustedProxies:env.GITLINEAGE_TRUSTED_PROXIES?.split(',').filter(Boolean),attemptsPerHour:env.GITLINEAGE_PUBLIC_ATTEMPTS?Number(env.GITLINEAGE_PUBLIC_ATTEMPTS):undefined,attemptsPerAddress:env.GITLINEAGE_PUBLIC_IP_ATTEMPTS?Number(env.GITLINEAGE_PUBLIC_IP_ATTEMPTS):undefined,startIntervalMs:options.explorationCooldownMs}) : null;
   if (exploration && (options.previewHandler || options.privateBetaHandler)) throw new Error('Choose one exploration entry');
 const server = createServer((request, response) => {
       if (exploration && /^\/api\/(?:deep-search|explore)(?:\/|$)/.test(request.url ?? '')) {

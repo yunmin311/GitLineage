@@ -25,7 +25,7 @@ type SearchOutput={target:Resolution|null;result:Awaited<ReturnType<typeof disco
 export interface PreviewTask {id:string;kind:'search'|'sources'|'compare';state:'running'|'completed'|'partial'|'cancelled';phase:string;createdAt:string;error:string|null;search?:SearchOutput;comparison?:Awaited<ReturnType<typeof runPinnedProbe>>;export?:PreviewExport;sourceExport?:SourcePreviewExport;sources?:{searchTaskId:string;targetId:number;candidateIds:number[];requests:SnapshotReceipt[];repositories:SourceDirectory[];usage:ReturnType<BudgetLedger['usage']>;network:ReturnType<NetworkLedger['usage']>}}
 export interface FileChoice {sourceTaskId:string;files:{repositoryId:number;paths:string[]}[]}
 interface Session {ledger:BudgetLedger;network:NetworkLedger;resolver:RepositorySnapshotResolver;resolutions:Map<number,Resolution>;trees:TreeCache;controller:AbortController;spent:number;started:number|null;task:PreviewTask|null;sourcesStarted:boolean;compareStarted:boolean;sourceTaskId:string|null;stages:{taskId:string;kind:string;wallMs:number;attempts:number;reservedBytes:number}[]}
-export interface PreviewOptions {transport?:Transport;cooldownMs?:number}
+export interface PreviewOptions {transport?:Transport;cooldownMs?:number;enrichedSearch?:boolean}
 export function repositoryInput(value:unknown):string {
  if(typeof value!=='string'||value.length>180)throw new Error('invalid repository');
  const name=value.trim().replace(/^https:\/\/github\.com\//,'').replace(/\/$/,'').toLowerCase();
@@ -86,8 +86,14 @@ export function createPreview(options:PreviewOptions={}) {
   const target=observation?await resolver.resolve(observation.repositoryId,[observation]):null;
   if(target?.identity)context.resolutions.set(target.requestedId,target);
   let result:SearchOutput['result']=null;
-  if(target?.identity&&!resolver.provider.stopped){task.phase='searching candidates';result=await discoverRepositories(buildQueryPlan(target.identity,{}, {perPage:3,pages:1}),{transport:tracked(task)},network);}
-  task.search={target:structuredClone(target),result,requests:structuredClone(resolver.provider.receipts),usage:ledger.usage(),network:network.usage(),scope:'one name query, first three results, at most three candidates; no whole-GitHub coverage'};
+  if(target?.identity&&!resolver.provider.stopped){
+   task.phase='searching candidates';let plan=buildQueryPlan(target.identity,{}, {perPage:3,pages:1});
+   if(options.enrichedSearch&&raw&&typeof raw==='object'){const metadata=raw as Record<string,unknown>;
+    try{plan=buildQueryPlan(target.identity,{language:typeof metadata.language==='string'?metadata.language:undefined,description:typeof metadata.description==='string'?metadata.description.slice(0,512):undefined},{perPage:3,pages:1});}catch{task.error='Unsafe or unsupported metadata query terms omitted; repository name query retained';}
+   }
+   result=await discoverRepositories(plan,{transport:tracked(task)},network);
+  }
+  task.search={target:structuredClone(target),result,requests:structuredClone(resolver.provider.receipts),usage:ledger.usage(),network:network.usage(),scope:options.enrichedSearch?'bounded name and description queries, language when provided, first page, at most three unique IDs; no whole-GitHub coverage':'one name query, first three results, at most three candidates; no whole-GitHub coverage'};
   if(!target?.identity)task.error=target?.reasons.join('; ')??'bootstrap: '+resolver.provider.failure();
   else if(result&&result.coverage.state!=='complete_within_requested')task.error=`Search ${result.coverage.state}: ${result.attempts.filter(a=>a.outcome!=='success').map(a=>a.outcome).join('; ')||'unfetched pages or rejected identities; see coverage'}`;
   return !!target?.identity&&result?.coverage.state==='complete_within_requested';

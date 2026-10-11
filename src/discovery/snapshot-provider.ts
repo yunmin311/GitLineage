@@ -17,7 +17,7 @@ export class SnapshotProvider {
   this.token=options.token;this.transport=options.transport??((url,init)=>fetch(url,init));
  }
  async get(endpoint:string,network:NetworkLedger):Promise<unknown|null>{
-  const branchListing=/^\/repos\/[a-zA-Z0-9][a-zA-Z0-9-]{0,38}\/[a-zA-Z0-9_.-]{1,100}\/branches\?per_page=3&page=1$/.test(endpoint);
+  const branchListing=/^\/repos\/[a-zA-Z0-9][a-zA-Z0-9-]{0,38}\/[a-zA-Z0-9_.-]{1,100}\/branches\?per_page=3&page=(?:[1-9]|1[0-9]|20)$/.test(endpoint);
   if(!branchListing&&!/^\/repositories\/[1-9]\d*(?:\/commits\/[^/?#]+|\/git\/(?:trees|blobs)\/[a-f0-9]{40})?$/.test(endpoint)&&!/^\/repos\/[a-zA-Z0-9][a-zA-Z0-9-]{0,38}\/[a-zA-Z0-9_.-]{1,100}(?:\/commits\/[^/?#]+|\/git\/(?:trees|blobs)\/[a-f0-9]{40})?$/.test(endpoint))throw new TypeError('endpoint not allowed');
   if(/^\/repositories\/\d+\//.test(endpoint)&&!this.historical)throw new TypeError('undocumented Git route prohibited');
   if(endpoint.split('/').some(p=>p==='.'||p==='..'))throw new TypeError('unsafe endpoint segment');
