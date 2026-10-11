@@ -30,6 +30,7 @@
    ========================================================================= */
 
 :root {
+  --repository-panel-top: 110px;
   /* ---------------------------------------------------------- paper & surface
      Monochrome. A warm bone that is never pure white, so the page reads as paper
      rather than as a screen. */
@@ -2097,3 +2098,15 @@ body.mobile-explorer .band-note { display: -webkit-box; -webkit-line-clamp: 2; -
 .explore-tree { list-style: none; padding: 0; }
 .explore-tree li { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px 0; border-bottom: 1px solid var(--rule); }
 .explore-tree li span { flex: 1 1 240px; overflow-wrap: anywhere; }
+
+/* Repository views belong to the loaded Explorer, never the landing page. */
+.repository-navigation {display:flex; align-items:center; gap:8px; padding:8px 16px; border-bottom:1px solid var(--rule); overflow-x:auto; flex-shrink:0;}
+.repository-navigation .repository-current {font-size:12px; padding:8px; color:var(--brand);}
+.repository-navigation .deep-action {white-space:nowrap; min-height:36px;}
+.explore-commit {border-inline-start:2px solid var(--rule-2); margin-inline-start:8px; padding-inline-start:18px;}
+.explore-tree li {display:flex; flex-wrap:wrap; gap:8px; align-items:center;}
+.deep-measurement summary {cursor:pointer; padding:10px 0; overflow-wrap:anywhere;}
+@media (max-width:767px) {.repository-navigation {gap:4px; padding:6px 10px;} .repository-navigation .deep-action {font-size:11px; padding:6px 9px;}}
+
+.repository-panel {position:fixed; inset:var(--repository-panel-top,110px) 12px 12px; margin:0; width:auto; max-width:none; height:auto; max-height:none; z-index:35; border:1px solid var(--rule-strong);}
+@media (max-width:767px) {.repository-panel {inset:var(--repository-panel-top,110px) 6px 6px; padding:14px;}}
