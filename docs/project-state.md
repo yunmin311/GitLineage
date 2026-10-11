@@ -19,7 +19,9 @@ Confirmed and implemented in this repository.
 | Direction is fixed by the ontology | `shares_history_with` and `similar_to` are undirected; everything else is directed. |
 | Dependency is `DECLARED` only | A manifest is an author's statement. GitLineage never runs a package manager. |
 | `derived_from` needs containment plus ordering | Shared commits alone give `shares_history_with`, never a direction. Truncated windows can never prove containment. |
-| Exact content only, no similarity | `shares_exact_content_with` uses identical Git blob ids, symmetric. No threshold, no score. `similar_to` exists in the ontology but no detector ships. |
+| Canonical exact content; separate sampled similarity | `shares_exact_content_with` uses identical Git blob IDs. Discovery measurements remain independent sidecars with `verification=pending`, `lineageClaim=none`; no similarity detector inserts canonical lineage edges. |
+| Public exploration, no login | Explicitly enabled anonymous entry reuses Discovery search/source/compare. Standard Graph remains the default; opening exploration starts no GitHub work. One process reserves at most 48 attempts/hour, 24 per new task, one active task and one new exploration/address/minute; cancellation does not refund. State/quota are process-local and reset on restart. |
+| Bounded structure and history | Fixed repository ID/revision/tree, at most six nonrecursive tree reads, six commit objects and three observed branch tips per exploration, within the existing 24-attempt/30-second budget. Categories describe paths. Submodules are pinned gitlinks, never followed. Missing ancestors/branches/directories remain unexamined; history is not a lineage verdict. |
 | Declarations require a resolvable repository | An attribution phrase without a repository URL in its window produces no relationship, only a diagnostic. Code blocks and indented code are not prose. |
 | `thanks to` is a reference | An acknowledgement is a link, not a claim of derivation. |
 | Collector boundary | Collectors observe and emit `Observation[]`. They never merge evidence, never choose a status, never touch the graph. |

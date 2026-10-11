@@ -32,7 +32,9 @@
     "test:deep-search": "node test/web/deep-search-acceptance.ts",
     "preview:private-beta": "node experiments/discovery-v2/serve-private-beta.ts",
     "test:private-beta": "node test/web/private-beta-acceptance.ts",
-    "test:private-beta-tls": "bash test/staging/run.sh"
+    "test:private-beta-tls": "bash test/staging/run.sh",
+    "test:exploration": "node test/web/public-exploration-acceptance.ts",
+    "preview:public": "GITLINEAGE_CACHE=\"$HOME/.local/state/gitlineage-public-preview/cache\" GITLINEAGE_JOB_STORE=\"$HOME/.local/state/gitlineage-public-preview/jobs\" GITLINEAGE_PUBLIC_EXPLORATION=1 node src/web/serve.ts --host 127.0.0.1 --port 8084 --client dist/web"
   },
   "dependencies": {
     "smol-toml": "^1.4.2"

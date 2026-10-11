@@ -2090,3 +2090,10 @@ body.mobile-explorer .band-note { display: -webkit-box; -webkit-line-clamp: 2; -
 .deep-layer-launch { top: 124px; }
 .deep-layer-candidate { display: block; width: 100%; text-align: left; margin-block: var(--s2); white-space: normal; overflow-wrap: anywhere; }
 @media (max-width: 767px) { .deep-layer-launch { top: 162px; } }
+
+/* Reading workspace reuses Explorer typography and modal ownership. */
+.explore-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+.explore-tabs [aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+.explore-tree { list-style: none; padding: 0; }
+.explore-tree li { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px 0; border-bottom: 1px solid var(--rule); }
+.explore-tree li span { flex: 1 1 240px; overflow-wrap: anywhere; }

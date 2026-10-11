@@ -86,6 +86,9 @@ jobs:
       - name: Deep Search and candidate layer browser acceptance
         run: npm run test:deep-search
 
+      - name: Anonymous repository exploration browser acceptance
+        run: npm run test:exploration
+
       - name: Private Beta authorization browser acceptance
         run: npm run test:private-beta
 
