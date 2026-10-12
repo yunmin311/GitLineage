@@ -2260,3 +2260,41 @@ body.mobile-explorer .band-note { display: -webkit-box; -webkit-line-clamp: 2; -
 #canvas .graph-group .aggregate-focus:focus-visible text,
 #canvas .graph-group .aggregate-next:focus-visible text,
 #canvas .graph-group .aggregate-previous:focus-visible text { fill:var(--brand); text-decoration:underline; }
+
+/* V3.3 surfaces and instruments; relationship perspectives own screen space. */
+.graph-perspectives{position:absolute;top:20px;left:calc(var(--rail-w) + 24px);right:24px;z-index:8;pointer-events:none;max-width:660px}
+.graph-perspective-tabs{display:flex;gap:6px;pointer-events:auto;flex-wrap:wrap}
+.graph-perspective-tabs button,.graph-exploration-actions button{font:600 13px/1.3 var(--sans);min-height:44px;padding:0 14px;border:1px solid var(--rule-2);border-radius:4px;background:var(--surface);color:var(--ink);cursor:pointer}
+.graph-perspective-tabs button[aria-pressed=true]{background:var(--brand);border-color:var(--brand);color:var(--surface)}
+.graph-perspective-tabs button:focus-visible,.graph-exploration-actions button:focus-visible{outline:2px solid var(--brand);outline-offset:3px}
+.graph-perspective-note{font:400 13px/1.5 var(--sans);color:var(--ink-2);margin:10px 0;max-width:550px;background:var(--paper);padding:3px 0}
+.graph-exploration-actions{display:flex;gap:8px;align-items:center;pointer-events:auto;flex-wrap:wrap}
+.graph-focus-label{font:500 12px/1.4 var(--sans);color:var(--ink-2)}
+.graph-group .bundle-card-box{stroke:var(--rule-2);stroke-width:1;stroke-dasharray:none;fill:var(--surface)}
+.graph-group .depth-shadow-plate{fill:var(--rule);opacity:.6}
+.graph-group .bundle-card-count{font:600 13px var(--sans)}
+.graph-group .plate-subtitle{font:400 11.5px var(--sans);fill:var(--ink-3)}
+.graph-group .plate-row-expand,.graph-group .plate-row-more{font:500 11.5px var(--sans);fill:var(--brand)}
+@media(max-width:1599px){.graph-perspectives{left:24px}}
+@media(max-width:767px){.graph-perspectives{top:12px;left:16px;right:16px}.graph-perspective-tabs{gap:4px;flex-wrap:nowrap}.graph-perspective-tabs button{font-size:11px;padding:0 8px;flex:1;white-space:nowrap}.graph-perspective-note{font-size:12px;max-width:100%}.graph-exploration-actions button{font-size:12px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}}
+
+.graph-group-jumps{display:flex;gap:6px;overflow:auto;pointer-events:auto;padding:2px 0 6px;scrollbar-width:thin}
+.graph-group-jumps button,.graph-neighbor-step button{flex:none;min-height:44px;border:1px solid var(--rule-2);background:var(--surface);border-radius:4px;font:500 12px var(--sans);padding:0 10px;color:var(--ink);cursor:pointer}
+.graph-group-jumps button[aria-pressed=true]{border-color:var(--brand);color:var(--brand)}
+.graph-group-jumps button:focus-visible,.graph-neighbor-step button:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.graph-neighbor-step{display:flex;align-items:center;gap:8px;pointer-events:auto;font:500 12px var(--sans)}
+.graph-neighbor-step span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:230px}.graph-neighbor-step button{width:44px;font-size:20px}
+.graph-provenance-empty{position:absolute;top:calc(50% + 62px);left:calc(50% - 210px);width:420px;pointer-events:none;color:var(--ink-2)}
+.graph-provenance-empty h2{font:600 18px/1.4 var(--sans);margin:0 0 10px}.graph-provenance-empty p{font:400 13px/1.65 var(--sans);margin:0}
+@media(max-width:767px){.graph-provenance-empty{left:28px;right:28px;width:auto;top:calc(50% + 75px)}.graph-provenance-empty h2{font-size:16px}.graph-provenance-empty p{font-size:12px}}
+
+@media(max-width:767px){.graph-perspectives{background:var(--paper);left:0;right:0;padding:0 16px 8px}.graph-neighbor-step{margin-top:4px;justify-content:space-between}.graph-neighbor-step span{font-weight:600}.node.is-selected .node-box{stroke:var(--brand);stroke-width:2}}
+
+.graph-relation-key{display:flex;gap:6px;flex-wrap:wrap;pointer-events:auto;margin-top:8px}.graph-relation-key button{min-height:44px;padding:0 10px;font:500 12px var(--sans);background:var(--surface);border:1px solid var(--rule-2);border-left:3px solid var(--verified);color:var(--ink);border-radius:3px;cursor:pointer}.graph-relation-key button[aria-pressed=true]{background:var(--verified-wash)}.graph-relation-key button:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+
+/* Short touch landscapes reserve an uncovered reading surface. */
+@media(max-height:500px) and (max-width:900px){
+ .mobile-explorer .graph-perspective-note,.mobile-explorer .graph-group-jumps,.mobile-explorer .graph-neighbor-step{display:none}
+ .mobile-explorer .graph-perspectives{top:8px;left:12px;right:12px;background:var(--paper);max-width:none;padding-bottom:6px}
+ .mobile-explorer .graph-focus-label{display:none}
+}

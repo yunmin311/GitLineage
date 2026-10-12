@@ -35,7 +35,7 @@ try{
  await page.screenshot({path:`${out}/${width}-graph.png`});
  check(`${label} navigation and opening subject reachable`,await page.locator('#mobile-nav').isVisible()&&base.subject.x>=0&&base.subject.right<=width&&base.subject.y>=base.stage.y&&base.subject.bottom<base.hud.y,base);
  check(`${label} primary controls 44px and no overflow`,await page.locator('#mobile-nav button, #zoom-fit, #search-btn').evaluateAll(es=>es.every(e=>{const r=e.getBoundingClientRect();return r.width>=43&&r.height>=43;}))&&!base.overflow);
- const x=base.stage.width/2,y=base.stage.y+Math.min(230,base.stage.height/2);
+ const blankPan=await page.evaluate(()=>{const r=document.querySelector('#graph-perspectives')!.getBoundingClientRect();return{x:innerWidth/2,y:r.bottom+50};});const {x,y}=blankPan;
  await touch(cdp,'touchStart',[{x,y,id:1}]);for(let i=1;i<=5;i++)await touch(cdp,'touchMove',[{x:x+i*8,y:y-i*6,id:1}]);await touch(cdp,'touchEnd',[]);
  const pan=await measure(page);check(`${label} native single finger pan without selection`,pan.camera!==base.camera&&!pan.selection&&same(base.stage,pan.stage),{base,pan});
  // A two-finger pinch at a fixed midpoint. Inverse CTM measures its world anchor.
@@ -46,9 +46,10 @@ try{
  await touch(cdp,'touchEnd',[]);await page.waitForTimeout(100);
  const pinch=await measure(page);const anchor=await page.evaluate(p=>{const q=new DOMPoint(p.x,p.y).matrixTransform(document.querySelector<SVGSVGElement>('#canvas')!.getScreenCTM()!);return{x:q.x,y:q.y};},world);
  check(`${label} two-finger zoom anchored at true midpoint, no ghost click`,pinch.ctm[0]!>pan.ctm[0]!&&Math.hypot(anchor.x-mx,anchor.y-my)<1&&!pinch.selection,{world,screenMidpoint:{x:mx,y:my},anchor,pinch});
- await page.locator('#zoom-fit').click();const fitted=await measure(page);check(`${label} Fit restores phone camera`,same(fitted.camera,base.camera)&&fitted.ctm[0]===1);
+ await page.locator('#zoom-fit').click();const fitted=await measure(page);check(`${label} Fit restores readable subject framing`,fitted.ctm[0]===1&&fitted.subject.x>=0&&fitted.subject.right<=width&&fitted.subject.bottom<fitted.hud.y);
  const node=await page.locator('.node-box.is-subject').boundingBox();await touch(cdp,'touchStart',[{x:node!.x+node!.width/2,y:node!.y+node!.height/2}]);await touch(cdp,'touchEnd',[]);
- await page.waitForTimeout(100);const selected=await measure(page);check(`${label} native tap opens real node Evidence`,selected.view==='evidence'&&selected.selection===view!.subject.id&&await page.locator('#drawer-inner').isVisible(),selected);
+ await page.waitForTimeout(100);const selected=await measure(page);check(`${label} native tap selects real node for spatial exploration`,selected.view==='graph'&&selected.selection===view!.subject.id,selected);
+ await page.locator('#mobile-nav [data-mobile-view=evidence]').click();check(`${label} explicit Evidence reads selected node`,await page.locator('#drawer-inner').isVisible());
  await page.locator('#mobile-nav [data-mobile-view=graph]').click();check(`${label} Evidence return keeps camera and selection`,same((await measure(page)).camera,fitted.camera)&&(await measure(page)).selection===selected.selection);
  await page.locator('#mobile-nav [data-mobile-view=relations]').click();const list=await measure(page);
  const expected=relationGroups(view!);
@@ -107,7 +108,7 @@ try{
  }
  // Finger count changes and cancellation must rebase, then permit a fresh normal tap.
  await page.locator('#zoom-fit').click();
- const rebased=await measure(page);const cy=rebased.stage.y+rebased.stage.height*.35,cx=width/2;
+ const rebased=await measure(page);const cy=await page.locator('#graph-perspectives').evaluate(e=>e.getBoundingClientRect().bottom+30),cx=width/2;
  await touch(cdp,'touchStart',[{x:cx-45,y:cy,id:1},{x:cx+45,y:cy,id:2}]);
  await touch(cdp,'touchMove',[{x:cx-60,y:cy,id:1},{x:cx+60,y:cy,id:2}]);
  // Chromium ends the supplied contact; omitting it in touchMove leaves it active.
@@ -118,7 +119,7 @@ try{
  await touch(cdp,'touchCancel',[]);await page.waitForTimeout(100);await page.locator('#zoom-fit').click();
  const tapBox=(await page.locator('.node-box.is-subject').boundingBox())!;
  await touch(cdp,'touchStart',[{x:tapBox.x+tapBox.width/2,y:tapBox.y+tapBox.height/2}]);await touch(cdp,'touchEnd',[]);await page.waitForTimeout(100);
- check(`${label} cancel releases three pointers and a fresh tap reads selected node`,(await measure(page)).view==='evidence'&&(await measure(page)).selection===view!.subject.id,{actual:await measure(page),tapBox,hit:await page.evaluate(p=>document.elementFromPoint(p.x,p.y)?.outerHTML,{x:tapBox.x+tapBox.width/2,y:tapBox.y+tapBox.height/2})});
+ check(`${label} cancel releases three pointers and a fresh tap selects the real node`,(await measure(page)).view==='graph'&&(await measure(page)).selection===view!.subject.id,{actual:await measure(page),tapBox,hit:await page.evaluate(p=>document.elementFromPoint(p.x,p.y)?.outerHTML,{x:tapBox.x+tapBox.width/2,y:tapBox.y+tapBox.height/2})});
  await page.locator('#mobile-nav [data-mobile-view=graph]').click();
  const blank=await page.evaluate(()=>{const r=document.querySelector('#stage')!.getBoundingClientRect(),h=document.querySelector('#viewport-hud')!.getBoundingClientRect().top;for(let y=r.top+20;y<h-10;y+=20)for(let x=10;x<innerWidth;x+=20)if(document.elementFromPoint(x,y)?.id==='canvas')return{x,y};return null;});
  const beforeBlank=await measure(page);if(blank){await touch(cdp,'touchStart',[blank]);await touch(cdp,'touchEnd',[]);await page.waitForTimeout(100);}

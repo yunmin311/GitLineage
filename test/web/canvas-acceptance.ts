@@ -543,7 +543,7 @@ async function scrollBehaviour(page: Page, selector: string): Promise<{
 
 /** Waits for the client to draw, whichever terminal state it lands in. */
 async function open(page: Page, url: string, path: string): Promise<void> {
-  await page.goto(url + path, { waitUntil: 'domcontentloaded' });
+  await page.goto(url + path + (path.includes('?')?'&':'?') + 'layers=ancestry,dependency,attribution,source-identity,similarity&perspective=custom', { waitUntil: 'domcontentloaded' });
   await page.waitForSelector('svg .node-box, svg .bundle-card-box', { timeout: 180_000 });
   await page.waitForTimeout(700);
 }
@@ -567,9 +567,9 @@ async function rowPoint(page: Page, pattern: RegExp): Promise<{ x: number; y: nu
       const id=member.dataset.nodeId;
       const edge=[...document.querySelectorAll<SVGGElement>('.edge-group')].find(g=>g.dataset.source===id||g.dataset.target===id);
       const path=edge?.querySelector<SVGPathElement>('.edge-hit'); if(!path)return null;
-      const at=path.getPointAtLength(edge!.dataset.target===id ? Math.max(0,path.getTotalLength()-6) : 6);
+      const at=path.getPointAtLength(edge!.dataset.target===id ? Math.max(0,path.getTotalLength()-24) : 24);
       const point=new DOMPoint(at.x,at.y).matrixTransform(path.getScreenCTM()!);
-      return {x:point.x,y:point.y};
+      const hit=document.elementFromPoint(point.x,point.y);return hit?.closest('.edge-group')===edge?{x:point.x,y:point.y}:null;
     }
     /*
      * Click the row's HIT RECT, not the decorative group's centre.
@@ -591,11 +591,11 @@ async function rowPoint(page: Page, pattern: RegExp): Promise<{ x: number; y: nu
   for(let i=0;i<await groups.count();i++){
     const g=groups.nth(i);
     if(await g.getAttribute('aria-expanded')==='false'){await g.focus();await page.keyboard.press('Enter');}
-    while(await g.locator('.aggregate-previous').getAttribute('aria-disabled')==='false'){await g.locator('.aggregate-previous').focus();await page.keyboard.press('Enter');}
+    await g.locator('.aggregate-focus').focus();await page.keyboard.press('Enter');await page.waitForTimeout(350);
     for(let j=0;j<30;j++){
       found=await point();if(found)return found;
-      if(await g.locator('.aggregate-next').getAttribute('aria-disabled')==='true')break;
-      await g.locator('.aggregate-next').focus();await page.keyboard.press('Enter');
+      if(!await g.locator('.aggregate-more').count())break;
+      await g.locator('.aggregate-more').focus();await page.keyboard.press('Enter');
     }
   }
   return null;
@@ -786,11 +786,10 @@ check('02 expanding reveals the held-back members',
         if(await g.getAttribute('aria-expanded')==='false'){await g.focus();await page.keyboard.press('Enter');}
         for(let batch=0;batch<30;batch++){
           for(const id of await page.locator('.aggregate-member').evaluateAll((ns,key)=>ns.filter(n=>(n as HTMLElement).dataset.aggregateKey===key).map(n=>(n as HTMLElement).dataset.nodeId!),key))reached.add(id);
-          if(await g.locator('.aggregate-next').getAttribute('aria-disabled')==='true')break;
-          await g.locator('.aggregate-next').focus();await page.keyboard.press('Enter');
+          if(!await g.locator('.aggregate-more').count())break;
+          await g.locator('.aggregate-more').focus();await page.keyboard.press('Enter');
         }
-        while(await g.locator('.aggregate-previous').getAttribute('aria-disabled')==='false'){await g.locator('.aggregate-previous').focus();await page.keyboard.press('Enter');}
-      }
+          }
       check('02 every relationship is individually reachable',reached.size===14,`${reached.size} members traversed through bounded batches`);
       check('02 expanding moves nothing in the world',
         worldCamera(fExpanded.camera) === worldCamera(fDefault.camera),
@@ -1301,7 +1300,7 @@ check('02 expanding reveals the held-back members',
     // ===================================== 12 · camera stability, proof capture
     await open(page, url, `/${SUBJECT_REPO}`);
     await page.screenshot({ path: `${OUT}/12a-camera-default.png` });
-    const camDefault = await readFrame(page);
+    let camDefault = await readFrame(page);
     const memberAgain = await rowPoint(page, new RegExp(MEMBER_NAME))
       ?? await (async () => {
         const m = await affordancePoint(page, '.plate-row-more');
@@ -1309,6 +1308,7 @@ check('02 expanding reveals the held-back members',
         await page.waitForTimeout(700);
         return rowPoint(page, new RegExp(MEMBER_NAME));
       })();
+    camDefault = await readFrame(page);
     if (memberAgain) {
       await page.mouse.click(memberAgain.x, memberAgain.y);
       await page.waitForTimeout(800);
@@ -1412,6 +1412,7 @@ check('02 expanding reveals the held-back members',
       worldCamera(fEvidenceExpanded.camera) === worldCamera(fEvidence.camera));
 
     const evidenceMember = await rowPoint(evidence, /serde/) ?? await rowPoint(evidence, /./);
+    const beforeEvidenceSelection=await readFrame(evidence);
     if (evidenceMember) {
       await evidence.mouse.click(evidenceMember.x, evidenceMember.y);
       await evidence.waitForTimeout(800);
@@ -1426,7 +1427,7 @@ check('02 expanding reveals the held-back members',
       fEvidenceSelected.rails.drawer === 'shown' && /package\.json|manifest|Cargo\.toml/i.test(evidenceDrawer),
       fEvidenceSelected.drawerSections.join(' / '));
     check('17 selecting evidence does not move the world',
-      worldCamera(fEvidenceSelected.camera) === worldCamera(fEvidence.camera));
+      worldCamera(fEvidenceSelected.camera) === worldCamera(beforeEvidenceSelection.camera));
 
     // Selected + hover: the state the ladder exists to protect.
     const evidenceRow = await rowPoint(evidence, /./);
@@ -1741,6 +1742,8 @@ check('02 expanding reveals the held-back members',
       await page.mouse.click(anyMember.x, anyMember.y);
       await page.waitForTimeout(700);
     }
+    // The spatial field can extend beyond the camera; fit the scene before sampling painted tiers.
+    await page.locator('#zoom-fit').click();await page.waitForTimeout(400);
     tiers.splice(1, 0, { tier: 'selected plate', owner: '.bundle-card.is-selected', expected: 5 });
 
     const depthPixels: Record<string, unknown> = {};

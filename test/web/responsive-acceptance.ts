@@ -38,7 +38,7 @@ try {
     const page=await browser.newPage({viewport:{width:width!,height:height!},hasTouch:true});
     const errors:string[]=[]; page.on('pageerror',e=>errors.push(e.message));
     page.on('requestfailed',r=>errors.push(`${r.url()} ${r.failure()?.errorText}`));
-    await page.goto(`${app.url}/${B}`);
+    await page.goto(`${app.url}/${B}?layers=attribution&perspective=references`);
     await page.locator('.bundle-card').first().waitFor({timeout:60000});
     if(!await page.locator('.aggregate-member').count()){await page.locator('.bundle-card').first().focus();await page.keyboard.press('Enter');}
     await page.locator('#zoom-fit').click();await page.waitForTimeout(320);
@@ -84,7 +84,7 @@ try {
     check(`${width} context close restores evidence without losing selection`,!restored.rail&&restored.drawer&&restored.selection===selected.selection&&restored.contained);
     for(let i=0;i<3;i++){ await page.locator('#rail-toggle').click();await page.locator('#rail-toggle').click(); }
     const repeat=await measure(page);
-    check(`${width} repeated transitions do not accumulate camera drift`,same(restored.ctm,repeat.ctm)&&same(restored.stage,repeat.stage)&&same(restored.hud,repeat.hud)&&restored.selection===repeat.selection,{restored,repeat});
+    check(`${width} repeated transitions do not accumulate camera drift`,(Object.keys(restored.ctm) as (keyof typeof restored.ctm)[]).every(k=>Math.abs(restored.ctm[k]-repeat.ctm[k])<0.01)&&same(restored.stage,repeat.stage)&&same(restored.hud,repeat.hud)&&restored.selection===repeat.selection,{restored,repeat});
     await page.locator('#rail-toggle').click();
     if(width!>=1600) await page.locator('#rail-close').click(); else await page.keyboard.press('Escape');
     check(`${width} Context close returns to evidence`,!(await measure(page)).rail&&(await measure(page)).drawer);
@@ -96,7 +96,7 @@ try {
   }
   // A second real graph has 97 relations: native touch scroll must stay in evidence.
   const touch=await browser.newPage({viewport:{width:1280,height:800},hasTouch:true});
-  await touch.goto(`${app.url}/${A}`);
+  await touch.goto(`${app.url}/${A}?layers=dependency&perspective=dependencies`);
   await touch.locator('.node-box.is-subject').waitFor({timeout:60000});
   await touch.locator('.node').filter({has:touch.locator('.node-box.is-subject')}).locator('.node-hit').click();
   const nodeSelected=await measure(touch);

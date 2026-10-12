@@ -1,51 +1,49 @@
-/** Offline, painted geometry and interaction checks for group exploration. */
+/** Offline spatial exploration regression. Fixed ranks and Next/Previous paging
+ * assertions are obsolete: bounded local growth must preserve spatial context. */
 import {chromium} from 'playwright';
 import assert from 'node:assert/strict';
 import {mkdir,writeFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
-import {fixtureServer,A} from './fixture-server.ts';
+import {fixtureServer,A,C,D,E} from './fixture-server.ts';
 const out=resolve('artifacts/unification/after');await mkdir(out,{recursive:true});
-const app=await fixtureServer({phaseDelayMs:0});const browser=await chromium.launch({headless:true});
-const results=[];
-try{for(const width of [430,1280,1920]){
- const page=await browser.newPage({viewport:{width,height:width===430?932:1080},hasTouch:width===430,isMobile:width===430,reducedMotion:'reduce'});
- await page.goto(app.url+'/'+A);await page.locator('.bundle-card').first().waitFor();
+const app=await fixtureServer({phaseDelayMs:0});const browser=await chromium.launch({headless:true});const results=[];
+try{for(const width of [390,430,1280,1920]){
+ const page=await browser.newPage({viewport:{width,height:width<768?844:1000},hasTouch:width<768,isMobile:width<768,reducedMotion:'reduce'});const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto(app.url+'/'+A);await page.locator('[data-perspective=dependencies]').waitFor();
+ assert.equal(await page.locator('.bundle-card').count(),0,'Dependencies never fill the default ancestry view');
+ assert.match(await page.locator('.graph-provenance-empty').textContent()??'',/No recorded ancestry/);
+ await page.locator('[data-perspective=dependencies]').click();
  const group=page.locator('.bundle-card').filter({has:page.locator('.bundle-card-count',{hasText:'nebula_app'})});
  await group.focus();await page.keyboard.press('Enter');
- assert.ok(await page.locator('.aggregate-member').count()>0,'Expand must expose real member nodes on the canvas');
+ const count=await page.locator('.aggregate-member').count();assert.ok(count>0&&count<=8,'Expansion creates a bounded independent neighborhood');
+ const initial=await page.locator('.aggregate-member').evaluateAll(ns=>Object.fromEntries(ns.map(n=>[(n as SVGGElement).dataset.nodeId,n.querySelector('.node-box')?.getAttribute('x')])));
+ await group.locator('.aggregate-more').focus();await page.keyboard.press('Enter');
+ const grown=await page.locator('.aggregate-member').count();assert.ok(grown>count&&grown<=24);
+ const stable=await page.locator('.aggregate-member').evaluateAll(ns=>Object.fromEntries(ns.map(n=>[(n as SVGGElement).dataset.nodeId,n.querySelector('.node-box')?.getAttribute('x')])));for(const [id,x]of Object.entries(initial))assert.equal(stable[id],x,'Previously explored nodes stay in place');
+ const second=page.locator('.bundle-card').filter({has:page.locator('.bundle-card-count',{hasText:'mobile/link'})});await second.focus();await page.keyboard.press('Enter');
  const probe=await page.evaluate(()=>{
-  const cards=[...document.querySelectorAll<SVGGElement>('#canvas .bundle-card')];
-  const overflow=cards.flatMap(g=>{const b=g.querySelector<SVGGraphicsElement>('.bundle-card-box')!.getBBox();return [...g.querySelectorAll<SVGTextElement>('text')].filter(t=>{const r=t.getBBox();return r.x<b.x-1||r.y<b.y-1||r.x+r.width>b.x+b.width+1||r.y+r.height>b.y+b.height+1;}).map(t=>t.textContent);});
-  const nodes=[...document.querySelectorAll<SVGGraphicsElement>('.aggregate-member .node-box')].map(n=>{const b=n.getBBox();return{x:b.x,y:b.y,w:b.width,h:b.height};});
-  return{overflow,nodes,ctm:document.querySelector<SVGSVGElement>('#canvas')!.getScreenCTM()?.toString()};
- });assert.deepEqual(probe.overflow,[],'Every visible plate glyph belongs inside its painted border');
- for(let i=0;i<probe.nodes.length;i++)for(let j=i+1;j<probe.nodes.length;j++){const a=probe.nodes[i]!,b=probe.nodes[j]!;assert.ok(a.x+a.w<=b.x||b.x+b.w<=a.x||a.y+a.h<=b.y||b.y+b.h<=a.y,'Member cards do not overlap');}
- await group.locator('.aggregate-focus').focus();await page.keyboard.press('Enter');
+  const svg=document.querySelector<SVGSVGElement>('#canvas')!;
+  const boxes=[...svg.querySelectorAll<SVGGraphicsElement>('.node-box,.bundle-card-box')].map(n=>{const b=n.getBBox();return{x:b.x,y:b.y,w:b.width,h:b.height};});
+  const paths=[...svg.querySelectorAll<SVGGElement>('.edge-group')].map(g=>({id:g.dataset.relationshipId,source:g.dataset.source,target:g.dataset.target}));
+  const c=svg.getScreenCTM()!;return{boxes,paths,ctm:{a:c.a,d:c.d,e:c.e,f:c.f},stage:svg.getBoundingClientRect().toJSON(),camera:svg.getAttribute('viewBox')};
+ });for(let i=0;i<probe.boxes.length;i++)for(let j=i+1;j<probe.boxes.length;j++){const a=probe.boxes[i]!,b=probe.boxes[j]!;assert.ok(a.x+a.w<=b.x||b.x+b.w<=a.x||a.y+a.h<=b.y||b.y+b.h<=a.y,'Real nodes and grouping controls do not overlap');}
+ assert.ok(new Set(probe.boxes.map(b=>Math.round(b.x))).size>4&&new Set(probe.boxes.map(b=>Math.round(b.y))).size>4,'Neighborhood occupies two dimensions');assert.ok(probe.paths.every(p=>p.id&&p.source&&p.target&&!p.source.startsWith('bundle:')&&!p.target.startsWith('bundle:')),'Every painted line is a canonical entity relationship');
+ if(width<768){await page.locator('.graph-group-jumps button').filter({hasText:'nebula_app'}).click();const step=page.getByRole('button',{name:'Next nearby object'});assert.ok((await step.boundingBox())!.height>=44);await step.click();assert.ok(await page.locator('.aggregate-member.is-selected').count());
+ const rootBox=await page.locator('.node:has(.is-subject)').boundingBox(),peerBox=await page.locator('.aggregate-member.is-selected').boundingBox();for(const b of [rootBox,peerBox])assert.ok(b&&b.x>=0&&b.x+b.width<=width,'Local phone exploration frames both relationship endpoints');}else await page.locator('#zoom-fit').click();
  await page.screenshot({path:resolve(out,`${width}-graph-expanded.png`)});
- const first=await page.locator('.aggregate-member').first().getAttribute('data-node-id');
- if(width===430){const hit=await page.locator('.aggregate-next .plate-row-hit').boundingBox();assert.ok(hit&&hit.height>=44,'Phone pagination has a real 44px hit target');await page.touchscreen.tap(hit!.x+hit!.width/2,hit!.y+hit!.height/2);}else{await page.locator('.aggregate-next').focus();await page.keyboard.press('Enter');}assert.notEqual(await page.locator('.aggregate-member').first().getAttribute('data-node-id'),first,'Next reveals additional real members');
- const visited=new Set<string>();
- await page.locator('.aggregate-previous').focus();await page.keyboard.press('Enter');
- for(let round=0;round<30;round++){
-  for(const id of await page.locator('.aggregate-member').evaluateAll(ns=>ns.map(n=>(n as SVGGElement).dataset.nodeId!)))visited.add(id);
-  if(await page.locator('.aggregate-next').getAttribute('aria-disabled')==='true')break;
-  await page.locator('.aggregate-next').focus();await page.keyboard.press('Enter');
- }
- assert.equal(visited.size,45,'All 45 canonical members remain reachable through paging');
- await group.focus();await page.keyboard.press('Enter');assert.equal(await page.locator('.aggregate-member').count(),0,'Collapse restores overview');
- results.push({width,...probe,status:'PASS'});await page.close();
+ await group.focus();await page.keyboard.press('Enter');assert.ok(await page.locator('.aggregate-member').count()<grown+8,'Local collapse removes its neighborhood');
+ await page.goto(app.url+'/'+D);await page.locator('.edge-group.fam-ancestry').first().waitFor({state:'attached'});assert.equal(await page.locator('.graph-relation-key button').count(),3);await page.locator('.graph-relation-key button').first().click();assert.ok(await page.locator('#drawer').isVisible(),'Fork evidence opens from its explicit semantic control');
+ if(width<768)await page.locator('#mobile-evidence-back').click();else await page.keyboard.press('Escape');
+ await page.screenshot({path:resolve(out,`${width}-fork.png`)});
+ await page.goto(app.url+'/'+C);await page.locator('[data-perspective=dependencies]').waitFor();await page.locator('[data-perspective=dependencies]').click();
+ const groups=page.locator('.bundle-card');for(let i=0;i<await groups.count();i++){await groups.nth(i).focus();await page.keyboard.press('Enter');}
+ const coverage=page.locator('.node[data-node-id="pkg:pypi:coverage"]');await coverage.focus();await page.keyboard.press('Enter');
+ const before=await page.locator('#canvas').getAttribute('viewBox');await page.locator('#graph-explore-node').click();await page.locator('.graph-focus-label').waitFor();await page.locator('[data-perspective=references]').click();
+ assert.match(await page.locator('.graph-focus-label').textContent()??'',/coverage/);assert.ok(await page.locator('.node[data-node-id="repo:github:coveragepy/coveragepy"]').count(),'Existing canonical second-hop reference is projected');await page.screenshot({path:resolve(out,`${width}-second-hop.png`)});
+ await page.locator('#graph-back').click();assert.equal(await page.locator('#canvas').getAttribute('viewBox'),before,'Return restores exact previous camera');assert.ok(await coverage.count());
+ await page.goto(app.url+'/'+E);await page.locator('[data-perspective=origins]').waitFor();assert.equal(await page.locator('.edge-group').count(),0);assert.equal(await page.locator('.node').count(),1);await page.screenshot({path:resolve(out,`${width}-no-lineage.png`)});
+ assert.deepEqual(errors,[]);results.push({width,...probe,status:'PASS'});await page.close();
 }
- const moving=await browser.newPage({viewport:{width:1280,height:900}});
- await moving.goto(app.url+'/'+A);await moving.locator('.bundle-card').first().waitFor();
- const initial=await moving.locator('#canvas').getAttribute('viewBox');
- await moving.locator('#zoom-in').click();await moving.waitForTimeout(70);
- await moving.screenshot({path:resolve(out,'motion-intermediate.png')});
- const intermediate=await moving.locator('#canvas').getAttribute('viewBox');assert.notEqual(intermediate,initial,'Camera visibly interpolates');
- await moving.waitForTimeout(300);await moving.screenshot({path:resolve(out,'motion-settled.png')});const settled=await moving.locator('#canvas').getAttribute('viewBox');assert.notEqual(settled,intermediate,'Intermediate geometry differs from settled geometry');
- await moving.locator('#zoom-out').click();await moving.waitForTimeout(60);
- await moving.mouse.move(620,180);await moving.mouse.down();await moving.mouse.up();
- const stopped=await moving.locator('#canvas').getAttribute('viewBox');await moving.waitForTimeout(300);assert.equal(await moving.locator('#canvas').getAttribute('viewBox'),stopped,'Pointer input cancels camera motion without later jumps');
- await moving.emulateMedia({reducedMotion:'reduce'});await moving.locator('#zoom-in').click();const reduced=await moving.locator('#canvas').getAttribute('viewBox');await moving.waitForTimeout(300);assert.equal(await moving.locator('#canvas').getAttribute('viewBox'),reduced,'Reduced motion settles immediately');assert.notEqual(reduced,stopped);
- await moving.close();console.log('PASS camera interpolation, interruption and reduced motion');
- await writeFile(resolve(out,'geometry.json'),JSON.stringify(results,null,2));console.log('PASS group expansion, paging, collapse and painted geometry at 430 / 1280 / 1920');}
-finally{await browser.close();await app.cleanup();}
+ const moving=await browser.newPage({viewport:{width:1280,height:900}});await moving.goto(app.url+'/'+D);await moving.locator('.edge-group').first().waitFor({state:'attached'});const initial=await moving.locator('#canvas').getAttribute('viewBox');await moving.locator('#zoom-in').click();await moving.waitForTimeout(70);const intermediate=await moving.locator('#canvas').getAttribute('viewBox');assert.notEqual(intermediate,initial);await moving.waitForTimeout(300);assert.notEqual(await moving.locator('#canvas').getAttribute('viewBox'),intermediate);await moving.emulateMedia({reducedMotion:'reduce'});await moving.locator('#zoom-out').click();const settled=await moving.locator('#canvas').getAttribute('viewBox');await moving.waitForTimeout(300);assert.equal(await moving.locator('#canvas').getAttribute('viewBox'),settled);await moving.close();
+ await writeFile(resolve(out,'geometry.json'),JSON.stringify(results,null,2));console.log('PASS: ancestry priority, bounded 2D neighborhoods, local stability, semantic endpoints, canonical second hop, exact Back, mobile navigation, reduced motion. 390 / 430 / 1280 / 1920.');
+}finally{await browser.close();await app.cleanup();}

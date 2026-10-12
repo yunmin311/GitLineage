@@ -57,7 +57,7 @@ try {
     await page.goto(url); await page.evaluate(() => document.fonts.ready);
     check(`${width} landing project link`, await page.locator('#project-source[href="https://github.com/yunmin311/GitLineage"]').isVisible());
     await shot(page, `${width}-landing`);
-    await page.goto(`${url}/yunmin311/obsidian-config`);
+    await page.goto(`${url}/yunmin311/obsidian-config?layers=attribution&perspective=references`);
     await page.locator('.bundle-card').first().waitFor({timeout:180000});
     if(!await page.locator('.aggregate-member').count()){await page.locator('.bundle-card').first().focus();await page.keyboard.press('Enter');}
     await page.locator('#zoom-fit').click();await page.waitForTimeout(320);
@@ -208,7 +208,7 @@ try {
     }
     await route.fulfill({ response, json: body });
   });
-  await long.goto(`${url}/Kuddev/pebrel`);
+  await long.goto(`${url}/Kuddev/pebrel?layers=dependency&perspective=dependencies`);
   await long.locator('.plate-subtitle').first().waitFor({ timeout:180000 });
   await long.evaluate(() => document.fonts.ready);
   const overflow = await long.evaluate(() => {
@@ -249,7 +249,7 @@ try {
       const zoom = await page.evaluate(() => ({ width: innerWidth, height: innerHeight, dpr: devicePixelRatio, visualScale: visualViewport!.scale }));
       check('native browser 200% zoom verified', zoom.width === 640 && zoom.height === 400 && zoom.dpr === 2 && zoom.visualScale === 1, zoom);
       check('native 200% landing project link', await page.locator('#project-source').isVisible());
-      await page.goto(`${url}/yunmin311/obsidian-config`);
+      await page.goto(`${url}/yunmin311/obsidian-config?layers=attribution&perspective=references`);
       await page.locator('.bundle-card').first().waitFor({timeout:180000});
     if(!await page.locator('.aggregate-member').count()){await page.locator('.bundle-card').first().focus();await page.keyboard.press('Enter');}
     await page.locator('#zoom-fit').click();await page.waitForTimeout(320);

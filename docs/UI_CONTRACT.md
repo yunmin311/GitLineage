@@ -164,18 +164,27 @@ assertions with phone ownership checks; suite sizes remain 75 and 71. Native Chr
 200% zoom and desktop/tablet assertions remain unchanged. Chromium touch/keyboard
 viewport reduction is simulation; it does not certify physical devices or Safari.
 
-## Member exploration refinement (2026-10-12)
-The user superseded the nested shelf / two-column container model with independent
-repository, grouping and canonical member nodes. Compact grouping nodes contain no
-member tables. A rank-based tidy-tree layout reserves measured sibling leaf spans;
-canonical relations use separate orthogonal gutters and entity boundary ports.
-Neutral dashed grouping ties have no arrow and never become canonical lineage.
-Expansion shows four members per desktop batch or three per phone batch; Previous/Next
-keep all members reachable and preserve a selected object outside the current batch.
-Collapse restores compact groups. Expansion/paging retain the camera; explicit Focus
-frames a branch and Fit measures visible nodes with panel clearance. Existing motion
-expresses reflow and respects reduced motion. Node selection and canonical edge
-selection retain the original inspector and evidence. No graph/confidence changes.
-The former assertions requiring member rows inside an expanded outer frame are obsolete;
-independent-node acceptance measures compact groups, disjoint entity bounds, bounded
-paging, native hits, relationship ports and camera/selection continuity.
+## Spatial exploration refinement (2026-10-12)
+The user revoked fixed ranks, tree expansion directions and member pagination.
+Graph opens on ancestry and exact-source evidence. Dependency and attribution layers
+are explicit perspectives; empty provenance never substitutes dependencies for origins.
+V3.3 fonts, surfaces, semantic status colors, entity shapes and depth remain authoritative.
+
+Independent entities occupy focus-centred neighborhoods. Dense declaration sites own
+angular neighborhoods, not container tables; sparse ancestry uses relationship direction
+and viewport aspect. Actual rectangular collision clearance governs local displacement.
+Grouping controls are navigation only and have no artificial lineage ties. Canonical
+edges route between real boundary ports and detour around measured entity/group boxes.
+Selected neighborhoods load from the existing canonical endpoint and official projection;
+no additional inference, confidence or graph mutation. Back restores the exact preceding
+camera, layers, selection and positions. Expanding or collapsing retains camera and
+selection; explicit Focus/Fit are camera actions. Groups grow in bounded increments,
+and search locates remaining recorded members without a new table or paging model.
+
+Phone focus keeps nodes at reading size and offers a neighborhood compass and nearby
+object controls. A small real Fork frames both ends above the HUD and below the toolbar.
+The old assertions requiring fixed ranks, Previous/Next and all-layer default are
+obsolete. Their replacements check default provenance, explicit perspectives, disjoint
+spatial bounds, canonical ports/directions, bounded local growth, focus/back state,
+mobile glyph size, hit targets and actual world/screen geometry. Existing panel/touch,
+stale-response and four-view state contracts remain required.

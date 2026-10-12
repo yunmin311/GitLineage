@@ -1,0 +1,18 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';
+import {spatialLayout,spatialRoute} from '../src/web/client/lib/spatial.mjs';
+import {canonicalView} from './helpers/canonical-fixtures.ts';
+test('spatial neighborhoods retain canonical direction and distribute in two dimensions',()=>{const v=canonicalView('nachocebey__is'),edges=v.edges.filter(e=>e.family==='ancestry'||e.family==='source-identity');const p=spatialLayout({subjectId:v.subject.id,edges});assert.ok(p.size>1);for(const e of edges){const r=spatialRoute(e,p);assert.ok(r?.path);assert.equal(e.source,v.subject.id);}});
+test('dense local clusters do not overlap, and focus can move to a peer',()=>{const edges=Array.from({length:24},(_,i)=>({id:String(i),source:'root',target:'p'+i}));const p=spatialLayout({subjectId:'root',edges,groups:[{key:'a',peers:edges.slice(0,12).map(e=>e.target)},{key:'b',peers:edges.slice(12).map(e=>e.target)}]});const boxes=[...p.values()];for(let i=0;i<boxes.length;i++)for(let j=i+1;j<boxes.length;j++){const a=boxes[i]!,b=boxes[j]!;assert.ok(Math.abs(a.x-b.x)>((a.width||216)+(b.width||216))/2||Math.abs(a.y-b.y)>((a.height||52)+(b.height||52))/2);}const xs=new Set(boxes.map(b=>Math.round(b.x))),ys=new Set(boxes.map(b=>Math.round(b.y)));assert.ok(xs.size>6&&ys.size>6);assert.equal(spatialLayout({subjectId:'root',focusId:'p0',edges}).get('p0')?.x,960);});
+test('incremental growth reserves existing peers before allocating new objects',()=>{const all=Array.from({length:16},(_,i)=>({id:String(i),source:'root',target:'p'+i}));const first=all.filter((_,i)=>i%2===0).slice(0,5),groups=(es:typeof all)=>[{key:'g',peers:es.map(e=>e.target)}];const p=spatialLayout({subjectId:'root',edges:first,groups:groups(first),compact:true});const next=spatialLayout({subjectId:'root',edges:all,groups:groups(all),compact:true,previous:p});for(const e of first)assert.deepEqual(next.get(e.target),p.get(e.target));});
+
+test('multi-parent and many-to-many paths attach to borders and clear every unrelated object',()=>{
+ const edges=[{source:'root',target:'a'},{source:'root',target:'b'},{source:'a',target:'c'},{source:'b',target:'c'},{source:'a',target:'d'},{source:'b',target:'d'},{source:'c',target:'root'}];
+ for(const compact of [false,true]){const ps=spatialLayout({subjectId:'root',edges,compact});
+  for(const edge of edges){const route=spatialRoute(edge,ps)!;assert.ok(route);const nums=route.path.match(/-?\d+(?:\.\d+)?(?:e[+-]?\d+)?/gi)!.map(Number);const start={x:nums[0]!,y:nums[1]!},end={x:nums.at(-2)!,y:nums.at(-1)!};
+   for(const [point,id]of [[start,edge.source],[end,edge.target]] as const){const box=ps.get(id)!;assert.ok(Math.abs(Math.abs(point.x-box.x)-108)<.001||Math.abs(Math.abs(point.y-box.y)-26)<.001,'Endpoint touches its actual object boundary');}
+   const points=[];if(route.path.includes('Q'))for(let i=0;i<=200;i++){const t=i/200;points.push({x:(1-t)**2*nums[0]!+2*(1-t)*t*nums[2]!+t*t*nums[4]!,y:(1-t)**2*nums[1]!+2*(1-t)*t*nums[3]!+t*t*nums[5]!});}
+   else for(let j=2;j<nums.length;j+=2)for(let i=0;i<=200;i++){const t=i/200;points.push({x:nums[j-2]!+(nums[j]!-nums[j-2]!)*t,y:nums[j-1]!+(nums[j+1]!-nums[j-1]!)*t});}
+   for(const [id,box]of ps)if(id!==edge.source&&id!==edge.target)for(const point of points)assert.ok(Math.abs(point.x-box.x)>=108||Math.abs(point.y-box.y)>=26,'Route clears unrelated objects');
+  }
+ }
+});
