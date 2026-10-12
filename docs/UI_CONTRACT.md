@@ -163,3 +163,14 @@ coarse-pointer branch and Responsive's 844x390 branch replace obsolete legacy pa
 assertions with phone ownership checks; suite sizes remain 75 and 71. Native Chromium
 200% zoom and desktop/tablet assertions remain unchanged. Chromium touch/keyboard
 viewport reduction is simulation; it does not certify physical devices or Safari.
+
+## Member exploration refinement (2026-10-12)
+Aggregate expansion exposes canonical member nodes and relationships on measured shelves,
+twelve members per page in two columns. Previous/Next retain every member's reachability;
+collapse restores the overview. Member selection uses the existing node inspector, and
+canonical edge selection opens the original evidence. These are presentation changes:
+no derived layout or discovery observation changes the canonical graph or confidence.
+Collapsed row budgets include both the affordance and remainder notice. Expanded edge
+routes enter from separate row gutters. Fit measures the current cards, subject and
+visible panels on desktop; phone Fit frames the expanded group. Canvas acceptance's old
+flat-row expansion assertions now check real members and selected canonical edges.

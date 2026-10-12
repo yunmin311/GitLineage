@@ -1,3 +1,4 @@
+import {captureMotion, transitionScene, transitionCamera, stopMotion, revealInstrument} from './lib/motion.mjs';
 import { mountRepositoryExplorer } from './lib/repository-explorer.mjs';
 import { mountDeepPreview } from './lib/deep-preview.mjs';
 /**
@@ -210,6 +211,7 @@ function navigate(repository, push = true) {
   state.selectedNodeId = '';
   state.query = '';
   state.expandedBundles = new Set();
+  aggregatePages.clear();
   // A different repository is a different dataset, so the camera refits. This
   // previously inherited the previous repository's framing.
   state.refitPending = true;
@@ -912,6 +914,8 @@ const BUNDLE_ID_PREFIX = 'bundle:';
  * are only ever created when nothing else would be drawn.
  */
 const PLATE_W = 184;
+const MEMBER_PAGE_SIZE = 12;
+const aggregatePages = new Map();
 /**
  * An expanded plate is wider because each row carries a label and the file that
  * declares it. At the collapsed width the two overprinted each other and neither
@@ -979,6 +983,7 @@ const PLATE_BOTTOM_LIMIT = ZONES.bandTop - 48;
  * how rows ended up outside their own border.
  */
 function plateRowsFor(plate, top, hiddenRows) {
+  if (plate.expanded) return { shown: [], hidden: 0, overflow: 0, height: plateHeader(plate) + Math.ceil(Math.min(MEMBER_PAGE_SIZE, plate.memberEdgeIds.length) / 2) * 74 + 48 };
   const rows = plateRows(plate);
   const header = plateHeader(plate);
   const chrome = PLATE_HEADER + (plate.meta ? PLATE_SUBTITLE : 0) + 12
@@ -1065,7 +1070,7 @@ function authoredPositions(view, edges, composition) {
       currentHeight: plate.expanded ? Math.max(expanded.height, collapsed.height) : collapsed.height,
     };
   });
-  const plateSlots = layoutMassStacks(reserved, {
+  let plateSlots = layoutMassStacks(reserved, {
     gap: PLATE_STACK_GAP,
     rowPitch: PLATE_ROW,
     // A shut mass is its header and nothing else; the renderer measures it, and this is
@@ -1074,6 +1079,18 @@ function authoredPositions(view, edges, composition) {
     // mass cannot shrink at all.
     shutHeight: (plate) => plateRowsFor({ ...plate, open: false, expanded: false }, ZONES.dataTop, 0).height,
   });
+  // Expanded groups use measured shelves in two columns, outside the overview budget.
+  // This changes presentation only; canonical relationship membership stays intact.
+  if (composition.plates.some(p => p.expanded)) {
+    plateSlots = new Map();
+    const bottoms = [200, 200];
+    for (const plate of reserved) {
+      const col = bottoms[0] <= bottoms[1] ? 0 : 1;
+      const height = plate.expanded ? plateRowsFor(plate, 0, 0).height : plate.collapsedHeight;
+      plateSlots.set(plate.key, {key:plate.key, x:786 + col * 536, y:bottoms[col], height});
+      bottoms[col] += height + 26;
+    }
+  }
   for (const [key, slot] of plateSlots) {
     positions.set(`${BUNDLE_ID_PREFIX}${key}`, {
       x: slot.x,
@@ -1086,11 +1103,25 @@ function authoredPositions(view, edges, composition) {
 
   // Loose relationships: the endpoints of the relationships actually drawn, in the
   // regime's ranked order, so slot position never decides visual importance.
+  const expandedIds = new Set(composition.plates.filter(p => p.expanded).flatMap(p => p.memberEdgeIds));
   const nodeIds = [];
   for (const edge of edges) {
+    if (expandedIds.has(edge.id)) continue;
     for (const id of [edge.source, edge.target]) {
       if (id !== view.subject.id && !nodeIds.includes(id)) nodeIds.push(id);
     }
+  }
+  for (const plate of composition.plates.filter(p => p.expanded)) {
+    const slot = positions.get(`${BUNDLE_ID_PREFIX}${plate.key}`);
+    const page = Math.min(aggregatePages.get(plate.key) || 0, Math.floor((plate.memberEdgeIds.length - 1) / MEMBER_PAGE_SIZE));
+    aggregatePages.set(plate.key, page);
+    const ids = plate.memberEdgeIds.slice(page * MEMBER_PAGE_SIZE, (page + 1) * MEMBER_PAGE_SIZE);
+    ids.forEach((id, i) => {
+      const edge = edges.find(e => e.id === id);
+      if (!edge) return;
+      const peer = edge.source === view.subject.id ? edge.target : edge.source;
+      positions.set(peer, {x:slot.x - PLATE_W/2 + 128 + (i%2)*240, y:slot.y-slot.height/2+plateHeader(plate)+36+Math.floor(i/2)*74, aggregateKey:plate.key});
+    });
   }
   const slots = nodeIds.map((id) => (view.nodes.find((n) => n.id === id) || {}).slot || 'dependency');
   // Plates are handed to the placement as obstacles, so a loose node can never
@@ -1102,10 +1133,10 @@ function authoredPositions(view, edges, composition) {
     const rows = plateRows(plate);
     const slot = positions.get(`${BUNDLE_ID_PREFIX}${plate.key}`);
     const left = (slot?.x ?? ZONES.dataLeft) - PLATE_W / 2;
-    const width = rows.length > 0 ? PLATE_W_EXPANDED : PLATE_W;
+    const width = plate.expanded ? 488 : rows.length > 0 ? PLATE_W_EXPANDED : PLATE_W;
     return {
       x: left + width / 2,
-      y: (slot?.y ?? ZONES.dataTop) + (slot?.height ?? 0) / 2,
+      y: slot?.y ?? ZONES.dataTop,
       hw: width / 2,
       hh: (slot?.height ?? 0) / 2,
     };
@@ -1385,7 +1416,7 @@ function renderBottomBand(view) {
       : '';
     band.append(el('span', {
       class: 'band-note',
-      text: `${composition.direct.length} shown directly${plateNote}`,
+      text: `${composition.direct.length} direct · ${composition.plates.filter(p=>p.expanded).reduce((n,p)=>n+Math.min(MEMBER_PAGE_SIZE,p.memberEdgeIds.length-(aggregatePages.get(p.key)||0)*MEMBER_PAGE_SIZE),0)} group members visible${plateNote}`,
     }));
   }
 
@@ -1479,6 +1510,7 @@ function currentComposition(view) {
 function draw() {
   const view = state.view;
   const canvas = $('canvas');
+  const before = captureMotion(canvas);
   const focusedEdge = document.activeElement?.getAttribute('data-edge-id');
   const focusedNode = document.activeElement?.getAttribute('data-node-id');
   canvas.replaceChildren();
@@ -1491,7 +1523,12 @@ function draw() {
   const loose = new Set(composition.looseEdgeIds);
   // Phone navigation also exposes the composition's already-promoted real relationships.
   if (isPhone()) for (const id of composition.promotedEdgeIds) loose.add(id);
-  const edges = visibleCandidates(view).filter((edge) => loose.has(edge.id));
+  const expandedEdgeIds = new Set(composition.plates.filter(p => p.expanded).flatMap(p => {
+    const page = aggregatePages.get(p.key) || 0;
+    return p.memberEdgeIds.slice(page * MEMBER_PAGE_SIZE, (page + 1) * MEMBER_PAGE_SIZE);
+  }));
+  const selectedMember = state.selectedNodeId && state.selectedNodeId !== view.subject.id;
+  const edges = visibleCandidates(view).filter((edge) => loose.has(edge.id) || expandedEdgeIds.has(edge.id) || (selectedMember && (edge.source === state.selectedNodeId || edge.target === state.selectedNodeId)));
   // Authored composition, not a content fit. The subject sits where the design
   // puts it, the data mass stacks down the right zone, and loose relationships
   // are placed on an arc around the anchor rather than in a slot grid.
@@ -1542,6 +1579,7 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
 
   const edgeLayer = svgEl('g', { class: 'edge-layer' });
   const nodeLayer = svgEl('g', { class: 'node-layer' });
+  const memberEdgeLayer = svgEl('g', {class:'member-edge-layer'});
 
   const query = state.query ? state.query.toLowerCase() : '';
   const matchedNodes = new Set(searchNodes(view, query));
@@ -1551,6 +1589,17 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
   for (const edge of edges) {
     const { fanIndex, fanCount } = fanSlot(edge, edges);
     const geometry = edgeGeometry(edge, positions, fanIndex, fanCount);
+    // Real canonical edges enter members through row gutters, never through labels.
+    const member = positions.get(edge.source)?.aggregateKey ? positions.get(edge.source) : positions.get(edge.target)?.aggregateKey ? positions.get(edge.target) : null;
+    if (member && geometry && (edge.source === view.subject.id || edge.target === view.subject.id)) {
+      const plate = positions.get(`${BUNDLE_ID_PREFIX}${member.aggregateKey}`);
+      const subject = positions.get(view.subject.id);
+      const left = plate.x - PLATE_W / 2, bus = left - 14, gutter = member.y - NODE_H / 2 - (member.x - left > 240 ? 22 : 10);
+      const points = [[subject.x+NODE_W/2,subject.y],[bus,subject.y],[bus,gutter],[member.x,gutter],[member.x,member.y-NODE_H/2]];
+      if(edge.source!==view.subject.id)points.reverse();
+      geometry.path = points.map(([x,y],i)=>`${i?'L':'M'}${x},${y}`).join(' ');
+      geometry.label = {x:bus-4,y:gutter-6};geometry.badge=geometry.label;
+    }
     if (!geometry) continue;
 
     const group = svgEl('g', {
@@ -1564,6 +1613,7 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
       ].filter(Boolean).join(' '),
     });
     group.dataset.relationshipId = edge.id;
+    group.dataset.source = edge.source; group.dataset.target = edge.target;
 
     group.append(
       svgEl('path', {
@@ -1583,7 +1633,7 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
     // A crowded edge keeps its label in the DOM but marks the group, so CSS reveals
     // it on hover or selection. Redrawing on hover would rebuild the canvas under
     // the pointer and re-fire the event.
-    const crowded = fanCount > LABEL_FAN_LIMIT || isCrowdedEdge(edge, degrees, LABEL_DEGREE_LIMIT);
+    const crowded = expandedEdgeIds.has(edge.id) || fanCount > LABEL_FAN_LIMIT || isCrowdedEdge(edge, degrees, LABEL_DEGREE_LIMIT);
     if (crowded) group.classList.add('is-dense');
     group.append(
       svgEl('text', { x: geometry.label.x, y: geometry.label.y, class: 'edge-label' }, [edge.label]),
@@ -1598,7 +1648,7 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
         ]),
       );
     }
-    edgeLayer.append(group);
+    (expandedEdgeIds.has(edge.id) ? memberEdgeLayer : edgeLayer).append(group);
   }
 
   /*
@@ -1627,7 +1677,7 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
      * count. A neutral plate stays shut until the reader opens it. Either way the
      * list is capped and the plate states what it is holding back.
      */
-const hiddenRows = plateHiddenRows(plate);
+const hiddenRows = plate.expanded ? 0 : plateHiddenRows(plate);
     const top = Math.round(position.y - position.height / 2);
     /*
      * Drawn no taller than the slot the stack allocated.
@@ -1645,7 +1695,9 @@ const hiddenRows = plateHiddenRows(plate);
     const slotRoom = Math.max(0, position.height - PLATE_HEADER - (plate.meta ? PLATE_SUBTITLE : 0) - 12);
     const rowLimit = Math.floor(slotRoom / PLATE_ROW);
     const fitsSlot = plan.height <= position.height + 1;
-    const shownRows = fitsSlot ? plan.shown : plan.shown.slice(0, Math.max(0, rowLimit - 1));
+    let shownRows = fitsSlot ? plan.shown : plan.shown.slice(0, Math.max(0, rowLimit - 1));
+    // Both the remainder and hidden-member affordance consume a real row.
+    while (shownRows.length && plateHeight(shownRows.length + (plan.overflow + plan.shown.length - shownRows.length > 0 ? 1 : 0), hiddenRows, !!plate.meta) > position.height) shownRows = shownRows.slice(0, -1);
     const clipped = shownRows.length < plan.shown.length;
     const header = plateHeader(plate);
     /*
@@ -1656,14 +1708,12 @@ const hiddenRows = plateHiddenRows(plate);
      * yield a row went quiet about it, which is the same dishonesty as dropping a member.
      */
     const overflow = plan.overflow + (clipped ? plan.shown.length - shownRows.length : 0);
-    const height = plateHeight(
-      shownRows.length,
-      hiddenRows + (clipped ? plan.shown.length - shownRows.length : 0),
-      !!plate.meta,
+    const height = plate.expanded ? position.height : plateHeight(
+      shownRows.length + (overflow > 0 ? 1 : 0), hiddenRows, !!plate.meta,
     );
     // Widening grows to the right of the subject's tie, so the connection stays
     // anchored and the plate does not jump when it opens.
-    const width = plateRows(plate).length > 0 ? PLATE_W_EXPANDED : PLATE_W;
+    const width = plate.expanded ? 488 : plateRows(plate).length > 0 ? PLATE_W_EXPANDED : PLATE_W;
     // The left edge is fixed and the plate widens rightward, away from the subject.
     // Anchoring the left edge to the tie point keeps subject -> plate short and
     // stops an opening plate from growing back over the subject it belongs to.
@@ -1691,7 +1741,7 @@ const hiddenRows = plateHiddenRows(plate);
     const rowMembers = shownRows.flatMap((row) => row.memberEdgeIds);
     const ownsSelection =
       plate.memberEdgeIds.includes(state.selectedEdgeId) ||
-      rowMembers.includes(state.selectedEdgeId);
+      rowMembers.includes(state.selectedEdgeId) || plate.memberEdgeIds.some(id => { const e = view.edges.find(e => e.id === id); return state.selectedNodeId && (e?.source === state.selectedNodeId || e?.target === state.selectedNodeId); });
     // Selection raises the plate that owns it, never a row inside it.
     const plateTier = depthTier({ isSelected: ownsSelection });
     /*
@@ -1700,9 +1750,9 @@ const hiddenRows = plateHiddenRows(plate);
      * rest; it is still open, and drawing it as a shut card would contradict the rows
      * directly beneath its own header.
      */
-    const isOpen = shownRows.length > 0;
+    const isOpen = plate.expanded || shownRows.length > 0;
     const group = svgEl('g', {
-      class: `bundle-card st-${plate.status}${isOpen ? ' is-open' : ''}${ownsSelection ? ' is-selected' : ''}`,
+      class: `bundle-card st-${plate.status}${isOpen ? ' is-open' : ''}${plate.expanded ? ' is-expanded' : ''}${ownsSelection ? ' is-selected' : ''}`,
       role: 'button',
       tabindex: '0',
       'aria-label': `${plate.count} ${plate.relationshipType.replace(/_/g, ' ')} relationships, grouped`,
@@ -1875,7 +1925,7 @@ const hiddenRows = plateHiddenRows(plate);
      */
     if (overflow > 0) {
       const heldY = plateTop + header + shownRows.length * PLATE_ROW
-        + (hiddenRows > 0 ? PLATE_ROW : 0) + 4;
+        + (hiddenRows > 0 ? PLATE_ROW : 0);
       group.append(
         svgEl('text', { x: left + 12, y: heldY + 18, class: 'plate-row-held' }, [
           `${overflow} more in the Drawer`,
@@ -1883,6 +1933,20 @@ const hiddenRows = plateHiddenRows(plate);
       );
     }
 
+    if (plate.expanded) {
+      const page = aggregatePages.get(plate.key) || 0;
+      const total = Math.ceil(plate.memberEdgeIds.length / MEMBER_PAGE_SIZE);
+      const y = plateTop + height - 20;
+      group.append(svgEl('text', {x:left+12,y,class:'plate-row-more'}, [`Members ${page*MEMBER_PAGE_SIZE+1}–${Math.min((page+1)*MEMBER_PAGE_SIZE,plate.count)} / ${plate.count}`]));
+      const action = (label, x, enabled, fn, cls) => {
+        const g = svgEl('g',{role:'button',tabindex:enabled?'0':'-1','aria-label':label,'aria-disabled':String(!enabled),class:cls});
+        g.append(svgEl('text',{x,y,class:'plate-row-expand'},[label]),svgEl('rect',{x:x-8,y:y-38,width:76,height:54,class:'plate-row-hit'}));
+        const run = e => {e.stopPropagation();if(enabled){fn();draw();const next=$('canvas').querySelector(`.${cls}[aria-disabled="false"]`) || $('canvas').querySelector('.aggregate-previous[aria-disabled="false"], .aggregate-next[aria-disabled="false"]');next?.focus({preventScroll:true});}};
+        g.addEventListener('click',run);g.addEventListener('mobile-tap',run);g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();run(e);}});group.append(g);
+      };
+      action('Previous',left+270,page>0,()=>aggregatePages.set(plate.key,page-1),'aggregate-previous');
+      action('Next',left+374,page+1<total,()=>aggregatePages.set(plate.key,page+1),'aggregate-next');
+    }
     const activate = (event) => {
       event.stopPropagation();
       // A click on a row selects that row; only the plate's own surface toggles.
@@ -1894,6 +1958,8 @@ const hiddenRows = plateHiddenRows(plate);
     });
     nodeLayer.append(group);
   }
+
+  nodeLayer.append(memberEdgeLayer);
 
   // Only nodes that take part in what is drawn are drawn. An entity reachable only
   // through a plate is listed as a row inside that plate, so it cannot appear as a
@@ -1911,6 +1977,7 @@ const hiddenRows = plateHiddenRows(plate);
     const group = svgEl('g', {
       class: [
         'node',
+        position.aggregateKey ? 'aggregate-member' : '',
         node.isSubject ? 'is-subject' : '',
         state.selectedNodeId === node.id ? 'is-selected' : '',
         focusMode && !matchedNodes.has(node.id) ? 'is-dim' : '',
@@ -2002,6 +2069,7 @@ const hiddenRows = plateHiddenRows(plate);
 
   canvas.append(edgeLayer, nodeLayer);
   fitGraphText(canvas);
+  transitionScene(canvas, before);
   if (focusedEdge) {
     Array.from(canvas.querySelectorAll('[data-edge-id]')).find(row => row.getAttribute('data-edge-id') === focusedEdge)?.focus({ preventScroll: true });
   }
@@ -2053,7 +2121,7 @@ function toggleBundle(key) {
   else state.expandedBundles.add(key);
   syncUrl();
   // The camera must not move. Expansion is a local change: it reflows rows
-  // inside its own plate and nothing else, so the pan, zoom, viewport centre and
+  // across reserved member shelves, while the pan, zoom, viewport centre and
   // world focal the reader already has stay exactly as they were. Refitting here
   // used to reset `hasFitted`, which re-ran `fitViewBox` and silently recentred
   // the whole scene on every expand and collapse.
@@ -2478,6 +2546,7 @@ function renderDrawer() {
   }
 
   inner.append(close, block);
+  revealInstrument(block);
 
   /*
    * Two things about a freshly-filled scroller.
@@ -2902,6 +2971,7 @@ function setupViewport() {
 
   canvas.addEventListener('wheel', (event) => {
     event.preventDefault();
+    stopMotion(canvas);
     const rect = canvas.getBoundingClientRect();
     if (event.deltaY === 0) return;
     const factor = Math.exp(-Math.max(-120, Math.min(120, event.deltaY)) * 0.002);
@@ -2913,6 +2983,7 @@ function setupViewport() {
   let suppressClick = false;
   const DRAG_THRESHOLD = 5;
   canvas.addEventListener('pointerdown', event => {
+    stopMotion(canvas);
     if (isPhone() && event.pointerType === 'touch') return;
     if (event.button !== 0 || !event.isPrimary) return;
     suppressClick = false;
@@ -2985,7 +3056,7 @@ function clientToGraph(canvas, clientX, clientY) {
 function zoomBy(factor) {
   const canvas = $('canvas');
   const next = zoomViewBox(canvas.getAttribute('viewBox'), factor, null, state.zoom);
-  setCamera(canvas, next.viewBox, next.zoom);
+  transitionCamera(canvas, next.viewBox, box=>setCamera(canvas,box,canvas.clientWidth / Number(box.split(/\s+/)[2])));
 }
 
 /**
@@ -2999,7 +3070,16 @@ function fit() {
   if (!state.view) return;
   const canvas = $('canvas');
   const viewport = { width: canvas.clientWidth || 1200, height: canvas.clientHeight || 700 };
-  if (isPhone()) phoneFit(); else setCamera(canvas, initialViewBox(viewport).viewBox, 1);
+  const expanded = [...canvas.querySelectorAll('.bundle-card.is-expanded .bundle-card-box')];
+  if (expanded.length) {
+    const boxes = (isPhone() ? expanded : [...canvas.querySelectorAll('.bundle-card-box, .node-box')]).map(n=>n.getBBox());
+    const x=Math.min(...boxes.map(b=>b.x))-16,y=Math.min(...boxes.map(b=>b.y))-32;
+    const right=Math.max(...boxes.map(b=>b.x+b.width))+16,bottom=Math.max(...boxes.map(b=>b.y+b.height))+32;
+    const freeWidth = viewport.width - (isPhone() ? 0 : (visiblePanels(panels).rail ? 320 : 24) + (visiblePanels(panels).drawer ? 400 : 24));
+    const scale=Math.max((right-x)/Math.max(240,freeWidth),(bottom-y)/(viewport.height-80));
+    const w=viewport.width*scale,h=viewport.height*scale;
+    transitionCamera(canvas,`${x-(w-(right-x))/2 - (!isPhone() && visiblePanels(panels).rail ? 140*scale : 0)} ${y-(h-(bottom-y))/2} ${w} ${h}`,box=>setCamera(canvas,box,canvas.clientWidth / Number(box.split(/\s+/)[2])));
+  } else if (isPhone()) phoneFit(); else transitionCamera(canvas, initialViewBox(viewport).viewBox,box=>setCamera(canvas,box,canvas.clientWidth / Number(box.split(/\s+/)[2])));
 }
 
 // --------------------------------------------------------------------- boot

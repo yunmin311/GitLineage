@@ -2190,3 +2190,33 @@ body.mobile-explorer .band-note { display: -webkit-box; -webkit-line-clamp: 2; -
 .workspace-candidate-navigation [aria-pressed="true"], .workspace-tree [aria-pressed="true"] { background: var(--brand-wash); border-color: var(--brand); }
 
 .workspace-fragment { white-space: pre-wrap; overflow-wrap: anywhere; font: 11px/1.6 var(--mono); background: var(--surface); border-left: 2px solid var(--brand); padding: 8px; margin: 8px 0 12px; }
+
+/* Shared instruments: labels use sans; only object identities and values use mono. */
+.repository-navigation button, .repository-workspace .d-action,
+.workspace-discovery-controls button, .workspace-discovery-evidence button {
+ font-family: var(--sans); font-size: var(--t-label-size, 11.5px); font-weight: 550;
+ transition: background-color 110ms ease-out, border-color 110ms ease-out, color 110ms ease-out;
+}
+.repository-workspace button:focus-visible, .repository-navigation button:focus-visible {
+ outline: 2px solid var(--brand); outline-offset: 3px;
+}
+.workspace-shadow { fill: var(--ink); opacity: .16; pointer-events: none; }
+.workspace-node.is-selected .workspace-shadow { opacity: .32; }
+.workspace-box { transition: fill 110ms ease-out, stroke 110ms ease-out; }
+.workspace-link.is-selected { stroke: var(--ink); stroke-width: 2.5; }
+.workspace-node.commit::selection, .workspace-node.merge::selection { background: var(--brand-wash); }
+.workspace-caption { font: 550 var(--t-label-size, 11.5px)/1.4 var(--sans); }
+.workspace-caption small { font: 10px/1.5 var(--mono); }
+.aggregate-next, .aggregate-previous { cursor: pointer; }
+.aggregate-next[aria-disabled="true"], .aggregate-previous[aria-disabled="true"] { opacity: .35; cursor: default; }
+.aggregate-next:focus-visible, .aggregate-previous:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+ .repository-workspace *, .repository-navigation *, .aggregate-member * { transition-duration: 0s !important; }
+}
+.workspace-commit-marker { fill: var(--paper); stroke: var(--ink); stroke-width: 2; }
+.workspace-node.merge .workspace-commit-marker, .workspace-node.is-selected .workspace-commit-marker { fill: var(--ink); }
+
+.workspace-node .node-label { font-family: var(--sans); font-size: 12.5px; }
+
+.workspace-measurement-picker { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.workspace-measurement-picker button { font-size: 10px; overflow-wrap: anywhere; min-height: 44px; padding: 6px; }
