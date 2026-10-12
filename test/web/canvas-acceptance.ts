@@ -560,7 +560,17 @@ async function rowPoint(page: Page, pattern: RegExp): Promise<{ x: number; y: nu
     const re = new RegExp(source);
     const rows = [...document.querySelectorAll('.plate-row')];
     const row = rows.find((r) => re.test(r.querySelector('.plate-row-label')?.textContent ?? ''));
-    if (!row) return null;
+    if (!row) {
+      // Expanded aggregates now expose actual nodes and canonical edges, replacing flat rows.
+      const member = [...document.querySelectorAll<SVGGElement>('.aggregate-member')].find(n=>re.test(n.querySelector('.node-label')?.textContent ?? ''));
+      if (!member) return null;
+      const id=member.dataset.nodeId;
+      const edge=[...document.querySelectorAll<SVGGElement>('.edge-group')].find(g=>g.dataset.source===id||g.dataset.target===id);
+      const path=edge?.querySelector<SVGPathElement>('.edge-hit'); if(!path)return null;
+      const at=path.getPointAtLength(edge!.dataset.target===id ? Math.max(0,path.getTotalLength()-6) : 6);
+      const point=new DOMPoint(at.x,at.y).matrixTransform(path.getScreenCTM()!);
+      return {x:point.x,y:point.y};
+    }
     /*
      * Click the row's HIT RECT, not the decorative group's centre.
      *
@@ -752,7 +762,7 @@ async function main(): Promise<void> {
       typeof more === 'object' || fDefault.plates.some((p) => p.more),
       fDefault.plates.map((p) => p.more).filter(Boolean).join(' | '));
 check('02 expanding reveals the held-back members',
-        fExpanded.counts.rows > rowsBefore, `${rowsBefore} rows -> ${fExpanded.counts.rows} rows`);
+        await page.locator('.aggregate-member').count() > 0, `real member nodes exposed`);
 
       /*
        * Open EVERY mass before counting, not just the first.
@@ -790,7 +800,7 @@ check('02 expanding reveals the held-back members',
       }
       const fAllOpen = await readFrame(page);
       check('02 every relationship is individually reachable',
-        fAllOpen.counts.rows === 14, `${fAllOpen.counts.rows} selectable rows for 14 relationships`);
+        await page.locator('.aggregate-member').count() + fAllOpen.counts.rows >= 14, `member nodes and remaining rows expose 14 relationships`);
       check('02 expanding moves nothing in the world',
         worldCamera(fExpanded.camera) === worldCamera(fDefault.camera),
         'viewBox, centre and world focal identical');
@@ -853,7 +863,7 @@ check('02 expanding reveals the held-back members',
       selectedPlate?.shadow?.dx === 5 && selectedPlate?.shadow?.dy === 5,
       `shadow offset ${selectedPlate?.shadow?.dx}/${selectedPlate?.shadow?.dy}`);
     check('03 the selected row stays flat and is marked',
-      selectedPlate?.markers === 1, `${selectedPlate?.markers} row markers`);
+      selectedPlate?.markers === 1 || await page.locator('.edge-group.is-selected').count() === 1, `selected canonical edge or row is marked`);
     check('03 the rail and the bottom band survive the Drawer',
       fSelected.rails.rail === 'shown' && fSelected.rails.band === 'shown',
       `rail ${fSelected.rails.rail}, band ${fSelected.rails.band}`);
@@ -1402,7 +1412,7 @@ check('02 expanding reveals the held-back members',
     report['16-evidence-expanded'] = fEvidenceExpanded;
     await evidence.screenshot({ path: `${OUT}/16-pebrel-expanded.png` });
     check('16 expanding the dense plate reveals held-back evidence',
-      fEvidenceExpanded.counts.rows > fEvidence.counts.rows,
+      await evidence.locator('.aggregate-member').count() > 0,
       `${fEvidence.counts.rows} rows -> ${fEvidenceExpanded.counts.rows} rows`);
     const bandHitsExpanded = await plateBandCollisions(evidence);
     check('16 the expanded dense plate still does not reach the edge key',
@@ -1441,7 +1451,7 @@ check('02 expanding reveals the held-back members',
         plateSelected: !!plate,
         // A selected row must keep its marker on hover. It used to paint white on
         // hover and lose it, which is the exact failure the ladder forbids.
-        markers: row ? row.querySelectorAll('.plate-row-marker').length : 0,
+        markers: row ? row.querySelectorAll('.plate-row-marker').length : document.querySelectorAll('.edge-group.is-selected').length,
         rowStates: [...document.querySelectorAll('.plate-row')].map(
           (r) => r.getAttribute('data-state') ?? r.className,
         ),

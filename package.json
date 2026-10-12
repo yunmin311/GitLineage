@@ -35,7 +35,8 @@
     "test:private-beta-tls": "bash test/staging/run.sh",
     "test:exploration": "node test/web/public-exploration-acceptance.ts",
     "preview:workspace": "node test/web/workspace-preview.ts",
-    "preview:public": "GITLINEAGE_CACHE=\"$HOME/.local/state/gitlineage-public-preview/cache\" GITLINEAGE_JOB_STORE=\"$HOME/.local/state/gitlineage-public-preview/jobs\" GITLINEAGE_PUBLIC_EXPLORATION=1 node src/web/serve.ts --host 127.0.0.1 --port 8084 --client dist/web"
+    "preview:public": "GITLINEAGE_CACHE=\"$HOME/.local/state/gitlineage-public-preview/cache\" GITLINEAGE_JOB_STORE=\"$HOME/.local/state/gitlineage-public-preview/jobs\" GITLINEAGE_PUBLIC_EXPLORATION=1 node src/web/serve.ts --host 127.0.0.1 --port 8084 --client dist/web",
+    "test:unification": "node test/web/unification-acceptance.ts"
   },
   "dependencies": {
     "smol-toml": "^1.4.2"

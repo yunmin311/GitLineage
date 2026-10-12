@@ -81,7 +81,7 @@ try {
       check('640 reading return retains selection',!await page.locator('#drawer').isVisible()&&!(await geometry(page)).selection.startsWith('?'));
       await page.locator('#mobile-nav [data-mobile-view=graph]').click();const restored=await geometry(page);
       check('640 graph camera restored',same(base.ctm,restored.ctm));
-      await page.locator('#zoom-in').click();check('640 graph zoom changes camera only',same(restored.stage,(await geometry(page)).stage)&&restored.viewBox!==(await geometry(page)).viewBox);
+      await page.locator('#zoom-in').click();await page.waitForTimeout(300);check('640 graph zoom changes camera only',same(restored.stage,(await geometry(page)).stage)&&restored.viewBox!==(await geometry(page)).viewBox);
       await page.locator('#zoom-fit').click();
       check('640 Fit keeps HUD fixed',same(restored.hud,(await geometry(page)).hud));
       check('640 no overflow or runtime failures',await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)&&errors.length===0,errors);
@@ -130,11 +130,12 @@ try {
     check(`${width} policy retains selection`, both.selection===drawer.selection && both.rail && (width!>=1600?both.drawer:!both.drawer));
     await shot(page, `${width}-both-panels`);
     if (width!<1600) { await page.locator('#rail-toggle').click(); both=await geometry(page); }
+    // Camera controls now interpolate for 260ms; measure the settled view before pan.
     // Zoom controls are viewport operations, available even with both panels open.
     const controlsAccessible = await page.locator('#zoom-in').evaluate(e => { const r=e.getBoundingClientRect(); return !!document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)?.closest('#zoom-in'); });
     check(`${width} HUD controls hittable with both panels`, controlsAccessible);
     if (controlsAccessible) {
-      for (let i=0; i<2; i++) { await page.locator('#zoom-in').click(); await page.locator('#zoom-out').click(); }
+      for (let i=0; i<2; i++) { await page.locator('#zoom-in').click(); await page.waitForTimeout(300); await page.locator('#zoom-out').click(); await page.waitForTimeout(300); }
       const zoomed = await geometry(page);
       check(`${width} HUD fixed on zoom`, same(both.hud, zoomed.hud) && both.hudFont === zoomed.hudFont, { before:both.hud,after:zoomed.hud });
     }
@@ -150,7 +151,7 @@ try {
       check(`${width} pan changes camera only and fixes HUD`, pre.viewBox !== post.viewBox && same(pre.stage,post.stage) && same(pre.hud,post.hud) && pre.zoom === post.zoom, { pre,post });
       await shot(page, `${width}-drag`);
     } else check(`${width} exposed canvas for dual-panel pan`, width! < 768, 'No exposed canvas at this compact width');
-    if (controlsAccessible) { const pre=await geometry(page); await page.locator('#zoom-fit').click(); const post=await geometry(page); check(`${width} HUD fixed on fit`, same(pre.hud,post.hud)); }
+    if (controlsAccessible) { const pre=await geometry(page); await page.locator('#zoom-fit').click(); await page.waitForTimeout(300); const post=await geometry(page); check(`${width} HUD fixed on fit`, same(pre.hud,post.hud)); }
     if (width === 1280 && spot) {
       // Continuous trackpad deltas must make proportional camera changes.
       const pre = await geometry(page);
