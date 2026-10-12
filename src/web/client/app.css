@@ -2220,3 +2220,33 @@ body.mobile-explorer .band-note { display: -webkit-box; -webkit-line-clamp: 2; -
 
 .workspace-measurement-picker { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
 .workspace-measurement-picker button { font-size: 10px; overflow-wrap: anywhere; min-height: 44px; padding: 6px; }
+/* V3.3 object hierarchy: Geist prose, paper instruments, quiet technical identity. */
+.workspace-title { font-size:16px; line-height:1.35; letter-spacing:-.02em; }
+.workspace-node .node-label { font:500 13px var(--sans); }
+.workspace-node .node-fact { font:400 11px var(--mono); fill:var(--ink-2); }
+.workspace-node.candidate .workspace-box { stroke-dasharray:none; }
+.workspace-node.target .workspace-box { stroke:var(--ink); stroke-width:2; }
+.workspace-link { stroke:#8295A6; stroke-width:1.5; fill:none; stroke-linejoin:round; }
+.workspace-commit-marker { fill:var(--surface); stroke:var(--brand); stroke-width:2; }
+.workspace-node.merge .workspace-commit-marker { fill:var(--brand); }
+.workspace-section-title { font:500 12px var(--sans); fill:var(--ink-2); }
+.workspace-technical { border-top:1px solid var(--rule); margin-top:16px; padding-top:10px; font-size:12px; }
+.workspace-technical summary { cursor:pointer; color:var(--ink-2); min-height:44px; padding:12px 0; }
+.workspace-technical .d-kv { margin:8px 0; }
+.workspace-technical .d-action { margin-bottom:8px; }
+.workspace-discovery-evidence details { display:block; }
+.workspace-discovery-evidence .deep-measurement[hidden] { display:none; }
+.workspace-fragment { background:var(--paper-deep); border:1px solid var(--rule); border-radius:3px; padding:12px; font:11px/1.6 var(--mono); overflow:auto; }
+.workspace-measurement-picker { display:flex; flex-wrap:wrap; gap:4px; }
+.workspace-measurement-picker button { flex:1; min-width:80px; font-size:11px; }
+.workspace-drawer .d-quote { font:400 13px/1.65 var(--sans); border-left:2px solid var(--brand); padding-left:12px; }
+.workspace-tree button { font:400 12px/1.4 var(--sans); }
+@media (max-width:767px) { .workspace-caption { left:16px; right:16px; font-size:10px; } .workspace-node .node-label { font-size:13px; } }
+.workspace-proof-box { fill:var(--surface); stroke:var(--rule-2); stroke-width:1; }
+.workspace-proof-metric { font:500 13px var(--sans); fill:var(--ink); }
+.workspace-comparison-proof .node-fact { font:11px var(--mono); fill:var(--ink-2); }
+.workspace-measurement-picker { flex-direction:row; }
+.workspace-discovery-evidence .deep-measurement h4 { font:500 13px/1.5 var(--sans); }
+.workspace-discovery-controls button, .workspace-discovery-evidence button { font-family:var(--sans); }
+#canvas .aggregate-member .node-label { font-family:var(--sans); font-size:13px; font-weight:500; }
+.workspace-commit-leader { stroke:var(--rule-2); stroke-width:1; fill:none; }

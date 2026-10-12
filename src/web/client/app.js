@@ -914,7 +914,9 @@ const BUNDLE_ID_PREFIX = 'bundle:';
  * are only ever created when nothing else would be drawn.
  */
 const PLATE_W = 184;
-const MEMBER_PAGE_SIZE = 12;
+const memberPageSize = () => isPhone() ? 6 : 12;
+const memberColumns = () => isPhone() ? 1 : 2;
+const expandedWidth = () => isPhone() ? 280 : 488;
 const aggregatePages = new Map();
 /**
  * An expanded plate is wider because each row carries a label and the file that
@@ -983,7 +985,7 @@ const PLATE_BOTTOM_LIMIT = ZONES.bandTop - 48;
  * how rows ended up outside their own border.
  */
 function plateRowsFor(plate, top, hiddenRows) {
-  if (plate.expanded) return { shown: [], hidden: 0, overflow: 0, height: plateHeader(plate) + Math.ceil(Math.min(MEMBER_PAGE_SIZE, plate.memberEdgeIds.length) / 2) * 74 + 48 };
+  if (plate.expanded) return { shown: [], hidden: 0, overflow: 0, height: plateHeader(plate) + Math.ceil(Math.min(memberPageSize(), plate.memberEdgeIds.length) / memberColumns()) * 74 + 48 };
   const rows = plateRows(plate);
   const header = plateHeader(plate);
   const chrome = PLATE_HEADER + (plate.meta ? PLATE_SUBTITLE : 0) + 12
@@ -1091,6 +1093,7 @@ function authoredPositions(view, edges, composition) {
       bottoms[col] += height + 26;
     }
   }
+  if(isPhone()&&composition.plates.some(p=>p.expanded)){const first=plateSlots.get(composition.plates.find(p=>p.expanded).key);subject.x=first.x-PLATE_W/2+140;subject.y=first.y-80;}
   for (const [key, slot] of plateSlots) {
     positions.set(`${BUNDLE_ID_PREFIX}${key}`, {
       x: slot.x,
@@ -1113,14 +1116,14 @@ function authoredPositions(view, edges, composition) {
   }
   for (const plate of composition.plates.filter(p => p.expanded)) {
     const slot = positions.get(`${BUNDLE_ID_PREFIX}${plate.key}`);
-    const page = Math.min(aggregatePages.get(plate.key) || 0, Math.floor((plate.memberEdgeIds.length - 1) / MEMBER_PAGE_SIZE));
+    const page = Math.min(aggregatePages.get(plate.key) || 0, Math.floor((plate.memberEdgeIds.length - 1) / memberPageSize()));
     aggregatePages.set(plate.key, page);
-    const ids = plate.memberEdgeIds.slice(page * MEMBER_PAGE_SIZE, (page + 1) * MEMBER_PAGE_SIZE);
+    const ids = plate.memberEdgeIds.slice(page * memberPageSize(), (page + 1) * memberPageSize());
     ids.forEach((id, i) => {
       const edge = edges.find(e => e.id === id);
       if (!edge) return;
       const peer = edge.source === view.subject.id ? edge.target : edge.source;
-      positions.set(peer, {x:slot.x - PLATE_W/2 + 128 + (i%2)*240, y:slot.y-slot.height/2+plateHeader(plate)+36+Math.floor(i/2)*74, aggregateKey:plate.key});
+      positions.set(peer, {x:slot.x - PLATE_W/2 + 128 + (i%memberColumns())*240, y:slot.y-slot.height/2+plateHeader(plate)+36+Math.floor(i/memberColumns())*74, aggregateKey:plate.key});
     });
   }
   const slots = nodeIds.map((id) => (view.nodes.find((n) => n.id === id) || {}).slot || 'dependency');
@@ -1133,7 +1136,7 @@ function authoredPositions(view, edges, composition) {
     const rows = plateRows(plate);
     const slot = positions.get(`${BUNDLE_ID_PREFIX}${plate.key}`);
     const left = (slot?.x ?? ZONES.dataLeft) - PLATE_W / 2;
-    const width = plate.expanded ? 488 : rows.length > 0 ? PLATE_W_EXPANDED : PLATE_W;
+    const width = plate.expanded ? expandedWidth() : rows.length > 0 ? PLATE_W_EXPANDED : PLATE_W;
     return {
       x: left + width / 2,
       y: slot?.y ?? ZONES.dataTop,
@@ -1416,7 +1419,7 @@ function renderBottomBand(view) {
       : '';
     band.append(el('span', {
       class: 'band-note',
-      text: `${composition.direct.length} direct · ${composition.plates.filter(p=>p.expanded).reduce((n,p)=>n+Math.min(MEMBER_PAGE_SIZE,p.memberEdgeIds.length-(aggregatePages.get(p.key)||0)*MEMBER_PAGE_SIZE),0)} group members visible${plateNote}`,
+      text: `${composition.direct.length} direct · ${composition.plates.filter(p=>p.expanded).reduce((n,p)=>n+Math.min(memberPageSize(),p.memberEdgeIds.length-(aggregatePages.get(p.key)||0)*memberPageSize()),0)} group members visible${plateNote}`,
     }));
   }
 
@@ -1525,7 +1528,7 @@ function draw() {
   if (isPhone()) for (const id of composition.promotedEdgeIds) loose.add(id);
   const expandedEdgeIds = new Set(composition.plates.filter(p => p.expanded).flatMap(p => {
     const page = aggregatePages.get(p.key) || 0;
-    return p.memberEdgeIds.slice(page * MEMBER_PAGE_SIZE, (page + 1) * MEMBER_PAGE_SIZE);
+    return p.memberEdgeIds.slice(page * memberPageSize(), (page + 1) * memberPageSize());
   }));
   const selectedMember = state.selectedNodeId && state.selectedNodeId !== view.subject.id;
   const edges = visibleCandidates(view).filter((edge) => loose.has(edge.id) || expandedEdgeIds.has(edge.id) || (selectedMember && (edge.source === state.selectedNodeId || edge.target === state.selectedNodeId)));
@@ -1594,8 +1597,10 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
     if (member && geometry && (edge.source === view.subject.id || edge.target === view.subject.id)) {
       const plate = positions.get(`${BUNDLE_ID_PREFIX}${member.aggregateKey}`);
       const subject = positions.get(view.subject.id);
-      const left = plate.x - PLATE_W / 2, bus = left - 14, gutter = member.y - NODE_H / 2 - (member.x - left > 240 ? 22 : 10);
-      const points = [[subject.x+NODE_W/2,subject.y],[bus,subject.y],[bus,gutter],[member.x,gutter],[member.x,member.y-NODE_H/2]];
+      const left = plate.x - PLATE_W / 2;
+      const column = !isPhone() && member.x-left > 240 ? 1 : 0;
+      const bus = left+8+column*240, gutter = plate.y-plate.height/2+plateHeader(composition.plates.find(p=>p.key===member.aggregateKey))-8;
+      const points = [[subject.x+NODE_W/2,subject.y],[left-20,subject.y],[left-20,gutter],[bus,gutter],[bus,member.y],[member.x-NODE_W/2,member.y]];
       if(edge.source!==view.subject.id)points.reverse();
       geometry.path = points.map(([x,y],i)=>`${i?'L':'M'}${x},${y}`).join(' ');
       geometry.label = {x:bus-4,y:gutter-6};geometry.badge=geometry.label;
@@ -1661,6 +1666,7 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
    */
   const subjectPosition = positions.get(view.subject.id);
   for (const plate of composition.plates) {
+    if(isPhone()&&composition.plates.some(p=>p.expanded)&&!plate.expanded)continue;
     const position = positions.get(`${BUNDLE_ID_PREFIX}${plate.key}`);
     if (!position || !subjectPosition) continue;
 
@@ -1713,7 +1719,7 @@ const hiddenRows = plate.expanded ? 0 : plateHiddenRows(plate);
     );
     // Widening grows to the right of the subject's tie, so the connection stays
     // anchored and the plate does not jump when it opens.
-    const width = plate.expanded ? 488 : plateRows(plate).length > 0 ? PLATE_W_EXPANDED : PLATE_W;
+    const width = plate.expanded ? expandedWidth() : plateRows(plate).length > 0 ? PLATE_W_EXPANDED : PLATE_W;
     // The left edge is fixed and the plate widens rightward, away from the subject.
     // Anchoring the left edge to the tie point keeps subject -> plate short and
     // stops an opening plate from growing back over the subject it belongs to.
@@ -1724,9 +1730,17 @@ const hiddenRows = plate.expanded ? 0 : plateHiddenRows(plate);
     // The tie arrives on the plate's left edge, which is where the plate always is.
     const to = { x: left, y: position.y };
     const midX = from.x + (to.x - from.x) * 0.55;
-    edgeLayer.append(
+    let tiePath = `M ${from.x} ${from.y} C ${midX} ${from.y} ${midX} ${to.y} ${to.x} ${to.y}`;
+    // Keep the subject's aggregate ties outside an expanded member plate.
+    const blockers = composition.plates.filter(p=>p.expanded).map(p=>positions.get(`${BUNDLE_ID_PREFIX}${p.key}`));
+    const blocker = blockers.find(p=>to.x>p.x-PLATE_W/2+expandedWidth());
+    if(blocker){const busLeft=blocker.x-PLATE_W/2-32,busRight=to.x-20;
+      const gutter=Math.min(...composition.plates.map(p=>{const pos=positions.get(`${BUNDLE_ID_PREFIX}${p.key}`);return pos.y-pos.height/2;}))-24;
+      tiePath=`M ${subjectPosition.x+NODE_W/2} ${subjectPosition.y} L ${busLeft} ${subjectPosition.y} L ${busLeft} ${gutter} L ${busRight} ${gutter} L ${busRight} ${to.y} L ${to.x} ${to.y}`;
+    }
+    if(!plate.expanded)edgeLayer.append(
       svgEl('path', {
-        d: `M ${from.x} ${from.y} C ${midX} ${from.y} ${midX} ${to.y} ${to.x} ${to.y}`,
+        d: tiePath,
         class: 'bundle-link',
       }),
     );
@@ -1935,17 +1949,17 @@ const hiddenRows = plate.expanded ? 0 : plateHiddenRows(plate);
 
     if (plate.expanded) {
       const page = aggregatePages.get(plate.key) || 0;
-      const total = Math.ceil(plate.memberEdgeIds.length / MEMBER_PAGE_SIZE);
+      const total = Math.ceil(plate.memberEdgeIds.length / memberPageSize());
       const y = plateTop + height - 20;
-      group.append(svgEl('text', {x:left+12,y,class:'plate-row-more'}, [`Members ${page*MEMBER_PAGE_SIZE+1}–${Math.min((page+1)*MEMBER_PAGE_SIZE,plate.count)} / ${plate.count}`]));
+      group.append(svgEl('text', {x:left+12,y,class:'plate-row-more'}, [`Members ${page*memberPageSize()+1}–${Math.min((page+1)*memberPageSize(),plate.count)} / ${plate.count}`]));
       const action = (label, x, enabled, fn, cls) => {
         const g = svgEl('g',{role:'button',tabindex:enabled?'0':'-1','aria-label':label,'aria-disabled':String(!enabled),class:cls});
         g.append(svgEl('text',{x,y,class:'plate-row-expand'},[label]),svgEl('rect',{x:x-8,y:y-38,width:76,height:54,class:'plate-row-hit'}));
         const run = e => {e.stopPropagation();if(enabled){fn();draw();const next=$('canvas').querySelector(`.${cls}[aria-disabled="false"]`) || $('canvas').querySelector('.aggregate-previous[aria-disabled="false"], .aggregate-next[aria-disabled="false"]');next?.focus({preventScroll:true});}};
         g.addEventListener('click',run);g.addEventListener('mobile-tap',run);g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();run(e);}});group.append(g);
       };
-      action('Previous',left+270,page>0,()=>aggregatePages.set(plate.key,page-1),'aggregate-previous');
-      action('Next',left+374,page+1<total,()=>aggregatePages.set(plate.key,page+1),'aggregate-next');
+      action('Previous',left+(isPhone()?106:270),page>0,()=>aggregatePages.set(plate.key,page-1),'aggregate-previous');
+      action('Next',left+(isPhone()?204:374),page+1<total,()=>aggregatePages.set(plate.key,page+1),'aggregate-next');
     }
     const activate = (event) => {
       event.stopPropagation();
@@ -3072,7 +3086,7 @@ function fit() {
   const viewport = { width: canvas.clientWidth || 1200, height: canvas.clientHeight || 700 };
   const expanded = [...canvas.querySelectorAll('.bundle-card.is-expanded .bundle-card-box')];
   if (expanded.length) {
-    const boxes = (isPhone() ? expanded : [...canvas.querySelectorAll('.bundle-card-box, .node-box')]).map(n=>n.getBBox());
+    const boxes = (isPhone() ? [...expanded,canvas.querySelector('.node-box.is-subject')] : [...canvas.querySelectorAll('.bundle-card-box, .node-box')]).map(n=>n.getBBox());
     const x=Math.min(...boxes.map(b=>b.x))-16,y=Math.min(...boxes.map(b=>b.y))-32;
     const right=Math.max(...boxes.map(b=>b.x+b.width))+16,bottom=Math.max(...boxes.map(b=>b.y+b.height))+32;
     const freeWidth = viewport.width - (isPhone() ? 0 : (visiblePanels(panels).rail ? 320 : 24) + (visiblePanels(panels).drawer ? 400 : 24));
