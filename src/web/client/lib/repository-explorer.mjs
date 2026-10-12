@@ -1,172 +1,633 @@
-import {captureMotion,transitionScene,transitionCamera,stopMotion,revealInstrument} from './motion.mjs';
-import {parseViewBox} from './camera.mjs';
-
-/** Public repository views. Canonical DOM and state remain mounted and untouched. */
-export function mountRepositoryExplorer(getRepository,deep){
- const el=(tag,text,cls)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;};
- const button=(id,text,fn)=>{const n=el('button',text,'d-action');n.type='button';if(id)n.id=id;n.addEventListener('click',fn);return n;};
- const svgEl=(tag,attrs={},text)=>{const n=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const [k,v]of Object.entries(attrs))n.setAttribute(k,String(v));if(text!==undefined)n.textContent=text;return n;};
- const explorer=document.querySelector('#explorer'),canonical=document.querySelector('#explorer-body');
- const nav=el('nav',undefined,'repository-navigation');nav.setAttribute('aria-label','Repository views');explorer.prepend(nav);
- const workspace=el('section',undefined,'repository-workspace');workspace.id='repository-workspace';workspace.hidden=true;workspace.setAttribute('aria-label','Repository exploration');canonical.after(workspace);
- const left=el('aside',undefined,'workspace-rail rail'),leftInner=el('div',undefined,'rail-scroll gl-scroll'),stage=el('div',undefined,'workspace-stage stage'),right=el('aside',undefined,'workspace-drawer drawer'),rightInner=el('div',undefined,'drawer-inner gl-scroll');
- left.setAttribute('aria-label','Repository navigation');right.setAttribute('aria-label','Selected object evidence');left.append(leftInner);right.append(rightInner);workspace.append(left,stage,right);
- const svg=svgEl('svg',{id:'workspace-canvas',role:'group','aria-label':'Repository visualization',tabindex:0});stage.append(svg);
- const caption=el('div',undefined,'workspace-caption'),controls=el('div',undefined,'workspace-controls');stage.append(caption,controls);
- controls.append(button('workspace-zoom-out','−',()=>zoom(1.2,undefined,true)),button('workspace-zoom-in','+',()=>zoom(1/1.2,undefined,true)),button('workspace-fit','Fit',()=>fit(true)));
- controls.querySelector('#workspace-fit').addEventListener('click',()=>revealInstrument(stage));
- controls.children[0].setAttribute('aria-label','Zoom out visualization');controls.children[1].setAttribute('aria-label','Zoom in visualization');
- const mobile=el('nav',undefined,'workspace-mobile');mobile.setAttribute('aria-label','Workspace views');workspace.append(mobile);
- const mobiles={};for(const [id,name]of [['canvas','Canvas'],['navigation','Navigate'],['evidence','Evidence']]){mobiles[id]=button('',name,()=>surface(id));mobile.append(mobiles[id]);}
- let workGeneration=0;
- let tab='graph',task=null,path='',busy=false,repository='',selection=null,scene=[],connections=[],extent={w:900,h:600},mobileView='canvas';
- const viewStates=new Map(),expanded=new Set(['']),limits=new Map();let selectedDiscovery=null,discoverySearch=null;
- const input=el('input');input.id='explore-repository';input.placeholder='owner/repo';input.required=true;input.setAttribute('aria-label','Public GitHub repository');
- const form=el('form',undefined,'workspace-form');form.append(input,button('explore-load','Read fixed version',()=>form.requestSubmit()));
- const status=el('p','Read a fixed version to explore its recorded structure and history.','deep-status');status.id='explore-status';status.setAttribute('role','status');
- const cancel=button('explore-cancel','Cancel',async()=>{if(task)try{await request(`/${task.id}/cancel`,{});}catch(e){status.textContent=e.message;}});cancel.hidden=true;
- const navigation=el('section');navigation.id='explore-content';
- const exportButton=button('explore-download','Export observations',()=>{if(task){const a=el('a'),url=URL.createObjectURL(new Blob([JSON.stringify(task,null,2)],{type:'application/json'}));a.href=url;a.download='gitlineage-repository-exploration.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}});
- const discoveryRail=el('section',undefined,'workspace-discovery-controls'),discoveryEvidence=el('section',undefined,'workspace-discovery-evidence'),inspector=el('section');
- // Reuse the actual Discovery controller, form, selections and exports. No second engine.
- for(const id of ['deep-status','deep-candidates','deep-source-preview','deep-cancel']){const n=deep.dialog.querySelector('#'+id);if(n)discoveryRail.append(n);}
- discoveryRail.prepend(deep.dialog.querySelector('.deep-form'));
- for(const id of ['deep-files','deep-compare','deep-results'])discoveryEvidence.append(deep.dialog.querySelector('#'+id));
- discoveryEvidence.prepend(inspector);
- deep.dialog.hidden=true;deep.launcher.remove();deep.layerLauncher.hidden=true;
- const tabButtons={};for(const [id,name]of [['graph','Graph'],['structure','Structure'],['history','History'],['discovery','Discovery']]){
-  const b=button(id==='structure'?'deep-launch':id==='discovery'?'repository-deep':'repository-'+id,name,()=>open(id));tabButtons[id]=b;nav.append(b);b.setAttribute('aria-pressed',String(id==='graph'));
- }
- function surface(value){mobileView=value;workspace.dataset.surface=value;for(const [id,b]of Object.entries(mobiles))b.setAttribute('aria-pressed',String(id===value));}
- function open(next){
-  if(tab!=='graph')viewStates.set(tab,{box:svg.getAttribute('viewBox'),selection,path,mobileView,scrollLeft:leftInner.scrollTop,scrollRight:rightInner.scrollTop});
-  const layersButton=document.querySelector('#layers-btn'),layersPop=document.querySelector('#layers-pop');if(layersButton)layersButton.hidden=next!=='graph';if(layersPop){layersPop.inert=next!=='graph';layersPop.style.visibility=next==='graph'?'':'hidden';}
-  const repo=getRepository(),name=typeof repo==='string'?repo:repo?`${repo.owner}/${repo.name}`:'';
-  if(name&&name!==repository){workGeneration++;if(task?.state==='running')void request(`/${task.id}/cancel`,{}).catch(()=>{});busy=false;repository=name;input.value=name;input.disabled=false;form.querySelector('button').disabled=false;cancel.hidden=true;task=null;path='';selection=null;viewStates.clear();expanded.clear();expanded.add('');selectedDiscovery=null;deep.workspace.reset(name);}
-  tab=next;for(const [id,b]of Object.entries(tabButtons))b.setAttribute('aria-pressed',String(id===tab));
-  workspace.hidden=tab==='graph';canonical.inert=tab!=='graph';explorer.classList.toggle('workspace-active',tab!=='graph');
-  // Keep the original stage dimensions and CTM while the replacement view owns pixels.
-  canonical.style.visibility=tab==='graph'?'':'hidden';
-  const mobileNav=document.querySelector('#mobile-nav');if(mobileNav)mobileNav.style.visibility=tab==='graph'?'':'hidden';
-  if(tab==='graph'){tabButtons.graph.focus();return;}
-  const saved=viewStates.get(tab);selection=saved?.selection??null;path=saved?.path??path;surface(saved?.mobileView??'canvas');
-  if(tab==='discovery'){const d=discoveryRail.querySelector('#deep-repository');if(!d.value)d.value=input.value;}
-  render();revealInstrument(stage);if(saved?.box)svg.setAttribute('viewBox',saved.box);else fit();leftInner.scrollTop=saved?.scrollLeft??0;rightInner.scrollTop=saved?.scrollRight??0;
- }
- async function request(suffix,data){const response=await fetch('/api/explore'+suffix,data===undefined?{}:{method:'POST',headers:{'content-type':'application/json','x-gitlineage-csrf':'1'},body:JSON.stringify(data)});const value=await response.json();if(!response.ok)throw new Error((value.error||'Unavailable')+(value.retryAt?' · Retry after '+new Date(value.retryAt).toLocaleTimeString():''));return value;}
- async function work(fn){if(busy)return;const version=workGeneration;busy=true;cancel.hidden=false;input.disabled=true;form.querySelector('button').disabled=true;try{let next=await fn();if(version!==workGeneration)return;task=next;while(next.state==='running'){status.textContent='Reading fixed Git objects…';await new Promise(r=>setTimeout(r,250));if(version!==workGeneration)return;next=await request('/'+next.id);if(version!==workGeneration)return;task=next;}status.textContent=`${task.state}${task.error?' · '+task.error:''}`;render();}catch(e){if(version===workGeneration)status.textContent=e.message;}finally{if(version===workGeneration){busy=false;cancel.hidden=true;input.disabled=false;form.querySelector('button').disabled=false;}}}
- form.addEventListener('submit',e=>{e.preventDefault();path='';selection=null;expanded.clear();expanded.add('');void work(()=>request('',{repository:input.value})).then(()=>fit());});
- nav.addEventListener('keydown',e=>{if(tab!=='graph'){e.stopPropagation();if(e.key==='Escape'){e.preventDefault();open('graph');}}});
- workspace.addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Escape'){e.preventDefault();if(mobileView!=='canvas')surface('canvas');else open('graph');}});
- function heading(container,eyebrow,title){container.append(el('p',eyebrow,'d-eyebrow'),el('h2',title,'workspace-title'));}
- function technical(container){const d=el('details',undefined,'workspace-technical');d.append(el('summary','Technical identity & provenance'));container.append(d);return d;}
- function fact(container,label,value){const row=el('dl',undefined,'d-kv');row.append(el('dt',label),el('dd',value??'Unavailable'));container.append(row);}
- function external(container,title,revision,file){const a=el('a',title,'d-src');a.href=`https://github.com/${task.repository}/${file?'blob':'commit'}/${revision}${file?'/'+file.split('/').map(encodeURIComponent).join('/'):''}`;a.target='_blank';a.rel='noopener noreferrer';container.append(a);}
- function choose(node){selection=node.id;if(tab==='discovery')selectedDiscovery=node.data;for(const b of navigation.querySelectorAll('[data-file], [data-path], [data-commit]')){const id=b.dataset.file?'file:'+b.dataset.file:b.hasAttribute('data-path')?'dir:'+b.dataset.path:b.dataset.commit;b.setAttribute(b.hasAttribute('data-path')?'aria-selected':'aria-pressed',String(id===selection));}for(const b of leftInner.querySelectorAll('.workspace-candidate-navigation button'))b.setAttribute('aria-pressed',String(b.textContent===node.label));renderEvidence();revealInstrument(rightInner);paint();rightInner.scrollTop=0;surface('evidence');}
- function addNode(id,label,meta,x,y,data,kind='file'){scene.push({id,label,meta,x,y,data,kind,w:innerWidth<768?248:280,h:60});}
- function directory(next){if(busy)return;path=next;expanded.add(next);selection='dir:'+next;if(task.directories.some(d=>d.path===next)){render();}else void work(()=>request(`/${task.id}/directory`,{path:next}));}
- function toggleDirectory(next){if(expanded.has(next)&&task.directories.some(d=>d.path===next)){expanded.delete(next);selection='dir:'+next;render();}else directory(next);}
- function render(){
-  const active=document.activeElement,restoreFocus=workspace.contains(active);
-  leftInner.replaceChildren();rightInner.replaceChildren();navigation.replaceChildren();scene=[];connections=[];
-  heading(leftInner,'REPOSITORY EXPLORER',tab==='structure'?'Structure':tab==='history'?'Git history':'Discovery');
-  if(tab==='discovery'){leftInner.append(discoveryRail);rightInner.append(discoveryEvidence);drawDiscovery();}
-  else{leftInner.append(form,status,cancel,navigation);if(task){leftInner.append(el('p',`${task.repository} · ${task.revision?.slice(0,12)??'unavailable'}`,'deep-digest'),exportButton);if(tab==='structure')drawStructure();else drawHistory();if(task.serviceQuota)leftInner.append(el('p',`Shared requests ${task.serviceQuota.spentAttempts}/${task.serviceQuota.attemptsPerHour} · resets ${new Date(task.serviceQuota.resetAt).toLocaleTimeString()}`,'rail-note'));}renderEvidence();}
-  caption.replaceChildren(el('span',tab==='structure'?'FIXED TREE · EXPAND DIRECTORIES':tab==='history'?'GIT DAG · NEWER → OLDER':'OBSERVATIONS · NO LINEAGE ARROWS'),el('small',tab==='discovery'?'Lineage unverified · no ancestry claim':task?`${task.state} · ${task.coverage?.[tab==='history'?'history':'structure']??'bounded objects'}`:'No objects loaded'));
-  paint();if(!svg.hasAttribute('viewBox'))fit();if(restoreFocus&&active?.isConnected)active.focus({preventScroll:true});
- }
- function drawStructure(){
-  const tree=el('div',undefined,'workspace-tree');tree.setAttribute('role','tree');navigation.append(tree);let row=0;
-  function walk(folder,depth,parent,objectSha){const d=task.directories.find(d=>d.path===folder),id='dir:'+folder;
-   addNode(id,folder?folder.split('/').pop():task.repository,folder?'DIRECTORY':'REPOSITORY ROOT',depth*(innerWidth<768?18:340)+24,row++*80+32,{path:folder,type:'tree',sha:d?.sha??objectSha},'directory');scene.at(-1).depth=depth;if(parent)connections.push([parent,id]);
-   const b=button('',(expanded.has(folder)?'− ':'+ ')+(folder||'/'),()=>toggleDirectory(folder));b.dataset.path=folder;b.style.paddingInlineStart=`${12+depth*12}px`;b.setAttribute('role','treeitem');b.setAttribute('aria-expanded',String(expanded.has(folder)));b.setAttribute('aria-selected',String(selection===id));tree.append(b);
-   if(!expanded.has(folder)||!d)return;
-   const limit=limits.get(folder)??12;for(const entry of d.entries.slice(0,limit)){const p=folder?folder+'/'+entry.path:entry.path;if(entry.type==='tree')walk(p,depth+1,id,entry.sha);else{const nodeId='file:'+p;addNode(nodeId,entry.path,entry.category, (depth+1)*(innerWidth<768?18:340)+24,row++*80+32,{...entry,path:p},entry.type==='commit'?'submodule':'file');scene.at(-1).depth=depth+1;connections.push([id,nodeId]);const fileButton=button('',entry.path,()=>{const n=scene.find(n=>n.id===nodeId);choose(n);focusNode(n);});fileButton.dataset.file=p;fileButton.setAttribute('aria-pressed',String(selection===nodeId));fileButton.style.paddingInlineStart=`${24+depth*12}px`;tree.append(fileButton);}}
-   if(d.entries.length>limit){const more=button('',`Show ${Math.min(12,d.entries.length-limit)} more listed objects`,()=>{limits.set(folder,limit+12);render();});tree.append(more);}
-  }walk('',0,null);
-  // Align directory parents with their descendant span; columns express depth.
-  if(innerWidth>=1600){for(const node of [...scene].reverse()){const children=connections.filter(([a])=>a===node.id).map(([,b])=>scene.find(n=>n.id===b));if(children.length)node.y=(children[0].y+children.at(-1).y)/2;}}else if(innerWidth>=768){let leaf=0;for(const node of [...scene].reverse()){node.w=200;node.y=32+node.depth*130;const children=connections.filter(([a])=>a===node.id).map(([,b])=>scene.find(n=>n.id===b));node.x=children.length?(children[0].x+children.at(-1).x)/2:24+leaf++*220;}const min=Math.min(...scene.map(n=>n.x));scene.forEach(n=>n.x-=min-24);}
-  extent={w:Math.max(...scene.map(n=>n.x+n.w))+24,h:Math.max(...scene.map(n=>n.y+n.h))+32};
-  navigation.append(el('p',`${task.directories.length} directories read. Collapsed directories are not loaded automatically; unlisted contents remain unknown.`,'rail-note'));
- }
- function drawHistory(){
-  heading(navigation,'OBSERVED BRANCH TIPS','Branches');for(const branch of task.branches){const b=button('',`${branch.name} · ${branch.sha.slice(0,8)}`,()=>{const n=scene.find(n=>n.id===branch.sha);if(n){choose(n);focusNode(n);}else{status.textContent='Branch tip not loaded. Read its fixed version to inspect structure.';selection=branch.sha;renderEvidence();}});navigation.append(b);}
-  navigation.append(button('explore-branches','Load branch tips',()=>void work(()=>request(`/${task.id}/branches`,{}))));
-  const remaining=new Map(task.commits.map(c=>[c.sha,c])),ordered=[];while(remaining.size){const next=[...remaining.values()].find(c=>![...remaining.values()].some(other=>other.parents.includes(c.sha)));if(!next){ordered.push(...remaining.values());break;}ordered.push(next);remaining.delete(next.sha);}
-  const lanes=new Map();let nextLane=1;ordered.forEach((c,i)=>{const lane=lanes.get(c.sha)??0;lanes.set(c.sha,lane);c.parents.forEach((p,j)=>{if(!lanes.has(p))lanes.set(p,j===0?lane:nextLane++);});
-   addNode(c.sha,c.message.split('\n')[0],`${c.sha.slice(0,8)} · ${c.date?.slice(0,10)??'unknown date'}`,innerWidth<768?88:130,36+i*80,c,c.parents.length>1?'merge':'commit');scene.at(-1).track=24+lane*24;scene.at(-1).w=innerWidth<768?248:350;
+// Unified display layer; Canonical Graph remains unchanged.
+import { spatialRoute } from "./spatial.mjs";
+function mountRepositoryExplorer(getRepository, deep, bridge) {
+  const make = (tag, text, cls) => {
+    const n = document.createElement(tag);
+    if (text !== void 0) n.textContent = text;
+    if (cls) n.className = cls;
+    return n;
+  };
+  const btn = (id, text, fn) => {
+    const n = make("button", text, "d-action");
+    n.type = "button";
+    if (id) n.id = id;
+    n.onclick = fn;
+    return n;
+  };
+  const svg = (tag, attrs = {}, text) => {
+    const n = document.createElementNS("http://www.w3.org/2000/svg", tag);
+    for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, String(v));
+    if (text !== void 0) n.textContent = text;
+    return n;
+  };
+  const nav = make("nav", void 0, "repository-navigation unified-tools");
+  nav.setAttribute("aria-label", "Graph exploration tools");
+  document.querySelector("#explorer").prepend(nav);
+  const status = make("p", "", "rail-note");
+  status.id = "workspace-status";
+  status.setAttribute("role", "status");
+  status.setAttribute("aria-live", "polite");
+  const tools = make("section", void 0, "unified-navigation");
+  tools.setAttribute("aria-label", "Exploration path and tools");
+  const path = make("nav", void 0, "unified-path");
+  path.setAttribute("aria-label", "Exploration path");
+  const search = make("input");
+  search.placeholder = "Find explored objects\u2026";
+  search.setAttribute("aria-label", "Find explored objects");
+  search.autocomplete = "off";
+  search.spellcheck = false;
+  const hits = make("div", void 0, "unified-search-results");
+  search.oninput = () => {
+    hits.replaceChildren();
+    if (!search.value.trim()) return;
+    for (const n of allNodes().filter((n2) => [n2.label, n2.data?.path, n2.kind].join(" ").toLowerCase().includes(search.value.toLowerCase())).slice(0, 12)) hits.append(btn("", n.label, () => focus(n.id)));
+  };
+  const layers = make("div", void 0, "unified-layer-controls");
+  tools.append(make("h3", "Explore this graph"), path, search, hits, layers, status);
+  const discovery = make("section", void 0, "workspace-discovery-controls");
+  discovery.id = "workspace-discovery";
+  discovery.hidden = true;
+  for (const n of [...deep.dialog.children]) if (!n.matches("header")) discovery.append(n);
+  deep.dialog.hidden = true;
+  deep.launcher.remove();
+  deep.layerLauncher.hidden = true;
+  let root = "", rootRevision = "", generation = 0, busy = false, objects = new Map(), links = new Map(), positions = new Map(), collapsed = new Set(), hiddenLayers = new Set(), jobs = new Map(), history = [], trail = [], rootCamera = null, restoring = null;
+  let discoveryTarget = "", baselinePending = false;
+  const kinds = [["history", "Git history"], ["structure", "Structure"], ["dependency", "Dependencies"], ["observation", "Candidates"], ["similarity", "File matches"]];
+  const limit = () => innerWidth < 768 ? 5 : 8;
+  const key = () => `gitlineage.workspace.v1:${root.toLowerCase()}`;
+  const jobKey = (repo) => repo.toLowerCase();
+  const sha = (value) => typeof value === "string" ? value : value?.sha ?? "";
+  const ref = (repo, revision2, kind, value = "") => `display:${encodeURIComponent(repo.toLowerCase())}:${revision2}:${kind}:${encodeURIComponent(value)}`;
+  const rootId = () => bridge.root()?.id;
+  function repoNode(repo) {
+    return bridge.nodes().find((n) => n.label.toLowerCase() === repo.toLowerCase())?.id ?? ref(repo, "", "repository");
+  }
+  function node(id, label, kind, data) {
+    data = { ...data, revision: sha(data?.revision) };
+    if (!objects.has(id)) objects.set(id, { id, label, kind, data });
+    else objects.get(id).data = { ...objects.get(id).data, ...data };
+    return id;
+  }
+  function edge(from, to, kind, label, data = {}, directed = false) {
+    const id = JSON.stringify([from, to, kind, data.measurement?.method ?? ""]);
+    links.set(id, { id, source: from, target: to, kind, label, data, directed });
+    return id;
+  }
+  function allNodes() {
+    return [...bridge.nodes(), ...objects.values()];
+  }
+  function find(id) {
+    return objects.get(id) ?? bridge.nodes().find((n) => n.id === id);
+  }
+  function repositoryOf(id) {
+    const n = find(id);
+    return n?.data?.repository ?? (n?.type === "repository" || n?.kind === "repository" ? n.label : root);
+  }
+  function save() {
+    if (!root) return;
+    try {
+      const value = { version: 1, root, revision: bridge.revision(), objects: [...objects], links: [...links], positions: [...positions], collapsed: [...collapsed], hiddenLayers: [...hiddenLayers], jobs: [...jobs], history, trail, rootCamera, camera: bridge.camera(), selected: bridge.selected() };
+      const data = JSON.stringify(value);
+      if (data.length < 2e6) sessionStorage.setItem(key(), data);
+    } catch {
+    }
+  }
+  function reset() {
+    const repo = getRepository(), name = typeof repo === "string" ? repo : repo ? `${repo.owner}/${repo.name}` : "";
+    if (!name || name === root && rootRevision === bridge.revision() || !bridge.root()) return;
+    generation++;
+    root = name;
+    rootRevision = bridge.revision();
+    objects.clear();
+    links.clear();
+    positions.clear();
+    collapsed.clear();
+    hiddenLayers.clear();
+    jobs.clear();
+    history = [];
+    trail = [];
+    rootCamera = bridge.camera();
+    baselinePending = true;
+    restoring = null;
+    busy = false;
+    discoveryTarget = name;
+    deep.workspace.reset(name);
+    try {
+      const saved = JSON.parse(sessionStorage.getItem(key()) || "null");
+      if (saved?.version === 1 && saved.revision === bridge.revision()) {
+        objects = new Map(saved.objects);
+        links = new Map(saved.links);
+        positions = new Map(saved.positions);
+        collapsed = new Set(saved.collapsed);
+        hiddenLayers = new Set(saved.hiddenLayers);
+        jobs = new Map(saved.jobs);
+        history = saved.history;
+        trail = saved.trail;
+        rootCamera = saved.rootCamera;
+        baselinePending = false;
+        restoring = saved;
+      }
+    } catch {
+    }
+  }
+  function checkpoint(id) {
+    history.push({ camera: bridge.camera(), selected: bridge.selected(), trail: [...trail], collapsed: [...collapsed], hiddenLayers: [...hiddenLayers] });
+    if (history.length > 60) history.shift();
+    if (id && trail.at(-1) !== id) trail.push(id);
+  }
+  function focus(id) {
+    checkpoint(id);
+    // Search also reveals a previously collapsed or filtered observation path.
+    const pending = [id], seen = new Set();
+    while (pending.length) {
+      const target = pending.pop();
+      if (seen.has(target)) continue;
+      seen.add(target);
+      for (const relation of links.values()) if (relation.target === target) {
+        collapsed.delete(relation.source);
+        hiddenLayers.delete(relation.kind);
+        pending.push(relation.source);
+      }
+    }
+    bridge.select(id);
+    bridge.focus(id);
+    refresh();
+  }
+  function back() {
+    const p = history.pop();
+    if (!p) return;
+    trail = p.trail;
+    collapsed = new Set(p.collapsed);
+    hiddenLayers = new Set(p.hiddenLayers ?? []);
+    bridge.select(p.selected);
+    bridge.restore(p.camera);
+    refresh(false);
+  }
+  function returnRoot() {
+    checkpoint(rootId());
+    bridge.select(rootId());
+    if (rootCamera) bridge.restore(rootCamera);
+    refresh(false);
+  }
+  function refresh(redraw = true) {
+    if (redraw) bridge.draw();
+    bridge.drawer();
+    decorate();
+    save();
+  }
+  async function request(suffix, data) {
+    const response = await fetch("/api/explore" + suffix, data === void 0 ? {} : { method: "POST", headers: { "content-type": "application/json", "x-gitlineage-csrf": "1" }, body: JSON.stringify(data) });
+    const value = await response.json();
+    if (!response.ok) throw new Error(value.error || "Exploration unavailable");
+    return value;
+  }
+  async function operate(fn) {
+    if (busy) {
+      status.textContent = "An exploration is already running.";
+      return;
+    }
+    const token = generation;
+    busy = true;
+    status.textContent = "Reading fixed Git objects\u2026";
+    try {
+      await fn(token);
+      if (token !== generation) return;
+      status.textContent = "Objects added to this graph. Unopened contents remain unknown.";
+      refresh();
+    } catch (error) {
+      if (token === generation) status.textContent = error.message;
+    } finally {
+      if (token === generation) {
+        busy = false;
+        decorate();
+      }
+    }
+  }
+  async function ensure(repo, token) {
+    let task = jobs.get(jobKey(repo));
+    const previousLimit = task?.displayHistoryLimit;
+    if (task) {
+      try {
+        task = await request("/" + task.id);
+      } catch {
+        task = null;
+      }
+    }
+    if (!task) task = await request("", { repository: repo });
+    while (task.state === "running") {
+      await new Promise((r) => setTimeout(r, 250));
+      if (token !== generation) throw new Error("Repository changed");
+      task = await request("/" + task.id);
+    }
+    if (token !== generation) throw new Error("Repository changed");
+    if (!task.revision) throw new Error(task.error || "Fixed identity unavailable");
+    if (previousLimit) task.displayHistoryLimit = previousLimit;
+    jobs.set(jobKey(repo), task);
+    if (repoNode(repo) !== rootId()) node(repoNode(repo), repo, "repository", { repository: repo, revision: task.revision });
+    return task;
+  }
+  async function revision(task, sha2, token) {
+    if (sha2 && task.revision !== sha2) task = await request(`/${task.id}/revision`, { sha: sha2 });
+    if (token !== generation) throw new Error("Repository changed");
+    jobs.set(jobKey(task.repository), task);
+    return task;
+  }
+  function changedFiles(task, commit) {
+    const cid = ref(task.repository, "", "commit", commit.sha);
+    for (const file of commit.changes.slice(0, limit())) {
+      const fid = node(ref(task.repository, commit.sha, "file", file.path), file.path.split("/").pop(), "file", { ...file, repository: task.repository, revision: commit.sha, path: file.path, fromCommit: commit.sha });
+      edge(cid, fid, "structure", "changed file", { ...file, revision: commit.sha });
+    }
+    if (commit.changes.length > limit()) status.textContent = `${limit()} of ${commit.changes.length} sampled changes shown; open the commit inspector for more.`;
+  }
+  function historyNodes(task) {
+    const rid = repoNode(task.repository);
+    const commits = task.commits.slice(0, task.displayHistoryLimit ?? limit());
+    for (const c of commits) node(ref(task.repository, "", "commit", c.sha), c.message.split("\n")[0] || c.sha.slice(0, 8), "commit", { ...c, repository: task.repository, revision: c.sha });
+    for (const c of commits) {
+      const id = ref(task.repository, "", "commit", c.sha);
+      for (const parent of c.parents) {
+        const pid = ref(task.repository, "", "commit", parent);
+        if (objects.has(pid)) edge(id, pid, "history", "parent commit", { repository: task.repository, child: c.sha, parent }, true);
+      }
+    }
+    for (const b of task.branches.slice(0, 8)) {
+      const bid = node(ref(task.repository, "", "branch", b.name), b.name, "branch", { ...b, repository: task.repository });
+      edge(rid, bid, "history", "observed branch");
+      const tip = ref(task.repository, "", "commit", b.sha);
+      if (objects.has(tip)) edge(bid, tip, "history", "points to commit", {}, true);
+    }
+    const anchor = ref(task.repository, "", "commit", task.historyAnchor || task.revision);
+    if (objects.has(anchor)) edge(rid, anchor, "history", "observed HEAD");
+  }
+  function directoryNodes(task, folder = "", count = limit()) {
+    const did = node(ref(task.repository, task.revision, "directory", folder), folder ? folder.split("/").pop() : "Tree @ " + task.revision.slice(0, 7), "directory", { repository: task.repository, revision: task.revision, path: folder });
+    const c = ref(task.repository, "", "commit", task.revision);
+    if (!folder) edge(objects.has(c) ? c : repoNode(task.repository), did, "structure", "tree at version");
+    else {
+      const parent = ref(task.repository, task.revision, "directory", folder.split("/").slice(0, -1).join("/"));
+      if (objects.has(parent)) edge(parent, did, "structure", "contains directory");
+    }
+    const d = task.directories.find((d2) => d2.path === folder);
+    if (!d) return did;
+    const selected = d.entries.slice(0, count);
+    for (const entry of selected) {
+      const p = folder ? folder + "/" + entry.path : entry.path, kind = entry.type === "tree" ? "directory" : entry.type === "commit" ? "submodule" : "file";
+      const child = node(ref(task.repository, task.revision, kind, p), entry.path, kind, { ...entry, repository: task.repository, revision: task.revision, path: p });
+      edge(did, child, "structure", entry.type === "tree" ? "contains directory" : "contains " + kind, { tree: d.sha, object: entry.sha });
+    }
+    objects.get(did).data = { ...objects.get(did).data, shown: selected.length, total: d.entries.length, sha: d.sha };
+    collapsed.delete(did);
+    return did;
+  }
+  function readHistory(id = rootId()) {
+    checkpoint(id);
+    const repo = repositoryOf(id);
+    void operate(async (token) => {
+      const task = await ensure(repo, token);
+      historyNodes(task);
+      collapsed.delete(id);
+    });
+  }
+  function readStructure(id = rootId()) {
+    checkpoint(id);
+    const n = find(id), repo = repositoryOf(id);
+    void operate(async (token) => {
+      let task = await ensure(repo, token);
+      task = await revision(task, n?.kind === "commit" ? n.data.sha : n?.data?.revision, token);
+      directoryNodes(task);
+      collapsed.delete(id);
+    });
+  }
+  function expand(id) {
+    const n = find(id);
+    if (!n) return;
+    if (n.kind === "candidate" || n.kind === "repository" || n.type === "repository") {
+      readHistory(id);
+      return;
+    }
+    checkpoint(id);
+    void operate(async (token) => {
+      let task = await ensure(n.data.repository, token);
+      if (n.kind === "commit") {
+        historyNodes(task);
+        changedFiles(task, n.data);
+        collapsed.delete(id);
+      } else if (n.kind === "branch") {
+        task = await revision(task, n.data.sha, token);
+        historyNodes(task);
+        collapsed.delete(id);
+      } else if (n.kind === "directory") {
+        task = await revision(task, n.data.revision, token);
+        if (n.data.path && !task.directories.some((d) => d.path === n.data.path)) task = await request(`/${task.id}/directory`, { path: n.data.path });
+        if (token !== generation) return;
+        jobs.set(jobKey(task.repository), task);
+        directoryNodes(task, n.data.path, (n.data.shown || 0) + limit());
+      } else if (n.kind === "file") {
+        task = await revision(task, n.data.revision, token);
+        const parts = n.data.path.split("/");
+        parts.pop();
+        let folder = "";
+        directoryNodes(task);
+        for (const part of parts) {
+          folder = folder ? folder + "/" + part : part;
+          if (!task.directories.some((d) => d.path === folder)) task = await request(`/${task.id}/directory`, { path: folder });
+          if (token !== generation) return;
+          directoryNodes(task, folder);
+        }
+        const did = ref(task.repository, task.revision, "directory", folder);
+        if (task.directories.find((d) => d.path === folder)?.entries.some((e) => e.type === "blob" && e.path === n.data.path.split("/").pop())) edge(did, id, "structure", "contains file", { revision: task.revision });
+        historyNodes(task);
+        for (const c of task.commits) if (c.sha === n.data.revision && c.changes.some((f) => f.path === n.data.path)) edge(ref(task.repository, "", "commit", c.sha), id, "structure", "changed file");
+        jobs.set(jobKey(task.repository), task);
+      }
+      collapsed.delete(id);
+    });
+  }
+  function collapse(id) {
+    checkpoint(id);
+    collapsed.has(id) ? collapsed.delete(id) : collapsed.add(id);
+    refresh();
+  }
+  const lineageTool = btn("workspace-origins", "Repository relations", () => {
+    discovery.hidden = true;
+    bridge.origins();
+    decorate();
   });
-  for(const c of task.commits)for(const parent of c.parents){if(scene.some(n=>n.id===parent))connections.push([c.sha,parent]);else{const id='pending:'+parent;if(!scene.some(n=>n.id===id))addNode(id,parent.slice(0,12),'PARENT OBJECT NOT LOADED',innerWidth<768?88:130,36+(task.commits.length+scene.filter(n=>n.kind==='pending').length)*80,{sha:parent},'pending');const pending=scene.find(n=>n.id===id);pending.track=24+(lanes.get(parent)??0)*24;pending.w=innerWidth<768?248:350;connections.push([c.sha,id]);}}
-  for(const c of task.commits){const b=button('',`${c.sha.slice(0,8)} · ${c.message.split('\n')[0]}`,()=>{const n=scene.find(n=>n.id===c.sha);choose(n);focusNode(n);});b.dataset.commit=c.sha;b.setAttribute('aria-pressed',String(selection===c.sha));navigation.append(b);}
-  if(task.coverage.pendingParents.length)navigation.append(button('explore-history-more','Load earlier commits',()=>void work(()=>request(`/${task.id}/history`,{}))));
-  extent={w:Math.max(...scene.map(n=>n.x+n.w))+24,h:Math.max(...scene.map(n=>n.y+n.h))+32};
- }
- function drawDiscovery(){const {parent,current}=deep.workspace.state,list=parent?.search?.result?.candidates??[],target=parent?.search?.target?.identity,compact=innerWidth<1600;
-  if((parent?.id??null)!==discoverySearch){discoverySearch=parent?.id??null;selection=null;selectedDiscovery=null;inspector.replaceChildren();}
-  if(target)addNode('target',target.fullName,'TARGET · FIXED VERSION',24,48,target,'target');
-  for(const [i,c]of list.entries()){const comparison=current?.comparison?.content.comparisons.find(r=>r.candidate?.candidate.repositoryId===c.candidate.repositoryId),measurements=comparison?.candidate?.similarity??[];
-   addNode('candidate:'+c.candidate.repositoryId,c.candidate.fullName,measurements.length?'SELECTED FILES · '+(measurements.find(m=>m.method==='strict_token5')?.score===undefined?'MEASURED':(measurements.find(m=>m.method==='strict_token5').score*100).toFixed(2)+'% STRICT'):'NOT COMPARED · NO SCORE',24,188+i*100,{candidate:c,comparison},'candidate');scene.at(-1).w=compact?300:310;}
-  if(target){scene[0].w=compact?300:800;scene[0].h=72;}extent={w:compact?348:848,h:Math.max(current?.comparison?704:300,list.length*100+204)};if(selection){const n=scene.find(n=>n.id===selection);if(n)selectedDiscovery=n.data;}if(selectedDiscovery)discoveryInspector(selectedDiscovery);if(current?.kind==='compare'){const list=el('nav',undefined,'workspace-candidate-navigation');list.setAttribute('aria-label','Discovered candidates');for(const n of scene.filter(n=>n.kind==='candidate')){const b=button('',n.label,()=>{choose(n);focusNode(n);});b.setAttribute('aria-pressed',String(selection===n.id));list.append(b);}leftInner.append(list);}
- }
- function discoveryInspector(data){inspector.replaceChildren();const c=data.candidate;for(const card of discoveryEvidence.querySelectorAll('[data-comparison-repository]'))card.hidden=!!c&&card.dataset.comparisonRepository!==String(c.candidate.repositoryId);if(!c){heading(inspector,'PINNED SEARCH TARGET',data.fullName);inspector.append(el('p','The fixed target for this comparison. Search results are observations, not ancestry.','d-quote'));const t=technical(inspector);fact(t,'ID',String(data.repositoryId));fact(t,'Revision',data.revision);return;}
-  if(data.comparison?.candidate?.similarity?.length)discoveryEvidence.append(inspector);else discoveryEvidence.prepend(inspector);
-  heading(inspector,'SEARCH OBSERVATION',c.candidate.fullName);const identity=technical(inspector);fact(identity,'Numeric ID',String(c.candidate.repositoryId));inspector.append(el('p','Verification pending · lineage claim none','deep-warning'));
-  for(const d of c.discoveries){const section=el('section',undefined,'d-card');section.append(el('h3',d.source),el('p',d.reason,'d-quote'));const provenance=technical(section);fact(provenance,'Query',d.query);fact(provenance,'Version',d.version);fact(provenance,'Rank / page',`${d.rank} / ${d.page}`);inspector.append(section);}
-  if(!data.comparison?.candidate?.similarity?.length)inspector.append(el('p','Not compared. Select this candidate in Navigate, then read Source Files. No zero score is substituted.','rail-note'));
- }
- function renderEvidence(){if(tab==='discovery'){if(selectedDiscovery)discoveryInspector(selectedDiscovery);return;}
-  rightInner.replaceChildren();const node=scene.find(n=>n.id===selection);heading(rightInner,tab==='structure'?'FIXED OBJECT':'RECORDED GIT OBJECT',node?.label??'Select an object');
-  if(!node){rightInner.append(el('p','Select a node on the canvas or in Navigate to inspect its fixed identity and observations.','rail-note'));return;}
-  const data=node.data,identity=el('details',undefined,'workspace-technical');identity.append(el('summary','Technical identity & provenance'));fact(identity,'Repository',task.repository);fact(identity,'Numeric ID',String(task.resolution?.requestedId??'unavailable'));
-  if(tab==='structure'){
-   fact(rightInner,'Path',data.path||'/');fact(rightInner,'Type',data.category??data.type);fact(identity,'Revision',task.revision);fact(identity,'Git object',data.sha);if(data.size!==undefined)fact(rightInner,'Bytes',String(data.size));
-   if(data.type==='tree'){rightInner.append(button('explore-directory',expanded.has(data.path)?'Collapse directory':'Expand directory',()=>toggleDirectory(data.path)));const loaded=task.directories.find(d=>d.path===data.path);fact(rightInner,'Coverage',loaded?`${loaded.entries.length} entries listed; child directories loaded on demand`:'Not loaded');}
-   else{external(rightInner,'Open pinned source',task.revision,data.path);if(data.category==='package manifest')rightInner.append(button('','Read package declaration',()=>void work(()=>request(`/${task.id}/manifest`,{path:data.path}))));}
-   if(data.type==='commit')rightInner.append(el('p','Submodule commit identity only. External content is never followed.','deep-warning'));
-   for(const p of task.packages??[])if(p.path===data.path&&p.revision===task.revision){heading(rightInner,'PACKAGE DECLARATION',p.name);fact(rightInner,'SHA-256',p.digest);fact(rightInner,'Workspaces',p.workspaces.join(', ')||'none declared');for(const d of p.dependencies)fact(rightInner,d.name,`${d.version} · ${d.kind}`);}
-  }else{
-   fact(identity,'Commit',data.sha);if(node.kind==='pending'){rightInner.append(el('p','A recorded parent reference; its commit object is not loaded. Contents and earlier ancestry are unknown.','deep-warning'));return;}
-   fact(rightInner,'Author',data.author);fact(rightInner,'Date',data.date);fact(identity,'Tree',data.tree);rightInner.append(el('p',data.message,'d-quote'));for(const parent of data.parents)fact(identity,'Parent',parent);if(data.parents.length>1)rightInner.append(el('p','Merge: multiple parents recorded in the returned Git object.','deep-note'));
-   rightInner.append(button('explore-commit-structure','Structure at this commit',()=>{viewStates.delete('structure');open('structure');path='';selection=null;expanded.clear();expanded.add('');void work(()=>request(`/${task.id}/revision`,{sha:data.sha})).then(()=>fit());}));
-   heading(rightInner,'CHANGED FILE SAMPLE',`${data.changes.length} observed files`);for(const file of data.changes){external(rightInner,file.path,data.sha,file.path);rightInner.append(el('p',`${file.status} · +${file.additions} −${file.deletions}`,'deep-note'));}if(!data.changes.length)rightInner.append(el('p','No changed-file sample returned. This does not prove an unchanged commit.','rail-note'));rightInner.append(el('p','At most 40 file changes per commit; not a complete diff.','deep-note'));external(rightInner,'Open fixed commit',data.sha);
-  }rightInner.append(identity);
- }
- function paint(){const before=captureMotion(svg);const focused=document.activeElement?.closest?.('[data-node]')?.getAttribute('data-node');svg.replaceChildren();svg.setAttribute('aria-label',tab==='structure'?'Repository module hierarchy':tab==='history'?'Git commit DAG':'Discovered candidate observations');
-  if(tab==='discovery'&&scene.length){svg.append(svgEl('text',{x:24,y:26,class:'workspace-section-title'},'Comparison target'),svgEl('text',{x:24,y:166,class:'workspace-section-title'},'Candidate observations · no ancestry claim'));}
-  if(tab==='discovery'&&deep.workspace.state.current?.comparison){const task=deep.workspace.state.current,compact=innerWidth<1600;const result=task.comparison.content.comparisons.find(r=>r.candidate?.candidate.repositoryId===selectedDiscovery?.candidate?.candidate.repositoryId)??task.comparison.content.comparisons.find(r=>r.candidate?.similarity?.length);const metrics=result?.candidate?.similarity??[];if(metrics.length){const x=compact?24:374,y=compact?520:188,w=compact?300:450;
-   const g=svgEl('g',{class:'workspace-comparison-proof','aria-label':'Selected file evidence'});g.append(svgEl('rect',{x,y,width:w,height:compact?160:300,rx:3,class:'workspace-proof-box'}),svgEl('text',{x:x+16,y:y+26,class:'workspace-section-title'},result.candidate.candidate.fullName+' · file evidence'));
-   metrics.slice(0,3).forEach((m,i)=>{const label={exact_blob:'Exact content',strict_token5:'Strict tokens',normalized_token5:'Normalized tokens'}[m.method]??m.method;g.append(svgEl('text',{x:x+16,y:y+54+i*22,class:'workspace-proof-metric'},label+'  '+(m.score==null?'Unavailable':(m.score*100).toFixed(2)+'%')));});
-   g.append(svgEl('text',{x:x+16,y:y+(compact?136:134),class:'workspace-section-title'},'File scope only · lineage unverified'));
-   if(!compact){const m=metrics.find(m=>m.method==='strict_token5')??metrics[0];[m.firstPath,m.secondPath].forEach((path,i)=>g.append(svgEl('text',{x:x+16,y:y+174+i*22,class:'node-fact'},(i?'Candidate: ':'Target: ')+path)));const fragment=task.fragments?.find(f=>f.repositoryId===result.candidate.candidate.repositoryId&&f.method===m.method);if(fragment){g.append(svgEl('text',{x:x+16,y:y+236,class:'node-fact'},fragment.targetText.slice(0,58)),svgEl('text',{x:x+16,y:y+264,class:'workspace-section-title'},'Inspect matching fragments in Evidence'));}}
-   svg.append(g);
-  }}
-  for(const [a,b]of connections){const first=scene.find(n=>n.id===a),second=scene.find(n=>n.id===b);if(!first||!second)continue;
-   const y1=first.y+first.h/2,y2=second.y+second.h/2;
-   let d;if(tab==='history'){const x1=first.track??24,x2=second.track??24;const bend=Math.min(y2-20,y1+30);d=`M${x1},${y1} L${x1},${bend} L${x2},${bend+Math.abs(x2-x1)} L${x2},${y2}`;}
-   else if(innerWidth<768){const bus=first.x+8;d=`M${bus},${first.y+first.h} V${y2} H${second.x}`;}
-   else if(innerWidth<1600){const x1=first.x+first.w/2,x2=second.x+second.w/2,bus=first.y+first.h+28;d=`M${x1},${first.y+first.h} V${bus} H${x2} V${second.y}`;}
-   else{const x1=first.x+first.w,x2=second.x,bus=x1+30;d=`M${x1},${y1} H${bus} V${y2} H${x2}`;}
-   const link=svgEl('g',{'data-relationship-id':a+'→'+b});link.append(svgEl('path',{d,class:'workspace-link'+((a===selection||b===selection)?' is-selected':''),'data-from':a,'data-to':b}));svg.append(link);
+  nav.append(lineageTool, btn("workspace-history", "Expand Git history", () => readHistory(bridge.selected() || rootId())), btn("workspace-structure", "Expand structure", () => readStructure(bridge.selected() || rootId())), btn("workspace-candidates", "Find related projects", () => {
+    discovery.hidden = !discovery.hidden;
+    const repo = repositoryOf(bridge.selected() || rootId());
+    if (repo !== discoveryTarget) {
+      deep.workspace.reset(repo);
+      discoveryTarget = repo;
+    }
+    decorate();
+    bridge.navigation();
+  }), btn("workspace-return", "Return to repository", returnRoot));
+  const shortLabels = { "workspace-origins": "Relations", "workspace-history": "Git history", "workspace-structure": "Structure", "workspace-candidates": "Discover", "workspace-return": "Return" };
+  for (const b of nav.children) {
+    const full = b.textContent;
+    b.setAttribute("aria-label", full);
+    b.replaceChildren(make("span", full, "unified-label-full"), make("span", shortLabels[b.id], "unified-label-short"));
   }
-  for(const node of scene){const g=svgEl('g',{class:`workspace-node ${node.kind}${selection===node.id?' is-selected':''}`,transform:`translate(${node.x},${node.y})`,role:'button',tabindex:0,'aria-label':node.label+' · '+node.meta,'data-node':node.id});g.append(svgEl('rect',{x:3,y:3,width:node.w,height:node.h,rx:3,class:'workspace-shadow'}));g.append(svgEl('rect',{width:node.w,height:node.h,rx:3,class:'workspace-box'}),svgEl('text',{x:12,y:22,class:'node-label'},node.label),svgEl('text',{x:12,y:42,class:'node-fact'},node.meta));g.append(svgEl('title',{},node.label+' · '+node.meta));
-   g.addEventListener('click',()=>{if(!dragged)choose(node);});g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();choose(node);}});svg.append(g);
-   for(const text of g.querySelectorAll('text')){const full=text.textContent;while(text.getComputedTextLength()>(node.w-(node.kind==='directory'?60:24))&&text.textContent.length>2)text.textContent=text.textContent.slice(0,-2)+'…';text.setAttribute('aria-label',full);}
-   if(tab==='structure'&&node.kind==='directory'){const control=svgEl('g',{role:'button',tabindex:0,'aria-label':(expanded.has(node.data.path)?'Collapse ':'Expand ')+(node.data.path||'root'),transform:`translate(${node.w-44},0)`});control.append(svgEl('rect',{width:44,height:node.h,fill:'transparent'}),svgEl('text',{x:8,y:23,class:'node-fact'},expanded.has(node.data.path)?'−':'+'));control.addEventListener('click',e=>{e.stopPropagation();if(!dragged)toggleDirectory(node.data.path);});control.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopPropagation();toggleDirectory(node.data.path);}});g.append(control);}
-   if(tab==='history'){g.prepend(svgEl('path',{d:`M${(node.track??24)-node.x},${node.h/2} H0`,class:'workspace-commit-leader'}));g.append(svgEl('circle',{cx:(node.track??24)-node.x,cy:node.h/2,r:node.kind==='merge'?6:4,class:'workspace-commit-marker'}));const names=task.branches.filter(b=>b.sha===node.id).map(b=>b.name);if(names.length)g.append(svgEl('text',{x:12,y:node.h+14,class:'workspace-branch'},names.join(' · ')));}
+  function decorate() {
+    reset();
+    const host = innerWidth < 768 ? document.querySelector("#mobile-relation-list") : document.querySelector("#rail-scroll");
+    if (host) {
+      host.prepend(tools);
+      tools.append(discovery);
+    }
+    path.replaceChildren(btn("workspace-back", "Back", back));
+    path.firstChild.disabled = !history.length;
+    path.append(btn("", root, returnRoot));
+    for (const id of trail.slice(-5)) {
+      const n = find(id);
+      if (n) path.append(btn("", n.label, () => focus(id)));
+    }
+    layers.replaceChildren();
+    for (const [k, label] of kinds) {
+      const b = btn("", label, () => {
+        if (k === "dependency") {
+          bridge.dependencies(!bridge.dependencyEnabled());
+        } else {
+          hiddenLayers.has(k) ? hiddenLayers.delete(k) : hiddenLayers.add(k);
+        }
+        refresh();
+      });
+      b.setAttribute("aria-pressed", String(k === "dependency" ? bridge.dependencyEnabled() : !hiddenLayers.has(k)));
+      layers.append(b);
+    }
+    for (const b of nav.children) b.disabled = busy && b.id !== "workspace-return";
   }
-  if(!scene.length){svg.append(svgEl('text',{x:40,y:80,class:'workspace-empty'},tab==='discovery'?'Search candidates to map observed projects.':'Read a fixed version to begin exploring.'));extent={w:650,h:400};}transitionScene(svg,before);if(focused)[...svg.querySelectorAll('[data-node]')].find(n=>n.getAttribute('data-node')===focused)?.focus({preventScroll:true});
- }
- function fit(animate=false){const r=stage.getBoundingClientRect(),scale=Math.max(1,extent.w/Math.max(1,r.width-40),extent.h/Math.max(1,r.height-116));const w=r.width*scale,h=r.height*scale;const box=`${Math.min(0,-(w-extent.w)/2)} ${-68*scale} ${w} ${h}`;if(animate)transitionCamera(svg,box);else svg.setAttribute('viewBox',box);}
- function focusNode(n){const b=parseViewBox(svg.getAttribute('viewBox'));if(b)transitionCamera(svg,`${n.x+n.w/2-b.width/2} ${n.y+n.h/2-b.height/2} ${b.width} ${b.height}`);}
- function zoom(factor,point,animate=false){const b=parseViewBox(svg.getAttribute('viewBox'));if(!b)return;const p=point??{x:b.x+b.width/2,y:b.y+b.height/2};const f=Math.min(4,Math.max(.1,factor));const box=`${p.x-(p.x-b.x)*f} ${p.y-(p.y-b.y)*f} ${b.width*f} ${b.height*f}`;if(animate)transitionCamera(svg,box);else svg.setAttribute('viewBox',box);}
- // Independent per-view camera; pointer ownership stays inside this SVG.
- let drag=null,dragged=false;const pointers=new Map();
- svg.addEventListener('pointerdown',e=>{stopMotion(svg);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});drag={x:e.clientX,y:e.clientY,box:parseViewBox(svg.getAttribute('viewBox'))};dragged=false;});
- svg.addEventListener('pointermove',e=>{if(!pointers.has(e.pointerId)||!drag?.box)return;const previous=[...pointers.values()];pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pointers.size===2){svg.setPointerCapture(e.pointerId);const current=[...pointers.values()],distance=p=>Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y),matrix=svg.getScreenCTM();if(matrix&&distance(current)>0){const a=new DOMPoint((previous[0].x+previous[1].x)/2,(previous[0].y+previous[1].y)/2).matrixTransform(matrix.inverse()),b=new DOMPoint((current[0].x+current[1].x)/2,(current[0].y+current[1].y)/2).matrixTransform(matrix.inverse());const box=parseViewBox(svg.getAttribute('viewBox'));svg.setAttribute('viewBox',`${box.x+a.x-b.x} ${box.y+a.y-b.y} ${box.width} ${box.height}`);zoom(distance(previous)/distance(current),a);}dragged=true;return;}
-  const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.hypot(dx,dy)>5)dragged=true;if(!dragged)return;svg.setPointerCapture(e.pointerId);const r=svg.getBoundingClientRect(),b=drag.box;svg.setAttribute('viewBox',`${b.x-dx*b.width/r.width} ${b.y-dy*b.height/r.height} ${b.width} ${b.height}`);});
- for(const type of ['pointerup','pointercancel','lostpointercapture'])svg.addEventListener(type,e=>{pointers.delete(e.pointerId);const remaining=[...pointers.values()][0];drag=remaining?{...remaining,box:parseViewBox(svg.getAttribute('viewBox'))}:null;if(type==='pointercancel')dragged=true;});
- svg.addEventListener('wheel',e=>{e.preventDefault();stopMotion(svg);const m=svg.getScreenCTM();if(m)zoom(e.deltaY>0?1.12:1/1.12,new DOMPoint(e.clientX,e.clientY).matrixTransform(m.inverse()));},{passive:false});
- let lastDeepTask=null;deep.workspace.subscribe(()=>{if(tab==='discovery'){const current=deep.workspace.state.current;render();if(!viewStates.has('discovery'))fit();if(current&&current.state!=='running'&&current.id!==lastDeepTask){lastDeepTask=current.id;if(current.kind==='sources'||current.kind==='compare'){surface('evidence');rightInner.scrollTop=0;const candidate=scene.find(n=>n.kind==='candidate'&&deep.workspace.state.selected.includes(n.data.candidate.candidate.repositoryId));if(candidate){selection=candidate.id;selectedDiscovery=candidate.data;discoveryInspector(selectedDiscovery);paint();}}}}});
- const observer=new MutationObserver(()=>{if(explorer.hidden&&tab!=='graph')open('graph');});observer.observe(explorer,{attributes:true,attributeFilter:['hidden']});
- surface('canvas');
+  function visible() {
+    const enabled = [...links.values()].filter((e) => !hiddenLayers.has(e.kind));
+    const roots = new Set(bridge.nodes().map((n) => n.id)), shown = new Set(roots);
+    let changed = true;
+    while (changed) {
+      changed = false;
+      for (const e of enabled) if (shown.has(e.source) && !collapsed.has(e.source) && !shown.has(e.target)) {
+        shown.add(e.target);
+        changed = true;
+      }
+    }
+    return { nodes: [...objects.values()].filter((n) => shown.has(n.id)), edges: enabled.filter((e) => shown.has(e.source) && shown.has(e.target) && !collapsed.has(e.source)) };
+  }
+  function paint(canvas, canonicalPositions) {
+    reset();
+    const scene = visible(), occupied = new Map(canonicalPositions);
+    const connected = scene.nodes.filter((n) => scene.edges.some((e) => e.target === n.id || e.source === n.id));
+    const overlap = (p, q) => Math.abs(p.x - q.x) < 248 && Math.abs(p.y - q.y) < 82;
+    for (const n of connected) {
+      const p = positions.get(n.id);
+      if (p && ![...occupied.values()].some((q) => overlap(p, q))) occupied.set(n.id, p);
+    }
+    let todo = connected.filter((n) => !occupied.has(n.id));
+    for (let pass = 0, maxPass = todo.length + 2; todo.length && pass < maxPass; pass++) {
+      let progress = false;
+      for (const n of [...todo]) {
+        const parent = scene.edges.find((e) => e.target === n.id && occupied.has(e.source)), anchor = occupied.get(parent?.source);
+        if (!anchor && pass < 1) continue;
+        const repoAnchor = n.data?.repository && occupied.get(repoNode(n.data.repository));
+        const origin = (n.kind === "commit" || n.kind === "branch" ? repoAnchor : null) ?? anchor ?? occupied.get(rootId()) ?? { x: 960, y: 800 };
+        const siblings = scene.edges.filter((e) => e.source === parent?.source && e.kind === parent?.kind), index = siblings.findIndex((e) => e.target === n.id);
+        let chosen;
+        const seed = n.kind === "commit" ? -1.5 : n.kind === "directory" ? 0.8 : n.kind === "candidate" ? -0.5 : 1.5;
+        for (let attempt = 0; attempt < 300; attempt++) {
+          const a = seed + (Math.max(0, index) + attempt) * 2.399963, ring = Math.floor(attempt / 12), radius = (innerWidth < 768 ? 210 : 290) + ring * 115;
+          const p = { x: origin.x + Math.cos(a) * radius, y: origin.y + Math.sin(a) * radius * 0.68 };
+          if (![...occupied.values()].some((q) => overlap(p, q))) {
+            chosen = p;
+            break;
+          }
+        }
+        if (chosen) {
+          positions.set(n.id, chosen);
+          occupied.set(n.id, chosen);
+          todo = todo.filter((x) => x !== n);
+          progress = true;
+        }
+      }
+      if (!progress) break;
+    }
+    const edgeLayer = svg("g", { class: "unified-edge-layer" }), nodeLayer = svg("g", { class: "unified-node-layer" });
+    const defs = svg("defs");
+    defs.append(svg("marker", { id: "display-arrow", viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 6, markerHeight: 6, orient: "auto-start-reverse" }));
+    defs.firstChild.append(svg("path", { d: "M0 0 L10 5 L0 10 z", fill: "var(--brand)" }));
+    canvas.append(defs);
+    for (const e of scene.edges) {
+      const peers = scene.edges.filter((p) => p.source === e.source && p.target === e.target);
+      const route = spatialRoute(e, occupied, peers.indexOf(e), peers.length);
+      if (!route) continue;
+      const g = svg("g", { class: "unified-edge kind-" + e.kind + (bridge.selected() === e.id ? " is-selected" : ""), role: "button", tabindex: 0, "aria-label": e.label, "data-display-edge": e.id, "data-source": e.source, "data-target": e.target });
+      g.append(svg("path", { d: route.path, class: "unified-line", "marker-end": e.directed ? "url(#display-arrow)" : "none" }), svg("title", {}, e.label));
+      const hit = svg("path", { d: route.path, class: "edge-hit" });
+      hit.addEventListener("click", (event) => {
+        event.stopPropagation();
+        bridge.select(e.id, true);
+      });
+      g.append(hit);
+      g.onkeydown = event => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          bridge.select(e.id, true);
+        }
+      };
+      if (bridge.selected() === e.source || bridge.selected() === e.target || bridge.selected() === e.id) g.append(svg("text", { x: route.label.x, y: route.label.y - 9, class: "unified-edge-label" }, e.label));
+      edgeLayer.append(g);
+    }
+    for (const n of connected) {
+      const p = occupied.get(n.id);
+      if (!p || canonicalPositions.has(n.id)) continue;
+      const selected = bridge.selected() === n.id, g = svg("g", { class: `node unified-node kind-${n.kind}${selected ? " is-selected" : ""}`, "data-node-id": n.id, "data-kind": n.kind, role: "button", tabindex: 0, "aria-label": n.kind + ": " + n.label });
+      const radius = n.kind === "commit" ? 20 : n.kind === "branch" ? 12 : 3;
+      g.append(svg("rect", { x: p.x - 105, y: p.y - 23, width: 216, height: 52, rx: radius, class: "workspace-shadow" }), svg("rect", { x: p.x - 108, y: p.y - 26, width: 216, height: 52, rx: radius, class: "node-box" }));
+      const label = svg("text", { x: p.x - 98, y: p.y - 3, class: "node-label" }, n.label), meta = svg("text", { x: p.x - 98, y: p.y + 15, class: "node-fact" }, n.kind + (n.data?.revision ? " \xB7 " + n.data.revision.slice(0, 7) : "") + (n.kind === "candidate" ? " \xB7 lineage unverified" : ""));
+      g.append(label, meta, svg("title", {}, n.label));
+      if (n.kind === "directory") g.append(svg("path", { d: `M${p.x - 108} ${p.y - 17} h18 l6 -8 h22`, class: "unified-directory-tab" }));
+      const hit = svg("rect", { x: p.x - 108, y: p.y - 26, width: 216, height: 52, fill: "transparent", class: "node-hit" });
+      hit.onclick = (e) => {
+        e.stopPropagation();
+        bridge.select(n.id);
+      };
+      g.onkeydown = (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          bridge.select(n.id);
+        }
+      };
+      g.append(hit);
+      nodeLayer.append(g);
+      canonicalPositions.set(n.id, p);
+    }
+    canvas.prepend(edgeLayer);
+    canvas.append(nodeLayer);
+    decorate();
+    if (restoring) {
+      const snapshot = restoring;
+      restoring = null;
+      queueMicrotask(() => {
+        bridge.select(snapshot.selected);
+        bridge.restore(snapshot.camera);
+      });
+    }
+  }
+  function inspector(id) {
+    const n = objects.get(id), e = links.get(id);
+    if (!n && !e) return null;
+    const block = make("section", void 0, "unified-inspector");
+    block.append(make("h2", n?.label ?? e.label, "workspace-title"));
+    if (e) {
+      block.append(make("p", e.kind === "observation" ? "Search observation. This connection records a candidate result, not ancestry." : e.kind === "similarity" ? "Measurement of selected files only. This does not prove derivation." : e.kind === "history" ? "Recorded Git parent or reference relation." : "Structure and changed-file observations at a fixed version.", "d-quote"), make("p", (find(e.source)?.label ?? e.source) + (e.directed ? " \u2192 " : " — ") + (find(e.target)?.label ?? e.target), "rail-note"));
+      const detail = make("details", void 0, "workspace-technical");
+      detail.append(make("summary", "Recorded details"), make("pre", JSON.stringify(e.data, null, 2)));
+      if (e.kind === "similarity") {
+        const m = e.data.measurement;
+        block.append(make("p", `${m.method} \xB7 ${m.score == null ? "unavailable" : (m.score * 100).toFixed(2) + "%"} \xB7 ${m.state}`, "d-quote"), make("p", `${m.firstPath} \u2194 ${m.secondPath}`, "rail-note"));
+        for (const f of (e.data.fragments ?? []).slice(0, 4)) block.append(make("pre", `Target: ${f.targetText}
+Candidate: ${f.candidateText}`, "workspace-fragment"));
+      }
+      block.append(detail);
+      return block;
+    }
+    block.append(make("p", n.kind + (n.data.path ? " \xB7 " + n.data.path : "") + (n.data.revision ? " \xB7 version " + n.data.revision.slice(0, 7) : ""), "d-quote"));
+    const actions = make("div", void 0, "unified-node-actions");
+    actions.append(btn("workspace-expand", "Expand nearby objects", () => expand(id)), btn("workspace-focus", "Focus here", () => focus(id)), btn("workspace-collapse", collapsed.has(id) ? "Restore neighborhood" : "Collapse neighborhood", () => collapse(id)));
+    block.append(actions);
+    if (["repository", "candidate", "commit"].includes(n.kind)) block.append(btn("workspace-node-history", "Expand Git history", () => readHistory(id)), btn("workspace-node-structure", "Expand structure at version", () => readStructure(id)));
+    if (n.kind === "commit") {
+      block.append(make("p", n.data.message, "d-quote"), make("p", `${n.data.author} \xB7 ${n.data.date}`, "rail-note"));
+      const task = jobs.get(jobKey(n.data.repository));
+      if (task) {
+        block.append(btn("workspace-earlier", "Expand recorded parents", () => void operate(async (token) => {
+          const shown = jobs.get(jobKey(n.data.repository))?.displayHistoryLimit ?? limit();
+          let t = await ensure(n.data.repository, token);
+          if (t.coverage.pendingParents.length) t = await request(`/${t.id}/history`, {});
+          if (token !== generation) return;
+          t.displayHistoryLimit = Math.min(t.commits.length, shown + limit());
+          jobs.set(jobKey(t.repository), t);
+          historyNodes(t);
+        })));
+        if (n.data.changes.length > limit()) block.append(btn("workspace-more-files", "Expand more sampled changes", () => {
+          n.data.changeOffset = (n.data.changeOffset ?? limit()) + limit();
+          const c = { ...n.data, changes: n.data.changes.slice(n.data.changeOffset - limit(), n.data.changeOffset) };
+          changedFiles(task, c);
+          refresh();
+        }));
+      }
+    }
+    if (n.kind === "file") {
+      const a = make("a", "Open pinned source", "d-src");
+      a.href = `https://github.com/${n.data.repository}/blob/${n.data.revision}/${n.data.path.split("/").map(encodeURIComponent).join("/")}`;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      block.append(a, btn("workspace-file-candidates", "Find cross-repository evidence", () => {
+        discovery.hidden = false;
+        deep.workspace.reset(n.data.repository);
+        discoveryTarget = n.data.repository;
+        decorate();
+        bridge.navigation();
+      }));
+    }
+    if (n.kind === "directory") block.append(make("p", n.data.total === void 0 ? "Contents not read." : `${n.data.shown} of ${n.data.total} verified entries shown. Expand adds a bounded neighborhood.`, "rail-note"));
+    if (n.kind === "candidate") {
+      block.append(make("p", "Candidate observation \xB7 lineage unverified", "deep-warning"));
+      for (const d of n.data.observation?.discoveries ?? []) block.append(make("p", d.reason, "d-quote"));
+    }
+    const matches = [...links.values()].filter((e2) => e2.kind === "similarity" && (e2.source === id || e2.target === id));
+    for (const match of matches) block.append(btn("", match.label + " \xB7 read evidence", () => bridge.select(match.id, true)));
+    const details = make("details", void 0, "workspace-technical");
+    details.append(make("summary", "Technical identity & recorded details"), make("pre", JSON.stringify(n.data, null, 2)));
+    block.append(details);
+    return block;
+  }
+  function repositoryActions(id) {
+    const n = find(id);
+    if (n?.type !== "repository") return null;
+    const b = make("section", void 0, "unified-node-actions");
+    b.append(btn("workspace-node-history", "Expand Git history", () => readHistory(id)), btn("workspace-node-structure", "Expand structure", () => readStructure(id)), btn("workspace-node-collapse", "Collapse local observations", () => collapse(id)));
+    return b;
+  }
+  deep.workspace.subscribe(() => {
+    reset();
+    const { parent, current, sourceTask } = deep.workspace.state;
+    if (!parent?.search?.target?.identity) return;
+    const target = parent.search.target.identity, rid = repoNode(target.fullName);
+    if (!bridge.nodes().some((n) => n.id === rid)) node(rid, target.fullName, "repository", { repository: target.fullName, revision: target.revision });
+    for (const c of parent.search.result.candidates) {
+      const id = repoNode(c.candidate.fullName);
+      if (id !== rootId()) node(id, c.candidate.fullName, "candidate", { repository: c.candidate.fullName, revision: c.candidate.revision, observation: c });
+      edge(rid, id, "observation", "candidate observation", c);
+    }
+    for (const r of sourceTask?.sources?.repositories ?? []) {
+      const repo = repoNode(r.fullName);
+      for (const f of r.files.filter((f2) => f2.selectable).slice(0, limit())) {
+        const fid = node(ref(r.fullName, r.revision, "file", f.path), f.path.split("/").pop(), "file", { ...f, repository: r.fullName, revision: r.revision });
+        edge(repo, fid, "structure", "listed source file", { coverage: r.coverage });
+      }
+    }
+    for (const result of current?.comparison?.content.comparisons ?? []) {
+      const repo = result.candidate?.candidate;
+      if (!repo) continue;
+      for (const m of result.candidate.similarity ?? []) {
+        const a = ref(result.candidate.target.fullName, result.candidate.target.revision, "file", m.firstPath), b = ref(repo.fullName, repo.revision, "file", m.secondPath);
+        if (objects.has(a) && objects.has(b)) edge(a, b, "similarity", `${m.method} \xB7 ${m.score == null ? "unavailable" : (m.score * 100).toFixed(2) + "%"}`, { measurement: m, fragments: current.fragments?.filter((f) => f.repositoryId === repo.repositoryId && f.method === m.method && f.firstPath === m.firstPath && f.secondPath === m.secondPath), lineageClaim: "none" });
+      }
+    }
+    refresh();
+  });
+  addEventListener("pagehide", save);
+  const controller = { settle() {
+    if (baselinePending) {
+      rootCamera = bridge.camera();
+      baselinePending = false;
+      save();
+    }
+  }, paint, decorate, inspector, repositoryActions, has: (id) => objects.has(id) || links.has(id), name: (id) => objects.get(id)?.label ?? links.get(id)?.label, search: (query) => visible().nodes.filter((n) => n.label.toLowerCase().includes(query.toLowerCase())).map((n) => n.id), save, reset, focus };
+  decorate();
+  bridge.draw();
+  return controller;
 }
+export {
+  mountRepositoryExplorer
+};

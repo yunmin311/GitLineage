@@ -99,6 +99,7 @@ const LABEL_FAN_LIMIT = 2;
 /** The same rule for node degree: a hub's labels all land near the hub. */
 const LABEL_DEGREE_LIMIT = 4;
 
+let workspace = null;
 const state = {
   repository: null,
   view: null,
@@ -923,7 +924,7 @@ function authoredPositions(view,edges,composition){
 const PERSPECTIVES=[['origins','Origins',['ancestry','source-identity']],['dependencies','Dependencies',['dependency']],['references','References',['attribution']]];
 function setPerspective(value){
  const entry=PERSPECTIVES.find(p=>p[0]===value);if(!entry)return;
- state.activeGroup='';state.perspective=value;state.layers=Object.fromEntries(Object.keys(allLayersOn()).map(f=>[f,entry[2].includes(f)]));state.positions.clear();
+ state.activeGroup='';state.perspective=value;state.layers=Object.fromEntries(Object.keys(allLayersOn()).map(f=>[f,entry[2].includes(f)]));if(!workspace)state.positions.clear();
  state.selectedNodeId=state.focusId||'';state.selectedEdgeId='';syncUrl();draw();renderDrawer();fit();
 }
 function renderPerspective(){
@@ -938,7 +939,7 @@ function renderPerspective(){
  const selected=state.selectedNodeId&&state.selectedNodeId!==state.view.subject.id;
  const bar=el('div',{class:'graph-exploration-actions'});
  if(state.explorationBack.length)bar.append(el('button',{type:'button',id:'graph-back',text:'← Back',onclick:()=>{const prev=state.explorationBack.pop();state.focusId=prev.focusId;state.layers=prev.layers;state.perspective=prev.perspective;state.selectedNodeId=prev.selectedNodeId;state.selectedEdgeId=prev.selectedEdgeId;state.positions=prev.positions;state.activeGroup=prev.activeGroup;state.expandedBundles=prev.expandedBundles;aggregatePages.clear();for(const [key,value]of prev.aggregatePages)aggregatePages.set(key,value);draw();renderDrawer();setCamera($('canvas'),prev.camera,prev.zoom);syncUrl();}}));
- if(selected)bar.append(el('button',{type:'button',id:'graph-explore-node',text:'Explore '+nameOf(state.selectedNodeId),onclick:()=>void exploreNode(state.selectedNodeId)}));
+ if(selected)bar.append(el('button',{type:'button',id:'graph-explore-node',text:'Explore '+nameOf(state.selectedNodeId),onclick:()=>workspace?workspace.focus(state.selectedNodeId):void exploreNode(state.selectedNodeId)}));
  if(state.focusId)bar.append(el('span',{class:'graph-focus-label',text:'Focus: '+nameOf(state.focusId)}));
  if(bar.childElementCount)host.append(bar);
  if(state.perspective==='origins'){
@@ -1234,7 +1235,7 @@ function renderBottomBand(view) {
       : '';
     band.append(el('span', {
       class: 'band-note',
-      text: `${$('canvas').querySelectorAll('.node').length} objects · ${$('canvas').querySelectorAll('.edge-group').length} recorded relationships${plateNote}`,
+      text: `${$('canvas').querySelectorAll('.node').length} objects · ${$('canvas').querySelectorAll('.edge-group').length} recorded relationships · ${$('canvas').querySelectorAll('.unified-edge').length} exploration links${plateNote}`,
     }));
   }
 
@@ -1595,6 +1596,8 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
   }
 
   canvas.append(edgeLayer, nodeLayer);
+  workspace?.paint(canvas, positions);
+  state.contentBounds=contentBounds(positions);
   fitGraphText(canvas);
   transitionScene(canvas, before);
   if (focusedEdge) {
@@ -1605,13 +1608,15 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
   }
   renderPerspective();
   let empty=$('graph-provenance-empty');if(!empty){empty=el('div',{id:'graph-provenance-empty',class:'graph-provenance-empty'});$('stage').append(empty);}
-  empty.replaceChildren();setHidden(empty,edges.length>0||composition.plates.length>0);
+  empty.replaceChildren();setHidden(empty,edges.length>0||composition.plates.length>0||canvas.querySelectorAll('.unified-node').length>0);
   if(edges.length===0&&composition.plates.length===0){empty.append(el('h2',{text:state.perspective==='origins'?'No recorded ancestry':'No recorded relationships in this layer'}),el('p',{text:state.perspective==='origins'?'This analysis has no verified fork or derivation record. Explore the fixed repository structure and Git history, or switch to a separate relationship layer.':'Choose another relationship layer, or return to the previous exploration focus.'}));}
   if(isPhone()&&state.refitMobile){if(edges.length>0&&positions.size<=3)fitGraphBoxes([...canvas.querySelectorAll('.node-box')]);else phoneFit();state.refitMobile=false;}
   renderBundles();
   renderLayersPop();
   renderRail(view);
+  workspace?.decorate();
   renderBottomBand(view);
+  workspace?.settle();
   updateSearchCount();
 }
 
@@ -1838,7 +1843,7 @@ function updateSearchCount() {
     $('search-count').textContent = '';
     return;
   }
-  const nodes = searchNodes(state.view, state.query).length;
+  const nodes = searchNodes(state.view, state.query).length+(workspace?.search(state.query).length||0);
   const edges = searchEdges(state.view, state.query).length;
   $('search-count').textContent = `${nodes} node${nodes === 1 ? '' : 's'} · ${edges} relationship${edges === 1 ? '' : 's'}`;
 }
@@ -1934,6 +1939,7 @@ function renderMobileRelations() {
     list.append(familyDetails);
   }
   list.scrollTop = 0;
+  workspace?.decorate();
 }
 function filterMobileRelations() {
   const query = $('mobile-relation-query').value.trim().toLowerCase();
@@ -2003,8 +2009,8 @@ function renderMobileSearch() {
   const box=$('mobile-search-results');box.replaceChildren();
   setHidden(box,!isPhone() || !state.query);
   if (!isPhone() || !state.query) return;
-  for (const id of searchNodes(state.view,state.query)) {
-    box.append(el('button',{text:nameOf(id),onclick:()=>{ toggleSearch(false);locateMobile(id,'node'); }}));
+  for (const id of [...searchNodes(state.view,state.query),...(workspace?.search(state.query)||[])]) {
+    box.append(el('button',{text:nameOf(id),onclick:()=>{ toggleSearch(false);workspace?.has(id)?workspace.focus(id):locateMobile(id,'node'); }}));
   }
   if (!box.childElementCount) box.append(el('p',{text:'No matching nodes. Browse Relations for relationship search.'}));
 }
@@ -2060,12 +2066,13 @@ function renderDrawer() {
   inner.replaceChildren();
 
   const view = state.view;
+  if (!view) return;
   // A stale or hand-edited selection resolves to nothing. The URL is corrected
   // instead of leaving an empty drawer open.
-  if (state.selectedEdgeId && !view.edges.some((edge) => edge.id === state.selectedEdgeId)) {
+  if (state.selectedEdgeId && !view.edges.some((edge) => edge.id === state.selectedEdgeId) && !workspace?.has(state.selectedEdgeId)) {
     state.selectedEdgeId = '';
   }
-  if (state.selectedNodeId && !view.nodes.some((node) => node.id === state.selectedNodeId)) {
+  if (state.selectedNodeId && !view.nodes.some((node) => node.id === state.selectedNodeId) && !workspace?.has(state.selectedNodeId)) {
     state.selectedNodeId = '';
   }
 
@@ -2088,11 +2095,14 @@ function renderDrawer() {
   });
   const block = el('div');
 
-  if (state.selectedEdgeId) {
+  const displayEvidence = workspace?.inspector(state.selectedEdgeId || state.selectedNodeId);
+  if (displayEvidence) block.append(displayEvidence);
+  else if (state.selectedEdgeId) {
     const edge = view.edges.find((item) => item.id === state.selectedEdgeId);
     if (edge) block.append(renderEdgeDrawer(edge));
   } else {
     block.append(renderNodeDrawer());
+    const actions=workspace?.repositoryActions(state.selectedNodeId);if(actions)block.prepend(actions);
   }
 
   inner.append(close, block);
@@ -2117,7 +2127,7 @@ function renderDrawer() {
 
 function nameOf(id) {
   const node = state.view.nodes.find((item) => item.id === id);
-  return node ? node.label : id;
+  return node ? node.label : workspace?.name(id) || id;
 }
 
 function renderEdgeDrawer(edge) {
@@ -2438,7 +2448,7 @@ function setCamera(canvas, viewBox, zoom) {
   const [x, y, width, height] = parts;
   const centre = { x: x + width / 2, y: y + height / 2 };
   const z = Number.isFinite(zoom) && zoom > 0 ? zoom : 1;
-  const window = viewBoxFor(viewport, centre, z);
+  const window = workspace ? {viewBox:`${centre.x-width/2} ${centre.y-height/2} ${width} ${height}`,zoom:z} : viewBoxFor(viewport, centre, z);
   canvas.setAttribute('viewBox', window.viewBox);
   state.zoom = window.zoom;
 
@@ -2508,10 +2518,10 @@ function setupViewport() {
     read: () => ({ viewBox: canvas.getAttribute('viewBox'), zoom: state.zoom }),
     write: (box, zoom) => setCamera(canvas, box, zoom) });
   canvas.addEventListener('mobile-tap', event => {
-    const edge = event.target.closest('[data-edge-id], [data-relationship-id]');
+    const edge = event.target.closest('[data-edge-id], [data-relationship-id], [data-display-edge]');
     const node = event.target.closest('[data-node-id]');
     const plate = event.target.closest('[data-bundle-key]');
-    if (edge) selectEdge(edge.dataset.edgeId || edge.dataset.relationshipId);
+    if (edge) selectEdge(edge.dataset.edgeId || edge.dataset.relationshipId || edge.dataset.displayEdge);
     else if (node) selectNode(node.dataset.nodeId);
     else if (plate) toggleBundle(plate.dataset.bundleKey);
     else if (event.target === canvas) clearSelection();
@@ -2829,4 +2839,10 @@ $('layers-btn').addEventListener('click', () => toggleLayers());
 installTracerTestStepper();
 boot();
 
-void mountDeepPreview(() => state.repository).then(deep => { if(deep?.capabilities.scope==='anonymous') mountRepositoryExplorer(() => state.repository, deep); });
+void mountDeepPreview(() => state.repository).then(deep => { if(deep?.capabilities.scope==='anonymous') workspace=mountRepositoryExplorer(() => state.repository, deep, {
+ root:()=>state.view?.nodes.find(n=>n.id===state.view.subject.id),nodes:()=>state.view?.nodes||[],revision:()=>state.view?.revision.commit,selected:()=>state.selectedNodeId||state.selectedEdgeId,camera:()=>({box:$('canvas').getAttribute('viewBox'),zoom:state.zoom}),
+ select:(id,edge=false)=>{if(isPhone()&&id&&(edge?state.selectedEdgeId:state.selectedNodeId)===id&&mobile.view==='graph'){switchMobile('evidence');return;}state.selectedNodeId=edge?'':id||'';state.selectedEdgeId=edge?id:'';draw();renderDrawer();syncUrl();},
+ draw,drawer:()=>{const previousPanels={...panels};$('drawer-inner').dataset.selectionKey='';renderDrawer();panels=previousPanels;applyPanels();},restore:c=>c&&setCamera($('canvas'),c.box,c.zoom),
+ focus:id=>{if(isPhone())switchMobile('graph');const n=[...$('canvas').querySelectorAll('.node')].find(n=>n.dataset.nodeId===id);if(n)fitGraphBoxes([n.querySelector('.node-box')]);},
+ dependencyEnabled:()=>state.layers.dependency,dependencies:enabled=>{state.layers.dependency=enabled;state.perspective='custom';syncUrl();},origins:()=>setPerspective('origins'),navigation:()=>isPhone()?switchMobile('relations'):toggleRail(true),
+ }); if(workspace){draw();renderDrawer();} });
