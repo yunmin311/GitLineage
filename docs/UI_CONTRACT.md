@@ -165,12 +165,17 @@ assertions with phone ownership checks; suite sizes remain 75 and 71. Native Chr
 viewport reduction is simulation; it does not certify physical devices or Safari.
 
 ## Member exploration refinement (2026-10-12)
-Aggregate expansion exposes canonical member nodes and relationships on measured shelves,
-twelve members per page in two columns. Previous/Next retain every member's reachability;
-collapse restores the overview. Member selection uses the existing node inspector, and
-canonical edge selection opens the original evidence. These are presentation changes:
-no derived layout or discovery observation changes the canonical graph or confidence.
-Collapsed row budgets include both the affordance and remainder notice. Expanded edge
-routes enter from separate row gutters. Fit measures the current cards, subject and
-visible panels on desktop; phone Fit frames the expanded group. Canvas acceptance's old
-flat-row expansion assertions now check real members and selected canonical edges.
+The user superseded the nested shelf / two-column container model with independent
+repository, grouping and canonical member nodes. Compact grouping nodes contain no
+member tables. A rank-based tidy-tree layout reserves measured sibling leaf spans;
+canonical relations use separate orthogonal gutters and entity boundary ports.
+Neutral dashed grouping ties have no arrow and never become canonical lineage.
+Expansion shows four members per desktop batch or three per phone batch; Previous/Next
+keep all members reachable and preserve a selected object outside the current batch.
+Collapse restores compact groups. Expansion/paging retain the camera; explicit Focus
+frames a branch and Fit measures visible nodes with panel clearance. Existing motion
+expresses reflow and respects reduced motion. Node selection and canonical edge
+selection retain the original inspector and evidence. No graph/confidence changes.
+The former assertions requiring member rows inside an expanded outer frame are obsolete;
+independent-node acceptance measures compact groups, disjoint entity bounds, bounded
+paging, native hits, relationship ports and camera/selection continuity.

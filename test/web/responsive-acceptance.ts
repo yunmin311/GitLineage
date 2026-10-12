@@ -39,7 +39,9 @@ try {
     const errors:string[]=[]; page.on('pageerror',e=>errors.push(e.message));
     page.on('requestfailed',r=>errors.push(`${r.url()} ${r.failure()?.errorText}`));
     await page.goto(`${app.url}/${B}`);
-    await page.locator('.plate-row[role=button]').first().waitFor({timeout:60000});
+    await page.locator('.bundle-card').first().waitFor({timeout:60000});
+    if(!await page.locator('.aggregate-member').count()){await page.locator('.bundle-card').first().focus();await page.keyboard.press('Enter');}
+    await page.locator('#zoom-fit').click();await page.waitForTimeout(320);
     await page.evaluate(()=>document.fonts.ready);
     // Commit B replaces the obsolete 844x390 temporary desktop-panel expectations.
     if(width===844) {
@@ -67,10 +69,10 @@ try {
     }
     if(await page.locator('#rail').isVisible()) await page.locator('#rail-toggle').click();
     const base=await measure(page);
-    await page.locator('.plate-row[role=button]').first().click();
+    await page.locator('.aggregate-member[role=button]').first().click();
     const selected=await measure(page);
     check(`${width} evidence keeps selected row entirely visible`, selected.drawer&&selected.contained&&selected.hittable&&selected.intersections.every(a=>a===0),selected);
-    check(`${width} panel preserves stage and screen scale`,same(base.stage,selected.stage)&&base.ctm.a===selected.ctm.a&&base.ctm.d===selected.ctm.d&&base.subject.w===selected.subject.w&&base.subject.h===selected.subject.h);
+    check(`${width} panel preserves stage and screen scale`,same(base.stage,selected.stage)&&base.ctm.a===selected.ctm.a&&base.ctm.d===selected.ctm.d&&Math.abs(base.subject.w-selected.subject.w)<.001&&Math.abs(base.subject.h-selected.subject.h)<.001);
     await page.screenshot({path:`${out}/${width}-evidence.png`});
     await page.locator('#rail-toggle').click();
     const context=await measure(page);
@@ -87,7 +89,7 @@ try {
     if(width!>=1600) await page.locator('#rail-close').click(); else await page.keyboard.press('Escape');
     check(`${width} Context close returns to evidence`,!(await measure(page)).rail&&(await measure(page)).drawer);
     await page.keyboard.press('Escape');
-    check(`${width} evidence close restores graph focus`,!await page.locator('#drawer').isVisible()&&await page.locator('.plate-row[role=button]').first().evaluate(e=>e===document.activeElement));
+    check(`${width} evidence close restores graph focus`,!await page.locator('#drawer').isVisible()&&await page.locator('.aggregate-member[role=button]').first().evaluate(e=>e===document.activeElement));
     check(`${width} no horizontal overflow or runtime/request failures`,!(await measure(page)).overflow&&errors.length===0,errors);
     evidence[`${width}x${height}`]={base,selected,context,restored,repeat};
     await page.close();

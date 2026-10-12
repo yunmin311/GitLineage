@@ -82,10 +82,10 @@ try{
  check(`${label} View in Graph locates retained target`,located.view==='graph'&&located.selection===edge.id&&located.camera!==null&&await page.locator('[data-mobile-located]').count()===1,located);
  const hit=await page.evaluate(()=>{
    const stage=document.querySelector('#stage')!.getBoundingClientRect(), bottom=document.querySelector('#viewport-hud')!.getBoundingClientRect().top;
-   for(const e of document.querySelectorAll<SVGGraphicsElement>('.plate-row-hit, .edge-hit')) {
+   for(const e of document.querySelectorAll<SVGGraphicsElement>('.edge-group .edge-hit')) {
      const owner=e.closest<HTMLElement>('[data-edge-id], [data-relationship-id]')!;
      const r=e.getBoundingClientRect();let points=[{x:r.x+r.width/2,y:r.y+r.height/2}];
-     if(e instanceof SVGPathElement) points=[.25,.5,.75].map(t=>{const p=e.getPointAtLength(e.getTotalLength()*t);const q=new DOMPoint(p.x,p.y).matrixTransform(e.getScreenCTM()!);return{x:q.x,y:q.y};});
+     if(e instanceof SVGPathElement) points=Array.from({length:19},(_,i)=>(i+1)/20).map(t=>{const p=e.getPointAtLength(e.getTotalLength()*t);const q=new DOMPoint(p.x,p.y).matrixTransform(e.getScreenCTM()!);return{x:q.x,y:q.y};});
      for(const p of points) if(p.x>0&&p.x<innerWidth&&p.y>stage.top&&p.y<bottom&&owner.contains(document.elementFromPoint(p.x,p.y))) return {...p,id:owner.dataset.edgeId||owner.dataset.relationshipId};
    }return null;
  });

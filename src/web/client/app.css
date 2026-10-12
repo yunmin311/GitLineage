@@ -2250,3 +2250,13 @@ body.mobile-explorer .band-note { display: -webkit-box; -webkit-line-clamp: 2; -
 .workspace-discovery-controls button, .workspace-discovery-evidence button { font-family:var(--sans); }
 #canvas .aggregate-member .node-label { font-family:var(--sans); font-size:13px; font-weight:500; }
 .workspace-commit-leader { stroke:var(--rule-2); stroke-width:1; fill:none; }
+/* Grouping is a navigation rank, never a container or canonical entity. */
+#canvas .graph-group .bundle-card-box { fill:var(--surface-hi); stroke:var(--rule-2); stroke-width:1; }
+#canvas .graph-group.is-expanded .bundle-card-box { stroke:var(--brand); }
+#canvas .graph-group:focus-visible .bundle-card-box { stroke:var(--brand); stroke-width:2; }
+#canvas .graph-group .bundle-card-count { font-family:var(--sans); font-size:13px; font-weight:600; }
+#canvas .grouping-tie { stroke:var(--rule-2); stroke-dasharray:2 5; stroke-width:1; }
+#canvas .group-batch { font-family:var(--sans); font-size:11.5px; fill:var(--ink-3); }
+#canvas .graph-group .aggregate-focus:focus-visible text,
+#canvas .graph-group .aggregate-next:focus-visible text,
+#canvas .graph-group .aggregate-previous:focus-visible text { fill:var(--brand); text-decoration:underline; }

@@ -20,13 +20,13 @@ try{for(const width of [430,1280,1920]){
   return{overflow,nodes,ctm:document.querySelector<SVGSVGElement>('#canvas')!.getScreenCTM()?.toString()};
  });assert.deepEqual(probe.overflow,[],'Every visible plate glyph belongs inside its painted border');
  for(let i=0;i<probe.nodes.length;i++)for(let j=i+1;j<probe.nodes.length;j++){const a=probe.nodes[i]!,b=probe.nodes[j]!;assert.ok(a.x+a.w<=b.x||b.x+b.w<=a.x||a.y+a.h<=b.y||b.y+b.h<=a.y,'Member cards do not overlap');}
- await page.locator('#zoom-fit').click();
+ await group.locator('.aggregate-focus').focus();await page.keyboard.press('Enter');
  await page.screenshot({path:resolve(out,`${width}-graph-expanded.png`)});
  const first=await page.locator('.aggregate-member').first().getAttribute('data-node-id');
  if(width===430){const hit=await page.locator('.aggregate-next .plate-row-hit').boundingBox();assert.ok(hit&&hit.height>=44,'Phone pagination has a real 44px hit target');await page.touchscreen.tap(hit!.x+hit!.width/2,hit!.y+hit!.height/2);}else{await page.locator('.aggregate-next').focus();await page.keyboard.press('Enter');}assert.notEqual(await page.locator('.aggregate-member').first().getAttribute('data-node-id'),first,'Next reveals additional real members');
  const visited=new Set<string>();
  await page.locator('.aggregate-previous').focus();await page.keyboard.press('Enter');
- for(let round=0;round<10;round++){
+ for(let round=0;round<30;round++){
   for(const id of await page.locator('.aggregate-member').evaluateAll(ns=>ns.map(n=>(n as SVGGElement).dataset.nodeId!)))visited.add(id);
   if(await page.locator('.aggregate-next').getAttribute('aria-disabled')==='true')break;
   await page.locator('.aggregate-next').focus();await page.keyboard.press('Enter');

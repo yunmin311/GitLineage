@@ -556,7 +556,7 @@ async function open(page: Page, url: string, path: string): Promise<void> {
  * cannot express that will click something else and call it a pass.
  */
 async function rowPoint(page: Page, pattern: RegExp): Promise<{ x: number; y: number } | null> {
-  return page.evaluate((source) => {
+  const point = () => page.evaluate((source) => {
     const re = new RegExp(source);
     const rows = [...document.querySelectorAll('.plate-row')];
     const row = rows.find((r) => re.test(r.querySelector('.plate-row-label')?.textContent ?? ''));
@@ -586,6 +586,19 @@ async function rowPoint(page: Page, pattern: RegExp): Promise<{ x: number; y: nu
     const b = hit.getBoundingClientRect();
     return { x: b.x + Math.min(30, b.width / 2), y: b.y + b.height / 2 };
   }, pattern.source);
+  let found=await point();if(found)return found;
+  const groups=page.locator('.bundle-card');
+  for(let i=0;i<await groups.count();i++){
+    const g=groups.nth(i);
+    if(await g.getAttribute('aria-expanded')==='false'){await g.focus();await page.keyboard.press('Enter');}
+    while(await g.locator('.aggregate-previous').getAttribute('aria-disabled')==='false'){await g.locator('.aggregate-previous').focus();await page.keyboard.press('Enter');}
+    for(let j=0;j<30;j++){
+      found=await point();if(found)return found;
+      if(await g.locator('.aggregate-next').getAttribute('aria-disabled')==='true')break;
+      await g.locator('.aggregate-next').focus();await page.keyboard.press('Enter');
+    }
+  }
+  return null;
 }
 
 /** The centre of a plate row carrying the given class, e.g. `plate-row-more`. */
@@ -764,43 +777,21 @@ async function main(): Promise<void> {
 check('02 expanding reveals the held-back members',
         await page.locator('.aggregate-member').count() > 0, `real member nodes exposed`);
 
-      /*
-       * Open EVERY mass before counting, not just the first.
-       *
-       * This used to click one affordance and count, which was correct only while every
-       * mass was open by default. Frozen V3.3 opens the LARGEST structural group and
-       * leaves the rest shut -- the first paint leads with the group holding the most
-       * relationships instead of with every group at once -- so on a repository with two
-       * structural groups one click exposes twelve of fourteen rows and the two in the shut
-       * group were counted as unreachable when they never were.
-       *
-       * The invariant under test has not changed: every relationship is individually
-       * reachable through the interaction model. Both halves of that model are exercised
-       * here -- the row affordance inside an open mass, and the mass's own surface, which is
-       * how a SHUT mass opens at all.
-       */
-      for (let round = 0; round < 12; round += 1) {
-        const next = await affordancePoint(page, '.plate-row-more');
-        if (!next) break;
-        await page.mouse.click(next.x, next.y);
-        await page.waitForTimeout(500);
+      // Independent nodes are deliberately bounded. Reachability means traversing
+      // each batch, not forcing all 14 entities onto one frame as the old test did.
+      const reached = new Set<string>();
+      const groups = page.locator('.bundle-card');
+      for(let i=0;i<await groups.count();i++){
+        const g=groups.nth(i);const key=await g.getAttribute('data-bundle-key');
+        if(await g.getAttribute('aria-expanded')==='false'){await g.focus();await page.keyboard.press('Enter');}
+        for(let batch=0;batch<30;batch++){
+          for(const id of await page.locator('.aggregate-member').evaluateAll((ns,key)=>ns.filter(n=>(n as HTMLElement).dataset.aggregateKey===key).map(n=>(n as HTMLElement).dataset.nodeId!),key))reached.add(id);
+          if(await g.locator('.aggregate-next').getAttribute('aria-disabled')==='true')break;
+          await g.locator('.aggregate-next').focus();await page.keyboard.press('Enter');
+        }
+        while(await g.locator('.aggregate-previous').getAttribute('aria-disabled')==='false'){await g.locator('.aggregate-previous').focus();await page.keyboard.press('Enter');}
       }
-      // Then a shut mass: clicking its own surface toggles it open.
-      const shutPoint = await page.evaluate(() => {
-        const shut = [...document.querySelectorAll('.bundle-card')].find(
-          (g) => !g.classList.contains('is-open'),
-        );
-        const count = shut?.querySelector('.bundle-card-count')?.getBoundingClientRect();
-        if (!count) return null;
-        return { x: count.x + 8, y: count.y + count.height / 2 };
-      });
-      if (shutPoint) {
-        await page.mouse.click(shutPoint.x, shutPoint.y);
-        await page.waitForTimeout(500);
-      }
-      const fAllOpen = await readFrame(page);
-      check('02 every relationship is individually reachable',
-        await page.locator('.aggregate-member').count() + fAllOpen.counts.rows >= 14, `member nodes and remaining rows expose 14 relationships`);
+      check('02 every relationship is individually reachable',reached.size===14,`${reached.size} members traversed through bounded batches`);
       check('02 expanding moves nothing in the world',
         worldCamera(fExpanded.camera) === worldCamera(fDefault.camera),
         'viewBox, centre and world focal identical');
@@ -1358,7 +1349,7 @@ check('02 expanding reveals the held-back members',
           : null,
         boxesKept: document.querySelectorAll('svg .node-box, svg .bundle-card-box').length,
         depthShapesKept: document.querySelectorAll('.depth-shadow').length,
-        marksKept: document.querySelectorAll('.plate-row-status').length,
+        marksKept: document.querySelectorAll('.edge-line, .grouping-tie').length,
       };
     });
     report['13-masked'] = masked;
@@ -1393,9 +1384,9 @@ check('02 expanding reveals the held-back members',
     // The one that matters most here: 97 records in one plate, against a band that must
     // stay whole.
     const heldBefore = await page.evaluate(
-      () => document.querySelectorAll('.plate-row-held').length,
+      () => [...document.querySelectorAll('.bundle-card .plate-subtitle')].filter(n=>/members/.test(n.textContent||'')).length,
     );
-    check('15 a plate tall enough to reach the band states what it is holding back',
+    check('15 compact groups state their full member count',
       heldBefore > 0, `${heldBefore} "in the Drawer" notes on the plate`);
     const bandHits = await plateBandCollisions(page);
     check('15 no plate draws through the edge key',
