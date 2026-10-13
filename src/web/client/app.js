@@ -1149,10 +1149,13 @@ function renderRail(view) {
 
   // Status: the real counts, with no interpretation added to them.
   const status = el('div', { class: 'statline' });
-  status.append(el('span', {
-    class: 'k',
-    text: `${view.statusCounts.VERIFIED} verified \u00b7 ${view.statusCounts.DECLARED} declared \u00b7 ${view.statusCounts.DETECTED} detected`,
-  }));
+  const statusMarks = el('div', { class: 'rail-statuses' });
+  for (const [key, style, label] of [['VERIFIED', 'v', 'Verified'], ['DECLARED', 'd', 'Declared'], ['DETECTED', 't', 'Detected']]) {
+    const mark = el('span', { class: `st st-${style}` });
+    mark.append(el('span', { class: 'sw', 'aria-hidden': 'true' }), el('span', { class: 'status-count', text: String(view.statusCounts[key]) }), label);
+    statusMarks.append(mark);
+  }
+  status.append(statusMarks);
   status.append(el('span', {
     class: 'k',
     text: `${view.edgeCount} one-hop of ${view.edgeCount + view.hiddenRelationshipCount} relationships`,

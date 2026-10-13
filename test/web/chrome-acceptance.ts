@@ -11,6 +11,8 @@ const browser=await chromium.launch();const results:any[]=[];
 try {for(const width of [1280,1920,1024,768,430,390]){
  const page=await browser.newPage({viewport:{width,height:width<768?900:1080},isMobile:width<768,hasTouch:width<768,reducedMotion:'reduce'});
  await page.goto(app.url+'/'+A);await page.locator('#workspace-history').waitFor();
+ const flatControls=await page.locator('.appbar button,.appbar .text-btn,.repository-navigation button,.graph-perspective-tabs button').evaluateAll(items=>items.map(el=>({id:el.id,shadow:getComputedStyle(el).boxShadow})));
+ assert.ok(flatControls.every(c=>c.shadow==='none'),'Navigation and visibility controls stay flat; depth belongs to focal objects');
  const measure=()=>page.evaluate(()=>{const rect=(el:Element)=>el.getBoundingClientRect().toJSON();const visible=(id:string)=>{const el=document.getElementById(id)!;return !el.hidden&&getComputedStyle(el).display!=='none'?rect(el):null;};const svg=document.getElementById('canvas') as unknown as SVGSVGElement,c=svg.getScreenCTM()!,s=svg.getBoundingClientRect(),f=new DOMPoint(s.x+s.width/2,s.y+s.height/2).matrixTransform(c.inverse());return{stage:rect(svg),ctm:[c.a,c.b,c.c,c.d,c.e,c.f],focal:[f.x,f.y],rail:visible('rail'),drawer:visible('drawer'),layers:rect(document.getElementById('graph-perspectives')!),overview:rect(document.getElementById('graph-overview')!),buttons:[...document.querySelectorAll('.graph-perspective-tabs button')].map(el=>({rect:rect(el),reachable:document.elementFromPoint(el.getBoundingClientRect().x+el.getBoundingClientRect().width/2,el.getBoundingClientRect().y+el.getBoundingClientRect().height/2)?.closest('button')===el})),selected:document.querySelector('.node.is-selected .node-box')?rect(document.querySelector('.node.is-selected .node-box')!):null};});
  const note=await page.locator('.graph-perspective-note').evaluate(n=>({display:getComputedStyle(n).display,background:getComputedStyle(n).backgroundColor}));assert.equal(note.background,'rgba(0, 0, 0, 0)','An inert note must not paint an opaque strip over graph nodes');
  if(width>=768){
@@ -70,5 +72,14 @@ try {for(const width of [1280,1920,1024,768,430,390]){
  await motionPage.emulateMedia({reducedMotion:'reduce'});await motionPage.locator('#rail-close').click();
  const reduced=await motionPage.evaluate(()=>{document.getElementById('rail-toggle')!.click();return document.getElementById('rail-scroll')!.getAnimations().length;});assert.equal(reduced,0,'Reduced motion suppresses panel entrance');
  await motionPage.close();
+ const surfaces=await browser.newPage({viewport:{width:1920,height:1080},reducedMotion:'reduce'});
+ await surfaces.goto(app.url+'/');await surfaces.locator('#landing:not([hidden])').waitFor();
+ assert.equal(await surfaces.locator('.appbar .text-btn').first().evaluate(e=>getComputedStyle(e).boxShadow),'none','Landing navigation uses the same flat control surface');
+ assert.notEqual(await surfaces.locator('.input-card').evaluate(e=>getComputedStyle(e).boxShadow),'none','The main landing entry retains its focal depth');
+ await surfaces.goto(app.url+'/'+A);await surfaces.locator('#workspace-history').waitFor();
+ await surfaces.locator('#workspace-history').click();await surfaces.locator('.history-row').first().waitFor();
+ const historyActions=await surfaces.locator('#git-history .d-action').evaluateAll(items=>items.map(e=>getComputedStyle(e).boxShadow));
+ assert.ok(historyActions.length>0&&historyActions.every(shadow=>shadow==='none'),'Git history uses the same flat reading and navigation controls');
+ await surfaces.close();
  await writeFile(resolve(out,'geometry.json'),JSON.stringify(results,null,2));console.log('PASS chrome: panels, HUD hit targets, geometry and logo at six widths');}
 finally{await browser.close();await app.cleanup();}
