@@ -1,4 +1,4 @@
-import {chromium,webkit} from 'playwright';
+import {chromium,webkit,type Page} from 'playwright';
 import {cacheProof} from './cache-proof.ts';
 import {mkdir,writeFile,readFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
@@ -7,6 +7,17 @@ import {fixtureServer,A} from './fixture-server.ts';
 import {createPreview} from '../../experiments/discovery-v2/preview.ts';
 import {treeFixture} from '../discovery/tree-fixture.ts';
 import {validatePreviewExport,validateSourceExport} from '../../experiments/discovery-v2/preview-contract.ts';
+// Initial phone fitting animates for 260ms. Capture a settled camera, rather than
+// comparing an arbitrary intermediate animation frame with the final position.
+async function settledCamera(page:Page){
+ await page.waitForFunction(()=>{
+  const canvas=document.querySelector('#canvas');
+  const box=canvas?.getAttribute('viewBox');
+  const w=window as typeof window & {cameraSample?:{box:string|null|undefined,since:number}};
+  if(!w.cameraSample||w.cameraSample.box!==box){w.cameraSample={box,since:performance.now()};return false;}
+  return !!box&&performance.now()-w.cameraSample.since>=300;
+ },undefined,{timeout:5000});
+}
 const fixture=treeFixture();
 // A constructed Fork can diverge while an unknown candidate remains identical.
 fixture.repos[0]!.files={'src/main.ts':fixture.repos[0]!.files['index.js']!, 'src/extra.ts':Buffer.from('export const extra = 234567;\n')};
@@ -50,6 +61,8 @@ try{
  await page.locator('#deep-results .deep-measurement').first().locator(':scope > summary').click();
  const raw=page.getByText('Raw measurement, matched token ranges and fingerprints',{exact:true}).first();await raw.click();assert.ok((await raw.locator('..').innerText()).includes('firstDigest'));
  const paths=page.getByText('Pinned snapshots, Git blob SHA, file bindings and incomplete paths',{exact:true}).first();await paths.click();assert.match(await paths.locator('..').innerText(),/explicit selected paths only/); // Entry-path failures are no longer manufactured by tree-derived selection.
+ // Export is a secondary disclosure: exercise the visible user path before downloading.
+ await page.locator('summary').filter({hasText:'Export comparison & receipt'}).click();
  const [download]=await Promise.all([page.waitForEvent('download'),page.locator('#deep-download').click()]);assert.equal(download.suggestedFilename(),'gitlineage-deep-sidecar.json');const saved=resolve(out,`${width}-mock-sidecar.json`);await download.saveAs(saved);const exported=JSON.parse(await readFile(saved,'utf8'));validatePreviewExport(exported);assert.equal(exported.schemaVersion,'discovery-preview-export@2');assert.equal(exported.provenance.candidates.length,2);for(const candidate of exported.provenance.candidates){assert.equal(candidate.repositoryId,candidate.searchCandidate.candidate.repositoryId);for(const d of candidate.searchCandidate.discoveries){assert.equal(d.query,'example in:name is:public fork:true');assert.ok(d.rank>0&&d.page===1&&d.reason);}}assert.equal(exported.selection!.combined.usage.attempts,fixture.calls.length);fixture.calls.length=0;
  await page.locator('#deep-dialog').evaluate(el=>el.scrollTo(0,0));
  await page.screenshot({path:resolve(out,`${width}-comparison.png`),fullPage:true});
@@ -84,7 +97,8 @@ try{
  await provenancePage.locator('#deep-launch').click();await provenancePage.locator('#deep-repository').fill('root/example');await provenancePage.locator('#deep-search-submit').click();
  await provenancePage.locator('#deep-candidates input[value="4"]').check();await provenancePage.locator('#deep-source-preview').click();
  await provenancePage.locator('#deep-files input[value="src/main.ts"]').check();await provenancePage.locator('#deep-files input[value="src/extra.ts"]').uncheck();
- await provenancePage.locator('#deep-compare').click();await provenancePage.locator('#deep-download').waitFor();
+ await provenancePage.locator('#deep-compare').click();await provenancePage.locator('#deep-download').waitFor({state:'attached'});
+ await provenancePage.locator('summary').filter({hasText:'Export comparison & receipt'}).click();
  const [provenanceDownload]=await Promise.all([provenancePage.waitForEvent('download'),provenancePage.locator('#deep-download').click()]);
  const provenancePath=resolve(out,'multiple-search-observations-sidecar.json');await provenanceDownload.saveAs(provenancePath);
  const provenanceExport=JSON.parse(await readFile(provenancePath,'utf8'));validatePreviewExport(provenanceExport);
@@ -97,7 +111,7 @@ try{
  for(const width of [390,430,1280,1920])for(const mode of ['filtered_only','no_results'] as const){
  const f=treeFixture();f.repos[3]!.files={'README.md':Buffer.from('Documentation only, no executable source')};f.rebuild();
  preview=createPreview({cooldownMs:0,transport:async(url,init)=>{const response=await f.transport(url,init);if(mode==='no_results'&&new URL(url).pathname==='/search/repositories')return new Response(JSON.stringify({items:[],total_count:0,incomplete_results:false}));return response;}});
- app=await fixtureServer({previewHandler:preview.handler});const page=await browser.newPage({viewport:{width,height:932}});await page.goto(app.url+preview.accessPath);await page.goto(app.url+'/'+A);await page.locator('#canvas .node-box').first().waitFor();const original=await page.locator('#canvas').evaluate(el=>{const m=(el as unknown as SVGSVGElement).getScreenCTM();return{viewBox:el.getAttribute('viewBox'),ctm:m?[m.a,m.b,m.c,m.d,m.e,m.f].map(v=>Number(v.toFixed(4))):null,url:location.href,selection:new URL(location.href).searchParams.get('node')}});assert.ok(original.ctm&&original.ctm.some(Number.isFinite));const cache=await cacheProof(app.fixtureCacheRoot);await page.locator('#deep-launch').click();await page.locator('#deep-repository').fill('root/example');await page.locator('#deep-search-submit').click();
+ app=await fixtureServer({previewHandler:preview.handler});const page=await browser.newPage({viewport:{width,height:932}});await page.goto(app.url+preview.accessPath);await page.goto(app.url+'/'+A);await page.locator('#canvas .node-box').first().waitFor();await settledCamera(page);const original=await page.locator('#canvas').evaluate(el=>{const m=(el as unknown as SVGSVGElement).getScreenCTM();return{viewBox:el.getAttribute('viewBox'),ctm:m?[m.a,m.b,m.c,m.d,m.e,m.f].map(v=>Number(v.toFixed(4))):null,url:location.href,selection:new URL(location.href).searchParams.get('node')}});assert.ok(original.ctm&&original.ctm.some(Number.isFinite));const cache=await cacheProof(app.fixtureCacheRoot);await page.locator('#deep-launch').click();await page.locator('#deep-repository').fill('root/example');await page.locator('#deep-search-submit').click();
  await page.waitForFunction(()=>/^search: (completed|partial)/.test(document.querySelector('#deep-status')?.textContent??''));
  if(mode==='filtered_only'){
   await page.locator('#deep-candidates input[value="4"]').check();await page.locator('#deep-source-preview').click();await page.locator('#deep-source-download').waitFor();
@@ -109,7 +123,7 @@ try{
  }
  for(const width of [390,430,1280,1920])for(const mode of ['rate_limit','cancel'] as const){
  preview=createPreview({cooldownMs:0,transport:async(_url,init)=>{if(mode==='rate_limit')return new Response('',{status:403,headers:{'x-ratelimit-remaining':'0'}});await new Promise<void>((_r,j)=>init.signal.addEventListener('abort',()=>j(new Error('cancelled')),{once:true}));throw new Error('cancelled');}});app=await fixtureServer({previewHandler:preview.handler});
- const page=await browser.newPage({viewport:{width,height:932}});await page.goto(app.url+preview.accessPath);await page.goto(app.url+'/'+A);await page.locator('#canvas .node-box').first().waitFor();const original=await page.locator('#canvas').evaluate(el=>{const m=(el as unknown as SVGSVGElement).getScreenCTM();return{viewBox:el.getAttribute('viewBox'),ctm:m?[m.a,m.b,m.c,m.d,m.e,m.f].map(v=>Number(v.toFixed(4))):null,url:location.href,selection:new URL(location.href).searchParams.get('node')}});assert.ok(original.ctm&&original.ctm.some(Number.isFinite));const cache=await cacheProof(app.fixtureCacheRoot);await page.locator('#deep-launch').click();await page.locator('#deep-repository').fill('root/example');await page.locator('#deep-search-submit').click();
+ const page=await browser.newPage({viewport:{width,height:932}});await page.goto(app.url+preview.accessPath);await page.goto(app.url+'/'+A);await page.locator('#canvas .node-box').first().waitFor();await settledCamera(page);const original=await page.locator('#canvas').evaluate(el=>{const m=(el as unknown as SVGSVGElement).getScreenCTM();return{viewBox:el.getAttribute('viewBox'),ctm:m?[m.a,m.b,m.c,m.d,m.e,m.f].map(v=>Number(v.toFixed(4))):null,url:location.href,selection:new URL(location.href).searchParams.get('node')}});assert.ok(original.ctm&&original.ctm.some(Number.isFinite));const cache=await cacheProof(app.fixtureCacheRoot);await page.locator('#deep-launch').click();await page.locator('#deep-repository').fill('root/example');await page.locator('#deep-search-submit').click();
  if(mode==='cancel'){await page.locator('#deep-cancel').click();await page.waitForFunction(()=>document.querySelector('#deep-status')?.textContent?.includes('cancelled'));}else await page.waitForFunction(()=>document.querySelector('#deep-status')?.textContent?.includes('partial'));
  assert.match(await page.locator('#deep-candidates').innerText(),/incomplete or unavailable/);assert.equal(await page.locator('#deep-results .deep-measurement').count(),0);
  await page.screenshot({path:resolve(out,`${mode}.png`)});checks.push({mode,width,status:'PASS',unavailableNotZero:true});await page.locator('#deep-back').click();await page.locator('#deep-candidate-layer').click();assert.equal(await page.locator('#deep-layer-dialog .deep-layer-candidate').count(),0);await page.locator('#deep-layer-close').click();assert.deepEqual(await page.locator('#canvas').evaluate(el=>{const m=(el as unknown as SVGSVGElement).getScreenCTM();return{viewBox:el.getAttribute('viewBox'),ctm:m?[m.a,m.b,m.c,m.d,m.e,m.f].map(v=>Number(v.toFixed(4))):null,url:location.href,selection:new URL(location.href).searchParams.get('node')}}),original);assert.deepEqual(await cacheProof(app.fixtureCacheRoot),cache);await page.close();await preview.close();await app.cleanup();app=undefined as never;

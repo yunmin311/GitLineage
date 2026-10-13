@@ -2251,7 +2251,7 @@ function renderDrawer() {
     if (edge) block.append(renderEdgeDrawer(edge));
   } else {
     block.append(renderNodeDrawer());
-    const actions=workspace?.repositoryActions(state.selectedNodeId);if(actions)block.prepend(actions);
+    const actions=workspace?.repositoryActions(state.selectedNodeId);if(actions){const overview=block.querySelector(".entity-overview");if(overview)overview.after(actions);else block.append(actions);}
   }
 
   inner.append(close, block);

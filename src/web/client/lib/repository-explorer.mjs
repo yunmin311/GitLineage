@@ -101,7 +101,7 @@ function mountRepositoryExplorer(getRepository, deep, bridge) {
   }
   function repositoryOf(id) {
     const n = find(id);
-    return n?.data?.repository ?? (n?.type === "repository" || n?.kind === "repository" ? n.label : root);
+    return n?.data?.repository ?? (n?.type === "Repository" || n?.kind === "repository" ? n.label : root);
   }
   function save() {
     if (!root) return;
@@ -301,7 +301,7 @@ function mountRepositoryExplorer(getRepository, deep, bridge) {
   function expand(id) {
     const n = find(id);
     if (!n) return;
-    if (n.kind === "candidate" || n.kind === "repository" || n.type === "repository") {
+    if (n.kind === "candidate" || n.kind === "repository" || n.type === "Repository") {
       if(bridge.grow)void bridge.grow(id);readStructure(id);
       return;
     }
@@ -383,7 +383,7 @@ function mountRepositoryExplorer(getRepository, deep, bridge) {
     path.append(btn("", root, returnRoot));
     for (const id of trail.slice(-5)) {
       const n = find(id);
-      if (n) path.append(btn("", n.label, () => focus(id)));
+      if (n && id !== rootId()) path.append(btn("", n.label, () => focus(id)));
     }
     layers.replaceChildren();
     for (const [k, label] of kinds) {
@@ -495,7 +495,7 @@ function mountRepositoryExplorer(getRepository, deep, bridge) {
     const n = objects.get(id), e = links.get(id);
     if (!n && !e) return null;
     const block = make("section", void 0, "unified-inspector");
-    block.append(make("h2", n?.label ?? e.label, "workspace-title"));
+    block.append(make("p", n ? n.kind.charAt(0).toUpperCase() + n.kind.slice(1) : "Recorded relationship", "d-eyebrow"), make("h2", n?.label ?? e.label, "d-head"));
     if (e) {
       block.append(make("p", e.kind === "observation" ? "Search observation. This connection records a candidate result, not ancestry." : e.kind === "similarity" ? "Measurement of selected files only. This does not prove derivation." : e.kind === "history" ? "Recorded Git parent or reference relation." : "Structure and changed-file observations at a fixed version.", "d-quote"), make("p", (find(e.source)?.label ?? e.source) + (e.directed ? " \u2192 " : " — ") + (find(e.target)?.label ?? e.target), "rail-note"));
       const detail = make("details", void 0, "workspace-technical");
@@ -509,7 +509,7 @@ Candidate: ${f.candidateText}`, "workspace-fragment"));
       block.append(detail);
       return block;
     }
-    block.append(make("p", n.kind + (n.data.path ? " \xB7 " + n.data.path : "") + (n.data.revision ? " \xB7 version " + n.data.revision.slice(0, 7) : ""), "d-quote"));
+    block.append(make("p", (n.data.repository || n.kind) + (n.data.revision ? " \xB7 pinned version " + n.data.revision.slice(0, 7) : ""), "d-sub"));
     if(n.data.path){
       const hierarchy=make("div",void 0,"d-hierarchy");hierarchy.append(make("p","STRUCTURE PATH","d-block-head"));
       const path=make("ol");path.append(make("li",n.data.repository||"Repository"));
@@ -519,12 +519,12 @@ Candidate: ${f.candidateText}`, "workspace-fragment"));
     const actions = make("div", void 0, "unified-node-actions");
     actions.append(btn("workspace-expand", "Expand nearby objects", () => expand(id)), btn("workspace-focus", "Focus here", () => focus(id)), btn("workspace-collapse", collapsed.has(id) ? "Restore neighborhood" : "Collapse neighborhood", () => collapse(id)));
     block.append(actions);
-    if (["repository", "candidate", "commit"].includes(n.kind)) block.append(btn("workspace-node-history", "Open Git history", () => readHistory(id)), btn("workspace-node-structure", "Expand structure at version", () => readStructure(id)));
+    if (["repository", "candidate", "commit"].includes(n.kind)) actions.append(btn("workspace-node-history", "Open Git history", () => readHistory(id)), btn("workspace-node-structure", "Expand structure at version", () => readStructure(id)));
     if (n.kind === "commit") {
       block.append(make("p", n.data.message, "d-quote"), make("p", `${n.data.author} \xB7 ${n.data.date}`, "rail-note"));
       const task = jobs.get(jobKey(n.data.repository));
       if (task) {
-        block.append(btn("workspace-earlier", "Expand recorded parents", () => void operate(async (token) => {
+        actions.append(btn("workspace-earlier", "Expand recorded parents", () => void operate(async (token) => {
           const shown = jobs.get(jobKey(n.data.repository))?.displayHistoryLimit ?? limit();
           let t = await ensure(n.data.repository, token);
           if (t.coverage.pendingParents.length) t = await request(`/${t.id}/history`, {});
@@ -533,7 +533,7 @@ Candidate: ${f.candidateText}`, "workspace-fragment"));
           jobs.set(jobKey(t.repository), t);
 
         })));
-        if (n.data.changes.length > limit()) block.append(btn("workspace-more-files", "Expand more sampled changes", () => {
+        if (n.data.changes.length > limit()) actions.append(btn("workspace-more-files", "Expand more sampled changes", () => {
           n.data.changeOffset = (n.data.changeOffset ?? limit()) + limit();
           const c = { ...n.data, changes: n.data.changes.slice(n.data.changeOffset - limit(), n.data.changeOffset) };
           changedFiles(task, c);
@@ -546,7 +546,8 @@ Candidate: ${f.candidateText}`, "workspace-fragment"));
       a.href = `https://github.com/${n.data.repository}/blob/${n.data.revision}/${n.data.path.split("/").map(encodeURIComponent).join("/")}`;
       a.target = "_blank";
       a.rel = "noopener noreferrer";
-      block.append(a, btn("workspace-file-candidates", "Find cross-repository evidence", () => {
+      block.append(a);
+      actions.append(btn("workspace-file-candidates", "Find cross-repository evidence", () => {
         discovery.hidden = false;
         deep.workspace.reset(n.data.repository);
         discoveryTarget = n.data.repository;
@@ -560,7 +561,7 @@ Candidate: ${f.candidateText}`, "workspace-fragment"));
       for (const d of n.data.observation?.discoveries ?? []) block.append(make("p", d.reason, "d-quote"));
     }
     const matches = [...links.values()].filter((e2) => e2.kind === "similarity" && (e2.source === id || e2.target === id));
-    for (const match of matches) block.append(btn("", match.label + " \xB7 read evidence", () => bridge.select(match.id, true)));
+    for (const match of matches) actions.append(btn("", match.label + " \xB7 read evidence", () => bridge.select(match.id, true)));
     const details = make("details", void 0, "workspace-technical");
     details.append(make("summary", "Technical identity & recorded details"), make("pre", JSON.stringify(n.data, null, 2)));
     block.append(details);
@@ -568,7 +569,7 @@ Candidate: ${f.candidateText}`, "workspace-fragment"));
   }
   function repositoryActions(id) {
     const n = find(id);
-    if (n?.type !== "repository") return null;
+    if (n?.type !== "Repository") return null;
     const b = make("section", void 0, "unified-node-actions");
     b.append(btn("workspace-node-history", "Open Git history", () => readHistory(id)), btn("workspace-node-structure", "Expand structure", () => readStructure(id)), btn("workspace-node-collapse", "Collapse local observations", () => collapse(id)));
     return b;
