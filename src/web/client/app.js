@@ -1,7 +1,7 @@
 import {classifyRelationships} from './lib/classification.mjs';
 import {spatialLayout, spatialExpansion, spatialRoute, ORIGIN} from './lib/spatial.mjs';
 import {buildView as projectCanonicalView} from '../view-model.ts';
-import {captureMotion, transitionScene, transitionCamera, stopMotion, revealInstrument} from './lib/motion.mjs';
+import {captureMotion, transitionScene, transitionCamera, stopMotion, revealInstrument, revealPanel} from './lib/motion.mjs';
 import { mountRepositoryExplorer } from './lib/repository-explorer.mjs';
 import { mountDeepPreview } from './lib/deep-preview.mjs';
 /**
@@ -1129,7 +1129,7 @@ function renderRail(view) {
 
   const block = (heading, body) => {
     const section = el('div', { class: 'lblk' });
-    section.append(el('h6', { text: heading }));
+    section.append(el('h6', { text: capitalise(heading) }));
     for (const child of body) section.append(child);
     rail.append(section);
   };
@@ -1243,7 +1243,7 @@ function renderRail(view) {
   const reference = el('details',{class:'rail-reference'});
   reference.append(el('summary',{text:'Reading the graph'}));
   for(const section of [...rail.querySelectorAll(':scope > .lblk')]) {
-   const heading=section.querySelector('h6')?.textContent;
+   const heading=section.querySelector('h6')?.textContent?.toLowerCase();
    if(['reading names','not on the canvas','relationships'].includes(heading))reference.append(section);
    if(heading==='provenance') {
     const analysis=el('details',{class:'rail-reference'});
@@ -2560,6 +2560,7 @@ function renderNodeDrawer() {
   if (groups.length === 0) {
     relBlock.append(el('p', { class: 'node-detail', text: 'No one-hop relationship in this view.' }));
   }
+  if(groups.length) relBlock.append(el('p',{class:'d-basis',text:'Navigation groups, not repository relationships.'}));
   for (const group of groups) {
     const section = el('details', { class: 'd-group' });
     section.open = groups.length === 1 || group === groups[0];
@@ -2570,7 +2571,7 @@ function renderNodeDrawer() {
     const appendRow=(host,edge)=>{const other=edge.source===node.id?edge.target:edge.source;const row=el('button',{class:'bundle-row'});row.append(el('span',{class:'relationship-object',text:nameOf(other)}),el('span',{class:'relationship-kind',text:edge.label}));row.addEventListener('click',()=>{state.selectedNodeId='';selectEdge(edge.id);});host.append(row);};
     const taxonomy=classifyRelationships(view,{key:group.key,family:group.members[0]?.family,count:group.members.length,memberEdgeIds:group.members.map(e=>e.id)});
     if(taxonomy.categories.length){
-      const appendCategory=(host,n)=>{const details=el('details',{class:'d-classification category-level-'+n.level});details.append(el('summary',{text:n.label+' · '+n.edgeIds.length}),el('p',{class:'d-basis',text:n.basis+' · navigation grouping, not a repository relationship'}));
+      const appendCategory=(host,n)=>{const details=el('details',{class:'d-classification category-level-'+n.level});details.append(el('summary',{text:n.label+' · '+n.edgeIds.length}),el('p',{class:'d-basis',text:n.basis}));
        if(n.children.length)for(const child of n.children)appendCategory(details,child);else for(const id of n.edgeIds){const e=group.members.find(e=>e.id===id);if(e)appendRow(details,e);}host.append(details);};
       for(const n of taxonomy.roots)appendCategory(section,n);
     }else for(const edge of group.members)appendRow(section,edge);
@@ -2632,8 +2633,12 @@ function applyPanels() {
   const body = $('explorer-body');
   const hiddenFocus = mobileFocus || (!visible.rail && $('rail').contains(document.activeElement))
     || (!visible.drawer && $('drawer').contains(document.activeElement));
+  const enteringRail = visible.rail && $('rail').hidden;
+  const enteringDrawer = visible.drawer && $('drawer').hidden;
   setHidden($('rail'), !visible.rail);
   setHidden($('drawer'), !visible.drawer);
+  if (enteringRail) revealPanel($('rail-scroll'), 'left');
+  if (enteringDrawer) revealPanel($('drawer-inner'), 'right');
   setHidden($('drawer-scrim'), true);
   body.classList.toggle('rail-open', visible.rail);
   body.classList.toggle('rail-closed', !visible.rail);

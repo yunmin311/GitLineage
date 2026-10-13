@@ -21,6 +21,22 @@ function mountRepositoryExplorer(getRepository, deep, bridge) {
     if (text !== void 0) n.textContent = text;
     return n;
   };
+  // One stroke vocabulary for workspace tools; names remain the accessible labels.
+  const icon = (kind) => {
+    const paths = {
+      relations: 'M3 8h10M3 4v8M13 4v8M6 8V3h4',
+      history: 'M8 3a5 5 0 1 1-4 2M3 2v4h4M8 5v3l2 2',
+      structure: 'M2 4h5l2 2h5v7H2z',
+      observation: 'M10 10l4 4M11 6a5 5 0 1 1-10 0 5 5 0 0 1 10 0',
+      similarity: 'M2 3h5v10H2zM9 3h5v10H9zM5 6h6M5 10h6',
+      dependency: 'M3 3h4v4H3zM9 9h4v4H9zM5 7v4h4',
+      back: 'M7 3 2 8l5 5M2 8h12',
+      search: 'M10 10l4 4M11 6a5 5 0 1 1-10 0 5 5 0 0 1 10 0'
+    };
+    const n = svg('svg', {viewBox:'0 0 16 16', 'aria-hidden':'true', class:'workspace-icon', fill:'none', stroke:'currentColor', 'stroke-width':1.3, 'stroke-linecap':'round', 'stroke-linejoin':'round'});
+    n.append(svg('path', {d:paths[kind] || paths.relations}));
+    return n;
+  };
   const nav = make("nav", void 0, "repository-navigation unified-tools");
   nav.setAttribute("aria-label", "Graph exploration tools");
   document.querySelector("#explorer").prepend(nav);
@@ -44,7 +60,9 @@ function mountRepositoryExplorer(getRepository, deep, bridge) {
     for (const n of allNodes().filter((n2) => [n2.label, n2.data?.path, n2.kind].join(" ").toLowerCase().includes(search.value.toLowerCase())).slice(0, 12)) hits.append(btn("", n.label, () => focus(n.id)));
   };
   const layers = make("div", void 0, "unified-layer-controls");
-  tools.append(make("h3", "Exploration path"), path, search, hits, make("h3", "Visible objects"), layers, status);
+  const searchField = make("label", void 0, "workspace-search");
+  searchField.append(icon('search'), search);
+  tools.append(make("h3", "Exploration path"), path, searchField, hits, make("h3", "Visible objects"), layers, status);
   const discovery = make("section", void 0, "workspace-discovery-controls");
   discovery.id = "workspace-discovery";
   discovery.hidden = true;
@@ -349,7 +367,8 @@ function mountRepositoryExplorer(getRepository, deep, bridge) {
   for (const b of nav.children) {
     const full = b.textContent;
     b.setAttribute("aria-label", full);
-    b.replaceChildren(make("span", full, "unified-label-full"), make("span", shortLabels[b.id], "unified-label-short"));
+    const kind = {'workspace-origins':'relations','workspace-history':'history','workspace-structure':'structure','workspace-candidates':'observation','workspace-return':'back'}[b.id];
+    b.replaceChildren(icon(kind), make("span", full, "unified-label-full"), make("span", shortLabels[b.id], "unified-label-short"));
   }
   function decorate() {
     reset();
@@ -360,6 +379,7 @@ function mountRepositoryExplorer(getRepository, deep, bridge) {
     }
     path.replaceChildren(btn("workspace-back", "Back", back));
     path.firstChild.disabled = !history.length;
+    path.firstChild.prepend(icon("back"));
     path.append(btn("", root, returnRoot));
     for (const id of trail.slice(-5)) {
       const n = find(id);
@@ -376,6 +396,11 @@ function mountRepositoryExplorer(getRepository, deep, bridge) {
         refresh();
       });
       b.setAttribute("aria-pressed", String(k === "dependency" ? bridge.dependencyEnabled() : !hiddenLayers.has(k)));
+      b.dataset.layer = k;
+      b.prepend(icon(k));
+      const indicator = make('span', '', 'layer-indicator');
+      indicator.setAttribute('aria-hidden', 'true');
+      b.append(indicator);
       layers.append(b);
     }
     for (const b of nav.children) b.disabled = busy && b.id !== "workspace-return";

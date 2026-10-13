@@ -32,3 +32,13 @@ export function transitionCamera(root, end, write=value=>root.setAttribute('view
  const tick=now=>{const t=Math.max(0,Math.min(1,(now-start)/260)),e=1-(1-t)**3;write(to.map((v,i)=>from[i]+(v-from[i])*e).join(' '));if(t<1)frame=requestAnimationFrame(tick);else active.delete(root);};frame=requestAnimationFrame(tick);
 }
 export function revealInstrument(root) {if(!reduced())root.animate([{opacity:.55,transform:'translateY(4px)'},{opacity:1,transform:'translateY(0)'}],{duration:160,easing:'ease-out'});}
+
+/** Panel entrance moves only its contents, preserving stage and camera geometry. */
+const entrances = new WeakMap();
+export function revealPanel(root, side) {
+ entrances.get(root)?.cancel();
+ if(reduced())return;
+ const animation=root.animate([{opacity:.4,transform:`translateX(${side === 'left' ? -8 : 8}px)`},{opacity:1,transform:'translateX(0)'}],{duration:160,easing:'cubic-bezier(.22,.61,.36,1)'});
+ entrances.set(root,animation);
+ animation.finished.then(()=>{if(entrances.get(root)===animation)entrances.delete(root);},()=>{});
+}
