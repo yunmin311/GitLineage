@@ -268,6 +268,11 @@ for (const href of exampleHrefs) {
   await page.waitForSelector('svg .node-hit', { timeout: 180_000 });
   await page.waitForTimeout(800);
   await page.locator('svg .node.is-subject .node-hit').first().dispatchEvent('click');
+  // Classification summaries intentionally precede members; expand their real
+  // reading controls instead of expecting the old flat 97-row entity detail.
+  await page.waitForSelector('.drawer-inner .d-classification summary', { timeout: 60_000 });
+  await page.locator('.drawer-inner .d-classification.category-level-1 > summary').first().click();
+  await page.locator('.drawer-inner .d-classification.category-level-2 > summary').first().click();
   await page.waitForSelector('.drawer-inner .bundle-row', { timeout: 60_000 });
   await page.waitForTimeout(400);
 
@@ -452,6 +457,10 @@ for (const [label, width, height] of [['1920x1080', 1920, 1080], ['1280x800', 12
   await panelScroll(page, label, width, '.rail-scroll', 'rail');
 
   await page.locator('svg .node.is-subject .node-hit').first().dispatchEvent('click');
+  // Classification summaries replace the old initially visible flat member list.
+  // Open them to exercise the same full-content Drawer scroll and edge pixels.
+  await page.waitForSelector('.drawer-inner .d-classification summary', { timeout: 60_000 });
+  await page.locator('.drawer-inner .d-classification').evaluateAll(ns=>ns.forEach(n=>(n as HTMLDetailsElement).open=true));
   await page.waitForSelector('.drawer-inner .bundle-row', { timeout: 60_000 });
   await panelScroll(page, label, width, '.drawer-inner', 'Drawer');
   await page.close();

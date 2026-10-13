@@ -17,7 +17,7 @@ export function spatialLayout({subjectId,edges,groups=[],compact=false,previous=
  // entities keep one owner and one identity; the other links remain cross references.
  for(const [f,branches]of families){
   const vertical=compact&&f==='dependency', sign=f==='ancestry'||f==='source-identity'?-1:1;
-  const heights=branches.map(g=>vertical?(g.peers.filter(id=>owners.get(id)===g).length>1?768:256):Math.max(128,g.peers.filter(id=>owners.get(id)===g).length*76+48));
+  const heights=branches.map(g=>g.reserve|| (vertical?(g.peers.filter(id=>owners.get(id)===g).length>1?768:256):Math.max(128,g.peers.filter(id=>owners.get(id)===g).length*76+48)));
   let cursor=-heights.reduce((a,b)=>a+b,0)/2;
   for(let k=0;k<branches.length;k++){
    const g=branches[k],band=heights[k],center=cursor+band/2;cursor+=band;
@@ -114,8 +114,9 @@ export function spatialRoute(edge,positions,fanIndex=0,fanCount=1){
 /** Tidy local forests with measured subtree footprints. The forest is only a
  * placement scaffold: all original DAG edges, including additional parents and
  * cycles, are routed afterwards. Canonical anchors cannot be moved here. */
-export function spatialExpansion({anchors,nodes,edges,previous=new Map(),compact=false}){
+export function spatialExpansion({anchors,nodes,edges,previous=new Map(),compact=false,preserve=false}){
  const occupied=new Map(anchors),ids=new Set(nodes.map(n=>n.id)),children=new Map(),owned=new Set(anchors.keys());
+ if(preserve)for(const id of ids){const old=previous.get(id);if(old&&old.angle===(compact?Math.PI/2:0))occupied.set(id,{...old});}
  // Breadth-first ownership ensures the first real reachable parent supplies
  // spatial context. Additional incoming edges never duplicate the object.
  const queue=[...anchors.keys()];
@@ -146,6 +147,20 @@ export function spatialExpansion({anchors,nodes,edges,previous=new Map(),compact
   let shift={x:anchor.x,y:anchor.y};
   if(kids.length===1&&previous.has(kids[0])){const old=previous.get(kids[0]),local=tree.get(kids[0]);shift={x:old.x-local.x,y:old.y-local.y};}
   const collides=offset=>[...tree.values()].some(p=>[...occupied.values()].some(q=>overlaps({x:p.x+offset.x,y:p.y+offset.y},q,20)));
+  if(preserve&&[...tree.keys()].some(key=>previous.has(key))){
+   // Reserve existing objects before finding space for additions. Classification
+   // growth must not reshuffle siblings merely because a leaf gains another child.
+   for(const [key]of tree){const old=previous.get(key);if(old&&old.angle===tree.get(key).angle)occupied.set(key,{...old});}
+   for(const [key,p]of tree){if(occupied.has(key))continue;
+    const parent=edges.find(e=>e.target===key)?.source,at=occupied.get(parent)||anchor;
+    const localParent=tree.get(parent)||{x:0,y:0};
+    const desired={...p,x:at.x+p.x-localParent.x,y:at.y+p.y-localParent.y};
+    let candidate=desired,attempt=0;
+    while([...occupied.values()].some(q=>overlaps(candidate,q,20))&&attempt<600){attempt++;const step=Math.ceil(attempt/2)*(attempt%2?1:-1);candidate=vertical?{...desired,x:desired.x+step*248,y:desired.y+Math.floor(attempt/20)*100}:{...desired,x:desired.x+Math.floor(attempt/20)*280*sign,y:desired.y+step*88};}
+    occupied.set(key,candidate);
+   }
+   continue;
+  }
   const base={...shift};let attempt=0;
   while(collides(shift)&&attempt<600){attempt++;const step=Math.ceil(attempt/2)*(attempt%2?1:-1);shift=vertical?{x:base.x+step*248,y:base.y+Math.floor(attempt/30)*170}:{x:base.x+Math.floor(attempt/30)*280*sign,y:base.y+step*88};}
   for(const [key,p]of tree)occupied.set(key,{...p,x:p.x+shift.x,y:p.y+shift.y});

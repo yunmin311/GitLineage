@@ -483,6 +483,12 @@ Candidate: ${f.candidateText}`, "workspace-fragment"));
       return block;
     }
     block.append(make("p", n.kind + (n.data.path ? " \xB7 " + n.data.path : "") + (n.data.revision ? " \xB7 version " + n.data.revision.slice(0, 7) : ""), "d-quote"));
+    if(n.data.path){
+      const hierarchy=make("div",void 0,"d-hierarchy");hierarchy.append(make("p","STRUCTURE PATH","d-block-head"));
+      const path=make("ol");path.append(make("li",n.data.repository||"Repository"));
+      const segments=n.data.path.split("/").filter(Boolean);for(let i=0;i<segments.length;i++)path.append(make("li",segments[i],i===segments.length-1?"hierarchy-scope":"hierarchy-sites"));
+      hierarchy.append(path);block.append(hierarchy);
+    }
     const actions = make("div", void 0, "unified-node-actions");
     actions.append(btn("workspace-expand", "Expand nearby objects", () => expand(id)), btn("workspace-focus", "Focus here", () => focus(id)), btn("workspace-collapse", collapsed.has(id) ? "Restore neighborhood" : "Collapse neighborhood", () => collapse(id)));
     block.append(actions);

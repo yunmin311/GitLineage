@@ -42,3 +42,12 @@ test('presentation forests measure subtrees while retaining additional parents a
  const boxes=[...p.values()];for(let i=0;i<boxes.length;i++)for(let j=i+1;j<boxes.length;j++)assert.ok(Math.abs(boxes[i]!.x-boxes[j]!.x)>=216||Math.abs(boxes[i]!.y-boxes[j]!.y)>=52);
  }
 });
+
+test('classification growth reserves all existing neighborhoods before placing another branch',async()=>{
+ const {spatialExpansion}=await import('../src/web/client/lib/spatial.mjs');
+ const anchors=new Map([['a',{x:0,y:0,angle:Math.PI/2}],['b',{x:360,y:0,angle:Math.PI/2}]]);
+ const first=spatialExpansion({anchors,nodes:[{id:'scope-a'},{id:'member-a'}],edges:[{source:'a',target:'scope-a'},{source:'scope-a',target:'member-a'}],compact:true,preserve:true});
+ const next=spatialExpansion({anchors,nodes:[{id:'scope-a'},{id:'member-a'},{id:'scope-b'},{id:'member-b'}],edges:[{source:'a',target:'scope-a'},{source:'scope-a',target:'member-a'},{source:'b',target:'scope-b'},{source:'scope-b',target:'member-b'}],previous:first,compact:true,preserve:true});
+ assert.deepEqual(next.get('member-a'),first.get('member-a'));assert.deepEqual(next.get('scope-a'),first.get('scope-a'));
+ const points=[...next.values()];for(let i=0;i<points.length;i++)for(let j=i+1;j<points.length;j++)assert.ok(Math.abs(points[i]!.x-points[j]!.x)>=236||Math.abs(points[i]!.y-points[j]!.y)>=72);
+});

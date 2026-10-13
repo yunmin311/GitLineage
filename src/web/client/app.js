@@ -1,4 +1,5 @@
-import {spatialLayout, spatialRoute, ORIGIN} from './lib/spatial.mjs';
+import {classifyRelationships} from './lib/classification.mjs';
+import {spatialLayout, spatialExpansion, spatialRoute, ORIGIN} from './lib/spatial.mjs';
 import {buildView as projectCanonicalView} from '../view-model.ts';
 import {captureMotion, transitionScene, transitionCamera, stopMotion, revealInstrument} from './lib/motion.mjs';
 import { mountRepositoryExplorer } from './lib/repository-explorer.mjs';
@@ -913,12 +914,48 @@ function provenanceLayers(){return {ancestry:true,'source-identity':true,depende
 function exploredIds(plate){
  if(!plate.expanded)return [];
  const limit=aggregatePages.get(plate.key)||memberPageSize();
- const matching=state.query?plate.memberEdgeIds.filter(id=>{const e=state.view.edges.find(e=>e.id===id);return [e?.source,e?.target].some(id=>state.view.nodes.find(n=>n.id===id)?.label.toLowerCase().includes(state.query.toLowerCase()));}):plate.memberEdgeIds;
+ const taxonomy=classifyRelationships(state.view,plate);
+ const ordered=taxonomy.ordered.filter(id=>!taxonomy.paths.get(id)?.some(n=>state.expandedBundles.has('closed:'+n.id)));
+ const matching=state.query?ordered.filter(id=>{const e=state.view.edges.find(e=>e.id===id);return [e?.source,e?.target].some(id=>state.view.nodes.find(n=>n.id===id)?.label.toLowerCase().includes(state.query.toLowerCase()));}):ordered;
  return matching.slice(0,limit);
 }
 function authoredPositions(view,edges,composition){
- const groups=composition.plates.map(plate=>({key:plate.key,family:plate.family,peers:plate.memberEdgeIds.map(id=>view.edges.find(e=>e.id===id)).filter(Boolean).map(e=>e.source===view.subject.id?e.target:e.source)}));
- const positions=spatialLayout({subjectId:view.subject.id,focusId:view.subject.id,edges,groups,compact:isPhone(),previous:state.positions});
+ const taxonomies=new Map(composition.plates.map(p=>[p.key,classifyRelationships(view,p)]));
+ const classified=new Set();const categoryNodes=[],navigation=[];
+ const groups=composition.plates.map(plate=>{
+  const taxonomy=taxonomies.get(plate.key),shown=new Set(edges.filter(e=>plate.memberEdgeIds.includes(e.id)).map(e=>e.id));
+  const peers=plate.memberEdgeIds.filter(id=>edges.some(e=>e.id===id)).map(id=>view.edges.find(e=>e.id===id)).filter(Boolean).map(e=>e.source===view.subject.id?e.target:e.source);
+  if(!plate.expanded||!taxonomy.categories.length)return {key:plate.key,family:plate.family,peers};
+  const closed=n=>state.expandedBundles.has('closed:'+n.id);
+  for(const n of taxonomy.categories){
+   if(taxonomy.categories.some(parent=>parent.id===n.parent&&closed(parent)))continue;
+   categoryNodes.push(n);navigation.push({source:n.parent,target:n.id,presentation:'branch',kind:'observation'});
+  }
+  for(const id of shown){const edge=view.edges.find(e=>e.id===id);if(!edge)continue;
+   const peer=edge.source===view.subject.id?edge.target:edge.source;
+   if(classified.has(peer))continue;classified.add(peer);
+   const parent=taxonomy.paths.get(id)?.at(-1);if(parent)navigation.push({source:parent.id,target:peer,presentation:'branch',kind:'observation'});
+  }
+  const localNodes=categoryNodes.filter(n=>taxonomy.categories.some(c=>c.id===n.id));
+  const localLinks=navigation.filter(e=>e.source==='bundle:'+plate.key||taxonomy.categories.some(c=>c.id===e.source));
+  const measured=spatialExpansion({anchors:new Map([['bundle:'+plate.key,{x:0,y:0,angle:isPhone()?Math.PI/2:0}]]),nodes:[...localNodes,...localLinks.filter(e=>!e.target.startsWith('category:')).map(e=>({id:e.target}))],edges:localLinks,compact:isPhone()});
+  const cross=[...measured.values()].map(p=>isPhone()?p.x:p.y);
+  return {key:plate.key,family:plate.family,peers:[],reserve:Math.max(256,Math.max(...cross)-Math.min(...cross)+(isPhone()?256:112))};
+ });
+ const base=spatialLayout({subjectId:view.subject.id,edges:edges.filter(e=>!classified.has(e.source)&&!classified.has(e.target)),groups,compact:isPhone(),previous:state.positions});
+ if(categoryNodes.length){
+  for(const [id]of base){const old=state.positions.get(id);if(old)base.set(id,{...old});}
+  const overlaps=(a,b)=>Math.abs(a.x-b.x)<((a.width||216)+(b.width||216))/2+20&&Math.abs(a.y-b.y)<((a.height||52)+(b.height||52))/2+20;
+  for(const [id,p]of base){if(state.positions.has(id)||id===view.subject.id||id.startsWith(BUNDLE_ID_PREFIX))continue;
+   let candidate=p,attempt=0;const obstacles=[...[...base].filter(([key])=>key!==id).map(([,q])=>q),...state.positions.values()];
+   while(obstacles.some(q=>overlaps(candidate,q))&&attempt<600){attempt++;candidate={...p,x:p.x+(isPhone()?(attempt%2)*248:Math.floor(attempt/12)*280),y:p.y+Math.ceil(attempt/2)*88};}base.set(id,candidate);
+  }
+ }
+ const positions=spatialExpansion({anchors:base,nodes:[...categoryNodes,...[...classified].map(id=>({id}))],edges:navigation,previous:state.positions,compact:isPhone(),preserve:true});
+ for(const plate of composition.plates){const taxonomy=taxonomies.get(plate.key);for(const n of taxonomy.categories){const p=positions.get(n.id);if(p)Object.assign(p,{aggregateKey:plate.key,parentId:n.parent});}}
+ for(const link of navigation){const p=positions.get(link.target),parent=positions.get(link.source);if(p&&parent)Object.assign(p,{aggregateKey:parent.aggregateKey,parentId:link.source});}
+ state.classifications=categoryNodes;state.classificationLinks=navigation.filter(e=>e.target.startsWith('category:'));
+
  state.positions=positions;state.placementOverflow=0;return positions;
 }
 const PERSPECTIVES=[['origins','Origins',['ancestry','source-identity']],['dependencies','Dependencies',['dependency']],['references','References',['attribution']]];
@@ -941,6 +978,12 @@ function renderPerspective(){
  if(selected)bar.append(el('button',{type:'button',id:'graph-explore-node',text:'Explore '+nameOf(state.selectedNodeId),onclick:()=>workspace?workspace.expand(state.selectedNodeId):void exploreNode(state.selectedNodeId)}));
  if(state.focusId)bar.append(el('span',{class:'graph-focus-label',text:'Focus: '+nameOf(state.focusId)}));
  if(bar.childElementCount)host.append(bar);
+ if(isPhone()&&state.selectedNodeId&&state.positions.get(state.selectedNodeId)?.parentId){
+  const labels=[];let id=state.positions.get(state.selectedNodeId).parentId;const seen=new Set();
+  while(id&&!seen.has(id)){seen.add(id);const category=state.classifications?.find(n=>n.id===id);const plate=id.startsWith(BUNDLE_ID_PREFIX)?state.composition?.plates.find(p=>BUNDLE_ID_PREFIX+p.key===id):null;if(category)labels.unshift(category.label);else if(plate)labels.unshift(plate.label.replace(/ ×\d+$/, ''));id=state.positions.get(id)?.parentId;}
+  host.append(el('p',{class:'graph-focus-path',text:labels.join(' → ')}));
+ }
+
  if(state.perspective==='origins'){
   const relations=visibleCandidates(state.view);if(relations.length&&relations.length<=6){const key=el('div',{class:'graph-relation-key'});for(const edge of relations)key.append(el('button',{type:'button',text:edge.label,class:'st-'+edge.status,'aria-pressed':String(state.selectedEdgeId===edge.id),onclick:()=>selectEdge(edge.id)}));host.append(key);}
  }
@@ -1334,6 +1377,7 @@ function draw() {
   const before = captureMotion(canvas);
   const focusedEdge = document.activeElement?.getAttribute('data-edge-id');
   const focusedNode = document.activeElement?.getAttribute('data-node-id');
+  const focusedCategory=document.activeElement?.getAttribute('data-category-id');
   canvas.replaceChildren();
   if (!view) return;
 
@@ -1402,6 +1446,10 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
   const nodeLayer = svgEl('g', { class: 'node-layer' });
   const memberEdgeLayer = svgEl('g', {class:'member-edge-layer'});
 
+  const mobilePath=new Set();let pathId=isPhone()&&state.activeGroup?state.selectedNodeId:null;
+  while(pathId&&!mobilePath.has(pathId)){mobilePath.add(pathId);pathId=positions.get(pathId)?.parentId;}
+  const selectedParent=positions.get(state.selectedNodeId)?.parentId;
+  const mute=id=>mobilePath.size>0&&!mobilePath.has(id)&&positions.get(id)?.parentId!==selectedParent;
   const query = state.query ? state.query.toLowerCase() : '';
   const matchedNodes = new Set(searchNodes(view, query));
   const matchedEdges = new Set(searchEdges(view, query));
@@ -1414,8 +1462,8 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
     if(aggregate&&expandedEdgeIds.has(edge.id)){
       const peer=edge.source===view.subject.id?edge.target:edge.source;
       const memberPeers=edges.filter(e=>aggregate.memberEdgeIds.includes(e.id)).sort((a,b)=>{const pa=positions.get(a.source===view.subject.id?a.target:a.source),pb=positions.get(b.source===view.subject.id?b.target:b.source);return Math.abs(Math.cos(positions.get(BUNDLE_ID_PREFIX+aggregate.key)?.angle||0))>.7?pa.y-pb.y:(pa.x-pb.x||pa.y-pb.y);});
-      const route=spatialRoute({source:BUNDLE_ID_PREFIX+aggregate.key,target:peer,presentation:positions.get(peer)?.aggregateKey===aggregate.key?'branch':undefined},positions,memberPeers.indexOf(edge),memberPeers.length);
-      if(route){const nav=svgEl('g',{class:'group-navigation'+(positions.get(peer)?.aggregateKey!==aggregate.key?' is-cross-reference':''), 'data-navigation-source':BUNDLE_ID_PREFIX+aggregate.key,'data-navigation-target':peer});nav.append(svgEl('path',{d:route.path,class:'group-navigation-line'}),svgEl('title',{},['Member of '+aggregate.label+'; select the object to read its actual relationship.']));memberEdgeLayer.append(nav);}
+      const route=spatialRoute({source:positions.get(peer)?.aggregateKey===aggregate.key?(positions.get(peer)?.parentId||BUNDLE_ID_PREFIX+aggregate.key):BUNDLE_ID_PREFIX+aggregate.key,target:peer,presentation:positions.get(peer)?.aggregateKey===aggregate.key?'branch':undefined},positions,memberPeers.indexOf(edge),memberPeers.length);
+      if(route){const nav=svgEl('g',{class:'group-navigation'+(mute(peer)?' is-neighborhood-muted':'')+(positions.get(peer)?.aggregateKey!==aggregate.key?' is-cross-reference':''), 'data-navigation-source':positions.get(peer)?.aggregateKey===aggregate.key?(positions.get(peer)?.parentId||BUNDLE_ID_PREFIX+aggregate.key):BUNDLE_ID_PREFIX+aggregate.key,'data-navigation-target':peer});nav.append(svgEl('path',{d:route.path,class:'group-navigation-line'}),svgEl('title',{},['Member of '+aggregate.label+'; select the object to read its actual relationship.']));memberEdgeLayer.append(nav);}
       if(state.selectedEdgeId!==edge.id)continue;
     }
     const { fanIndex, fanCount } = fanSlot(edge, edges);
@@ -1498,7 +1546,7 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
     const action=(label,x,fn,cls)=>{const g=svgEl('g',{role:'button',tabindex:'0','aria-label':label,class:cls});g.append(svgEl('text',{x,y:top+69,class:'plate-row-expand'},[label]),svgEl('rect',{x:x-4,y:top+44,width:90,height:44,class:'plate-row-hit'}));const run=e=>{e.stopPropagation();fn();};g.addEventListener('click',run);g.addEventListener('mobile-tap',run);g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();run(e);}});group.append(g);};
     if(plate.expanded){
       action('Focus',left+12,()=>focusGraphGroup(plate.key),'aggregate-focus');
-      if(shown<plate.count)action('Explore more',left+110,()=>{aggregatePages.set(plate.key,shown+memberPageSize());draw();},'aggregate-more');
+      if(shown<plate.count)action('Explore more',left+110,()=>{aggregatePages.set(plate.key,(aggregatePages.get(plate.key)||memberPageSize())+memberPageSize());draw();},'aggregate-more');
       else if(shown<plate.count)action('Find member',left+110,()=>{toggleSearch(true);$('search-input').focus();},'aggregate-search');
     }else{group.append(svgEl('text',{x:left+12,y:top+69,class:'plate-row-more'},['Explore neighborhood']));}
     const activate=e=>{e.stopPropagation();if(e.target?.closest('.aggregate-more, .aggregate-search, .aggregate-focus'))return;toggleBundle(plate.key);};
@@ -1506,6 +1554,17 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
     nodeLayer.append(group);
   }
 
+  for(const link of state.classificationLinks||[]){
+    const route=spatialRoute(link,positions);if(route){const nav=svgEl('g',{class:'group-navigation classification-navigation'+(mute(link.target)?' is-neighborhood-muted':''),'data-navigation-source':link.source,'data-navigation-target':link.target});nav.append(svgEl('path',{d:route.path,class:'group-navigation-line'}));memberEdgeLayer.append(nav);}
+  }
+  for(const category of state.classifications||[]){
+    const p=positions.get(category.id);if(!p)continue;
+    const closed=state.expandedBundles.has('closed:'+category.id);
+    const g=svgEl('g',{class:'classification-node category-level-'+category.level+(mute(category.id)?' is-neighborhood-muted':''),role:'button',tabindex:'0','aria-expanded':String(!closed),'aria-label':category.label+', '+category.edgeIds.length+' relationships. '+category.basis,'data-category-id':category.id,'data-parent-id':category.parent});
+    g.append(svgEl('rect',{x:p.x-108,y:p.y-26,width:216,height:52,rx:category.level===1?13:3,class:'classification-box'}),svgEl('text',{x:p.x-94,y:p.y-4,class:'classification-label'},[(closed?'+ ':'− ')+category.label]),svgEl('text',{x:p.x-94,y:p.y+15,class:'classification-caption'},[category.edgeIds.length+' relationships · '+(category.level===1?'scope':'declaration sites')]),svgEl('title',{},[category.basis+' · display grouping only']));
+    const activate=e=>{e.preventDefault();e.stopPropagation();if(closed)state.expandedBundles.delete('closed:'+category.id);else state.expandedBundles.add('closed:'+category.id);syncUrl();draw();renderDrawer();};
+    g.addEventListener('click',activate);g.addEventListener('mobile-tap',activate);g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' ')activate(e);});nodeLayer.append(g);
+  }
   nodeLayer.append(memberEdgeLayer);
 
   // Real entities require a canonical relation and an independent layout position.
@@ -1523,6 +1582,7 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
       class: [
         'node',
         position.aggregateKey ? 'aggregate-member' : '',
+        !node.isSubject&&mute(node.id)?'is-neighborhood-muted':'',
         `entity-${node.type.toLowerCase()}`,
         node.isSubject ? 'is-subject' : '',
         state.selectedNodeId === node.id ? 'is-selected' : '',
@@ -1530,6 +1590,7 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
       ].filter(Boolean).join(' '),
     });
     group.dataset.nodeId = node.id;
+    if(position.parentId)group.dataset.parentId=position.parentId;
     if(position.aggregateKey)group.dataset.aggregateKey=position.aggregateKey;
     group.setAttribute('tabindex', '0');
     group.setAttribute('role','button');group.setAttribute('aria-label',node.label);
@@ -1587,7 +1648,11 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
         node.label,
       ]),
     );
-    if (!node.isSubject && !node.fact) group.append(svgEl('text',{x:position.x-NODE_W/2+10,y:position.y+15,class:'node-fact'},[node.type.toUpperCase()]));
+    if (!node.isSubject && !node.fact) {
+      let parent=position.parentId,scope;
+      while(parent){const category=state.classifications?.find(n=>n.id===parent);if(!category)break;if(category.level===1)scope=category.label;parent=category.parent;}
+      group.append(svgEl('text',{x:position.x-NODE_W/2+10,y:position.y+15,class:'node-fact'},[node.type.toUpperCase()+(scope?' · '+scope.toUpperCase():'')]));
+    }
     if (node.fact) {
       group.append(
         svgEl('text', {
@@ -1628,6 +1693,7 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
   if (focusedNode) {
     Array.from(canvas.querySelectorAll('[data-node-id]')).find(node => node.getAttribute('data-node-id') === focusedNode)?.focus({ preventScroll: true });
   }
+  if(focusedCategory)[...canvas.querySelectorAll('[data-category-id]')].find(n=>n.dataset.categoryId===focusedCategory)?.focus({preventScroll:true});
   renderPerspective();
   let empty=$('graph-provenance-empty');if(!empty){empty=el('div',{id:'graph-provenance-empty',class:'graph-provenance-empty'});$('stage').append(empty);}
   empty.replaceChildren();setHidden(empty,edges.length>0||composition.plates.length>0||canvas.querySelectorAll('.unified-node').length>0);
@@ -1978,10 +2044,14 @@ function phoneFit(targetId) {
  const canvas=$('canvas'),rootId=state.view?.subject.id;
  const id=targetId||rootId;
  const target=state.positions.get(id||rootId)||ORIGIN;
- const parent=target.aggregateKey?state.positions.get(BUNDLE_ID_PREFIX+target.aggregateKey):null;
+ const parentId=target.parentId||(target.aggregateKey?BUNDLE_ID_PREFIX+target.aggregateKey:null);
+ const parent=parentId?state.positions.get(parentId):null;
  const root=state.positions.get(rootId)||target;
  const box=p=>({getBBox:()=>({x:p.x-108,y:p.y-(p.height||52)/2,width:216,height:p.height||52})});
- const connection=targetId&&parent?[...canvas.querySelectorAll('.group-navigation')].find(n=>n.dataset.navigationTarget===id&&n.dataset.navigationSource===BUNDLE_ID_PREFIX+target.aggregateKey)?.querySelector('path'):null;
+ const connection=targetId&&parent?[...canvas.querySelectorAll('.group-navigation')].find(n=>n.dataset.navigationTarget===id&&n.dataset.navigationSource===parentId)?.querySelector('path'):null;
+ // Short touch landscapes locate the readable entity; its parent path stays in
+ // the navigation. A long obstacle-avoiding connector must not shrink it away.
+ if(targetId&&canvas.clientHeight<400){fitGraphBoxes([box(target)]);return;}
  fitGraphBoxes([box(target),...(parent?[box(parent)]:[]),...(connection?[connection]:[]),...(!targetId&&id!==rootId?[box(root)]:[])]);
 }
 function renderOverview(){
@@ -1991,7 +2061,7 @@ function renderOverview(){
  const map=svgEl('svg',{viewBox:`${minX} ${minY} ${maxX-minX} ${maxY-minY}`,role:'button',tabindex:0,'aria-label':'Graph overview: click a neighborhood; Enter returns to the repository'});
  for(const n of $('canvas').querySelectorAll('.group-navigation-line,.unified-line,.edge-line'))map.append(svgEl('path',{d:n.getAttribute('d'),fill:'none',stroke:'var(--rule-2)','stroke-width':5}));
  for(const [id,p]of points)map.append(svgEl('rect',{x:p.x-70,y:p.y-20,width:140,height:40,rx:5,fill:id===state.view.subject.id?'var(--brand)':'var(--brand-edge)'}));
- const focus=id=>id.startsWith(BUNDLE_ID_PREFIX)?focusGraphGroup(id.slice(BUNDLE_ID_PREFIX.length)):workspace?.has(id)?workspace.focus(id):(selectNode(id),phoneFit(id));
+ const focus=id=>id.startsWith('category:')?phoneFit(id):id.startsWith(BUNDLE_ID_PREFIX)?focusGraphGroup(id.slice(BUNDLE_ID_PREFIX.length)):workspace?.has(id)?workspace.focus(id):(selectNode(id),phoneFit(id));
  map.onclick=e=>{const at=new DOMPoint(e.clientX,e.clientY).matrixTransform(map.getScreenCTM().inverse());const nearest=points.reduce((a,b)=>Math.hypot(b[1].x-at.x,b[1].y-at.y)<Math.hypot(a[1].x-at.x,a[1].y-at.y)?b:a);focus(nearest[0]);};
  map.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();focus(state.view.subject.id);}};
  host.append(el('span',{text:'Overview · '+points.length+' objects'}),map);
@@ -2400,7 +2470,21 @@ function renderNodeDrawer() {
 
   wrap.append(el('p', { class: 'd-eyebrow', text: 'ENTITY' }));
   wrap.append(el('p', { class: 'd-head', text: node.label }));
-  wrap.append(el('p', { class: 'd-sub' }, [el('span', { class: 'mono', text: node.id })]));
+  const technical=el('details',{class:'workspace-technical'});technical.append(el('summary',{text:'Technical identity'}),el('p',{class:'mono',text:node.id}));
+  const hierarchy=el('div',{class:'d-hierarchy'});hierarchy.append(el('p',{class:'d-block-head',text:'EXPLORATION PATH'}));
+  const path=el('ol');path.append(el('li',{text:view.subject.label}));
+  const plate=state.composition?.plates.find(p=>p.memberEdgeIds.some(id=>{const e=view.edges.find(e=>e.id===id);return e&&(e.source===node.id||e.target===node.id);}));
+  if(plate&&!node.isSubject){
+   path.append(el('li',{text:plate.label.replace(/ ×\d+$/, '')}));
+   const edgeId=plate.memberEdgeIds.find(id=>{const e=view.edges.find(e=>e.id===id);return e&&(e.source===node.id||e.target===node.id);});
+   const categories=classifyRelationships(view,plate).paths.get(edgeId)||[];
+   for(const n of categories)path.append(el('li',{class:n.level===1?'hierarchy-scope':'hierarchy-sites',text:n.label+' · '+n.basis}));
+   path.append(el('li',{text:node.label}));
+   const cards=view.evidenceByRelationship[edgeId]||[];
+   const sites=[...new Set(cards.filter(c=>c.type==='package_manifest').map(c=>(c.data?.data||c.data)?.manifest_path).filter(Boolean))];
+   hierarchy.append(path);if(sites.length)hierarchy.append(el('p',{class:'d-sub',text:'Recorded declaring sites: '+sites.join(' · ')}));wrap.append(hierarchy);
+  }
+
 
   const facts = el('div', { class: 'd-block' });
   facts.append(el('p', { class: 'd-block-head', text: 'FACTS' }));
@@ -2435,15 +2519,14 @@ function renderNodeDrawer() {
       el('span', { class: 'mono', text: group.manifest ? group.key : `${group.key} · no manifest` }),
       el('span', { class: 'd-group-count r-mono', text: String(group.members.length) }),
     ]));
-    for (const edge of group.members) {
-      const other = edge.source === node.id ? edge.target : edge.source;
-      const row = el('button', { class: 'bundle-row', text: `${edge.label} · ${nameOf(other)}` });
-      row.addEventListener('click', () => {
-        state.selectedNodeId = '';
-        selectEdge(edge.id);
-      });
-      section.append(row);
-    }
+    const appendRow=(host,edge)=>{const other=edge.source===node.id?edge.target:edge.source;const row=el('button',{class:'bundle-row',text:edge.label+' · '+nameOf(other)});row.addEventListener('click',()=>{state.selectedNodeId='';selectEdge(edge.id);});host.append(row);};
+    const taxonomy=classifyRelationships(view,{key:group.key,family:group.members[0]?.family,count:group.members.length,memberEdgeIds:group.members.map(e=>e.id)});
+    if(taxonomy.categories.length){
+      const appendCategory=(host,n)=>{const details=el('details',{class:'d-classification category-level-'+n.level});details.append(el('summary',{text:n.label+' · '+n.edgeIds.length}),el('p',{class:'d-basis',text:n.basis+' · navigation grouping, not a repository relationship'}));
+       if(n.children.length)for(const child of n.children)appendCategory(details,child);else for(const id of n.edgeIds){const e=group.members.find(e=>e.id===id);if(e)appendRow(details,e);}host.append(details);};
+      for(const n of taxonomy.roots)appendCategory(section,n);
+    }else for(const edge of group.members)appendRow(section,edge);
+
     relBlock.append(section);
   }
   wrap.append(relBlock);
@@ -2454,6 +2537,7 @@ function renderNodeDrawer() {
     actions.append(link);
     wrap.append(actions);
   }
+  wrap.append(technical);
   return wrap;
 }
 
@@ -2663,7 +2747,8 @@ function fitGraphBoxes(nodes){
  const right=Math.max(...boxes.map(b=>b.x+b.width))+24,bottom=Math.max(...boxes.map(b=>b.y+b.height))+padding;
  const viewport={width:canvas.clientWidth,height:canvas.clientHeight};
  const rail=!isPhone()&&visiblePanels(panels).rail?320:0,drawer=!isPhone()&&visiblePanels(panels).drawer?400:0;
- const hud=$('viewport-hud').getBoundingClientRect().height+(isPhone()&&canvas.clientHeight>=600?80:0);
+ const overviewSpace=$('graph-overview')?.getBoundingClientRect().height||56;
+ const hud=$('viewport-hud').getBoundingClientRect().height+(isPhone()&&canvas.clientHeight>=600?Math.max(80,overviewSpace+24):0);
  const toolbar=$('graph-perspectives')?.offsetHeight||110;
  const availableHeight=Math.max(44,viewport.height-hud-toolbar-32);
  const scale=Math.max(1/1.2,(right-x)/Math.max(240,viewport.width-rail-drawer-48),(bottom-y)/availableHeight);
@@ -2681,7 +2766,7 @@ function focusGraphGroup(key){
   state.activeGroup=key;if(first){state.selectedNodeId=first.dataset.nodeId;state.selectedEdgeId='';draw();renderDrawer();syncUrl();}phoneFit(first?.dataset.nodeId);return;
  }
 
- fitGraphBoxes([canvas.querySelector('.node-box.is-subject'),group?.querySelector('.bundle-card-box'),...members.map(n=>n.querySelector('.node-box'))]);
+ fitGraphBoxes([canvas.querySelector('.node-box.is-subject'),group?.querySelector('.bundle-card-box'),...members.map(n=>n.querySelector('.node-box')),...[...canvas.querySelectorAll('.classification-node')].filter(n=>state.positions.get(n.dataset.categoryId)?.aggregateKey===key).map(n=>n.querySelector('.classification-box'))]);
 }
 
 function fit() {
@@ -2689,7 +2774,7 @@ function fit() {
   const canvas = $('canvas');
   if(isPhone() && canvas.clientHeight<400){phoneFit();return;}
   if(isPhone()){phoneFit();return;}
-  fitGraphBoxes([...canvas.querySelectorAll('.bundle-card-box, .node-box')]);
+  fitGraphBoxes([...canvas.querySelectorAll('.bundle-card-box, .node-box, .classification-box')]);
 }
 
 // --------------------------------------------------------------------- boot

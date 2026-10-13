@@ -2364,3 +2364,28 @@ body.mobile-explorer .band-note { display: -webkit-box; -webkit-line-clamp: 2; -
 .unified-node.kind-file .node-box{fill:var(--surface-hi);stroke:var(--rule-2)}
 .unified-file-fold{fill:none;stroke:var(--rule-2);stroke-width:1.5}
 .kind-structure .unified-line{stroke:var(--ink-3);stroke-width:1.4}
+
+/* Display hierarchy: scope capsules, declaration brackets, canonical entity cards. */
+.classification-box { fill:var(--paper); stroke:var(--brand-edge); stroke-width:1; }
+.category-level-2 .classification-box { fill:transparent; stroke:var(--rule-2); stroke-dasharray:3 3; }
+.classification-label { font:600 12px var(--sans); fill:var(--ink); }
+.classification-caption { font:10px var(--sans); fill:var(--ink-3); }
+.classification-node { cursor:pointer; }
+.classification-node:focus-visible .classification-box { stroke:var(--brand);stroke-width:2; }
+.d-hierarchy { margin:16px 0; padding:12px; border-left:3px solid var(--brand-edge); background:var(--paper); }
+body .d-hierarchy > .d-block-head { position:static;margin:0;padding:0;background:transparent; }
+.d-hierarchy ol { list-style:none; margin:8px 0;padding:0; }
+.d-hierarchy li { padding:6px 0 6px 12px;border-left:1px solid var(--rule-2);font-size:12px; }
+.d-hierarchy .hierarchy-scope { font-weight:600; }
+.d-hierarchy .hierarchy-sites { margin-left:12px;color:var(--ink-3); }
+.d-classification { margin:8px 0; border-left:2px solid var(--brand-edge);padding-left:12px; }
+.d-classification details { margin:8px 0; }
+.d-classification summary { cursor:pointer;min-height:44px;display:flex;align-items:center;gap:8px;font-size:12px; }
+.d-classification .d-basis { color:var(--ink-3);font-size:11px;line-height:1.6; }
+
+.d-classification.category-level-1 > summary { border:1px solid var(--brand-edge);border-radius:10px;padding:0 10px;font-weight:600; }
+.d-classification.category-level-2 { border-left:1px dashed var(--rule-2); }
+
+.is-neighborhood-muted { opacity:.18; }
+.graph-focus-path { margin:6px 0;color:var(--ink-2);font-size:11px;line-height:1.5; }
+@media(max-height:500px) and (max-width:900px){.mobile-explorer .graph-focus-path{display:none}}
