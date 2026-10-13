@@ -191,6 +191,7 @@ function syncUrl(replace = true) {
   });
   const params = new URLSearchParams(query);
   params.set('perspective', state.perspective);
+  params.set('neighborhoods', JSON.stringify([...aggregatePages]));
   if (isPhone()) params.set('mobile', mobile.view);
   const next = `${repositoryPath(state.repository)}${params.size ? '?' + params : ''}`;
   if (window.location.pathname + window.location.search === next) return;
@@ -208,6 +209,13 @@ function readUrlState() {
   state.layers = urlState.layers ? parseLayerState(urlState.layers) : provenanceLayers();
   state.perspective = new URLSearchParams(window.location.search).get('perspective') || (urlState.layers ? 'custom' : 'origins');
   state.expandedBundles = new Set(urlState.bundles ? urlState.bundles.split(',') : []);
+  aggregatePages.clear();
+  try {
+    const saved=JSON.parse(new URLSearchParams(window.location.search).get('neighborhoods')||'[]');
+    if(Array.isArray(saved))for(const item of saved){
+      if(Array.isArray(item)&&item.length===2&&typeof item[0]==='string'&&Number.isSafeInteger(item[1])&&item[1]>0&&item[1]<=100000)aggregatePages.set(item[0],item[1]);
+    }
+  } catch { /* Invalid URL state cannot interrupt graph loading. */ }
   if (urlState.depth) {
     const depth = Number(urlState.depth);
     if (Number.isFinite(depth)) state.depth = depth;
@@ -915,9 +923,12 @@ function exploredIds(plate){
  if(!plate.expanded)return [];
  const limit=aggregatePages.get(plate.key)||memberPageSize();
  const taxonomy=classifyRelationships(state.view,plate);
- const ordered=taxonomy.ordered.filter(id=>!taxonomy.paths.get(id)?.some(n=>state.expandedBundles.has('closed:'+n.id)));
- const matching=state.query?ordered.filter(id=>{const e=state.view.edges.find(e=>e.id===id);return [e?.source,e?.target].some(id=>state.view.nodes.find(n=>n.id===id)?.label.toLowerCase().includes(state.query.toLowerCase()));}):ordered;
- return matching.slice(0,limit);
+ // Admission precedes visibility: folding a category never loads replacements.
+ return taxonomy.ordered.slice(0,limit).filter(id=>!taxonomy.paths.get(id)?.some(n=>state.expandedBundles.has('closed:'+n.id)));
+}
+function revealRelationships(plate,ids){
+ const taxonomy=classifyRelationships(state.view,plate);
+ for(const id of ids)for(const ancestor of taxonomy.paths.get(id)||[])state.expandedBundles.delete('closed:'+ancestor.id);
 }
 function authoredPositions(view,edges,composition){
  const taxonomies=new Map(composition.plates.map(p=>[p.key,classifyRelationships(view,p)]));
@@ -1389,11 +1400,20 @@ function draw() {
   const loose = new Set(composition.looseEdgeIds);
   // Phone navigation also exposes the composition's already-promoted real relationships.
   for (const id of composition.promotedEdgeIds) loose.add(id);
-  if(!state.hasFitted&&composition.plates.length){for(const plate of [...composition.plates].sort((a,b)=>b.count-a.count).slice(0,isPhone()?1:2)){state.expandedBundles.add(plate.key);plate.expanded=true;aggregatePages.set(plate.key,isPhone()?1:3);}}
+  if(!state.hasFitted&&composition.plates.length&&!new URLSearchParams(location.search).has('neighborhoods')){for(const plate of [...composition.plates].sort((a,b)=>b.count-a.count).slice(0,isPhone()?1:2)){state.expandedBundles.add(plate.key);plate.expanded=true;aggregatePages.set(plate.key,isPhone()?1:3);}}
   const expandedEdgeIds = new Set(composition.plates.flatMap(exploredIds));
   const selectedMember = state.selectedNodeId && state.selectedNodeId !== view.subject.id;
   const selectedEdges = new Set(selectedMember ? visibleCandidates(view).filter(e=>e.source===state.selectedNodeId||e.target===state.selectedNodeId).slice(0,memberPageSize()).map(e=>e.id) : []);
-  const edges = visibleCandidates(view).filter((edge) => loose.has(edge.id) || edge.id===state.selectedEdgeId || expandedEdgeIds.has(edge.id) || selectedEdges.has(edge.id));
+  // Selection retains evidence, but cannot reopen a deliberately folded branch.
+  for(const edge of visibleCandidates(view)){
+    if(edge.id!==state.selectedEdgeId&&!selectedEdges.has(edge.id))continue;
+    const plate=composition.plates.find(p=>p.memberEdgeIds.includes(edge.id));
+    if(plate?.expanded&&!classifyRelationships(view,plate).paths.get(edge.id)?.some(n=>state.expandedBundles.has('closed:'+n.id)))expandedEdgeIds.add(edge.id);
+  }
+  const edges = visibleCandidates(view).filter(edge=>{
+    const plate=composition.plates.find(p=>p.memberEdgeIds.includes(edge.id));
+    return plate?expandedEdgeIds.has(edge.id):loose.has(edge.id)||edge.id===state.selectedEdgeId||selectedEdges.has(edge.id);
+  });
   // Allocate a two-dimensional neighborhood around the current focus. Existing
   // objects reserve their footprints before new peers and group controls arrive.
   const positions = authoredPositions(view, edges, composition);
@@ -1542,12 +1562,11 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
       svgEl('text',{x:left+12,y:top+25,class:'bundle-card-count'},[plate.label.replace(/ ×\d+$/, '')]),
       svgEl('text',{x:left+12,y:top+43,class:'plate-subtitle'},[`${plate.family==='dependency'?'DEPENDENCIES':plate.family==='attribution'?'REFERENCES':'ORIGINS'} · ${plate.count} members`])
     );
-    const shown=exploredIds(plate).length;
+    const admitted=Math.min(plate.count,aggregatePages.get(plate.key)||memberPageSize());
     const action=(label,x,fn,cls)=>{const g=svgEl('g',{role:'button',tabindex:'0','aria-label':label,class:cls});g.append(svgEl('text',{x,y:top+69,class:'plate-row-expand'},[label]),svgEl('rect',{x:x-4,y:top+44,width:90,height:44,class:'plate-row-hit'}));const run=e=>{e.stopPropagation();fn();};g.addEventListener('click',run);g.addEventListener('mobile-tap',run);g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();run(e);}});group.append(g);};
     if(plate.expanded){
       action('Focus',left+12,()=>focusGraphGroup(plate.key),'aggregate-focus');
-      if(shown<plate.count)action('Explore more',left+110,()=>{aggregatePages.set(plate.key,(aggregatePages.get(plate.key)||memberPageSize())+memberPageSize());draw();},'aggregate-more');
-      else if(shown<plate.count)action('Find member',left+110,()=>{toggleSearch(true);$('search-input').focus();},'aggregate-search');
+      if(admitted<plate.count)action('Explore more',left+110,()=>{const next=Math.min(plate.count,admitted+memberPageSize());revealRelationships(plate,classifyRelationships(view,plate).ordered.slice(admitted,next));aggregatePages.set(plate.key,next);draw();syncUrl();},'aggregate-more');
     }else{group.append(svgEl('text',{x:left+12,y:top+69,class:'plate-row-more'},['Explore neighborhood']));}
     const activate=e=>{e.stopPropagation();if(e.target?.closest('.aggregate-more, .aggregate-search, .aggregate-focus'))return;toggleBundle(plate.key);};
     group.addEventListener('click',activate);group.addEventListener('keydown',e=>{if(e.target!==group)return;if(e.key==='Enter'||e.key===' '){e.preventDefault();activate(e);}});
@@ -1562,7 +1581,11 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
     const closed=state.expandedBundles.has('closed:'+category.id);
     const g=svgEl('g',{class:'classification-node category-level-'+category.level+(mute(category.id)?' is-neighborhood-muted':''),role:'button',tabindex:'0','aria-expanded':String(!closed),'aria-label':category.label+', '+category.edgeIds.length+' relationships. '+category.basis,'data-category-id':category.id,'data-parent-id':category.parent});
     g.append(svgEl('rect',{x:p.x-108,y:p.y-26,width:216,height:52,rx:category.level===1?13:3,class:'classification-box'}),svgEl('text',{x:p.x-94,y:p.y-4,class:'classification-label'},[(closed?'+ ':'− ')+category.label]),svgEl('text',{x:p.x-94,y:p.y+15,class:'classification-caption'},[category.edgeIds.length+' relationships · '+(category.level===1?'scope':'declaration sites')]),svgEl('title',{},[category.basis+' · display grouping only']));
-    const activate=e=>{e.preventDefault();e.stopPropagation();if(closed)state.expandedBundles.delete('closed:'+category.id);else state.expandedBundles.add('closed:'+category.id);syncUrl();draw();renderDrawer();};
+    const activate=e=>{e.preventDefault();e.stopPropagation();if(closed){
+      state.expandedBundles.delete('closed:'+category.id);
+      const plate=composition.plates.find(p=>classifyRelationships(view,p).categories.some(n=>n.id===category.id));
+      if(plate&&!category.children.length){const taxonomy=classifyRelationships(view,plate),first=taxonomy.ordered.findIndex(id=>category.edgeIds.includes(id));aggregatePages.set(plate.key,Math.min(plate.count,Math.max(first+1,aggregatePages.get(plate.key)||memberPageSize())));}
+    }else state.expandedBundles.add('closed:'+category.id);syncUrl();draw();renderDrawer();};
     g.addEventListener('click',activate);g.addEventListener('mobile-tap',activate);g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' ')activate(e);});nodeLayer.append(g);
   }
   nodeLayer.append(memberEdgeLayer);
@@ -1708,6 +1731,7 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
   renderOverview();
   workspace?.settle();
   updateSearchCount();
+  if(initial)syncUrl();
 }
 
 /** Fit real glyph advances after attachment, preserving complete values in titles. */
@@ -2069,11 +2093,13 @@ function renderOverview(){
 function locateMobile(id,kind) {
   const relationIds = kind === 'edge' ? [id] : state.view.edges.filter(e=>e.source===id || e.target===id).map(e=>e.id);
   for(const edge of state.view.edges)if(relationIds.includes(edge.id)&&state.layers[edge.family]===false){state.layers[edge.family]=true;state.perspective='custom';}
-  const branch = state.composition.plates.find(p=>relationIds.some(edgeId=>p.memberEdgeIds.includes(edgeId)));
+  const branch = currentComposition(state.view).plates.find(p=>relationIds.some(edgeId=>p.memberEdgeIds.includes(edgeId)));
   if (branch) {
-    const index = branch.memberEdgeIds.findIndex(edgeId=>relationIds.includes(edgeId));
+    revealRelationships(branch,relationIds);
     state.expandedBundles.add(branch.key);
-    aggregatePages.set(branch.key, Math.max(memberPageSize(),aggregatePages.get(branch.key)||0));
+    // The selected relationship is explicitly rendered; locating it must not
+    // admit every earlier member of a large neighborhood.
+    aggregatePages.set(branch.key,Math.min(branch.count,aggregatePages.get(branch.key)||memberPageSize()));
   }
   if (kind === 'edge') {
     const edge = state.view.edges.find(e=>e.id===id);
@@ -2957,7 +2983,8 @@ boot();
 
 void mountDeepPreview(() => state.repository).then(deep => { if(deep?.capabilities.scope==='anonymous') workspace=mountRepositoryExplorer(() => state.repository, deep, {
  root:()=>state.view?.nodes.find(n=>n.id===state.view.subject.id),nodes:()=>state.view?.nodes||[],revision:()=>state.view?.revision.commit,selected:()=>state.selectedNodeId||state.selectedEdgeId,camera:()=>({box:$('canvas').getAttribute('viewBox'),zoom:state.zoom}),
- select:(id,edge=false)=>{if(isPhone()&&id&&(edge?state.selectedEdgeId:state.selectedNodeId)===id&&mobile.view==='graph'){switchMobile('evidence');return;}state.selectedNodeId=edge?'':id||'';state.selectedEdgeId=edge?id:'';draw();renderDrawer();syncUrl();},
+ positions:()=>[...state.positions],restorePositions:(saved,compact)=>{if(compact===isPhone()&&Array.isArray(saved))state.positions=new Map(saved.filter(item=>Array.isArray(item)&&item.length===2&&typeof item[0]==='string'&&Number.isFinite(item[1]?.x)&&Number.isFinite(item[1]?.y)));},
+ select:(id,edge=false,restoring=false)=>{if(restoring&&state.view?.edges.some(e=>e.id===id))edge=true;if(!restoring&&isPhone()&&id&&(edge?state.selectedEdgeId:state.selectedNodeId)===id&&mobile.view==='graph'){switchMobile('evidence');return;}state.selectedNodeId=edge?'':id||'';state.selectedEdgeId=edge?id:'';draw();renderDrawer();syncUrl();},
  draw,drawer:()=>{const previousPanels={...panels};$('drawer-inner').dataset.selectionKey='';renderDrawer();panels=previousPanels;applyPanels();},restore:c=>c&&setCamera($('canvas'),c.box,c.zoom),
  focus:(id,parentId)=>{if(isPhone())switchMobile('graph');const nodes=[...$('canvas').querySelectorAll('.node')],n=nodes.find(n=>n.dataset.nodeId===id),parent=nodes.find(n=>n.dataset.nodeId===parentId);if(n){const boxes=[n.querySelector('.node-box')];if(parent){const b=parent.querySelector('.node-box'),a=boxes[0].getBBox(),p=b.getBBox(),span=Math.max(a.x+a.width,p.x+p.width)-Math.min(a.x,p.x)+48;if(!isPhone()||span/Math.max(240,$('canvas').clientWidth-48)<=52/44)boxes.push(b);}fitGraphBoxes(boxes);}},
  dependencyEnabled:()=>state.layers.dependency,dependencies:enabled=>{state.layers.dependency=enabled;state.perspective='custom';syncUrl();},origins:()=>fit(),

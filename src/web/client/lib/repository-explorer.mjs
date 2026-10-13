@@ -88,7 +88,7 @@ function mountRepositoryExplorer(getRepository, deep, bridge) {
   function save() {
     if (!root) return;
     try {
-      const value = { version: 2, root, revision: bridge.revision(), objects: [...objects], links: [...links], positions: [...positions], collapsed: [...collapsed], hiddenLayers: [...hiddenLayers], jobs: [...jobs], history, trail, rootCamera, camera: bridge.camera(), selected: bridge.selected() };
+      const value = { version: 2, root, revision: bridge.revision(), objects: [...objects], links: [...links], positions: [...positions], canonicalPositions: bridge.positions?.(), compact: innerWidth < 768, collapsed: [...collapsed], hiddenLayers: [...hiddenLayers], jobs: [...jobs], history, trail, rootCamera, camera: bridge.camera(), selected: bridge.selected() };
       const data = JSON.stringify(value);
       if (data.length < 2e6) sessionStorage.setItem(key(), data);
     } catch {
@@ -459,7 +459,9 @@ function mountRepositoryExplorer(getRepository, deep, bridge) {
       const snapshot = restoring;
       restoring = null;
       queueMicrotask(() => {
-        bridge.select(snapshot.selected);
+        bridge.restorePositions?.(snapshot.canonicalPositions, snapshot.compact);
+        // Restoration is not a second user tap on the selected object.
+        bridge.select(snapshot.selected, links.has(snapshot.selected), true);
         bridge.restore(snapshot.camera);
       });
     }
