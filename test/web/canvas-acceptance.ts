@@ -562,14 +562,12 @@ async function rowPoint(page: Page, pattern: RegExp): Promise<{ x: number; y: nu
     const row = rows.find((r) => re.test(r.querySelector('.plate-row-label')?.textContent ?? ''));
     if (!row) {
       // Expanded aggregates now expose actual nodes and canonical edges, replacing flat rows.
-      const member = [...document.querySelectorAll<SVGGElement>('.aggregate-member')].find(n=>re.test(n.querySelector('.node-label')?.textContent ?? ''));
+      const member = [...document.querySelectorAll<SVGGElement>('.aggregate-member')].find(n=>re.test(n.querySelector('title')?.textContent || n.querySelector('.node-label')?.textContent || ''));
       if (!member) return null;
-      const id=member.dataset.nodeId;
-      const edge=[...document.querySelectorAll<SVGGElement>('.edge-group')].find(g=>g.dataset.source===id||g.dataset.target===id);
-      const path=edge?.querySelector<SVGPathElement>('.edge-hit'); if(!path)return null;
-      const at=path.getPointAtLength(edge!.dataset.target===id ? Math.max(0,path.getTotalLength()-24) : 24);
-      const point=new DOMPoint(at.x,at.y).matrixTransform(path.getScreenCTM()!);
-      const hit=document.elementFromPoint(point.x,point.y);return hit?.closest('.edge-group')===edge?{x:point.x,y:point.y}:null;
+      const target=member.querySelector('.node-hit')!;
+      const b=target.getBoundingClientRect();
+      const p={x:b.x+Math.min(30,b.width/2),y:b.y+b.height/2};
+      return document.elementFromPoint(p.x,p.y)?.closest('.node')===member?p:null;
     }
     /*
      * Click the row's HIT RECT, not the decorative group's centre.
@@ -596,6 +594,7 @@ async function rowPoint(page: Page, pattern: RegExp): Promise<{ x: number; y: nu
       found=await point();if(found)return found;
       if(!await g.locator('.aggregate-more').count())break;
       await g.locator('.aggregate-more').focus();await page.keyboard.press('Enter');
+      await g.locator('.aggregate-focus').focus();await page.keyboard.press('Enter');await page.waitForTimeout(350);
     }
   }
   return null;
@@ -725,8 +724,8 @@ async function main(): Promise<void> {
     report['01-default'] = fDefault;
     await page.screenshot({ path: `${OUT}/01-default-aggregated.png` });
 
-    check('01 the subject is the only node mass on the default paint',
-      fDefault.counts.loose === 0, `${fDefault.counts.loose} loose nodes`);
+    check('01 the subject has bounded connected member previews on the default paint',
+      fDefault.counts.loose > 0 && fDefault.counts.loose <= 6, `${fDefault.counts.loose} connected preview members`);
     check('01 evidence-supported groups are plates, not one bare count card',
       fDefault.counts.plates === 2, `${fDefault.counts.plates} plates`);
     check('01 nothing overlaps and nothing leaves the frame',
@@ -761,7 +760,7 @@ async function main(): Promise<void> {
       bandOnScreen ? `band ${bandOnScreen.left}..${bandOnScreen.right} in stage ${bandOnScreen.stage}` : 'no band');
 
     // ============================================ 02 · expanded to every member
-    const more = await affordancePoint(page, '.plate-row-more');
+    const more = await affordancePoint(page, '.aggregate-more');
     const rowsBefore = fDefault.counts.rows;
     if (more) {
       await page.mouse.click(more.x, more.y);
@@ -797,10 +796,13 @@ check('02 expanding reveals the held-back members',
 
     // ============================== 03 · a real member selected, with the Drawer
     const member = await rowPoint(page, new RegExp(MEMBER_NAME));
-    check(`03 the member "${MEMBER_NAME}" is reachable as a row`, member !== null);
+    const beforeMemberSelection=await readFrame(page);
+    check(`03 the member "${MEMBER_NAME}" is reachable as an independent node`, member !== null);
     if (member) {
       await page.mouse.click(member.x, member.y);
-      await page.waitForTimeout(800);
+      await page.waitForTimeout(400);
+      await page.locator('#drawer .bundle-row').first().click();
+      await page.waitForTimeout(400);
     }
     const fSelected = await readFrame(page);
     report['03-member-selected'] = fSelected;
@@ -818,30 +820,20 @@ check('02 expanding reveals the held-back members',
      * than a defect. Checked on every row of every plate, not only the selected one.
      */
     const rowText = await page.evaluate(() =>
-      [...document.querySelectorAll('.plate-row')].map((r) => {
-        const label = r.querySelector('.plate-row-label') as SVGGraphicsElement | null;
-        const dir = r.querySelector('.plate-row-dir') as SVGGraphicsElement | null;
-        const mark = r.querySelector('.plate-row-status') as SVGGraphicsElement | null;
-        return {
-          label: label?.textContent ?? '',
-          meta: r.querySelector('.plate-row-meta')?.textContent ?? '',
-          marked: r.querySelector('.plate-row-marker') !== null,
-          // Where the label's glyphs actually land, so a collision with the mark is
-          // measurable rather than a matter of opinion.
-          labelX: label ? label.getBBox().x : null,
-          dirRight: dir ? dir.getBBox().x + dir.getBBox().width : null,
-          markRight: mark ? mark.getBBox().x + mark.getBBox().width : null,
-        };
-      }),
-    );
+      [...document.querySelectorAll('.aggregate-member')].map(r=>{
+        const label=r.querySelector<SVGGraphicsElement>('.node-label'),box=r.querySelector<SVGGraphicsElement>('.node-box');
+        const lb=label?.getBBox(),bb=box?.getBBox();
+        return{label:label?.textContent||'',meta:r.querySelector('title')?.textContent||'',marked:r.classList.contains('is-selected'),
+          labelX:lb?.x??null,dirRight:bb?bb.x+8:null,markRight:bb?bb.x+bb.width:null,labelRight:lb?lb.x+lb.width:null};
+      }));
     report['03-rows'] = rowText;
     const nameless = rowText.filter((r) => r.label.trim() === '' && r.meta.trim() !== '');
-    check('03 every row states which claim it is', nameless.length === 0,
+    check('03 every independent member has a visible label and complete identity', rowText.length>0 && nameless.length === 0,
       nameless.map((r) => r.meta).join(', '));
     const collisions = rowText.filter(
-      (r) => r.labelX !== null && r.dirRight !== null && r.labelX < r.dirRight,
+      (r) => r.labelX !== null && r.dirRight !== null && (r.labelX < r.dirRight || (r.labelRight!==null&&r.markRight!==null&&r.labelRight>r.markRight-8)),
     );
-    check('03 no row mark collides with its label', collisions.length === 0,
+    check('03 member glyphs remain inside their node boundaries', collisions.length === 0,
       `${collisions.length} rows overlap`);
     const selectedPlate = fSelected.plates.find((p) => p.selected);
     check('03 selecting a member opens the Drawer with its real evidence',
@@ -861,7 +853,7 @@ check('02 expanding reveals the held-back members',
       fSelected.rails.drawer === 'shown' && fDefault.rails.rail === 'shown',
       'the rail was already the left column and stays it');
     check('03 selecting a member moves nothing in the world',
-      worldCamera(fSelected.camera) === worldCamera(fDefault.camera),
+      worldCamera(fSelected.camera) === worldCamera(beforeMemberSelection.camera),
       'viewBox, centre and world focal identical');
 
     // ================================ 12 · camera stability across the whole arc
@@ -875,7 +867,7 @@ check('02 expanding reveals the held-back members',
     const fClosed = await readFrame(page);
     report['12-camera-after-close'] = fClosed;
     check('12 closing the Drawer restores the shell without a refit',
-      closeDrawer && worldCamera(fClosed.camera) === worldCamera(fDefault.camera),
+      closeDrawer && worldCamera(fClosed.camera) === worldCamera(fSelected.camera),
       'the window is where it was before the Drawer opened');
 
     // ================================================= 04 · sparse real lineage
@@ -1394,7 +1386,7 @@ check('02 expanding reveals the held-back members',
     check('15 the rail key states the families this graph really has',
       fEvidence.keyRows > 0, `${fEvidence.keyRows} keyed families`);
 
-    const evidenceMore = await affordancePoint(evidence, '.plate-row-more');
+    const evidenceMore = await affordancePoint(evidence, '.aggregate-more');
     if (evidenceMore) {
       await evidence.mouse.click(evidenceMore.x, evidenceMore.y);
       await evidence.waitForTimeout(800);
@@ -1415,7 +1407,9 @@ check('02 expanding reveals the held-back members',
     const beforeEvidenceSelection=await readFrame(evidence);
     if (evidenceMember) {
       await evidence.mouse.click(evidenceMember.x, evidenceMember.y);
-      await evidence.waitForTimeout(800);
+      await evidence.waitForTimeout(400);
+      await evidence.locator('#drawer .bundle-row').first().click();
+      await evidence.waitForTimeout(400);
     }
     const fEvidenceSelected = await readFrame(evidence);
     report['17-evidence-selected'] = fEvidenceSelected;
@@ -1426,8 +1420,24 @@ check('02 expanding reveals the held-back members',
     check('17 selecting real evidence opens the Drawer with its manifest record',
       fEvidenceSelected.rails.drawer === 'shown' && /package\.json|manifest|Cargo\.toml/i.test(evidenceDrawer),
       fEvidenceSelected.drawerSections.join(' / '));
-    check('17 selecting evidence does not move the world',
-      worldCamera(fEvidenceSelected.camera) === worldCamera(beforeEvidenceSelection.camera));
+    // Selecting an offscreen/occluded peer can translate the camera to clear the
+    // newly opened Drawer. The former unconditional no-pan assertion contradicts
+    // the selected-target protection contract; retain scale and measure actual pixels.
+    const inspectedPeer=await evidence.evaluate(()=>{
+      const edge=document.querySelector<SVGGElement>('.edge-group.is-selected');
+      const root=document.querySelector<SVGGElement>('.node.is-subject')?.dataset.nodeId;
+      const id=edge?.dataset.source===root?edge?.dataset.target:edge?.dataset.source;
+      const node=[...document.querySelectorAll<SVGGElement>('.node')].find(n=>n.dataset.nodeId===id);
+      const b=node?.querySelector('.node-box')?.getBoundingClientRect();
+      const drawer=document.querySelector('#drawer')!.getBoundingClientRect();
+      const rail=document.querySelector('#rail')!.getBoundingClientRect();
+      return b?{left:b.left,right:b.right,freeLeft:rail.right,freeRight:drawer.left}:null;
+    });
+    report['17-protected-peer']=inspectedPeer;
+    check('17 reading evidence preserves zoom and clears the inspected peer from panels',
+      fEvidenceSelected.camera.scale===beforeEvidenceSelection.camera.scale&&!!inspectedPeer&&
+      inspectedPeer.left>=inspectedPeer.freeLeft&&inspectedPeer.right<=inspectedPeer.freeRight,
+      JSON.stringify(inspectedPeer));
 
     // Selected + hover: the state the ladder exists to protect.
     const evidenceRow = await rowPoint(evidence, /./);

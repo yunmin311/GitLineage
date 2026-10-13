@@ -2294,7 +2294,7 @@ body.mobile-explorer .band-note { display: -webkit-box; -webkit-line-clamp: 2; -
 
 /* Short touch landscapes reserve an uncovered reading surface. */
 @media(max-height:500px) and (max-width:900px){
- .mobile-explorer .graph-perspective-note,.mobile-explorer .graph-group-jumps,.mobile-explorer .graph-neighbor-step{display:none}
+ .mobile-explorer .graph-perspective-note{display:none}
  .mobile-explorer .graph-perspectives{top:8px;left:12px;right:12px;background:var(--paper);max-width:none;padding-bottom:6px}
  .mobile-explorer .graph-focus-label{display:none}
 }
@@ -2340,3 +2340,19 @@ body.mobile-explorer .band-note { display: -webkit-box; -webkit-line-clamp: 2; -
 }
 
 .unified-edge.is-selected .unified-line,.unified-edge:focus-visible .unified-line { stroke-width:2.5; }
+/* Independent Git log shares the accepted V3.3 surfaces and type ladder. */
+.git-history{position:absolute;inset:0;background:var(--paper);z-index:32;display:flex;flex-direction:column;min-height:0}
+.git-history header{display:flex;align-items:center;gap:16px;padding:16px 24px;border-bottom:2px solid var(--ink);background:var(--surface)}
+.git-history h2{font-size:16px;margin:0;flex:1}.git-history input,.git-history select{font:13px var(--sans);padding:8px;border:1px solid var(--rule-2);background:var(--surface-hi);border-radius:3px}
+.history-coverage{font-size:12px;color:var(--ink-2);padding:10px 24px;margin:0;border-bottom:1px solid var(--rule)}
+.history-body{display:flex;flex:1;min-height:0}.history-list{position:relative;flex:1;overflow:auto;touch-action:pan-y;overscroll-behavior:contain;padding:0 20px}.history-tracks{position:absolute;left:20px;top:0;pointer-events:none}.history-rows{min-width:0}.history-row{display:flex;flex-direction:column;justify-content:center;text-align:left;width:100%;padding:6px 14px;gap:4px;background:transparent;border:0;border-bottom:1px solid var(--rule);font:13px var(--sans);cursor:pointer;color:var(--ink)}.history-row:hover,.history-row.is-selected{background:var(--brand-wash)}.history-row.is-muted{opacity:.25}.history-message{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;font-weight:600}.history-meta{font-size:11px;color:var(--ink-3)}.history-branch{display:inline-block;margin-right:8px;background:var(--brand);color:var(--surface-hi);padding:2px 7px;border-radius:3px;font-size:11px}.history-detail{width:340px;padding:24px;border-left:1px solid var(--rule-2);background:var(--surface);overflow:auto;touch-action:pan-y}.history-detail h3{font-size:16px;line-height:1.5}.history-detail p{font-size:12px;color:var(--ink-2)}.history-detail code{word-break:break-all;font-size:11px}.history-detail .d-action{display:block;margin:10px 0;max-width:100%;overflow-wrap:anywhere;white-space:normal;text-align:left}.history-detail>button:first-child{display:none}.history-parents{display:flex;flex-wrap:wrap;gap:8px}.history-open #mobile-nav{visibility:hidden}
+@media(max-width:767px){.git-history{inset:0}.git-history header{padding:10px 12px;gap:8px;flex-wrap:wrap}.git-history h2{font-size:13px}.git-history input{flex:1;min-width:140px;width:140px}.git-history select{max-width:130px}.history-coverage{padding:8px 12px;font-size:11px}.history-list{padding:0 8px}.history-tracks{left:8px}.history-detail{display:none;width:100%;border-left:0}.show-commit .history-detail{display:block}.show-commit .history-list{display:none}.history-detail>button:first-child{display:block}.history-row{padding-left:8px}.graph-group-jumps{display:flex;max-width:100%;touch-action:pan-x}.graph-group-jumps button{max-width:230px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.graph-perspective-note{max-width:100%;font-size:11px}}
+.group-navigation-line{stroke:var(--rule-2);stroke-width:1.2;fill:none;pointer-events:none}.group-navigation-root{stroke-dasharray:4 3;stroke:var(--brand-edge)}
+.graph-overview{position:absolute;bottom:80px;left:284px;width:156px;border:1px solid var(--rule-2);border-radius:3px;background:var(--surface);padding:7px;z-index:5}.graph-overview span{font:11px var(--sans);color:var(--ink-2)}.graph-overview svg{display:block;width:100%;height:84px}.graph-overview svg rect{cursor:pointer}.graph-overview svg rect:focus{stroke:var(--ink);stroke-width:10}
+@media(max-width:1599px){.graph-overview{left:16px}}@media(max-width:767px){.graph-overview{width:110px;left:auto;right:12px;bottom:80px;padding:5px}.graph-overview svg{height:65px}.graph-overview span{font-size:10px}}
+
+.git-history .d-action{font-family:var(--sans);min-height:44px}
+
+@media(max-width:767px){.git-history input{order:3;flex-basis:calc(100% - 148px);min-width:0}.git-history select{order:4}.git-history h2{min-width:120px}}
+
+.edge-group:focus-visible .edge-line{stroke-width:2.5}

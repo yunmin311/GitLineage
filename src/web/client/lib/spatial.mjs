@@ -1,42 +1,35 @@
-/** Presentation only: focus-centred neighborhoods, rectangular collision clearance,
+/** Presentation only: relationship-owned branches, rectangular collision clearance,
  * and obstacle-aware canonical edges. No inference or graph mutation. */
 export const ORIGIN = Object.freeze({x:960,y:800});
 const W=216,H=52;
 const dimensions=p=>({w:p.width||W,h:p.height||H});
 function overlaps(a,b,gap=20){const aa=dimensions(a),bb=dimensions(b);return Math.abs(a.x-b.x)<(aa.w+bb.w)/2+gap&&Math.abs(a.y-b.y)<(aa.h+bb.h)/2+gap;}
-export function spatialLayout({subjectId,focusId=subjectId,edges,groups=[],mode='adaptive',compact=false,previous=new Map()}){
- const positions=new Map([[focusId,{...ORIGIN}]]), peers=new Map(), groupFor=new Map();
- for(const g of groups)for(const id of g.peers)groupFor.set(id,g.key);
- for(const e of edges)for(const id of [e.source,e.target])if(id!==focusId&&!peers.has(id))peers.set(id,{id,edge:e});
- if(focusId!==subjectId&&!peers.has(subjectId))peers.set(subjectId,{id:subjectId,edge:null});
- const sectors=new Map(groups.map((g,i)=>[g.key,-Math.PI/2+i*2*Math.PI/Math.max(1,groups.length)]));
- const buckets=new Map();for(const p of peers.values()){const key=groupFor.get(p.id)||'relations';if(!buckets.has(key))buckets.set(key,[]);buckets.get(key).push(p);}
- const dense=groups.length>0&&mode!=='orbit';
- // Reserve old objects first; newly sorted IDs must not displace earlier peers.
- if(mode!=='orbit')for(const peer of peers.values()){const old=previous.get(peer.id);if(old&&old.aggregateKey===groupFor.get(peer.id)&&![...positions.values()].some(p=>overlaps(old,p,28)))positions.set(peer.id,{...old});}
- for(const [key,list]of buckets){list.sort((a,b)=>a.id.localeCompare(b.id));const centre=sectors.get(key)??0;
-  list.forEach((peer,i)=>{
-   if(positions.has(peer.id))return;
-   let angle,rx,ry;
-   if(dense){const spread=groups.length>1?Math.min(2.4,2*Math.PI/groups.length*.84):2*Math.PI;const inRing=Math.min(6,list.length),ring=Math.floor(i/inRing),index=i%inRing;
-    angle=centre+(index-(inRing-1)/2)*spread/inRing;rx=340+ring*220;ry=210+ring*150;
-   }else{angle=-Math.PI/2+i*2*Math.PI/Math.max(1,list.length);rx=360;ry=200;
-    if(peer.edge?.family==='ancestry'&&list.length<=3){angle=peer.edge.relationshipType==='forked_from'?-Math.PI*.78:Math.PI*.1;rx=350;ry=210;}
-   }
-   if(compact){rx=Math.min(rx,160+Math.floor(i/6)*230);ry=Math.max(ry,180+Math.floor(i/6)*130);if(peer.edge?.family==='ancestry'&&list.length<=3){angle=-Math.PI/2;rx=80;ry=170;}}
-   const preferred={x:ORIGIN.x+Math.cos(angle)*rx,y:ORIGIN.y+Math.sin(angle)*ry,aggregateKey:groupFor.get(peer.id)};
-   // Keep existing neighborhoods stable when possible. New neighbors search local
-   // angular space; all existing objects reserve their real rectangular footprint.
-   const old=previous.get(peer.id);let p=old&&!overlaps(old,ORIGIN,40)&&old.aggregateKey===preferred.aggregateKey?{...old}:preferred;
-   if(mode==='orbit')p=preferred;
-   let attempt=0;while([...positions.values()].some(other=>overlaps(p,other,28))&&attempt<180){attempt++;const a=angle+(attempt%2?1:-1)*Math.ceil(attempt/2)*.13,r=Math.floor(attempt/24);p={...preferred,x:ORIGIN.x+Math.cos(a)*(rx+r*100),y:ORIGIN.y+Math.sin(a)*(ry+r*90)};}
-   positions.set(peer.id,p);
-  });
+// Branch ownership is presentation metadata. Canonical edges keep their endpoints.
+export function spatialLayout({subjectId,edges,groups=[],compact=false,previous=new Map()}){
+ const positions=new Map([[subjectId,{...ORIGIN}]]), owners=new Map();
+ const family=g=>g.family||(/depends_on/.test(g.key)?'dependency':/references|attribution/.test(g.key)?'attribution':'ancestry');
+ const directions={ancestry:compact?-Math.PI/2:-Math.PI*.88,'source-identity':-Math.PI*.70,dependency:compact?Math.PI/2:0,attribution:compact?-Math.PI*.15:-Math.PI*.35,similarity:Math.PI*.35};
+ const counts=new Map(),ord=new Map();for(const g of groups){const f=family(g);counts.set(f,(counts.get(f)||0)+1);}
+ // Branch anchors are installed first. Members grow beyond their own anchor,
+ // rather than displacing the branch control to the outside of an expanding fan.
+ for(const g of groups){const f=family(g),i=ord.get(f)||0;ord.set(f,i+1);const n=counts.get(f),angle=directions[f]??0;
+  const dx=Math.cos(angle),dy=Math.sin(angle),spread=(i-(n-1)/2)*(Math.abs(dy)>.7?250:150);
+  const anchor={x:ORIGIN.x+dx*340-dy*spread,y:ORIGIN.y+dy*(compact?170:220)+dx*spread,width:216,height:88,angle,aggregateKey:g.key};
+  const old=previous.get('bundle:'+g.key);positions.set('bundle:'+g.key,old||anchor);
+  for(const id of g.peers)if(!owners.has(id))owners.set(id,g);
  }
- for(const g of groups){const a=sectors.get(g.key),members=g.peers.map(id=>positions.get(id)).filter(Boolean);const radius=members.length?Math.max(...members.map(p=>Math.hypot(p.x-ORIGIN.x,p.y-ORIGIN.y)))+155:355;
-  let p={x:ORIGIN.x+Math.cos(a)*radius,y:ORIGIN.y+Math.sin(a)*radius*.65,width:216,height:88};let tries=0;
-  while([...positions.values()].some(other=>overlaps(p,other,24))&&tries++<80){const t=a+tries*.17;p={...p,x:ORIGIN.x+Math.cos(t)*(radius+Math.floor(tries/12)*80),y:ORIGIN.y+Math.sin(t)*(radius*.65+Math.floor(tries/12)*60)};}
-  positions.set('bundle:'+g.key,p);
+ const ids=[...new Set(edges.flatMap(e=>[e.source,e.target]))].filter(id=>id!==subjectId);
+ for(const id of ids){const old=previous.get(id);if(old&&!positions.has(id)&&![...positions.values()].some(p=>overlaps(old,p,24)))positions.set(id,old);}
+ const slots=new Map();
+ for(const id of ids){const g=owners.get(id),edge=edges.find(e=>e.source===id||e.target===id),f=g?family(g):edge?.family;
+  const angle=directions[f]??Math.PI*.4,dx=Math.cos(angle),dy=Math.sin(angle),anchor=g?positions.get('bundle:'+g.key):ORIGIN;
+  const key=g?.key||f||'related',i=slots.get(key)||0;slots.set(key,i+1);
+  if(positions.has(id))continue;
+  const horizontal=Math.abs(dx)>.7;
+  const preferred={x:anchor.x+dx*(g?290:350)+(horizontal?Math.floor(i/4)*270*dx:-dy*(i%2)*245),y:anchor.y+dy*(g?(compact?120:180):220)+(horizontal?(i%4-1.5)*92:Math.floor(i/2)*120*dy),aggregateKey:g?.key,angle};
+  let p=preferred,attempt=0;
+  while([...positions.values()].some(q=>overlaps(p,q,26))&&attempt<600){attempt++;const row=Math.ceil(attempt/2)*(attempt%2?1:-1);p={...preferred,x:preferred.x+(horizontal?Math.floor(attempt/18)*270*dx:row*245),y:preferred.y+(horizontal?row*94:Math.floor(attempt/18)*120*dy)};}
+  positions.set(id,p);
  }
  return positions;
 }

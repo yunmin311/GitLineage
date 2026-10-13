@@ -161,9 +161,10 @@ test('the HUD stays in screen space and only the SVG owns camera transforms', ()
   const app = code(APP);
   assert.doesNotMatch(app, /applyFrameTransform/);
   assert.match(app, /function setCamera\(/);
-  assert.match(app, /viewBoxFor\(/);
+  // Oct13: exploration is unbounded; the fixed WORLD clamp prevents reaching new nodes.
+  assert.match(app, /const window = \{viewBox:/);
   assert.equal(/canvas\.setAttribute\('viewBox',/.test(app.replace(/function setCamera\([\s\S]*?\n}/, '')), false,
-    'all camera writes use the same clamped path');
+    'all camera writes use the same SVG path');
 });
 
 test('long content is contained rather than overflowing the drawer', () => {

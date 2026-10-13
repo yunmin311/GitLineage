@@ -164,27 +164,22 @@ assertions with phone ownership checks; suite sizes remain 75 and 71. Native Chr
 200% zoom and desktop/tablet assertions remain unchanged. Chromium touch/keyboard
 viewport reduction is simulation; it does not certify physical devices or Safari.
 
-## Spatial exploration refinement (2026-10-12)
-The user revoked fixed ranks, tree expansion directions and member pagination.
-Graph opens on ancestry and exact-source evidence. Dependency and attribution layers
-are explicit perspectives; empty provenance never substitutes dependencies for origins.
-V3.3 fonts, surfaces, semantic status colors, entity shapes and depth remain authoritative.
+## Repository relationship workspace (2026-10-13)
+The latest product instruction supersedes exclusive relation perspectives and putting
+commits in the repository world. Origins, Dependencies and References are independent
+visibility controls in one persistent graph. Default visibility includes all recorded
+families; zero Origins states the absence of ancestry evidence without hiding dependencies.
+Git History is an independent parent-track log, returning to the unchanged repository
+camera, selection and exploration state. Changed files can be located in the main graph.
 
-Independent entities occupy focus-centred neighborhoods. Dense declaration sites own
-angular neighborhoods, not container tables; sparse ancestry uses relationship direction
-and viewport aspect. Actual rectangular collision clearance governs local displacement.
-Grouping controls are navigation only and have no artificial lineage ties. Canonical
-edges route between real boundary ports and detour around measured entity/group boxes.
-Selected neighborhoods load from the existing canonical endpoint and official projection;
-no additional inference, confidence or graph mutation. Back restores the exact preceding
-camera, layers, selection and positions. Expanding or collapsing retains camera and
-selection; explicit Focus/Fit are camera actions. Groups grow in bounded increments,
-and search locates remaining recorded members without a new table or paging model.
+V3.3 fonts, surfaces, semantic colors, entity shapes and component depth remain authoritative.
+Branches own local space. Group controls are navigation, never canonical ancestry claims;
+actual relationships preserve identity, evidence and direction. Measured rectangular
+clearance and boundary ports govern local expansion. Existing positions remain stable
+where clearance permits. Structure can expand to any depth covered by the provider;
+bounded batches retain explored objects, without a table or arbitrary layer limit.
 
-Phone focus keeps nodes at reading size and offers a neighborhood compass and nearby
-object controls. A small real Fork frames both ends above the HUD and below the toolbar.
-The old assertions requiring fixed ranks, Previous/Next and all-layer default are
-obsolete. Their replacements check default provenance, explicit perspectives, disjoint
-spatial bounds, canonical ports/directions, bounded local growth, focus/back state,
-mobile glyph size, hit targets and actual world/screen geometry. Existing panel/touch,
-stale-response and four-view state contracts remain required.
+Phone focus preserves readable local neighborhoods, with an overview for orientation.
+Panel, touch, stale-response, selection, focus and exact return contracts remain required.
+Acceptance checks actual pixels, world and screen bounds, semantic edges, unique IDs,
+multiple branches, recursive structure, history tracks and refresh restoration.

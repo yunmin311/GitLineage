@@ -909,7 +909,7 @@ const BUNDLE_ID_PREFIX = 'bundle:';
 // Local neighborhoods grow spatially. Limits describe explored space, never pages.
 const memberPageSize = () => isPhone() ? 5 : 8;
 const aggregatePages = new Map();
-function provenanceLayers(){return {ancestry:true,'source-identity':true,dependency:false,attribution:false,similarity:false};}
+function provenanceLayers(){return {ancestry:true,'source-identity':true,dependency:true,attribution:true,similarity:false};}
 function exploredIds(plate){
  if(!plate.expanded)return [];
  const limit=aggregatePages.get(plate.key)||memberPageSize();
@@ -917,38 +917,39 @@ function exploredIds(plate){
  return matching.slice(0,limit);
 }
 function authoredPositions(view,edges,composition){
- const groups=composition.plates.map(plate=>({key:plate.key,peers:plate.memberEdgeIds.map(id=>view.edges.find(e=>e.id===id)).filter(Boolean).map(e=>e.source===view.subject.id?e.target:e.source)}));
- const positions=spatialLayout({subjectId:view.subject.id,focusId:state.focusId||view.subject.id,edges,groups,compact:isPhone(),previous:state.positions});
+ const groups=composition.plates.map(plate=>({key:plate.key,family:plate.family,peers:plate.memberEdgeIds.map(id=>view.edges.find(e=>e.id===id)).filter(Boolean).map(e=>e.source===view.subject.id?e.target:e.source)}));
+ const positions=spatialLayout({subjectId:view.subject.id,focusId:view.subject.id,edges,groups,compact:isPhone(),previous:state.positions});
  state.positions=positions;state.placementOverflow=0;return positions;
 }
 const PERSPECTIVES=[['origins','Origins',['ancestry','source-identity']],['dependencies','Dependencies',['dependency']],['references','References',['attribution']]];
 function setPerspective(value){
  const entry=PERSPECTIVES.find(p=>p[0]===value);if(!entry)return;
- state.activeGroup='';state.perspective=value;state.layers=Object.fromEntries(Object.keys(allLayersOn()).map(f=>[f,entry[2].includes(f)]));if(!workspace)state.positions.clear();
- state.selectedNodeId=state.focusId||'';state.selectedEdgeId='';syncUrl();draw();renderDrawer();fit();
+ const enabled=!entry[2].some(f=>state.layers[f]);for(const f of entry[2])state.layers[f]=enabled;
+ state.perspective='custom';syncUrl();draw();renderDrawer();
 }
 function renderPerspective(){
  let host=$('graph-perspectives');if(!host){host=el('div',{id:'graph-perspectives',class:'graph-perspectives'});$('stage').append(host);}
- host.replaceChildren();const tabs=el('nav',{'aria-label':'Relationship perspectives',class:'graph-perspective-tabs'});
- for(const [id,label,families]of PERSPECTIVES){const count=state.view.edges.filter(e=>families.includes(e.family)&&(!state.focusId||e.source===state.focusId||e.target===state.focusId)).length;tabs.append(el('button',{type:'button','data-perspective':id,'aria-pressed':String(state.perspective===id),text:label+' · '+count,onclick:()=>setPerspective(id)}));}
+ host.replaceChildren();const tabs=el('nav',{'aria-label':'Relationship layers',class:'graph-perspective-tabs'});
+ for(const [id,label,families]of PERSPECTIVES){const count=state.view.edges.filter(e=>families.includes(e.family)).length;tabs.append(el('button',{type:'button','data-perspective':id,'aria-pressed':String(families.some(f=>state.layers[f])),text:label+' · '+count,onclick:()=>setPerspective(id)}));}
  host.append(tabs);
  const ancestry=state.view.edges.filter(e=>e.family==='ancestry').length;
- const description=state.perspective==='custom'?'Chosen relationship layers · each line retains its recorded meaning.':state.perspective==='origins'?(ancestry?'Git ancestry and source evidence · select a relationship to read its record.':'No recorded ancestry evidence. Exact content matches, if present, do not establish a fork.'):
- state.perspective==='dependencies'?'Declared dependencies & pinned submodules · grouped by declaration site. These are not ancestry links.':'Recorded references · attribution does not establish ancestry.';
+ const description=ancestry?'Recorded relationships · layers share one exploration space.':'No recorded ancestry evidence · dependencies and references remain separate claims.';
  host.append(el('p',{class:'graph-perspective-note',text:description}));
  const selected=state.selectedNodeId&&state.selectedNodeId!==state.view.subject.id;
  const bar=el('div',{class:'graph-exploration-actions'});
  if(state.explorationBack.length)bar.append(el('button',{type:'button',id:'graph-back',text:'← Back',onclick:()=>{const prev=state.explorationBack.pop();state.focusId=prev.focusId;state.layers=prev.layers;state.perspective=prev.perspective;state.selectedNodeId=prev.selectedNodeId;state.selectedEdgeId=prev.selectedEdgeId;state.positions=prev.positions;state.activeGroup=prev.activeGroup;state.expandedBundles=prev.expandedBundles;aggregatePages.clear();for(const [key,value]of prev.aggregatePages)aggregatePages.set(key,value);draw();renderDrawer();setCamera($('canvas'),prev.camera,prev.zoom);syncUrl();}}));
- if(selected)bar.append(el('button',{type:'button',id:'graph-explore-node',text:'Explore '+nameOf(state.selectedNodeId),onclick:()=>workspace?workspace.focus(state.selectedNodeId):void exploreNode(state.selectedNodeId)}));
+ if(selected)bar.append(el('button',{type:'button',id:'graph-explore-node',text:'Explore '+nameOf(state.selectedNodeId),onclick:()=>workspace?workspace.expand(state.selectedNodeId):void exploreNode(state.selectedNodeId)}));
  if(state.focusId)bar.append(el('span',{class:'graph-focus-label',text:'Focus: '+nameOf(state.focusId)}));
  if(bar.childElementCount)host.append(bar);
  if(state.perspective==='origins'){
   const relations=visibleCandidates(state.view);if(relations.length&&relations.length<=6){const key=el('div',{class:'graph-relation-key'});for(const edge of relations)key.append(el('button',{type:'button',text:edge.label,class:'st-'+edge.status,'aria-pressed':String(state.selectedEdgeId===edge.id),onclick:()=>selectEdge(edge.id)}));host.append(key);}
  }
 
- if(isPhone()&&state.composition.plates.length){
+ if(isPhone()&&(state.composition.plates.length||visibleCandidates(state.view).length)){
   const jump=el('div',{class:'graph-group-jumps','aria-label':'Navigate relationship neighborhoods'});
   for(const g of state.composition.plates)jump.append(el('button',{type:'button',text:g.label.replace(/ ×\d+$/,'')+' · '+g.count,'aria-pressed':String(g.expanded),onclick:()=>{if(!state.expandedBundles.has(g.key)){state.expandedBundles.add(g.key);draw();syncUrl();}focusGraphGroup(g.key);}}));
+  const grouped=new Set(state.composition.plates.flatMap(g=>g.memberEdgeIds));
+  const peers=new Set();for(const edge of visibleCandidates(state.view)){if(grouped.has(edge.id))continue;const id=edge.source===state.view.subject.id?edge.target:edge.source;if(peers.has(id))continue;peers.add(id);jump.append(el('button',{type:'button',text:edge.label+' · '+nameOf(id),onclick:()=>{state.activeGroup='';selectNode(id);switchMobile('graph');phoneFit(id);}}));}
   host.append(jump);
  }
  if(isPhone()&&((state.activeGroup&&state.expandedBundles.has(state.activeGroup))||(!state.composition.plates.length&&state.positions.size>2))){
@@ -968,7 +969,7 @@ async function exploreNode(id){
  const nodes=new Map(state.view.nodes.map(n=>[n.id,n]));for(const n of neighborhood.nodes)if(!nodes.has(n.id))nodes.set(n.id,{...n,isSubject:false});
  const edges=new Map(state.view.edges.map(e=>[e.id,e]));for(const e of neighborhood.edges)if(!edges.has(e.id))edges.set(e.id,e);
  state.view={...state.view,nodes:[...nodes.values()],edges:[...edges.values()],evidenceByRelationship:{...state.view.evidenceByRelationship,...neighborhood.evidenceByRelationship}};
- state.focusId=id;state.positions.clear();state.selectedNodeId=id;draw();renderDrawer();fit();syncUrl();
+ state.selectedNodeId=id;draw();renderDrawer();syncUrl();
 }
 
 /**
@@ -982,9 +983,7 @@ async function exploreNode(id){
  * aggregating.
  */
 function visibleCandidates(view) {
-  const neighborhood=new Set([view.subject.id,state.focusId]);
-  for(const e of view.edges)if(e.source===state.focusId||e.target===state.focusId){neighborhood.add(e.source);neighborhood.add(e.target);}
-  return view.edges.filter(edge=>state.layers[edge.family]!==false&&(!state.focusId||neighborhood.has(edge.source)&&neighborhood.has(edge.target)));
+  return view.edges.filter(edge=>state.layers[edge.family]!==false);
 }
 
 /*
@@ -1235,7 +1234,7 @@ function renderBottomBand(view) {
       : '';
     band.append(el('span', {
       class: 'band-note',
-      text: `${$('canvas').querySelectorAll('.node').length} objects · ${$('canvas').querySelectorAll('.edge-group').length} recorded relationships · ${$('canvas').querySelectorAll('.unified-edge').length} exploration links${plateNote}`,
+      text: `${$('canvas').querySelectorAll('.node').length} objects · ${$('canvas').querySelectorAll('.edge-group,.group-navigation').length} shown relationships · ${$('canvas').querySelectorAll('.unified-edge').length} exploration links${plateNote}`,
     }));
   }
 
@@ -1313,12 +1312,14 @@ function currentComposition(view) {
   if (!target) return null;
   const candidates = visibleCandidates(target);
   const { regime, peers, direct, directEdgeIds, aggregateEdgeIds } = promotedEdges(target, candidates);
-  const provenance = state.perspective==='origins' && candidates.length<=DRAWABLE_CAPACITY;
+  const provenance = candidates.every(e=>e.family==='ancestry'||e.family==='source-identity') && candidates.length<=DRAWABLE_CAPACITY;
+  const familyCounts=new Map();for(const e of candidates)familyCounts.set(e.family,(familyCounts.get(e.family)||0)+1);
+  const branchEdges=new Set(candidates.filter(e=>['dependency','attribution'].includes(e.family)&&familyCounts.get(e.family)>=4).map(e=>e.id));
   const composition = buildComposition(target, {
     edges: candidates,
     expandedAggregates: state.expandedBundles,
-    directEdgeIds: provenance ? candidates.map(e=>e.id) : directEdgeIds,
-    aggregateEdgeIds: provenance ? [] : aggregateEdgeIds,
+    directEdgeIds: provenance ? candidates.map(e=>e.id) : directEdgeIds.filter(id=>!branchEdges.has(id)),
+    aggregateEdgeIds: provenance ? [] : [...new Set([...aggregateEdgeIds,...branchEdges])],
     budget: DRAWABLE_CAPACITY,
   });
   composition.regime = regime;
@@ -1338,11 +1339,13 @@ function draw() {
 
   // The composition decides what is drawn individually and what collapses into a
   // plate. A 14-way fan-out reaches the canvas as one plate, not fourteen spokes.
+  const initial=!state.hasFitted;
   const composition = currentComposition(view);
   state.composition = composition;
   const loose = new Set(composition.looseEdgeIds);
   // Phone navigation also exposes the composition's already-promoted real relationships.
   for (const id of composition.promotedEdgeIds) loose.add(id);
+  if(!state.hasFitted&&composition.plates.length){for(const plate of [...composition.plates].sort((a,b)=>b.count-a.count).slice(0,isPhone()?1:2)){state.expandedBundles.add(plate.key);plate.expanded=true;aggregatePages.set(plate.key,isPhone()?1:3);}}
   const expandedEdgeIds = new Set(composition.plates.flatMap(exploredIds));
   const selectedMember = state.selectedNodeId && state.selectedNodeId !== view.subject.id;
   const selectedEdges = new Set(selectedMember ? visibleCandidates(view).filter(e=>e.source===state.selectedNodeId||e.target===state.selectedNodeId).slice(0,memberPageSize()).map(e=>e.id) : []);
@@ -1405,6 +1408,15 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
   const focusMode = query.length > 0 || Boolean(state.selectedNodeId);
 
   for (const edge of edges) {
+    const aggregate=composition.plates.find(p=>p.memberEdgeIds.includes(edge.id));
+    // A grouped relation is navigated through its display branch. Only a selected
+    // canonical relation draws the direct object-to-object claim and its arrow.
+    if(aggregate&&expandedEdgeIds.has(edge.id)&&state.selectedEdgeId!==edge.id&&state.selectedNodeId!==edge.source&&state.selectedNodeId!==edge.target){
+      const peer=edge.source===view.subject.id?edge.target:edge.source;
+      const route=spatialRoute({source:BUNDLE_ID_PREFIX+aggregate.key,target:peer},positions);
+      if(route){const nav=svgEl('g',{class:'group-navigation', 'data-navigation-source':BUNDLE_ID_PREFIX+aggregate.key,'data-navigation-target':peer});nav.append(svgEl('path',{d:route.path,class:'group-navigation-line'}),svgEl('title',{},['Member of '+aggregate.label+'; select the object to read its actual relationship.']));memberEdgeLayer.append(nav);}
+      continue;
+    }
     const { fanIndex, fanCount } = fanSlot(edge, edges);
     const geometry = edgeGeometry(edge, positions, fanIndex, fanCount);
     const route=spatialRoute(edge,positions,fanIndex,fanCount);
@@ -1421,6 +1433,10 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
         matchedEdges.has(edge.id) ? 'is-match' : '',
       ].filter(Boolean).join(' '),
     });
+    group.setAttribute('role','button');
+    group.setAttribute('tabindex','0');
+    group.setAttribute('aria-label',`${edge.source} ${edge.label} ${edge.target}`);
+    group.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();selectEdge(edge.id);}});
     group.dataset.relationshipId = edge.id;
     group.dataset.source = edge.source; group.dataset.target = edge.target;
 
@@ -1464,6 +1480,8 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
   const subjectPosition = positions.get(view.subject.id);
   for(const plate of composition.plates){
     const at=positions.get(BUNDLE_ID_PREFIX+plate.key);if(!at||!plate.count)continue;
+    const navigationRoute=spatialRoute({source:view.subject.id,target:BUNDLE_ID_PREFIX+plate.key},positions);
+    if(navigationRoute)edgeLayer.append(svgEl('path',{d:navigationRoute.path,class:'group-navigation-line group-navigation-root','aria-label':plate.label+' · grouping, not a lineage claim'}));
     const left=at.x-at.width/2,top=at.y-at.height/2;
     const owns=plate.memberEdgeIds.includes(state.selectedEdgeId)||plate.memberEdgeIds.some(id=>{const e=view.edges.find(e=>e.id===id);return state.selectedNodeId&&(e?.source===state.selectedNodeId||e?.target===state.selectedNodeId);});
     const group=svgEl('g',{class:`bundle-card graph-group st-${plate.status}${plate.expanded?' is-expanded is-open':''}${owns?' is-selected':''}`,role:'button',tabindex:'0','aria-label':`${plate.label}, ${plate.count} ${plate.relationshipType.replace(/_/g,' ')} relationships, grouped`,'aria-expanded':String(plate.expanded)});
@@ -1478,7 +1496,7 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
     const action=(label,x,fn,cls)=>{const g=svgEl('g',{role:'button',tabindex:'0','aria-label':label,class:cls});g.append(svgEl('text',{x,y:top+69,class:'plate-row-expand'},[label]),svgEl('rect',{x:x-4,y:top+44,width:90,height:44,class:'plate-row-hit'}));const run=e=>{e.stopPropagation();fn();};g.addEventListener('click',run);g.addEventListener('mobile-tap',run);g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();run(e);}});group.append(g);};
     if(plate.expanded){
       action('Focus',left+12,()=>focusGraphGroup(plate.key),'aggregate-focus');
-      if(shown<plate.count&&shown<24)action('Explore more',left+110,()=>{aggregatePages.set(plate.key,Math.min(24,shown+memberPageSize()));draw();},'aggregate-more');
+      if(shown<plate.count)action('Explore more',left+110,()=>{aggregatePages.set(plate.key,shown+memberPageSize());draw();},'aggregate-more');
       else if(shown<plate.count)action('Find member',left+110,()=>{toggleSearch(true);$('search-input').focus();},'aggregate-search');
     }else{group.append(svgEl('text',{x:left+12,y:top+69,class:'plate-row-more'},['Explore neighborhood']));}
     const activate=e=>{e.stopPropagation();if(e.target?.closest('.aggregate-more, .aggregate-search, .aggregate-focus'))return;toggleBundle(plate.key);};
@@ -1616,6 +1634,8 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
   renderRail(view);
   workspace?.decorate();
   renderBottomBand(view);
+  if(initial&&!isPhone())fit();
+  renderOverview();
   workspace?.settle();
   updateSearchCount();
 }
@@ -1655,7 +1675,7 @@ function toggleBundle(key) {
   if (state.expandedBundles.has(key)) state.expandedBundles.delete(key);
   else state.expandedBundles.add(key);
   syncUrl();
-  // The camera must not move. Expansion is a local change: it reflows rows
+  // The camera must not move. Expansion is a local change: it adds independent nodes
   // across reserved member shelves, while the pan, zoom, viewport centre and
   // world focal the reader already has stay exactly as they were. Refitting here
   // used to reset `hasFitted`, which re-ran `fitViewBox` and silently recentred
@@ -1951,19 +1971,28 @@ function filterMobileRelations() {
   }
 }
 function phoneFit(targetId) {
-  const canvas = $('canvas'), focusId=state.focusId||state.view?.subject.id;
-  const target=state.positions.get(targetId||focusId)||ORIGIN, focus=state.positions.get(focusId)||target;
-  const toolbar=$('graph-perspectives'), top=toolbar?toolbar.getBoundingClientRect().bottom-canvas.getBoundingClientRect().top+12:110;
-  const hud=$('viewport-hud').offsetHeight||60;
-  let x=target.x,y=target.y,scale=1;
-  // A local object is understood through its relationship. Keep both ends in the
-  // uncovered stage; an explicit Fit without a target still frames the focus.
-  if(targetId&&targetId!==focusId){
-    x=(target.x+focus.x)/2;y=(target.y+focus.y)/2;
-    scale=Math.min(1,(canvas.clientWidth-24)/(Math.abs(target.x-focus.x)+216),Math.max(80,canvas.clientHeight-top-hud-24)/(Math.abs(target.y-focus.y)+78));
-  }
-  const w=canvas.clientWidth/scale,h=canvas.clientHeight/scale;
-  setCamera(canvas, `${x-w/2} ${y-h/2-(top-hud)/(2*scale)} ${w} ${h}`,scale);
+ const canvas=$('canvas'),rootId=state.view?.subject.id;
+ let id=targetId;
+ if(!id && canvas.clientHeight<600){id=rootId;}
+ if(!id){const ancestry=visibleCandidates(state.view).find(e=>e.family==='ancestry'&&(e.source===rootId||e.target===rootId));if(ancestry)id=ancestry.source===rootId?ancestry.target:ancestry.source;}
+ if(!id){const plate=[...state.composition.plates].sort((a,b)=>b.count-a.count)[0];id=plate&&[...canvas.querySelectorAll('.aggregate-member')].find(n=>n.dataset.aggregateKey===plate.key)?.dataset.nodeId;}
+ const target=state.positions.get(id||rootId)||ORIGIN;
+ const parent=target.aggregateKey?state.positions.get(BUNDLE_ID_PREFIX+target.aggregateKey):null;
+ const root=state.positions.get(rootId)||target;
+ const box=p=>({getBBox:()=>({x:p.x-108,y:p.y-(p.height||52)/2,width:216,height:p.height||52})});
+ fitGraphBoxes([box(target),...(parent?[box(parent)]:[]),...(!targetId&&id!==rootId?[box(root)]:[])]);
+}
+function renderOverview(){
+ let host=$('graph-overview');if(!host){host=el('div',{id:'graph-overview',class:'graph-overview','aria-label':'Graph overview'});$('stage').append(host);}
+ host.replaceChildren();const points=[...state.positions.entries()];if(points.length<2){setHidden(host,true);return;}setHidden(host,false);
+ const minX=Math.min(...points.map(([,p])=>p.x))-120,minY=Math.min(...points.map(([,p])=>p.y))-60,maxX=Math.max(...points.map(([,p])=>p.x))+120,maxY=Math.max(...points.map(([,p])=>p.y))+60;
+ const map=svgEl('svg',{viewBox:`${minX} ${minY} ${maxX-minX} ${maxY-minY}`,role:'button',tabindex:0,'aria-label':'Graph overview: click a neighborhood; Enter returns to the repository'});
+ for(const n of $('canvas').querySelectorAll('.group-navigation-line,.unified-line,.edge-line'))map.append(svgEl('path',{d:n.getAttribute('d'),fill:'none',stroke:'var(--rule-2)','stroke-width':5}));
+ for(const [id,p]of points)map.append(svgEl('rect',{x:p.x-70,y:p.y-20,width:140,height:40,rx:5,fill:id===state.view.subject.id?'var(--brand)':'var(--brand-edge)'}));
+ const focus=id=>id.startsWith(BUNDLE_ID_PREFIX)?focusGraphGroup(id.slice(BUNDLE_ID_PREFIX.length)):workspace?.has(id)?workspace.focus(id):(selectNode(id),phoneFit(id));
+ map.onclick=e=>{const at=new DOMPoint(e.clientX,e.clientY).matrixTransform(map.getScreenCTM().inverse());const nearest=points.reduce((a,b)=>Math.hypot(b[1].x-at.x,b[1].y-at.y)<Math.hypot(a[1].x-at.x,a[1].y-at.y)?b:a);focus(nearest[0]);};
+ map.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();focus(state.view.subject.id);}};
+ host.append(el('span',{text:'Overview · '+points.length+' objects'}),map);
 }
 function locateMobile(id,kind) {
   const relationIds = kind === 'edge' ? [id] : state.view.edges.filter(e=>e.source===id || e.target===id).map(e=>e.id);
@@ -1972,7 +2001,7 @@ function locateMobile(id,kind) {
   if (branch) {
     const index = branch.memberEdgeIds.findIndex(edgeId=>relationIds.includes(edgeId));
     state.expandedBundles.add(branch.key);
-    aggregatePages.set(branch.key, Math.min(24,Math.max(memberPageSize(),aggregatePages.get(branch.key)||0)));
+    aggregatePages.set(branch.key, Math.max(memberPageSize(),aggregatePages.get(branch.key)||0));
   }
   if (kind === 'edge') {
     const edge = state.view.edges.find(e=>e.id===id);
@@ -2433,12 +2462,13 @@ function capitalise(text) {
 // --------------------------------------------------------- pan / zoom / fit
 
 let panState = null;
+let cameraViewport = null;
 
 /**
  * The single place a camera change is written.
  *
  * Every path that moves the window -- wheel, buttons, drag, fit -- goes through here,
- * Camera writes clamp the window inside the authored world. Shell overlays and
+ * The explored world is unbounded. Shell overlays and
  * viewport HUD never participate in this transform.
  */
 function setCamera(canvas, viewBox, zoom) {
@@ -2448,8 +2478,9 @@ function setCamera(canvas, viewBox, zoom) {
   const [x, y, width, height] = parts;
   const centre = { x: x + width / 2, y: y + height / 2 };
   const z = Number.isFinite(zoom) && zoom > 0 ? zoom : 1;
-  const window = workspace ? {viewBox:`${centre.x-width/2} ${centre.y-height/2} ${width} ${height}`,zoom:z} : viewBoxFor(viewport, centre, z);
+  const window = {viewBox:`${centre.x-width/2} ${centre.y-height/2} ${width} ${height}`,zoom:z};
   canvas.setAttribute('viewBox', window.viewBox);
+  cameraViewport = viewport;
   state.zoom = window.zoom;
 
   return window;
@@ -2584,12 +2615,15 @@ function setupViewport() {
   $('zoom-out').addEventListener('click', () => zoomBy(1 / ZOOM_STEP));
   $('zoom-fit').addEventListener('click', () => fit());
   window.addEventListener('resize', () => {
+    const canvasBefore = $('canvas'), oldBox = String(canvasBefore.getAttribute('viewBox')).split(/\s+/).map(Number);
+    const oldScale = cameraViewport ? Math.min(cameraViewport.width/oldBox[2],cameraViewport.height/oldBox[3]) : state.zoom;
     mobile.resetGesture();
     panels = transitionPanels(panels, { type: 'resize', width: window.innerWidth });
     applyPanels();
     if (state.view) {
       const canvas = $('canvas');
-      setCamera(canvas, canvas.getAttribute('viewBox'), state.zoom);
+      const width=canvas.clientWidth/oldScale,height=canvas.clientHeight/oldScale;
+      setCamera(canvas, `${oldBox[0]+oldBox[2]/2-width/2} ${oldBox[1]+oldBox[3]/2-height/2} ${width} ${height}`,oldScale);
       draw();
       const readingOffset = $('drawer-inner').scrollTop;
       const readingFocus = $('drawer-inner').contains(document.activeElement);
@@ -2619,23 +2653,17 @@ function zoomBy(factor) {
   transitionCamera(canvas, next.viewBox, box=>setCamera(canvas,box,canvas.clientWidth / Number(box.split(/\s+/)[2])));
 }
 
-/**
- * Reopens the window on the authored world, not on the content.
- *
- * This used to fit the content bounds, which meant "fit" was a second composition
- * rather than a way of looking at the first one -- and two of them disagreed at every
- * window size. It now returns the window to the world's own coordinates.
- */
 /** Explicit local focus uses the existing camera writer; expansion never fits. */
 function fitGraphBoxes(nodes){
  const canvas=$('canvas'), boxes=nodes.filter(Boolean).map(n=>n.getBBox());if(!boxes.length)return;
- const x=Math.min(...boxes.map(b=>b.x))-24,y=Math.min(...boxes.map(b=>b.y))-40;
- const right=Math.max(...boxes.map(b=>b.x+b.width))+24,bottom=Math.max(...boxes.map(b=>b.y+b.height))+40;
+ const padding=isPhone()&&canvas.clientHeight<400?12:40;
+ const x=Math.min(...boxes.map(b=>b.x))-24,y=Math.min(...boxes.map(b=>b.y))-padding;
+ const right=Math.max(...boxes.map(b=>b.x+b.width))+24,bottom=Math.max(...boxes.map(b=>b.y+b.height))+padding;
  const viewport={width:canvas.clientWidth,height:canvas.clientHeight};
  const rail=!isPhone()&&visiblePanels(panels).rail?320:0,drawer=!isPhone()&&visiblePanels(panels).drawer?400:0;
- const hud=isPhone()?$('viewport-hud').getBoundingClientRect().height:0;
+ const hud=$('viewport-hud').getBoundingClientRect().height+(isPhone()&&canvas.clientHeight>=600?80:0);
  const toolbar=$('graph-perspectives')?.offsetHeight||110;
- const availableHeight=Math.max(44,viewport.height-hud-toolbar-100);
+ const availableHeight=Math.max(44,viewport.height-hud-toolbar-32);
  const scale=Math.max(1/1.2,(right-x)/Math.max(240,viewport.width-rail-drawer-48),(bottom-y)/availableHeight);
  const w=viewport.width*scale,h=viewport.height*scale;
  transitionCamera(canvas,`${x-(w-(right-x))/2-(rail-drawer)*scale/2} ${y-(h-(bottom-y))/2+(hud-toolbar)/2*scale} ${w} ${h}`,box=>setCamera(canvas,box,canvas.clientWidth/Number(box.split(/\s+/)[2])));
@@ -2843,6 +2871,7 @@ void mountDeepPreview(() => state.repository).then(deep => { if(deep?.capabiliti
  root:()=>state.view?.nodes.find(n=>n.id===state.view.subject.id),nodes:()=>state.view?.nodes||[],revision:()=>state.view?.revision.commit,selected:()=>state.selectedNodeId||state.selectedEdgeId,camera:()=>({box:$('canvas').getAttribute('viewBox'),zoom:state.zoom}),
  select:(id,edge=false)=>{if(isPhone()&&id&&(edge?state.selectedEdgeId:state.selectedNodeId)===id&&mobile.view==='graph'){switchMobile('evidence');return;}state.selectedNodeId=edge?'':id||'';state.selectedEdgeId=edge?id:'';draw();renderDrawer();syncUrl();},
  draw,drawer:()=>{const previousPanels={...panels};$('drawer-inner').dataset.selectionKey='';renderDrawer();panels=previousPanels;applyPanels();},restore:c=>c&&setCamera($('canvas'),c.box,c.zoom),
- focus:id=>{if(isPhone())switchMobile('graph');const n=[...$('canvas').querySelectorAll('.node')].find(n=>n.dataset.nodeId===id);if(n)fitGraphBoxes([n.querySelector('.node-box')]);},
- dependencyEnabled:()=>state.layers.dependency,dependencies:enabled=>{state.layers.dependency=enabled;state.perspective='custom';syncUrl();},origins:()=>setPerspective('origins'),navigation:()=>isPhone()?switchMobile('relations'):toggleRail(true),
+ focus:(id,parentId)=>{if(isPhone())switchMobile('graph');const nodes=[...$('canvas').querySelectorAll('.node')],n=nodes.find(n=>n.dataset.nodeId===id),parent=nodes.find(n=>n.dataset.nodeId===parentId);if(n){const boxes=[n.querySelector('.node-box')];if(parent){const b=parent.querySelector('.node-box'),a=boxes[0].getBBox(),p=b.getBBox(),span=Math.max(a.x+a.width,p.x+p.width)-Math.min(a.x,p.x)+48;if(!isPhone()||span/Math.max(240,$('canvas').clientWidth-48)<=52/44)boxes.push(b);}fitGraphBoxes(boxes);}},
+ dependencyEnabled:()=>state.layers.dependency,dependencies:enabled=>{state.layers.dependency=enabled;state.perspective='custom';syncUrl();},origins:()=>fit(),
+ grow:id=>exploreNode(id),navigation:()=>isPhone()?switchMobile('relations'):toggleRail(true),
  }); if(workspace){draw();renderDrawer();} });

@@ -1,4 +1,5 @@
 // Unified display layer; Canonical Graph remains unchanged.
+import {openGitLog} from "./git-log.mjs";
 import { spatialRoute } from "./spatial.mjs";
 function mountRepositoryExplorer(getRepository, deep, bridge) {
   const make = (tag, text, cls) => {
@@ -53,9 +54,9 @@ function mountRepositoryExplorer(getRepository, deep, bridge) {
   deep.layerLauncher.hidden = true;
   let root = "", rootRevision = "", generation = 0, busy = false, objects = new Map(), links = new Map(), positions = new Map(), collapsed = new Set(), hiddenLayers = new Set(), jobs = new Map(), history = [], trail = [], rootCamera = null, restoring = null;
   let discoveryTarget = "", baselinePending = false;
-  const kinds = [["history", "Git history"], ["structure", "Structure"], ["dependency", "Dependencies"], ["observation", "Candidates"], ["similarity", "File matches"]];
+  const kinds = [["structure", "Structure"], ["dependency", "Dependencies"], ["observation", "Candidates"], ["similarity", "File matches"]];
   const limit = () => innerWidth < 768 ? 5 : 8;
-  const key = () => `gitlineage.workspace.v1:${root.toLowerCase()}`;
+  const key = () => `gitlineage.workspace.v2:${root.toLowerCase()}`;
   const jobKey = (repo) => repo.toLowerCase();
   const sha = (value) => typeof value === "string" ? value : value?.sha ?? "";
   const ref = (repo, revision2, kind, value = "") => `display:${encodeURIComponent(repo.toLowerCase())}:${revision2}:${kind}:${encodeURIComponent(value)}`;
@@ -87,7 +88,7 @@ function mountRepositoryExplorer(getRepository, deep, bridge) {
   function save() {
     if (!root) return;
     try {
-      const value = { version: 1, root, revision: bridge.revision(), objects: [...objects], links: [...links], positions: [...positions], collapsed: [...collapsed], hiddenLayers: [...hiddenLayers], jobs: [...jobs], history, trail, rootCamera, camera: bridge.camera(), selected: bridge.selected() };
+      const value = { version: 2, root, revision: bridge.revision(), objects: [...objects], links: [...links], positions: [...positions], collapsed: [...collapsed], hiddenLayers: [...hiddenLayers], jobs: [...jobs], history, trail, rootCamera, camera: bridge.camera(), selected: bridge.selected() };
       const data = JSON.stringify(value);
       if (data.length < 2e6) sessionStorage.setItem(key(), data);
     } catch {
@@ -115,7 +116,7 @@ function mountRepositoryExplorer(getRepository, deep, bridge) {
     deep.workspace.reset(name);
     try {
       const saved = JSON.parse(sessionStorage.getItem(key()) || "null");
-      if (saved?.version === 1 && saved.revision === bridge.revision()) {
+      if (saved?.version === 2 && saved.revision === bridge.revision()) {
         objects = new Map(saved.objects);
         links = new Map(saved.links);
         positions = new Map(saved.positions);
@@ -151,7 +152,7 @@ function mountRepositoryExplorer(getRepository, deep, bridge) {
       }
     }
     bridge.select(id);
-    bridge.focus(id);
+    bridge.focus(id, [...links.values()].find(e => e.target === id && e.kind === "structure")?.source);
     refresh();
   }
   function back() {
@@ -241,30 +242,10 @@ function mountRepositoryExplorer(getRepository, deep, bridge) {
     }
     if (commit.changes.length > limit()) status.textContent = `${limit()} of ${commit.changes.length} sampled changes shown; open the commit inspector for more.`;
   }
-  function historyNodes(task) {
-    const rid = repoNode(task.repository);
-    const commits = task.commits.slice(0, task.displayHistoryLimit ?? limit());
-    for (const c of commits) node(ref(task.repository, "", "commit", c.sha), c.message.split("\n")[0] || c.sha.slice(0, 8), "commit", { ...c, repository: task.repository, revision: c.sha });
-    for (const c of commits) {
-      const id = ref(task.repository, "", "commit", c.sha);
-      for (const parent of c.parents) {
-        const pid = ref(task.repository, "", "commit", parent);
-        if (objects.has(pid)) edge(id, pid, "history", "parent commit", { repository: task.repository, child: c.sha, parent }, true);
-      }
-    }
-    for (const b of task.branches.slice(0, 8)) {
-      const bid = node(ref(task.repository, "", "branch", b.name), b.name, "branch", { ...b, repository: task.repository });
-      edge(rid, bid, "history", "observed branch");
-      const tip = ref(task.repository, "", "commit", b.sha);
-      if (objects.has(tip)) edge(bid, tip, "history", "points to commit", {}, true);
-    }
-    const anchor = ref(task.repository, "", "commit", task.historyAnchor || task.revision);
-    if (objects.has(anchor)) edge(rid, anchor, "history", "observed HEAD");
-  }
   function directoryNodes(task, folder = "", count = limit()) {
     const did = node(ref(task.repository, task.revision, "directory", folder), folder ? folder.split("/").pop() : "Tree @ " + task.revision.slice(0, 7), "directory", { repository: task.repository, revision: task.revision, path: folder });
     const c = ref(task.repository, "", "commit", task.revision);
-    if (!folder) edge(objects.has(c) ? c : repoNode(task.repository), did, "structure", "tree at version");
+    if (!folder) edge(repoNode(task.repository), did, "structure", "tree at version");
     else {
       const parent = ref(task.repository, task.revision, "directory", folder.split("/").slice(0, -1).join("/"));
       if (objects.has(parent)) edge(parent, did, "structure", "contains directory");
@@ -282,13 +263,12 @@ function mountRepositoryExplorer(getRepository, deep, bridge) {
     return did;
   }
   function readHistory(id = rootId()) {
-    checkpoint(id);
-    const repo = repositoryOf(id);
-    void operate(async (token) => {
-      const task = await ensure(repo, token);
-      historyNodes(task);
-      collapsed.delete(id);
-    });
+    const repo=repositoryOf(id),camera=bridge.camera(),selected=bridge.selected();
+    const show=task=>openGitLog(task,{close:()=>{bridge.select(selected);bridge.restore(camera);},more:()=>void operate(async token=>{const t=await request(`/${task.id}/history`,{});if(token!==generation)return;jobs.set(jobKey(repo),t);show(t);}),exploreFile:(commit,file)=>{
+      checkpoint(id);const fid=node(ref(repo,commit.sha,"file",file.path),file.path.split("/").pop(),"file",{...file,path:file.path,repository:repo,revision:commit.sha,fromCommit:commit.sha});
+      edge(repoNode(repo),fid,"structure","changed file at commit",{commit:commit.sha,...file});refresh();focus(fid);
+    }});
+    void operate(async token=>{const task=await ensure(repo,token);show(task);});
   }
   function readStructure(id = rootId()) {
     checkpoint(id);
@@ -304,19 +284,19 @@ function mountRepositoryExplorer(getRepository, deep, bridge) {
     const n = find(id);
     if (!n) return;
     if (n.kind === "candidate" || n.kind === "repository" || n.type === "repository") {
-      readHistory(id);
+      if(bridge.grow)void bridge.grow(id);readStructure(id);
       return;
     }
     checkpoint(id);
     void operate(async (token) => {
       let task = await ensure(n.data.repository, token);
       if (n.kind === "commit") {
-        historyNodes(task);
+
         changedFiles(task, n.data);
         collapsed.delete(id);
       } else if (n.kind === "branch") {
         task = await revision(task, n.data.sha, token);
-        historyNodes(task);
+
         collapsed.delete(id);
       } else if (n.kind === "directory") {
         task = await revision(task, n.data.revision, token);
@@ -338,8 +318,8 @@ function mountRepositoryExplorer(getRepository, deep, bridge) {
         }
         const did = ref(task.repository, task.revision, "directory", folder);
         if (task.directories.find((d) => d.path === folder)?.entries.some((e) => e.type === "blob" && e.path === n.data.path.split("/").pop())) edge(did, id, "structure", "contains file", { revision: task.revision });
-        historyNodes(task);
-        for (const c of task.commits) if (c.sha === n.data.revision && c.changes.some((f) => f.path === n.data.path)) edge(ref(task.repository, "", "commit", c.sha), id, "structure", "changed file");
+
+
         jobs.set(jobKey(task.repository), task);
       }
       collapsed.delete(id);
@@ -355,7 +335,7 @@ function mountRepositoryExplorer(getRepository, deep, bridge) {
     bridge.origins();
     decorate();
   });
-  nav.append(lineageTool, btn("workspace-history", "Expand Git history", () => readHistory(bridge.selected() || rootId())), btn("workspace-structure", "Expand structure", () => readStructure(bridge.selected() || rootId())), btn("workspace-candidates", "Find related projects", () => {
+  nav.append(lineageTool, btn("workspace-history", "Open Git history", () => readHistory(rootId())), btn("workspace-structure", "Expand structure", () => readStructure(bridge.selected() || rootId())), btn("workspace-candidates", "Find related projects", () => {
     discovery.hidden = !discovery.hidden;
     const repo = repositoryOf(bridge.selected() || rootId());
     if (repo !== discoveryTarget) {
@@ -400,9 +380,9 @@ function mountRepositoryExplorer(getRepository, deep, bridge) {
     }
     for (const b of nav.children) b.disabled = busy && b.id !== "workspace-return";
   }
-  function visible() {
+  function visible(canonicalPositions) {
     const enabled = [...links.values()].filter((e) => !hiddenLayers.has(e.kind));
-    const roots = new Set(bridge.nodes().map((n) => n.id)), shown = new Set(roots);
+    const roots = new Set(canonicalPositions ? canonicalPositions.keys() : bridge.nodes().map((n) => n.id)), shown = new Set(roots);
     let changed = true;
     while (changed) {
       changed = false;
@@ -415,7 +395,7 @@ function mountRepositoryExplorer(getRepository, deep, bridge) {
   }
   function paint(canvas, canonicalPositions) {
     reset();
-    const scene = visible(), occupied = new Map(canonicalPositions);
+    const scene = visible(canonicalPositions), occupied = new Map(canonicalPositions);
     const connected = scene.nodes.filter((n) => scene.edges.some((e) => e.target === n.id || e.source === n.id));
     const overlap = (p, q) => Math.abs(p.x - q.x) < 248 && Math.abs(p.y - q.y) < 82;
     for (const n of connected) {
@@ -432,14 +412,16 @@ function mountRepositoryExplorer(getRepository, deep, bridge) {
         const origin = (n.kind === "commit" || n.kind === "branch" ? repoAnchor : null) ?? anchor ?? occupied.get(rootId()) ?? { x: 960, y: 800 };
         const siblings = scene.edges.filter((e) => e.source === parent?.source && e.kind === parent?.kind), index = siblings.findIndex((e) => e.target === n.id);
         let chosen;
-        const seed = n.kind === "commit" ? -1.5 : n.kind === "directory" ? 0.8 : n.kind === "candidate" ? -0.5 : 1.5;
-        for (let attempt = 0; attempt < 300; attempt++) {
-          const a = seed + (Math.max(0, index) + attempt) * 2.399963, ring = Math.floor(attempt / 12), radius = (innerWidth < 768 ? 210 : 290) + ring * 115;
-          const p = { x: origin.x + Math.cos(a) * radius, y: origin.y + Math.sin(a) * radius * 0.68 };
-          if (![...occupied.values()].some((q) => overlap(p, q))) {
-            chosen = p;
-            break;
-          }
+        // Inherit spatial ownership from the entry branch. Children extend locally
+        // along that branch; occupancy clearance never mixes unrelated branches.
+        const angle=origin.angle??(parent?.kind==="observation"?.55:2.3),dx=Math.cos(angle),dy=Math.sin(angle),horizontal=Math.abs(dx)>.7;
+        const slot=Math.max(0,index),row=slot%4,column=Math.floor(slot/4),step=horizontal?300:170;
+        const midpoint=(Math.min(4,siblings.length)-1)/2;
+        const preferred={x:origin.x+dx*step+(horizontal?column*280*Math.sign(dx):(row-midpoint)*248),y:origin.y+dy*step+(horizontal?(row-midpoint)*92:column*130*Math.sign(dy)),angle};
+        for (let attempt=0;attempt<600;attempt++){
+          const offset=attempt?Math.ceil(attempt/2)*(attempt%2?1:-1):0;
+          const p={...preferred,x:preferred.x+(horizontal?Math.floor(attempt/20)*280*dx:offset*248),y:preferred.y+(horizontal?offset*92:Math.floor(attempt/20)*150*dy)};
+          if(![...occupied.values()].some(q=>overlap(p,q))){chosen=p;break;}
         }
         if (chosen) {
           positions.set(n.id, chosen);
@@ -534,7 +516,7 @@ Candidate: ${f.candidateText}`, "workspace-fragment"));
     const actions = make("div", void 0, "unified-node-actions");
     actions.append(btn("workspace-expand", "Expand nearby objects", () => expand(id)), btn("workspace-focus", "Focus here", () => focus(id)), btn("workspace-collapse", collapsed.has(id) ? "Restore neighborhood" : "Collapse neighborhood", () => collapse(id)));
     block.append(actions);
-    if (["repository", "candidate", "commit"].includes(n.kind)) block.append(btn("workspace-node-history", "Expand Git history", () => readHistory(id)), btn("workspace-node-structure", "Expand structure at version", () => readStructure(id)));
+    if (["repository", "candidate", "commit"].includes(n.kind)) block.append(btn("workspace-node-history", "Open Git history", () => readHistory(id)), btn("workspace-node-structure", "Expand structure at version", () => readStructure(id)));
     if (n.kind === "commit") {
       block.append(make("p", n.data.message, "d-quote"), make("p", `${n.data.author} \xB7 ${n.data.date}`, "rail-note"));
       const task = jobs.get(jobKey(n.data.repository));
@@ -546,7 +528,7 @@ Candidate: ${f.candidateText}`, "workspace-fragment"));
           if (token !== generation) return;
           t.displayHistoryLimit = Math.min(t.commits.length, shown + limit());
           jobs.set(jobKey(t.repository), t);
-          historyNodes(t);
+
         })));
         if (n.data.changes.length > limit()) block.append(btn("workspace-more-files", "Expand more sampled changes", () => {
           n.data.changeOffset = (n.data.changeOffset ?? limit()) + limit();
@@ -585,7 +567,7 @@ Candidate: ${f.candidateText}`, "workspace-fragment"));
     const n = find(id);
     if (n?.type !== "repository") return null;
     const b = make("section", void 0, "unified-node-actions");
-    b.append(btn("workspace-node-history", "Expand Git history", () => readHistory(id)), btn("workspace-node-structure", "Expand structure", () => readStructure(id)), btn("workspace-node-collapse", "Collapse local observations", () => collapse(id)));
+    b.append(btn("workspace-node-history", "Open Git history", () => readHistory(id)), btn("workspace-node-structure", "Expand structure", () => readStructure(id)), btn("workspace-node-collapse", "Collapse local observations", () => collapse(id)));
     return b;
   }
   deep.workspace.subscribe(() => {
@@ -623,7 +605,7 @@ Candidate: ${f.candidateText}`, "workspace-fragment"));
       baselinePending = false;
       save();
     }
-  }, paint, decorate, inspector, repositoryActions, has: (id) => objects.has(id) || links.has(id), name: (id) => objects.get(id)?.label ?? links.get(id)?.label, search: (query) => visible().nodes.filter((n) => n.label.toLowerCase().includes(query.toLowerCase())).map((n) => n.id), save, reset, focus };
+  }, paint, decorate, inspector, repositoryActions, has: (id) => objects.has(id) || links.has(id), name: (id) => objects.get(id)?.label ?? links.get(id)?.label, search: (query) => visible().nodes.filter((n) => n.label.toLowerCase().includes(query.toLowerCase())).map((n) => n.id), save, reset, focus, expand };
   decorate();
   bridge.draw();
   return controller;

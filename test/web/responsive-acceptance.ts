@@ -1,3 +1,5 @@
+/** Oct13: an unbounded exploration world preserves CTM zoom at resize;
+ * viewBox width follows zoom and is no longer required to equal CSS width. */
 /** Real cached canonical graphs + controlled fixture scheduler, production client. */
 import { chromium, type Page } from 'playwright';
 import { mkdir, writeFile } from 'node:fs/promises';
@@ -142,12 +144,13 @@ try {
   await touch.setViewportSize({width:1024,height:768});
   await touch.waitForFunction(()=>document.querySelector('#explorer-body')?.getAttribute('data-panel-mode')==='compact');
   const narrow=await measure(touch);
-  check('live breakpoint reconciliation keeps zoom selection and one overlay',wide.ctm.a===narrow.ctm.a&&wide.selection===narrow.selection&&narrow.drawer&&!narrow.rail&&narrow.contained,{wide,narrow});
+  check('live breakpoint reconciliation keeps zoom selection and one overlay',Math.abs(wide.ctm.a-narrow.ctm.a)<1e-6&&wide.selection===narrow.selection&&narrow.drawer&&!narrow.rail&&narrow.contained,{wide,narrow});
   check('breakpoint hiding focused Context returns focus to disclosure',await touch.locator('#rail-toggle').evaluate(e=>e===document.activeElement));
   await touch.locator('.drawer-close').click();
   check('node evidence close returns focus to selected graph node',await touch.locator('.node').filter({has:touch.locator('.node-box.is-subject')}).evaluate(e=>e===document.activeElement));
   await touch.setViewportSize({width:1280,height:800});
-  await touch.waitForFunction(()=>document.querySelector('#canvas')?.getAttribute('viewBox')?.split(' ')[2]==='1280');
+  // CSS geometry updates before the resize event redraws and restores keyboard focus.
+  await touch.waitForFunction(()=>document.querySelector('#canvas')?.getBoundingClientRect().width===1280&&document.activeElement?.querySelector('.node-box.is-subject'));
   check('graph redraw preserves returned node focus',await touch.locator('.node').filter({has:touch.locator('.node-box.is-subject')}).evaluate(e=>e===document.activeElement));
   await cdp.detach();await touch.close();
 } finally {

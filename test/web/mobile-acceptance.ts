@@ -1,3 +1,5 @@
+/** Oct13: Fit frames a connected local neighborhood, not a fixed 1:1 root.
+ * Selection can focus its neighborhood; Evidence must retain that selected camera. */
 /** Actual production ViewGraphs + Chromium CDP touch simulation, not physical devices. */
 import { chromium, webkit, type Page, type CDPSession } from 'playwright';
 import { mkdir, writeFile } from 'node:fs/promises';
@@ -46,11 +48,11 @@ try{
  await touch(cdp,'touchEnd',[]);await page.waitForTimeout(100);
  const pinch=await measure(page);const anchor=await page.evaluate(p=>{const q=new DOMPoint(p.x,p.y).matrixTransform(document.querySelector<SVGSVGElement>('#canvas')!.getScreenCTM()!);return{x:q.x,y:q.y};},world);
  check(`${label} two-finger zoom anchored at true midpoint, no ghost click`,pinch.ctm[0]!>pan.ctm[0]!&&Math.hypot(anchor.x-mx,anchor.y-my)<1&&!pinch.selection,{world,screenMidpoint:{x:mx,y:my},anchor,pinch});
- await page.locator('#zoom-fit').click();const fitted=await measure(page);check(`${label} Fit restores readable subject framing`,fitted.ctm[0]===1&&fitted.subject.x>=0&&fitted.subject.right<=width&&fitted.subject.bottom<fitted.hud.y);
+ await page.locator('#zoom-fit').click();const fitted=await measure(page);check(`${label} Fit restores readable subject framing`,fitted.subject.height>=44&&fitted.subject.x>=0&&fitted.subject.right<=width&&fitted.subject.bottom<fitted.hud.y);
  const node=await page.locator('.node-box.is-subject').boundingBox();await touch(cdp,'touchStart',[{x:node!.x+node!.width/2,y:node!.y+node!.height/2}]);await touch(cdp,'touchEnd',[]);
  await page.waitForTimeout(100);const selected=await measure(page);check(`${label} native tap selects real node for spatial exploration`,selected.view==='graph'&&selected.selection===view!.subject.id,selected);
  await page.locator('#mobile-nav [data-mobile-view=evidence]').click();check(`${label} explicit Evidence reads selected node`,await page.locator('#drawer-inner').isVisible());
- await page.locator('#mobile-nav [data-mobile-view=graph]').click();check(`${label} Evidence return keeps camera and selection`,same((await measure(page)).camera,fitted.camera)&&(await measure(page)).selection===selected.selection);
+ await page.locator('#mobile-nav [data-mobile-view=graph]').click();check(`${label} Evidence return keeps camera and selection`,same((await measure(page)).camera,selected.camera)&&(await measure(page)).selection===selected.selection);
  await page.locator('#mobile-nav [data-mobile-view=relations]').click();const list=await measure(page);
  const expected=relationGroups(view!);
  const ids=await page.locator('[data-relation-id]').evaluateAll(es=>es.map(e=>(e as HTMLElement).dataset.relationId!).sort());
