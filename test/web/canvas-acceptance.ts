@@ -404,6 +404,18 @@ async function scrollbarPixels(browser: Browser, selector: string, repo: string,
       content: `${selector} * { visibility: hidden !important; }
                 .drawer-more, .rail-more { display: none !important; }`,
     });
+    // Chromium can retain LCD glyph fringes outside the invalidated text bounds
+    // after visibility:hidden (the right-aligned census count left three red
+    // pixels). Repaint the frame before measuring the empty gutter. This keeps
+    // both the native scrollbar and the strict pixel threshold under test.
+    await page.evaluate(async () => {
+      const display = document.body.style.display;
+      const painted = () => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+      document.body.style.display = 'none';
+      await painted();
+      document.body.style.display = display;
+      await painted();
+    });
     const clip = await page.evaluate(`(() => {
       const n = document.querySelector(${JSON.stringify(selector)});
       const frame = n.closest('.drawer, .rail');
@@ -1643,10 +1655,12 @@ check('02 expanding reveals the held-back members',
       await scroller.screenshot({ path: `${OUT}/19-drawer-bottom-of-scroll.png` });
       const atBottom = await scroller.evaluate(`(() => {
         const n = document.querySelector('.drawer-inner');
-        return { classes: [...n.classList], frameMore: document.querySelector('.drawer').classList.contains('is-more-below') };
-      })()`) as { classes: string[]; frameMore: boolean };
-      check('19 at the bottom the rule withdraws and the top fade appears',
-        atBottom.classes.includes('gl-has-above') && !atBottom.frameMore,
+        return { classes: [...n.classList], frameMore: document.querySelector('.drawer').classList.contains('is-more-below'), mask: getComputedStyle(n).maskImage };
+      })()`) as { classes: string[]; frameMore: boolean; mask: string };
+      // A top mask erased sticky headings as well as rows. The scroll state is
+      // still accurate, but the reading header must remain painted at the bottom.
+      check('19 at the bottom the rule withdraws and the sticky header remains unmasked',
+        atBottom.classes.includes('gl-has-above') && !atBottom.frameMore && atBottom.mask === 'none',
         `classes ${atBottom.classes.join(' ')}, rule ${atBottom.frameMore}`);
 
       // And at the top it is the other way round.

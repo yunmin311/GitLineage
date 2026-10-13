@@ -1152,7 +1152,7 @@ function renderRail(view) {
   const statusMarks = el('div', { class: 'rail-statuses' });
   for (const [key, style, label] of [['VERIFIED', 'v', 'Verified'], ['DECLARED', 'd', 'Declared'], ['DETECTED', 't', 'Detected']]) {
     const mark = el('span', { class: `st st-${style}` });
-    mark.append(el('span', { class: 'sw', 'aria-hidden': 'true' }), el('span', { class: 'status-count', text: String(view.statusCounts[key]) }), label);
+    mark.append(el('span', { class: 'sw', 'aria-hidden': 'true' }), el('span', { class: 'status-count', text: String(view.statusCounts[key]) }), el('span', { class: 'status-label', text: label }));
     statusMarks.append(mark);
   }
   status.append(statusMarks);
