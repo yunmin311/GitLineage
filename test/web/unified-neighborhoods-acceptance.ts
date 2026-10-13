@@ -18,7 +18,7 @@ try{for(const width of [1920,390]){
   await page.locator('#workspace-expand').click();await page.waitForFunction(n=>document.querySelector('#drawer-inner')?.textContent?.includes(`${n} of 129`),cap*2);
   const grown=await page.locator('.unified-node .node-box').evaluateAll(ns=>ns.map(n=>({id:n.parentElement!.getAttribute('data-node-id'),x:n.getAttribute('x'),y:n.getAttribute('y')})));for(const n of initial)assert.deepEqual(grown.find(p=>p.id===n.id),n);assert.ok(grown.length<30,'Large tree never floods the canvas');
   if(width<768)await page.locator('[data-mobile-view=graph]').click();else await page.locator('#zoom-fit').click();await page.screenshot({path:resolve(out,`${width}-large-tree.png`)});
-  const boxes=await page.locator('#canvas .node-box').evaluateAll(ns=>ns.map(n=>{const b=(n as SVGGraphicsElement).getBBox();return{x:b.x,y:b.y,w:b.width,h:b.height};}));for(let i=0;i<boxes.length;i++)for(let j=i+1;j<boxes.length;j++){const a=boxes[i]!,b=boxes[j]!;assert.ok(a.x+a.w<=b.x||b.x+b.w<=a.x||a.y+a.h<=b.y||b.y+b.h<=a.y);}
+  const boxes=await page.locator('#canvas .node-box').evaluateAll(ns=>ns.map(n=>{const b=(n as SVGGraphicsElement).getBBox();return{x:b.x,y:b.y,w:b.width,h:b.height,id:n.parentElement!.getAttribute('data-node-id')||n.parentElement!.getAttribute('data-bundle-key')};}));for(let i=0;i<boxes.length;i++)for(let j=i+1;j<boxes.length;j++){const a=boxes[i]!,b=boxes[j]!;assert.ok(a.x+a.w<=b.x||b.x+b.w<=a.x||a.y+a.h<=b.y||b.y+b.h<=a.y);}
   if(width<768){await locate('modules');await page.locator('[data-mobile-view=graph]').click();const camera=await page.locator('#canvas').getAttribute('viewBox');const cdp=await page.context().newCDPSession(page);await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:150,y:530}]});await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:205,y:560}]});await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});assert.notEqual(await page.locator('#canvas').getAttribute('viewBox'),camera,'Native touch pans this world');await cdp.detach();}
 
   if(await page.locator('[data-perspective=dependencies]').getAttribute('aria-pressed')!=='true')await page.locator('[data-perspective=dependencies]').click();
@@ -28,8 +28,8 @@ try{for(const width of [1920,390]){
   }
   assert.ok(await page.locator('.aggregate-member').count()>5);
   assert.ok(await page.locator('.unified-node').count()>10,'Dependency filtering retains the expanded tree world');
-  const mixed=await page.locator('#canvas .node-box,#canvas .bundle-card-box').evaluateAll(ns=>ns.map(n=>{const b=(n as SVGGraphicsElement).getBBox();return{x:b.x,y:b.y,w:b.width,h:b.height};}));
-  for(let i=0;i<mixed.length;i++)for(let j=i+1;j<mixed.length;j++){const a=mixed[i]!,b=mixed[j]!;assert.ok(a.x+a.w<=b.x||b.x+b.w<=a.x||a.y+a.h<=b.y||b.y+b.h<=a.y,'Mixed canonical and display neighborhoods do not overlap');}
+  const mixed=await page.locator('#canvas .node-box,#canvas .bundle-card-box').evaluateAll(ns=>ns.map(n=>{const b=(n as SVGGraphicsElement).getBBox();return{x:b.x,y:b.y,w:b.width,h:b.height,id:n.parentElement!.getAttribute('data-node-id')||n.parentElement!.getAttribute('data-bundle-key')};}));
+  for(let i=0;i<mixed.length;i++)for(let j=i+1;j<mixed.length;j++){const a=mixed[i]!,b=mixed[j]!;assert.ok(a.x+a.w<=b.x||b.x+b.w<=a.x||a.y+a.h<=b.y||b.y+b.h<=a.y,'Mixed canonical and display neighborhoods do not overlap: '+JSON.stringify([a,b]));}
   if(width>=768)await page.locator('#zoom-fit').click();
   await page.screenshot({path:resolve(out,`${width}-mixed-neighborhoods.png`)});
   for(const label of ['deep','one','two','three','four','five','six']){await locate(label);await page.locator('#workspace-expand').click();await page.waitForFunction(()=>document.querySelector('#workspace-status')?.textContent?.includes('Objects added'));}

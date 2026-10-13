@@ -2356,3 +2356,11 @@ body.mobile-explorer .band-note { display: -webkit-box; -webkit-line-clamp: 2; -
 @media(max-width:767px){.git-history input{order:3;flex-basis:calc(100% - 148px);min-width:0}.git-history select{order:4}.git-history h2{min-width:120px}}
 
 .edge-group:focus-visible .edge-line{stroke-width:2.5}
+/* Grouping is a declaration index; objects retain their accepted type primitives. */
+.graph-group.family-dependency .bundle-card-box{stroke-dasharray:3 2}
+.graph-group.family-attribution .bundle-card-box{stroke-dasharray:1 3}
+.graph-group.is-expanded .bundle-card-box{stroke-dasharray:none}
+.group-navigation.is-cross-reference .group-navigation-line{stroke-dasharray:2 4;stroke:var(--detected)}
+.unified-node.kind-file .node-box{fill:var(--surface-hi);stroke:var(--rule-2)}
+.unified-file-fold{fill:none;stroke:var(--rule-2);stroke-width:1.5}
+.kind-structure .unified-line{stroke:var(--ink-3);stroke-width:1.4}

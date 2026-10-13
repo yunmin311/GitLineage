@@ -1,6 +1,6 @@
 // Unified display layer; Canonical Graph remains unchanged.
 import {openGitLog} from "./git-log.mjs";
-import { spatialRoute } from "./spatial.mjs";
+import { spatialRoute, spatialExpansion } from "./spatial.mjs";
 function mountRepositoryExplorer(getRepository, deep, bridge) {
   const make = (tag, text, cls) => {
     const n = document.createElement(tag);
@@ -395,43 +395,10 @@ function mountRepositoryExplorer(getRepository, deep, bridge) {
   }
   function paint(canvas, canonicalPositions) {
     reset();
-    const scene = visible(canonicalPositions), occupied = new Map(canonicalPositions);
+    const scene = visible(canonicalPositions);
     const connected = scene.nodes.filter((n) => scene.edges.some((e) => e.target === n.id || e.source === n.id));
-    const overlap = (p, q) => Math.abs(p.x - q.x) < 248 && Math.abs(p.y - q.y) < 82;
-    for (const n of connected) {
-      const p = positions.get(n.id);
-      if (p && ![...occupied.values()].some((q) => overlap(p, q))) occupied.set(n.id, p);
-    }
-    let todo = connected.filter((n) => !occupied.has(n.id));
-    for (let pass = 0, maxPass = todo.length + 2; todo.length && pass < maxPass; pass++) {
-      let progress = false;
-      for (const n of [...todo]) {
-        const parent = scene.edges.find((e) => e.target === n.id && occupied.has(e.source)), anchor = occupied.get(parent?.source);
-        if (!anchor && pass < 1) continue;
-        const repoAnchor = n.data?.repository && occupied.get(repoNode(n.data.repository));
-        const origin = (n.kind === "commit" || n.kind === "branch" ? repoAnchor : null) ?? anchor ?? occupied.get(rootId()) ?? { x: 960, y: 800 };
-        const siblings = scene.edges.filter((e) => e.source === parent?.source && e.kind === parent?.kind), index = siblings.findIndex((e) => e.target === n.id);
-        let chosen;
-        // Inherit spatial ownership from the entry branch. Children extend locally
-        // along that branch; occupancy clearance never mixes unrelated branches.
-        const angle=origin.angle??(parent?.kind==="observation"?.55:2.3),dx=Math.cos(angle),dy=Math.sin(angle),horizontal=Math.abs(dx)>.7;
-        const slot=Math.max(0,index),row=slot%4,column=Math.floor(slot/4),step=horizontal?300:170;
-        const midpoint=(Math.min(4,siblings.length)-1)/2;
-        const preferred={x:origin.x+dx*step+(horizontal?column*280*Math.sign(dx):(row-midpoint)*248),y:origin.y+dy*step+(horizontal?(row-midpoint)*92:column*130*Math.sign(dy)),angle};
-        for (let attempt=0;attempt<600;attempt++){
-          const offset=attempt?Math.ceil(attempt/2)*(attempt%2?1:-1):0;
-          const p={...preferred,x:preferred.x+(horizontal?Math.floor(attempt/20)*280*dx:offset*248),y:preferred.y+(horizontal?offset*92:Math.floor(attempt/20)*150*dy)};
-          if(![...occupied.values()].some(q=>overlap(p,q))){chosen=p;break;}
-        }
-        if (chosen) {
-          positions.set(n.id, chosen);
-          occupied.set(n.id, chosen);
-          todo = todo.filter((x) => x !== n);
-          progress = true;
-        }
-      }
-      if (!progress) break;
-    }
+    const occupied = spatialExpansion({anchors:canonicalPositions,nodes:connected,edges:scene.edges,previous:positions,compact:window.innerWidth<768});
+    for(const n of connected)if(occupied.has(n.id))positions.set(n.id,occupied.get(n.id));
     const edgeLayer = svg("g", { class: "unified-edge-layer" }), nodeLayer = svg("g", { class: "unified-node-layer" });
     const defs = svg("defs");
     defs.append(svg("marker", { id: "display-arrow", viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 6, markerHeight: 6, orient: "auto-start-reverse" }));
@@ -439,7 +406,9 @@ function mountRepositoryExplorer(getRepository, deep, bridge) {
     canvas.append(defs);
     for (const e of scene.edges) {
       const peers = scene.edges.filter((p) => p.source === e.source && p.target === e.target);
-      const route = spatialRoute(e, occupied, peers.indexOf(e), peers.length);
+      const sourcePoint=occupied.get(e.source),vertical=Math.abs(Math.cos(sourcePoint?.angle??0))<.7;
+      const outgoing=scene.edges.filter(p=>p.source===e.source).sort((a,b)=>{const pa=occupied.get(a.target),pb=occupied.get(b.target);return vertical?((pa?.x??0)-(pb?.x??0)||(pa?.y??0)-(pb?.y??0)):(pa?.y??0)-(pb?.y??0);});
+      const route = spatialRoute(e, occupied, outgoing.indexOf(e), outgoing.length);
       if (!route) continue;
       const g = svg("g", { class: "unified-edge kind-" + e.kind + (bridge.selected() === e.id ? " is-selected" : ""), role: "button", tabindex: 0, "aria-label": e.label, "data-display-edge": e.id, "data-source": e.source, "data-target": e.target });
       g.append(svg("path", { d: route.path, class: "unified-line", "marker-end": e.directed ? "url(#display-arrow)" : "none" }), svg("title", {}, e.label));
@@ -466,6 +435,7 @@ function mountRepositoryExplorer(getRepository, deep, bridge) {
       g.append(svg("rect", { x: p.x - 105, y: p.y - 23, width: 216, height: 52, rx: radius, class: "workspace-shadow" }), svg("rect", { x: p.x - 108, y: p.y - 26, width: 216, height: 52, rx: radius, class: "node-box" }));
       const label = svg("text", { x: p.x - 98, y: p.y - 3, class: "node-label" }, n.label), meta = svg("text", { x: p.x - 98, y: p.y + 15, class: "node-fact" }, n.kind + (n.data?.revision ? " \xB7 " + n.data.revision.slice(0, 7) : "") + (n.kind === "candidate" ? " \xB7 lineage unverified" : ""));
       g.append(label, meta, svg("title", {}, n.label));
+      if (n.kind === "file") g.append(svg("path", { d: `M${p.x+88} ${p.y-26} v12 h20`, class: "unified-file-fold" }));
       if (n.kind === "directory") g.append(svg("path", { d: `M${p.x - 108} ${p.y - 17} h18 l6 -8 h22`, class: "unified-directory-tab" }));
       const hit = svg("rect", { x: p.x - 108, y: p.y - 26, width: 216, height: 52, fill: "transparent", class: "node-hit" });
       hit.onclick = (e) => {

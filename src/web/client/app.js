@@ -1411,11 +1411,12 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
     const aggregate=composition.plates.find(p=>p.memberEdgeIds.includes(edge.id));
     // A grouped relation is navigated through its display branch. Only a selected
     // canonical relation draws the direct object-to-object claim and its arrow.
-    if(aggregate&&expandedEdgeIds.has(edge.id)&&state.selectedEdgeId!==edge.id&&state.selectedNodeId!==edge.source&&state.selectedNodeId!==edge.target){
+    if(aggregate&&expandedEdgeIds.has(edge.id)){
       const peer=edge.source===view.subject.id?edge.target:edge.source;
-      const route=spatialRoute({source:BUNDLE_ID_PREFIX+aggregate.key,target:peer},positions);
-      if(route){const nav=svgEl('g',{class:'group-navigation', 'data-navigation-source':BUNDLE_ID_PREFIX+aggregate.key,'data-navigation-target':peer});nav.append(svgEl('path',{d:route.path,class:'group-navigation-line'}),svgEl('title',{},['Member of '+aggregate.label+'; select the object to read its actual relationship.']));memberEdgeLayer.append(nav);}
-      continue;
+      const memberPeers=edges.filter(e=>aggregate.memberEdgeIds.includes(e.id)).sort((a,b)=>{const pa=positions.get(a.source===view.subject.id?a.target:a.source),pb=positions.get(b.source===view.subject.id?b.target:b.source);return Math.abs(Math.cos(positions.get(BUNDLE_ID_PREFIX+aggregate.key)?.angle||0))>.7?pa.y-pb.y:(pa.x-pb.x||pa.y-pb.y);});
+      const route=spatialRoute({source:BUNDLE_ID_PREFIX+aggregate.key,target:peer,presentation:positions.get(peer)?.aggregateKey===aggregate.key?'branch':undefined},positions,memberPeers.indexOf(edge),memberPeers.length);
+      if(route){const nav=svgEl('g',{class:'group-navigation'+(positions.get(peer)?.aggregateKey!==aggregate.key?' is-cross-reference':''), 'data-navigation-source':BUNDLE_ID_PREFIX+aggregate.key,'data-navigation-target':peer});nav.append(svgEl('path',{d:route.path,class:'group-navigation-line'}),svgEl('title',{},['Member of '+aggregate.label+'; select the object to read its actual relationship.']));memberEdgeLayer.append(nav);}
+      if(state.selectedEdgeId!==edge.id)continue;
     }
     const { fanIndex, fanCount } = fanSlot(edge, edges);
     const geometry = edgeGeometry(edge, positions, fanIndex, fanCount);
@@ -1480,17 +1481,18 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
   const subjectPosition = positions.get(view.subject.id);
   for(const plate of composition.plates){
     const at=positions.get(BUNDLE_ID_PREFIX+plate.key);if(!at||!plate.count)continue;
-    const navigationRoute=spatialRoute({source:view.subject.id,target:BUNDLE_ID_PREFIX+plate.key},positions);
-    if(navigationRoute)edgeLayer.append(svgEl('path',{d:navigationRoute.path,class:'group-navigation-line group-navigation-root','aria-label':plate.label+' · grouping, not a lineage claim'}));
+    const siblings=composition.plates.filter(p=>p.family===plate.family).sort((a,b)=>{const pa=positions.get(BUNDLE_ID_PREFIX+a.key),pb=positions.get(BUNDLE_ID_PREFIX+b.key);return Math.abs(Math.cos(at.angle||0))>.7?pa.y-pb.y:(pa.x-pb.x||pa.y-pb.y);});
+    const navigationRoute=spatialRoute({source:view.subject.id,target:BUNDLE_ID_PREFIX+plate.key,presentation:'branch'},positions,siblings.indexOf(plate),siblings.length);
+    if(navigationRoute)edgeLayer.append(svgEl('path',{d:navigationRoute.path,class:'group-navigation-line group-navigation-root','data-navigation-source':view.subject.id,'data-navigation-target':BUNDLE_ID_PREFIX+plate.key,'aria-label':plate.label+' · grouping, not a lineage claim'}));
     const left=at.x-at.width/2,top=at.y-at.height/2;
     const owns=plate.memberEdgeIds.includes(state.selectedEdgeId)||plate.memberEdgeIds.some(id=>{const e=view.edges.find(e=>e.id===id);return state.selectedNodeId&&(e?.source===state.selectedNodeId||e?.target===state.selectedNodeId);});
-    const group=svgEl('g',{class:`bundle-card graph-group st-${plate.status}${plate.expanded?' is-expanded is-open':''}${owns?' is-selected':''}`,role:'button',tabindex:'0','aria-label':`${plate.label}, ${plate.count} ${plate.relationshipType.replace(/_/g,' ')} relationships, grouped`,'aria-expanded':String(plate.expanded)});
-    group.dataset.bundleKey=plate.key;
+    const group=svgEl('g',{class:`bundle-card graph-group family-${plate.family} st-${plate.status}${plate.expanded?' is-expanded is-open':''}${owns?' is-selected':''}`,role:'button',tabindex:'0','aria-label':`${plate.label}, ${plate.count} ${plate.relationshipType.replace(/_/g,' ')} relationships, grouped`,'aria-expanded':String(plate.expanded)});
+    group.dataset.bundleKey=plate.key;group.dataset.family=plate.family;
     group.append(svgEl('title',{},[`${plate.label} · ${plate.meta||plate.relationshipType} · grouping only`]),
       svgEl('rect',{x:left+(owns?5:4),y:top+(owns?5:4),width:at.width,height:at.height,rx:4,class:owns?'depth-shadow-selected':'depth-shadow-plate','aria-hidden':'true'}),
       svgEl('rect',{x:left,y:top,width:at.width,height:at.height,rx:4,class:'bundle-card-box depth-plate'}),
-      svgEl('text',{x:left+12,y:top+23,class:'bundle-card-count'},[plate.label.replace(/ ×\d+$/, '')]),
-      svgEl('text',{x:left+12,y:top+43,class:'plate-subtitle'},[`${plate.relationshipType.replace(/_/g,' ')} · ${plate.count} members`])
+      svgEl('text',{x:left+12,y:top+25,class:'bundle-card-count'},[plate.label.replace(/ ×\d+$/, '')]),
+      svgEl('text',{x:left+12,y:top+43,class:'plate-subtitle'},[`${plate.family==='dependency'?'DEPENDENCIES':plate.family==='attribution'?'REFERENCES':'ORIGINS'} · ${plate.count} members`])
     );
     const shown=exploredIds(plate).length;
     const action=(label,x,fn,cls)=>{const g=svgEl('g',{role:'button',tabindex:'0','aria-label':label,class:cls});g.append(svgEl('text',{x,y:top+69,class:'plate-row-expand'},[label]),svgEl('rect',{x:x-4,y:top+44,width:90,height:44,class:'plate-row-hit'}));const run=e=>{e.stopPropagation();fn();};g.addEventListener('click',run);g.addEventListener('mobile-tap',run);g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();run(e);}});group.append(g);};
@@ -1521,6 +1523,7 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
       class: [
         'node',
         position.aggregateKey ? 'aggregate-member' : '',
+        `entity-${node.type.toLowerCase()}`,
         node.isSubject ? 'is-subject' : '',
         state.selectedNodeId === node.id ? 'is-selected' : '',
         query.length > 0 && !matchedNodes.has(node.id) ? 'is-dim' : '',
@@ -1584,6 +1587,7 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
         node.label,
       ]),
     );
+    if (!node.isSubject && !node.fact) group.append(svgEl('text',{x:position.x-NODE_W/2+10,y:position.y+15,class:'node-fact'},[node.type.toUpperCase()]));
     if (node.fact) {
       group.append(
         svgEl('text', {
@@ -1972,15 +1976,13 @@ function filterMobileRelations() {
 }
 function phoneFit(targetId) {
  const canvas=$('canvas'),rootId=state.view?.subject.id;
- let id=targetId;
- if(!id && canvas.clientHeight<600){id=rootId;}
- if(!id){const ancestry=visibleCandidates(state.view).find(e=>e.family==='ancestry'&&(e.source===rootId||e.target===rootId));if(ancestry)id=ancestry.source===rootId?ancestry.target:ancestry.source;}
- if(!id){const plate=[...state.composition.plates].sort((a,b)=>b.count-a.count)[0];id=plate&&[...canvas.querySelectorAll('.aggregate-member')].find(n=>n.dataset.aggregateKey===plate.key)?.dataset.nodeId;}
+ const id=targetId||rootId;
  const target=state.positions.get(id||rootId)||ORIGIN;
  const parent=target.aggregateKey?state.positions.get(BUNDLE_ID_PREFIX+target.aggregateKey):null;
  const root=state.positions.get(rootId)||target;
  const box=p=>({getBBox:()=>({x:p.x-108,y:p.y-(p.height||52)/2,width:216,height:p.height||52})});
- fitGraphBoxes([box(target),...(parent?[box(parent)]:[]),...(!targetId&&id!==rootId?[box(root)]:[])]);
+ const connection=targetId&&parent?[...canvas.querySelectorAll('.group-navigation')].find(n=>n.dataset.navigationTarget===id&&n.dataset.navigationSource===BUNDLE_ID_PREFIX+target.aggregateKey)?.querySelector('path'):null;
+ fitGraphBoxes([box(target),...(parent?[box(parent)]:[]),...(connection?[connection]:[]),...(!targetId&&id!==rootId?[box(root)]:[])]);
 }
 function renderOverview(){
  let host=$('graph-overview');if(!host){host=el('div',{id:'graph-overview',class:'graph-overview','aria-label':'Graph overview'});$('stage').append(host);}
@@ -2656,7 +2658,7 @@ function zoomBy(factor) {
 /** Explicit local focus uses the existing camera writer; expansion never fits. */
 function fitGraphBoxes(nodes){
  const canvas=$('canvas'), boxes=nodes.filter(Boolean).map(n=>n.getBBox());if(!boxes.length)return;
- const padding=isPhone()&&canvas.clientHeight<400?12:40;
+ const padding=isPhone()?12:40;
  const x=Math.min(...boxes.map(b=>b.x))-24,y=Math.min(...boxes.map(b=>b.y))-padding;
  const right=Math.max(...boxes.map(b=>b.x+b.width))+24,bottom=Math.max(...boxes.map(b=>b.y+b.height))+padding;
  const viewport={width:canvas.clientWidth,height:canvas.clientHeight};
@@ -2674,7 +2676,8 @@ function focusGraphGroup(key){
  if(isPhone()){
   // Keep actual node text and touch targets at reading size. Navigation follows
   // the chosen neighborhood while the canvas can still pan to its other peers.
-  const first=members.find(n=>n.dataset.nodeId===state.selectedNodeId)||members[0];
+  const center=state.positions.get(BUNDLE_ID_PREFIX+key);
+  const first=members.find(n=>n.dataset.nodeId===state.selectedNodeId)||members.toSorted((a,b)=>{const pa=state.positions.get(a.dataset.nodeId),pb=state.positions.get(b.dataset.nodeId);return Math.hypot(pa.x-center.x,pa.y-center.y)-Math.hypot(pb.x-center.x,pb.y-center.y);})[0];
   state.activeGroup=key;if(first){state.selectedNodeId=first.dataset.nodeId;state.selectedEdgeId='';draw();renderDrawer();syncUrl();}phoneFit(first?.dataset.nodeId);return;
  }
 

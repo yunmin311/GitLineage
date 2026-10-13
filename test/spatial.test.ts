@@ -16,3 +16,29 @@ test('multi-parent and many-to-many paths attach to borders and clear every unre
   }
  }
 });
+
+test('expanded declaration branches reserve disjoint member bands',()=>{
+ const edges=Array.from({length:18},(_,i)=>({source:'root',target:'p'+i,family:'dependency'}));
+ const groups=Array.from({length:3},(_,i)=>({key:'depends_on/'+i,family:'dependency',peers:edges.slice(i*6,i*6+6).map(e=>e.target)}));
+ const ps=spatialLayout({subjectId:'root',edges,groups});
+ const bands=groups.map(g=>g.peers.map(id=>ps.get(id)!.y));
+ for(let i=0;i<bands.length-1;i++)assert.ok(Math.max(...bands[i]!) + 52 < Math.min(...bands[i+1]!), 'Members of neighboring declarations must not interleave');
+});
+test('routes leave explicit side ports and turn only at right angles',()=>{
+ const ps=new Map([['a',{x:0,y:0}],['b',{x:620,y:120}],['block',{x:300,y:50}]]);
+ const r=spatialRoute({source:'a',target:'b'},ps)!;
+ assert.ok(!r.path.includes('Q'),'Obstacle routing must not improvise a quadratic curve');
+ const nums=r.path.match(/-?\d+(?:\.\d+)?/g)!.map(Number);
+ for(let i=2;i<nums.length;i+=2)assert.ok(nums[i]===nums[i-2]||nums[i+1]===nums[i-1], 'Every routing segment is orthogonal');
+ assert.equal(nums[0],108);assert.equal(nums[1],0);
+});
+
+test('presentation forests measure subtrees while retaining additional parents and unique identity',async()=>{
+ const {spatialExpansion}=await import('../src/web/client/lib/spatial.mjs');
+ const edges=[{source:'root',target:'src',kind:'structure'},{source:'root',target:'vendor',kind:'structure'},{source:'src',target:'module',kind:'structure'},{source:'module',target:'file',kind:'structure'},{source:'vendor',target:'file',kind:'dependency'}];
+ const anchors=new Map([['root',{x:960,y:800}]]);
+ for(const compact of [false,true]){const p=spatialExpansion({anchors,nodes:['src','vendor','module','file'].map(id=>({id})),edges,compact});assert.equal(p.size,5);assert.equal(p.get('file')?.depth,2,'Shared object uses its first reachable owner, without losing the other parent edge');assert.equal(edges.length,5);
+ for(const e of edges)assert.ok(spatialRoute(e,p));
+ const boxes=[...p.values()];for(let i=0;i<boxes.length;i++)for(let j=i+1;j<boxes.length;j++)assert.ok(Math.abs(boxes[i]!.x-boxes[j]!.x)>=216||Math.abs(boxes[i]!.y-boxes[j]!.y)>=52);
+ }
+});

@@ -76,6 +76,20 @@ const worldCamera = (c: Camera) => JSON.stringify({
   viewBox: c.viewBox, centre: c.centre, worldFocal: c.worldFocal,
 });
 
+/** UI_CONTRACT permits only a protection pan when the new Drawer occludes selection.
+ * Check actual free-space geometry and unchanged world scale, rather than the old
+ * unconditional camera equality which contradicts that contract. */
+async function protectedSelection(page:Page,before:Camera,after:Camera){
+ const geometry=await page.evaluate(()=>{
+  const target=document.querySelector('.node.is-selected .node-box,.edge-group.is-selected .edge-label');
+  const b=target?.getBoundingClientRect(),stage=document.querySelector('#stage')!.getBoundingClientRect();
+  const shown=(id:string)=>{const e=document.querySelector<HTMLElement>(id)!;return !e.hidden&&e.getClientRects().length?e.getBoundingClientRect():null;};
+  const rail=shown('#rail'),drawer=shown('#drawer'),hud=shown('.viewport-hud'),top=shown('#graph-perspectives');
+  return b?{x:b.x,y:b.y,right:b.right,bottom:b.bottom,left:rail?.right??stage.left,freeRight:drawer?.left??stage.right,top:(top?.bottom??stage.top)+8,freeBottom:hud?.top??stage.bottom}:null;
+ });
+ return {ok:before.scale===after.scale&&JSON.stringify(before.worldFocal)===JSON.stringify(after.worldFocal)&&!!geometry&&geometry.x>=geometry.left&&geometry.right<=geometry.freeRight&&geometry.y>=geometry.top&&geometry.bottom<=geometry.freeBottom,geometry};
+}
+
 interface PlateProbe {
   label: string;
   open: boolean;
@@ -344,7 +358,12 @@ async function plateBandCollisions(page: Page): Promise<string[]> {
     for (const box of document.querySelectorAll('svg .bundle-card-box, svg .node-box')) {
       const r = box.getBoundingClientRect();
       if (r.left < b.right && b.left < r.right && r.top < b.bottom && b.top < r.bottom) {
-        bad.push((box.getAttribute('class') || 'box') + ' over band');
+        // World boxes may extend behind the fixed opaque HUD when panned.
+        // Their unpainted getBoundingClientRect is not a visual collision.
+        const hud=band.closest('.viewport-hud'),style=hud&&getComputedStyle(hud);
+        const hr=hud?.getBoundingClientRect();
+        const covered=hr&&style&&style.backgroundColor!=='transparent'&&!style.backgroundColor.endsWith(', 0)')&&parseFloat(style.opacity)===1&&hr.left<=Math.max(r.left,b.left)&&hr.right>=Math.min(r.right,b.right)&&hr.top<=Math.max(r.top,b.top)&&hr.bottom>=Math.min(r.bottom,b.bottom);
+        if(!covered)bad.push((box.getAttribute('class') || 'box') + ' painted over band');
       }
     }
     return bad;
@@ -852,9 +871,8 @@ check('02 expanding reveals the held-back members',
     check('03 the Drawer overlay preserves the rail and graph',
       fSelected.rails.drawer === 'shown' && fDefault.rails.rail === 'shown',
       'the rail was already the left column and stays it');
-    check('03 selecting a member moves nothing in the world',
-      worldCamera(fSelected.camera) === worldCamera(beforeMemberSelection.camera),
-      'viewBox, centre and world focal identical');
+    const protectedMember=await protectedSelection(page,beforeMemberSelection.camera,fSelected.camera);
+    check('03 selecting a member preserves zoom and protects the actual target',protectedMember.ok,JSON.stringify(protectedMember.geometry));
 
     // ================================ 12 · camera stability across the whole arc
     const closeDrawer = await page.evaluate(() => {
@@ -1308,14 +1326,9 @@ check('02 expanding reveals the held-back members',
     await page.screenshot({ path: `${OUT}/12b-camera-selected-drawer.png` });
     const camSelected = await readFrame(page);
     report['12-camera-proof'] = { default: camDefault.camera, selected: camSelected.camera };
-    check('12 the window is identical before and after reading a relationship',
-      worldCamera(camDefault.camera) === worldCamera(camSelected.camera),
-      `${worldCamera(camDefault.camera)} vs ${worldCamera(camSelected.camera)}`);
-    check('12 the subject keeps its world focal and actual screen position/scale',
-      JSON.stringify(camDefault.camera.worldFocal) === JSON.stringify(camSelected.camera.worldFocal)
-        && JSON.stringify(camDefault.camera.subjectScreen) === JSON.stringify(camSelected.camera.subjectScreen)
-        && camDefault.camera.scale === camSelected.camera.scale,
-      JSON.stringify({before:camDefault.camera, after:camSelected.camera}));
+    const protectedCamera=await protectedSelection(page,camDefault.camera,camSelected.camera);
+    check('12 reading a relationship retains zoom and world identity',camDefault.camera.scale===camSelected.camera.scale&&JSON.stringify(camDefault.camera.worldFocal)===JSON.stringify(camSelected.camera.worldFocal));
+    check('12 inspected target clears the actual panel and HUD bounds',protectedCamera.ok,JSON.stringify(protectedCamera.geometry));
 
     // ==================================== 13 · hierarchy without any text at all
     await open(page, url, `/${DENSE_REPO}`);
