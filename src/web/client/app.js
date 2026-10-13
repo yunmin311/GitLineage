@@ -1238,6 +1238,19 @@ function renderRail(view) {
   block('relationships', [keyHost]);
   renderFamilyKey(keyHost);
 
+  // Navigation and object controls stay primary; analysis receipts and reading
+  // conventions are reference material, disclosed without removing their content.
+  const reference = el('details',{class:'rail-reference'});
+  reference.append(el('summary',{text:'Reading the graph'}));
+  for(const section of [...rail.querySelectorAll(':scope > .lblk')]) {
+   const heading=section.querySelector('h6')?.textContent;
+   if(['reading names','not on the canvas','relationships'].includes(heading))reference.append(section);
+   if(heading==='provenance') {
+    const analysis=el('details',{class:'rail-reference'});
+    analysis.append(el('summary',{text:'Analysis details'}),section);rail.append(analysis);
+   }
+  }
+  if(reference.children.length>1)rail.append(reference);
   rail.hidden = false;
   // The rail's content just changed height, so its own scroll position is no longer
   // evidence of anything. Without this it keeps whatever fade it had while the content
@@ -2183,6 +2196,12 @@ function closeDrawer() {
   (node || row || $('zoom-fit')).focus({ preventScroll: true });
 }
 
+// Native disclosures keep their focus and scroll; only newly revealed content moves.
+$('drawer-inner').addEventListener('toggle',event=>{
+ const details=event.target;
+ if(details instanceof HTMLDetailsElement&&details.open)for(const child of details.children)if(child.tagName!=='SUMMARY')revealInstrument(child);
+},true);
+
 function renderDrawer() {
   const drawer = $('drawer');
   const inner = $('drawer-inner');
@@ -2494,9 +2513,9 @@ function renderNodeDrawer() {
   const wrap = el('div');
   if (!node) return wrap;
 
-  wrap.append(el('p', { class: 'd-eyebrow', text: 'ENTITY' }));
+  wrap.append(el('p', { class: 'd-eyebrow', text: node.isSubject ? 'ANALYSED REPOSITORY' : node.type.toUpperCase() }));
   wrap.append(el('p', { class: 'd-head', text: node.label }));
-  const technical=el('details',{class:'workspace-technical'});technical.append(el('summary',{text:'Technical identity'}),el('p',{class:'mono',text:node.id}));
+  const technical=el('details',{class:'workspace-technical'});technical.append(el('summary',{text:'Technical identity'}),el('p',{class:'mono',text:node.id}),el('p',{class:'d-sub',text:node.isSubject?'Analysed repository':'Related '+node.type.toLowerCase()}));
   const hierarchy=el('div',{class:'d-hierarchy'});hierarchy.append(el('p',{class:'d-block-head',text:'EXPLORATION PATH'}));
   const path=el('ol');path.append(el('li',{text:view.subject.label}));
   const plate=state.composition?.plates.find(p=>p.memberEdgeIds.some(id=>{const e=view.edges.find(e=>e.id===id);return e&&(e.source===node.id||e.target===node.id);}));
@@ -2512,14 +2531,16 @@ function renderNodeDrawer() {
   }
 
 
-  const facts = el('div', { class: 'd-block' });
-  facts.append(el('p', { class: 'd-block-head', text: 'FACTS' }));
-  const kv = el('dl', { class: 'd-kv' });
-  kv.append(el('dt', { text: 'type' }), el('dd', { text: node.type }));
-  if (node.fact) kv.append(el('dt', { text: 'detail' }), el('dd', { text: node.fact }));
-  kv.append(el('dt', { text: 'subject' }), el('dd', { text: node.isSubject ? 'yes (analysed repository)' : 'no' }));
-  facts.append(kv);
-  wrap.append(facts);
+  const overview = el('div', { class: 'entity-overview' });
+  overview.append(el('p',{class:'entity-description',text:node.fact || node.type}));
+  const relationships = edgesForNode(view,node.id).map(id=>view.edges.find(e=>e.id===id)).filter(Boolean);
+  const metrics=el('div',{class:'entity-metrics'});
+  for(const [label, count] of [['Origins',relationships.filter(e=>e.family==='ancestry').length],['Dependencies',relationships.filter(e=>e.family==='dependency').length],['References',relationships.filter(e=>['attribution','source-identity'].includes(e.family)).length]]) {
+   const item=el('div');item.append(el('strong',{text:String(count)}),el('span',{text:label}));metrics.append(item);
+  }
+  overview.append(metrics);
+  if(node.isSubject&&!relationships.some(e=>e.family==='ancestry'))overview.append(el('p',{class:'entity-absence',text:'No recorded ancestry evidence. Dependencies describe use, not origin.'}));
+  wrap.append(overview);
 
   /*
    * Relationships, by declaring manifest.
@@ -2540,12 +2561,13 @@ function renderNodeDrawer() {
     relBlock.append(el('p', { class: 'node-detail', text: 'No one-hop relationship in this view.' }));
   }
   for (const group of groups) {
-    const section = el('div', { class: 'd-group' });
-    section.append(el('p', { class: 'd-group-head' }, [
+    const section = el('details', { class: 'd-group' });
+    section.open = groups.length === 1 || group === groups[0];
+    section.append(el('summary', { class: 'd-group-head' }, [
       el('span', { class: 'mono', text: group.manifest ? group.key : `${group.key} · no manifest` }),
       el('span', { class: 'd-group-count r-mono', text: String(group.members.length) }),
     ]));
-    const appendRow=(host,edge)=>{const other=edge.source===node.id?edge.target:edge.source;const row=el('button',{class:'bundle-row',text:edge.label+' · '+nameOf(other)});row.addEventListener('click',()=>{state.selectedNodeId='';selectEdge(edge.id);});host.append(row);};
+    const appendRow=(host,edge)=>{const other=edge.source===node.id?edge.target:edge.source;const row=el('button',{class:'bundle-row'});row.append(el('span',{class:'relationship-object',text:nameOf(other)}),el('span',{class:'relationship-kind',text:edge.label}));row.addEventListener('click',()=>{state.selectedNodeId='';selectEdge(edge.id);});host.append(row);};
     const taxonomy=classifyRelationships(view,{key:group.key,family:group.members[0]?.family,count:group.members.length,memberEdgeIds:group.members.map(e=>e.id)});
     if(taxonomy.categories.length){
       const appendCategory=(host,n)=>{const details=el('details',{class:'d-classification category-level-'+n.level});details.append(el('summary',{text:n.label+' · '+n.edgeIds.length}),el('p',{class:'d-basis',text:n.basis+' · navigation grouping, not a repository relationship'}));

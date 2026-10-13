@@ -1526,6 +1526,8 @@ check('02 expanding reveals the held-back members',
       await open(scroller, url, `/${EVIDENCE_REPO}`);
       await scroller.click('svg .node.is-subject .node-hit');
       await scroller.waitForTimeout(900);
+      // Expand the manifest index before exercising its complete scroll range.
+      await scroller.locator('.d-group > summary').evaluateAll(items => items.forEach(item => { if (!(item.parentElement as HTMLDetailsElement).open) (item as HTMLElement).click(); }));
       const drawerScroll = await scrollBehaviour(scroller, '.drawer-inner');
       report['19-drawer-scroll'] = drawerScroll;
       check('19 the dense Drawer really scrolls',
@@ -1666,6 +1668,9 @@ check('02 expanding reveals the held-back members',
       const railPage = await browser.newPage({ viewport: { width: 1600, height: 620 } });
       railPage.on('pageerror', (e) => errors.push(`[rail-scroll] pageerror: ${e.message}`));
       await open(railPage, url, `/${EVIDENCE_REPO}`);
+      // Secondary reading context is intentionally collapsed on entry. Exercise
+      // its real disclosure before verifying the expanded rail's scroll range.
+      await railPage.locator('.rail-reference > summary').evaluateAll(items => items.forEach(item => (item as HTMLElement).click()));
       const railScroll = await scrollBehaviour(railPage, '.rail-scroll');
       report['19-rail-scroll'] = railScroll;
       await railPage.screenshot({ path: `${OUT}/19-rail-scrolled.png` });
