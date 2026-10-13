@@ -30,6 +30,8 @@
    ========================================================================= */
 
 :root {
+  --instrument-left: 0px;
+  --instrument-right: 0px;
   --repository-panel-top: 110px;
   /* ---------------------------------------------------------- paper & surface
      Monochrome. A warm bone that is never pure white, so the page reads as paper
@@ -2389,3 +2391,59 @@ body .d-hierarchy > .d-block-head { position:static;margin:0;padding:0;backgroun
 .is-neighborhood-muted { opacity:.18; }
 .graph-focus-path { margin:6px 0;color:var(--ink-2);font-size:11px;line-height:1.5; }
 @media(max-height:500px) and (max-width:900px){.mobile-explorer .graph-focus-path{display:none}}
+
+/* V3.3 instruments occupy the uncovered stage, independently of world geometry. */
+.brand-mark { width:20px;height:20px;background:transparent; }
+.brand-mark svg { display:block;width:100%;height:100%;fill:var(--ink); }
+.brand-mark path { fill:none;stroke:var(--ink);stroke-width:1.3; }
+.brand-mark .brand-root { fill:var(--brand); }
+#explorer-body .graph-perspectives { left:calc(var(--instrument-left, 0px) + var(--s4));right:calc(var(--instrument-right, 0px) + var(--s4));max-width:660px; }
+#explorer-body .graph-overview { left:calc(var(--instrument-left, 0px) + var(--s4)); }
+.graph-perspective-tabs button { min-height:32px;padding:0 var(--s3);font-size:var(--t-label-size);font-weight:500;background:transparent; }
+.graph-perspective-tabs button[aria-pressed=true] { background:var(--brand-wash);color:var(--brand-press);border-color:var(--brand-edge); }
+.graph-perspective-tabs button[aria-pressed=true]::before { content:'✓';margin-right:var(--s1); }
+.graph-perspective-tabs button:hover { border-color:var(--brand); }
+.graph-perspective-note { font-size:var(--t-meta-size);line-height:1.5;max-width:100%;margin:var(--s2) 0;color:var(--ink-3); }
+.repository-navigation.unified-tools { gap:var(--s2);padding:var(--s1) var(--s4); }
+.repository-navigation.unified-tools button { min-height:36px;border-color:transparent;background:transparent;font-weight:500; }
+.repository-navigation.unified-tools #workspace-history { border-color:var(--rule-2);background:var(--surface); }
+.repository-navigation.unified-tools #workspace-origins { color:var(--brand-press);font-weight:650;border-bottom:2px solid var(--brand);border-radius:0; }
+.repository-navigation.unified-tools button:hover { background:var(--brand-wash); }
+.unified-navigation { padding-bottom:var(--s3);margin-bottom:var(--s3); }
+.unified-navigation h3 { font-size:var(--t-label-size);font-weight:600;color:var(--ink-2);margin:var(--s3) 0 var(--s2); }
+.unified-path { gap:var(--s1); }
+.unified-path button { border:0;background:transparent;color:var(--ink-2);padding:var(--s1); }
+.unified-path button+button::before { content:'›';margin-right:var(--s1);color:var(--ink-4); }
+.unified-layer-controls { display:grid;grid-template-columns:1fr 1fr;gap:var(--s1); }
+.unified-layer-controls button { text-align:left;min-height:32px;padding:var(--s2);border:0;background:transparent;color:var(--ink-3); }
+.unified-layer-controls button[aria-pressed=true] { background:var(--brand-wash);color:var(--brand-press); }
+.unified-layer-controls button[aria-pressed=true]::before { content:'✓';margin-right:var(--s1); }
+#workspace-status { font-size:var(--t-meta-size);line-height:1.5;margin:var(--s2) 0; }
+.rail-scroll > .lblk { margin-top:var(--s3);padding-top:var(--s3); }
+.drawer .d-classification { margin:var(--s1) 0;border-left-width:1px;padding-left:var(--s2); }
+.drawer .d-classification.category-level-1 > summary { border:0;border-radius:0;border-bottom:1px solid var(--rule);padding:var(--s1) var(--s2);min-height:32px;background:var(--paper);font-size:var(--t-label-size); }
+.drawer .d-classification.category-level-2 > summary { min-height:28px; }
+.drawer .d-hierarchy { padding:var(--s2);margin:var(--s3) 0; }
+/* Focus uses the painted boundary, never the SVG group's shadow-inclusive box. */
+#canvas .node:focus, #canvas .classification-node:focus, #canvas .graph-group:focus { outline:none; }
+#canvas .node:focus-visible .node-box { stroke:var(--ink);stroke-width:2; }
+#canvas .node.is-selected .node-box { stroke:var(--ink);stroke-width:2; }
+#canvas .node.is-selected:hover .node-box { stroke:var(--ink); }
+#canvas .classification-node:focus-visible .classification-box { stroke:var(--brand);stroke-width:2; }
+.viewport-hud { gap:var(--s3); }
+.band { gap:var(--s3);padding-top:var(--s1); }
+.band .key { gap:var(--s3); }
+.band .ki { gap:var(--s1); }
+.band .ki-mark { width:16px; }
+.band-note { white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+@media(min-width:768px) { :root { --hud-h:48px; } .viewport-hud { padding:var(--s1) var(--s4); } .graph-overview { bottom:calc(var(--hud-h) + var(--s4)); } }
+@media(max-width:767px) {
+ #explorer-body .graph-perspectives { left:12px;right:12px; }
+ #explorer-body .graph-overview { left:auto;right:12px; }
+ .graph-perspective-tabs button { min-height:44px;padding:0 var(--s1); }
+ .repository-navigation.unified-tools button,.unified-layer-controls button,.unified-path button { min-height:44px; }
+ .drawer .d-classification.category-level-1 > summary,.drawer .d-classification.category-level-2 > summary { min-height:44px; }
+}
+.rail-scroll { gap:var(--s3); }
+.rail-scroll > .lblk { margin:0;flex:none; }
+.drawer .d-head { padding:var(--s2) var(--s3); }

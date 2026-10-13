@@ -44,7 +44,7 @@ function mountRepositoryExplorer(getRepository, deep, bridge) {
     for (const n of allNodes().filter((n2) => [n2.label, n2.data?.path, n2.kind].join(" ").toLowerCase().includes(search.value.toLowerCase())).slice(0, 12)) hits.append(btn("", n.label, () => focus(n.id)));
   };
   const layers = make("div", void 0, "unified-layer-controls");
-  tools.append(make("h3", "Explore this graph"), path, search, hits, layers, status);
+  tools.append(make("h3", "Exploration path"), path, search, hits, make("h3", "Visible objects"), layers, status);
   const discovery = make("section", void 0, "workspace-discovery-controls");
   discovery.id = "workspace-discovery";
   discovery.hidden = true;

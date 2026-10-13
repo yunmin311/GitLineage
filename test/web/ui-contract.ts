@@ -141,9 +141,10 @@ try {
       const zoomed = await geometry(page);
       check(`${width} HUD fixed on zoom`, same(both.hud, zoomed.hud) && both.hudFont === zoomed.hudFont, { before:both.hud,after:zoomed.hud });
     }
-    // Pan in the exposed centre, not on a panel or graph object. A leftward drag gives room at clamped edges.
+    // Pan through an exposed canvas corridor. A blank starting pixel alone can
+    // lead straight into a moved toolbar before pointer capture begins.
     const spot = await page.evaluate(() => {
-      for (let y=180; y<innerHeight-120; y+=30) for(let x=300; x<innerWidth-40; x+=20) if(document.elementFromPoint(x,y)?.id==='canvas') return {x,y};
+      for (let y=180; y<innerHeight-120; y+=30) for(let x=300; x<innerWidth-40; x+=20) if([0,.125,.25,.5,.75,1].every(t=>document.elementFromPoint(x+45*t,y-45*t)?.id==='canvas')) return {x,y};
       return null;
     });
     if (spot) {

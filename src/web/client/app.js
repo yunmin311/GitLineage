@@ -978,10 +978,10 @@ function setPerspective(value){
 function renderPerspective(){
  let host=$('graph-perspectives');if(!host){host=el('div',{id:'graph-perspectives',class:'graph-perspectives'});$('stage').append(host);}
  host.replaceChildren();const tabs=el('nav',{'aria-label':'Relationship layers',class:'graph-perspective-tabs'});
- for(const [id,label,families]of PERSPECTIVES){const count=state.view.edges.filter(e=>families.includes(e.family)).length;tabs.append(el('button',{type:'button','data-perspective':id,'aria-pressed':String(families.some(f=>state.layers[f])),text:label+' · '+count,onclick:()=>setPerspective(id)}));}
+ for(const [id,label,families]of PERSPECTIVES){const count=state.view.edges.filter(e=>families.includes(e.family)).length;tabs.append(el('button',{type:'button','data-perspective':id,'aria-label':label+' · '+count,'aria-pressed':String(families.some(f=>state.layers[f])),text:label+' · '+count,onclick:()=>setPerspective(id)}));}
  host.append(tabs);
  const ancestry=state.view.edges.filter(e=>e.family==='ancestry').length;
- const description=ancestry?'Recorded relationships · layers share one exploration space.':'No recorded ancestry evidence · dependencies and references remain separate claims.';
+ const description=ancestry?'Recorded relationships · layers share one exploration space.':'No recorded ancestry evidence · dependencies are separate claims.';
  host.append(el('p',{class:'graph-perspective-note',text:description}));
  const selected=state.selectedNodeId&&state.selectedNodeId!==state.view.subject.id;
  const bar=el('div',{class:'graph-exploration-actions'});
@@ -1261,9 +1261,9 @@ function renderBottomBand(view) {
 
   const key = el('div', { class: 'key' });
   for (const [kind, text] of [
-    ['directed', 'arrow at the target'],
-    ['symmetric', 'no arrow, the claim is mutual'],
-    ['aggregate', 'groups are navigation, not ancestry'],
+    ['directed', 'Directed'],
+    ['symmetric', 'Mutual'],
+    ['aggregate', 'Navigation group'],
   ]) {
     const item = el('div', { class: 'ki' });
     item.append(el('span', { class: `ki-mark ki-${kind}`, 'aria-hidden': 'true' }));
@@ -2617,6 +2617,10 @@ function applyPanels() {
   body.classList.toggle('rail-closed', !visible.rail);
   body.classList.toggle('with-drawer', visible.drawer);
   body.dataset.panelMode = panels.mode;
+  // Instruments use uncovered screen space; the SVG world keeps its bounds.
+  const stageRect = $('stage').getBoundingClientRect();
+  body.style.setProperty('--instrument-left', visible.rail ? `${$('rail').getBoundingClientRect().right-stageRect.left}px` : '0px');
+  body.style.setProperty('--instrument-right', visible.drawer ? `${stageRect.right-$('drawer').getBoundingClientRect().left}px` : '0px');
   $('rail-toggle').setAttribute('aria-expanded', String(visible.rail));
   if (hiddenFocus) $('rail-toggle').focus({ preventScroll: true });
   syncAllScrollAffordances();
