@@ -1,3 +1,4 @@
+import {connectionFallback} from './connection-fallback.mjs';
 // Unified display layer; Canonical Graph remains unchanged.
 import {openGitLog} from "./git-log.mjs";
 import { spatialRoute, spatialExpansion } from "./spatial.mjs";
@@ -434,7 +435,10 @@ function mountRepositoryExplorer(getRepository, deep, bridge) {
       const sourcePoint=occupied.get(e.source),vertical=Math.abs(Math.cos(sourcePoint?.angle??0))<.7;
       const outgoing=scene.edges.filter(p=>p.source===e.source).sort((a,b)=>{const pa=occupied.get(a.target),pb=occupied.get(b.target);return vertical?((pa?.x??0)-(pb?.x??0)||(pa?.y??0)-(pb?.y??0)):(pa?.y??0)-(pb?.y??0);});
       const route = spatialRoute(e, occupied, outgoing.indexOf(e), outgoing.length);
-      if (!route) continue;
+      if (!route) {
+        edgeLayer.append(connectionFallback(e,occupied,()=>bridge.select(e.id,true),{class:'unified-edge kind-'+e.kind,'data-display-edge':e.id,'data-source':e.source,'data-target':e.target}));
+        continue;
+      }
       const g = svg("g", { class: "unified-edge kind-" + e.kind + (bridge.selected() === e.id ? " is-selected" : ""), role: "button", tabindex: 0, "aria-label": e.label, "data-display-edge": e.id, "data-source": e.source, "data-target": e.target });
       g.append(svg("path", { d: route.path, class: "unified-line", "marker-end": e.directed ? "url(#display-arrow)" : "none" }), svg("title", {}, e.label));
       const hit = svg("path", { d: route.path, class: "edge-hit" });

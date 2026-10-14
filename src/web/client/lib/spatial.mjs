@@ -51,20 +51,38 @@ export function spatialLayout({subjectId,edges,groups=[],compact=false,previous=
  }
  return positions;
 }
-function blocked(a,b,boxes){return boxes.some(p=>{const{w,h}=dimensions(p);let low=0,high=1;for(const [delta,start,min,max]of [[b.x-a.x,a.x,p.x-w/2-12,p.x+w/2+12],[b.y-a.y,a.y,p.y-h/2-12,p.y+h/2+12]]){if(Math.abs(delta)<1e-9){if(start<=min||start>=max)return false;}else{let t1=(min-start)/delta,t2=(max-start)/delta;if(t1>t2)[t1,t2]=[t2,t1];low=Math.max(low,t1);high=Math.min(high,t2);if(high<=low)return false;}}return high>low&&high>0&&low<1;});}
+function blocked(a,b,boxes,padding=12){return boxes.some(p=>{const{w,h}=dimensions(p);let low=0,high=1;for(const [delta,start,min,max]of [[b.x-a.x,a.x,p.x-w/2-padding,p.x+w/2+padding],[b.y-a.y,a.y,p.y-h/2-padding,p.y+h/2+padding]]){if(Math.abs(delta)<1e-9){if(start<=min||start>=max)return false;}else{let t1=(min-start)/delta,t2=(max-start)/delta;if(t1>t2)[t1,t2]=[t2,t1];low=Math.max(low,t1);high=Math.min(high,t2);if(high<=low)return false;}}return high>low&&high>0&&low<1;});}
 export function spatialRoute(edge,positions,fanIndex=0,fanCount=1){
+ const preferred=spatialRouteAttempt(edge,positions,fanIndex,fanCount);
+ if(preferred)return preferred;
+ const a=positions.get(edge.source),b=positions.get(edge.target);if(!a||!b)return null;
+ // A shared neighbor can seal the preferred exit. Retry real boundary ports,
+ // keeping identity/direction and the same obstacle checks, never a blind curve.
+ const directions=[[1,0],[-1,0],[0,1],[0,-1]];
+ const pairs=directions.flatMap(from=>directions.map(to=>({from,to,cost:(b.x-a.x)*(-from[0]+to[0])+(b.y-a.y)*(-from[1]+to[1])}))).sort((p,q)=>p.cost-q.cost);
+ for(const ports of pairs){const route=spatialRouteAttempt(edge,positions,0,1,ports);if(route)return route;}
+ return null;
+}
+function spatialRouteAttempt(edge,positions,fanIndex,fanCount,ports){
  const a=positions.get(edge.source),b=positions.get(edge.target);if(!a||!b)return null;
  const da=dimensions(a),db=dimensions(b),dx=b.x-a.x,dy=b.y-a.y;
  const branchAngle=a.angle??b.angle;
  const horizontal=edge.presentation==='branch'&&branchAngle!==undefined?Math.abs(Math.cos(branchAngle))>.7:Math.abs(dx)>Math.abs(dy)*1.5,sign=Math.sign(horizontal?dx:dy)||1;
  const offset=(fanIndex-(fanCount-1)/2)*Math.min(10,32/Math.max(1,fanCount-1));
- const start=horizontal?{x:a.x+sign*da.w/2,y:a.y+offset}:{x:a.x+offset,y:a.y+sign*da.h/2};
- const end=horizontal?{x:b.x-sign*db.w/2,y:b.y+offset}:{x:b.x+offset,y:b.y-sign*db.h/2};
- const s=horizontal?{x:start.x+sign*24,y:start.y}:{x:start.x,y:start.y+sign*24};
- const t=horizontal?{x:end.x-sign*24,y:end.y}:{x:end.x,y:end.y-sign*24};
+ let start=horizontal?{x:a.x+sign*da.w/2,y:a.y+offset}:{x:a.x+offset,y:a.y+sign*da.h/2};
+ let end=horizontal?{x:b.x-sign*db.w/2,y:b.y+offset}:{x:b.x+offset,y:b.y-sign*db.h/2};
+ let s=horizontal?{x:start.x+sign*24,y:start.y}:{x:start.x,y:start.y+sign*24};
+ let t=horizontal?{x:end.x-sign*24,y:end.y}:{x:end.x,y:end.y-sign*24};
  const obstacles=[...positions.entries()].filter(([id])=>id!==edge.source&&id!==edge.target).map(([,p])=>p);
- const clear=points=>points.every((p,i)=>!i||!blocked(points[i-1],p,obstacles));
- if(edge.presentation==='branch'&&!horizontal&&a.aggregateKey&&a.aggregateKey===b.aggregateKey){
+ if(ports){
+  const port=(p,d,v)=>({x:p.x+v[0]*d.w/2,y:p.y+v[1]*d.h/2});
+  start=port(a,da,ports.from);end=port(b,db,ports.to);
+  s={x:start.x+ports.from[0]*24,y:start.y+ports.from[1]*24};
+  t={x:end.x+ports.to[0]*24,y:end.y+ports.to[1]*24};
+ }
+ const clear=points=>points.every((p,i)=>!i||(!blocked(points[i-1],p,obstacles)&&!blocked(points[i-1],p,[a,b],0)));
+ if(!clear([start,s])||!clear([t,end]))return null;
+ if(!ports&&edge.presentation==='branch'&&!horizontal&&a.aggregateKey&&a.aggregateKey===b.aggregateKey){
   // Compact neighborhoods connect down either side of their member column.
   // Side-entry curves avoid routing lower members through the rows above them.
   const side=b.x>a.x?1:-1,reach=100+Math.abs(dy)*.2;
@@ -73,7 +91,7 @@ export function spatialRoute(edge,positions,fanIndex=0,fanCount=1){
   const curve=t=>({x:(1-t)**3*from.x+3*(1-t)**2*t*c1.x+3*(1-t)*t*t*c2.x+t**3*to.x,y:(1-t)**3*from.y+3*(1-t)**2*t*c1.y+3*(1-t)*t*t*c2.y+t**3*to.y});
   if(clear(Array.from({length:33},(_,i)=>curve(i/32))))return{path:`M ${from.x} ${from.y} C ${c1.x} ${c1.y} ${c2.x} ${c2.y} ${to.x} ${to.y}`,label:curve(.5)};
  }
- if(edge.presentation==='branch'){
+ if(!ports&&edge.presentation==='branch'){
   const reach=Math.max(24,Math.abs(horizontal?end.x-start.x:end.y-start.y)/2);
   const c1=horizontal?{x:start.x+sign*reach,y:start.y}:{x:start.x,y:start.y+sign*reach};
   const c2=horizontal?{x:end.x-sign*reach,y:end.y}:{x:end.x,y:end.y-sign*reach};
@@ -89,7 +107,7 @@ export function spatialRoute(edge,positions,fanIndex=0,fanCount=1){
  if(!route){
   // Rectilinear visibility graph. Each obstacle corner offers horizontal/vertical
   // projections; bend cost discourages zigzags. No diagonal corner shortcuts.
-  const corners=obstacles.flatMap(p=>{const{w,h}=dimensions(p);return[-1,1].flatMap(x=>[-1,1].map(y=>({x:p.x+x*(w/2+18),y:p.y+y*(h/2+18)})));});
+  const corners=[...obstacles,a,b].flatMap(p=>{const{w,h}=dimensions(p);return[-1,1].flatMap(x=>[-1,1].map(y=>({x:p.x+x*(w/2+18),y:p.y+y*(h/2+18)})));});
   const vertices=[s,t,...corners],dist=vertices.map(()=>Infinity),parent=vertices.map(()=>null),done=new Set();dist[0]=0;
   for(let pass=0;pass<vertices.length;pass++){
    let u=-1;for(let i=0;i<vertices.length;i++)if(!done.has(i)&&(u<0||dist[i]<dist[u]))u=i;
@@ -104,7 +122,7 @@ export function spatialRoute(edge,positions,fanIndex=0,fanCount=1){
   }
   if(Number.isFinite(dist[1])){route=[t];let v=1;while(parent[v]){const hop=parent[v];route.unshift(vertices[hop.u],hop.elbow);v=hop.u;}}
  }
- if(!route)return null; // Never substitute an edge through an unrelated node.
+ if(!route||!clear([start,...route,end]))return null; // Never substitute an edge through a node.
  const points=[start,...route,end].filter((p,i,ps)=>!i||p.x!==ps[i-1].x||p.y!==ps[i-1].y);
  for(let i=points.length-2;i>0;i--)if((points[i-1].x===points[i].x&&points[i].x===points[i+1].x)||(points[i-1].y===points[i].y&&points[i].y===points[i+1].y))points.splice(i,1);
  const label=points.length===2?{x:(start.x+end.x)/2,y:(start.y+end.y)/2}:points[Math.floor(points.length/2)];

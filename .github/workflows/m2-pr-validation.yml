@@ -89,6 +89,9 @@ jobs:
       - name: Anonymous repository exploration browser acceptance
         run: npm run test:exploration
 
+      - name: Unified workspace and painted spatial routing
+        run: npm run test:unification && npm run test:spatial-routing
+
       - name: Private Beta authorization browser acceptance
         run: npm run test:private-beta
 

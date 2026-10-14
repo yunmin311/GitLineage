@@ -27,8 +27,15 @@ try{for(const width of [390,430,1280,1920]){
   const svg=document.querySelector<SVGSVGElement>('#canvas')!;
   const boxes=[...svg.querySelectorAll<SVGGraphicsElement>('.node-box,.bundle-card-box,.classification-box')].map(n=>{const b=n.getBBox();return{x:b.x,y:b.y,w:b.width,h:b.height};});
   const paths=[...svg.querySelectorAll<SVGGElement>('.edge-group')].map(g=>({id:g.dataset.relationshipId,source:g.dataset.source,target:g.dataset.target}));
-  const c=svg.getScreenCTM()!;return{boxes,paths,ctm:{a:c.a,d:c.d,e:c.e,f:c.f},stage:svg.getBoundingClientRect().toJSON(),camera:svg.getAttribute('viewBox')};
+  const collisions=[...svg.querySelectorAll<SVGPathElement>('.edge-line,.group-navigation-line,.unified-line')].flatMap(path=>{
+   const length=path.getTotalLength();for(let distance=1;distance<length;distance+=2){const p=path.getPointAtLength(distance);if(boxes.some(b=>p.x>b.x+.5&&p.x<b.x+b.w-.5&&p.y>b.y+.5&&p.y<b.y+b.h-.5))return[path.getAttribute('d')];}return[];
+  });
+  const navigation=[...svg.querySelectorAll<SVGElement>('[data-navigation-source]')].map(n=>({source:n.dataset.navigationSource,target:n.dataset.navigationTarget}));
+  const requiredNavigation=[...svg.querySelectorAll<SVGGElement>('.aggregate-member,.classification-node')].map(n=>({source:n.dataset.parentId,target:n.dataset.nodeId||n.dataset.categoryId}));
+  const c=svg.getScreenCTM()!;return{boxes,paths,collisions,navigation,requiredNavigation,ctm:{a:c.a,d:c.d,e:c.e,f:c.f},stage:svg.getBoundingClientRect().toJSON(),camera:svg.getAttribute('viewBox')};
  });for(let i=0;i<probe.boxes.length;i++)for(let j=i+1;j<probe.boxes.length;j++){const a=probe.boxes[i]!,b=probe.boxes[j]!;assert.ok(a.x+a.w<=b.x||b.x+b.w<=a.x||a.y+a.h<=b.y||b.y+b.h<=a.y,'Real nodes and grouping controls do not overlap');}
+ for(const link of probe.requiredNavigation)assert.ok(probe.navigation.some(n=>n.source===link.source&&n.target===link.target),`Rendered member ${link.target} retains its parent connection or explicit obstruction`);
+ assert.deepEqual(probe.collisions,[],'Actual painted connections clear node interiors');
  assert.ok(new Set(probe.boxes.map(b=>Math.round(b.x))).size>4&&new Set(probe.boxes.map(b=>Math.round(b.y))).size>4,'Neighborhood occupies two dimensions');assert.ok(probe.paths.every(p=>p.id&&p.source&&p.target&&!p.source.startsWith('bundle:')&&!p.target.startsWith('bundle:')),'Every painted line is a canonical entity relationship');
  if(width<768){await page.locator('.graph-group-jumps button').filter({hasText:'nebula_app'}).click();const step=page.getByRole('button',{name:'Next nearby object'});assert.ok((await step.boundingBox())!.height>=44);await step.click();assert.ok(await page.locator('.aggregate-member.is-selected').count());
  // With evidence-backed intermediate categories, the immediate category is the

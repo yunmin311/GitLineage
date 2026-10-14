@@ -51,3 +51,9 @@ test('classification growth reserves all existing neighborhoods before placing a
  assert.deepEqual(next.get('member-a'),first.get('member-a'));assert.deepEqual(next.get('scope-a'),first.get('scope-a'));
  const points=[...next.values()];for(let i=0;i<points.length;i++)for(let j=i+1;j<points.length;j++)assert.ok(Math.abs(points[i]!.x-points[j]!.x)>=236||Math.abs(points[i]!.y-points[j]!.y)>=72);
 });
+
+test('shared neighbor blocking a preferred exit uses another boundary port',()=>{
+ const ps=new Map([['a',{x:0,y:0}],['b',{x:600,y:0}],['shared',{x:244,y:0}]]);
+ const route=spatialRoute({source:'a',target:'b'},ps);
+ assert.ok(route,'A real relation must not vanish when its preferred port is blocked');
+});

@@ -148,9 +148,11 @@ try {
   check('breakpoint hiding focused Context returns focus to disclosure',await touch.locator('#rail-toggle').evaluate(e=>e===document.activeElement));
   await touch.locator('.drawer-close').click();
   check('node evidence close returns focus to selected graph node',await touch.locator('.node').filter({has:touch.locator('.node-box.is-subject')}).evaluate(e=>e===document.activeElement));
+  const previousSubject = await touch.locator('.node').filter({has:touch.locator('.node-box.is-subject')}).elementHandle();
   await touch.setViewportSize({width:1280,height:800});
-  // CSS geometry updates before the resize event redraws and restores keyboard focus.
-  await touch.waitForFunction(()=>document.querySelector('#canvas')?.getBoundingClientRect().width===1280&&document.activeElement?.querySelector('.node-box.is-subject'));
+  // CSS width and the old focused node can satisfy the predicate before resize
+  // replaces the SVG children. Observe replacement as well as restored focus.
+  await touch.waitForFunction(previous=>!previous?.isConnected&&document.querySelector('#canvas')?.getBoundingClientRect().width===1280&&document.activeElement?.querySelector('.node-box.is-subject'),previousSubject);
   check('graph redraw preserves returned node focus',await touch.locator('.node').filter({has:touch.locator('.node-box.is-subject')}).evaluate(e=>e===document.activeElement));
   await cdp.detach();await touch.close();
 } finally {

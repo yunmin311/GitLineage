@@ -1,3 +1,4 @@
+import {connectionFallback} from './lib/connection-fallback.mjs';
 import {classifyRelationships} from './lib/classification.mjs';
 import {spatialLayout, spatialExpansion, spatialRoute, ORIGIN} from './lib/spatial.mjs';
 import {buildView as projectCanonicalView} from '../view-model.ts';
@@ -1500,13 +1501,18 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
       const memberPeers=edges.filter(e=>aggregate.memberEdgeIds.includes(e.id)).sort((a,b)=>{const pa=positions.get(a.source===view.subject.id?a.target:a.source),pb=positions.get(b.source===view.subject.id?b.target:b.source);return Math.abs(Math.cos(positions.get(BUNDLE_ID_PREFIX+aggregate.key)?.angle||0))>.7?pa.y-pb.y:(pa.x-pb.x||pa.y-pb.y);});
       const route=spatialRoute({source:positions.get(peer)?.aggregateKey===aggregate.key?(positions.get(peer)?.parentId||BUNDLE_ID_PREFIX+aggregate.key):BUNDLE_ID_PREFIX+aggregate.key,target:peer,presentation:positions.get(peer)?.aggregateKey===aggregate.key?'branch':undefined},positions,memberPeers.indexOf(edge),memberPeers.length);
       if(route){const nav=svgEl('g',{class:'group-navigation'+(mute(peer)?' is-neighborhood-muted':'')+(positions.get(peer)?.aggregateKey!==aggregate.key?' is-cross-reference':''), 'data-navigation-source':positions.get(peer)?.aggregateKey===aggregate.key?(positions.get(peer)?.parentId||BUNDLE_ID_PREFIX+aggregate.key):BUNDLE_ID_PREFIX+aggregate.key,'data-navigation-target':peer});nav.append(svgEl('path',{d:route.path,class:'group-navigation-line'}),svgEl('title',{},['Member of '+aggregate.label+'; select the object to read its actual relationship.']));memberEdgeLayer.append(nav);}
+      else {const source=positions.get(peer)?.aggregateKey===aggregate.key?(positions.get(peer)?.parentId||BUNDLE_ID_PREFIX+aggregate.key):BUNDLE_ID_PREFIX+aggregate.key;memberEdgeLayer.append(connectionFallback({source,target:peer,label:'Member of '+aggregate.label+' · grouping only'},positions,()=>selectEdge(edge.id),{'data-navigation-source':source,'data-navigation-target':peer}));}
       if(state.selectedEdgeId!==edge.id)continue;
     }
     const { fanIndex, fanCount } = fanSlot(edge, edges);
     const geometry = edgeGeometry(edge, positions, fanIndex, fanCount);
     const route=spatialRoute(edge,positions,fanIndex,fanCount);
-    if(route){geometry.path=route.path;geometry.label={x:route.label.x,y:route.label.y-10};geometry.badge=geometry.label;}
     if (!geometry) continue;
+    if (!route) {
+      (expandedEdgeIds.has(edge.id) ? memberEdgeLayer : edgeLayer).append(connectionFallback(edge,positions,()=>selectEdge(edge.id),{class:'edge-group route-obstructed','data-relationship-id':edge.id,'data-source':edge.source,'data-target':edge.target}));
+      continue;
+    }
+    geometry.path=route.path;geometry.label={x:route.label.x,y:route.label.y-10};geometry.badge=geometry.label;
 
     const group = svgEl('g', {
       class: [
@@ -1568,6 +1574,7 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
     const siblings=composition.plates.filter(p=>p.family===plate.family).sort((a,b)=>{const pa=positions.get(BUNDLE_ID_PREFIX+a.key),pb=positions.get(BUNDLE_ID_PREFIX+b.key);return Math.abs(Math.cos(at.angle||0))>.7?pa.y-pb.y:(pa.x-pb.x||pa.y-pb.y);});
     const navigationRoute=spatialRoute({source:view.subject.id,target:BUNDLE_ID_PREFIX+plate.key,presentation:'branch'},positions,siblings.indexOf(plate),siblings.length);
     if(navigationRoute)edgeLayer.append(svgEl('path',{d:navigationRoute.path,class:'group-navigation-line group-navigation-root','data-navigation-source':view.subject.id,'data-navigation-target':BUNDLE_ID_PREFIX+plate.key,'aria-label':plate.label+' · grouping, not a lineage claim'}));
+    else edgeLayer.append(connectionFallback({source:view.subject.id,target:BUNDLE_ID_PREFIX+plate.key,label:plate.label+' · grouping only'},positions,()=>focusGraphGroup(plate.key),{'data-navigation-source':view.subject.id,'data-navigation-target':BUNDLE_ID_PREFIX+plate.key}));
     const left=at.x-at.width/2,top=at.y-at.height/2;
     const owns=plate.memberEdgeIds.includes(state.selectedEdgeId)||plate.memberEdgeIds.some(id=>{const e=view.edges.find(e=>e.id===id);return state.selectedNodeId&&(e?.source===state.selectedNodeId||e?.target===state.selectedNodeId);});
     const group=svgEl('g',{class:`bundle-card graph-group family-${plate.family} st-${plate.status}${plate.expanded?' is-expanded is-open':''}${owns?' is-selected':''}`,role:'button',tabindex:'0','aria-label':`${plate.label}, ${plate.count} ${plate.relationshipType.replace(/_/g,' ')} relationships, grouped`,'aria-expanded':String(plate.expanded)});
@@ -1590,7 +1597,7 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
   }
 
   for(const link of state.classificationLinks||[]){
-    const route=spatialRoute(link,positions);if(route){const nav=svgEl('g',{class:'group-navigation classification-navigation'+(mute(link.target)?' is-neighborhood-muted':''),'data-navigation-source':link.source,'data-navigation-target':link.target});nav.append(svgEl('path',{d:route.path,class:'group-navigation-line'}));memberEdgeLayer.append(nav);}
+    const route=spatialRoute(link,positions);if(route){const nav=svgEl('g',{class:'group-navigation classification-navigation'+(mute(link.target)?' is-neighborhood-muted':''),'data-navigation-source':link.source,'data-navigation-target':link.target});nav.append(svgEl('path',{d:route.path,class:'group-navigation-line'}));memberEdgeLayer.append(nav);}else memberEdgeLayer.append(connectionFallback(link,positions,()=>{const category=state.classifications?.find(c=>c.id===link.target);if(category?.edgeIds[0])selectEdge(category.edgeIds[0]);},{'data-navigation-source':link.source,'data-navigation-target':link.target}));
   }
   for(const category of state.classifications||[]){
     const p=positions.get(category.id);if(!p)continue;
