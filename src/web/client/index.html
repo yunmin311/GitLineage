@@ -216,21 +216,16 @@
         </div>
         <div class="hero-trace-node">
           <span class="hero-trace-mark" aria-hidden="true"></span>
-          <p class="hero-trace-stage">lineage</p>
-          <p class="hero-trace-value">1 repository</p>
+          <p class="hero-trace-stage">ancestry evidence</p>
+          <p class="hero-trace-value">None recorded</p>
         </div>
         <p class="hero-trace-note">Example trace &middot; Kuddev/pebrel &middot; rev 51514bd</p>
       </div>
 
       <p class="foot">
-        <span class="fine-k">Or replace</span>
-        <span class="fine-v">github</span>
-        <span class="fine-k">with</span>
-        <span class="fine-v">gitlineage</span>
-        <span class="fine-k">in any GitHub URL &mdash;</span>
-        <span class="fine-mono">github.com/o/r</span>
-        <span class="fine-k">becomes</span>
-        <span class="fine-mono">gitlineage.com/o/r</span>
+        <span class="fine-k">Direct link</span>
+        <span class="fine-mono">/owner/repository</span>
+        <span class="fine-k">on this site opens the same evidence-backed explorer.</span>
       </p>
 
       <!--
@@ -346,11 +341,10 @@
       </aside>
 
       <div class="an-tail">
-        <p><b>No percentage is shown.</b> The five phases are discrete stages the analyser
-          reports when it reaches them, not a measurable fraction of work.</p>
-        <p><b>These five phases are the whole contract.</b> Finer progress would need new
-          instrumentation emitted from <span class="mono">analyze()</span> &mdash; a change to
-          the pipeline, not to this screen.</p>
+        <p><b>Evidence first.</b> Git objects, manifests and declarations are checked before
+          relationships enter your graph. Dependencies and references do not prove ancestry.</p>
+        <p><b>Your explorer is next.</b> When analysis finishes, follow relationships,
+          inspect their evidence, or open the repository’s Git history.</p>
       </div>
 
     </div>

@@ -370,6 +370,14 @@ function renderAnalysis(status, jobId) {
   $('an-repo').textContent = repository;
 
   const running = RUNNING_PHASES.indexOf(status);
+  if (root.dataset.phase !== status) {
+    root.dataset.phase = status;
+    const object = root.querySelector('.an-obj');
+    if (object && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      object.getAnimations().forEach(animation => animation.cancel());
+      object.animate([{ opacity: .45, transform: 'translateY(8px)' }, { opacity: 1, transform: 'translateY(0)' }], { duration: 260, easing: 'cubic-bezier(.2,.7,.2,1)' });
+    }
+  }
   const fsm = ANALYSIS_FSM_TEXT[status];
   const current = running >= 0 ? ANALYSIS_PHASE_TEXT[status] : null;
 

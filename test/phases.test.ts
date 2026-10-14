@@ -278,10 +278,10 @@ test('the tracer uses no gradient, blur, glow or looping animation', () => {
       `every gradient in the sheet is a mask, and this one is not: ${before.slice(-40)}`);
   }
   assert.equal(/filter:\s*blur/.test(declared), false, 'no blur');
-  // The only animation is the tracer's single arrival pulse, which is declared once and
-  // applied by a class rather than by a keyframe on a moving part.
+  // Entry transitions complement the tracer; neither is a looping decoration.
   const animations = declared.match(/@keyframes\s+([\w-]+)/g) ?? [];
-  assert.deepEqual(animations, ['@keyframes tracer-arrive'], 'the only keyframe is the tracer arriving');
+  assert.deepEqual(animations, ['@keyframes tracer-arrive', '@keyframes reading-enter']);
+  assert.match(declared, /@media\(prefers-reduced-motion:no-preference\)\s*\{[\s\S]*@keyframes reading-enter/, 'entry animation is opt-in when motion is allowed');
   assert.equal(/animation:\s*[^;]*infinite/.test(declared), false, 'nothing loops');
   // The tracer is the one brand mark. Frozen V3.3 renamed this token from `--accent` to
   // `--brand`: it was green, which made "what is this analysis doing right now" compete

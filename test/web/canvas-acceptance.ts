@@ -1145,7 +1145,7 @@ check('02 expanding reveals the held-back members',
       `border ${composition.cardBorder}, shadow ${composition.cardShadow}`);
     check('10 the card is the primary object and the trace is secondary to it',
       Boolean(composition.cardBelowLede) && Boolean(composition.traceBelowCard)
-        && (composition.traceStages as string[]).join('>') === 'source>evidence>relationship>lineage',
+        && (composition.traceStages as string[]).join('>') === 'source>evidence>relationship>ancestry evidence',
       `trace below card ${composition.traceBelowCard}, stages ${(composition.traceStages as string[]).join(' > ')}`);
     check('10 the trace states that it is an example, not this visitor result',
       /example/i.test(String(composition.traceLabel)) && /pebrel/.test(String(composition.traceLabel)),
