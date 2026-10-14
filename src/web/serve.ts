@@ -1,4 +1,7 @@
-import { createServer, type Server } from 'node:http';
+import { createPublicExploration } from '../../experiments/public-exploration/service.ts';
+import type { Transport } from '../../experiments/public-exploration/service.ts';
+import { timingSafeEqual } from 'node:crypto';
+import { createServer, type Server, type IncomingMessage, type ServerResponse } from 'node:http';
 import { GitLineageServer } from './server.ts';
 import { loadConfig, type ServerConfig } from './config.ts';
 import type { AnalyzeInvocation } from './analysis/scheduler.ts';
@@ -6,6 +9,16 @@ import { logEvent, logStartup } from './analysis/logging.ts';
 import type { LineageGraph } from './types.ts';
 
 export interface ServeOptions {
+  /** Anonymous exploration opt-in; production remains Standard until explicitly enabled. */
+  publicExploration?: boolean;
+  explorationTransport?: Transport;
+  explorationCooldownMs?: number;
+  /** Opt-in local experiment seam. Normal CLI never installs a handler. */
+  previewHandler?: (request: IncomingMessage, response: ServerResponse) => Promise<void>;
+  /** Explicit private service seam; normal CLI does not install it. */
+  privateBetaHandler?: (request: IncomingMessage, response: ServerResponse) => Promise<void>;
+  /** Dedicated private proxy authentication; never enabled by the public CLI. */
+  privateBetaProxyKey?: string;
   port?: number;
   host?: string;
   cacheRoot?: string;
@@ -46,6 +59,7 @@ export async function serve(
   env: NodeJS.ProcessEnv = process.env,
   overrides: Partial<ServerConfig> = {},
 ): Promise<{ server: Server; url: string; app: GitLineageServer }> {
+  if (options.privateBetaProxyKey !== undefined && (!options.privateBetaHandler || !/^[a-f0-9]{64}$/.test(options.privateBetaProxyKey))) throw new Error('Invalid dedicated private proxy configuration');
   // One effective configuration, resolved once.
   //
   // This used to keep two: `loadConfig(env)` for the server and a separate
@@ -89,7 +103,49 @@ export async function serve(
     config,
   );
 
+const exploration = options.publicExploration || env.GITLINEAGE_PUBLIC_EXPLORATION === '1' ? createPublicExploration({transport: options.explorationTransport, cooldownMs: options.explorationCooldownMs, origin: env.GITLINEAGE_PUBLIC_ORIGIN,trustedProxies:env.GITLINEAGE_TRUSTED_PROXIES?.split(',').filter(Boolean),attemptsPerHour:env.GITLINEAGE_PUBLIC_ATTEMPTS?Number(env.GITLINEAGE_PUBLIC_ATTEMPTS):undefined,attemptsPerAddress:env.GITLINEAGE_PUBLIC_IP_ATTEMPTS?Number(env.GITLINEAGE_PUBLIC_IP_ATTEMPTS):undefined,startIntervalMs:options.explorationCooldownMs}) : null;
+  if (exploration && (options.previewHandler || options.privateBetaHandler)) throw new Error('Choose one exploration entry');
 const server = createServer((request, response) => {
+      if (exploration && /^\/api\/(?:deep-search|explore)(?:\/|$)/.test(request.url ?? '')) {
+        void exploration.handler(request, response).catch(() => {
+          if (!response.headersSent) response.writeHead(500, {'content-type':'application/json'});
+          response.end('{"error":"exploration_unavailable"}');
+        });
+        return;
+      }
+      if (options.privateBetaProxyKey) {
+        const marker = request.headers['x-gitlineage-proxy'];
+        if (typeof marker !== 'string' || !/^[a-f0-9]{64}$/.test(marker) || !timingSafeEqual(Buffer.from(marker), Buffer.from(options.privateBetaProxyKey)) || Object.keys(request.headers).some(key => key === 'forwarded' || key.startsWith('x-forwarded-'))) {
+          response.writeHead(403, { 'content-type': 'application/json', 'cache-control': 'no-store' });
+          response.end('{"error":"controlled proxy required"}');
+          return;
+        }
+      }
+      // Only the explicitly installed private service receives frame protection.
+      if (options.privateBetaHandler) {
+        response.setHeader('Content-Security-Policy', "frame-ancestors 'none'");
+        response.setHeader('X-Frame-Options', 'DENY');
+      }
+      if (options.privateBetaHandler && /^\/(?:api\/(?:deep-search|private-beta)(?:\/|$)|private-beta(?:\/|$))/.test(request.url ?? '')) {
+        void options.privateBetaHandler(request, response).catch(() => {
+          if (!response.headersSent) response.writeHead(500, {'content-type':'application/json'});
+          response.end('{"error":"private_beta_unavailable"}');
+        });
+        return;
+      }
+      if (!options.previewHandler && request.method === 'GET' && request.url === '/api/deep-search/capabilities') {
+        response.writeHead(200, { 'content-type': 'application/json', 'cache-control': 'no-store' });
+        response.end('{"enabled":false}');
+        return;
+      }
+      if (options.previewHandler && /^\/(?:api\/deep-search(?:\/|$)|preview-access\/)/.test(request.url ?? '')) {
+        // Bootstrap capabilities are private and must not enter HTTP logs.
+        void options.previewHandler(request, response).catch(() => {
+          if (!response.headersSent) response.writeHead(500, { 'content-type': 'application/json' });
+          response.end('{"error":"preview_internal"}');
+        });
+        return;
+      }
       const startedAt = Date.now();
       const method = request.method ?? 'GET';
       // The path is recorded without its query string: view state is already
@@ -122,6 +178,7 @@ const server = createServer((request, response) => {
       });
     });
 
+  server.on('close', () => { void exploration?.close(); });
   await new Promise<void>((resolve) => server.listen(port, host, resolve));
   // Report the port the OS actually bound, which matters when port 0 was asked for.
   const address = server.address();

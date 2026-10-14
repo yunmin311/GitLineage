@@ -1,0 +1,41 @@
+{
+  "engine": "Chromium simulation",
+  "results": [
+    {
+      "width": 390,
+      "status": "pass",
+      "graphStateUnchanged": true,
+      "focusRestored": true,
+      "requests": 15,
+      "verification": "pending",
+      "lineageClaim": "none"
+    },
+    {
+      "width": 430,
+      "status": "pass",
+      "graphStateUnchanged": true,
+      "focusRestored": true,
+      "requests": 15,
+      "verification": "pending",
+      "lineageClaim": "none"
+    },
+    {
+      "width": 1280,
+      "status": "pass",
+      "graphStateUnchanged": true,
+      "focusRestored": true,
+      "requests": 15,
+      "verification": "pending",
+      "lineageClaim": "none"
+    },
+    {
+      "width": 1920,
+      "status": "pass",
+      "graphStateUnchanged": true,
+      "focusRestored": true,
+      "requests": 15,
+      "verification": "pending",
+      "lineageClaim": "none"
+    }
+  ]
+}

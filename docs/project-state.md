@@ -13,13 +13,16 @@ Confirmed and implemented in this repository.
 | Three separate object kinds | `Entity`, `Relationship` and `Evidence` are never merged. Evidence is first-class data in `graph.json`, not UI text. |
 | Three evidence statuses | `VERIFIED`, `DECLARED`, `DETECTED`. No generic `INFERRED`. |
 | Ten relationship types | `forked_from`, `derived_from`, `shares_history_with`, `depends_on`, `uses_submodule`, `declared_inspiration`, `references`, `shares_exact_content_with`, `similar_to`, `evolved_into`. `copied_from` and similar accusations do not exist. |
-| | Direction is ontology-owned | Directional: `forked_from`, `derived_from`, `depends_on`, `uses_submodule`, `declared_inspiration`, `references`, `evolved_into`. Symmetric: `shares_history_with`, `shares_exact_content_with`, `similar_to`. The resolver stamps direction from the ontology and rejects contradicting observations. Symmetric endpoints are canonicalised so a pair yields one edge. A renderer must read `directed`, never infer it from the focused node. |
+| Direction is ontology-owned | Directional: `forked_from`, `derived_from`, `depends_on`, `uses_submodule`, `declared_inspiration`, `references`, `evolved_into`. Symmetric: `shares_history_with`, `shares_exact_content_with`, `similar_to`. The resolver stamps direction from the ontology and rejects contradicting observations. Symmetric endpoints are canonicalised so a pair yields one edge. A renderer must read `directed`, never infer it from the focused node. |
 | `shares_exact_content_with` replaces `contains_exact_content_from` | V1 direction audit. Identical blob content proves neither origin nor copying direction, so the type is symmetric and its evidence uses `first_*`/`second_*` keys instead of `source_*`/`target_*`. Core semantics changed, not only the display name. |
 | Two admission guards | Evidence type to relationship type, and status to both. A collector proposes, the resolver disposes. Rejections become diagnostics. |
-| Direction is fixed by the ontology | `shares_history_with` and `similar_to` are undirected; everything else is directed. |
+| Direction is fixed by the ontology | `shares_history_with`, `shares_exact_content_with` and `similar_to` are undirected; the other seven types are directed. |
 | Dependency is `DECLARED` only | A manifest is an author's statement. GitLineage never runs a package manager. |
 | `derived_from` needs containment plus ordering | Shared commits alone give `shares_history_with`, never a direction. Truncated windows can never prove containment. |
-| Exact content only, no similarity | `shares_exact_content_with` uses identical Git blob ids, symmetric. No threshold, no score. `similar_to` exists in the ontology but no detector ships. |
+| Canonical exact content; separate sampled similarity | `shares_exact_content_with` uses identical Git blob IDs. Discovery measurements remain independent sidecars with `verification=pending`, `lineageClaim=none`; no similarity detector inserts canonical lineage edges. |
+| Public exploration, no login | Explicitly enabled anonymous entry reuses Discovery search/source/compare and repository exploration. Opening exploration tools starts no Discovery transport work; an explicit exploration action is required. Normal canonical analysis can still request GitHub data on a cache miss. Defaults in `experiments/public-exploration/service.ts`: 1200 actual HTTP attempts/process/hour, 120/address/hour, ten seconds between new explorations/address, one active shared operation. Failed requests are charged before dispatch; cancellation does not refund. Visitor results are bound to cookie and address; quotas are process-local and reset on restart. Private Beta uses separate authenticated ownership and budgets. Both entry points remain disabled in production by default. |
+| Bounded structure and history | Pinned repository ID/revision/tree; initial history reads at most six commits and three observed branch tips. Explicit continuation reads six more commits/page up to 120/session, branch pages of three up to 20 pages, and listed directories up to 128/session (path validation currently caps depth at 32). Each operation has a fresh <=24-attempt / 30-second / 1-MiB reserved network budget; aggregate session ceiling is 240 attempts, also subject to the anonymous service quota. Submodules are pinned gitlinks, never followed. Unopened directories and unobserved parents remain unexamined; CPU hard budgeting is unsupported. See `experiments/public-exploration/repository-explorer.ts`. |
+| Main workspace and separate History | One repository relationship canvas combines Origins, Dependencies, References, observed internal structure and discovery observations. Layer switches change visibility/emphasis without replacing the graph world. Local expansion preserves object identity and URL exploration state. Git History uses its own log/branch tracks and returns to the preserved main graph. Presentation grouping is not a canonical lineage edge; discovery remains `pending` / `none`. |
 | Declarations require a resolvable repository | An attribution phrase without a repository URL in its window produces no relationship, only a diagnostic. Code blocks and indented code are not prose. |
 | `thanks to` is a reference | An acknowledgement is a link, not a claim of derivation. |
 | Collector boundary | Collectors observe and emit `Observation[]`. They never merge evidence, never choose a status, never touch the graph. |
@@ -32,7 +35,7 @@ Confirmed and implemented in this repository.
 | Blob identity from the tree API | Exact content costs one API call per candidate instead of a clone. |
 | Implementation language | TypeScript on Node >= 22.18, executed directly through Node's type stripping, with `tsc --noEmit` as the type gate and `node:test` as the test runner. |
 | Single package, not a monorepo | One `package.json`. Module boundaries under `src/` match the proposed layout so a later split is mechanical. |
-| Minimal dependencies | Runtime: `smol-toml` only. Dev: `typescript`, `@types/node`, `ajv`, `ajv-formats`, `playwright` (screenshot capture only). |
+| Minimal dependencies | Runtime: `smol-toml` only. Dev: `typescript`, `@types/node`, `ajv`, `ajv-formats`, `playwright` (browser interaction and screenshots), `esbuild` (production bundling). |
 | Core contract frozen for the Web phase | Phases 1 to 3 of the Web slice changed no ontology, collector, evidence semantic, resolver behaviour or graph schema field for presentation convenience. The one addition to the pipeline is an optional `onPhase` observer at existing stage boundaries, which is instrumentation and changes no behaviour. Every visual problem found in real data was fixed in `src/web/view-model.ts` and the client layout. Deviations are listed in `docs/web-slice.md`. |
 | Analysis is a job, not a request | The public deployment proved that a cold analysis (measured up to 311s) outlives any reverse-proxy deadline, so the initiating request was being cut off with `524` while the analysis completed anyway. Analysis is now an idempotent job with its own lifecycle: `POST /api/analysis/:owner/:repo` returns immediately, `GET /api/analysis/jobs/:jobId` observes real phases, and the result endpoints answer `analysis_pending` instead of blocking. Raising a timeout or pre-warming a cache would only move the problem. |
 | Job identity is the work, not the request | owner + repo + resolved revision + schema version + analyzer version. Two visitors asking for the same repository join one analysis instead of launching a second clone and a second pass over the GitHub API. The revision-aware artifact cache still does the real caching; deduplication only stops duplicate work. |
@@ -44,10 +47,10 @@ Confirmed and implemented in this repository.
 | `/owner/repo` as the primary route | So a future domain replacement is a DNS change. The whole frame lives in the query string (`edge`, `node`, `layers`, `q`, `bundles`, `depth`), so a shared link reproduces it exactly. `/` is the landing page. |
 | Freshness is stated, not implied | Both analysis endpoints return `cacheHit`, `resolvedRevision`, `resolvedRef`, `defaultBranch` and `elapsedMs`. The UI shows `cached <time>` in the app bar, so "reload gives the same result" is checkable. |
 | No localhost anywhere | Deployment settings come from the environment, and the production bundle is asserted to contain neither `localhost` nor `127.0.0.1`. Asset URLs are root-absolute, because the shell is also served at `/owner/repo`. |
-| Client logic is pure and testable | Everything under `src/web/client/lib/` is DOM-free and unit-tested in Node; `app.js` is the only DOM-aware file. `*.d.mts` declarations tie the browser modules to the view-model types. |
+| Client logic is separated and testable | Pure layout, classification and URL modules are unit-tested in Node. Workspace, History, motion and preview controllers also use the DOM and have browser acceptance checks. `*.d.mts` declarations tie typed browser imports to the view-model. |
 | Browser scripts typecheck separately | `tsconfig.web-scripts.json` adds the DOM lib for the Playwright drivers, so the main config stays DOM-free and server code cannot reach for browser globals by accident. |
-| Bundling is presentation-only | `vitest-dev/vitest` yields 102 one-hop edges. Secondary relationships collapse into counted bundles; nothing is dropped and every member stays reachable in the Evidence drawer. |
-| Hub layout wraps, it does not stack | `grpc/grpc` has 20 submodule peers in one slot. A slot wraps into a grid and is pushed clear of the subject by its own half-extent, and labels are thinned by node degree — 20 distinct pairs is 20 fans of one, so parallel-edge count does not predict the collision. |
+| Bundling is presentation-only | Canonical relationships remain intact. Counted grouping controls expand classified member neighborhoods on the main canvas; members and their actual relationship evidence remain reachable. Groups and categories are display navigation, not lineage edges. |
+| Relationship-owned spatial neighborhoods | The current presentation layout allocates branch envelopes and local subtree footprints, with one identity for shared objects and obstacle-aware cross references. If every safe route fails, inspectable endpoint badges expose the connection gap instead of omitting the relationship or drawing through nodes. |
 | CLI first, web later | `analyze` produces `graph.json`; the renderer consumes it and must not change the contract. |
 
 ### Implementation decisions taken during this work
@@ -89,10 +92,10 @@ Open, not implemented, not binding.
 
 | Proposal | Notes |
 | --- | --- |
-| Interactive explorer | **Shipped through Phase 2.** `src/web/` exposes the canonical graph and the view-model over HTTP, with the R3.1 one-hop Explorer as a production-bundled, URL-first, responsive client. Zoom/pan/fit, search, layers, bundles and the Evidence Drawer all work and are all in the URL. Remaining: fork-family cluster toggle, timeline attributes, compare view, multi-hop views. |
-| Deployment | **Configuration exists, hosting not decided.** The build is a static `dist/web` plus one Node server, driven entirely by environment variables, so hosting is a deployment question rather than a code change. Still to choose: domain, TLS, and whether a shared artifact cache is needed. |
+| Interactive explorer | **Implemented in M2.** `src/web/` serves separate canonical and presentation surfaces, a unified repository workspace and independent Git History. Local multi-neighborhood expansion, search, layers and evidence are available. Explicitly enabled Discovery V2 / Deep Search provides bounded source comparison without lineage claims. Full repository coverage, durable exploration sessions and physical-device acceptance are not established by the offline browser suites. |
+| Deployment | **Existing production is protected.** The build is `dist/web` plus one Node server; this PR changes neither deployment nor production data. Current live host, TLS and production revision are not revalidated by local or PR tests. |
 | Timeline / evolution view | First observed, last observed, introduced in commit, removed in commit. |
-| Similarity detector | Token fingerprints and candidate retrieval, `DETECTED` only, never allowed near the verified layer. |
+| Similarity detector | Bounded Discovery V2 candidate retrieval and sampled comparison are implemented as independent sidecars, `verification: pending`, `lineageClaim: none`. Broader coverage and provenance promotion are not established. |
 | Normalised content hashing | Would need a new evidence type and an ontology amendment before any code. |
 | `ExternalProject` entities | For projects hosted outside GitHub, so a declaration about a non-GitHub project is representable instead of being dropped. |
 | Manifest git-dependency to repository edge | Today a `git+https` spec is recorded inside the evidence and used as a candidate; a direct edge would need a new ontology decision. |
@@ -122,7 +125,7 @@ Open, not implemented, not binding.
 | Framework-first implementation | Not started | The specification deliberately left the language open until the analyzer contract was proven. It is now fixed by the decision above; the choice is recorded rather than debated. |
 | A monorepo with separate packages | Deferred | A single package with the proposed module layout proves the contract with less machinery. Revisit if the web layer needs independent deployables. |
 
-## Verification status
+## Historical verification status (Web Phase 2)
 
 | Check | Command | Status |
 | --- | --- | --- |
@@ -145,13 +148,19 @@ Open, not implemented, not binding.
 Recorded run for Web Phase 2: graph schema 2.0.0, analyzer 0.2.0, Node 24.21,
 git 2.43.0, WSL2, Chromium from the WSL Playwright cache.
 
+These counts and live runs are historical, not evidence for the current M2 HEAD.
+Current M2 acceptance is tracked by the PR workflows `M2 PR validation` and
+`P0/P0.5 stable UI validation` on the same final development commit. Offline
+Chromium fixtures, fixed Mock GitHub Transport and isolated trusted TLS/Caddy
+staging do not establish fresh GitHub API, WebKit or physical-device acceptance.
+
 Superseded run note: 89 tests at the direction-audit commit, 130 at the Phase 1
-commit, 209 at the async-jobs commit. The current run is recorded in the
-verification table above.
+commit, 209 at the async-jobs commit. The Phase 2 run is recorded in the
+historical verification table above.
 
 Details and recorded results: `docs/integration-validation.md`.
 
-## Hosting status
+## Historical hosting validation
 
 The intended host is a single-node Oracle OCI **Always Free Ampere A1** VM.
 Because Ampere A1 is `aarch64`, "it builds on an x86 laptop" answers the wrong
@@ -180,12 +189,9 @@ fixed and covered — the generic `PORT` outranking `GITLINEAGE_PORT`, a default
 port that collides with the OpenTelemetry collector, and `/healthz` reporting a
 different cache root from the one in use.
 
-**Not yet provisioned.** No OCI CLI, no `~/.oci` config, no API key, no tenancy
-or compartment OCID, and no SSH key for an instance. The OCI API is reachable
-from here and answers `401`, so this is missing credentials and not a network
-problem. The Always Free entitlement also caps A1 at four OCPU and 24 GB, which
-is comfortable for this workload; the risk to plan for is **capacity** in a given
-region, since Always Free A1 shapes are frequently out of stock.
+The provisioning and credential inventory recorded during this earlier validation
+is obsolete. This PR does not inspect or modify OCI, Caddy, TLS, DNS or production
+configuration. The current live deployment is not verified here.
 
 The live validation above was driven through a Cloudflare Quick Tunnel, which
 worked and then failed repeatedly for reasons outside the application: TLS
@@ -194,8 +200,6 @@ earlier 17-minute reading was wrong — the client could not poll while the serv
 finished in 71 seconds. **Client-side timing is not evidence of analysis
 duration**; `test/job-timing.ts` reads the server's own timestamps instead.
 
-Everything needed to finish the move is committed: `Dockerfile`,
-`gitlineage.env.example`, `deploy/gitlineage.service` and `deploy/RUNBOOK.md`.
-Given a tenancy, the remaining steps are creating the instance, attaching a
-volume, deploying the pinned revision, and re-running the cold, restart and
-browser suites against the real hostname.
+Deployment assets (`Dockerfile`, `gitlineage.env.example`,
+`deploy/gitlineage.service`, `deploy/RUNBOOK.md`) remain outside this closure's
+change scope; their presence is not a new deployment or live acceptance claim.

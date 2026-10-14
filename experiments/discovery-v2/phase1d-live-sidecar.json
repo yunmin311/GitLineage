@@ -1,0 +1,1891 @@
+{
+  "budget": {
+    "attempts": 24,
+    "bytesPerFile": 131072,
+    "candidates": 3,
+    "concurrency": 2,
+    "cpuMs": null,
+    "filesPerCandidate": 8,
+    "searchAttempts": 4,
+    "totalBytes": 2097152,
+    "wallMs": 30000
+  },
+  "comparisons": [
+    {
+      "candidate": {
+        "candidate": {
+          "aliases": [],
+          "completeness": "provider_id",
+          "fullName": "jucke/p-limit",
+          "provider": "github",
+          "repositoryId": 72682439,
+          "revision": "e293f0b92536447f72ca818fcf07be8d287f1c24"
+        },
+        "checks": [],
+        "coverage": {
+          "comparedPairs": 1,
+          "expectedPairs": 1,
+          "pending": [],
+          "reasons": [],
+          "state": "completed"
+        },
+        "discoveries": [
+          {
+            "locator": "https://github.com/jucke/p-limit",
+            "reason": "explicit bounded controls; no Search or inferred lineage",
+            "source": "explicit_public_probe",
+            "version": "phase1d-controls@1"
+          }
+        ],
+        "files": {
+          "candidate": [
+            {
+              "blob": "6008403a98879d80c8cbff6f43e5634e3a5fd9ce",
+              "bytes": 640,
+              "classification": "application_source",
+              "digest": "b89479e9f48bd6e7a90931a164cdec0b9ae203ea4e31ddb2329865cdf0b391f3",
+              "filterVersion": "source-filter@1",
+              "language": "javascript",
+              "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+              "path": "index.js",
+              "reasons": [
+                "supported source; no exclusion heuristic matched"
+              ]
+            }
+          ],
+          "target": [
+            {
+              "blob": "c24de5782032605aa83636bcf455f700e3b2ada7",
+              "bytes": 3868,
+              "classification": "application_source",
+              "digest": "edde12a4a4dbdbe8d27161cdd0853db0bab435d5dc6c15f9f4dedc27ee9bca60",
+              "filterVersion": "source-filter@1",
+              "language": "javascript",
+              "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+              "path": "index.js",
+              "reasons": [
+                "supported source; no exclusion heuristic matched"
+              ]
+            }
+          ]
+        },
+        "lineageClaim": "none",
+        "schemaVersion": "discovery-candidate@1",
+        "similarity": [
+          {
+            "filterVersion": "source-filter@1",
+            "firstCoverage": null,
+            "firstDigest": "edde12a4a4dbdbe8d27161cdd0853db0bab435d5dc6c15f9f4dedc27ee9bca60",
+            "firstPath": "index.js",
+            "firstShingles": null,
+            "firstTokens": 633,
+            "method": "exact_blob",
+            "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+            "ranges": [],
+            "rangesTruncated": false,
+            "reasons": [],
+            "score": 0,
+            "secondCoverage": null,
+            "secondDigest": "b89479e9f48bd6e7a90931a164cdec0b9ae203ea4e31ddb2329865cdf0b391f3",
+            "secondPath": "index.js",
+            "secondShingles": null,
+            "secondTokens": 162,
+            "sharedShingles": null,
+            "state": "completed",
+            "version": "git-blob-sha1@1"
+          },
+          {
+            "filterVersion": "source-filter@1",
+            "firstCoverage": 0.06597222222222222,
+            "firstDigest": "edde12a4a4dbdbe8d27161cdd0853db0bab435d5dc6c15f9f4dedc27ee9bca60",
+            "firstPath": "index.js",
+            "firstShingles": 576,
+            "firstTokens": 633,
+            "method": "strict_token5",
+            "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+            "ranges": [
+              {
+                "fingerprint": "0100a39cde69d0f5c80fd9dbdfcc28e63b79a1f1cedd23d6a5456c56adb2295a",
+                "first": [
+                  114,
+                  119
+                ],
+                "firstChars": [
+                  636,
+                  657
+                ],
+                "second": [
+                  50,
+                  55
+                ],
+                "secondChars": [
+                  256,
+                  277
+                ]
+              },
+              {
+                "fingerprint": "069baa46edde3a40ba8eca6a982d10e5f728ce0f55873dbbc8a0fe072fcaa184",
+                "first": [
+                  69,
+                  74
+                ],
+                "firstChars": [
+                  392,
+                  416
+                ],
+                "second": [
+                  41,
+                  46
+                ],
+                "secondChars": [
+                  221,
+                  245
+                ]
+              },
+              {
+                "fingerprint": "11642f8b681788ae5a6d232d0ce67c1d87ec31e58e937ba6de7e1300b25bda9f",
+                "first": [
+                  51,
+                  56
+                ],
+                "firstChars": [
+                  286,
+                  310
+                ],
+                "second": [
+                  25,
+                  30
+                ],
+                "secondChars": [
+                  106,
+                  130
+                ]
+              },
+              {
+                "fingerprint": "14b49a6462707385ab9fa2059bb160ad6ea29d7413a62114f83d9fe1e7539197",
+                "first": [
+                  420,
+                  425
+                ],
+                "firstChars": [
+                  2690,
+                  2704
+                ],
+                "second": [
+                  156,
+                  161
+                ],
+                "secondChars": [
+                  630,
+                  638
+                ]
+              },
+              {
+                "fingerprint": "16aeea9158927d1346dfabca0dcc90c5ec88f50c324a1dadcfc6db069f8859c1",
+                "first": [
+                  110,
+                  115
+                ],
+                "firstChars": [
+                  626,
+                  638
+                ],
+                "second": [
+                  46,
+                  51
+                ],
+                "secondChars": [
+                  246,
+                  258
+                ]
+              },
+              {
+                "fingerprint": "16c3061f4f9db46cccd042a21433a52c2ef9a7b3b5dad50e19111016571b129a",
+                "first": [
+                  112,
+                  117
+                ],
+                "firstChars": [
+                  633,
+                  654
+                ],
+                "second": [
+                  48,
+                  53
+                ],
+                "secondChars": [
+                  253,
+                  274
+                ]
+              },
+              {
+                "fingerprint": "242a49df41977fb146558b98d9caf3df40e1204d22fb79a51f05435fa3671ed6",
+                "first": [
+                  258,
+                  263
+                ],
+                "firstChars": [
+                  1909,
+                  1929
+                ],
+                "second": [
+                  78,
+                  83
+                ],
+                "secondChars": [
+                  348,
+                  368
+                ]
+              },
+              {
+                "fingerprint": "30fd561525913e61f8f530c53685d359c1d5e75e4fa9765588bb31a3a5694ed8",
+                "first": [
+                  353,
+                  358
+                ],
+                "firstChars": [
+                  2306,
+                  2323
+                ],
+                "second": [
+                  60,
+                  65
+                ],
+                "secondChars": [
+                  298,
+                  313
+                ]
+              },
+              {
+                "fingerprint": "34ef50085e7345e8f9b3303b26a49aa2c3afe0b993f8cb49eb0bfa0f4c26d459",
+                "first": [
+                  257,
+                  262
+                ],
+                "firstChars": [
+                  1906,
+                  1922
+                ],
+                "second": [
+                  77,
+                  82
+                ],
+                "secondChars": [
+                  345,
+                  361
+                ]
+              },
+              {
+                "fingerprint": "3598d3212f5b76208310172ca55a45ce3e3343fe5878d437e256d55e7d0ec9b0",
+                "first": [
+                  58,
+                  63
+                ],
+                "firstChars": [
+                  353,
+                  373
+                ],
+                "second": [
+                  32,
+                  37
+                ],
+                "secondChars": [
+                  191,
+                  211
+                ]
+              },
+              {
+                "fingerprint": "42e5cbf61da5fcffb4255497e472a598a23cb654570057988875f33b10d09764",
+                "first": [
+                  104,
+                  109
+                ],
+                "firstChars": [
+                  607,
+                  617
+                ],
+                "second": [
+                  70,
+                  75
+                ],
+                "secondChars": [
+                  322,
+                  332
+                ]
+              },
+              {
+                "fingerprint": "4b2ef7ee9b06d8847f18f760f62d02abff947cd0bc210d0dae59cf8111eb4243",
+                "first": [
+                  50,
+                  55
+                ],
+                "firstChars": [
+                  284,
+                  309
+                ],
+                "second": [
+                  24,
+                  29
+                ],
+                "secondChars": [
+                  104,
+                  129
+                ]
+              }
+            ],
+            "rangesTruncated": true,
+            "reasons": [],
+            "score": 0.05507246376811594,
+            "secondCoverage": 0.25,
+            "secondDigest": "b89479e9f48bd6e7a90931a164cdec0b9ae203ea4e31ddb2329865cdf0b391f3",
+            "secondPath": "index.js",
+            "secondShingles": 152,
+            "secondTokens": 162,
+            "sharedShingles": 38,
+            "state": "completed",
+            "version": "token5-set@1"
+          },
+          {
+            "filterVersion": "source-filter@1",
+            "firstCoverage": 0.1622222222222222,
+            "firstDigest": "edde12a4a4dbdbe8d27161cdd0853db0bab435d5dc6c15f9f4dedc27ee9bca60",
+            "firstPath": "index.js",
+            "firstShingles": 450,
+            "firstTokens": 633,
+            "method": "normalized_token5",
+            "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+            "ranges": [
+              {
+                "fingerprint": "01c0a7c4fd11aea608feb084e3a19f3a0a61cf9e729bf6521c9a18fe7140c106",
+                "first": [
+                  258,
+                  263
+                ],
+                "firstChars": [
+                  1909,
+                  1929
+                ],
+                "second": [
+                  78,
+                  83
+                ],
+                "secondChars": [
+                  348,
+                  368
+                ]
+              },
+              {
+                "fingerprint": "0d8312e69b11084ba5268c343408e433880ade38ffb0b32a9f55a3c8bf851a19",
+                "first": [
+                  135,
+                  140
+                ],
+                "firstChars": [
+                  729,
+                  807
+                ],
+                "second": [
+                  85,
+                  90
+                ],
+                "secondChars": [
+                  376,
+                  394
+                ]
+              },
+              {
+                "fingerprint": "0e69bfe5aeb2ba2b3f424f743310d676260157d23cc4c3e41f5bfd2062eed022",
+                "first": [
+                  261,
+                  266
+                ],
+                "firstChars": [
+                  1921,
+                  1938
+                ],
+                "second": [
+                  81,
+                  86
+                ],
+                "secondChars": [
+                  360,
+                  377
+                ]
+              },
+              {
+                "fingerprint": "0eb3aff5537a8a3b154c6f446627765af844c9ca6e653468535d568818eb4d9f",
+                "first": [
+                  240,
+                  245
+                ],
+                "firstChars": [
+                  1832,
+                  1850
+                ],
+                "second": [
+                  141,
+                  146
+                ],
+                "secondChars": [
+                  585,
+                  596
+                ]
+              },
+              {
+                "fingerprint": "0efb44317a01926437eb714aedf024a7931cd39d4a91f730dd3c65d7054a6796",
+                "first": [
+                  239,
+                  244
+                ],
+                "firstChars": [
+                  1830,
+                  1849
+                ],
+                "second": [
+                  140,
+                  145
+                ],
+                "secondChars": [
+                  583,
+                  595
+                ]
+              },
+              {
+                "fingerprint": "135759a26b2d4e74f928435e010135cc0c406bb58aae1c533a757a8324f69248",
+                "first": [
+                  439,
+                  444
+                ],
+                "firstChars": [
+                  2762,
+                  2781
+                ],
+                "second": [
+                  34,
+                  39
+                ],
+                "secondChars": [
+                  198,
+                  214
+                ]
+              },
+              {
+                "fingerprint": "14b49a6462707385ab9fa2059bb160ad6ea29d7413a62114f83d9fe1e7539197",
+                "first": [
+                  420,
+                  425
+                ],
+                "firstChars": [
+                  2690,
+                  2704
+                ],
+                "second": [
+                  156,
+                  161
+                ],
+                "secondChars": [
+                  630,
+                  638
+                ]
+              },
+              {
+                "fingerprint": "14b8f14139c46361ce0a3f1bd424d05d96dc102e1a9de12b4ec2b884e2848b96",
+                "first": [
+                  211,
+                  216
+                ],
+                "firstChars": [
+                  1591,
+                  1607
+                ],
+                "second": [
+                  152,
+                  157
+                ],
+                "secondChars": [
+                  621,
+                  631
+                ]
+              },
+              {
+                "fingerprint": "16872e0953adfbfcb9486451b3311b738eb4f55d35e8b4c5659746eb95236a31",
+                "first": [
+                  440,
+                  445
+                ],
+                "firstChars": [
+                  2768,
+                  2782
+                ],
+                "second": [
+                  35,
+                  40
+                ],
+                "secondChars": [
+                  204,
+                  215
+                ]
+              },
+              {
+                "fingerprint": "1869ca24e8e6a07b8053c210a36b290dc5bd29747209604d1ed5821d6373dd14",
+                "first": [
+                  354,
+                  359
+                ],
+                "firstChars": [
+                  2308,
+                  2324
+                ],
+                "second": [
+                  61,
+                  66
+                ],
+                "secondChars": [
+                  300,
+                  314
+                ]
+              },
+              {
+                "fingerprint": "1de54db0661b8d9a8bb25ab0b71de3e0535d86434a6cac029e468c9715e71ce3",
+                "first": [
+                  257,
+                  262
+                ],
+                "firstChars": [
+                  1906,
+                  1922
+                ],
+                "second": [
+                  77,
+                  82
+                ],
+                "secondChars": [
+                  345,
+                  361
+                ]
+              },
+              {
+                "fingerprint": "1e4b66a22719d089a36ce38b4a76b8eb6948f569079519598e65d0bcd6ebf37c",
+                "first": [
+                  112,
+                  117
+                ],
+                "firstChars": [
+                  633,
+                  654
+                ],
+                "second": [
+                  48,
+                  53
+                ],
+                "secondChars": [
+                  253,
+                  274
+                ]
+              }
+            ],
+            "rangesTruncated": true,
+            "reasons": [],
+            "score": 0.14147286821705427,
+            "secondCoverage": 0.5251798561151079,
+            "secondDigest": "b89479e9f48bd6e7a90931a164cdec0b9ae203ea4e31ddb2329865cdf0b391f3",
+            "secondPath": "index.js",
+            "secondShingles": 139,
+            "secondTokens": 162,
+            "sharedShingles": 73,
+            "state": "completed",
+            "version": "token5-set@1"
+          }
+        ],
+        "target": {
+          "aliases": [],
+          "completeness": "provider_id",
+          "fullName": "sindresorhus/p-limit",
+          "provider": "github",
+          "repositoryId": 71542716,
+          "revision": "a8a6fbec4e0e866d6d779b10889bb4f5567e70eb"
+        },
+        "usage": {
+          "activeWorkers": 0,
+          "attempts": 18,
+          "bytesByFile": {
+            "[\"github:71542716@a8a6fbec4e0e866d6d779b10889bb4f5567e70eb\",\"index.js\"]": 3868,
+            "[\"github:71544230@a0d20bf8c1a5f0067b1dce529b1ff013878591d3\",\"index.js\"]": 9716,
+            "[\"github:72682439@e293f0b92536447f72ca818fcf07be8d287f1c24\",\"index.js\"]": 640
+          },
+          "candidates": 1,
+          "files": {
+            "github:71542716@a8a6fbec4e0e866d6d779b10889bb4f5567e70eb": 1,
+            "github:71544230@a0d20bf8c1a5f0067b1dce529b1ff013878591d3": 1,
+            "github:72682439@e293f0b92536447f72ca818fcf07be8d287f1c24": 1
+          },
+          "peakWorkers": 1,
+          "searchAttempts": 0,
+          "totalBytes": 14224
+        },
+        "verification": {
+          "canonicalEvidenceIds": [],
+          "checks": [],
+          "state": "pending"
+        }
+      },
+      "label": "known public Fork control; metadata observation only",
+      "name": "jucke/p-limit",
+      "reason": null,
+      "summary": {
+        "comparedPairs": 1,
+        "exactPairs": 0,
+        "expectedPairs": 1,
+        "failures": [],
+        "firstFiltered": 0,
+        "firstIncluded": 1,
+        "firstTokens": 633,
+        "normalized": {
+          "first": 450,
+          "firstCoverage": 0.1622222222222222,
+          "score": 0.14147286821705427,
+          "second": 139,
+          "secondCoverage": 0.5251798561151079,
+          "shared": 73
+        },
+        "secondFiltered": 0,
+        "secondIncluded": 1,
+        "secondTokens": 162,
+        "state": "completed",
+        "strict": {
+          "first": 576,
+          "firstCoverage": 0.06597222222222222,
+          "score": 0.05507246376811594,
+          "second": 152,
+          "secondCoverage": 0.25,
+          "shared": 38
+        }
+      }
+    },
+    {
+      "candidate": {
+        "candidate": {
+          "aliases": [],
+          "completeness": "provider_id",
+          "fullName": "sindresorhus/p-throttle",
+          "provider": "github",
+          "repositoryId": 71544230,
+          "revision": "a0d20bf8c1a5f0067b1dce529b1ff013878591d3"
+        },
+        "checks": [],
+        "coverage": {
+          "comparedPairs": 1,
+          "expectedPairs": 1,
+          "pending": [],
+          "reasons": [],
+          "state": "completed"
+        },
+        "discoveries": [
+          {
+            "locator": "https://github.com/sindresorhus/p-throttle",
+            "reason": "explicit bounded controls; no Search or inferred lineage",
+            "source": "explicit_public_probe",
+            "version": "phase1d-controls@1"
+          }
+        ],
+        "files": {
+          "candidate": [
+            {
+              "blob": "5175416b80a246fb0cec7c2547906fd4c025cf18",
+              "bytes": 9716,
+              "classification": "application_source",
+              "digest": "5567e2731fa0393079ac096c10ebbedbec5a1cd7e687a8ba2021e96c44ef3fcf",
+              "filterVersion": "source-filter@1",
+              "language": "javascript",
+              "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+              "path": "index.js",
+              "reasons": [
+                "supported source; no exclusion heuristic matched"
+              ]
+            }
+          ],
+          "target": [
+            {
+              "blob": "c24de5782032605aa83636bcf455f700e3b2ada7",
+              "bytes": 3868,
+              "classification": "application_source",
+              "digest": "edde12a4a4dbdbe8d27161cdd0853db0bab435d5dc6c15f9f4dedc27ee9bca60",
+              "filterVersion": "source-filter@1",
+              "language": "javascript",
+              "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+              "path": "index.js",
+              "reasons": [
+                "supported source; no exclusion heuristic matched"
+              ]
+            }
+          ]
+        },
+        "lineageClaim": "none",
+        "schemaVersion": "discovery-candidate@1",
+        "similarity": [
+          {
+            "filterVersion": "source-filter@1",
+            "firstCoverage": null,
+            "firstDigest": "edde12a4a4dbdbe8d27161cdd0853db0bab435d5dc6c15f9f4dedc27ee9bca60",
+            "firstPath": "index.js",
+            "firstShingles": null,
+            "firstTokens": 633,
+            "method": "exact_blob",
+            "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+            "ranges": [],
+            "rangesTruncated": false,
+            "reasons": [],
+            "score": 0,
+            "secondCoverage": null,
+            "secondDigest": "5567e2731fa0393079ac096c10ebbedbec5a1cd7e687a8ba2021e96c44ef3fcf",
+            "secondPath": "index.js",
+            "secondShingles": null,
+            "secondTokens": 1592,
+            "sharedShingles": null,
+            "state": "completed",
+            "version": "git-blob-sha1@1"
+          },
+          {
+            "filterVersion": "source-filter@1",
+            "firstCoverage": 0.057291666666666664,
+            "firstDigest": "edde12a4a4dbdbe8d27161cdd0853db0bab435d5dc6c15f9f4dedc27ee9bca60",
+            "firstPath": "index.js",
+            "firstShingles": 576,
+            "firstTokens": 633,
+            "method": "strict_token5",
+            "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+            "ranges": [
+              {
+                "fingerprint": "11642f8b681788ae5a6d232d0ce67c1d87ec31e58e937ba6de7e1300b25bda9f",
+                "first": [
+                  51,
+                  56
+                ],
+                "firstChars": [
+                  286,
+                  310
+                ],
+                "second": [
+                  137,
+                  142
+                ],
+                "secondChars": [
+                  773,
+                  797
+                ]
+              },
+              {
+                "fingerprint": "14b49a6462707385ab9fa2059bb160ad6ea29d7413a62114f83d9fe1e7539197",
+                "first": [
+                  420,
+                  425
+                ],
+                "firstChars": [
+                  2690,
+                  2704
+                ],
+                "second": [
+                  1304,
+                  1309
+                ],
+                "secondChars": [
+                  8229,
+                  8241
+                ]
+              },
+              {
+                "fingerprint": "242a49df41977fb146558b98d9caf3df40e1204d22fb79a51f05435fa3671ed6",
+                "first": [
+                  258,
+                  263
+                ],
+                "firstChars": [
+                  1909,
+                  1929
+                ],
+                "second": [
+                  943,
+                  948
+                ],
+                "secondChars": [
+                  6222,
+                  6242
+                ]
+              },
+              {
+                "fingerprint": "42e5cbf61da5fcffb4255497e472a598a23cb654570057988875f33b10d09764",
+                "first": [
+                  104,
+                  109
+                ],
+                "firstChars": [
+                  607,
+                  617
+                ],
+                "second": [
+                  346,
+                  351
+                ],
+                "secondChars": [
+                  2539,
+                  2549
+                ]
+              },
+              {
+                "fingerprint": "479460acb9c7e0dfb27eba4aa8965eb895bc81db60c6e11130179181a1c031a3",
+                "first": [
+                  329,
+                  334
+                ],
+                "firstChars": [
+                  2202,
+                  2211
+                ],
+                "second": [
+                  1445,
+                  1450
+                ],
+                "secondChars": [
+                  8919,
+                  8928
+                ]
+              },
+              {
+                "fingerprint": "4b2ef7ee9b06d8847f18f760f62d02abff947cd0bc210d0dae59cf8111eb4243",
+                "first": [
+                  50,
+                  55
+                ],
+                "firstChars": [
+                  284,
+                  309
+                ],
+                "second": [
+                  136,
+                  141
+                ],
+                "secondChars": [
+                  771,
+                  796
+                ]
+              },
+              {
+                "fingerprint": "514151102e8211b9a363f449a8a2cf5c71bc0c59d8a7b3fca8c81b5ea966e577",
+                "first": [
+                  621,
+                  626
+                ],
+                "firstChars": [
+                  3780,
+                  3796
+                ],
+                "second": [
+                  135,
+                  140
+                ],
+                "secondChars": [
+                  770,
+                  786
+                ]
+              },
+              {
+                "fingerprint": "5260a60d22ee2e3873ec61f466978061bde8fdaab4d75ab79b53962fddbfbbe9",
+                "first": [
+                  164,
+                  169
+                ],
+                "firstChars": [
+                  1153,
+                  1167
+                ],
+                "second": [
+                  1292,
+                  1297
+                ],
+                "secondChars": [
+                  8178,
+                  8195
+                ]
+              },
+              {
+                "fingerprint": "56f328a2865dc2e0e916bfa87d70fcc788a0eb8efe6ad72a945cf249da8ee819",
+                "first": [
+                  263,
+                  268
+                ],
+                "firstChars": [
+                  1929,
+                  1943
+                ],
+                "second": [
+                  948,
+                  953
+                ],
+                "secondChars": [
+                  6242,
+                  6256
+                ]
+              },
+              {
+                "fingerprint": "60da8c8bae6cc393b190dd08e18f86cad8d828e618c4817c80d6c377d58c8a22",
+                "first": [
+                  103,
+                  108
+                ],
+                "firstChars": [
+                  606,
+                  616
+                ],
+                "second": [
+                  1301,
+                  1306
+                ],
+                "secondChars": [
+                  8221,
+                  8235
+                ]
+              },
+              {
+                "fingerprint": "620937d26833fb903f7a3e81f25387328e89541af160cae3d60558e0409be3ef",
+                "first": [
+                  229,
+                  234
+                ],
+                "firstChars": [
+                  1652,
+                  1667
+                ],
+                "second": [
+                  1229,
+                  1234
+                ],
+                "secondChars": [
+                  7918,
+                  7933
+                ]
+              },
+              {
+                "fingerprint": "8c9cb535e71df15444380108c6890bdc58ec4fe2dff9aea0d261946b12ef49d7",
+                "first": [
+                  328,
+                  333
+                ],
+                "firstChars": [
+                  2197,
+                  2210
+                ],
+                "second": [
+                  1444,
+                  1449
+                ],
+                "secondChars": [
+                  8914,
+                  8927
+                ]
+              }
+            ],
+            "rangesTruncated": true,
+            "reasons": [],
+            "score": 0.01738672286617492,
+            "secondCoverage": 0.024354243542435424,
+            "secondDigest": "5567e2731fa0393079ac096c10ebbedbec5a1cd7e687a8ba2021e96c44ef3fcf",
+            "secondPath": "index.js",
+            "secondShingles": 1355,
+            "secondTokens": 1592,
+            "sharedShingles": 33,
+            "state": "completed",
+            "version": "token5-set@1"
+          },
+          {
+            "filterVersion": "source-filter@1",
+            "firstCoverage": 0.35555555555555557,
+            "firstDigest": "edde12a4a4dbdbe8d27161cdd0853db0bab435d5dc6c15f9f4dedc27ee9bca60",
+            "firstPath": "index.js",
+            "firstShingles": 450,
+            "firstTokens": 633,
+            "method": "normalized_token5",
+            "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+            "ranges": [
+              {
+                "fingerprint": "016152032a266cfa7d6b753c1b6a22157d47d3b6602c23f2ece6fad4c4a42dff",
+                "first": [
+                  40,
+                  45
+                ],
+                "firstChars": [
+                  229,
+                  248
+                ],
+                "second": [
+                  55,
+                  60
+                ],
+                "secondChars": [
+                  362,
+                  375
+                ]
+              },
+              {
+                "fingerprint": "01c0a7c4fd11aea608feb084e3a19f3a0a61cf9e729bf6521c9a18fe7140c106",
+                "first": [
+                  258,
+                  263
+                ],
+                "firstChars": [
+                  1909,
+                  1929
+                ],
+                "second": [
+                  943,
+                  948
+                ],
+                "secondChars": [
+                  6222,
+                  6242
+                ]
+              },
+              {
+                "fingerprint": "0300bc6ba8b50eaac6c890c673a2aeb02fed2229171f025101afc8bde0fcea7c",
+                "first": [
+                  232,
+                  237
+                ],
+                "firstChars": [
+                  1665,
+                  1816
+                ],
+                "second": [
+                  57,
+                  62
+                ],
+                "secondChars": [
+                  369,
+                  389
+                ]
+              },
+              {
+                "fingerprint": "07fc149981fb956e513c100c465bb83e005f7d743f5238a7fd1d228182af3ac3",
+                "first": [
+                  307,
+                  312
+                ],
+                "firstChars": [
+                  2115,
+                  2130
+                ],
+                "second": [
+                  924,
+                  929
+                ],
+                "secondChars": [
+                  6145,
+                  6165
+                ]
+              },
+              {
+                "fingerprint": "0c7fb9da9d154d7e1a581747680bff778a255c66775f24fe0cb8184718ad8827",
+                "first": [
+                  484,
+                  489
+                ],
+                "firstChars": [
+                  2957,
+                  2977
+                ],
+                "second": [
+                  972,
+                  977
+                ],
+                "secondChars": [
+                  6394,
+                  6415
+                ]
+              },
+              {
+                "fingerprint": "0d8312e69b11084ba5268c343408e433880ade38ffb0b32a9f55a3c8bf851a19",
+                "first": [
+                  135,
+                  140
+                ],
+                "firstChars": [
+                  729,
+                  807
+                ],
+                "second": [
+                  28,
+                  33
+                ],
+                "secondChars": [
+                  221,
+                  241
+                ]
+              },
+              {
+                "fingerprint": "0e5bff284d5d2072978c80a5f3e4b9039ddf9b45690e2bee136ac9531445b459",
+                "first": [
+                  547,
+                  552
+                ],
+                "firstChars": [
+                  3423,
+                  3441
+                ],
+                "second": [
+                  1042,
+                  1047
+                ],
+                "secondChars": [
+                  6853,
+                  6879
+                ]
+              },
+              {
+                "fingerprint": "0e69bfe5aeb2ba2b3f424f743310d676260157d23cc4c3e41f5bfd2062eed022",
+                "first": [
+                  261,
+                  266
+                ],
+                "firstChars": [
+                  1921,
+                  1938
+                ],
+                "second": [
+                  946,
+                  951
+                ],
+                "secondChars": [
+                  6234,
+                  6251
+                ]
+              },
+              {
+                "fingerprint": "0eb3aff5537a8a3b154c6f446627765af844c9ca6e653468535d568818eb4d9f",
+                "first": [
+                  240,
+                  245
+                ],
+                "firstChars": [
+                  1832,
+                  1850
+                ],
+                "second": [
+                  1299,
+                  1304
+                ],
+                "secondChars": [
+                  8207,
+                  8224
+                ]
+              },
+              {
+                "fingerprint": "101a191c8390e093cf531d819c1b64fce1f16fc6894eeedfed59cfa00485d678",
+                "first": [
+                  348,
+                  353
+                ],
+                "firstChars": [
+                  2288,
+                  2305
+                ],
+                "second": [
+                  694,
+                  699
+                ],
+                "secondChars": [
+                  4581,
+                  4605
+                ]
+              },
+              {
+                "fingerprint": "14a7cef1cc01cd9a9edb227b27962e142bf7e921a0a5965a6e08116a9f1df0cf",
+                "first": [
+                  325,
+                  330
+                ],
+                "firstChars": [
+                  2175,
+                  2203
+                ],
+                "second": [
+                  61,
+                  66
+                ],
+                "secondChars": [
+                  377,
+                  408
+                ]
+              },
+              {
+                "fingerprint": "14b49a6462707385ab9fa2059bb160ad6ea29d7413a62114f83d9fe1e7539197",
+                "first": [
+                  420,
+                  425
+                ],
+                "firstChars": [
+                  2690,
+                  2704
+                ],
+                "second": [
+                  1304,
+                  1309
+                ],
+                "secondChars": [
+                  8229,
+                  8241
+                ]
+              }
+            ],
+            "rangesTruncated": true,
+            "reasons": [],
+            "score": 0.13479359730412804,
+            "secondCoverage": 0.17837235228539577,
+            "secondDigest": "5567e2731fa0393079ac096c10ebbedbec5a1cd7e687a8ba2021e96c44ef3fcf",
+            "secondPath": "index.js",
+            "secondShingles": 897,
+            "secondTokens": 1592,
+            "sharedShingles": 160,
+            "state": "completed",
+            "version": "token5-set@1"
+          }
+        ],
+        "target": {
+          "aliases": [],
+          "completeness": "provider_id",
+          "fullName": "sindresorhus/p-limit",
+          "provider": "github",
+          "repositoryId": 71542716,
+          "revision": "a8a6fbec4e0e866d6d779b10889bb4f5567e70eb"
+        },
+        "usage": {
+          "activeWorkers": 0,
+          "attempts": 18,
+          "bytesByFile": {
+            "[\"github:71542716@a8a6fbec4e0e866d6d779b10889bb4f5567e70eb\",\"index.js\"]": 3868,
+            "[\"github:71544230@a0d20bf8c1a5f0067b1dce529b1ff013878591d3\",\"index.js\"]": 9716,
+            "[\"github:72682439@e293f0b92536447f72ca818fcf07be8d287f1c24\",\"index.js\"]": 640
+          },
+          "candidates": 2,
+          "files": {
+            "github:71542716@a8a6fbec4e0e866d6d779b10889bb4f5567e70eb": 1,
+            "github:71544230@a0d20bf8c1a5f0067b1dce529b1ff013878591d3": 1,
+            "github:72682439@e293f0b92536447f72ca818fcf07be8d287f1c24": 1
+          },
+          "peakWorkers": 1,
+          "searchAttempts": 0,
+          "totalBytes": 14224
+        },
+        "verification": {
+          "canonicalEvidenceIds": [],
+          "checks": [],
+          "state": "pending"
+        }
+      },
+      "label": "unknown; unjudged",
+      "name": "sindresorhus/p-throttle",
+      "reason": null,
+      "summary": {
+        "comparedPairs": 1,
+        "exactPairs": 0,
+        "expectedPairs": 1,
+        "failures": [],
+        "firstFiltered": 0,
+        "firstIncluded": 1,
+        "firstTokens": 633,
+        "normalized": {
+          "first": 450,
+          "firstCoverage": 0.35555555555555557,
+          "score": 0.13479359730412804,
+          "second": 897,
+          "secondCoverage": 0.17837235228539577,
+          "shared": 160
+        },
+        "secondFiltered": 0,
+        "secondIncluded": 1,
+        "secondTokens": 1592,
+        "state": "completed",
+        "strict": {
+          "first": 576,
+          "firstCoverage": 0.057291666666666664,
+          "score": 0.01738672286617492,
+          "second": 1355,
+          "secondCoverage": 0.024354243542435424,
+          "shared": 33
+        }
+      }
+    }
+  ],
+  "coverage": {
+    "completed": 2,
+    "inconclusive": 0,
+    "state": "completed"
+  },
+  "cpuBudget": "unsupported",
+  "lineageClaim": "none",
+  "network": {
+    "overflowBytes": 0,
+    "receivedBytes": 121345,
+    "reservedBytes": 589824,
+    "retainedBytes": 121345
+  },
+  "networkProfile": {
+    "perResponseBytes": 32768,
+    "totalResponseBytes": 1048576
+  },
+  "requests": [
+    {
+      "endpoint": "/repos/sindresorhus/p-limit",
+      "outcome": "success",
+      "reason": null,
+      "receivedBytes": 5364,
+      "reservedBytes": 32768,
+      "retainedBytes": 5364,
+      "status": 200
+    },
+    {
+      "endpoint": "/repositories/71542716",
+      "outcome": "success",
+      "reason": null,
+      "receivedBytes": 5364,
+      "reservedBytes": 32768,
+      "retainedBytes": 5364,
+      "status": 200
+    },
+    {
+      "endpoint": "/repos/sindresorhus/p-limit/commits/a8a6fbec4e0e866d6d779b10889bb4f5567e70eb",
+      "outcome": "success",
+      "reason": null,
+      "receivedBytes": 4304,
+      "reservedBytes": 32768,
+      "retainedBytes": 4304,
+      "status": 200
+    },
+    {
+      "endpoint": "/repos/sindresorhus/p-limit/git/trees/dcc7e576c722ad0f7d474128a704accb0ffc6abd",
+      "outcome": "success",
+      "reason": null,
+      "receivedBytes": 3483,
+      "reservedBytes": 32768,
+      "retainedBytes": 3483,
+      "status": 200
+    },
+    {
+      "endpoint": "/repos/sindresorhus/p-limit/git/blobs/c24de5782032605aa83636bcf455f700e3b2ada7",
+      "outcome": "success",
+      "reason": null,
+      "receivedBytes": 5625,
+      "reservedBytes": 32768,
+      "retainedBytes": 5625,
+      "status": 200
+    },
+    {
+      "endpoint": "/repos/sindresorhus/p-limit",
+      "outcome": "success",
+      "reason": null,
+      "receivedBytes": 5364,
+      "reservedBytes": 32768,
+      "retainedBytes": 5364,
+      "status": 200
+    },
+    {
+      "endpoint": "/repos/jucke/p-limit",
+      "outcome": "success",
+      "reason": null,
+      "receivedBytes": 15568,
+      "reservedBytes": 32768,
+      "retainedBytes": 15568,
+      "status": 200
+    },
+    {
+      "endpoint": "/repositories/72682439",
+      "outcome": "success",
+      "reason": null,
+      "receivedBytes": 15568,
+      "reservedBytes": 32768,
+      "retainedBytes": 15568,
+      "status": 200
+    },
+    {
+      "endpoint": "/repos/jucke/p-limit/commits/e293f0b92536447f72ca818fcf07be8d287f1c24",
+      "outcome": "success",
+      "reason": null,
+      "receivedBytes": 4372,
+      "reservedBytes": 32768,
+      "retainedBytes": 4372,
+      "status": 200
+    },
+    {
+      "endpoint": "/repos/jucke/p-limit/git/trees/2ba2ab5828da5f5a0a37a657903ed24cf17a868a",
+      "outcome": "success",
+      "reason": null,
+      "receivedBytes": 2105,
+      "reservedBytes": 32768,
+      "retainedBytes": 2105,
+      "status": 200
+    },
+    {
+      "endpoint": "/repos/jucke/p-limit/git/blobs/6008403a98879d80c8cbff6f43e5634e3a5fd9ce",
+      "outcome": "success",
+      "reason": null,
+      "receivedBytes": 1171,
+      "reservedBytes": 32768,
+      "retainedBytes": 1171,
+      "status": 200
+    },
+    {
+      "endpoint": "/repos/jucke/p-limit",
+      "outcome": "success",
+      "reason": null,
+      "receivedBytes": 15568,
+      "reservedBytes": 32768,
+      "retainedBytes": 15568,
+      "status": 200
+    },
+    {
+      "endpoint": "/repos/sindresorhus/p-throttle",
+      "outcome": "success",
+      "reason": null,
+      "receivedBytes": 5463,
+      "reservedBytes": 32768,
+      "retainedBytes": 5463,
+      "status": 200
+    },
+    {
+      "endpoint": "/repositories/71544230",
+      "outcome": "success",
+      "reason": null,
+      "receivedBytes": 5463,
+      "reservedBytes": 32768,
+      "retainedBytes": 5463,
+      "status": 200
+    },
+    {
+      "endpoint": "/repos/sindresorhus/p-throttle/commits/a0d20bf8c1a5f0067b1dce529b1ff013878591d3",
+      "outcome": "success",
+      "reason": null,
+      "receivedBytes": 4337,
+      "reservedBytes": 32768,
+      "retainedBytes": 4337,
+      "status": 200
+    },
+    {
+      "endpoint": "/repos/sindresorhus/p-throttle/git/trees/bd45d1c6634275599efd314d792a96e9e1b277a7",
+      "outcome": "success",
+      "reason": null,
+      "receivedBytes": 3079,
+      "reservedBytes": 32768,
+      "retainedBytes": 3079,
+      "status": 200
+    },
+    {
+      "endpoint": "/repos/sindresorhus/p-throttle/git/blobs/5175416b80a246fb0cec7c2547906fd4c025cf18",
+      "outcome": "success",
+      "reason": null,
+      "receivedBytes": 13684,
+      "reservedBytes": 32768,
+      "retainedBytes": 13684,
+      "status": 200
+    },
+    {
+      "endpoint": "/repos/sindresorhus/p-throttle",
+      "outcome": "success",
+      "reason": null,
+      "receivedBytes": 5463,
+      "reservedBytes": 32768,
+      "retainedBytes": 5463,
+      "status": 200
+    }
+  ],
+  "schemaVersion": "discovery-pinned-probe@1",
+  "scope": "explicit controls and selected paths only; no discovery recall claim",
+  "snapshots": [
+    {
+      "bootstrap": {
+        "fullName": "sindresorhus/p-limit",
+        "htmlUrl": "https://github.com/sindresorhus/p-limit",
+        "repositoryId": 71542716,
+        "source": "repository_metadata"
+      },
+      "control": {
+        "name": "sindresorhus/p-limit",
+        "repositoryId": null,
+        "revision": "a8a6fbec4e0e866d6d779b10889bb4f5567e70eb",
+        "selections": [
+          {
+            "expectedDigest": "edde12a4a4dbdbe8d27161cdd0853db0bab435d5dc6c15f9f4dedc27ee9bca60",
+            "path": "index.js",
+            "reason": "explicit MIT Phase0 pinned public entry; SHA256 independently recorded"
+          }
+        ]
+      },
+      "expectedId": 71542716,
+      "identityCheck": {
+        "fullName": "sindresorhus/p-limit",
+        "reason": null,
+        "repositoryId": 71542716,
+        "state": "matched"
+      },
+      "resolution": {
+        "defaultBranch": "main",
+        "identity": {
+          "aliases": [],
+          "completeness": "provider_id",
+          "fullName": "sindresorhus/p-limit",
+          "provider": "github",
+          "repositoryId": 71542716,
+          "revision": "a8a6fbec4e0e866d6d779b10889bb4f5567e70eb"
+        },
+        "metadata": {
+          "fork": false,
+          "parentId": null
+        },
+        "observations": [
+          {
+            "fullName": "sindresorhus/p-limit",
+            "htmlUrl": "https://github.com/sindresorhus/p-limit",
+            "repositoryId": 71542716,
+            "source": "repository_metadata"
+          },
+          {
+            "fullName": "sindresorhus/p-limit",
+            "htmlUrl": "https://github.com/sindresorhus/p-limit",
+            "repositoryId": 71542716,
+            "source": "repository_metadata"
+          }
+        ],
+        "parents": [
+          "4d4ec71803d8736567249c3dde06ea82795ae7c7"
+        ],
+        "reasons": [],
+        "requestSource": "github-rest-verified-name@1",
+        "requestedId": 71542716,
+        "schemaVersion": "repository-snapshot@1",
+        "state": "resolved",
+        "tree": "dcc7e576c722ad0f7d474128a704accb0ffc6abd"
+      },
+      "source": {
+        "bindings": [
+          {
+            "blob": "c24de5782032605aa83636bcf455f700e3b2ada7",
+            "bytes": 3868,
+            "digest": "edde12a4a4dbdbe8d27161cdd0853db0bab435d5dc6c15f9f4dedc27ee9bca60",
+            "filterVersion": "source-filter@1",
+            "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+            "path": "index.js",
+            "repositoryId": 71542716,
+            "revision": "a8a6fbec4e0e866d6d779b10889bb4f5567e70eb"
+          }
+        ],
+        "coverage": {
+          "pending": [],
+          "reasons": [],
+          "scope": "explicit selected paths only",
+          "state": "completed",
+          "treeTruncated": false
+        },
+        "materializedBytes": 3868,
+        "selections": [
+          {
+            "expectedDigest": "edde12a4a4dbdbe8d27161cdd0853db0bab435d5dc6c15f9f4dedc27ee9bca60",
+            "path": "index.js",
+            "reason": "explicit MIT Phase0 pinned public entry; SHA256 independently recorded"
+          }
+        ],
+        "snapshot": {
+          "files": [
+            {
+              "blob": "c24de5782032605aa83636bcf455f700e3b2ada7",
+              "bytes": 3868,
+              "classification": "application_source",
+              "digest": "edde12a4a4dbdbe8d27161cdd0853db0bab435d5dc6c15f9f4dedc27ee9bca60",
+              "filterVersion": "source-filter@1",
+              "language": "javascript",
+              "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+              "path": "index.js",
+              "reasons": [
+                "supported source; no exclusion heuristic matched"
+              ]
+            }
+          ],
+          "identity": {
+            "aliases": [],
+            "completeness": "provider_id",
+            "fullName": "sindresorhus/p-limit",
+            "provider": "github",
+            "repositoryId": 71542716,
+            "revision": "a8a6fbec4e0e866d6d779b10889bb4f5567e70eb"
+          },
+          "pending": [],
+          "reasons": [],
+          "state": "completed"
+        }
+      },
+      "state": "completed"
+    },
+    {
+      "bootstrap": {
+        "fullName": "jucke/p-limit",
+        "htmlUrl": "https://github.com/jucke/p-limit",
+        "repositoryId": 72682439,
+        "source": "repository_metadata"
+      },
+      "control": {
+        "name": "jucke/p-limit",
+        "repositoryId": null,
+        "revision": "e293f0b92536447f72ca818fcf07be8d287f1c24",
+        "selections": [
+          {
+            "expectedDigest": "b89479e9f48bd6e7a90931a164cdec0b9ae203ea4e31ddb2329865cdf0b391f3",
+            "path": "index.js",
+            "reason": "explicit MIT Phase0 pinned public entry; SHA256 independently recorded"
+          }
+        ]
+      },
+      "expectedId": 72682439,
+      "identityCheck": {
+        "fullName": "jucke/p-limit",
+        "reason": null,
+        "repositoryId": 72682439,
+        "state": "matched"
+      },
+      "resolution": {
+        "defaultBranch": "master",
+        "identity": {
+          "aliases": [],
+          "completeness": "provider_id",
+          "fullName": "jucke/p-limit",
+          "provider": "github",
+          "repositoryId": 72682439,
+          "revision": "e293f0b92536447f72ca818fcf07be8d287f1c24"
+        },
+        "metadata": {
+          "fork": true,
+          "parentId": 71542716
+        },
+        "observations": [
+          {
+            "fullName": "jucke/p-limit",
+            "htmlUrl": "https://github.com/jucke/p-limit",
+            "repositoryId": 72682439,
+            "source": "repository_metadata"
+          },
+          {
+            "fullName": "jucke/p-limit",
+            "htmlUrl": "https://github.com/jucke/p-limit",
+            "repositoryId": 72682439,
+            "source": "repository_metadata"
+          }
+        ],
+        "parents": [
+          "77cf1678dbb9dcb778e16e898097d32c8b5cca38"
+        ],
+        "reasons": [],
+        "requestSource": "github-rest-verified-name@1",
+        "requestedId": 72682439,
+        "schemaVersion": "repository-snapshot@1",
+        "state": "resolved",
+        "tree": "2ba2ab5828da5f5a0a37a657903ed24cf17a868a"
+      },
+      "source": {
+        "bindings": [
+          {
+            "blob": "6008403a98879d80c8cbff6f43e5634e3a5fd9ce",
+            "bytes": 640,
+            "digest": "b89479e9f48bd6e7a90931a164cdec0b9ae203ea4e31ddb2329865cdf0b391f3",
+            "filterVersion": "source-filter@1",
+            "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+            "path": "index.js",
+            "repositoryId": 72682439,
+            "revision": "e293f0b92536447f72ca818fcf07be8d287f1c24"
+          }
+        ],
+        "coverage": {
+          "pending": [],
+          "reasons": [],
+          "scope": "explicit selected paths only",
+          "state": "completed",
+          "treeTruncated": false
+        },
+        "materializedBytes": 640,
+        "selections": [
+          {
+            "expectedDigest": "b89479e9f48bd6e7a90931a164cdec0b9ae203ea4e31ddb2329865cdf0b391f3",
+            "path": "index.js",
+            "reason": "explicit MIT Phase0 pinned public entry; SHA256 independently recorded"
+          }
+        ],
+        "snapshot": {
+          "files": [
+            {
+              "blob": "6008403a98879d80c8cbff6f43e5634e3a5fd9ce",
+              "bytes": 640,
+              "classification": "application_source",
+              "digest": "b89479e9f48bd6e7a90931a164cdec0b9ae203ea4e31ddb2329865cdf0b391f3",
+              "filterVersion": "source-filter@1",
+              "language": "javascript",
+              "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+              "path": "index.js",
+              "reasons": [
+                "supported source; no exclusion heuristic matched"
+              ]
+            }
+          ],
+          "identity": {
+            "aliases": [],
+            "completeness": "provider_id",
+            "fullName": "jucke/p-limit",
+            "provider": "github",
+            "repositoryId": 72682439,
+            "revision": "e293f0b92536447f72ca818fcf07be8d287f1c24"
+          },
+          "pending": [],
+          "reasons": [],
+          "state": "completed"
+        }
+      },
+      "state": "completed"
+    },
+    {
+      "bootstrap": {
+        "fullName": "sindresorhus/p-throttle",
+        "htmlUrl": "https://github.com/sindresorhus/p-throttle",
+        "repositoryId": 71544230,
+        "source": "repository_metadata"
+      },
+      "control": {
+        "name": "sindresorhus/p-throttle",
+        "repositoryId": null,
+        "revision": "a0d20bf8c1a5f0067b1dce529b1ff013878591d3",
+        "selections": [
+          {
+            "expectedDigest": "5567e2731fa0393079ac096c10ebbedbec5a1cd7e687a8ba2021e96c44ef3fcf",
+            "path": "index.js",
+            "reason": "explicit MIT Phase0 pinned public entry; SHA256 independently recorded"
+          }
+        ]
+      },
+      "expectedId": 71544230,
+      "identityCheck": {
+        "fullName": "sindresorhus/p-throttle",
+        "reason": null,
+        "repositoryId": 71544230,
+        "state": "matched"
+      },
+      "resolution": {
+        "defaultBranch": "main",
+        "identity": {
+          "aliases": [],
+          "completeness": "provider_id",
+          "fullName": "sindresorhus/p-throttle",
+          "provider": "github",
+          "repositoryId": 71544230,
+          "revision": "a0d20bf8c1a5f0067b1dce529b1ff013878591d3"
+        },
+        "metadata": {
+          "fork": false,
+          "parentId": null
+        },
+        "observations": [
+          {
+            "fullName": "sindresorhus/p-throttle",
+            "htmlUrl": "https://github.com/sindresorhus/p-throttle",
+            "repositoryId": 71544230,
+            "source": "repository_metadata"
+          },
+          {
+            "fullName": "sindresorhus/p-throttle",
+            "htmlUrl": "https://github.com/sindresorhus/p-throttle",
+            "repositoryId": 71544230,
+            "source": "repository_metadata"
+          }
+        ],
+        "parents": [
+          "09f6e9503dd590b9a3c9e33711ff65a23cf1032b"
+        ],
+        "reasons": [],
+        "requestSource": "github-rest-verified-name@1",
+        "requestedId": 71544230,
+        "schemaVersion": "repository-snapshot@1",
+        "state": "resolved",
+        "tree": "bd45d1c6634275599efd314d792a96e9e1b277a7"
+      },
+      "source": {
+        "bindings": [
+          {
+            "blob": "5175416b80a246fb0cec7c2547906fd4c025cf18",
+            "bytes": 9716,
+            "digest": "5567e2731fa0393079ac096c10ebbedbec5a1cd7e687a8ba2021e96c44ef3fcf",
+            "filterVersion": "source-filter@1",
+            "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+            "path": "index.js",
+            "repositoryId": 71544230,
+            "revision": "a0d20bf8c1a5f0067b1dce529b1ff013878591d3"
+          }
+        ],
+        "coverage": {
+          "pending": [],
+          "reasons": [],
+          "scope": "explicit selected paths only",
+          "state": "completed",
+          "treeTruncated": false
+        },
+        "materializedBytes": 9716,
+        "selections": [
+          {
+            "expectedDigest": "5567e2731fa0393079ac096c10ebbedbec5a1cd7e687a8ba2021e96c44ef3fcf",
+            "path": "index.js",
+            "reason": "explicit MIT Phase0 pinned public entry; SHA256 independently recorded"
+          }
+        ],
+        "snapshot": {
+          "files": [
+            {
+              "blob": "5175416b80a246fb0cec7c2547906fd4c025cf18",
+              "bytes": 9716,
+              "classification": "application_source",
+              "digest": "5567e2731fa0393079ac096c10ebbedbec5a1cd7e687a8ba2021e96c44ef3fcf",
+              "filterVersion": "source-filter@1",
+              "language": "javascript",
+              "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+              "path": "index.js",
+              "reasons": [
+                "supported source; no exclusion heuristic matched"
+              ]
+            }
+          ],
+          "identity": {
+            "aliases": [],
+            "completeness": "provider_id",
+            "fullName": "sindresorhus/p-throttle",
+            "provider": "github",
+            "repositoryId": 71544230,
+            "revision": "a0d20bf8c1a5f0067b1dce529b1ff013878591d3"
+          },
+          "pending": [],
+          "reasons": [],
+          "state": "completed"
+        }
+      },
+      "state": "completed"
+    }
+  ],
+  "sourceMaterializedBytes": 14224,
+  "usage": {
+    "activeWorkers": 0,
+    "attempts": 18,
+    "bytesByFile": {
+      "[\"github:71542716@a8a6fbec4e0e866d6d779b10889bb4f5567e70eb\",\"index.js\"]": 3868,
+      "[\"github:71544230@a0d20bf8c1a5f0067b1dce529b1ff013878591d3\",\"index.js\"]": 9716,
+      "[\"github:72682439@e293f0b92536447f72ca818fcf07be8d287f1c24\",\"index.js\"]": 640
+    },
+    "candidates": 2,
+    "files": {
+      "github:71542716@a8a6fbec4e0e866d6d779b10889bb4f5567e70eb": 1,
+      "github:71544230@a0d20bf8c1a5f0067b1dce529b1ff013878591d3": 1,
+      "github:72682439@e293f0b92536447f72ca818fcf07be8d287f1c24": 1
+    },
+    "peakWorkers": 1,
+    "searchAttempts": 0,
+    "totalBytes": 14224
+  },
+  "verification": "pending"
+}

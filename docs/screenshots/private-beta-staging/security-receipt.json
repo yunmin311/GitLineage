@@ -1,0 +1,330 @@
+{
+  "level": "local TLS staging only",
+  "verification": "pending",
+  "lineageClaim": "none",
+  "invalidRequestsNoWork": true,
+  "syncMeasurement": {
+    "samples": 20,
+    "bytes": 2571,
+    "p50Ms": 1.7285620000002382,
+    "p95Ms": 2.248572000000422,
+    "scope": "separate temp-file measurement of file fsync + rename + directory fsync, not power-loss proof"
+  },
+  "https": {
+    "defaultCaddyForwardingObserved": true,
+    "strippedUpstreamHeaders": true,
+    "trustedChain": true,
+    "untrustedChainRejected": true,
+    "rejections": true,
+    "rotation": true,
+    "expiry": true,
+    "peakActive": 2,
+    "reserved": 72,
+    "providerCalls": 3,
+    "elapsedMs": 10526,
+    "stateBytes": 2571,
+    "storeUid": 1000,
+    "directoryMode": "0700",
+    "stateMode": "0600"
+  },
+  "providerBlocks": [
+    {
+      "status": 403,
+      "reserved": 24,
+      "providerCalls": 1,
+      "otherIdentityBlocked": true
+    },
+    {
+      "status": 429,
+      "reserved": 24,
+      "providerCalls": 1,
+      "otherIdentityBlocked": true
+    }
+  ],
+  "persistenceFailure": {
+    "admissionDenied": true,
+    "providerCalls": 0
+  },
+  "serviceProcess": {
+    "rssKiB": 155756,
+    "statCPUFields": [
+      35,
+      6
+    ],
+    "note": "Linux CPU ticks at interruption, not CPU hard budget"
+  },
+  "recovery": {
+    "SIGKILL": true,
+    "staleLockRefused": true,
+    "duplicateRefused": true,
+    "operatorConfirmedExit": true,
+    "partial": true,
+    "retainedReservation": 24,
+    "gracefulRestart": true,
+    "powerLoss": "not tested"
+  },
+  "harnessResources": {
+    "cpu": {
+      "user": 778932,
+      "system": 170020
+    },
+    "rss": 175050752,
+    "note": "harness process totals, not engine hard isolation"
+  },
+  "caddy": {
+    "version": "2.10.2",
+    "startupMs": 118.48583400000007,
+    "rssKiB": 47696,
+    "cpuTicks": [
+      5,
+      2
+    ]
+  },
+  "proxyResponses": [
+    {
+      "path": "/healthz",
+      "status": 503,
+      "ms": 7.979990999999927
+    },
+    {
+      "path": "/healthz",
+      "status": 403,
+      "ms": 5.881309000000101
+    },
+    {
+      "path": "/api/deep-search/capabilities",
+      "status": 403,
+      "ms": 1.110723999999891
+    },
+    {
+      "path": "/api/deep-search/search",
+      "status": 401,
+      "ms": 1.2336409999998068
+    },
+    {
+      "path": "/api/deep-search/capabilities",
+      "status": 403,
+      "ms": 0.5599440000000868
+    },
+    {
+      "path": "/api/deep-search/capabilities",
+      "status": 403,
+      "ms": 0.4676199999998971
+    },
+    {
+      "path": "/api/deep-search/capabilities",
+      "status": 403,
+      "ms": 0.520149000000174
+    },
+    {
+      "path": "/api/deep-search/capabilities",
+      "status": 403,
+      "ms": 0.4068160000001626
+    },
+    {
+      "path": "/api/deep-search/capabilities",
+      "status": 403,
+      "ms": 0.9746560000000954
+    },
+    {
+      "path": "/api/private-beta/login",
+      "status": 200,
+      "ms": 27.502508000000034
+    },
+    {
+      "path": "/api/private-beta/login",
+      "status": 200,
+      "ms": 28.164616000000024
+    },
+    {
+      "path": "/api/deep-search/search",
+      "status": 403,
+      "ms": 1.063133999999991
+    },
+    {
+      "path": "/api/deep-search/search",
+      "status": 403,
+      "ms": 0.9629039999999804
+    },
+    {
+      "path": "/api/deep-search/search",
+      "status": 403,
+      "ms": 0.9436359999999695
+    },
+    {
+      "path": "/api/private-beta/login",
+      "status": 401,
+      "ms": 26.44871000000012
+    },
+    {
+      "path": "/api/deep-search/search",
+      "status": 202,
+      "ms": 7.555320999999822
+    },
+    {
+      "path": "/api/deep-search/search",
+      "status": 429,
+      "ms": 1.681306000000177
+    },
+    {
+      "path": "/api/deep-search/search",
+      "status": 202,
+      "ms": 4.228779999999915
+    },
+    {
+      "path": "/api/deep-search/search",
+      "status": 429,
+      "ms": 1.2710309999999936
+    },
+    {
+      "path": "/api/deep-search/tasks/329d5fe12938cc1f64c116f6",
+      "status": 400,
+      "ms": 2.359713000000056
+    },
+    {
+      "path": "/api/deep-search/tasks/329d5fe12938cc1f64c116f6/cancel",
+      "status": 400,
+      "ms": 0.9025420000000395
+    },
+    {
+      "path": "/api/deep-search/tasks/329d5fe12938cc1f64c116f6/cancel",
+      "status": 200,
+      "ms": 5.288516000000072
+    },
+    {
+      "path": "/api/deep-search/tasks/92c0468895e2267cc126a0ca/cancel",
+      "status": 200,
+      "ms": 2.4107890000000225
+    },
+    {
+      "path": "/api/private-beta/login",
+      "status": 200,
+      "ms": 25.196811000000025
+    },
+    {
+      "path": "/api/deep-search/capabilities",
+      "status": 401,
+      "ms": 0.8402429999998731
+    },
+    {
+      "path": "/api/deep-search/search",
+      "status": 202,
+      "ms": 21.67414500000018
+    },
+    {
+      "path": "/api/deep-search/tasks/7fffef193917143c77288186",
+      "status": 200,
+      "ms": 3.2602780000015628
+    },
+    {
+      "path": "/api/deep-search/tasks/7fffef193917143c77288186",
+      "status": 401,
+      "ms": 0.918071999998574
+    },
+    {
+      "path": "/api/private-beta/login",
+      "status": 200,
+      "ms": 24.729593000000023
+    },
+    {
+      "path": "/api/deep-search/search",
+      "status": 202,
+      "ms": 10.937673999998879
+    },
+    {
+      "path": "/api/private-beta/login",
+      "status": 200,
+      "ms": 26.97107599999981
+    },
+    {
+      "path": "/api/deep-search/search",
+      "status": 429,
+      "ms": 1.1255930000006629
+    },
+    {
+      "path": "/api/private-beta/logout",
+      "status": 200,
+      "ms": 0.808617000000595
+    },
+    {
+      "path": "/api/deep-search/capabilities",
+      "status": 401,
+      "ms": 0.7846539999991364
+    },
+    {
+      "path": "/api/private-beta/login",
+      "status": 200,
+      "ms": 26.037712000001193
+    },
+    {
+      "path": "/api/deep-search/search",
+      "status": 202,
+      "ms": 11.379133999998885
+    },
+    {
+      "path": "/api/private-beta/login",
+      "status": 200,
+      "ms": 25.661243999998987
+    },
+    {
+      "path": "/api/deep-search/search",
+      "status": 429,
+      "ms": 1.1687509999992471
+    },
+    {
+      "path": "/api/private-beta/login",
+      "status": 200,
+      "ms": 24.473015999999916
+    },
+    {
+      "path": "/api/deep-search/search",
+      "status": 202,
+      "ms": 15.118225000000166
+    },
+    {
+      "path": "/api/private-beta/login",
+      "status": 200,
+      "ms": 26.284523999998783
+    },
+    {
+      "path": "/api/deep-search/search",
+      "status": 429,
+      "ms": 1.0200890000014624
+    },
+    {
+      "path": "/api/private-beta/login",
+      "status": 200,
+      "ms": 24.507235000000946
+    },
+    {
+      "path": "/api/deep-search/search",
+      "status": 400,
+      "ms": 4.84196399999928
+    },
+    {
+      "path": "/api/deep-search/search",
+      "status": 400,
+      "ms": 0.8657669999993232
+    },
+    {
+      "path": "/api/private-beta/login",
+      "status": 200,
+      "ms": 34.66811299999972
+    },
+    {
+      "path": "/api/deep-search/search",
+      "status": 202,
+      "ms": 6.9058269999986805
+    },
+    {
+      "path": "/api/private-beta/login",
+      "status": 200,
+      "ms": 35.47234899999967
+    },
+    {
+      "path": "/api/deep-search/tasks/3f2723df9c2ab04caf749e63",
+      "status": 200,
+      "ms": 1.2176470000013069
+    }
+  ]
+}

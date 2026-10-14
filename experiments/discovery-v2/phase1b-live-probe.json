@@ -1,0 +1,336 @@
+{
+  "schemaVersion": "discovery-search-sidecar@2",
+  "candidateSchema": "discovery-candidate@2",
+  "plan": {
+    "version": "repository-query-plan@1",
+    "target": {
+      "provider": "github",
+      "repositoryId": null,
+      "completeness": "name_only",
+      "fullName": "sindresorhus/p-limit",
+      "aliases": [],
+      "revision": "a8a6fbec4e0e866d6d779b10889bb4f5567e70eb"
+    },
+    "queries": [
+      {
+        "q": "p-limit in:name is:public fork:true",
+        "source": "repository_name",
+        "reason": "fixed target repository name"
+      }
+    ],
+    "perPage": 5,
+    "pages": 1
+  },
+  "candidates": [
+    {
+      "schemaVersion": "discovery-candidate@2",
+      "target": {
+        "provider": "github",
+        "repositoryId": null,
+        "completeness": "name_only",
+        "fullName": "sindresorhus/p-limit",
+        "aliases": [],
+        "revision": "a8a6fbec4e0e866d6d779b10889bb4f5567e70eb"
+      },
+      "candidate": {
+        "provider": "github",
+        "repositoryId": 226565322,
+        "completeness": "provider_id",
+        "fullName": "1inch/limit-order-protocol",
+        "aliases": [],
+        "htmlUrl": "https://github.com/1inch/limit-order-protocol",
+        "observations": [
+          {
+            "repositoryId": 226565322,
+            "fullName": "1inch/limit-order-protocol",
+            "htmlUrl": "https://github.com/1inch/limit-order-protocol",
+            "source": "repository_search",
+            "observedAt": "2026-10-09T06:27:29.072Z"
+          }
+        ],
+        "conflicts": [],
+        "revision": {
+          "state": "unresolved",
+          "sha": null
+        }
+      },
+      "discoveries": [
+        {
+          "source": "repository_search",
+          "version": "github-rest-repository-search@1",
+          "query": "p-limit in:name is:public fork:true",
+          "querySource": "repository_name",
+          "reason": "fixed target repository name",
+          "page": 1,
+          "rank": 2,
+          "observedAt": "2026-10-09T06:27:29.072Z"
+        }
+      ],
+      "similarity": [],
+      "supportingFiles": [],
+      "verification": {
+        "state": "pending",
+        "canonicalEvidenceIds": []
+      },
+      "lineageClaim": "none",
+      "comparison": {
+        "state": "unexecuted",
+        "reason": "revision unresolved"
+      }
+    },
+    {
+      "schemaVersion": "discovery-candidate@2",
+      "target": {
+        "provider": "github",
+        "repositoryId": null,
+        "completeness": "name_only",
+        "fullName": "sindresorhus/p-limit",
+        "aliases": [],
+        "revision": "a8a6fbec4e0e866d6d779b10889bb4f5567e70eb"
+      },
+      "candidate": {
+        "provider": "github",
+        "repositoryId": 60833257,
+        "completeness": "provider_id",
+        "fullName": "nullice/limitpng",
+        "aliases": [],
+        "htmlUrl": "https://github.com/nullice/limitpng",
+        "observations": [
+          {
+            "repositoryId": 60833257,
+            "fullName": "nullice/limitpng",
+            "htmlUrl": "https://github.com/nullice/limitpng",
+            "source": "repository_search",
+            "observedAt": "2026-10-09T06:27:29.072Z"
+          }
+        ],
+        "conflicts": [],
+        "revision": {
+          "state": "unresolved",
+          "sha": null
+        }
+      },
+      "discoveries": [
+        {
+          "source": "repository_search",
+          "version": "github-rest-repository-search@1",
+          "query": "p-limit in:name is:public fork:true",
+          "querySource": "repository_name",
+          "reason": "fixed target repository name",
+          "page": 1,
+          "rank": 3,
+          "observedAt": "2026-10-09T06:27:29.072Z"
+        }
+      ],
+      "similarity": [],
+      "supportingFiles": [],
+      "verification": {
+        "state": "pending",
+        "canonicalEvidenceIds": []
+      },
+      "lineageClaim": "none",
+      "comparison": {
+        "state": "unexecuted",
+        "reason": "revision unresolved"
+      }
+    },
+    {
+      "schemaVersion": "discovery-candidate@2",
+      "target": {
+        "provider": "github",
+        "repositoryId": null,
+        "completeness": "name_only",
+        "fullName": "sindresorhus/p-limit",
+        "aliases": [],
+        "revision": "a8a6fbec4e0e866d6d779b10889bb4f5567e70eb"
+      },
+      "candidate": {
+        "provider": "github",
+        "repositoryId": 223577988,
+        "completeness": "provider_id",
+        "fullName": "vutran1710/pyratelimiter",
+        "aliases": [],
+        "htmlUrl": "https://github.com/vutran1710/pyratelimiter",
+        "observations": [
+          {
+            "repositoryId": 223577988,
+            "fullName": "vutran1710/pyratelimiter",
+            "htmlUrl": "https://github.com/vutran1710/pyratelimiter",
+            "source": "repository_search",
+            "observedAt": "2026-10-09T06:27:29.072Z"
+          }
+        ],
+        "conflicts": [],
+        "revision": {
+          "state": "unresolved",
+          "sha": null
+        }
+      },
+      "discoveries": [
+        {
+          "source": "repository_search",
+          "version": "github-rest-repository-search@1",
+          "query": "p-limit in:name is:public fork:true",
+          "querySource": "repository_name",
+          "reason": "fixed target repository name",
+          "page": 1,
+          "rank": 4,
+          "observedAt": "2026-10-09T06:27:29.072Z"
+        }
+      ],
+      "similarity": [],
+      "supportingFiles": [],
+      "verification": {
+        "state": "pending",
+        "canonicalEvidenceIds": []
+      },
+      "lineageClaim": "none",
+      "comparison": {
+        "state": "unexecuted",
+        "reason": "revision unresolved"
+      }
+    },
+    {
+      "schemaVersion": "discovery-candidate@2",
+      "target": {
+        "provider": "github",
+        "repositoryId": null,
+        "completeness": "name_only",
+        "fullName": "sindresorhus/p-limit",
+        "aliases": [],
+        "revision": "a8a6fbec4e0e866d6d779b10889bb4f5567e70eb"
+      },
+      "candidate": {
+        "provider": "github",
+        "repositoryId": 3633486,
+        "completeness": "provider_id",
+        "fullName": "danielktaylor/pylimitbook",
+        "aliases": [],
+        "htmlUrl": "https://github.com/danielktaylor/pylimitbook",
+        "observations": [
+          {
+            "repositoryId": 3633486,
+            "fullName": "danielktaylor/pylimitbook",
+            "htmlUrl": "https://github.com/danielktaylor/pylimitbook",
+            "source": "repository_search",
+            "observedAt": "2026-10-09T06:27:29.072Z"
+          }
+        ],
+        "conflicts": [],
+        "revision": {
+          "state": "unresolved",
+          "sha": null
+        }
+      },
+      "discoveries": [
+        {
+          "source": "repository_search",
+          "version": "github-rest-repository-search@1",
+          "query": "p-limit in:name is:public fork:true",
+          "querySource": "repository_name",
+          "reason": "fixed target repository name",
+          "page": 1,
+          "rank": 5,
+          "observedAt": "2026-10-09T06:27:29.072Z"
+        }
+      ],
+      "similarity": [],
+      "supportingFiles": [],
+      "verification": {
+        "state": "pending",
+        "canonicalEvidenceIds": []
+      },
+      "lineageClaim": "none",
+      "comparison": {
+        "state": "unexecuted",
+        "reason": "revision unresolved"
+      }
+    }
+  ],
+  "queries": [
+    {
+      "query": 0,
+      "requestedPages": [
+        1
+      ],
+      "completedPages": [
+        1
+      ],
+      "totalCount": 10745,
+      "incompleteResults": false,
+      "returnedItems": 5,
+      "unfetchedAccessiblePages": 199,
+      "beyondWindow": 9745
+    }
+  ],
+  "attempts": [
+    {
+      "query": 0,
+      "page": 1,
+      "retry": 0,
+      "status": 200,
+      "outcome": "success",
+      "headers": {
+        "x-ratelimit-limit": "10",
+        "x-ratelimit-remaining": "9",
+        "x-ratelimit-reset": "1791527308",
+        "x-ratelimit-used": "1",
+        "x-ratelimit-resource": "search",
+        "x-github-api-version-selected": "2026-03-10"
+      },
+      "receivedBytes": 26785,
+      "retainedBytes": 26785,
+      "reservedBytes": 65536
+    }
+  ],
+  "coverage": {
+    "state": "partial_provider",
+    "scope": "bounded public repository metadata search; never all GitHub",
+    "plannedQueries": 1,
+    "attemptedQueries": 1,
+    "requestedPages": 1,
+    "completedPages": 1,
+    "returnedItems": 5,
+    "uniqueObserved": 4,
+    "processedCandidates": 4,
+    "rejectedIdentity": 0,
+    "rejectedBudget": 0,
+    "excludedTarget": 1,
+    "accessibleWindow": 1000,
+    "uncompletedPlanned": []
+  },
+  "budget": {
+    "attempts": 1,
+    "searchAttempts": 1,
+    "candidates": 5,
+    "filesPerCandidate": 32,
+    "bytesPerFile": 262144,
+    "totalBytes": 2097152,
+    "wallMs": 15000,
+    "concurrency": 1,
+    "cpuMs": null
+  },
+  "networkProfile": {
+    "perResponseBytes": 65536,
+    "totalResponseBytes": 65536
+  },
+  "usage": {
+    "attempts": 1,
+    "searchAttempts": 1,
+    "candidates": 4,
+    "files": {},
+    "bytesByFile": {},
+    "totalBytes": 0,
+    "activeWorkers": 0,
+    "peakWorkers": 1
+  },
+  "network": {
+    "reservedBytes": 65536,
+    "receivedBytes": 26785,
+    "retainedBytes": 26785,
+    "overflowBytes": 0
+  },
+  "wallMs": 947.751647,
+  "cpuBudget": "unsupported",
+  "message": "发现候选尚未验证，不构成谱系关系。"
+}

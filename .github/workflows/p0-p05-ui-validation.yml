@@ -56,6 +56,12 @@ jobs:
           test -s dist/web/index.html
           test -s dist/web/assets/app.js
 
+      - name: Install production guard dependency
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends --yes ripgrep
+          command -v rg
+
       - name: Production Deep Search remains disabled
         run: |
           if test -e src/discovery || test -e test/discovery || test -e experiments/discovery-v2; then

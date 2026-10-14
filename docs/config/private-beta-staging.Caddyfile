@@ -1,0 +1,33 @@
+# Dedicated loopback staging only. Never include this in the production Caddyfile.
+# Change the authority in BOTH the site and @unexpected to the fixed Beta origin.
+# Certificate/key paths are placeholders, not committed test or production keys.
+{
+ admin off
+ auto_https disable_redirects
+}
+https://localhost:8443 {
+ bind 127.0.0.1
+ @unexpected expression `{http.request.hostport} != "localhost:8443"`
+ respond @unexpected 403
+ tls /absolute/private/path/leaf.pem /absolute/private/path/leaf.key
+ @forwarded header Forwarded *
+ respond @forwarded 403
+ @xff header X-Forwarded-For *
+ respond @xff 403
+ @xfh header X-Forwarded-Host *
+ respond @xfh 403
+ @xfp header X-Forwarded-Proto *
+ respond @xfp 403
+ @marker header X-Gitlineage-Proxy *
+ respond @marker 403
+ reverse_proxy 127.0.0.1:8083 {
+  header_up Host localhost:8443
+  header_up -Forwarded
+  header_up -X-Forwarded-For
+  header_up -X-Forwarded-Host
+  header_up -X-Forwarded-Proto
+  header_up X-Gitlineage-Proxy {$GITLINEAGE_BETA_PROXY_KEY}
+ }
+}
+# Other X-Forwarded-* fields remain visible to Gate, which rejects every such field.
+# Do not wildcard-remove them: that would hide forged input from Gate.

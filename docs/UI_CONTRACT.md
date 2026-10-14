@@ -163,3 +163,23 @@ coarse-pointer branch and Responsive's 844x390 branch replace obsolete legacy pa
 assertions with phone ownership checks; suite sizes remain 75 and 71. Native Chromium
 200% zoom and desktop/tablet assertions remain unchanged. Chromium touch/keyboard
 viewport reduction is simulation; it does not certify physical devices or Safari.
+
+## Repository relationship workspace (2026-10-13)
+The latest product instruction supersedes exclusive relation perspectives and putting
+commits in the repository world. Origins, Dependencies and References are independent
+visibility controls in one persistent graph. Default visibility includes all recorded
+families; zero Origins states the absence of ancestry evidence without hiding dependencies.
+Git History is an independent parent-track log, returning to the unchanged repository
+camera, selection and exploration state. Changed files can be located in the main graph.
+
+V3.3 fonts, surfaces, semantic colors, entity shapes and component depth remain authoritative.
+Branches own local space. Group controls are navigation, never canonical ancestry claims;
+actual relationships preserve identity, evidence and direction. Measured rectangular
+clearance and boundary ports govern local expansion. Existing positions remain stable
+where clearance permits. Structure can expand to any depth covered by the provider;
+bounded batches retain explored objects, without a table or arbitrary layer limit.
+
+Phone focus preserves readable local neighborhoods, with an overview for orientation.
+Panel, touch, stale-response, selection, focus and exact return contracts remain required.
+Acceptance checks actual pixels, world and screen bounds, semantic edges, unique IDs,
+multiple branches, recursive structure, history tracks and refresh restoration.

@@ -1,0 +1,3022 @@
+{
+  "schemaVersion": "discovery-preview-export@2",
+  "selection": {
+    "schemaVersion": "bounded-tree-selection@1",
+    "sourceTaskId": "061195beedf5bfa8ff76471d",
+    "searchReceipt": {
+      "coverage": {
+        "state": "partial_provider",
+        "scope": "bounded public repository metadata search; never all GitHub",
+        "plannedQueries": 1,
+        "attemptedQueries": 1,
+        "requestedPages": 1,
+        "completedPages": 1,
+        "returnedItems": 3,
+        "uniqueObserved": 2,
+        "processedCandidates": 2,
+        "rejectedIdentity": 0,
+        "rejectedBudget": 0,
+        "excludedTarget": 1,
+        "accessibleWindow": 1000,
+        "uncompletedPlanned": []
+      },
+      "attempts": [
+        {
+          "query": 0,
+          "page": 1,
+          "retry": 0,
+          "status": 200,
+          "outcome": "success",
+          "headers": {
+            "x-ratelimit-limit": "10",
+            "x-ratelimit-remaining": "5",
+            "x-ratelimit-reset": "1791593950",
+            "x-ratelimit-used": "5",
+            "x-ratelimit-resource": "search",
+            "x-github-api-version-selected": "2026-03-10"
+          },
+          "receivedBytes": 15910,
+          "retainedBytes": 15910,
+          "reservedBytes": 32768
+        }
+      ],
+      "queries": [
+        {
+          "state": "partial_provider",
+          "query": 0,
+          "requestedPages": [
+            1
+          ],
+          "completedPages": [
+            1
+          ],
+          "totalCount": 39,
+          "incompleteResults": false,
+          "returnedItems": 3,
+          "unfetchedAccessiblePages": 12,
+          "beyondWindow": 0
+        }
+      ],
+      "usage": {
+        "attempts": 4,
+        "searchAttempts": 1,
+        "candidates": 2,
+        "files": {},
+        "bytesByFile": {},
+        "totalBytes": 0,
+        "activeWorkers": 0,
+        "peakWorkers": 1
+      },
+      "network": {
+        "reservedBytes": 131072,
+        "receivedBytes": 31382,
+        "retainedBytes": 31382,
+        "overflowBytes": 0
+      }
+    },
+    "repositories": [
+      {
+        "repositoryId": 315531538,
+        "revision": "72a8fa96a9d389765cdf2bb9c6daba8302fc375d",
+        "tree": "0b81d56218d4a4ab1b9ec91109e7b5d493e123d7",
+        "fullName": "sindresorhus/yocto-queue",
+        "files": [
+          {
+            "path": ".editorconfig",
+            "type": "blob",
+            "bytes": 175,
+            "blob": "1c6314a31833395fd5ff016a6506bdd51860657c",
+            "selectable": false,
+            "reason": "only JS and TS supported",
+            "language": "unsupported"
+          },
+          {
+            "path": ".gitattributes",
+            "type": "blob",
+            "bytes": 19,
+            "blob": "6313b56c57848efce05faa7aa7e901ccfc2886ea",
+            "selectable": false,
+            "reason": "too small for supported source comparison",
+            "language": "unsupported"
+          },
+          {
+            "path": ".gitignore",
+            "type": "blob",
+            "bytes": 23,
+            "blob": "239ecff1372358a22aa99dcbb375fdad7abba817",
+            "selectable": false,
+            "reason": "only JS and TS supported",
+            "language": "unsupported"
+          },
+          {
+            "path": ".npmrc",
+            "type": "blob",
+            "bytes": 19,
+            "blob": "43c97e719a5a824700932f72e6e7e6748ce45d01",
+            "selectable": false,
+            "reason": "too small for supported source comparison",
+            "language": "unsupported"
+          },
+          {
+            "path": "index.d.ts",
+            "type": "blob",
+            "bytes": 1991,
+            "blob": "0475d9853a37ea304cac34ad41b1ac3736447ff3",
+            "selectable": true,
+            "reason": "supported JS/TS; content filters run after digest-checked read",
+            "language": "typescript"
+          },
+          {
+            "path": "index.js",
+            "type": "blob",
+            "bytes": 1587,
+            "blob": "627ed535f3163b37f2e3b208a23788fd0a715eba",
+            "selectable": true,
+            "reason": "supported JS/TS; content filters run after digest-checked read",
+            "language": "javascript"
+          },
+          {
+            "path": "index.test-d.ts",
+            "type": "blob",
+            "bytes": 173,
+            "blob": "7f413f89fc5f1710b2715df9f57bcf65974fe28d",
+            "selectable": true,
+            "reason": "supported JS/TS; content filters run after digest-checked read",
+            "language": "typescript"
+          },
+          {
+            "path": "license",
+            "type": "blob",
+            "bytes": 1117,
+            "blob": "fa7ceba3eb4a9657a9db7f3ffca4e4e97a9019de",
+            "selectable": false,
+            "reason": "license name",
+            "language": "unsupported"
+          },
+          {
+            "path": "package.json",
+            "type": "blob",
+            "bytes": 849,
+            "blob": "e9963ac06226563b55c958f9b925c996502771a9",
+            "selectable": false,
+            "reason": "only JS and TS supported",
+            "language": "unsupported"
+          },
+          {
+            "path": "readme.md",
+            "type": "blob",
+            "bytes": 2573,
+            "blob": "f94f98ef865f793b8e09c28e9d1a862fd088ae34",
+            "selectable": false,
+            "reason": "documentation name",
+            "language": "unsupported"
+          },
+          {
+            "path": "test.js",
+            "type": "blob",
+            "bytes": 1744,
+            "blob": "1ed25bfc91dc47f148a57838fd814bf790f3e007",
+            "selectable": true,
+            "reason": "supported JS/TS; content filters run after digest-checked read",
+            "language": "javascript"
+          },
+          {
+            "path": ".github/security.md",
+            "type": "blob",
+            "bytes": 179,
+            "blob": "930aea2eb560a83a3995a62f940c4effddfe877d",
+            "selectable": false,
+            "reason": "documentation name",
+            "language": "unsupported"
+          },
+          {
+            "path": ".github/workflows/main.yml",
+            "type": "blob",
+            "bytes": 406,
+            "blob": "5f816e231deed299c6482cea041906a009a2c207",
+            "selectable": false,
+            "reason": "only JS and TS supported",
+            "language": "unsupported"
+          }
+        ],
+        "coverage": {
+          "scope": "bounded tree listing, not a repository scan",
+          "state": "listed",
+          "enumeration": "complete",
+          "eligibleFiles": 4,
+          "visitedTrees": 3,
+          "unlistedDirectories": [],
+          "filtered": [
+            {
+              "path": ".editorconfig",
+              "reason": "only JS and TS supported"
+            },
+            {
+              "path": ".gitattributes",
+              "reason": "too small for supported source comparison"
+            },
+            {
+              "path": ".gitignore",
+              "reason": "only JS and TS supported"
+            },
+            {
+              "path": ".npmrc",
+              "reason": "too small for supported source comparison"
+            },
+            {
+              "path": "license",
+              "reason": "license name"
+            },
+            {
+              "path": "package.json",
+              "reason": "only JS and TS supported"
+            },
+            {
+              "path": "readme.md",
+              "reason": "documentation name"
+            },
+            {
+              "path": ".github/security.md",
+              "reason": "documentation name"
+            },
+            {
+              "path": ".github/workflows/main.yml",
+              "reason": "only JS and TS supported"
+            }
+          ],
+          "reasons": []
+        }
+      },
+      {
+        "repositoryId": 1168938776,
+        "revision": "db05e3dcd2aabd33b5b325aa7646f8d2c4b1ffd0",
+        "tree": "9925e53c997bf4590cbab809fc482b74093f3da8",
+        "fullName": "munachi-n/yocto-queue",
+        "files": [
+          {
+            "path": ".editorconfig",
+            "type": "blob",
+            "bytes": 175,
+            "blob": "1c6314a31833395fd5ff016a6506bdd51860657c",
+            "selectable": false,
+            "reason": "only JS and TS supported",
+            "language": "unsupported"
+          },
+          {
+            "path": ".gitattributes",
+            "type": "blob",
+            "bytes": 19,
+            "blob": "6313b56c57848efce05faa7aa7e901ccfc2886ea",
+            "selectable": false,
+            "reason": "too small for supported source comparison",
+            "language": "unsupported"
+          },
+          {
+            "path": ".gitignore",
+            "type": "blob",
+            "bytes": 23,
+            "blob": "239ecff1372358a22aa99dcbb375fdad7abba817",
+            "selectable": false,
+            "reason": "only JS and TS supported",
+            "language": "unsupported"
+          },
+          {
+            "path": ".npmrc",
+            "type": "blob",
+            "bytes": 19,
+            "blob": "43c97e719a5a824700932f72e6e7e6748ce45d01",
+            "selectable": false,
+            "reason": "too small for supported source comparison",
+            "language": "unsupported"
+          },
+          {
+            "path": "index.d.ts",
+            "type": "blob",
+            "bytes": 1991,
+            "blob": "0475d9853a37ea304cac34ad41b1ac3736447ff3",
+            "selectable": true,
+            "reason": "supported JS/TS; content filters run after digest-checked read",
+            "language": "typescript"
+          },
+          {
+            "path": "index.js",
+            "type": "blob",
+            "bytes": 1587,
+            "blob": "627ed535f3163b37f2e3b208a23788fd0a715eba",
+            "selectable": true,
+            "reason": "supported JS/TS; content filters run after digest-checked read",
+            "language": "javascript"
+          },
+          {
+            "path": "index.test-d.ts",
+            "type": "blob",
+            "bytes": 173,
+            "blob": "7f413f89fc5f1710b2715df9f57bcf65974fe28d",
+            "selectable": true,
+            "reason": "supported JS/TS; content filters run after digest-checked read",
+            "language": "typescript"
+          },
+          {
+            "path": "license",
+            "type": "blob",
+            "bytes": 1117,
+            "blob": "fa7ceba3eb4a9657a9db7f3ffca4e4e97a9019de",
+            "selectable": false,
+            "reason": "license name",
+            "language": "unsupported"
+          },
+          {
+            "path": "package.json",
+            "type": "blob",
+            "bytes": 849,
+            "blob": "e9963ac06226563b55c958f9b925c996502771a9",
+            "selectable": false,
+            "reason": "only JS and TS supported",
+            "language": "unsupported"
+          },
+          {
+            "path": "readme.md",
+            "type": "blob",
+            "bytes": 2573,
+            "blob": "f94f98ef865f793b8e09c28e9d1a862fd088ae34",
+            "selectable": false,
+            "reason": "documentation name",
+            "language": "unsupported"
+          },
+          {
+            "path": "test.js",
+            "type": "blob",
+            "bytes": 1744,
+            "blob": "1ed25bfc91dc47f148a57838fd814bf790f3e007",
+            "selectable": true,
+            "reason": "supported JS/TS; content filters run after digest-checked read",
+            "language": "javascript"
+          }
+        ],
+        "coverage": {
+          "scope": "bounded tree listing, not a repository scan",
+          "state": "listed",
+          "enumeration": "complete",
+          "eligibleFiles": 4,
+          "visitedTrees": 1,
+          "unlistedDirectories": [],
+          "filtered": [
+            {
+              "path": ".editorconfig",
+              "reason": "only JS and TS supported"
+            },
+            {
+              "path": ".gitattributes",
+              "reason": "too small for supported source comparison"
+            },
+            {
+              "path": ".gitignore",
+              "reason": "only JS and TS supported"
+            },
+            {
+              "path": ".npmrc",
+              "reason": "too small for supported source comparison"
+            },
+            {
+              "path": "license",
+              "reason": "license name"
+            },
+            {
+              "path": "package.json",
+              "reason": "only JS and TS supported"
+            },
+            {
+              "path": "readme.md",
+              "reason": "documentation name"
+            }
+          ],
+          "reasons": []
+        }
+      }
+    ],
+    "selected": [
+      {
+        "repositoryId": 315531538,
+        "paths": [
+          "index.d.ts",
+          "index.js"
+        ]
+      },
+      {
+        "repositoryId": 1168938776,
+        "paths": [
+          "index.d.ts",
+          "index.js"
+        ]
+      }
+    ],
+    "stages": [
+      {
+        "taskId": "d2fb3f1c647b50ec5af3fd8a",
+        "kind": "search",
+        "wallMs": 1566.8791359999996,
+        "attempts": 4,
+        "reservedBytes": 131072
+      },
+      {
+        "taskId": "061195beedf5bfa8ff76471d",
+        "kind": "sources",
+        "wallMs": 2635.930002000001,
+        "attempts": 8,
+        "reservedBytes": 262144
+      },
+      {
+        "taskId": "05d0468b3ff443e4ee14a815",
+        "kind": "compare",
+        "wallMs": 3201.1053640000027,
+        "attempts": 6,
+        "reservedBytes": 196608
+      }
+    ],
+    "combined": {
+      "usage": {
+        "attempts": 18,
+        "searchAttempts": 1,
+        "candidates": 2,
+        "files": {
+          "github:315531538@72a8fa96a9d389765cdf2bb9c6daba8302fc375d": 2,
+          "github:1168938776@db05e3dcd2aabd33b5b325aa7646f8d2c4b1ffd0": 2
+        },
+        "bytesByFile": {
+          "[\"github:315531538@72a8fa96a9d389765cdf2bb9c6daba8302fc375d\",\"index.d.ts\"]": 1991,
+          "[\"github:315531538@72a8fa96a9d389765cdf2bb9c6daba8302fc375d\",\"index.js\"]": 1587,
+          "[\"github:1168938776@db05e3dcd2aabd33b5b325aa7646f8d2c4b1ffd0\",\"index.d.ts\"]": 1991,
+          "[\"github:1168938776@db05e3dcd2aabd33b5b325aa7646f8d2c4b1ffd0\",\"index.js\"]": 1587
+        },
+        "totalBytes": 7156,
+        "activeWorkers": 0,
+        "peakWorkers": 1
+      },
+      "network": {
+        "reservedBytes": 589824,
+        "receivedBytes": 96080,
+        "retainedBytes": 96080,
+        "overflowBytes": 0
+      },
+      "activeWallMs": 7403.914502000003,
+      "elapsedWallMs": 33435
+    },
+    "coverageScope": "selected files only; repository-wide coverage unknown"
+  },
+  "provenance": {
+    "schemaVersion": "discovery-preview-provenance@1",
+    "searchTaskId": "d2fb3f1c647b50ec5af3fd8a",
+    "compareTaskId": "05d0468b3ff443e4ee14a815",
+    "searchContentDigest": "b0683fa7b1c527ed46c5077d8dcb6c0b5a0a15dc8003c42284438f405842c2fd",
+    "target": {
+      "repositoryId": 315531538,
+      "revision": "72a8fa96a9d389765cdf2bb9c6daba8302fc375d"
+    },
+    "candidates": [
+      {
+        "repositoryId": 1168938776,
+        "revision": "db05e3dcd2aabd33b5b325aa7646f8d2c4b1ffd0",
+        "searchCandidate": {
+          "schemaVersion": "discovery-candidate@2",
+          "target": {
+            "provider": "github",
+            "repositoryId": 315531538,
+            "completeness": "provider_id",
+            "fullName": "sindresorhus/yocto-queue",
+            "aliases": [],
+            "revision": "72a8fa96a9d389765cdf2bb9c6daba8302fc375d"
+          },
+          "candidate": {
+            "provider": "github",
+            "repositoryId": 1168938776,
+            "completeness": "provider_id",
+            "fullName": "munachi-n/yocto-queue",
+            "aliases": [],
+            "htmlUrl": "https://github.com/munachi-n/yocto-queue",
+            "observations": [
+              {
+                "repositoryId": 1168938776,
+                "fullName": "munachi-n/yocto-queue",
+                "htmlUrl": "https://github.com/munachi-n/yocto-queue",
+                "source": "repository_search",
+                "observedAt": "2026-10-10T00:59:05.412Z"
+              }
+            ],
+            "conflicts": [],
+            "revision": {
+              "state": "unresolved",
+              "sha": null
+            }
+          },
+          "discoveries": [
+            {
+              "source": "repository_search",
+              "version": "github-rest-repository-search@1",
+              "query": "yocto-queue in:name is:public fork:true",
+              "querySource": "repository_name",
+              "reason": "fixed target repository name",
+              "page": 1,
+              "rank": 2,
+              "observedAt": "2026-10-10T00:59:05.412Z"
+            }
+          ],
+          "similarity": [],
+          "supportingFiles": [],
+          "verification": {
+            "state": "pending",
+            "canonicalEvidenceIds": []
+          },
+          "lineageClaim": "none",
+          "comparison": {
+            "state": "unexecuted",
+            "reason": "revision unresolved"
+          }
+        }
+      }
+    ],
+    "status": "search_observation_only"
+  },
+  "probe": {
+    "content": {
+      "schemaVersion": "discovery-pinned-probe@1",
+      "scope": "bounded search preview and user-selected paths only; search observations are not verified evidence",
+      "snapshots": [
+        {
+          "control": {
+            "name": "sindresorhus/yocto-queue",
+            "repositoryId": 315531538,
+            "revision": "72a8fa96a9d389765cdf2bb9c6daba8302fc375d",
+            "selections": [
+              {
+                "path": "index.d.ts",
+                "reason": "explicit user selection from pinned bounded tree"
+              },
+              {
+                "path": "index.js",
+                "reason": "explicit user selection from pinned bounded tree"
+              }
+            ]
+          },
+          "expectedId": 315531538,
+          "bootstrap": null,
+          "resolution": {
+            "schemaVersion": "repository-snapshot@1",
+            "requestedId": 315531538,
+            "state": "resolved",
+            "identity": {
+              "provider": "github",
+              "repositoryId": 315531538,
+              "completeness": "provider_id",
+              "fullName": "sindresorhus/yocto-queue",
+              "aliases": [],
+              "revision": "72a8fa96a9d389765cdf2bb9c6daba8302fc375d"
+            },
+            "observations": [
+              {
+                "repositoryId": 315531538,
+                "fullName": "sindresorhus/yocto-queue",
+                "htmlUrl": "https://github.com/sindresorhus/yocto-queue",
+                "source": "repository_metadata"
+              },
+              {
+                "repositoryId": 315531538,
+                "fullName": "sindresorhus/yocto-queue",
+                "htmlUrl": "https://github.com/sindresorhus/yocto-queue",
+                "source": "repository_metadata"
+              }
+            ],
+            "defaultBranch": "main",
+            "tree": "0b81d56218d4a4ab1b9ec91109e7b5d493e123d7",
+            "parents": [
+              "b07eac099753833b29d06c614149904445739776"
+            ],
+            "metadata": {
+              "fork": false,
+              "parentId": null
+            },
+            "reasons": [],
+            "requestSource": "github-rest-verified-name@1"
+          },
+          "source": {
+            "snapshot": {
+              "identity": {
+                "provider": "github",
+                "repositoryId": 315531538,
+                "completeness": "provider_id",
+                "fullName": "sindresorhus/yocto-queue",
+                "aliases": [],
+                "revision": "72a8fa96a9d389765cdf2bb9c6daba8302fc375d"
+              },
+              "files": [
+                {
+                  "path": "index.d.ts",
+                  "digest": "a760662b79da8ff47d9152d25b5641491b036a3762c3cd94645380c9f97288e7",
+                  "blob": "0475d9853a37ea304cac34ad41b1ac3736447ff3",
+                  "bytes": 1991,
+                  "language": "typescript",
+                  "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                  "filterVersion": "source-filter@1",
+                  "classification": "application_source",
+                  "reasons": [
+                    "supported source; no exclusion heuristic matched"
+                  ]
+                },
+                {
+                  "path": "index.js",
+                  "digest": "2eabf3096793c43934ef127fb50238dcba93074fb54f943fc62aeab616769dfc",
+                  "blob": "627ed535f3163b37f2e3b208a23788fd0a715eba",
+                  "bytes": 1587,
+                  "language": "javascript",
+                  "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                  "filterVersion": "source-filter@1",
+                  "classification": "application_source",
+                  "reasons": [
+                    "supported source; no exclusion heuristic matched"
+                  ]
+                }
+              ],
+              "state": "completed",
+              "pending": [],
+              "reasons": []
+            },
+            "selections": [
+              {
+                "path": "index.d.ts",
+                "reason": "explicit user selection from pinned bounded tree"
+              },
+              {
+                "path": "index.js",
+                "reason": "explicit user selection from pinned bounded tree"
+              }
+            ],
+            "bindings": [
+              {
+                "repositoryId": 315531538,
+                "revision": "72a8fa96a9d389765cdf2bb9c6daba8302fc375d",
+                "path": "index.d.ts",
+                "blob": "0475d9853a37ea304cac34ad41b1ac3736447ff3",
+                "digest": "a760662b79da8ff47d9152d25b5641491b036a3762c3cd94645380c9f97288e7",
+                "bytes": 1991,
+                "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                "filterVersion": "source-filter@1"
+              },
+              {
+                "repositoryId": 315531538,
+                "revision": "72a8fa96a9d389765cdf2bb9c6daba8302fc375d",
+                "path": "index.js",
+                "blob": "627ed535f3163b37f2e3b208a23788fd0a715eba",
+                "digest": "2eabf3096793c43934ef127fb50238dcba93074fb54f943fc62aeab616769dfc",
+                "bytes": 1587,
+                "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                "filterVersion": "source-filter@1"
+              }
+            ],
+            "materializedBytes": 3578,
+            "coverage": {
+              "scope": "explicit selected paths only",
+              "state": "completed",
+              "treeTruncated": false,
+              "reasons": [],
+              "pending": []
+            }
+          },
+          "identityCheck": {
+            "state": "matched",
+            "repositoryId": 315531538,
+            "fullName": "sindresorhus/yocto-queue",
+            "reason": null
+          },
+          "state": "completed"
+        },
+        {
+          "control": {
+            "name": "munachi-n/yocto-queue",
+            "repositoryId": 1168938776,
+            "revision": "db05e3dcd2aabd33b5b325aa7646f8d2c4b1ffd0",
+            "selections": [
+              {
+                "path": "index.d.ts",
+                "reason": "explicit user selection from pinned bounded tree"
+              },
+              {
+                "path": "index.js",
+                "reason": "explicit user selection from pinned bounded tree"
+              }
+            ]
+          },
+          "expectedId": 1168938776,
+          "bootstrap": null,
+          "resolution": {
+            "schemaVersion": "repository-snapshot@1",
+            "requestedId": 1168938776,
+            "state": "resolved",
+            "identity": {
+              "provider": "github",
+              "repositoryId": 1168938776,
+              "completeness": "provider_id",
+              "fullName": "munachi-n/yocto-queue",
+              "aliases": [],
+              "revision": "db05e3dcd2aabd33b5b325aa7646f8d2c4b1ffd0"
+            },
+            "observations": [
+              {
+                "repositoryId": 1168938776,
+                "fullName": "munachi-n/yocto-queue",
+                "htmlUrl": "https://github.com/munachi-n/yocto-queue",
+                "source": "repository_search"
+              },
+              {
+                "repositoryId": 1168938776,
+                "fullName": "munachi-n/yocto-queue",
+                "htmlUrl": "https://github.com/munachi-n/yocto-queue",
+                "source": "repository_metadata"
+              }
+            ],
+            "defaultBranch": "master",
+            "tree": "9925e53c997bf4590cbab809fc482b74093f3da8",
+            "parents": [],
+            "metadata": {
+              "fork": false,
+              "parentId": null
+            },
+            "reasons": [],
+            "requestSource": "github-rest-verified-name@1"
+          },
+          "source": {
+            "snapshot": {
+              "identity": {
+                "provider": "github",
+                "repositoryId": 1168938776,
+                "completeness": "provider_id",
+                "fullName": "munachi-n/yocto-queue",
+                "aliases": [],
+                "revision": "db05e3dcd2aabd33b5b325aa7646f8d2c4b1ffd0"
+              },
+              "files": [
+                {
+                  "path": "index.d.ts",
+                  "digest": "a760662b79da8ff47d9152d25b5641491b036a3762c3cd94645380c9f97288e7",
+                  "blob": "0475d9853a37ea304cac34ad41b1ac3736447ff3",
+                  "bytes": 1991,
+                  "language": "typescript",
+                  "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                  "filterVersion": "source-filter@1",
+                  "classification": "application_source",
+                  "reasons": [
+                    "supported source; no exclusion heuristic matched"
+                  ]
+                },
+                {
+                  "path": "index.js",
+                  "digest": "2eabf3096793c43934ef127fb50238dcba93074fb54f943fc62aeab616769dfc",
+                  "blob": "627ed535f3163b37f2e3b208a23788fd0a715eba",
+                  "bytes": 1587,
+                  "language": "javascript",
+                  "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                  "filterVersion": "source-filter@1",
+                  "classification": "application_source",
+                  "reasons": [
+                    "supported source; no exclusion heuristic matched"
+                  ]
+                }
+              ],
+              "state": "completed",
+              "pending": [],
+              "reasons": []
+            },
+            "selections": [
+              {
+                "path": "index.d.ts",
+                "reason": "explicit user selection from pinned bounded tree"
+              },
+              {
+                "path": "index.js",
+                "reason": "explicit user selection from pinned bounded tree"
+              }
+            ],
+            "bindings": [
+              {
+                "repositoryId": 1168938776,
+                "revision": "db05e3dcd2aabd33b5b325aa7646f8d2c4b1ffd0",
+                "path": "index.d.ts",
+                "blob": "0475d9853a37ea304cac34ad41b1ac3736447ff3",
+                "digest": "a760662b79da8ff47d9152d25b5641491b036a3762c3cd94645380c9f97288e7",
+                "bytes": 1991,
+                "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                "filterVersion": "source-filter@1"
+              },
+              {
+                "repositoryId": 1168938776,
+                "revision": "db05e3dcd2aabd33b5b325aa7646f8d2c4b1ffd0",
+                "path": "index.js",
+                "blob": "627ed535f3163b37f2e3b208a23788fd0a715eba",
+                "digest": "2eabf3096793c43934ef127fb50238dcba93074fb54f943fc62aeab616769dfc",
+                "bytes": 1587,
+                "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                "filterVersion": "source-filter@1"
+              }
+            ],
+            "materializedBytes": 3578,
+            "coverage": {
+              "scope": "explicit selected paths only",
+              "state": "completed",
+              "treeTruncated": false,
+              "reasons": [],
+              "pending": []
+            }
+          },
+          "identityCheck": {
+            "state": "matched",
+            "repositoryId": 1168938776,
+            "fullName": "munachi-n/yocto-queue",
+            "reason": null
+          },
+          "state": "completed"
+        }
+      ],
+      "comparisons": [
+        {
+          "name": "munachi-n/yocto-queue",
+          "candidate": {
+            "schemaVersion": "discovery-candidate@1",
+            "target": {
+              "provider": "github",
+              "repositoryId": 315531538,
+              "completeness": "provider_id",
+              "fullName": "sindresorhus/yocto-queue",
+              "aliases": [],
+              "revision": "72a8fa96a9d389765cdf2bb9c6daba8302fc375d"
+            },
+            "candidate": {
+              "provider": "github",
+              "repositoryId": 1168938776,
+              "completeness": "provider_id",
+              "fullName": "munachi-n/yocto-queue",
+              "aliases": [],
+              "revision": "db05e3dcd2aabd33b5b325aa7646f8d2c4b1ffd0"
+            },
+            "discoveries": [
+              {
+                "source": "repository_search",
+                "version": "github-rest-repository-search@1",
+                "reason": "fixed target repository name",
+                "locator": "https://api.github.com/search/repositories?query=yocto-queue%20in%3Aname%20is%3Apublic%20fork%3Atrue&page=1&rank=2"
+              }
+            ],
+            "similarity": [
+              {
+                "version": "git-blob-sha1@1",
+                "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                "filterVersion": "source-filter@1",
+                "firstPath": "index.d.ts",
+                "secondPath": "index.d.ts",
+                "firstDigest": "a760662b79da8ff47d9152d25b5641491b036a3762c3cd94645380c9f97288e7",
+                "secondDigest": "a760662b79da8ff47d9152d25b5641491b036a3762c3cd94645380c9f97288e7",
+                "firstTokens": 84,
+                "secondTokens": 84,
+                "rangesTruncated": false,
+                "reasons": [],
+                "method": "exact_blob",
+                "state": "completed",
+                "score": 1,
+                "sharedShingles": null,
+                "firstShingles": null,
+                "secondShingles": null,
+                "firstCoverage": null,
+                "secondCoverage": null,
+                "ranges": []
+              },
+              {
+                "version": "token5-set@1",
+                "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                "filterVersion": "source-filter@1",
+                "firstPath": "index.d.ts",
+                "secondPath": "index.d.ts",
+                "firstDigest": "a760662b79da8ff47d9152d25b5641491b036a3762c3cd94645380c9f97288e7",
+                "secondDigest": "a760662b79da8ff47d9152d25b5641491b036a3762c3cd94645380c9f97288e7",
+                "firstTokens": 84,
+                "secondTokens": 84,
+                "rangesTruncated": true,
+                "reasons": [],
+                "method": "strict_token5",
+                "state": "completed",
+                "score": 1,
+                "sharedShingles": 73,
+                "firstShingles": 73,
+                "secondShingles": 73,
+                "firstCoverage": 1,
+                "secondCoverage": 1,
+                "ranges": [
+                  {
+                    "first": [
+                      47,
+                      52
+                    ],
+                    "second": [
+                      47,
+                      52
+                    ],
+                    "firstChars": [
+                      1544,
+                      1597
+                    ],
+                    "secondChars": [
+                      1544,
+                      1597
+                    ],
+                    "fingerprint": "028bb529d13c720f33240238e8074791b48961faf857a8d5b614c713beda8877"
+                  },
+                  {
+                    "first": [
+                      45,
+                      50
+                    ],
+                    "second": [
+                      45,
+                      50
+                    ],
+                    "firstChars": [
+                      1534,
+                      1591
+                    ],
+                    "secondChars": [
+                      1534,
+                      1591
+                    ],
+                    "fingerprint": "02e089e0a1a13338f78cd93d4787f380edb64f9f3dfb28d3527d7507467f1625"
+                  },
+                  {
+                    "first": [
+                      32,
+                      37
+                    ],
+                    "second": [
+                      32,
+                      37
+                    ],
+                    "firstChars": [
+                      1249,
+                      1278
+                    ],
+                    "secondChars": [
+                      1249,
+                      1278
+                    ],
+                    "fingerprint": "03d40bb308b1a7396963463169704c2ff36be358af27c471349ce449d50c7ddf"
+                  },
+                  {
+                    "first": [
+                      60,
+                      65
+                    ],
+                    "second": [
+                      60,
+                      65
+                    ],
+                    "firstChars": [
+                      1739,
+                      1754
+                    ],
+                    "secondChars": [
+                      1739,
+                      1754
+                    ],
+                    "fingerprint": "07224e9489865ff4afc6e43b9c1230981d097b1c71d0de450178455a83c04add"
+                  },
+                  {
+                    "first": [
+                      64,
+                      69
+                    ],
+                    "second": [
+                      64,
+                      69
+                    ],
+                    "firstChars": [
+                      1753,
+                      1894
+                    ],
+                    "secondChars": [
+                      1753,
+                      1894
+                    ],
+                    "fingerprint": "07aa668a5243086a9c125b6b69caca1a3212d69962ece91753f472bcca3b448f"
+                  },
+                  {
+                    "first": [
+                      30,
+                      35
+                    ],
+                    "second": [
+                      30,
+                      35
+                    ],
+                    "firstChars": [
+                      1247,
+                      1268
+                    ],
+                    "secondChars": [
+                      1247,
+                      1268
+                    ],
+                    "fingerprint": "0f47318a06d87d162f9c3e8c3a24533b9b165387c45af667bd77427dcf5713a2"
+                  },
+                  {
+                    "first": [
+                      54,
+                      59
+                    ],
+                    "second": [
+                      54,
+                      59
+                    ],
+                    "firstChars": [
+                      1608,
+                      1670
+                    ],
+                    "secondChars": [
+                      1608,
+                      1670
+                    ],
+                    "fingerprint": "151582fa05e4e6e7cffb5457f2ef6c612e20590dd1bd634e166f322571693bf6"
+                  },
+                  {
+                    "first": [
+                      29,
+                      34
+                    ],
+                    "second": [
+                      29,
+                      34
+                    ],
+                    "firstChars": [
+                      1246,
+                      1267
+                    ],
+                    "secondChars": [
+                      1246,
+                      1267
+                    ],
+                    "fingerprint": "2369eba2019ce82f6ad7f45b226395c13f96fd6044da1b02dc332a83bd539f0a"
+                  },
+                  {
+                    "first": [
+                      68,
+                      73
+                    ],
+                    "second": [
+                      68,
+                      73
+                    ],
+                    "firstChars": [
+                      1890,
+                      1907
+                    ],
+                    "secondChars": [
+                      1890,
+                      1907
+                    ],
+                    "fingerprint": "248b468bf7e1cf3bade14f4baa065fda9ccf26908adc2920ae0ad681a2d2f77d"
+                  },
+                  {
+                    "first": [
+                      38,
+                      43
+                    ],
+                    "second": [
+                      38,
+                      43
+                    ],
+                    "firstChars": [
+                      1282,
+                      1516
+                    ],
+                    "secondChars": [
+                      1282,
+                      1516
+                    ],
+                    "fingerprint": "283054160bd5fc87ddde1a6ebea5919b52cd69a38ca1b1a506b0100dbf13c42a"
+                  },
+                  {
+                    "first": [
+                      14,
+                      19
+                    ],
+                    "second": [
+                      14,
+                      19
+                    ],
+                    "firstChars": [
+                      105,
+                      127
+                    ],
+                    "secondChars": [
+                      105,
+                      127
+                    ],
+                    "fingerprint": "2b7323af299c01fa9b9df9b71da8f62061d0f66e75f91f6260eed566180cbb55"
+                  },
+                  {
+                    "first": [
+                      61,
+                      66
+                    ],
+                    "second": [
+                      61,
+                      66
+                    ],
+                    "firstChars": [
+                      1740,
+                      1764
+                    ],
+                    "secondChars": [
+                      1740,
+                      1764
+                    ],
+                    "fingerprint": "2e19639a268fecc537ebd3ac2ffab68b17b0cd88342d10b6d440352eb191651f"
+                  }
+                ]
+              },
+              {
+                "version": "token5-set@1",
+                "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                "filterVersion": "source-filter@1",
+                "firstPath": "index.d.ts",
+                "secondPath": "index.d.ts",
+                "firstDigest": "a760662b79da8ff47d9152d25b5641491b036a3762c3cd94645380c9f97288e7",
+                "secondDigest": "a760662b79da8ff47d9152d25b5641491b036a3762c3cd94645380c9f97288e7",
+                "firstTokens": 84,
+                "secondTokens": 84,
+                "rangesTruncated": true,
+                "reasons": [],
+                "method": "normalized_token5",
+                "state": "completed",
+                "score": 1,
+                "sharedShingles": 69,
+                "firstShingles": 69,
+                "secondShingles": 69,
+                "firstCoverage": 1,
+                "secondCoverage": 1,
+                "ranges": [
+                  {
+                    "first": [
+                      25,
+                      30
+                    ],
+                    "second": [
+                      25,
+                      30
+                    ],
+                    "firstChars": [
+                      1230,
+                      1247
+                    ],
+                    "secondChars": [
+                      1230,
+                      1247
+                    ],
+                    "fingerprint": "000909a78b10a41411d670b572863370bc2ac176684a0c3fb5bd4d87a5149504"
+                  },
+                  {
+                    "first": [
+                      37,
+                      42
+                    ],
+                    "second": [
+                      37,
+                      42
+                    ],
+                    "firstChars": [
+                      1278,
+                      1515
+                    ],
+                    "secondChars": [
+                      1278,
+                      1515
+                    ],
+                    "fingerprint": "00d97d34456967eb34af94ea38d00ecbf13c3bc376630552f33086a793943b9b"
+                  },
+                  {
+                    "first": [
+                      57,
+                      62
+                    ],
+                    "second": [
+                      57,
+                      62
+                    ],
+                    "firstChars": [
+                      1615,
+                      1741
+                    ],
+                    "secondChars": [
+                      1615,
+                      1741
+                    ],
+                    "fingerprint": "03771b38a5bcc529b39e815cae20a8f8cd1cafbaba6f074d95150c5f8b5e1409"
+                  },
+                  {
+                    "first": [
+                      23,
+                      28
+                    ],
+                    "second": [
+                      23,
+                      28
+                    ],
+                    "firstChars": [
+                      786,
+                      1238
+                    ],
+                    "secondChars": [
+                      786,
+                      1238
+                    ],
+                    "fingerprint": "04b9a14084511686a916edb95dc770d138e7ce457f19316fe6b118782596f6d3"
+                  },
+                  {
+                    "first": [
+                      19,
+                      24
+                    ],
+                    "second": [
+                      19,
+                      24
+                    ],
+                    "firstChars": [
+                      482,
+                      787
+                    ],
+                    "secondChars": [
+                      482,
+                      787
+                    ],
+                    "fingerprint": "08949a2f8eb0e22c98d3da7f84e3c06d1f0125c2ea6f13e2ebf20327f7c48e74"
+                  },
+                  {
+                    "first": [
+                      51,
+                      56
+                    ],
+                    "second": [
+                      51,
+                      56
+                    ],
+                    "firstChars": [
+                      1592,
+                      1610
+                    ],
+                    "secondChars": [
+                      1592,
+                      1610
+                    ],
+                    "fingerprint": "0b53cc42778022a9bd3ef7dc883828c09f3e9fe68333f6ba502e2fdd214159a0"
+                  },
+                  {
+                    "first": [
+                      12,
+                      17
+                    ],
+                    "second": [
+                      12,
+                      17
+                    ],
+                    "firstChars": [
+                      69,
+                      119
+                    ],
+                    "secondChars": [
+                      69,
+                      119
+                    ],
+                    "fingerprint": "17c04c18bb06f029f1143d3c7e20ea3e2ffe2c04acf554703f312e89b1f357a0"
+                  },
+                  {
+                    "first": [
+                      34,
+                      39
+                    ],
+                    "second": [
+                      34,
+                      39
+                    ],
+                    "firstChars": [
+                      1267,
+                      1506
+                    ],
+                    "secondChars": [
+                      1267,
+                      1506
+                    ],
+                    "fingerprint": "191190189fc34e5a2ca48342d111546efa8ba93ad8c6d3835ce2b0e0988102cd"
+                  },
+                  {
+                    "first": [
+                      64,
+                      69
+                    ],
+                    "second": [
+                      64,
+                      69
+                    ],
+                    "firstChars": [
+                      1753,
+                      1894
+                    ],
+                    "secondChars": [
+                      1753,
+                      1894
+                    ],
+                    "fingerprint": "1fe65758418058df3fe2a1d169e3676035eee88011800038aa312dbebac2c04e"
+                  },
+                  {
+                    "first": [
+                      8,
+                      13
+                    ],
+                    "second": [
+                      8,
+                      13
+                    ],
+                    "firstChars": [
+                      49,
+                      70
+                    ],
+                    "secondChars": [
+                      49,
+                      70
+                    ],
+                    "fingerprint": "28f57d8162a5031d31c6f4eb1f40780c2de3781534ac06f27c709f727642b086"
+                  },
+                  {
+                    "first": [
+                      16,
+                      21
+                    ],
+                    "second": [
+                      16,
+                      21
+                    ],
+                    "firstChars": [
+                      118,
+                      784
+                    ],
+                    "secondChars": [
+                      118,
+                      784
+                    ],
+                    "fingerprint": "37c4a94ef850595af4a9ea5643fe3b7146ea5064419285fe865553b273d40b6f"
+                  },
+                  {
+                    "first": [
+                      65,
+                      70
+                    ],
+                    "second": [
+                      65,
+                      70
+                    ],
+                    "firstChars": [
+                      1755,
+                      1895
+                    ],
+                    "secondChars": [
+                      1755,
+                      1895
+                    ],
+                    "fingerprint": "395579f1780e933dc17f483bcd777f5f67362ad7e7aee9e69c3b5ef1175069bd"
+                  }
+                ]
+              },
+              {
+                "version": "git-blob-sha1@1",
+                "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                "filterVersion": "source-filter@1",
+                "firstPath": "index.d.ts",
+                "secondPath": "index.js",
+                "firstDigest": "a760662b79da8ff47d9152d25b5641491b036a3762c3cd94645380c9f97288e7",
+                "secondDigest": "2eabf3096793c43934ef127fb50238dcba93074fb54f943fc62aeab616769dfc",
+                "firstTokens": 84,
+                "secondTokens": 268,
+                "rangesTruncated": false,
+                "reasons": [],
+                "method": "exact_blob",
+                "state": "completed",
+                "score": 0,
+                "sharedShingles": null,
+                "firstShingles": null,
+                "secondShingles": null,
+                "firstCoverage": null,
+                "secondCoverage": null,
+                "ranges": []
+              },
+              {
+                "version": "token5-set@1",
+                "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                "filterVersion": "source-filter@1",
+                "firstPath": "index.d.ts",
+                "secondPath": "index.js",
+                "firstDigest": "a760662b79da8ff47d9152d25b5641491b036a3762c3cd94645380c9f97288e7",
+                "secondDigest": "2eabf3096793c43934ef127fb50238dcba93074fb54f943fc62aeab616769dfc",
+                "firstTokens": 84,
+                "secondTokens": 268,
+                "rangesTruncated": false,
+                "reasons": [],
+                "method": "strict_token5",
+                "state": "completed",
+                "score": 0.009708737864077669,
+                "sharedShingles": 3,
+                "firstShingles": 73,
+                "secondShingles": 239,
+                "firstCoverage": 0.0410958904109589,
+                "secondCoverage": 0.012552301255230125,
+                "ranges": [
+                  {
+                    "first": [
+                      27,
+                      32
+                    ],
+                    "second": [
+                      215,
+                      220
+                    ],
+                    "firstChars": [
+                      1237,
+                      1249
+                    ],
+                    "secondChars": [
+                      1394,
+                      1406
+                    ],
+                    "fingerprint": "659b620ddf8dfaa3804b0a104213233c7c4689007d3b102c66bbc5f59cd932c4"
+                  },
+                  {
+                    "first": [
+                      25,
+                      30
+                    ],
+                    "second": [
+                      213,
+                      218
+                    ],
+                    "firstChars": [
+                      1230,
+                      1247
+                    ],
+                    "secondChars": [
+                      1387,
+                      1404
+                    ],
+                    "fingerprint": "ba6eb714efce5e379a92ff1092bca202c2293e62f3dae1528a8d2a982ca0cd7c"
+                  },
+                  {
+                    "first": [
+                      26,
+                      31
+                    ],
+                    "second": [
+                      214,
+                      219
+                    ],
+                    "firstChars": [
+                      1231,
+                      1248
+                    ],
+                    "secondChars": [
+                      1388,
+                      1405
+                    ],
+                    "fingerprint": "f851bd61a93a6fffb888af27990b09ae0492d972cd0f918324722d5d87831355"
+                  }
+                ]
+              },
+              {
+                "version": "token5-set@1",
+                "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                "filterVersion": "source-filter@1",
+                "firstPath": "index.d.ts",
+                "secondPath": "index.js",
+                "firstDigest": "a760662b79da8ff47d9152d25b5641491b036a3762c3cd94645380c9f97288e7",
+                "secondDigest": "2eabf3096793c43934ef127fb50238dcba93074fb54f943fc62aeab616769dfc",
+                "firstTokens": 84,
+                "secondTokens": 268,
+                "rangesTruncated": false,
+                "reasons": [],
+                "method": "normalized_token5",
+                "state": "completed",
+                "score": 0.010676156583629894,
+                "sharedShingles": 3,
+                "firstShingles": 69,
+                "secondShingles": 215,
+                "firstCoverage": 0.043478260869565216,
+                "secondCoverage": 0.013953488372093023,
+                "ranges": [
+                  {
+                    "first": [
+                      25,
+                      30
+                    ],
+                    "second": [
+                      213,
+                      218
+                    ],
+                    "firstChars": [
+                      1230,
+                      1247
+                    ],
+                    "secondChars": [
+                      1387,
+                      1404
+                    ],
+                    "fingerprint": "000909a78b10a41411d670b572863370bc2ac176684a0c3fb5bd4d87a5149504"
+                  },
+                  {
+                    "first": [
+                      27,
+                      32
+                    ],
+                    "second": [
+                      215,
+                      220
+                    ],
+                    "firstChars": [
+                      1237,
+                      1249
+                    ],
+                    "secondChars": [
+                      1394,
+                      1406
+                    ],
+                    "fingerprint": "7bbd74563b276550676cd2d9cbdf12514794b74ff876aa7c9db6b629118d9af4"
+                  },
+                  {
+                    "first": [
+                      26,
+                      31
+                    ],
+                    "second": [
+                      214,
+                      219
+                    ],
+                    "firstChars": [
+                      1231,
+                      1248
+                    ],
+                    "secondChars": [
+                      1388,
+                      1405
+                    ],
+                    "fingerprint": "8bcd0caa02ac973ed294420200a1e46fbe5433090d3737a6b7740944c55b2938"
+                  }
+                ]
+              },
+              {
+                "version": "git-blob-sha1@1",
+                "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                "filterVersion": "source-filter@1",
+                "firstPath": "index.js",
+                "secondPath": "index.d.ts",
+                "firstDigest": "2eabf3096793c43934ef127fb50238dcba93074fb54f943fc62aeab616769dfc",
+                "secondDigest": "a760662b79da8ff47d9152d25b5641491b036a3762c3cd94645380c9f97288e7",
+                "firstTokens": 268,
+                "secondTokens": 84,
+                "rangesTruncated": false,
+                "reasons": [],
+                "method": "exact_blob",
+                "state": "completed",
+                "score": 0,
+                "sharedShingles": null,
+                "firstShingles": null,
+                "secondShingles": null,
+                "firstCoverage": null,
+                "secondCoverage": null,
+                "ranges": []
+              },
+              {
+                "version": "token5-set@1",
+                "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                "filterVersion": "source-filter@1",
+                "firstPath": "index.js",
+                "secondPath": "index.d.ts",
+                "firstDigest": "2eabf3096793c43934ef127fb50238dcba93074fb54f943fc62aeab616769dfc",
+                "secondDigest": "a760662b79da8ff47d9152d25b5641491b036a3762c3cd94645380c9f97288e7",
+                "firstTokens": 268,
+                "secondTokens": 84,
+                "rangesTruncated": false,
+                "reasons": [],
+                "method": "strict_token5",
+                "state": "completed",
+                "score": 0.009708737864077669,
+                "sharedShingles": 3,
+                "firstShingles": 239,
+                "secondShingles": 73,
+                "firstCoverage": 0.012552301255230125,
+                "secondCoverage": 0.0410958904109589,
+                "ranges": [
+                  {
+                    "first": [
+                      215,
+                      220
+                    ],
+                    "second": [
+                      27,
+                      32
+                    ],
+                    "firstChars": [
+                      1394,
+                      1406
+                    ],
+                    "secondChars": [
+                      1237,
+                      1249
+                    ],
+                    "fingerprint": "659b620ddf8dfaa3804b0a104213233c7c4689007d3b102c66bbc5f59cd932c4"
+                  },
+                  {
+                    "first": [
+                      213,
+                      218
+                    ],
+                    "second": [
+                      25,
+                      30
+                    ],
+                    "firstChars": [
+                      1387,
+                      1404
+                    ],
+                    "secondChars": [
+                      1230,
+                      1247
+                    ],
+                    "fingerprint": "ba6eb714efce5e379a92ff1092bca202c2293e62f3dae1528a8d2a982ca0cd7c"
+                  },
+                  {
+                    "first": [
+                      214,
+                      219
+                    ],
+                    "second": [
+                      26,
+                      31
+                    ],
+                    "firstChars": [
+                      1388,
+                      1405
+                    ],
+                    "secondChars": [
+                      1231,
+                      1248
+                    ],
+                    "fingerprint": "f851bd61a93a6fffb888af27990b09ae0492d972cd0f918324722d5d87831355"
+                  }
+                ]
+              },
+              {
+                "version": "token5-set@1",
+                "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                "filterVersion": "source-filter@1",
+                "firstPath": "index.js",
+                "secondPath": "index.d.ts",
+                "firstDigest": "2eabf3096793c43934ef127fb50238dcba93074fb54f943fc62aeab616769dfc",
+                "secondDigest": "a760662b79da8ff47d9152d25b5641491b036a3762c3cd94645380c9f97288e7",
+                "firstTokens": 268,
+                "secondTokens": 84,
+                "rangesTruncated": false,
+                "reasons": [],
+                "method": "normalized_token5",
+                "state": "completed",
+                "score": 0.010676156583629894,
+                "sharedShingles": 3,
+                "firstShingles": 215,
+                "secondShingles": 69,
+                "firstCoverage": 0.013953488372093023,
+                "secondCoverage": 0.043478260869565216,
+                "ranges": [
+                  {
+                    "first": [
+                      213,
+                      218
+                    ],
+                    "second": [
+                      25,
+                      30
+                    ],
+                    "firstChars": [
+                      1387,
+                      1404
+                    ],
+                    "secondChars": [
+                      1230,
+                      1247
+                    ],
+                    "fingerprint": "000909a78b10a41411d670b572863370bc2ac176684a0c3fb5bd4d87a5149504"
+                  },
+                  {
+                    "first": [
+                      215,
+                      220
+                    ],
+                    "second": [
+                      27,
+                      32
+                    ],
+                    "firstChars": [
+                      1394,
+                      1406
+                    ],
+                    "secondChars": [
+                      1237,
+                      1249
+                    ],
+                    "fingerprint": "7bbd74563b276550676cd2d9cbdf12514794b74ff876aa7c9db6b629118d9af4"
+                  },
+                  {
+                    "first": [
+                      214,
+                      219
+                    ],
+                    "second": [
+                      26,
+                      31
+                    ],
+                    "firstChars": [
+                      1388,
+                      1405
+                    ],
+                    "secondChars": [
+                      1231,
+                      1248
+                    ],
+                    "fingerprint": "8bcd0caa02ac973ed294420200a1e46fbe5433090d3737a6b7740944c55b2938"
+                  }
+                ]
+              },
+              {
+                "version": "git-blob-sha1@1",
+                "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                "filterVersion": "source-filter@1",
+                "firstPath": "index.js",
+                "secondPath": "index.js",
+                "firstDigest": "2eabf3096793c43934ef127fb50238dcba93074fb54f943fc62aeab616769dfc",
+                "secondDigest": "2eabf3096793c43934ef127fb50238dcba93074fb54f943fc62aeab616769dfc",
+                "firstTokens": 268,
+                "secondTokens": 268,
+                "rangesTruncated": false,
+                "reasons": [],
+                "method": "exact_blob",
+                "state": "completed",
+                "score": 1,
+                "sharedShingles": null,
+                "firstShingles": null,
+                "secondShingles": null,
+                "firstCoverage": null,
+                "secondCoverage": null,
+                "ranges": []
+              },
+              {
+                "version": "token5-set@1",
+                "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                "filterVersion": "source-filter@1",
+                "firstPath": "index.js",
+                "secondPath": "index.js",
+                "firstDigest": "2eabf3096793c43934ef127fb50238dcba93074fb54f943fc62aeab616769dfc",
+                "secondDigest": "2eabf3096793c43934ef127fb50238dcba93074fb54f943fc62aeab616769dfc",
+                "firstTokens": 268,
+                "secondTokens": 268,
+                "rangesTruncated": true,
+                "reasons": [],
+                "method": "strict_token5",
+                "state": "completed",
+                "score": 1,
+                "sharedShingles": 239,
+                "firstShingles": 239,
+                "secondShingles": 239,
+                "firstCoverage": 1,
+                "secondCoverage": 1,
+                "ranges": [
+                  {
+                    "first": [
+                      95,
+                      100
+                    ],
+                    "second": [
+                      95,
+                      100
+                    ],
+                    "firstChars": [
+                      853,
+                      874
+                    ],
+                    "secondChars": [
+                      853,
+                      874
+                    ],
+                    "fingerprint": "00d230a4305b002ee8bd09289e649673114ce243a9be6c0bfe78afe099e97831"
+                  },
+                  {
+                    "first": [
+                      238,
+                      243
+                    ],
+                    "second": [
+                      238,
+                      243
+                    ],
+                    "firstChars": [
+                      1485,
+                      1507
+                    ],
+                    "secondChars": [
+                      1485,
+                      1507
+                    ],
+                    "fingerprint": "014f80016ac4a6bdb88ec42db19c47e8923f6cb6bdd5c9d62f53fa9916f15690"
+                  },
+                  {
+                    "first": [
+                      43,
+                      48
+                    ],
+                    "second": [
+                      43,
+                      48
+                    ],
+                    "firstChars": [
+                      674,
+                      691
+                    ],
+                    "secondChars": [
+                      674,
+                      691
+                    ],
+                    "fingerprint": "033cc72859d09aab22cc013587222073d73274836f10b17d9ee57dd9a76417d6"
+                  },
+                  {
+                    "first": [
+                      18,
+                      23
+                    ],
+                    "second": [
+                      18,
+                      23
+                    ],
+                    "firstChars": [
+                      570,
+                      595
+                    ],
+                    "secondChars": [
+                      570,
+                      595
+                    ],
+                    "fingerprint": "0479b6f37d4bdad5ffa2cc3f43f517857442efae593bd0dab9dc78b05080a0dc"
+                  },
+                  {
+                    "first": [
+                      218,
+                      223
+                    ],
+                    "second": [
+                      218,
+                      223
+                    ],
+                    "firstChars": [
+                      1404,
+                      1422
+                    ],
+                    "secondChars": [
+                      1404,
+                      1422
+                    ],
+                    "fingerprint": "06a2a7c1c8762d7accdd5866aba9a710f5b47297fee9515d463538706b029052"
+                  },
+                  {
+                    "first": [
+                      75,
+                      80
+                    ],
+                    "second": [
+                      75,
+                      80
+                    ],
+                    "firstChars": [
+                      780,
+                      796
+                    ],
+                    "secondChars": [
+                      780,
+                      796
+                    ],
+                    "fingerprint": "0783de7c9a364b95fb5e8f028cd06b799be8a8fbdf36a72d6304beeb08fc2871"
+                  },
+                  {
+                    "first": [
+                      193,
+                      198
+                    ],
+                    "second": [
+                      193,
+                      198
+                    ],
+                    "firstChars": [
+                      1321,
+                      1337
+                    ],
+                    "secondChars": [
+                      1321,
+                      1337
+                    ],
+                    "fingerprint": "07c342429ab0fcb6e56da2c9252203a38a814853692adeb889ebbb4b20f67250"
+                  },
+                  {
+                    "first": [
+                      212,
+                      217
+                    ],
+                    "second": [
+                      212,
+                      217
+                    ],
+                    "firstChars": [
+                      1385,
+                      1403
+                    ],
+                    "secondChars": [
+                      1385,
+                      1403
+                    ],
+                    "fingerprint": "08e89d685cada98a3448165523f6fab37c2d0282ca26cec0c3fe995a2fc3293d"
+                  },
+                  {
+                    "first": [
+                      7,
+                      12
+                    ],
+                    "second": [
+                      7,
+                      12
+                    ],
+                    "firstChars": [
+                      526,
+                      546
+                    ],
+                    "secondChars": [
+                      526,
+                      546
+                    ],
+                    "fingerprint": "093a85ec9b829578d2bec8c57ca33cf2de28794512b9bbbee98d9b1c4482a8e5"
+                  },
+                  {
+                    "first": [
+                      103,
+                      108
+                    ],
+                    "second": [
+                      103,
+                      108
+                    ],
+                    "firstChars": [
+                      881,
+                      902
+                    ],
+                    "secondChars": [
+                      881,
+                      902
+                    ],
+                    "fingerprint": "0c1f8c053ccd50b167373302fac8bcfd95df4da13b4b2c8bc0762f60b6e12c43"
+                  },
+                  {
+                    "first": [
+                      257,
+                      262
+                    ],
+                    "second": [
+                      257,
+                      262
+                    ],
+                    "firstChars": [
+                      1551,
+                      1574
+                    ],
+                    "secondChars": [
+                      1551,
+                      1574
+                    ],
+                    "fingerprint": "0c53160579ffd64c94d51e0860e8e15ccbf638fc331a5fec6361718d56db19c2"
+                  },
+                  {
+                    "first": [
+                      17,
+                      22
+                    ],
+                    "second": [
+                      17,
+                      22
+                    ],
+                    "firstChars": [
+                      567,
+                      589
+                    ],
+                    "secondChars": [
+                      567,
+                      589
+                    ],
+                    "fingerprint": "0c924aa56629ddb34c06b56f736bc0ee2a52e1776bdcf6afb5f20bc55fb309af"
+                  }
+                ]
+              },
+              {
+                "version": "token5-set@1",
+                "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                "filterVersion": "source-filter@1",
+                "firstPath": "index.js",
+                "secondPath": "index.js",
+                "firstDigest": "2eabf3096793c43934ef127fb50238dcba93074fb54f943fc62aeab616769dfc",
+                "secondDigest": "2eabf3096793c43934ef127fb50238dcba93074fb54f943fc62aeab616769dfc",
+                "firstTokens": 268,
+                "secondTokens": 268,
+                "rangesTruncated": true,
+                "reasons": [],
+                "method": "normalized_token5",
+                "state": "completed",
+                "score": 1,
+                "sharedShingles": 215,
+                "firstShingles": 215,
+                "secondShingles": 215,
+                "firstCoverage": 1,
+                "secondCoverage": 1,
+                "ranges": [
+                  {
+                    "first": [
+                      213,
+                      218
+                    ],
+                    "second": [
+                      213,
+                      218
+                    ],
+                    "firstChars": [
+                      1387,
+                      1404
+                    ],
+                    "secondChars": [
+                      1387,
+                      1404
+                    ],
+                    "fingerprint": "000909a78b10a41411d670b572863370bc2ac176684a0c3fb5bd4d87a5149504"
+                  },
+                  {
+                    "first": [
+                      52,
+                      57
+                    ],
+                    "second": [
+                      52,
+                      57
+                    ],
+                    "firstChars": [
+                      707,
+                      721
+                    ],
+                    "secondChars": [
+                      707,
+                      721
+                    ],
+                    "fingerprint": "016152032a266cfa7d6b753c1b6a22157d47d3b6602c23f2ece6fad4c4a42dff"
+                  },
+                  {
+                    "first": [
+                      18,
+                      23
+                    ],
+                    "second": [
+                      18,
+                      23
+                    ],
+                    "firstChars": [
+                      570,
+                      595
+                    ],
+                    "secondChars": [
+                      570,
+                      595
+                    ],
+                    "fingerprint": "0479b6f37d4bdad5ffa2cc3f43f517857442efae593bd0dab9dc78b05080a0dc"
+                  },
+                  {
+                    "first": [
+                      212,
+                      217
+                    ],
+                    "second": [
+                      212,
+                      217
+                    ],
+                    "firstChars": [
+                      1385,
+                      1403
+                    ],
+                    "secondChars": [
+                      1385,
+                      1403
+                    ],
+                    "fingerprint": "0510971fb14c41616662d5ec1811068b31aff7ed398346791182aef2200762fa"
+                  },
+                  {
+                    "first": [
+                      39,
+                      44
+                    ],
+                    "second": [
+                      39,
+                      44
+                    ],
+                    "firstChars": [
+                      659,
+                      675
+                    ],
+                    "secondChars": [
+                      659,
+                      675
+                    ],
+                    "fingerprint": "05d2cc7234d1a1eabf5dff4519874c55bad262d5acc4adf60a074a682dec0bd2"
+                  },
+                  {
+                    "first": [
+                      193,
+                      198
+                    ],
+                    "second": [
+                      193,
+                      198
+                    ],
+                    "firstChars": [
+                      1321,
+                      1337
+                    ],
+                    "secondChars": [
+                      1321,
+                      1337
+                    ],
+                    "fingerprint": "07c342429ab0fcb6e56da2c9252203a38a814853692adeb889ebbb4b20f67250"
+                  },
+                  {
+                    "first": [
+                      152,
+                      157
+                    ],
+                    "second": [
+                      152,
+                      157
+                    ],
+                    "firstChars": [
+                      1116,
+                      1133
+                    ],
+                    "secondChars": [
+                      1116,
+                      1133
+                    ],
+                    "fingerprint": "07eec7b77e0b4c4e486ccddbfee136bbde0c41ab18c48349a13d1863338881ba"
+                  },
+                  {
+                    "first": [
+                      50,
+                      55
+                    ],
+                    "second": [
+                      50,
+                      55
+                    ],
+                    "firstChars": [
+                      699,
+                      714
+                    ],
+                    "secondChars": [
+                      699,
+                      714
+                    ],
+                    "fingerprint": "08d22ef050e7a6122c6b0cfb083dc510fd87a3812958a94b6d42c558404b91e1"
+                  },
+                  {
+                    "first": [
+                      257,
+                      262
+                    ],
+                    "second": [
+                      257,
+                      262
+                    ],
+                    "firstChars": [
+                      1551,
+                      1574
+                    ],
+                    "secondChars": [
+                      1551,
+                      1574
+                    ],
+                    "fingerprint": "08f4bfbf904fa6652e6235393459244a637680e6aa8648f5c009b4b3f6958b95"
+                  },
+                  {
+                    "first": [
+                      126,
+                      131
+                    ],
+                    "second": [
+                      126,
+                      131
+                    ],
+                    "firstChars": [
+                      968,
+                      982
+                    ],
+                    "secondChars": [
+                      968,
+                      982
+                    ],
+                    "fingerprint": "0973e74b16de260cdfdf06a8f40819d59070818ecf479f47094cb37eda046308"
+                  },
+                  {
+                    "first": [
+                      5,
+                      10
+                    ],
+                    "second": [
+                      5,
+                      10
+                    ],
+                    "firstChars": [
+                      518,
+                      543
+                    ],
+                    "secondChars": [
+                      518,
+                      543
+                    ],
+                    "fingerprint": "0b93fb49509d45d3f6c50596b974a423f0b198666f3cf08971c48815d03c516a"
+                  },
+                  {
+                    "first": [
+                      17,
+                      22
+                    ],
+                    "second": [
+                      17,
+                      22
+                    ],
+                    "firstChars": [
+                      567,
+                      589
+                    ],
+                    "secondChars": [
+                      567,
+                      589
+                    ],
+                    "fingerprint": "0c924aa56629ddb34c06b56f736bc0ee2a52e1776bdcf6afb5f20bc55fb309af"
+                  }
+                ]
+              }
+            ],
+            "files": {
+              "target": [
+                {
+                  "path": "index.d.ts",
+                  "digest": "a760662b79da8ff47d9152d25b5641491b036a3762c3cd94645380c9f97288e7",
+                  "blob": "0475d9853a37ea304cac34ad41b1ac3736447ff3",
+                  "bytes": 1991,
+                  "language": "typescript",
+                  "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                  "filterVersion": "source-filter@1",
+                  "classification": "application_source",
+                  "reasons": [
+                    "supported source; no exclusion heuristic matched"
+                  ]
+                },
+                {
+                  "path": "index.js",
+                  "digest": "2eabf3096793c43934ef127fb50238dcba93074fb54f943fc62aeab616769dfc",
+                  "blob": "627ed535f3163b37f2e3b208a23788fd0a715eba",
+                  "bytes": 1587,
+                  "language": "javascript",
+                  "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                  "filterVersion": "source-filter@1",
+                  "classification": "application_source",
+                  "reasons": [
+                    "supported source; no exclusion heuristic matched"
+                  ]
+                }
+              ],
+              "candidate": [
+                {
+                  "path": "index.d.ts",
+                  "digest": "a760662b79da8ff47d9152d25b5641491b036a3762c3cd94645380c9f97288e7",
+                  "blob": "0475d9853a37ea304cac34ad41b1ac3736447ff3",
+                  "bytes": 1991,
+                  "language": "typescript",
+                  "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                  "filterVersion": "source-filter@1",
+                  "classification": "application_source",
+                  "reasons": [
+                    "supported source; no exclusion heuristic matched"
+                  ]
+                },
+                {
+                  "path": "index.js",
+                  "digest": "2eabf3096793c43934ef127fb50238dcba93074fb54f943fc62aeab616769dfc",
+                  "blob": "627ed535f3163b37f2e3b208a23788fd0a715eba",
+                  "bytes": 1587,
+                  "language": "javascript",
+                  "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                  "filterVersion": "source-filter@1",
+                  "classification": "application_source",
+                  "reasons": [
+                    "supported source; no exclusion heuristic matched"
+                  ]
+                }
+              ]
+            },
+            "checks": [],
+            "verification": {
+              "state": "pending",
+              "checks": [],
+              "canonicalEvidenceIds": []
+            },
+            "lineageClaim": "none",
+            "coverage": {
+              "state": "completed",
+              "expectedPairs": 4,
+              "comparedPairs": 4,
+              "pending": [],
+              "reasons": []
+            },
+            "usage": {
+              "attempts": 18,
+              "searchAttempts": 1,
+              "candidates": 2,
+              "files": {
+                "github:315531538@72a8fa96a9d389765cdf2bb9c6daba8302fc375d": 2,
+                "github:1168938776@db05e3dcd2aabd33b5b325aa7646f8d2c4b1ffd0": 2
+              },
+              "bytesByFile": {
+                "[\"github:315531538@72a8fa96a9d389765cdf2bb9c6daba8302fc375d\",\"index.d.ts\"]": 1991,
+                "[\"github:315531538@72a8fa96a9d389765cdf2bb9c6daba8302fc375d\",\"index.js\"]": 1587,
+                "[\"github:1168938776@db05e3dcd2aabd33b5b325aa7646f8d2c4b1ffd0\",\"index.d.ts\"]": 1991,
+                "[\"github:1168938776@db05e3dcd2aabd33b5b325aa7646f8d2c4b1ffd0\",\"index.js\"]": 1587
+              },
+              "totalBytes": 7156,
+              "activeWorkers": 0,
+              "peakWorkers": 1
+            }
+          },
+          "summary": {
+            "state": "completed",
+            "strict": {
+              "shared": 309,
+              "first": 309,
+              "second": 309,
+              "score": 1,
+              "firstCoverage": 1,
+              "secondCoverage": 1
+            },
+            "normalized": {
+              "shared": 281,
+              "first": 281,
+              "second": 281,
+              "score": 1,
+              "firstCoverage": 1,
+              "secondCoverage": 1
+            },
+            "firstTokens": 352,
+            "secondTokens": 352,
+            "firstIncluded": 2,
+            "secondIncluded": 2,
+            "firstFiltered": 0,
+            "secondFiltered": 0,
+            "exactPairs": 2,
+            "expectedPairs": 4,
+            "comparedPairs": 4,
+            "failures": []
+          },
+          "reason": null,
+          "label": "unknown; unjudged"
+        }
+      ],
+      "requests": [
+        {
+          "endpoint": "/repos/sindresorhus/yocto-queue",
+          "status": 200,
+          "outcome": "success",
+          "reason": null,
+          "reservedBytes": 32768,
+          "receivedBytes": 5562,
+          "retainedBytes": 5562
+        },
+        {
+          "endpoint": "/repositories/315531538",
+          "status": 200,
+          "outcome": "success",
+          "reason": null,
+          "reservedBytes": 32768,
+          "receivedBytes": 5562,
+          "retainedBytes": 5562
+        },
+        {
+          "endpoint": "/repos/sindresorhus/yocto-queue/commits/main",
+          "status": 200,
+          "outcome": "success",
+          "reason": null,
+          "reservedBytes": 32768,
+          "receivedBytes": 4348,
+          "retainedBytes": 4348
+        },
+        {
+          "endpoint": "/repositories/1168938776",
+          "status": 200,
+          "outcome": "success",
+          "reason": null,
+          "reservedBytes": 32768,
+          "receivedBytes": 5252,
+          "retainedBytes": 5252
+        },
+        {
+          "endpoint": "/repos/munachi-n/yocto-queue/commits/master",
+          "status": 200,
+          "outcome": "success",
+          "reason": null,
+          "reservedBytes": 32768,
+          "receivedBytes": 20229,
+          "retainedBytes": 20229
+        },
+        {
+          "endpoint": "/repos/sindresorhus/yocto-queue/git/trees/0b81d56218d4a4ab1b9ec91109e7b5d493e123d7",
+          "status": 200,
+          "outcome": "success",
+          "reason": null,
+          "reservedBytes": 32768,
+          "receivedBytes": 2879,
+          "retainedBytes": 2879
+        },
+        {
+          "endpoint": "/repos/sindresorhus/yocto-queue/git/trees/8396da1247b5dd9931670feb4ab37a0c367b92e6",
+          "status": 200,
+          "outcome": "success",
+          "reason": null,
+          "reservedBytes": 32768,
+          "receivedBytes": 629,
+          "retainedBytes": 629
+        },
+        {
+          "endpoint": "/repos/sindresorhus/yocto-queue/git/trees/a9c67974f2227184434b96cd1739383776d8dbc1",
+          "status": 200,
+          "outcome": "success",
+          "reason": null,
+          "reservedBytes": 32768,
+          "receivedBytes": 413,
+          "retainedBytes": 413
+        },
+        {
+          "endpoint": "/repos/sindresorhus/yocto-queue",
+          "status": 200,
+          "outcome": "success",
+          "reason": null,
+          "reservedBytes": 32768,
+          "receivedBytes": 5562,
+          "retainedBytes": 5562
+        },
+        {
+          "endpoint": "/repos/munachi-n/yocto-queue/git/trees/9925e53c997bf4590cbab809fc482b74093f3da8",
+          "status": 200,
+          "outcome": "success",
+          "reason": null,
+          "reservedBytes": 32768,
+          "receivedBytes": 2632,
+          "retainedBytes": 2632
+        },
+        {
+          "endpoint": "/repos/munachi-n/yocto-queue",
+          "status": 200,
+          "outcome": "success",
+          "reason": null,
+          "reservedBytes": 32768,
+          "receivedBytes": 5252,
+          "retainedBytes": 5252
+        },
+        {
+          "endpoint": "/repos/sindresorhus/yocto-queue/git/blobs/0475d9853a37ea304cac34ad41b1ac3736447ff3",
+          "status": 200,
+          "outcome": "success",
+          "reason": null,
+          "reservedBytes": 32768,
+          "receivedBytes": 3043,
+          "retainedBytes": 3043
+        },
+        {
+          "endpoint": "/repos/sindresorhus/yocto-queue/git/blobs/627ed535f3163b37f2e3b208a23788fd0a715eba",
+          "status": 200,
+          "outcome": "success",
+          "reason": null,
+          "reservedBytes": 32768,
+          "receivedBytes": 2485,
+          "retainedBytes": 2485
+        },
+        {
+          "endpoint": "/repos/sindresorhus/yocto-queue",
+          "status": 200,
+          "outcome": "success",
+          "reason": null,
+          "reservedBytes": 32768,
+          "receivedBytes": 5562,
+          "retainedBytes": 5562
+        },
+        {
+          "endpoint": "/repos/munachi-n/yocto-queue/git/blobs/0475d9853a37ea304cac34ad41b1ac3736447ff3",
+          "status": 200,
+          "outcome": "success",
+          "reason": null,
+          "reservedBytes": 32768,
+          "receivedBytes": 3033,
+          "retainedBytes": 3033
+        },
+        {
+          "endpoint": "/repos/munachi-n/yocto-queue/git/blobs/627ed535f3163b37f2e3b208a23788fd0a715eba",
+          "status": 200,
+          "outcome": "success",
+          "reason": null,
+          "reservedBytes": 32768,
+          "receivedBytes": 2475,
+          "retainedBytes": 2475
+        },
+        {
+          "endpoint": "/repos/munachi-n/yocto-queue",
+          "status": 200,
+          "outcome": "success",
+          "reason": null,
+          "reservedBytes": 32768,
+          "receivedBytes": 5252,
+          "retainedBytes": 5252
+        }
+      ],
+      "budget": {
+        "attempts": 24,
+        "searchAttempts": 2,
+        "candidates": 3,
+        "filesPerCandidate": 8,
+        "bytesPerFile": 131072,
+        "totalBytes": 2097152,
+        "wallMs": 30000,
+        "concurrency": 2,
+        "cpuMs": null
+      },
+      "networkProfile": {
+        "perResponseBytes": 32768,
+        "totalResponseBytes": 1048576
+      },
+      "usage": {
+        "attempts": 18,
+        "searchAttempts": 1,
+        "candidates": 2,
+        "files": {
+          "github:315531538@72a8fa96a9d389765cdf2bb9c6daba8302fc375d": 2,
+          "github:1168938776@db05e3dcd2aabd33b5b325aa7646f8d2c4b1ffd0": 2
+        },
+        "bytesByFile": {
+          "[\"github:315531538@72a8fa96a9d389765cdf2bb9c6daba8302fc375d\",\"index.d.ts\"]": 1991,
+          "[\"github:315531538@72a8fa96a9d389765cdf2bb9c6daba8302fc375d\",\"index.js\"]": 1587,
+          "[\"github:1168938776@db05e3dcd2aabd33b5b325aa7646f8d2c4b1ffd0\",\"index.d.ts\"]": 1991,
+          "[\"github:1168938776@db05e3dcd2aabd33b5b325aa7646f8d2c4b1ffd0\",\"index.js\"]": 1587
+        },
+        "totalBytes": 7156,
+        "activeWorkers": 0,
+        "peakWorkers": 1
+      },
+      "network": {
+        "reservedBytes": 589824,
+        "receivedBytes": 96080,
+        "retainedBytes": 96080,
+        "overflowBytes": 0
+      },
+      "sourceMaterializedBytes": 7156,
+      "coverage": {
+        "state": "completed",
+        "completed": 1,
+        "inconclusive": 0
+      },
+      "verification": "pending",
+      "lineageClaim": "none",
+      "cpuBudget": "unsupported"
+    },
+    "receipt": {
+      "schemaVersion": "discovery-pinned-probe-receipt@1",
+      "contentDigest": "c479e6e62eebeb79317cd5b93771bc3c8c5722dbe0599afef90f41a5ffa763e0",
+      "startedAt": "2026-10-10T00:59:34.079Z",
+      "wallMs": 3197.1839519999994,
+      "processCpuMs": 377.863,
+      "cpuBudget": "unsupported",
+      "cpuScope": "process including workers; observational only",
+      "requests": [
+        {
+          "request": {
+            "endpoint": "/repos/sindresorhus/yocto-queue",
+            "status": 200,
+            "outcome": "success",
+            "reason": null,
+            "reservedBytes": 32768,
+            "receivedBytes": 5562,
+            "retainedBytes": 5562
+          },
+          "startedAt": "2026-10-10T00:59:03.846Z",
+          "wallMs": 480.1957059999995,
+          "headers": {
+            "x-ratelimit-limit": "60",
+            "x-ratelimit-remaining": "48",
+            "x-ratelimit-reset": "1791597168",
+            "x-ratelimit-used": "12",
+            "x-ratelimit-resource": "core",
+            "x-github-api-version-selected": "2026-03-10"
+          }
+        },
+        {
+          "request": {
+            "endpoint": "/repositories/315531538",
+            "status": 200,
+            "outcome": "success",
+            "reason": null,
+            "reservedBytes": 32768,
+            "receivedBytes": 5562,
+            "retainedBytes": 5562
+          },
+          "startedAt": "2026-10-10T00:59:04.326Z",
+          "wallMs": 338.47771399999965,
+          "headers": {
+            "x-ratelimit-limit": "60",
+            "x-ratelimit-remaining": "47",
+            "x-ratelimit-reset": "1791597168",
+            "x-ratelimit-used": "13",
+            "x-ratelimit-resource": "core",
+            "x-github-api-version-selected": "2026-03-10"
+          }
+        },
+        {
+          "request": {
+            "endpoint": "/repos/sindresorhus/yocto-queue/commits/main",
+            "status": 200,
+            "outcome": "success",
+            "reason": null,
+            "reservedBytes": 32768,
+            "receivedBytes": 4348,
+            "retainedBytes": 4348
+          },
+          "startedAt": "2026-10-10T00:59:04.665Z",
+          "wallMs": 329.9053649999996,
+          "headers": {
+            "x-ratelimit-limit": "60",
+            "x-ratelimit-remaining": "46",
+            "x-ratelimit-reset": "1791597168",
+            "x-ratelimit-used": "14",
+            "x-ratelimit-resource": "core",
+            "x-github-api-version-selected": "2026-03-10"
+          }
+        },
+        {
+          "request": {
+            "endpoint": "/repositories/1168938776",
+            "status": 200,
+            "outcome": "success",
+            "reason": null,
+            "reservedBytes": 32768,
+            "receivedBytes": 5252,
+            "retainedBytes": 5252
+          },
+          "startedAt": "2026-10-10T00:59:18.927Z",
+          "wallMs": 469.38472700000057,
+          "headers": {
+            "x-ratelimit-limit": "60",
+            "x-ratelimit-remaining": "45",
+            "x-ratelimit-reset": "1791597168",
+            "x-ratelimit-used": "15",
+            "x-ratelimit-resource": "core",
+            "x-github-api-version-selected": "2026-03-10"
+          }
+        },
+        {
+          "request": {
+            "endpoint": "/repos/munachi-n/yocto-queue/commits/master",
+            "status": 200,
+            "outcome": "success",
+            "reason": null,
+            "reservedBytes": 32768,
+            "receivedBytes": 20229,
+            "retainedBytes": 20229
+          },
+          "startedAt": "2026-10-10T00:59:19.397Z",
+          "wallMs": 454.7827909999978,
+          "headers": {
+            "x-ratelimit-limit": "60",
+            "x-ratelimit-remaining": "44",
+            "x-ratelimit-reset": "1791597168",
+            "x-ratelimit-used": "16",
+            "x-ratelimit-resource": "core",
+            "x-github-api-version-selected": "2026-03-10"
+          }
+        },
+        {
+          "request": {
+            "endpoint": "/repos/sindresorhus/yocto-queue/git/trees/0b81d56218d4a4ab1b9ec91109e7b5d493e123d7",
+            "status": 200,
+            "outcome": "success",
+            "reason": null,
+            "reservedBytes": 32768,
+            "receivedBytes": 2879,
+            "retainedBytes": 2879
+          },
+          "startedAt": "2026-10-10T00:59:19.852Z",
+          "wallMs": 331.15464500000235,
+          "headers": {
+            "x-ratelimit-limit": "60",
+            "x-ratelimit-remaining": "43",
+            "x-ratelimit-reset": "1791597168",
+            "x-ratelimit-used": "17",
+            "x-ratelimit-resource": "core",
+            "x-github-api-version-selected": "2026-03-10"
+          }
+        },
+        {
+          "request": {
+            "endpoint": "/repos/sindresorhus/yocto-queue/git/trees/8396da1247b5dd9931670feb4ab37a0c367b92e6",
+            "status": 200,
+            "outcome": "success",
+            "reason": null,
+            "reservedBytes": 32768,
+            "receivedBytes": 629,
+            "retainedBytes": 629
+          },
+          "startedAt": "2026-10-10T00:59:20.185Z",
+          "wallMs": 330.47990199999913,
+          "headers": {
+            "x-ratelimit-limit": "60",
+            "x-ratelimit-remaining": "42",
+            "x-ratelimit-reset": "1791597168",
+            "x-ratelimit-used": "18",
+            "x-ratelimit-resource": "core",
+            "x-github-api-version-selected": "2026-03-10"
+          }
+        },
+        {
+          "request": {
+            "endpoint": "/repos/sindresorhus/yocto-queue/git/trees/a9c67974f2227184434b96cd1739383776d8dbc1",
+            "status": 200,
+            "outcome": "success",
+            "reason": null,
+            "reservedBytes": 32768,
+            "receivedBytes": 413,
+            "retainedBytes": 413
+          },
+          "startedAt": "2026-10-10T00:59:20.516Z",
+          "wallMs": 319.079730999998,
+          "headers": {
+            "x-ratelimit-limit": "60",
+            "x-ratelimit-remaining": "41",
+            "x-ratelimit-reset": "1791597168",
+            "x-ratelimit-used": "19",
+            "x-ratelimit-resource": "core",
+            "x-github-api-version-selected": "2026-03-10"
+          }
+        },
+        {
+          "request": {
+            "endpoint": "/repos/sindresorhus/yocto-queue",
+            "status": 200,
+            "outcome": "success",
+            "reason": null,
+            "reservedBytes": 32768,
+            "receivedBytes": 5562,
+            "retainedBytes": 5562
+          },
+          "startedAt": "2026-10-10T00:59:20.835Z",
+          "wallMs": 96.76742100000047,
+          "headers": {
+            "x-ratelimit-limit": "60",
+            "x-ratelimit-remaining": "40",
+            "x-ratelimit-reset": "1791597168",
+            "x-ratelimit-used": "20",
+            "x-ratelimit-resource": "core",
+            "x-github-api-version-selected": "2026-03-10"
+          }
+        },
+        {
+          "request": {
+            "endpoint": "/repos/munachi-n/yocto-queue/git/trees/9925e53c997bf4590cbab809fc482b74093f3da8",
+            "status": 200,
+            "outcome": "success",
+            "reason": null,
+            "reservedBytes": 32768,
+            "receivedBytes": 2632,
+            "retainedBytes": 2632
+          },
+          "startedAt": "2026-10-10T00:59:20.932Z",
+          "wallMs": 342.45574599999964,
+          "headers": {
+            "x-ratelimit-limit": "60",
+            "x-ratelimit-remaining": "39",
+            "x-ratelimit-reset": "1791597168",
+            "x-ratelimit-used": "21",
+            "x-ratelimit-resource": "core",
+            "x-github-api-version-selected": "2026-03-10"
+          }
+        },
+        {
+          "request": {
+            "endpoint": "/repos/munachi-n/yocto-queue",
+            "status": 200,
+            "outcome": "success",
+            "reason": null,
+            "reservedBytes": 32768,
+            "receivedBytes": 5252,
+            "retainedBytes": 5252
+          },
+          "startedAt": "2026-10-10T00:59:21.275Z",
+          "wallMs": 287.8979959999997,
+          "headers": {
+            "x-ratelimit-limit": "60",
+            "x-ratelimit-remaining": "38",
+            "x-ratelimit-reset": "1791597168",
+            "x-ratelimit-used": "22",
+            "x-ratelimit-resource": "core",
+            "x-github-api-version-selected": "2026-03-10"
+          }
+        },
+        {
+          "request": {
+            "endpoint": "/repos/sindresorhus/yocto-queue/git/blobs/0475d9853a37ea304cac34ad41b1ac3736447ff3",
+            "status": 200,
+            "outcome": "success",
+            "reason": null,
+            "reservedBytes": 32768,
+            "receivedBytes": 3043,
+            "retainedBytes": 3043
+          },
+          "startedAt": "2026-10-10T00:59:34.080Z",
+          "wallMs": 1071.1646299999993,
+          "headers": {
+            "x-ratelimit-limit": "60",
+            "x-ratelimit-remaining": "37",
+            "x-ratelimit-reset": "1791597168",
+            "x-ratelimit-used": "23",
+            "x-ratelimit-resource": "core",
+            "x-github-api-version-selected": "2026-03-10"
+          }
+        },
+        {
+          "request": {
+            "endpoint": "/repos/sindresorhus/yocto-queue/git/blobs/627ed535f3163b37f2e3b208a23788fd0a715eba",
+            "status": 200,
+            "outcome": "success",
+            "reason": null,
+            "reservedBytes": 32768,
+            "receivedBytes": 2485,
+            "retainedBytes": 2485
+          },
+          "startedAt": "2026-10-10T00:59:35.152Z",
+          "wallMs": 280.0403609999994,
+          "headers": {
+            "x-ratelimit-limit": "60",
+            "x-ratelimit-remaining": "36",
+            "x-ratelimit-reset": "1791597168",
+            "x-ratelimit-used": "24",
+            "x-ratelimit-resource": "core",
+            "x-github-api-version-selected": "2026-03-10"
+          }
+        },
+        {
+          "request": {
+            "endpoint": "/repos/sindresorhus/yocto-queue",
+            "status": 200,
+            "outcome": "success",
+            "reason": null,
+            "reservedBytes": 32768,
+            "receivedBytes": 5562,
+            "retainedBytes": 5562
+          },
+          "startedAt": "2026-10-10T00:59:35.432Z",
+          "wallMs": 242.61789999999746,
+          "headers": {
+            "x-ratelimit-limit": "60",
+            "x-ratelimit-remaining": "35",
+            "x-ratelimit-reset": "1791597168",
+            "x-ratelimit-used": "25",
+            "x-ratelimit-resource": "core",
+            "x-github-api-version-selected": "2026-03-10"
+          }
+        },
+        {
+          "request": {
+            "endpoint": "/repos/munachi-n/yocto-queue/git/blobs/0475d9853a37ea304cac34ad41b1ac3736447ff3",
+            "status": 200,
+            "outcome": "success",
+            "reason": null,
+            "reservedBytes": 32768,
+            "receivedBytes": 3033,
+            "retainedBytes": 3033
+          },
+          "startedAt": "2026-10-10T00:59:35.675Z",
+          "wallMs": 538.213002000004,
+          "headers": {
+            "x-ratelimit-limit": "60",
+            "x-ratelimit-remaining": "34",
+            "x-ratelimit-reset": "1791597168",
+            "x-ratelimit-used": "26",
+            "x-ratelimit-resource": "core",
+            "x-github-api-version-selected": "2026-03-10"
+          }
+        },
+        {
+          "request": {
+            "endpoint": "/repos/munachi-n/yocto-queue/git/blobs/627ed535f3163b37f2e3b208a23788fd0a715eba",
+            "status": 200,
+            "outcome": "success",
+            "reason": null,
+            "reservedBytes": 32768,
+            "receivedBytes": 2475,
+            "retainedBytes": 2475
+          },
+          "startedAt": "2026-10-10T00:59:36.213Z",
+          "wallMs": 505.35462999999436,
+          "headers": {
+            "x-ratelimit-limit": "60",
+            "x-ratelimit-remaining": "33",
+            "x-ratelimit-reset": "1791597168",
+            "x-ratelimit-used": "27",
+            "x-ratelimit-resource": "core",
+            "x-github-api-version-selected": "2026-03-10"
+          }
+        },
+        {
+          "request": {
+            "endpoint": "/repos/munachi-n/yocto-queue",
+            "status": 200,
+            "outcome": "success",
+            "reason": null,
+            "reservedBytes": 32768,
+            "receivedBytes": 5252,
+            "retainedBytes": 5252
+          },
+          "startedAt": "2026-10-10T00:59:36.719Z",
+          "wallMs": 214.363860999998,
+          "headers": {
+            "x-ratelimit-limit": "60",
+            "x-ratelimit-remaining": "32",
+            "x-ratelimit-reset": "1791597168",
+            "x-ratelimit-used": "28",
+            "x-ratelimit-resource": "core",
+            "x-github-api-version-selected": "2026-03-10"
+          }
+        }
+      ],
+      "observations": [
+        {
+          "expectedId": 315531538,
+          "bootstrap": null,
+          "resolution": [
+            {
+              "repositoryId": 315531538,
+              "fullName": "sindresorhus/yocto-queue",
+              "htmlUrl": "https://github.com/sindresorhus/yocto-queue",
+              "source": "repository_metadata",
+              "observedAt": "2026-10-10T00:59:04.326Z"
+            },
+            {
+              "repositoryId": 315531538,
+              "fullName": "sindresorhus/yocto-queue",
+              "htmlUrl": "https://github.com/sindresorhus/yocto-queue",
+              "source": "repository_metadata",
+              "observedAt": "2026-10-10T00:59:04.665Z"
+            }
+          ]
+        },
+        {
+          "expectedId": 1168938776,
+          "bootstrap": null,
+          "resolution": [
+            {
+              "repositoryId": 1168938776,
+              "fullName": "munachi-n/yocto-queue",
+              "htmlUrl": "https://github.com/munachi-n/yocto-queue",
+              "source": "repository_search",
+              "observedAt": "2026-10-10T00:59:05.412Z"
+            },
+            {
+              "repositoryId": 1168938776,
+              "fullName": "munachi-n/yocto-queue",
+              "htmlUrl": "https://github.com/munachi-n/yocto-queue",
+              "source": "repository_metadata",
+              "observedAt": "2026-10-10T00:59:19.397Z"
+            }
+          ]
+        }
+      ],
+      "node": "v24.21.0",
+      "platform": "linux"
+    }
+  },
+  "contentDigest": "1513604256579cea82929bc79ba59d2092b2aa07ef756be41677bc63dafd1125"
+}

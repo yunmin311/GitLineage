@@ -1,3 +1,10 @@
+import {connectionFallback} from './lib/connection-fallback.mjs';
+import {classifyRelationships} from './lib/classification.mjs';
+import {spatialLayout, spatialExpansion, spatialRoute, ORIGIN} from './lib/spatial.mjs';
+import {buildView as projectCanonicalView} from '../view-model.ts';
+import {captureMotion, transitionScene, transitionCamera, stopMotion, revealInstrument, revealPanel} from './lib/motion.mjs';
+import { mountRepositoryExplorer } from './lib/repository-explorer.mjs';
+import { mountDeepPreview } from './lib/deep-preview.mjs';
 /**
  * GitLineage Explorer application.
  *
@@ -67,10 +74,10 @@ import {
   PHASES, SETTLED_PHASE, arcSegment, tracerPoint, phaseLabel, phaseTransition, isSettled,
   phaseIndex as tracerPhaseIndex,
 } from './lib/phases.mjs';
-import { buildComposition, plateRows, plateHiddenRows, PLATE_MEMBER_ROWS } from './lib/aggregate.mjs';
+import { buildComposition } from './lib/aggregate.mjs';
 import { Regime, regimeFor, partitionPeers, isHomogeneousFan } from './lib/regime.mjs';
 import {
-  WORLD, ZONES, subjectPosition, dataZonePositions, layoutMassStacks, loosePositions, initialViewBox, viewBoxFor,
+  WORLD, ZONES, subjectPosition, initialViewBox, viewBoxFor,
 } from './lib/compose.mjs';
 import { DRAWABLE_CAPACITY } from './lib/regime.mjs';
 
@@ -94,6 +101,7 @@ const LABEL_FAN_LIMIT = 2;
 /** The same rule for node degree: a hub's labels all land near the hub. */
 const LABEL_DEGREE_LIMIT = 4;
 
+let workspace = null;
 const state = {
   repository: null,
   view: null,
@@ -101,7 +109,11 @@ const state = {
   meta: null,
   selectedEdgeId: '',
   selectedNodeId: '',
-  layers: allLayersOn(),
+  layers: provenanceLayers(),
+  perspective: 'origins',
+  focusId: '',
+  explorationBack: [],
+  positions: new Map(),
   expandedBundles: new Set(),
   query: '',
   depth: 200,
@@ -179,6 +191,8 @@ function syncUrl(replace = true) {
     depth: String(state.depth),
   });
   const params = new URLSearchParams(query);
+  params.set('perspective', state.perspective);
+  params.set('neighborhoods', JSON.stringify([...aggregatePages]));
   if (isPhone()) params.set('mobile', mobile.view);
   const next = `${repositoryPath(state.repository)}${params.size ? '?' + params : ''}`;
   if (window.location.pathname + window.location.search === next) return;
@@ -191,11 +205,18 @@ function readUrlState() {
   state.selectedEdgeId = urlState.edge;
   state.selectedNodeId = urlState.node;
   state.query = urlState.search;
-  // An absent `layers` parameter means every layer is on. Parsing the empty
-  // string would mean the opposite, so the default is only replaced when the
-  // parameter is actually present.
-  state.layers = urlState.layers ? parseLayerState(urlState.layers) : allLayersOn();
+  // Without an explicit layer choice, recorded ancestry and source identity
+  // take priority. Dependencies and references require a deliberate switch.
+  state.layers = urlState.layers ? parseLayerState(urlState.layers) : provenanceLayers();
+  state.perspective = new URLSearchParams(window.location.search).get('perspective') || (urlState.layers ? 'custom' : 'origins');
   state.expandedBundles = new Set(urlState.bundles ? urlState.bundles.split(',') : []);
+  aggregatePages.clear();
+  try {
+    const saved=JSON.parse(new URLSearchParams(window.location.search).get('neighborhoods')||'[]');
+    if(Array.isArray(saved))for(const item of saved){
+      if(Array.isArray(item)&&item.length===2&&typeof item[0]==='string'&&Number.isSafeInteger(item[1])&&item[1]>0&&item[1]<=100000)aggregatePages.set(item[0],item[1]);
+    }
+  } catch { /* Invalid URL state cannot interrupt graph loading. */ }
   if (urlState.depth) {
     const depth = Number(urlState.depth);
     if (Number.isFinite(depth)) state.depth = depth;
@@ -208,6 +229,8 @@ function navigate(repository, push = true) {
   state.selectedNodeId = '';
   state.query = '';
   state.expandedBundles = new Set();
+  aggregatePages.clear();
+  state.activeGroup='';state.focusId='';state.explorationBack=[];state.positions.clear();state.perspective='origins';state.layers=provenanceLayers();
   // A different repository is a different dataset, so the camera refits. This
   // previously inherited the previous repository's framing.
   state.refitPending = true;
@@ -784,16 +807,7 @@ function applyView(viewEnvelope) {
   setHidden($('strip'), true);
   renderChrome(view);
 
-  if (view.empty.isEmpty) {
-    setHidden($('empty'), false);
-    $('empty-body').textContent = view.empty.reason;
-    $('canvas').replaceChildren();
-    setHidden($('bundles'), true);
-      state.phase = 'empty';
-    setChrome('no lineage');
-    return;
-  }
-
+  setHidden($('empty'), true);
   // The phase chip is the last thing set, so it can never report a stale label.
   setChrome(state.phase === 'partial' ? 'partial' : 'analyzed');
   draw();
@@ -902,223 +916,115 @@ function currentEdges() {
 /** Pseudo-id for a bundle representative card. Never an entity id. */
 const BUNDLE_ID_PREFIX = 'bundle:';
 
-/**
- * Positions for bundle representative cards.
- *
- * Deliberately a layout-only concept: these are cards standing in for grouped
- * relationships, not entities. They are fanned to the right of the subject and
- * are only ever created when nothing else would be drawn.
- */
-const PLATE_W = 184;
-/**
- * An expanded plate is wider because each row carries a label and the file that
- * declares it. At the collapsed width the two overprinted each other and neither
- * could be read, which a DOM measurement cannot see because both elements exist.
- */
-const PLATE_W_EXPANDED = 344;
-const PLATE_HEADER = 34;
-/** The line under a plate's title that names where the claim was written down. */
-const PLATE_SUBTITLE = 22;
-const PLATE_ROW = 26;
-
-/**
- * Room for a row's evidence mark and its direction arrow, before the label starts.
- *
- * Measured, not guessed: the mark is 7 wide at a 12 inset and the arrow ends 4 past
- * its own origin, so a 16-unit allowance put the label's first glyph underneath the
- * arrow. Every row in the plate overprinted its own name, and the damage is
- * invisible to a DOM check because both elements are present and correctly placed.
- */
-const ROW_MARK_W = 26;
-
-/**
- * Plate height.
- *
- * A shut plate is its header plus the open affordance. An open one adds a row per
- * listed member, plus a line when it is holding some back. A plate that knows which
- * file declares it carries that as a subtitle, which costs a line and is the only
- * place the reader is told that the grouping is about *where* the claim was written
- * rather than what it claims.
- *
- * Every caller derives the height from this one function, so the reserved space and
- * the drawn box cannot disagree -- which is what previously let a plate's rows sit
- * outside its own border.
- */
-function plateHeader(plate) {
-  return PLATE_HEADER + (plate.meta ? PLATE_SUBTITLE : 0);
+// Local neighborhoods grow spatially. Limits describe explored space, never pages.
+const memberPageSize = () => isPhone() ? 5 : 8;
+const aggregatePages = new Map();
+function provenanceLayers(){return {ancestry:true,'source-identity':true,dependency:true,attribution:true,similarity:false};}
+function exploredIds(plate){
+ if(!plate.expanded)return [];
+ const limit=aggregatePages.get(plate.key)||memberPageSize();
+ const taxonomy=classifyRelationships(state.view,plate);
+ // Admission precedes visibility: folding a category never loads replacements.
+ return taxonomy.ordered.slice(0,limit).filter(id=>!taxonomy.paths.get(id)?.some(n=>state.expandedBundles.has('closed:'+n.id)));
 }
-
-function plateHeight(rowCount, hiddenRows = 0, hasSubtitle = false) {
-  const header = PLATE_HEADER + (hasSubtitle ? PLATE_SUBTITLE : 0);
-  const rows = rowCount + (hiddenRows > 0 ? 1 : 0);
-  return header + (rows > 0 ? rows * PLATE_ROW : 14) + 12;
+function revealRelationships(plate,ids){
+ const taxonomy=classifyRelationships(state.view,plate);
+ for(const id of ids)for(const ancestor of taxonomy.paths.get(id)||[])state.expandedBundles.delete('closed:'+ancestor.id);
 }
-
-/**
- * How far down the world a plate may reach.
- *
- * The original composition budget ends at ZONES.bandTop. Keep that authored
- * geometry limit even though the legend now belongs to the screen HUD. Kuddev/pebrel
- * is the case: one plate of 97 `package_manifest` records, which at 26 units a row is
- * over 2500 units tall against a limit of about 700.
- *
- * So a plate is bounded, and states what it is holding back. It is not silently
- * truncated: the remainder is counted in words on the plate, and every one of those
- * relationships is still reachable in the Drawer.
- */
-const PLATE_BOTTOM_LIMIT = ZONES.bandTop - 48;
-
-/**
- * The rows a plate can actually show, given where its top lands.
- *
- * One function, called by both the placement and the drawer of the plate, because the
- * reserved height and the drawn height have to come from the same arithmetic. They
- * used to come from the same function and then from a second copy that drifted, which is
- * how rows ended up outside their own border.
- */
-function plateRowsFor(plate, top, hiddenRows) {
-  const rows = plateRows(plate);
-  const header = plateHeader(plate);
-  const chrome = PLATE_HEADER + (plate.meta ? PLATE_SUBTITLE : 0) + 12
-    + (hiddenRows > 0 ? PLATE_ROW : 0) + (rows.length > 0 ? 0 : 14);
-  const budget = PLATE_BOTTOM_LIMIT - top - chrome;
-  /*
-   * Two budgets, because there are two possible extra lines: the collapsed affordance
-   * and the "in the Drawer" note. Which one is needed is not known until the rows are
-   * counted, so the note's row is reserved optimistically and given back when every row
-   * fits. Reserving it and not using it would leave a blank line at the bottom of most
-   * plates; not reserving it would put the note outside its own plate, which is the
-   * defect this whole bound exists to prevent.
-   */
-  const withNote = Math.max(0, Math.floor((budget - PLATE_ROW) / PLATE_ROW));
-  if (rows.length > withNote) {
-    return {
-      shown: rows.slice(0, withNote),
-      hidden: hiddenRows,
-      overflow: rows.length - withNote,
-      height: plateHeight(withNote, hiddenRows, !!plate.meta) + PLATE_ROW,
-    };
+function authoredPositions(view,edges,composition){
+ const taxonomies=new Map(composition.plates.map(p=>[p.key,classifyRelationships(view,p)]));
+ const classified=new Set();const categoryNodes=[],navigation=[];
+ const groups=composition.plates.map(plate=>{
+  const taxonomy=taxonomies.get(plate.key),shown=new Set(edges.filter(e=>plate.memberEdgeIds.includes(e.id)).map(e=>e.id));
+  const peers=plate.memberEdgeIds.filter(id=>edges.some(e=>e.id===id)).map(id=>view.edges.find(e=>e.id===id)).filter(Boolean).map(e=>e.source===view.subject.id?e.target:e.source);
+  if(!plate.expanded||!taxonomy.categories.length)return {key:plate.key,family:plate.family,peers};
+  const closed=n=>state.expandedBundles.has('closed:'+n.id);
+  for(const n of taxonomy.categories){
+   if(taxonomy.categories.some(parent=>parent.id===n.parent&&closed(parent)))continue;
+   categoryNodes.push(n);navigation.push({source:n.parent,target:n.id,presentation:'branch',kind:'observation'});
   }
-  return {
-    shown: rows,
-    hidden: hiddenRows,
-    overflow: 0,
-    height: plateHeight(rows.length, hiddenRows, !!plate.meta),
-  };
+  for(const id of shown){const edge=view.edges.find(e=>e.id===id);if(!edge)continue;
+   const peer=edge.source===view.subject.id?edge.target:edge.source;
+   if(classified.has(peer))continue;classified.add(peer);
+   const parent=taxonomy.paths.get(id)?.at(-1);if(parent)navigation.push({source:parent.id,target:peer,presentation:'branch',kind:'observation'});
+  }
+  const localNodes=categoryNodes.filter(n=>taxonomy.categories.some(c=>c.id===n.id));
+  const localLinks=navigation.filter(e=>e.source==='bundle:'+plate.key||taxonomy.categories.some(c=>c.id===e.source));
+  const measured=spatialExpansion({anchors:new Map([['bundle:'+plate.key,{x:0,y:0,angle:isPhone()?Math.PI/2:0}]]),nodes:[...localNodes,...localLinks.filter(e=>!e.target.startsWith('category:')).map(e=>({id:e.target}))],edges:localLinks,compact:isPhone()});
+  const cross=[...measured.values()].map(p=>isPhone()?p.x:p.y);
+  return {key:plate.key,family:plate.family,peers:[],reserve:Math.max(256,Math.max(...cross)-Math.min(...cross)+(isPhone()?256:112))};
+ });
+ const base=spatialLayout({subjectId:view.subject.id,edges:edges.filter(e=>!classified.has(e.source)&&!classified.has(e.target)),groups,compact:isPhone(),previous:state.positions});
+ if(categoryNodes.length){
+  for(const [id]of base){const old=state.positions.get(id);if(old)base.set(id,{...old});}
+  const overlaps=(a,b)=>Math.abs(a.x-b.x)<((a.width||216)+(b.width||216))/2+20&&Math.abs(a.y-b.y)<((a.height||52)+(b.height||52))/2+20;
+  for(const [id,p]of base){if(state.positions.has(id)||id===view.subject.id||id.startsWith(BUNDLE_ID_PREFIX))continue;
+   let candidate=p,attempt=0;const obstacles=[...[...base].filter(([key])=>key!==id).map(([,q])=>q),...state.positions.values()];
+   while(obstacles.some(q=>overlaps(candidate,q))&&attempt<600){attempt++;candidate={...p,x:p.x+(isPhone()?(attempt%2)*248:Math.floor(attempt/12)*280),y:p.y+Math.ceil(attempt/2)*88};}base.set(id,candidate);
+  }
+ }
+ const positions=spatialExpansion({anchors:base,nodes:[...categoryNodes,...[...classified].map(id=>({id}))],edges:navigation,previous:state.positions,compact:isPhone(),preserve:true});
+ for(const plate of composition.plates){const taxonomy=taxonomies.get(plate.key);for(const n of taxonomy.categories){const p=positions.get(n.id);if(p)Object.assign(p,{aggregateKey:plate.key,parentId:n.parent});}}
+ for(const link of navigation){const p=positions.get(link.target),parent=positions.get(link.source);if(p&&parent)Object.assign(p,{aggregateKey:parent.aggregateKey,parentId:link.source});}
+ state.classifications=categoryNodes;state.classificationLinks=navigation.filter(e=>e.target.startsWith('category:'));
+
+ state.positions=positions;state.placementOverflow=0;return positions;
 }
+const PERSPECTIVES=[['origins','Origins',['ancestry','source-identity']],['dependencies','Dependencies',['dependency']],['references','References',['attribution']]];
+function setPerspective(value){
+ const entry=PERSPECTIVES.find(p=>p[0]===value);if(!entry)return;
+ const enabled=!entry[2].some(f=>state.layers[f]);for(const f of entry[2])state.layers[f]=enabled;
+ state.perspective='custom';syncUrl();draw();renderDrawer();
+}
+function renderPerspective(){
+ let host=$('graph-perspectives');if(!host){host=el('div',{id:'graph-perspectives',class:'graph-perspectives'});$('stage').append(host);}
+ host.replaceChildren();const tabs=el('nav',{'aria-label':'Relationship layers',class:'graph-perspective-tabs'});
+ for(const [id,label,families]of PERSPECTIVES){const count=state.view.edges.filter(e=>families.includes(e.family)).length;tabs.append(el('button',{type:'button','data-perspective':id,'aria-label':label+' · '+count,'aria-pressed':String(families.some(f=>state.layers[f])),text:label+' · '+count,onclick:()=>setPerspective(id)}));}
+ host.append(tabs);
+ const ancestry=state.view.edges.filter(e=>e.family==='ancestry').length;
+ const description=ancestry?'Recorded relationships · layers share one exploration space.':'No recorded ancestry evidence · dependencies are separate claims.';
+ host.append(el('p',{class:'graph-perspective-note',text:description}));
+ const selected=state.selectedNodeId&&state.selectedNodeId!==state.view.subject.id;
+ const bar=el('div',{class:'graph-exploration-actions'});
+ if(state.explorationBack.length)bar.append(el('button',{type:'button',id:'graph-back',text:'← Back',onclick:()=>{const prev=state.explorationBack.pop();state.focusId=prev.focusId;state.layers=prev.layers;state.perspective=prev.perspective;state.selectedNodeId=prev.selectedNodeId;state.selectedEdgeId=prev.selectedEdgeId;state.positions=prev.positions;state.activeGroup=prev.activeGroup;state.expandedBundles=prev.expandedBundles;aggregatePages.clear();for(const [key,value]of prev.aggregatePages)aggregatePages.set(key,value);draw();renderDrawer();setCamera($('canvas'),prev.camera,prev.zoom);syncUrl();}}));
+ if(selected)bar.append(el('button',{type:'button',id:'graph-explore-node',text:'Explore '+nameOf(state.selectedNodeId),onclick:()=>workspace?workspace.expand(state.selectedNodeId):void exploreNode(state.selectedNodeId)}));
+ if(state.focusId)bar.append(el('span',{class:'graph-focus-label',text:'Focus: '+nameOf(state.focusId)}));
+ if(bar.childElementCount)host.append(bar);
+ if(isPhone()&&state.selectedNodeId&&state.positions.get(state.selectedNodeId)?.parentId){
+  const labels=[];let id=state.positions.get(state.selectedNodeId).parentId;const seen=new Set();
+  while(id&&!seen.has(id)){seen.add(id);const category=state.classifications?.find(n=>n.id===id);const plate=id.startsWith(BUNDLE_ID_PREFIX)?state.composition?.plates.find(p=>BUNDLE_ID_PREFIX+p.key===id):null;if(category)labels.unshift(category.label);else if(plate)labels.unshift(plate.label.replace(/ ×\d+$/, ''));id=state.positions.get(id)?.parentId;}
+  host.append(el('p',{class:'graph-focus-path',text:labels.join(' → ')}));
+ }
 
-/**
- * Plates stand in the data zone to the right of the subject.
- *
- * They are stacked downward from the subject's own line so the tie from subject to
- * plate stays short and readable instead of fanning into long diagonals. The
- * stack is measured rather than pitched on a fixed interval, so an expanded plate
- * grows into the space below it and never overlaps its neighbour.
- */
-/**
- * Places everything on the authored frame.
- *
- * The subject is fixed. Plates stack down the right-hand data zone from its
- * authored top, so every subject-to-plate tie is short and near-horizontal
- * instead of fanning into long diagonals. Loose relationships are placed on a
- * downward-opening arc around the subject, so a small graph reads as a
- * constellation rather than as mechanical columns, and nothing lands in the empty
- * upper field.
- */
-function authoredPositions(view, edges, composition) {
-  const positions = new Map();
-  const subject = subjectPosition();
-  positions.set(view.subject.id, subject);
+ if(state.perspective==='origins'){
+  const relations=visibleCandidates(state.view);if(relations.length&&relations.length<=6){const key=el('div',{class:'graph-relation-key'});for(const edge of relations)key.append(el('button',{type:'button',text:edge.label,class:'st-'+edge.status,'aria-pressed':String(state.selectedEdgeId===edge.id),onclick:()=>selectEdge(edge.id)}));host.append(key);}
+ }
 
-/*
- * Plates: one bounded STACK per fan.
- *
- * Each plate is reserved twice -- collapsed (its default rows) and expanded (every
- * representative row it holds) -- and a stack is placed from the larger, so a mass
- * can never grow past the slot its siblings were placed against. See
- * `layoutMassStacks`, which owns the geometry; this only supplies the two heights
- * and hands each child its slot. The reserved heights are kept on the position so
- * the draw pass measures the plate from the SAME numbers rather than re-deriving
- * a taller height the stack was never given room for.
- */
-  const PLATE_STACK_GAP = 26;
-  const reserved = composition.plates.map((plate) => {
-    const hiddenRows = plateHiddenRows(plate);
-    const collapsed = plateRowsFor(plate, ZONES.dataTop, hiddenRows);
-    // Worst case: open, and holding back nothing, so it can show every member row.
-    const expanded = plateRowsFor(
-      { ...plate, open: true, expanded: true },
-      ZONES.dataTop,
-      0,
-    );
-    return {
-      ...plate,
-      collapsedHeight: collapsed.height,
-      expandedHeight: Math.max(expanded.height, collapsed.height),
-      // The height the stack should reserve for this mass RIGHT NOW. A mass the reader
-      // has expanded occupies its expanded height, so the masses beneath it are placed
-      // below where it actually ends rather than below where it would end if shut. This
-      // is the whole of "downstream masses may shift": the shift happens in the stack's
-      // own reservation, not by nudging one plate after the fact.
-      currentHeight: plate.expanded ? Math.max(expanded.height, collapsed.height) : collapsed.height,
-    };
-  });
-  const plateSlots = layoutMassStacks(reserved, {
-    gap: PLATE_STACK_GAP,
-    rowPitch: PLATE_ROW,
-    // A shut mass is its header and nothing else; the renderer measures it, and this is
-    // how the stack learns the floor an open mass yields down to. BOTH flags are forced:
-    // a shut-but-expanded mass still lists its rows, which would tell the stack that the
-    // mass cannot shrink at all.
-    shutHeight: (plate) => plateRowsFor({ ...plate, open: false, expanded: false }, ZONES.dataTop, 0).height,
-  });
-  for (const [key, slot] of plateSlots) {
-    positions.set(`${BUNDLE_ID_PREFIX}${key}`, {
-      x: slot.x,
-      y: slot.y + slot.height / 2,
-      height: slot.height,
-      collapsedHeight: slot.collapsedHeight,
-      expandedHeight: slot.expandedHeight,
-    });
-  }
+ if(isPhone()&&(state.composition.plates.length||visibleCandidates(state.view).length)){
+  const jump=el('div',{class:'graph-group-jumps','aria-label':'Navigate relationship neighborhoods'});
+  for(const g of state.composition.plates)jump.append(el('button',{type:'button',text:g.label.replace(/ ×\d+$/,'')+' · '+g.count,'aria-pressed':String(g.expanded),onclick:()=>{if(!state.expandedBundles.has(g.key)){state.expandedBundles.add(g.key);draw();syncUrl();}focusGraphGroup(g.key);}}));
+  const grouped=new Set(state.composition.plates.flatMap(g=>g.memberEdgeIds));
+  const peers=new Set();for(const edge of visibleCandidates(state.view)){if(grouped.has(edge.id))continue;const id=edge.source===state.view.subject.id?edge.target:edge.source;if(peers.has(id))continue;peers.add(id);jump.append(el('button',{type:'button',text:edge.label+' · '+nameOf(id),onclick:()=>{state.activeGroup='';selectNode(id);switchMobile('graph');phoneFit(id);}}));}
+  host.append(jump);
+ }
+ if(isPhone()&&((state.activeGroup&&state.expandedBundles.has(state.activeGroup))||(!state.composition.plates.length&&state.positions.size>2))){
+  const peers=[...state.positions.keys()].filter(id=>id!==(state.focusId||state.view.subject.id)&&!id.startsWith('bundle:')&&(!state.activeGroup||state.positions.get(id).aggregateKey===state.activeGroup));
+  const at=Math.max(0,peers.indexOf(state.selectedNodeId)),bar=el('div',{class:'graph-neighbor-step'});
+  const show=i=>{state.selectedNodeId=peers[(i+peers.length)%peers.length];state.selectedEdgeId='';draw();renderDrawer();phoneFit(state.selectedNodeId);syncUrl();};
+  bar.append(el('button',{type:'button',text:'‹','aria-label':'Previous nearby object',onclick:()=>show(at-1)}),el('span',{text:nameOf(peers[at])}),el('button',{type:'button',text:'›','aria-label':'Next nearby object',onclick:()=>show(at+1)}));host.append(bar);
+ }
 
-  // Loose relationships: the endpoints of the relationships actually drawn, in the
-  // regime's ranked order, so slot position never decides visual importance.
-  const nodeIds = [];
-  for (const edge of edges) {
-    for (const id of [edge.source, edge.target]) {
-      if (id !== view.subject.id && !nodeIds.includes(id)) nodeIds.push(id);
-    }
-  }
-  const slots = nodeIds.map((id) => (view.nodes.find((n) => n.id === id) || {}).slot || 'dependency');
-  // Plates are handed to the placement as obstacles, so a loose node can never
-  // land on top of one. Measured overlap was 1 before this was passed.
-  // The plate's real drawn extent, not a worst case. Reserving the expanded width
-  // for every plate blocked the right-hand column of the field and silently halved
-  // how many peers the scene could show.
-  const obstacles = composition.plates.map((plate) => {
-    const rows = plateRows(plate);
-    const slot = positions.get(`${BUNDLE_ID_PREFIX}${plate.key}`);
-    const left = (slot?.x ?? ZONES.dataLeft) - PLATE_W / 2;
-    const width = rows.length > 0 ? PLATE_W_EXPANDED : PLATE_W;
-    return {
-      x: left + width / 2,
-      y: (slot?.y ?? ZONES.dataTop) + (slot?.height ?? 0) / 2,
-      hw: width / 2,
-      hh: (slot?.height ?? 0) / 2,
-    };
-  });
-  const placement = loosePositions(nodeIds.length, slots, [subject], obstacles);
-  // The regime sizes the direct set to what the field holds, so this is expected to
-  // be zero. It is still tracked rather than assumed, because a mismatch would mean
-  // relationships are missing from the scene, and that must be visible in review.
-  state.placementOverflow = placement.overflowed;
-  nodeIds.forEach((id, index) => {
-    const at = placement.positions[index];
-    if (at) positions.set(id, at);
-  });
-
-  return positions;
+}
+async function exploreNode(id){
+ const token=state.loadToken,repo=state.repository;
+ if(!state.graph){try{const response=await fetch(`/api/graph/${repo.owner}/${repo.name}?depth=${state.depth}`);const envelope=await response.json();if(token!==state.loadToken||!response.ok||!envelope.ok)return;state.graph=envelope.data;}catch{return;}}
+ if(token!==state.loadToken)return;
+ state.explorationBack.push({focusId:state.focusId,layers:{...state.layers},perspective:state.perspective,selectedNodeId:state.selectedNodeId,selectedEdgeId:state.selectedEdgeId,positions:new Map(state.positions),activeGroup:state.activeGroup,expandedBundles:new Set(state.expandedBundles),aggregatePages:new Map(aggregatePages),camera:$('canvas').getAttribute('viewBox'),zoom:state.zoom});
+ const neighborhood=projectCanonicalView(state.graph,{subjectId:id});
+ const nodes=new Map(state.view.nodes.map(n=>[n.id,n]));for(const n of neighborhood.nodes)if(!nodes.has(n.id))nodes.set(n.id,{...n,isSubject:false});
+ const edges=new Map(state.view.edges.map(e=>[e.id,e]));for(const e of neighborhood.edges)if(!edges.has(e.id))edges.set(e.id,e);
+ state.view={...state.view,nodes:[...nodes.values()],edges:[...edges.values()],evidenceByRelationship:{...state.view.evidenceByRelationship,...neighborhood.evidenceByRelationship}};
+ state.selectedNodeId=id;draw();renderDrawer();syncUrl();
 }
 
 /**
@@ -1132,7 +1038,7 @@ function authoredPositions(view, edges, composition) {
  * aggregating.
  */
 function visibleCandidates(view) {
-  return view.edges.filter((edge) => state.layers[edge.family] !== false);
+  return view.edges.filter(edge=>state.layers[edge.family]!==false);
 }
 
 /*
@@ -1224,7 +1130,7 @@ function renderRail(view) {
 
   const block = (heading, body) => {
     const section = el('div', { class: 'lblk' });
-    section.append(el('h6', { text: heading }));
+    section.append(el('h6', { text: capitalise(heading) }));
     for (const child of body) section.append(child);
     rail.append(section);
   };
@@ -1244,10 +1150,13 @@ function renderRail(view) {
 
   // Status: the real counts, with no interpretation added to them.
   const status = el('div', { class: 'statline' });
-  status.append(el('span', {
-    class: 'k',
-    text: `${view.statusCounts.VERIFIED} verified \u00b7 ${view.statusCounts.DECLARED} declared \u00b7 ${view.statusCounts.DETECTED} detected`,
-  }));
+  const statusMarks = el('div', { class: 'rail-statuses' });
+  for (const [key, style, label] of [['VERIFIED', 'v', 'Verified'], ['DECLARED', 'd', 'Declared'], ['DETECTED', 't', 'Detected']]) {
+    const mark = el('span', { class: `st st-${style}` });
+    mark.append(el('span', { class: 'sw', 'aria-hidden': 'true' }), el('span', { class: 'status-count', text: String(view.statusCounts[key]) }), el('span', { class: 'status-label', text: label }));
+    statusMarks.append(mark);
+  }
+  status.append(statusMarks);
   status.append(el('span', {
     class: 'k',
     text: `${view.edgeCount} one-hop of ${view.edgeCount + view.hiddenRelationshipCount} relationships`,
@@ -1308,7 +1217,7 @@ function renderRail(view) {
   // and this column were claiming the same space. It is a rail block now, because the
   // Drawer has its own shell overlay and does not own world coordinates.
   const present = new Set((view.edges || []).map((edge) => edge.family));
-  const absent = ['lineage', 'dependency', 'attribution', 'source-identity']
+  const absent = ['ancestry', 'dependency', 'attribution', 'source-identity']
     .filter((family) => !present.has(family));
   const absentBlock = [];
   if (absent.length > 0) {
@@ -1317,12 +1226,12 @@ function renderRail(view) {
     absentBlock.push(chips);
     absentBlock.push(el('p', {
       class: 'rule-note',
-      text: 'This repository declares none of these. That is a fact about the data, not a gap in the analysis.',
+      text: 'This analysis records none of these relationships. Absence of a record does not prove absence of ancestry.',
     }));
   } else {
     absentBlock.push(el('p', {
       class: 'rule-note',
-      text: 'Every lineage family this ontology knows about is present in the graph.',
+      text: 'The recorded graph contains relationships in every available family.',
     }));
   }
   block('not on the canvas', absentBlock);
@@ -1333,6 +1242,19 @@ function renderRail(view) {
   block('relationships', [keyHost]);
   renderFamilyKey(keyHost);
 
+  // Navigation and object controls stay primary; analysis receipts and reading
+  // conventions are reference material, disclosed without removing their content.
+  const reference = el('details',{class:'rail-reference'});
+  reference.append(el('summary',{text:'Reading the graph'}));
+  for(const section of [...rail.querySelectorAll(':scope > .lblk')]) {
+   const heading=section.querySelector('h6')?.textContent?.toLowerCase();
+   if(['reading names','not on the canvas','relationships'].includes(heading))reference.append(section);
+   if(heading==='provenance') {
+    const analysis=el('details',{class:'rail-reference'});
+    analysis.append(el('summary',{text:'Analysis details'}),section);rail.append(analysis);
+   }
+  }
+  if(reference.children.length>1)rail.append(reference);
   rail.hidden = false;
   // The rail's content just changed height, so its own scroll position is no longer
   // evidence of anything. Without this it keeps whatever fade it had while the content
@@ -1356,9 +1278,9 @@ function renderBottomBand(view) {
 
   const key = el('div', { class: 'key' });
   for (const [kind, text] of [
-    ['directed', 'arrow at the target'],
-    ['symmetric', 'no arrow, the claim is mutual'],
-    ['aggregate', 'a count, not one relationship'],
+    ['directed', 'Directed'],
+    ['symmetric', 'Mutual'],
+    ['aggregate', 'Navigation group'],
   ]) {
     const item = el('div', { class: 'ki' });
     item.append(el('span', { class: `ki-mark ki-${kind}`, 'aria-hidden': 'true' }));
@@ -1383,7 +1305,7 @@ function renderBottomBand(view) {
       : '';
     band.append(el('span', {
       class: 'band-note',
-      text: `${composition.direct.length} shown directly${plateNote}`,
+      text: `${$('canvas').querySelectorAll('.node').length} objects · ${$('canvas').querySelectorAll('.edge-group,.group-navigation').length} shown relationships · ${$('canvas').querySelectorAll('.unified-edge').length} exploration links${plateNote}`,
     }));
   }
 
@@ -1461,11 +1383,14 @@ function currentComposition(view) {
   if (!target) return null;
   const candidates = visibleCandidates(target);
   const { regime, peers, direct, directEdgeIds, aggregateEdgeIds } = promotedEdges(target, candidates);
+  const provenance = candidates.every(e=>e.family==='ancestry'||e.family==='source-identity') && candidates.length<=DRAWABLE_CAPACITY;
+  const familyCounts=new Map();for(const e of candidates)familyCounts.set(e.family,(familyCounts.get(e.family)||0)+1);
+  const branchEdges=new Set(candidates.filter(e=>['dependency','attribution'].includes(e.family)&&familyCounts.get(e.family)>=4).map(e=>e.id));
   const composition = buildComposition(target, {
     edges: candidates,
     expandedAggregates: state.expandedBundles,
-    directEdgeIds,
-    aggregateEdgeIds,
+    directEdgeIds: provenance ? candidates.map(e=>e.id) : directEdgeIds.filter(id=>!branchEdges.has(id)),
+    aggregateEdgeIds: provenance ? [] : [...new Set([...aggregateEdgeIds,...branchEdges])],
     budget: DRAWABLE_CAPACITY,
   });
   composition.regime = regime;
@@ -1477,22 +1402,37 @@ function currentComposition(view) {
 function draw() {
   const view = state.view;
   const canvas = $('canvas');
+  const before = captureMotion(canvas);
   const focusedEdge = document.activeElement?.getAttribute('data-edge-id');
   const focusedNode = document.activeElement?.getAttribute('data-node-id');
+  const focusedCategory=document.activeElement?.getAttribute('data-category-id');
   canvas.replaceChildren();
   if (!view) return;
 
   // The composition decides what is drawn individually and what collapses into a
   // plate. A 14-way fan-out reaches the canvas as one plate, not fourteen spokes.
+  const initial=!state.hasFitted;
   const composition = currentComposition(view);
   state.composition = composition;
   const loose = new Set(composition.looseEdgeIds);
   // Phone navigation also exposes the composition's already-promoted real relationships.
-  if (isPhone()) for (const id of composition.promotedEdgeIds) loose.add(id);
-  const edges = visibleCandidates(view).filter((edge) => loose.has(edge.id));
-  // Authored composition, not a content fit. The subject sits where the design
-  // puts it, the data mass stacks down the right zone, and loose relationships
-  // are placed on an arc around the anchor rather than in a slot grid.
+  for (const id of composition.promotedEdgeIds) loose.add(id);
+  if(!state.hasFitted&&composition.plates.length&&!new URLSearchParams(location.search).has('neighborhoods')){for(const plate of [...composition.plates].sort((a,b)=>b.count-a.count).slice(0,isPhone()?1:2)){state.expandedBundles.add(plate.key);plate.expanded=true;aggregatePages.set(plate.key,isPhone()?1:3);}}
+  const expandedEdgeIds = new Set(composition.plates.flatMap(exploredIds));
+  const selectedMember = state.selectedNodeId && state.selectedNodeId !== view.subject.id;
+  const selectedEdges = new Set(selectedMember ? visibleCandidates(view).filter(e=>e.source===state.selectedNodeId||e.target===state.selectedNodeId).slice(0,memberPageSize()).map(e=>e.id) : []);
+  // Selection retains evidence, but cannot reopen a deliberately folded branch.
+  for(const edge of visibleCandidates(view)){
+    if(edge.id!==state.selectedEdgeId&&!selectedEdges.has(edge.id))continue;
+    const plate=composition.plates.find(p=>p.memberEdgeIds.includes(edge.id));
+    if(plate?.expanded&&!classifyRelationships(view,plate).paths.get(edge.id)?.some(n=>state.expandedBundles.has('closed:'+n.id)))expandedEdgeIds.add(edge.id);
+  }
+  const edges = visibleCandidates(view).filter(edge=>{
+    const plate=composition.plates.find(p=>p.memberEdgeIds.includes(edge.id));
+    return plate?expandedEdgeIds.has(edge.id):loose.has(edge.id)||edge.id===state.selectedEdgeId||selectedEdges.has(edge.id);
+  });
+  // Allocate a two-dimensional neighborhood around the current focus. Existing
+  // objects reserve their footprints before new peers and group controls arrive.
   const positions = authoredPositions(view, edges, composition);
   // Degree decides label thinning. Parallel-edge count does not: a hub with 20
   // distinct peers has 20 fans of one, and their mid-line labels still collide.
@@ -1517,7 +1457,8 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
     //
     // It goes through `setCamera` like every other camera write, so the clamp and the
     // world's HTML layer are remapped here too rather than only on interaction.
-    if (isPhone()) phoneFit(); else setCamera(canvas, initialViewBox(viewport).viewBox, 1);
+    setCamera(canvas, `${ORIGIN.x-viewport.width/2} ${ORIGIN.y-viewport.height/2} ${viewport.width} ${viewport.height}`, 1);
+    state.refitMobile=isPhone();
     state.hasFitted = true;
     state.refitPending = false;
   }
@@ -1540,16 +1481,38 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
 
   const edgeLayer = svgEl('g', { class: 'edge-layer' });
   const nodeLayer = svgEl('g', { class: 'node-layer' });
+  const memberEdgeLayer = svgEl('g', {class:'member-edge-layer'});
 
+  const mobilePath=new Set();let pathId=isPhone()&&state.activeGroup?state.selectedNodeId:null;
+  while(pathId&&!mobilePath.has(pathId)){mobilePath.add(pathId);pathId=positions.get(pathId)?.parentId;}
+  const selectedParent=positions.get(state.selectedNodeId)?.parentId;
+  const mute=id=>mobilePath.size>0&&!mobilePath.has(id)&&positions.get(id)?.parentId!==selectedParent;
   const query = state.query ? state.query.toLowerCase() : '';
   const matchedNodes = new Set(searchNodes(view, query));
   const matchedEdges = new Set(searchEdges(view, query));
   const focusMode = query.length > 0 || Boolean(state.selectedNodeId);
 
   for (const edge of edges) {
+    const aggregate=composition.plates.find(p=>p.memberEdgeIds.includes(edge.id));
+    // A grouped relation is navigated through its display branch. Only a selected
+    // canonical relation draws the direct object-to-object claim and its arrow.
+    if(aggregate&&expandedEdgeIds.has(edge.id)){
+      const peer=edge.source===view.subject.id?edge.target:edge.source;
+      const memberPeers=edges.filter(e=>aggregate.memberEdgeIds.includes(e.id)).sort((a,b)=>{const pa=positions.get(a.source===view.subject.id?a.target:a.source),pb=positions.get(b.source===view.subject.id?b.target:b.source);return Math.abs(Math.cos(positions.get(BUNDLE_ID_PREFIX+aggregate.key)?.angle||0))>.7?pa.y-pb.y:(pa.x-pb.x||pa.y-pb.y);});
+      const route=spatialRoute({source:positions.get(peer)?.aggregateKey===aggregate.key?(positions.get(peer)?.parentId||BUNDLE_ID_PREFIX+aggregate.key):BUNDLE_ID_PREFIX+aggregate.key,target:peer,presentation:positions.get(peer)?.aggregateKey===aggregate.key?'branch':undefined},positions,memberPeers.indexOf(edge),memberPeers.length);
+      if(route){const nav=svgEl('g',{class:'group-navigation'+(mute(peer)?' is-neighborhood-muted':'')+(positions.get(peer)?.aggregateKey!==aggregate.key?' is-cross-reference':''), 'data-navigation-source':positions.get(peer)?.aggregateKey===aggregate.key?(positions.get(peer)?.parentId||BUNDLE_ID_PREFIX+aggregate.key):BUNDLE_ID_PREFIX+aggregate.key,'data-navigation-target':peer});nav.append(svgEl('path',{d:route.path,class:'group-navigation-line'}),svgEl('title',{},['Member of '+aggregate.label+'; select the object to read its actual relationship.']));memberEdgeLayer.append(nav);}
+      else {const source=positions.get(peer)?.aggregateKey===aggregate.key?(positions.get(peer)?.parentId||BUNDLE_ID_PREFIX+aggregate.key):BUNDLE_ID_PREFIX+aggregate.key;memberEdgeLayer.append(connectionFallback({source,target:peer,label:'Member of '+aggregate.label+' · grouping only'},positions,()=>selectEdge(edge.id),{'data-navigation-source':source,'data-navigation-target':peer}));}
+      if(state.selectedEdgeId!==edge.id)continue;
+    }
     const { fanIndex, fanCount } = fanSlot(edge, edges);
     const geometry = edgeGeometry(edge, positions, fanIndex, fanCount);
+    const route=spatialRoute(edge,positions,fanIndex,fanCount);
     if (!geometry) continue;
+    if (!route) {
+      (expandedEdgeIds.has(edge.id) ? memberEdgeLayer : edgeLayer).append(connectionFallback(edge,positions,()=>selectEdge(edge.id),{class:'edge-group route-obstructed','data-relationship-id':edge.id,'data-source':edge.source,'data-target':edge.target}));
+      continue;
+    }
+    geometry.path=route.path;geometry.label={x:route.label.x,y:route.label.y-10};geometry.badge=geometry.label;
 
     const group = svgEl('g', {
       class: [
@@ -1557,11 +1520,16 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
         `fam-${edge.family}`,
         `st-${edge.status}`,
         state.selectedEdgeId === edge.id ? 'is-selected' : '',
-        focusMode && !matchedEdges.has(edge.id) && !isEdgeTouching(edge, matchedNodes) ? 'is-dim' : '',
+        query.length > 0 && !matchedEdges.has(edge.id) && !isEdgeTouching(edge, matchedNodes) ? 'is-dim' : '',
         matchedEdges.has(edge.id) ? 'is-match' : '',
       ].filter(Boolean).join(' '),
     });
+    group.setAttribute('role','button');
+    group.setAttribute('tabindex','0');
+    group.setAttribute('aria-label',`${edge.source} ${edge.label} ${edge.target}`);
+    group.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();selectEdge(edge.id);}});
     group.dataset.relationshipId = edge.id;
+    group.dataset.source = edge.source; group.dataset.target = edge.target;
 
     group.append(
       svgEl('path', {
@@ -1581,7 +1549,7 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
     // A crowded edge keeps its label in the DOM but marks the group, so CSS reveals
     // it on hover or selection. Redrawing on hover would rebuild the canvas under
     // the pointer and re-fire the event.
-    const crowded = fanCount > LABEL_FAN_LIMIT || isCrowdedEdge(edge, degrees, LABEL_DEGREE_LIMIT);
+    const crowded = expandedEdgeIds.has(edge.id) || fanCount > LABEL_FAN_LIMIT || isCrowdedEdge(edge, degrees, LABEL_DEGREE_LIMIT);
     if (crowded) group.classList.add('is-dense');
     group.append(
       svgEl('text', { x: geometry.label.x, y: geometry.label.y, class: 'edge-label' }, [edge.label]),
@@ -1596,306 +1564,56 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
         ]),
       );
     }
-    edgeLayer.append(group);
+    (expandedEdgeIds.has(edge.id) ? memberEdgeLayer : edgeLayer).append(group);
   }
 
-  /*
-   * Aggregate plates.
-   *
-   * A plate stands in for several relationships. Its connector carries no
-   * arrowhead, because a plate is not a relationship and has no direction: it is a
-   * count of several. Expanding one reveals evidence-supported rows *inside* the
-   * plate, so a fan-out never turns back into subject spokes.
-   */
+  // Compact, independent grouping nodes. No nested members, rows or table frame.
   const subjectPosition = positions.get(view.subject.id);
-  for (const plate of composition.plates) {
-    const position = positions.get(`${BUNDLE_ID_PREFIX}${plate.key}`);
-    if (!position || !subjectPosition) continue;
-
-    // A plate with no members is not a plate. This happened when a forced aggregate
-    // lost its members and the plate drew as an empty box while its relationships
-    // reappeared as loose edges.
-    if (plate.count < 1) continue;
-
-    /*
-     * Rows list the plate's members, one relationship each.
-     *
-     * A group plate -- one whose evidence named it -- is open by default, so the
-     * default paint carries the real claims into the data zone rather than a bare
-     * count. A neutral plate stays shut until the reader opens it. Either way the
-     * list is capped and the plate states what it is holding back.
-     */
-const hiddenRows = plateHiddenRows(plate);
-    const top = Math.round(position.y - position.height / 2);
-    /*
-     * Drawn no taller than the slot the stack allocated.
-     *
-     * `position.height` is the height this mass was given when the stack was placed, with
-     * every mass below it already accounted for. `plateRowsFor` sizes a plate against the
-     * band from a top, so the budget it returns is first computed from the plate's real top
-     * and then CLAMPED to the slot: a plate that would outgrow its slot has its rows cut
-     * back until it fits, and the rows it drops are counted on the plate and stay reachable
-     * in the Drawer. Clamping after the call rather than before is what keeps the common
-     * case -- a plate that already fits its slot -- showing every row it has, instead of
-     * being sized by a synthetic top.
-     */
-    const plan = plateRowsFor(plate, top, hiddenRows);
-    const slotRoom = Math.max(0, position.height - PLATE_HEADER - (plate.meta ? PLATE_SUBTITLE : 0) - 12);
-    const rowLimit = Math.floor(slotRoom / PLATE_ROW);
-    const fitsSlot = plan.height <= position.height + 1;
-    const shownRows = fitsSlot ? plan.shown : plan.shown.slice(0, Math.max(0, rowLimit - 1));
-    const clipped = shownRows.length < plan.shown.length;
-    const header = plateHeader(plate);
-    /*
-     * A clipped plate still has to say what it is holding back, and the "N more in the
-     * Drawer" note reads `plan.overflow`. Clipping the rows to the slot makes `overflow`
-     * stale -- it counted what the BAND would hide, not what the STACK made room for --
-     * so the rows the clip removes are added to it here. Without this a stack that had to
-     * yield a row went quiet about it, which is the same dishonesty as dropping a member.
-     */
-    const overflow = plan.overflow + (clipped ? plan.shown.length - shownRows.length : 0);
-    const height = plateHeight(
-      shownRows.length,
-      hiddenRows + (clipped ? plan.shown.length - shownRows.length : 0),
-      !!plate.meta,
+  for(const plate of composition.plates){
+    const at=positions.get(BUNDLE_ID_PREFIX+plate.key);if(!at||!plate.count)continue;
+    const siblings=composition.plates.filter(p=>p.family===plate.family).sort((a,b)=>{const pa=positions.get(BUNDLE_ID_PREFIX+a.key),pb=positions.get(BUNDLE_ID_PREFIX+b.key);return Math.abs(Math.cos(at.angle||0))>.7?pa.y-pb.y:(pa.x-pb.x||pa.y-pb.y);});
+    const navigationRoute=spatialRoute({source:view.subject.id,target:BUNDLE_ID_PREFIX+plate.key,presentation:'branch'},positions,siblings.indexOf(plate),siblings.length);
+    if(navigationRoute)edgeLayer.append(svgEl('path',{d:navigationRoute.path,class:'group-navigation-line group-navigation-root','data-navigation-source':view.subject.id,'data-navigation-target':BUNDLE_ID_PREFIX+plate.key,'aria-label':plate.label+' · grouping, not a lineage claim'}));
+    else edgeLayer.append(connectionFallback({source:view.subject.id,target:BUNDLE_ID_PREFIX+plate.key,label:plate.label+' · grouping only'},positions,()=>focusGraphGroup(plate.key),{'data-navigation-source':view.subject.id,'data-navigation-target':BUNDLE_ID_PREFIX+plate.key}));
+    const left=at.x-at.width/2,top=at.y-at.height/2;
+    const owns=plate.memberEdgeIds.includes(state.selectedEdgeId)||plate.memberEdgeIds.some(id=>{const e=view.edges.find(e=>e.id===id);return state.selectedNodeId&&(e?.source===state.selectedNodeId||e?.target===state.selectedNodeId);});
+    const group=svgEl('g',{class:`bundle-card graph-group family-${plate.family} st-${plate.status}${plate.expanded?' is-expanded is-open':''}${owns?' is-selected':''}`,role:'button',tabindex:'0','aria-label':`${plate.label}, ${plate.count} ${plate.relationshipType.replace(/_/g,' ')} relationships, grouped`,'aria-expanded':String(plate.expanded)});
+    group.dataset.bundleKey=plate.key;group.dataset.family=plate.family;
+    group.append(svgEl('title',{},[`${plate.label} · ${plate.meta||plate.relationshipType} · grouping only`]),
+      svgEl('rect',{x:left+(owns?5:4),y:top+(owns?5:4),width:at.width,height:at.height,rx:4,class:owns?'depth-shadow-selected':'depth-shadow-plate','aria-hidden':'true'}),
+      svgEl('rect',{x:left,y:top,width:at.width,height:at.height,rx:4,class:'bundle-card-box depth-plate'}),
+      svgEl('text',{x:left+12,y:top+25,class:'bundle-card-count'},[plate.label.replace(/ ×\d+$/, '')]),
+      svgEl('text',{x:left+12,y:top+43,class:'plate-subtitle'},[`${plate.family==='dependency'?'DEPENDENCIES':plate.family==='attribution'?'REFERENCES':'ORIGINS'} · ${plate.count} members`])
     );
-    // Widening grows to the right of the subject's tie, so the connection stays
-    // anchored and the plate does not jump when it opens.
-    const width = plateRows(plate).length > 0 ? PLATE_W_EXPANDED : PLATE_W;
-    // The left edge is fixed and the plate widens rightward, away from the subject.
-    // Anchoring the left edge to the tie point keeps subject -> plate short and
-    // stops an opening plate from growing back over the subject it belongs to.
-    const left = position.x - PLATE_W / 2;
-    const plateTop = position.y - height / 2;
-
-    const from = nodeAnchor(subjectPosition, position);
-    // The tie arrives on the plate's left edge, which is where the plate always is.
-    const to = { x: left, y: position.y };
-    const midX = from.x + (to.x - from.x) * 0.55;
-    edgeLayer.append(
-      svgEl('path', {
-        d: `M ${from.x} ${from.y} C ${midX} ${from.y} ${midX} ${to.y} ${to.x} ${to.y}`,
-        class: 'bundle-link',
-      }),
-    );
-
-    // Selection raises the plate that owns the selection, never a row inside it.
-    /*
-     * Explicit ownership: a plate owns the selection when the selected relationship
-     * is one of its members, or one of the rows it is showing. The earlier
-     * `selectedEdgeId.startsWith(bundle.key)` test worked only because a plate's key
-     * happened to be a prefix of its members' bundle keys -- an accident of naming.
-     */
-    const rowMembers = shownRows.flatMap((row) => row.memberEdgeIds);
-    const ownsSelection =
-      plate.memberEdgeIds.includes(state.selectedEdgeId) ||
-      rowMembers.includes(state.selectedEdgeId);
-    // Selection raises the plate that owns it, never a row inside it.
-    const plateTier = depthTier({ isSelected: ownsSelection });
-    /*
-     * `is-open` means "this plate is showing its rows", which is not the same as
-     * "this plate is showing every row". A plate capped at six says so and offers the
-     * rest; it is still open, and drawing it as a shut card would contradict the rows
-     * directly beneath its own header.
-     */
-    const isOpen = shownRows.length > 0;
-    const group = svgEl('g', {
-      class: `bundle-card st-${plate.status}${isOpen ? ' is-open' : ''}${ownsSelection ? ' is-selected' : ''}`,
-      role: 'button',
-      tabindex: '0',
-      'aria-label': `${plate.count} ${plate.relationshipType.replace(/_/g, ' ')} relationships, grouped`,
-      'aria-expanded': plate.expanded ? 'true' : 'false',
-    });
-    group.dataset.bundleKey = plate.key;
-
-    if (depthOffset(plateTier) > 0) {
-      const d = depthOffset(plateTier);
-      group.append(
-        svgEl('rect', {
-      x: left + d, y: plateTop + d, width, height, rx: 4,
-          class: depthShadowClass(plateTier), 'aria-hidden': 'true',
-        }),
-      );
-    }
-    group.append(
-      svgEl('rect', {
-      x: left, y: plateTop, width, height, rx: 4,
-        class: ['bundle-card-box', depthClass(plateTier)].filter(Boolean).join(' '),
-      }),
-    );
-    group.append(
-      svgEl('text', { x: left + 12, y: plateTop + 22, class: 'bundle-card-count' }, [plate.label]),
-    );
-    /*
-     * Where the claim was written down.
-     *
-     * A plate grouped by declaration form is making a claim about *evidence*, not
-     * about the relationship, and that is the one claim on this canvas a reader
-     * cannot infer from the shape. Naming the declaring file makes the grouping
-     * checkable at a glance, and it is the reason the group is allowed to exist.
-     *
-     * Only ever a place, never a category: "declared in" says where a claim was
-     * written, which is what the evidence supports. It never says what the claim
-     * means, so a reference cannot be read here as a dependency.
-     */
-    if (plate.meta) {
-      group.append(
-        svgEl('text', { x: left + 12, y: plateTop + 40, class: 'plate-subtitle' }, [
-          `declared in: ${plate.meta}`,
-        ]),
-      );
-    }
-
-    // Rows are content of the plate. They stay flat: no depth, no shadow, and a
-    // selected row is marked by its own solid ink rule rather than by rising.
-    // Reserve independent pixel columns; fitGraphText measures the real font advances.
-    const MARK_W = ROW_MARK_W;
-
-    shownRows.forEach((row, index) => {
-    const rowY = plateTop + header + index * PLATE_ROW;
-      const rowSelected = row.memberEdgeIds.includes(state.selectedEdgeId);
-      /*
-       * One `<g>` per row, so the row's own accessible name lives on the row rather
-       * than inside a `<text>`. A `<title>` nested in `<text>` becomes part of that
-       * element's text content, which put the full name and the full locator into the
-       * rendered string.
-       */
-      const item = svgEl('g', { class: `plate-row${rowSelected ? ' is-selected' : ''}`, role: 'button', tabindex: '0', 'aria-label': `${row.label}${row.meta ? ` · ${row.meta}` : ''}`, 'aria-pressed': String(rowSelected), 'data-edge-id': row.memberEdgeIds[0] || '' });
-      item.append(svgEl('rect', { x: left, y: rowY + 2, width, height: PLATE_ROW - 4, class: 'plate-row-surface' }));
-      item.append(svgEl('title', {}, [`${row.label}${row.meta ? ` \u00b7 ${row.meta}` : ''}`]));
-      if (rowSelected) {
-        item.append(
-          svgEl('rect', {
-            x: left + 6, y: rowY + 4, width: width - 12, height: PLATE_ROW - 6,
-            class: 'plate-row-marker', 'aria-hidden': 'true',
-          }),
-        );
-      }
-      /*
-       * The member's own evidence strength.
-       *
-       * A row that inherits its plate's status cannot be trusted on its own: a plate
-       * groups by relation, and one `references` fan can hold both a VERIFIED claim
-       * and a DECLARED one. The mark is read from the relationship, and the direction
-       * beside it is canonical, so a symmetric relationship shows no arrowhead.
-       */
-      const markX = left + 12;
-      item.append(
-        svgEl('rect', {
-          x: markX, y: rowY + 9, width: 7, height: 7,
-          class: `plate-row-status st-${row.status || plate.status}`, 'aria-hidden': 'true',
-        }),
-      );
-      if (row.directed) {
-        item.append(
-          svgEl('path', {
-            d: `M ${markX + 14} ${rowY + 9.5} l 4 2.5 l -4 2.5`,
-            class: 'plate-row-dir', 'aria-hidden': 'true',
-          }),
-        );
-      }
-      const labelX = markX + MARK_W;
-      const label = svgEl('text', { x: labelX, y: rowY + 18, class: 'plate-row-label' }, [row.label]);
-      item.append(label);
-      /*
-       * A row is selectable.
-       *
-       * It had no hit target, so clicking one did nothing: the frozen design's
-       * selected row cannot exist if a row cannot be selected. The row stays flat --
-       * the marker beside it shows selection and the plate above rises, so the row
-       * itself never gains depth.
-       */
-      const rowHit = svgEl('rect', {
-        x: left, y: rowY + 2, width, height: PLATE_ROW - 4,
-        class: 'plate-row-hit', 'aria-hidden': 'true',
-      });
-      rowHit.addEventListener('click', (event) => {
-        event.stopPropagation();
-        const first = row.memberEdgeIds[0];
-        if (!first) return;
-        selectEdge(first);
-      });
-      item.append(rowHit);
-      item.addEventListener('keydown', event => {
-        if (event.key !== 'Enter' && event.key !== ' ') return;
-        event.preventDefault(); event.stopPropagation();
-        if (row.memberEdgeIds[0]) selectEdge(row.memberEdgeIds[0]);
-      });
-      if (row.meta) {
-        item.append(
-          svgEl('text', { x: left + width - 12, y: rowY + 18, class: 'plate-row-meta', 'text-anchor': 'end' }, [
-            compactLocator(row.meta),
-          ]),
-        );
-      }
-      group.append(item);
-    });
-
-    /*
-     * What the plate is holding back, said out loud.
-     *
-     * A bounded list with a silent remainder is how relationships go missing: the
-     * plate claimed a count, showed fewer rows, and never said so. This states the
-     * remainder and offers the one action that reveals it, so the count and what is
-     * on screen can always be reconciled.
-     */
-    if (hiddenRows > 0) {
-    const moreY = plateTop + header + shownRows.length * PLATE_ROW;
-      group.append(
-        svgEl('text', { x: left + 12, y: moreY + 18, class: 'plate-row-more' }, [
-          `${hiddenRows} more row${hiddenRows === 1 ? '' : 's'} in this plate`,
-        ]),
-      );
-      group.append(
-        svgEl('text', { x: left + width - 12, y: moreY + 18, class: 'plate-row-expand', 'text-anchor': 'end' }, [
-          'expand',
-        ]),
-      );
-      const moreHit = svgEl('rect', {
-        x: left, y: moreY + 2, width, height: PLATE_ROW - 4,
-        class: 'plate-row-hit', 'aria-hidden': 'true',
-      });
-      moreHit.addEventListener('click', (event) => {
-        event.stopPropagation();
-        toggleBundle(plate.key);
-      });
-      group.append(moreHit);
-    }
-
-    /*
-     * The remainder the plate could not show, because it ran out of world above the
-     * band.
-     *
-     * This is a different fact from the collapsed affordance above and it needs
-     * different words: those rows are reachable by expanding, these are not on the
-     * canvas at all and are only in the Drawer. `Kuddev/pebrel` is the case -- one
-     * plate of 97 manifest records against a plate that can hold about twenty-five.
-     */
-    if (overflow > 0) {
-      const heldY = plateTop + header + shownRows.length * PLATE_ROW
-        + (hiddenRows > 0 ? PLATE_ROW : 0) + 4;
-      group.append(
-        svgEl('text', { x: left + 12, y: heldY + 18, class: 'plate-row-held' }, [
-          `${overflow} more in the Drawer`,
-        ]),
-      );
-    }
-
-    const activate = (event) => {
-      event.stopPropagation();
-      // A click on a row selects that row; only the plate's own surface toggles.
-      if (event.target && event.target.classList.contains('plate-row-hit')) return;
-      toggleBundle(plate.key);
-    };    group.addEventListener('click', activate);
-    group.addEventListener('keydown', (event) => {
-      if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); activate(event); }
-    });
+    const admitted=Math.min(plate.count,aggregatePages.get(plate.key)||memberPageSize());
+    const action=(label,x,fn,cls)=>{const g=svgEl('g',{role:'button',tabindex:'0','aria-label':label,class:cls});g.append(svgEl('text',{x,y:top+69,class:'plate-row-expand'},[label]),svgEl('rect',{x:x-4,y:top+44,width:90,height:44,class:'plate-row-hit'}));const run=e=>{e.stopPropagation();fn();};g.addEventListener('click',run);g.addEventListener('mobile-tap',run);g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();run(e);}});group.append(g);};
+    if(plate.expanded){
+      action('Focus',left+12,()=>focusGraphGroup(plate.key),'aggregate-focus');
+      if(admitted<plate.count)action('Explore more',left+110,()=>{const next=Math.min(plate.count,admitted+memberPageSize());revealRelationships(plate,classifyRelationships(view,plate).ordered.slice(admitted,next));aggregatePages.set(plate.key,next);draw();syncUrl();},'aggregate-more');
+    }else{group.append(svgEl('text',{x:left+12,y:top+69,class:'plate-row-more'},['Explore neighborhood']));}
+    const activate=e=>{e.stopPropagation();if(e.target?.closest('.aggregate-more, .aggregate-search, .aggregate-focus'))return;toggleBundle(plate.key);};
+    group.addEventListener('click',activate);group.addEventListener('keydown',e=>{if(e.target!==group)return;if(e.key==='Enter'||e.key===' '){e.preventDefault();activate(e);}});
     nodeLayer.append(group);
   }
 
-  // Only nodes that take part in what is drawn are drawn. An entity reachable only
-  // through a plate is listed as a row inside that plate, so it cannot appear as a
-  // disconnected island with no relationship attached.
+  for(const link of state.classificationLinks||[]){
+    const route=spatialRoute(link,positions);if(route){const nav=svgEl('g',{class:'group-navigation classification-navigation'+(mute(link.target)?' is-neighborhood-muted':''),'data-navigation-source':link.source,'data-navigation-target':link.target});nav.append(svgEl('path',{d:route.path,class:'group-navigation-line'}));memberEdgeLayer.append(nav);}else memberEdgeLayer.append(connectionFallback(link,positions,()=>{const category=state.classifications?.find(c=>c.id===link.target);if(category?.edgeIds[0])selectEdge(category.edgeIds[0]);},{'data-navigation-source':link.source,'data-navigation-target':link.target}));
+  }
+  for(const category of state.classifications||[]){
+    const p=positions.get(category.id);if(!p)continue;
+    const closed=state.expandedBundles.has('closed:'+category.id);
+    const g=svgEl('g',{class:'classification-node category-level-'+category.level+(mute(category.id)?' is-neighborhood-muted':''),role:'button',tabindex:'0','aria-expanded':String(!closed),'aria-label':category.label+', '+category.edgeIds.length+' relationships. '+category.basis,'data-category-id':category.id,'data-parent-id':category.parent});
+    g.append(svgEl('rect',{x:p.x-108,y:p.y-26,width:216,height:52,rx:category.level===1?13:3,class:'classification-box'}),svgEl('text',{x:p.x-94,y:p.y-4,class:'classification-label'},[(closed?'+ ':'− ')+category.label]),svgEl('text',{x:p.x-94,y:p.y+15,class:'classification-caption'},[category.edgeIds.length+' relationships · '+(category.level===1?'scope':'declaration sites')]),svgEl('title',{},[category.basis+' · display grouping only']));
+    const activate=e=>{e.preventDefault();e.stopPropagation();if(closed){
+      state.expandedBundles.delete('closed:'+category.id);
+      const plate=composition.plates.find(p=>classifyRelationships(view,p).categories.some(n=>n.id===category.id));
+      if(plate&&!category.children.length){const taxonomy=classifyRelationships(view,plate),first=taxonomy.ordered.findIndex(id=>category.edgeIds.includes(id));aggregatePages.set(plate.key,Math.min(plate.count,Math.max(first+1,aggregatePages.get(plate.key)||memberPageSize())));}
+    }else state.expandedBundles.add('closed:'+category.id);syncUrl();draw();renderDrawer();};
+    g.addEventListener('click',activate);g.addEventListener('mobile-tap',activate);g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' ')activate(e);});nodeLayer.append(g);
+  }
+  nodeLayer.append(memberEdgeLayer);
+
+  // Real entities require a canonical relation and an independent layout position.
   const drawnNodeIds = new Set([view.subject.id]);
   for (const edge of edges) {
     drawnNodeIds.add(edge.source);
@@ -1909,13 +1627,20 @@ const hiddenRows = plateHiddenRows(plate);
     const group = svgEl('g', {
       class: [
         'node',
+        position.aggregateKey ? 'aggregate-member' : '',
+        !node.isSubject&&mute(node.id)?'is-neighborhood-muted':'',
+        `entity-${node.type.toLowerCase()}`,
         node.isSubject ? 'is-subject' : '',
         state.selectedNodeId === node.id ? 'is-selected' : '',
-        focusMode && !matchedNodes.has(node.id) ? 'is-dim' : '',
+        query.length > 0 && !matchedNodes.has(node.id) ? 'is-dim' : '',
       ].filter(Boolean).join(' '),
     });
     group.dataset.nodeId = node.id;
-    group.setAttribute('tabindex', '-1'); // Programmatic focus return after evidence close.
+    if(position.parentId)group.dataset.parentId=position.parentId;
+    if(position.aggregateKey)group.dataset.aggregateKey=position.aggregateKey;
+    group.setAttribute('tabindex', '0');
+    group.setAttribute('role','button');group.setAttribute('aria-label',node.label);
+    group.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();selectNode(node.id);}});
 
     // Identity comes from the canonical `entity.type` on the view node, never
     // from `isPackage`. `nodePrimitive` covers the whole canonical union, so a
@@ -1969,6 +1694,11 @@ const hiddenRows = plateHiddenRows(plate);
         node.label,
       ]),
     );
+    if (!node.isSubject && !node.fact) {
+      let parent=position.parentId,scope;
+      while(parent){const category=state.classifications?.find(n=>n.id===parent);if(!category)break;if(category.level===1)scope=category.label;parent=category.parent;}
+      group.append(svgEl('text',{x:position.x-NODE_W/2+10,y:position.y+15,class:'node-fact'},[node.type.toUpperCase()+(scope?' · '+scope.toUpperCase():'')]));
+    }
     if (node.fact) {
       group.append(
         svgEl('text', {
@@ -1999,18 +1729,32 @@ const hiddenRows = plateHiddenRows(plate);
   }
 
   canvas.append(edgeLayer, nodeLayer);
+  workspace?.paint(canvas, positions);
+  state.contentBounds=contentBounds(positions);
   fitGraphText(canvas);
+  transitionScene(canvas, before);
   if (focusedEdge) {
     Array.from(canvas.querySelectorAll('[data-edge-id]')).find(row => row.getAttribute('data-edge-id') === focusedEdge)?.focus({ preventScroll: true });
   }
   if (focusedNode) {
     Array.from(canvas.querySelectorAll('[data-node-id]')).find(node => node.getAttribute('data-node-id') === focusedNode)?.focus({ preventScroll: true });
   }
+  if(focusedCategory)[...canvas.querySelectorAll('[data-category-id]')].find(n=>n.dataset.categoryId===focusedCategory)?.focus({preventScroll:true});
+  renderPerspective();
+  let empty=$('graph-provenance-empty');if(!empty){empty=el('div',{id:'graph-provenance-empty',class:'graph-provenance-empty'});$('stage').append(empty);}
+  empty.replaceChildren();setHidden(empty,edges.length>0||composition.plates.length>0||canvas.querySelectorAll('.unified-node').length>0);
+  if(edges.length===0&&composition.plates.length===0){empty.append(el('h2',{text:state.perspective==='origins'?'No recorded ancestry':'No recorded relationships in this layer'}),el('p',{text:state.perspective==='origins'?'This analysis has no verified fork or derivation record. Explore the fixed repository structure and Git history, or switch to a separate relationship layer.':'Choose another relationship layer, or return to the previous exploration focus.'}));}
+  if(isPhone()&&state.refitMobile){if(edges.length>0&&positions.size<=3)fitGraphBoxes([...canvas.querySelectorAll('.node-box')]);else phoneFit();state.refitMobile=false;}
   renderBundles();
   renderLayersPop();
   renderRail(view);
+  workspace?.decorate();
   renderBottomBand(view);
+  if(initial&&!isPhone())fit();
+  renderOverview();
+  workspace?.settle();
   updateSearchCount();
+  if(initial)syncUrl();
 }
 
 /** Fit real glyph advances after attachment, preserving complete values in titles. */
@@ -2019,12 +1763,10 @@ function fitGraphText(canvas) {
     const full = text.textContent;
     const card = text.closest('.bundle-card, .node');
     const box = card.querySelector('.bundle-card-box, .node-box').getBBox();
-    const hasMeta = text.closest('.plate-row')?.querySelector('.plate-row-meta');
     let room = box.width - 24;
-    if (text.classList.contains('plate-row-label')) room -= ROW_MARK_W + (hasMeta ? 140 : 0);
-    if (text.classList.contains('plate-row-meta')) room = 126;
-    if (text.classList.contains('plate-row-more')) room -= 80;
-    if (text.classList.contains('plate-row-expand')) room = 64;
+    if (text.classList.contains('plate-subtitle') && card.classList.contains('is-expanded')) room = 164;
+    if (text.classList.contains('group-batch')) room = 68;
+    if (text.classList.contains('plate-row-expand')) room = 96;
     if (text.classList.contains('subject-tag')) continue;
     if (text.getComputedTextLength() <= room) continue;
     const chars = Array.from(full);
@@ -2050,8 +1792,8 @@ function toggleBundle(key) {
   if (state.expandedBundles.has(key)) state.expandedBundles.delete(key);
   else state.expandedBundles.add(key);
   syncUrl();
-  // The camera must not move. Expansion is a local change: it reflows rows
-  // inside its own plate and nothing else, so the pan, zoom, viewport centre and
+  // The camera must not move. Expansion is a local change: it adds independent nodes
+  // across reserved member shelves, while the pan, zoom, viewport centre and
   // world focal the reader already has stay exactly as they were. Refitting here
   // used to reset `hasFitted`, which re-ran `fitViewBox` and silently recentred
   // the whole scene on every expand and collapse.
@@ -2238,7 +1980,7 @@ function updateSearchCount() {
     $('search-count').textContent = '';
     return;
   }
-  const nodes = searchNodes(state.view, state.query).length;
+  const nodes = searchNodes(state.view, state.query).length+(workspace?.search(state.query).length||0);
   const edges = searchEdges(state.view, state.query).length;
   $('search-count').textContent = `${nodes} node${nodes === 1 ? '' : 's'} · ${edges} relationship${edges === 1 ? '' : 's'}`;
 }
@@ -2334,6 +2076,7 @@ function renderMobileRelations() {
     list.append(familyDetails);
   }
   list.scrollTop = 0;
+  workspace?.decorate();
 }
 function filterMobileRelations() {
   const query = $('mobile-relation-query').value.trim().toLowerCase();
@@ -2344,11 +2087,43 @@ function filterMobileRelations() {
     if (query && match) details.open = true;
   }
 }
-function phoneFit() {
-  const canvas = $('canvas'), { x,y } = subjectPosition();
-  setCamera(canvas, `${x-canvas.clientWidth/2} ${y-canvas.clientHeight/2} ${canvas.clientWidth} ${canvas.clientHeight}`,1);
+function phoneFit(targetId) {
+ const canvas=$('canvas'),rootId=state.view?.subject.id;
+ const id=targetId||rootId;
+ const target=state.positions.get(id||rootId)||ORIGIN;
+ const parentId=target.parentId||(target.aggregateKey?BUNDLE_ID_PREFIX+target.aggregateKey:null);
+ const parent=parentId?state.positions.get(parentId):null;
+ const root=state.positions.get(rootId)||target;
+ const box=p=>({getBBox:()=>({x:p.x-108,y:p.y-(p.height||52)/2,width:216,height:p.height||52})});
+ const connection=targetId&&parent?[...canvas.querySelectorAll('.group-navigation')].find(n=>n.dataset.navigationTarget===id&&n.dataset.navigationSource===parentId)?.querySelector('path'):null;
+ // Short touch landscapes locate the readable entity; its parent path stays in
+ // the navigation. A long obstacle-avoiding connector must not shrink it away.
+ if(targetId&&canvas.clientHeight<400){fitGraphBoxes([box(target)]);return;}
+ fitGraphBoxes([box(target),...(parent?[box(parent)]:[]),...(connection?[connection]:[]),...(!targetId&&id!==rootId?[box(root)]:[])]);
+}
+function renderOverview(){
+ let host=$('graph-overview');if(!host){host=el('div',{id:'graph-overview',class:'graph-overview','aria-label':'Graph overview'});$('stage').append(host);}
+ host.replaceChildren();const points=[...state.positions.entries()];if(points.length<2){setHidden(host,true);return;}setHidden(host,false);
+ const minX=Math.min(...points.map(([,p])=>p.x))-120,minY=Math.min(...points.map(([,p])=>p.y))-60,maxX=Math.max(...points.map(([,p])=>p.x))+120,maxY=Math.max(...points.map(([,p])=>p.y))+60;
+ const map=svgEl('svg',{viewBox:`${minX} ${minY} ${maxX-minX} ${maxY-minY}`,role:'button',tabindex:0,'aria-label':'Graph overview: click a neighborhood; Enter returns to the repository'});
+ for(const n of $('canvas').querySelectorAll('.group-navigation-line,.unified-line,.edge-line'))map.append(svgEl('path',{d:n.getAttribute('d'),fill:'none',stroke:'var(--rule-2)','stroke-width':5}));
+ for(const [id,p]of points)map.append(svgEl('rect',{x:p.x-70,y:p.y-20,width:140,height:40,rx:5,fill:id===state.view.subject.id?'var(--brand)':'var(--brand-edge)'}));
+ const focus=id=>id.startsWith('category:')?phoneFit(id):id.startsWith(BUNDLE_ID_PREFIX)?focusGraphGroup(id.slice(BUNDLE_ID_PREFIX.length)):workspace?.has(id)?workspace.focus(id):(selectNode(id),phoneFit(id));
+ map.onclick=e=>{const at=new DOMPoint(e.clientX,e.clientY).matrixTransform(map.getScreenCTM().inverse());const nearest=points.reduce((a,b)=>Math.hypot(b[1].x-at.x,b[1].y-at.y)<Math.hypot(a[1].x-at.x,a[1].y-at.y)?b:a);focus(nearest[0]);};
+ map.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();focus(state.view.subject.id);}};
+ host.append(el('span',{text:'Overview · '+points.length+' objects'}),map);
 }
 function locateMobile(id,kind) {
+  const relationIds = kind === 'edge' ? [id] : state.view.edges.filter(e=>e.source===id || e.target===id).map(e=>e.id);
+  for(const edge of state.view.edges)if(relationIds.includes(edge.id)&&state.layers[edge.family]===false){state.layers[edge.family]=true;state.perspective='custom';}
+  const branch = currentComposition(state.view).plates.find(p=>relationIds.some(edgeId=>p.memberEdgeIds.includes(edgeId)));
+  if (branch) {
+    revealRelationships(branch,relationIds);
+    state.expandedBundles.add(branch.key);
+    // The selected relationship is explicitly rendered; locating it must not
+    // admit every earlier member of a large neighborhood.
+    aggregatePages.set(branch.key,Math.min(branch.count,aggregatePages.get(branch.key)||memberPageSize()));
+  }
   if (kind === 'edge') {
     const edge = state.view.edges.find(e=>e.id===id);
     state.selectedEdgeId=id;state.selectedNodeId='';
@@ -2368,6 +2143,7 @@ function locateMobile(id,kind) {
   if (target) {
     target.setAttribute('data-mobile-located',id);
     if (grouped) { const note=$('band').querySelector('.band-note'); if (note) { note.textContent = `${kind === 'node' ? nameOf(id) : nameOf(state.view.edges.find(e=>e.id===id)?.target)} · grouped here; read Evidence for this member`; note.title=note.textContent; } }
+    if (branch) { state.activeGroup=branch.key; renderPerspective(); const edge=state.view.edges.find(e=>e.id===id);phoneFit(kind==='node'?id:edge?.target); (target.closest('[tabindex]') || $('zoom-fit')).focus({preventScroll:true}); return; }
     const r=target.getBoundingClientRect(), c=canvas.getScreenCTM();
     const point=new DOMPoint(r.x+r.width/2,r.y+r.height/2).matrixTransform(c.inverse());
     // Explicit location fits the actual target above the HUD, including short landscape.
@@ -2383,8 +2159,8 @@ function renderMobileSearch() {
   const box=$('mobile-search-results');box.replaceChildren();
   setHidden(box,!isPhone() || !state.query);
   if (!isPhone() || !state.query) return;
-  for (const id of searchNodes(state.view,state.query)) {
-    box.append(el('button',{text:nameOf(id),onclick:()=>{ toggleSearch(false);locateMobile(id,'node'); }}));
+  for (const id of [...searchNodes(state.view,state.query),...(workspace?.search(state.query)||[])]) {
+    box.append(el('button',{text:nameOf(id),onclick:()=>{ toggleSearch(false);workspace?.has(id)?workspace.focus(id):locateMobile(id,'node'); }}));
   }
   if (!box.childElementCount) box.append(el('p',{text:'No matching nodes. Browse Relations for relationship search.'}));
 }
@@ -2399,7 +2175,7 @@ function selectEdge(id) {
   syncUrl();
   draw();
   renderDrawer();
-  if (isPhone() && (state.selectedEdgeId || state.selectedNodeId)) switchMobile('evidence', true, previous);
+  if(isPhone())switchMobile('evidence',true,previous);
 }
 
 function selectNode(id) {
@@ -2410,7 +2186,7 @@ function selectNode(id) {
   syncUrl();
   draw();
   renderDrawer();
-  if (isPhone() && (state.selectedEdgeId || state.selectedNodeId)) switchMobile('evidence', true, previous);
+  if(isPhone()&&state.selectedNodeId)phoneFit(state.selectedNodeId);
 }
 
 function clearSelection() {
@@ -2430,6 +2206,12 @@ function closeDrawer() {
   (node || row || $('zoom-fit')).focus({ preventScroll: true });
 }
 
+// Native disclosures keep their focus and scroll; only newly revealed content moves.
+$('drawer-inner').addEventListener('toggle',event=>{
+ const details=event.target;
+ if(details instanceof HTMLDetailsElement&&details.open)for(const child of details.children)if(child.tagName!=='SUMMARY')revealInstrument(child);
+},true);
+
 function renderDrawer() {
   const drawer = $('drawer');
   const inner = $('drawer-inner');
@@ -2440,12 +2222,13 @@ function renderDrawer() {
   inner.replaceChildren();
 
   const view = state.view;
+  if (!view) return;
   // A stale or hand-edited selection resolves to nothing. The URL is corrected
   // instead of leaving an empty drawer open.
-  if (state.selectedEdgeId && !view.edges.some((edge) => edge.id === state.selectedEdgeId)) {
+  if (state.selectedEdgeId && !view.edges.some((edge) => edge.id === state.selectedEdgeId) && !workspace?.has(state.selectedEdgeId)) {
     state.selectedEdgeId = '';
   }
-  if (state.selectedNodeId && !view.nodes.some((node) => node.id === state.selectedNodeId)) {
+  if (state.selectedNodeId && !view.nodes.some((node) => node.id === state.selectedNodeId) && !workspace?.has(state.selectedNodeId)) {
     state.selectedNodeId = '';
   }
 
@@ -2468,14 +2251,18 @@ function renderDrawer() {
   });
   const block = el('div');
 
-  if (state.selectedEdgeId) {
+  const displayEvidence = workspace?.inspector(state.selectedEdgeId || state.selectedNodeId);
+  if (displayEvidence) block.append(displayEvidence);
+  else if (state.selectedEdgeId) {
     const edge = view.edges.find((item) => item.id === state.selectedEdgeId);
     if (edge) block.append(renderEdgeDrawer(edge));
   } else {
     block.append(renderNodeDrawer());
+    const actions=workspace?.repositoryActions(state.selectedNodeId);if(actions){const overview=block.querySelector(".entity-overview");if(overview)overview.after(actions);else block.append(actions);}
   }
 
   inner.append(close, block);
+  revealInstrument(block);
 
   /*
    * Two things about a freshly-filled scroller.
@@ -2496,7 +2283,7 @@ function renderDrawer() {
 
 function nameOf(id) {
   const node = state.view.nodes.find((item) => item.id === id);
-  return node ? node.label : id;
+  return node ? node.label : workspace?.name(id) || id;
 }
 
 function renderEdgeDrawer(edge) {
@@ -2736,18 +2523,34 @@ function renderNodeDrawer() {
   const wrap = el('div');
   if (!node) return wrap;
 
-  wrap.append(el('p', { class: 'd-eyebrow', text: 'ENTITY' }));
+  wrap.append(el('p', { class: 'd-eyebrow', text: node.isSubject ? 'ANALYSED REPOSITORY' : node.type.toUpperCase() }));
   wrap.append(el('p', { class: 'd-head', text: node.label }));
-  wrap.append(el('p', { class: 'd-sub' }, [el('span', { class: 'mono', text: node.id })]));
+  const technical=el('details',{class:'workspace-technical'});technical.append(el('summary',{text:'Technical identity'}),el('p',{class:'mono',text:node.id}),el('p',{class:'d-sub',text:node.isSubject?'Analysed repository':'Related '+node.type.toLowerCase()}));
+  const hierarchy=el('div',{class:'d-hierarchy'});hierarchy.append(el('p',{class:'d-block-head',text:'EXPLORATION PATH'}));
+  const path=el('ol');path.append(el('li',{text:view.subject.label}));
+  const plate=state.composition?.plates.find(p=>p.memberEdgeIds.some(id=>{const e=view.edges.find(e=>e.id===id);return e&&(e.source===node.id||e.target===node.id);}));
+  if(plate&&!node.isSubject){
+   path.append(el('li',{text:plate.label.replace(/ ×\d+$/, '')}));
+   const edgeId=plate.memberEdgeIds.find(id=>{const e=view.edges.find(e=>e.id===id);return e&&(e.source===node.id||e.target===node.id);});
+   const categories=classifyRelationships(view,plate).paths.get(edgeId)||[];
+   for(const n of categories)path.append(el('li',{class:n.level===1?'hierarchy-scope':'hierarchy-sites',text:n.label+' · '+n.basis}));
+   path.append(el('li',{text:node.label}));
+   const cards=view.evidenceByRelationship[edgeId]||[];
+   const sites=[...new Set(cards.filter(c=>c.type==='package_manifest').map(c=>(c.data?.data||c.data)?.manifest_path).filter(Boolean))];
+   hierarchy.append(path);if(sites.length)hierarchy.append(el('p',{class:'d-sub',text:'Recorded declaring sites: '+sites.join(' · ')}));wrap.append(hierarchy);
+  }
 
-  const facts = el('div', { class: 'd-block' });
-  facts.append(el('p', { class: 'd-block-head', text: 'FACTS' }));
-  const kv = el('dl', { class: 'd-kv' });
-  kv.append(el('dt', { text: 'type' }), el('dd', { text: node.type }));
-  if (node.fact) kv.append(el('dt', { text: 'detail' }), el('dd', { text: node.fact }));
-  kv.append(el('dt', { text: 'subject' }), el('dd', { text: node.isSubject ? 'yes (analysed repository)' : 'no' }));
-  facts.append(kv);
-  wrap.append(facts);
+
+  const overview = el('div', { class: 'entity-overview' });
+  overview.append(el('p',{class:'entity-description',text:node.fact || node.type}));
+  const relationships = edgesForNode(view,node.id).map(id=>view.edges.find(e=>e.id===id)).filter(Boolean);
+  const metrics=el('div',{class:'entity-metrics'});
+  for(const [label, count] of [['Origins',relationships.filter(e=>e.family==='ancestry').length],['Dependencies',relationships.filter(e=>e.family==='dependency').length],['References',relationships.filter(e=>['attribution','source-identity'].includes(e.family)).length]]) {
+   const item=el('div');item.append(el('strong',{text:String(count)}),el('span',{text:label}));metrics.append(item);
+  }
+  overview.append(metrics);
+  if(node.isSubject&&!relationships.some(e=>e.family==='ancestry'))overview.append(el('p',{class:'entity-absence',text:'No recorded ancestry evidence. Dependencies describe use, not origin.'}));
+  wrap.append(overview);
 
   /*
    * Relationships, by declaring manifest.
@@ -2767,21 +2570,22 @@ function renderNodeDrawer() {
   if (groups.length === 0) {
     relBlock.append(el('p', { class: 'node-detail', text: 'No one-hop relationship in this view.' }));
   }
+  if(groups.length) relBlock.append(el('p',{class:'d-basis',text:'Navigation groups, not repository relationships.'}));
   for (const group of groups) {
-    const section = el('div', { class: 'd-group' });
-    section.append(el('p', { class: 'd-group-head' }, [
+    const section = el('details', { class: 'd-group' });
+    section.open = groups.length === 1 || group === groups[0];
+    section.append(el('summary', { class: 'd-group-head' }, [
       el('span', { class: 'mono', text: group.manifest ? group.key : `${group.key} · no manifest` }),
       el('span', { class: 'd-group-count r-mono', text: String(group.members.length) }),
     ]));
-    for (const edge of group.members) {
-      const other = edge.source === node.id ? edge.target : edge.source;
-      const row = el('button', { class: 'bundle-row', text: `${edge.label} · ${nameOf(other)}` });
-      row.addEventListener('click', () => {
-        state.selectedNodeId = '';
-        selectEdge(edge.id);
-      });
-      section.append(row);
-    }
+    const appendRow=(host,edge)=>{const other=edge.source===node.id?edge.target:edge.source;const row=el('button',{class:'bundle-row'});row.append(el('span',{class:'relationship-object',text:nameOf(other)}),el('span',{class:'relationship-kind',text:edge.label}));row.addEventListener('click',()=>{state.selectedNodeId='';selectEdge(edge.id);});host.append(row);};
+    const taxonomy=classifyRelationships(view,{key:group.key,family:group.members[0]?.family,count:group.members.length,memberEdgeIds:group.members.map(e=>e.id)});
+    if(taxonomy.categories.length){
+      const appendCategory=(host,n)=>{const details=el('details',{class:'d-classification category-level-'+n.level});details.append(el('summary',{text:n.label+' · '+n.edgeIds.length}),el('p',{class:'d-basis',text:n.basis}));
+       if(n.children.length)for(const child of n.children)appendCategory(details,child);else for(const id of n.edgeIds){const e=group.members.find(e=>e.id===id);if(e)appendRow(details,e);}host.append(details);};
+      for(const n of taxonomy.roots)appendCategory(section,n);
+    }else for(const edge of group.members)appendRow(section,edge);
+
     relBlock.append(section);
   }
   wrap.append(relBlock);
@@ -2792,6 +2596,7 @@ function renderNodeDrawer() {
     actions.append(link);
     wrap.append(actions);
   }
+  wrap.append(technical);
   return wrap;
 }
 
@@ -2802,12 +2607,13 @@ function capitalise(text) {
 // --------------------------------------------------------- pan / zoom / fit
 
 let panState = null;
+let cameraViewport = null;
 
 /**
  * The single place a camera change is written.
  *
  * Every path that moves the window -- wheel, buttons, drag, fit -- goes through here,
- * Camera writes clamp the window inside the authored world. Shell overlays and
+ * The explored world is unbounded. Shell overlays and
  * viewport HUD never participate in this transform.
  */
 function setCamera(canvas, viewBox, zoom) {
@@ -2817,8 +2623,9 @@ function setCamera(canvas, viewBox, zoom) {
   const [x, y, width, height] = parts;
   const centre = { x: x + width / 2, y: y + height / 2 };
   const z = Number.isFinite(zoom) && zoom > 0 ? zoom : 1;
-  const window = viewBoxFor(viewport, centre, z);
+  const window = {viewBox:`${centre.x-width/2} ${centre.y-height/2} ${width} ${height}`,zoom:z};
   canvas.setAttribute('viewBox', window.viewBox);
+  cameraViewport = viewport;
   state.zoom = window.zoom;
 
   return window;
@@ -2836,13 +2643,21 @@ function applyPanels() {
   const body = $('explorer-body');
   const hiddenFocus = mobileFocus || (!visible.rail && $('rail').contains(document.activeElement))
     || (!visible.drawer && $('drawer').contains(document.activeElement));
+  const enteringRail = visible.rail && $('rail').hidden;
+  const enteringDrawer = visible.drawer && $('drawer').hidden;
   setHidden($('rail'), !visible.rail);
   setHidden($('drawer'), !visible.drawer);
+  if (enteringRail) revealPanel($('rail-scroll'), 'left');
+  if (enteringDrawer) revealPanel($('drawer-inner'), 'right');
   setHidden($('drawer-scrim'), true);
   body.classList.toggle('rail-open', visible.rail);
   body.classList.toggle('rail-closed', !visible.rail);
   body.classList.toggle('with-drawer', visible.drawer);
   body.dataset.panelMode = panels.mode;
+  // Instruments use uncovered screen space; the SVG world keeps its bounds.
+  const stageRect = $('stage').getBoundingClientRect();
+  body.style.setProperty('--instrument-left', visible.rail ? `${$('rail').getBoundingClientRect().right-stageRect.left}px` : '0px');
+  body.style.setProperty('--instrument-right', visible.drawer ? `${stageRect.right-$('drawer').getBoundingClientRect().left}px` : '0px');
   $('rail-toggle').setAttribute('aria-expanded', String(visible.rail));
   if (hiddenFocus) $('rail-toggle').focus({ preventScroll: true });
   syncAllScrollAffordances();
@@ -2867,9 +2682,9 @@ function protectSelectedTarget() {
   const visible = visiblePanels(panels);
   const free = { left: visible.rail ? $('rail').getBoundingClientRect().right : stage.left,
     right: visible.drawer ? $('drawer').getBoundingClientRect().left : stage.right,
-    top: stage.top, bottom: hud.top };
+    top: Math.max(stage.top,($('graph-perspectives')?.getBoundingClientRect().bottom||stage.top)+8), bottom: hud.top };
   const pan = protectionPan(target.getBoundingClientRect(), free);
-  if (!pan || (!pan.dx && !pan.dy)) return;
+  if (!pan || (Math.abs(pan.dx)<0.01 && Math.abs(pan.dy)<0.01)) return;
   const canvas = $('canvas'), c = canvas.getScreenCTM();
   const [x, y, w, h] = canvas.getAttribute('viewBox').split(/\s+/).map(Number);
   setCamera(canvas, `${x-pan.dx/c.a} ${y-pan.dy/c.d} ${w} ${h}`, state.zoom);
@@ -2887,10 +2702,10 @@ function setupViewport() {
     read: () => ({ viewBox: canvas.getAttribute('viewBox'), zoom: state.zoom }),
     write: (box, zoom) => setCamera(canvas, box, zoom) });
   canvas.addEventListener('mobile-tap', event => {
-    const edge = event.target.closest('[data-edge-id], [data-relationship-id]');
+    const edge = event.target.closest('[data-edge-id], [data-relationship-id], [data-display-edge]');
     const node = event.target.closest('[data-node-id]');
     const plate = event.target.closest('[data-bundle-key]');
-    if (edge) selectEdge(edge.dataset.edgeId || edge.dataset.relationshipId);
+    if (edge) selectEdge(edge.dataset.edgeId || edge.dataset.relationshipId || edge.dataset.displayEdge);
     else if (node) selectNode(node.dataset.nodeId);
     else if (plate) toggleBundle(plate.dataset.bundleKey);
     else if (event.target === canvas) clearSelection();
@@ -2900,6 +2715,7 @@ function setupViewport() {
 
   canvas.addEventListener('wheel', (event) => {
     event.preventDefault();
+    stopMotion(canvas);
     const rect = canvas.getBoundingClientRect();
     if (event.deltaY === 0) return;
     const factor = Math.exp(-Math.max(-120, Math.min(120, event.deltaY)) * 0.002);
@@ -2911,11 +2727,12 @@ function setupViewport() {
   let suppressClick = false;
   const DRAG_THRESHOLD = 5;
   canvas.addEventListener('pointerdown', event => {
+    stopMotion(canvas);
     if (isPhone() && event.pointerType === 'touch') return;
     if (event.button !== 0 || !event.isPrimary) return;
     suppressClick = false;
     panState = { pointerId: event.pointerId, x: event.clientX, y: event.clientY,
-      viewBox: canvas.getAttribute('viewBox'), ctm: canvas.getScreenCTM(), dragging: false };
+      viewBox: canvas.getAttribute('viewBox'), zoom: state.zoom, ctm: canvas.getScreenCTM(), dragging: false };
   });
   canvas.addEventListener('pointermove', event => {
     if (!panState || event.pointerId !== panState.pointerId) return;
@@ -2929,7 +2746,7 @@ function setupViewport() {
     }
     const [vx, vy, vw, vh] = String(panState.viewBox).split(/\s+/).map(Number);
     const c = panState.ctm;
-    setCamera(canvas, `${vx - sx / c.a} ${vy - sy / c.d} ${vw} ${vh}`, c.a);
+    setCamera(canvas, `${vx - sx / c.a} ${vy - sy / c.d} ${vw} ${vh}`, panState.zoom);
   });
   const endPointer = event => {
     if (!panState || event.pointerId !== panState.pointerId) return;
@@ -2951,12 +2768,15 @@ function setupViewport() {
   $('zoom-out').addEventListener('click', () => zoomBy(1 / ZOOM_STEP));
   $('zoom-fit').addEventListener('click', () => fit());
   window.addEventListener('resize', () => {
+    const canvasBefore = $('canvas'), oldBox = String(canvasBefore.getAttribute('viewBox')).split(/\s+/).map(Number);
+    const oldScale = cameraViewport ? Math.min(cameraViewport.width/oldBox[2],cameraViewport.height/oldBox[3]) : state.zoom;
     mobile.resetGesture();
     panels = transitionPanels(panels, { type: 'resize', width: window.innerWidth });
     applyPanels();
     if (state.view) {
       const canvas = $('canvas');
-      setCamera(canvas, canvas.getAttribute('viewBox'), state.zoom);
+      const width=canvas.clientWidth/oldScale,height=canvas.clientHeight/oldScale;
+      setCamera(canvas, `${oldBox[0]+oldBox[2]/2-width/2} ${oldBox[1]+oldBox[3]/2-height/2} ${width} ${height}`,oldScale);
       draw();
       const readingOffset = $('drawer-inner').scrollTop;
       const readingFocus = $('drawer-inner').contains(document.activeElement);
@@ -2983,21 +2803,45 @@ function clientToGraph(canvas, clientX, clientY) {
 function zoomBy(factor) {
   const canvas = $('canvas');
   const next = zoomViewBox(canvas.getAttribute('viewBox'), factor, null, state.zoom);
-  setCamera(canvas, next.viewBox, next.zoom);
+  transitionCamera(canvas, next.viewBox, box=>setCamera(canvas,box,canvas.clientWidth / Number(box.split(/\s+/)[2])));
 }
 
-/**
- * Reopens the window on the authored world, not on the content.
- *
- * This used to fit the content bounds, which meant "fit" was a second composition
- * rather than a way of looking at the first one -- and two of them disagreed at every
- * window size. It now returns the window to the world's own coordinates.
- */
+/** Explicit local focus uses the existing camera writer; expansion never fits. */
+function fitGraphBoxes(nodes){
+ const canvas=$('canvas'), boxes=nodes.filter(Boolean).map(n=>n.getBBox());if(!boxes.length)return;
+ const padding=isPhone()?12:40;
+ const x=Math.min(...boxes.map(b=>b.x))-24,y=Math.min(...boxes.map(b=>b.y))-padding;
+ const right=Math.max(...boxes.map(b=>b.x+b.width))+24,bottom=Math.max(...boxes.map(b=>b.y+b.height))+padding;
+ const viewport={width:canvas.clientWidth,height:canvas.clientHeight};
+ const rail=!isPhone()&&visiblePanels(panels).rail?320:0,drawer=!isPhone()&&visiblePanels(panels).drawer?400:0;
+ const overviewSpace=$('graph-overview')?.getBoundingClientRect().height||56;
+ const hud=$('viewport-hud').getBoundingClientRect().height+(isPhone()&&canvas.clientHeight>=600?Math.max(80,overviewSpace+24):0);
+ const toolbar=$('graph-perspectives')?.offsetHeight||110;
+ const availableHeight=Math.max(44,viewport.height-hud-toolbar-32);
+ const scale=Math.max(1/1.2,(right-x)/Math.max(240,viewport.width-rail-drawer-48),(bottom-y)/availableHeight);
+ const w=viewport.width*scale,h=viewport.height*scale;
+ transitionCamera(canvas,`${x-(w-(right-x))/2-(rail-drawer)*scale/2} ${y-(h-(bottom-y))/2+(hud-toolbar)/2*scale} ${w} ${h}`,box=>setCamera(canvas,box,canvas.clientWidth/Number(box.split(/\s+/)[2])));
+}
+function focusGraphGroup(key){
+ const canvas=$('canvas');const members=[...canvas.querySelectorAll('.aggregate-member')].filter(n=>n.dataset.aggregateKey===key);
+ const group=[...canvas.querySelectorAll('.bundle-card')].find(n=>n.dataset.bundleKey===key);
+ if(isPhone()){
+  // Keep actual node text and touch targets at reading size. Navigation follows
+  // the chosen neighborhood while the canvas can still pan to its other peers.
+  const center=state.positions.get(BUNDLE_ID_PREFIX+key);
+  const first=members.find(n=>n.dataset.nodeId===state.selectedNodeId)||members.toSorted((a,b)=>{const pa=state.positions.get(a.dataset.nodeId),pb=state.positions.get(b.dataset.nodeId);return Math.hypot(pa.x-center.x,pa.y-center.y)-Math.hypot(pb.x-center.x,pb.y-center.y);})[0];
+  state.activeGroup=key;if(first){state.selectedNodeId=first.dataset.nodeId;state.selectedEdgeId='';draw();renderDrawer();syncUrl();}phoneFit(first?.dataset.nodeId);return;
+ }
+
+ fitGraphBoxes([canvas.querySelector('.node-box.is-subject'),group?.querySelector('.bundle-card-box'),...members.map(n=>n.querySelector('.node-box')),...[...canvas.querySelectorAll('.classification-node')].filter(n=>state.positions.get(n.dataset.categoryId)?.aggregateKey===key).map(n=>n.querySelector('.classification-box'))]);
+}
+
 function fit() {
   if (!state.view) return;
   const canvas = $('canvas');
-  const viewport = { width: canvas.clientWidth || 1200, height: canvas.clientHeight || 700 };
-  if (isPhone()) phoneFit(); else setCamera(canvas, initialViewBox(viewport).viewBox, 1);
+  if(isPhone() && canvas.clientHeight<400){phoneFit();return;}
+  if(isPhone()){phoneFit();return;}
+  fitGraphBoxes([...canvas.querySelectorAll('.bundle-card-box, .node-box, .classification-box')]);
 }
 
 // --------------------------------------------------------------------- boot
@@ -3124,6 +2968,7 @@ $('layers-btn').addEventListener('click', () => toggleLayers());
     if (!row || !row.dataset.family) return;
     const family = row.dataset.family;
     state.layers[family] = state.layers[family] === false;
+    state.perspective='custom';
     syncUrl();
     draw();
   });
@@ -3176,3 +3021,13 @@ $('layers-btn').addEventListener('click', () => toggleLayers());
 
 installTracerTestStepper();
 boot();
+
+void mountDeepPreview(() => state.repository).then(deep => { if(deep?.capabilities.scope==='anonymous') workspace=mountRepositoryExplorer(() => state.repository, deep, {
+ root:()=>state.view?.nodes.find(n=>n.id===state.view.subject.id),nodes:()=>state.view?.nodes||[],revision:()=>state.view?.revision.commit,selected:()=>state.selectedNodeId||state.selectedEdgeId,camera:()=>({box:$('canvas').getAttribute('viewBox'),zoom:state.zoom}),
+ positions:()=>[...state.positions],restorePositions:(saved,compact)=>{if(compact===isPhone()&&Array.isArray(saved))state.positions=new Map(saved.filter(item=>Array.isArray(item)&&item.length===2&&typeof item[0]==='string'&&Number.isFinite(item[1]?.x)&&Number.isFinite(item[1]?.y)));},
+ select:(id,edge=false,restoring=false)=>{if(restoring&&state.view?.edges.some(e=>e.id===id))edge=true;if(!restoring&&isPhone()&&id&&(edge?state.selectedEdgeId:state.selectedNodeId)===id&&mobile.view==='graph'){switchMobile('evidence');return;}state.selectedNodeId=edge?'':id||'';state.selectedEdgeId=edge?id:'';draw();renderDrawer();syncUrl();},
+ draw,drawer:()=>{const previousPanels={...panels};$('drawer-inner').dataset.selectionKey='';renderDrawer();panels=previousPanels;applyPanels();},restore:c=>c&&setCamera($('canvas'),c.box,c.zoom),
+ focus:(id,parentId)=>{if(isPhone())switchMobile('graph');const nodes=[...$('canvas').querySelectorAll('.node')],n=nodes.find(n=>n.dataset.nodeId===id),parent=nodes.find(n=>n.dataset.nodeId===parentId);if(n){const boxes=[n.querySelector('.node-box')];if(parent){const b=parent.querySelector('.node-box'),a=boxes[0].getBBox(),p=b.getBBox(),span=Math.max(a.x+a.width,p.x+p.width)-Math.min(a.x,p.x)+48;if(!isPhone()||span/Math.max(240,$('canvas').clientWidth-48)<=52/44)boxes.push(b);}fitGraphBoxes(boxes);}},
+ dependencyEnabled:()=>state.layers.dependency,dependencies:enabled=>{state.layers.dependency=enabled;state.perspective='custom';syncUrl();},origins:()=>fit(),
+ grow:id=>exploreNode(id),navigation:()=>isPhone()?switchMobile('relations'):toggleRail(true),
+ }); if(workspace){draw();renderDrawer();} });

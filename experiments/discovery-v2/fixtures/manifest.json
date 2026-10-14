@@ -1,0 +1,120 @@
+{
+  "acquiredAt": "2026-10-09T05:04:17.863Z",
+  "sources": [
+    {
+      "repository": "sindresorhus/p-limit",
+      "revision": "a8a6fbec4e0e866d6d779b10889bb4f5567e70eb",
+      "license": "MIT",
+      "fork": false,
+      "parent": null,
+      "source": null,
+      "commitParents": [
+        "4d4ec71803d8736567249c3dde06ea82795ae7c7"
+      ],
+      "files": [
+        {
+          "path": "index.js",
+          "local": "sindresorhus--p-limit--index.js",
+          "sha256": "edde12a4a4dbdbe8d27161cdd0853db0bab435d5dc6c15f9f4dedc27ee9bca60",
+          "url": "https://github.com/sindresorhus/p-limit/blob/a8a6fbec4e0e866d6d779b10889bb4f5567e70eb/index.js"
+        },
+        {
+          "path": "license",
+          "local": "sindresorhus--p-limit--license",
+          "sha256": "5c932d88256b4ab958f64a856fa48e8bd1f55bc1d96b8149c65689e0c61789d3",
+          "url": "https://github.com/sindresorhus/p-limit/blob/a8a6fbec4e0e866d6d779b10889bb4f5567e70eb/license"
+        }
+      ]
+    },
+    {
+      "repository": "jucke/p-limit",
+      "revision": "e293f0b92536447f72ca818fcf07be8d287f1c24",
+      "license": "MIT",
+      "fork": true,
+      "parent": "sindresorhus/p-limit",
+      "source": "sindresorhus/p-limit",
+      "commitParents": [
+        "77cf1678dbb9dcb778e16e898097d32c8b5cca38"
+      ],
+      "files": [
+        {
+          "path": "index.js",
+          "local": "jucke--p-limit--index.js",
+          "sha256": "b89479e9f48bd6e7a90931a164cdec0b9ae203ea4e31ddb2329865cdf0b391f3",
+          "url": "https://github.com/jucke/p-limit/blob/e293f0b92536447f72ca818fcf07be8d287f1c24/index.js"
+        },
+        {
+          "path": "license",
+          "local": "jucke--p-limit--license",
+          "sha256": "6fb9754611c20f6649f68805e8c990e83261f29316e29de9e6cedae607b8634c",
+          "url": "https://github.com/jucke/p-limit/blob/e293f0b92536447f72ca818fcf07be8d287f1c24/license"
+        }
+      ],
+      "sharedCommitAvailableInUpstream": "e293f0b92536447f72ca818fcf07be8d287f1c24"
+    },
+    {
+      "repository": "sindresorhus/yocto-queue",
+      "revision": "72a8fa96a9d389765cdf2bb9c6daba8302fc375d",
+      "license": "MIT",
+      "fork": false,
+      "parent": null,
+      "source": null,
+      "commitParents": [
+        "b07eac099753833b29d06c614149904445739776"
+      ],
+      "files": [
+        {
+          "path": "index.js",
+          "local": "sindresorhus--yocto-queue--index.js",
+          "sha256": "2eabf3096793c43934ef127fb50238dcba93074fb54f943fc62aeab616769dfc",
+          "url": "https://github.com/sindresorhus/yocto-queue/blob/72a8fa96a9d389765cdf2bb9c6daba8302fc375d/index.js"
+        },
+        {
+          "path": "license",
+          "local": "sindresorhus--yocto-queue--license",
+          "sha256": "5c932d88256b4ab958f64a856fa48e8bd1f55bc1d96b8149c65689e0c61789d3",
+          "url": "https://github.com/sindresorhus/yocto-queue/blob/72a8fa96a9d389765cdf2bb9c6daba8302fc375d/license"
+        },
+        {
+          "path": "readme.md",
+          "local": "sindresorhus--yocto-queue--readme.md",
+          "sha256": "5086c38712996f2d4322e5dfc22fcc47e2173ee304adcefb30641163f1bd9c0f",
+          "url": "https://github.com/sindresorhus/yocto-queue/blob/72a8fa96a9d389765cdf2bb9c6daba8302fc375d/readme.md"
+        }
+      ]
+    },
+    {
+      "repository": "sindresorhus/p-throttle",
+      "revision": "a0d20bf8c1a5f0067b1dce529b1ff013878591d3",
+      "license": "MIT",
+      "fork": false,
+      "parent": null,
+      "source": null,
+      "commitParents": [
+        "09f6e9503dd590b9a3c9e33711ff65a23cf1032b"
+      ],
+      "files": [
+        {
+          "path": "index.js",
+          "local": "sindresorhus--p-throttle--index.js",
+          "sha256": "5567e2731fa0393079ac096c10ebbedbec5a1cd7e687a8ba2021e96c44ef3fcf",
+          "url": "https://github.com/sindresorhus/p-throttle/blob/a0d20bf8c1a5f0067b1dce529b1ff013878591d3/index.js"
+        },
+        {
+          "path": "license",
+          "local": "sindresorhus--p-throttle--license",
+          "sha256": "5c932d88256b4ab958f64a856fa48e8bd1f55bc1d96b8149c65689e0c61789d3",
+          "url": "https://github.com/sindresorhus/p-throttle/blob/a0d20bf8c1a5f0067b1dce529b1ff013878591d3/license"
+        },
+        {
+          "path": "readme.md",
+          "local": "sindresorhus--p-throttle--readme.md",
+          "sha256": "bbfa76e1ee80871b57ad1c1a3566dcf3917f0453177ffca999b178ed071d7db7",
+          "url": "https://github.com/sindresorhus/p-throttle/blob/a0d20bf8c1a5f0067b1dce529b1ff013878591d3/readme.md"
+        }
+      ]
+    }
+  ],
+  "forkSelection": "oldest first public fork; one page, one result",
+  "labels": "fork parent metadata is known; other public pairs remain unknown; synthetic labels defined by construction"
+}

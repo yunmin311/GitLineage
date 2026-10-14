@@ -1,0 +1,391 @@
+{
+  "contentDigest": "a996cb856efd956807c8758432181bb9cb8dfce2477a8228505d0db8be594b84",
+  "cpuBudget": "unsupported",
+  "cpuScope": "process including workers; observational only",
+  "node": "v24.21.0",
+  "platform": "linux",
+  "processCpuMs": 898.244,
+  "requests": [
+    {
+      "headers": {},
+      "request": {
+        "endpoint": "/repositories/1",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 117,
+        "reservedBytes": 32768,
+        "retainedBytes": 117,
+        "status": 200
+      },
+      "startedAt": "2026-10-09T00:00:00.000Z",
+      "wallMs": 0.5919099999999844
+    },
+    {
+      "headers": {},
+      "request": {
+        "endpoint": "/repositories/1/commits/cac1a6416a877d091954f52cae3f640c61a4e011",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 132,
+        "reservedBytes": 32768,
+        "retainedBytes": 132,
+        "status": 200
+      },
+      "startedAt": "2026-10-09T00:00:00.000Z",
+      "wallMs": 0.3917549999999892
+    },
+    {
+      "headers": {},
+      "request": {
+        "endpoint": "/repositories/1/git/trees/1f71f9ac9237086831306ba771dfc2ac8bd299d9",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 186,
+        "reservedBytes": 32768,
+        "retainedBytes": 186,
+        "status": 200
+      },
+      "startedAt": "2026-10-09T00:00:00.000Z",
+      "wallMs": 0.5149340000000393
+    },
+    {
+      "headers": {},
+      "request": {
+        "endpoint": "/repositories/1/git/blobs/6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 213,
+        "reservedBytes": 32768,
+        "retainedBytes": 213,
+        "status": 200
+      },
+      "startedAt": "2026-10-09T00:00:00.000Z",
+      "wallMs": 0.3675869999999577
+    },
+    {
+      "headers": {},
+      "request": {
+        "endpoint": "/repositories/2",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 134,
+        "reservedBytes": 32768,
+        "retainedBytes": 134,
+        "status": 200
+      },
+      "startedAt": "2026-10-09T00:00:00.000Z",
+      "wallMs": 0.2726229999999532
+    },
+    {
+      "headers": {},
+      "request": {
+        "endpoint": "/repositories/2/commits/main",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 182,
+        "reservedBytes": 32768,
+        "retainedBytes": 182,
+        "status": 200
+      },
+      "startedAt": "2026-10-09T00:00:00.000Z",
+      "wallMs": 0.2351449999999886
+    },
+    {
+      "headers": {},
+      "request": {
+        "endpoint": "/repositories/2/git/trees/1f71f9ac9237086831306ba771dfc2ac8bd299d9",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 186,
+        "reservedBytes": 32768,
+        "retainedBytes": 186,
+        "status": 200
+      },
+      "startedAt": "2026-10-09T00:00:00.000Z",
+      "wallMs": 0.18241999999997915
+    },
+    {
+      "headers": {},
+      "request": {
+        "endpoint": "/repositories/2/git/blobs/6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 213,
+        "reservedBytes": 32768,
+        "retainedBytes": 213,
+        "status": 200
+      },
+      "startedAt": "2026-10-09T00:00:00.000Z",
+      "wallMs": 0.22589800000002924
+    },
+    {
+      "headers": {},
+      "request": {
+        "endpoint": "/repositories/3",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 119,
+        "reservedBytes": 32768,
+        "retainedBytes": 119,
+        "status": 200
+      },
+      "startedAt": "2026-10-09T00:00:00.000Z",
+      "wallMs": 0.3853550000000041
+    },
+    {
+      "headers": {},
+      "request": {
+        "endpoint": "/repositories/3/commits/main",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 132,
+        "reservedBytes": 32768,
+        "retainedBytes": 132,
+        "status": 200
+      },
+      "startedAt": "2026-10-09T00:00:00.000Z",
+      "wallMs": 0.14321799999993345
+    },
+    {
+      "headers": {},
+      "request": {
+        "endpoint": "/repositories/3/git/trees/f067ff3135c3d39b2b39190c1cb5d37642f8c2d7",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 186,
+        "reservedBytes": 32768,
+        "retainedBytes": 186,
+        "status": 200
+      },
+      "startedAt": "2026-10-09T00:00:00.000Z",
+      "wallMs": 0.14583499999992
+    },
+    {
+      "headers": {},
+      "request": {
+        "endpoint": "/repositories/3/git/blobs/b57e980fa8065f44e6bd32654a8258630ee394fb",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 133,
+        "reservedBytes": 32768,
+        "retainedBytes": 133,
+        "status": 200
+      },
+      "startedAt": "2026-10-09T00:00:00.000Z",
+      "wallMs": 0.11488600000006954
+    },
+    {
+      "headers": {},
+      "request": {
+        "endpoint": "/repositories/4",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 123,
+        "reservedBytes": 32768,
+        "retainedBytes": 123,
+        "status": 200
+      },
+      "startedAt": "2026-10-09T00:00:00.000Z",
+      "wallMs": 0.3223410000000513
+    },
+    {
+      "headers": {},
+      "request": {
+        "endpoint": "/repositories/4/commits/main",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 132,
+        "reservedBytes": 32768,
+        "retainedBytes": 132,
+        "status": 200
+      },
+      "startedAt": "2026-10-09T00:00:00.000Z",
+      "wallMs": 0.17857600000002094
+    },
+    {
+      "headers": {},
+      "request": {
+        "endpoint": "/repositories/4/git/trees/1f71f9ac9237086831306ba771dfc2ac8bd299d9",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 186,
+        "reservedBytes": 32768,
+        "retainedBytes": 186,
+        "status": 200
+      },
+      "startedAt": "2026-10-09T00:00:00.000Z",
+      "wallMs": 0.16252799999983836
+    },
+    {
+      "headers": {},
+      "request": {
+        "endpoint": "/repositories/4/git/blobs/6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+        "outcome": "success",
+        "reason": null,
+        "receivedBytes": 213,
+        "reservedBytes": 32768,
+        "retainedBytes": 213,
+        "status": 200
+      },
+      "startedAt": "2026-10-09T00:00:00.000Z",
+      "wallMs": 0.1250800000000254
+    }
+  ],
+  "resolution": [
+    {
+      "observations": [
+        {
+          "fullName": "root/example",
+          "htmlUrl": "https://github.com/root/example",
+          "observedAt": "2026-10-09T00:00:00.000Z",
+          "repositoryId": 1,
+          "source": "repository_metadata"
+        }
+      ],
+      "repositoryId": 1
+    },
+    {
+      "observations": [
+        {
+          "fullName": "old/example",
+          "htmlUrl": "https://github.com/old/example",
+          "observedAt": "2026-10-09T00:00:00.000Z",
+          "repositoryId": 2,
+          "source": "repository_search"
+        },
+        {
+          "fullName": "fork/example",
+          "htmlUrl": "https://github.com/fork/example",
+          "observedAt": "2026-10-09T00:00:00.000Z",
+          "repositoryId": 2,
+          "source": "repository_metadata"
+        }
+      ],
+      "repositoryId": 2
+    },
+    {
+      "observations": [
+        {
+          "fullName": "other/example",
+          "htmlUrl": "https://github.com/other/example",
+          "observedAt": "2026-10-09T00:00:00.000Z",
+          "repositoryId": 3,
+          "source": "repository_search"
+        },
+        {
+          "fullName": "other/example",
+          "htmlUrl": "https://github.com/other/example",
+          "observedAt": "2026-10-09T00:00:00.000Z",
+          "repositoryId": 3,
+          "source": "repository_metadata"
+        }
+      ],
+      "repositoryId": 3
+    },
+    {
+      "observations": [
+        {
+          "fullName": "unknown/example",
+          "htmlUrl": "https://github.com/unknown/example",
+          "observedAt": "2026-10-09T00:00:00.000Z",
+          "repositoryId": 4,
+          "source": "repository_search"
+        },
+        {
+          "fullName": "unknown/example",
+          "htmlUrl": "https://github.com/unknown/example",
+          "observedAt": "2026-10-09T00:00:00.000Z",
+          "repositoryId": 4,
+          "source": "repository_metadata"
+        }
+      ],
+      "repositoryId": 4
+    }
+  ],
+  "schemaVersion": "discovery-e2e-receipt@1",
+  "search": {
+    "discoveries": [
+      [
+        {
+          "observedAt": "2026-10-09T00:00:00.000Z",
+          "page": 1,
+          "query": "example in:name is:public fork:true",
+          "querySource": "repository_name",
+          "rank": 1,
+          "reason": "fixed target repository name",
+          "source": "repository_search",
+          "version": "github-rest-repository-search@1"
+        }
+      ],
+      [
+        {
+          "observedAt": "2026-10-09T00:00:00.000Z",
+          "page": 1,
+          "query": "example in:name is:public fork:true",
+          "querySource": "repository_name",
+          "rank": 2,
+          "reason": "fixed target repository name",
+          "source": "repository_search",
+          "version": "github-rest-repository-search@1"
+        }
+      ],
+      [
+        {
+          "observedAt": "2026-10-09T00:00:00.000Z",
+          "page": 1,
+          "query": "example in:name is:public fork:true",
+          "querySource": "repository_name",
+          "rank": 3,
+          "reason": "fixed target repository name",
+          "source": "repository_search",
+          "version": "github-rest-repository-search@1"
+        }
+      ]
+    ],
+    "observations": [
+      [
+        {
+          "fullName": "old/example",
+          "htmlUrl": "https://github.com/old/example",
+          "observedAt": "2026-10-09T00:00:00.000Z",
+          "repositoryId": 2,
+          "source": "repository_search"
+        }
+      ],
+      [
+        {
+          "fullName": "other/example",
+          "htmlUrl": "https://github.com/other/example",
+          "observedAt": "2026-10-09T00:00:00.000Z",
+          "repositoryId": 3,
+          "source": "repository_search"
+        }
+      ],
+      [
+        {
+          "fullName": "unknown/example",
+          "htmlUrl": "https://github.com/unknown/example",
+          "observedAt": "2026-10-09T00:00:00.000Z",
+          "repositoryId": 4,
+          "source": "repository_search"
+        }
+      ]
+    ],
+    "requests": [
+      {
+        "headers": {},
+        "outcome": "success",
+        "page": 1,
+        "query": 0,
+        "receivedBytes": 303,
+        "reservedBytes": 32768,
+        "retainedBytes": 303,
+        "retry": 0,
+        "status": 200
+      }
+    ],
+    "wallMs": 25.673167000000035
+  },
+  "startedAt": "2026-10-09T00:00:00.000Z",
+  "wallMs": 1018.175484
+}

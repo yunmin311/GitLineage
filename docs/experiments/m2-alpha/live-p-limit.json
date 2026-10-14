@@ -1,0 +1,1043 @@
+{
+  "mode": "explicit anonymous real GitHub; standard Graph uses the existing local fixture",
+  "startedAt": "2026-10-09T12:44:30.816Z",
+  "elapsedMs": 26896,
+  "tasks": [
+    {
+      "id": "447b6a92ed3089894f867f08",
+      "kind": "search",
+      "state": "partial",
+      "phase": "partial",
+      "createdAt": "2026-10-09T12:44:33.411Z",
+      "error": "Search partial_provider: unfetched pages or rejected identities; see coverage",
+      "search": {
+        "target": {
+          "schemaVersion": "repository-snapshot@1",
+          "requestedId": 71542716,
+          "state": "resolved",
+          "identity": {
+            "provider": "github",
+            "repositoryId": 71542716,
+            "completeness": "provider_id",
+            "fullName": "sindresorhus/p-limit",
+            "aliases": [],
+            "revision": "a8a6fbec4e0e866d6d779b10889bb4f5567e70eb"
+          },
+          "observations": [
+            {
+              "repositoryId": 71542716,
+              "fullName": "sindresorhus/p-limit",
+              "htmlUrl": "https://github.com/sindresorhus/p-limit",
+              "source": "repository_metadata",
+              "observedAt": "2026-10-09T12:44:34.063Z"
+            },
+            {
+              "repositoryId": 71542716,
+              "fullName": "sindresorhus/p-limit",
+              "htmlUrl": "https://github.com/sindresorhus/p-limit",
+              "source": "repository_metadata",
+              "observedAt": "2026-10-09T12:44:34.526Z"
+            }
+          ],
+          "defaultBranch": "main",
+          "tree": "dcc7e576c722ad0f7d474128a704accb0ffc6abd",
+          "parents": [
+            "4d4ec71803d8736567249c3dde06ea82795ae7c7"
+          ],
+          "metadata": {
+            "fork": false,
+            "parentId": null
+          },
+          "reasons": [],
+          "requestSource": "github-rest-verified-name@1"
+        },
+        "result": {
+          "schemaVersion": "discovery-search-sidecar@2",
+          "candidateSchema": "discovery-candidate@2",
+          "plan": {
+            "version": "repository-query-plan@1",
+            "target": {
+              "provider": "github",
+              "repositoryId": 71542716,
+              "completeness": "provider_id",
+              "fullName": "sindresorhus/p-limit",
+              "aliases": [],
+              "revision": "a8a6fbec4e0e866d6d779b10889bb4f5567e70eb"
+            },
+            "queries": [
+              {
+                "q": "p-limit in:name is:public fork:true",
+                "source": "repository_name",
+                "reason": "fixed target repository name"
+              }
+            ],
+            "perPage": 3,
+            "pages": 1
+          },
+          "candidates": [
+            {
+              "schemaVersion": "discovery-candidate@2",
+              "target": {
+                "provider": "github",
+                "repositoryId": 71542716,
+                "completeness": "provider_id",
+                "fullName": "sindresorhus/p-limit",
+                "aliases": [],
+                "revision": "a8a6fbec4e0e866d6d779b10889bb4f5567e70eb"
+              },
+              "candidate": {
+                "provider": "github",
+                "repositoryId": 226565322,
+                "completeness": "provider_id",
+                "fullName": "1inch/limit-order-protocol",
+                "aliases": [],
+                "htmlUrl": "https://github.com/1inch/limit-order-protocol",
+                "observations": [
+                  {
+                    "repositoryId": 226565322,
+                    "fullName": "1inch/limit-order-protocol",
+                    "htmlUrl": "https://github.com/1inch/limit-order-protocol",
+                    "source": "repository_search",
+                    "observedAt": "2026-10-09T12:44:35.460Z"
+                  }
+                ],
+                "conflicts": [],
+                "revision": {
+                  "state": "unresolved",
+                  "sha": null
+                }
+              },
+              "discoveries": [
+                {
+                  "source": "repository_search",
+                  "version": "github-rest-repository-search@1",
+                  "query": "p-limit in:name is:public fork:true",
+                  "querySource": "repository_name",
+                  "reason": "fixed target repository name",
+                  "page": 1,
+                  "rank": 2,
+                  "observedAt": "2026-10-09T12:44:35.460Z"
+                }
+              ],
+              "similarity": [],
+              "supportingFiles": [],
+              "verification": {
+                "state": "pending",
+                "canonicalEvidenceIds": []
+              },
+              "lineageClaim": "none",
+              "comparison": {
+                "state": "unexecuted",
+                "reason": "revision unresolved"
+              }
+            },
+            {
+              "schemaVersion": "discovery-candidate@2",
+              "target": {
+                "provider": "github",
+                "repositoryId": 71542716,
+                "completeness": "provider_id",
+                "fullName": "sindresorhus/p-limit",
+                "aliases": [],
+                "revision": "a8a6fbec4e0e866d6d779b10889bb4f5567e70eb"
+              },
+              "candidate": {
+                "provider": "github",
+                "repositoryId": 60833257,
+                "completeness": "provider_id",
+                "fullName": "nullice/limitpng",
+                "aliases": [],
+                "htmlUrl": "https://github.com/nullice/limitpng",
+                "observations": [
+                  {
+                    "repositoryId": 60833257,
+                    "fullName": "nullice/limitpng",
+                    "htmlUrl": "https://github.com/nullice/limitpng",
+                    "source": "repository_search",
+                    "observedAt": "2026-10-09T12:44:35.460Z"
+                  }
+                ],
+                "conflicts": [],
+                "revision": {
+                  "state": "unresolved",
+                  "sha": null
+                }
+              },
+              "discoveries": [
+                {
+                  "source": "repository_search",
+                  "version": "github-rest-repository-search@1",
+                  "query": "p-limit in:name is:public fork:true",
+                  "querySource": "repository_name",
+                  "reason": "fixed target repository name",
+                  "page": 1,
+                  "rank": 3,
+                  "observedAt": "2026-10-09T12:44:35.460Z"
+                }
+              ],
+              "similarity": [],
+              "supportingFiles": [],
+              "verification": {
+                "state": "pending",
+                "canonicalEvidenceIds": []
+              },
+              "lineageClaim": "none",
+              "comparison": {
+                "state": "unexecuted",
+                "reason": "revision unresolved"
+              }
+            }
+          ],
+          "queries": [
+            {
+              "state": "partial_provider",
+              "query": 0,
+              "requestedPages": [
+                1
+              ],
+              "completedPages": [
+                1
+              ],
+              "totalCount": 10748,
+              "incompleteResults": false,
+              "returnedItems": 3,
+              "unfetchedAccessiblePages": 333,
+              "beyondWindow": 9748
+            }
+          ],
+          "attempts": [
+            {
+              "query": 0,
+              "page": 1,
+              "retry": 0,
+              "status": 200,
+              "outcome": "success",
+              "headers": {
+                "x-ratelimit-limit": "10",
+                "x-ratelimit-remaining": "9",
+                "x-ratelimit-reset": "1791549935",
+                "x-ratelimit-used": "1",
+                "x-ratelimit-resource": "search",
+                "x-github-api-version-selected": "2026-03-10"
+              },
+              "receivedBytes": 15739,
+              "retainedBytes": 15739,
+              "reservedBytes": 32768
+            }
+          ],
+          "rejectedIdentities": [],
+          "coverage": {
+            "state": "partial_provider",
+            "scope": "bounded public repository metadata search; never all GitHub",
+            "plannedQueries": 1,
+            "attemptedQueries": 1,
+            "requestedPages": 1,
+            "completedPages": 1,
+            "returnedItems": 3,
+            "uniqueObserved": 2,
+            "processedCandidates": 2,
+            "rejectedIdentity": 0,
+            "rejectedBudget": 0,
+            "excludedTarget": 1,
+            "accessibleWindow": 1000,
+            "uncompletedPlanned": []
+          },
+          "budget": {
+            "attempts": 24,
+            "searchAttempts": 2,
+            "candidates": 3,
+            "filesPerCandidate": 8,
+            "bytesPerFile": 131072,
+            "totalBytes": 2097152,
+            "wallMs": 30000,
+            "concurrency": 2,
+            "cpuMs": null
+          },
+          "networkProfile": {
+            "perResponseBytes": 32768,
+            "totalResponseBytes": 1048576
+          },
+          "usage": {
+            "attempts": 4,
+            "searchAttempts": 1,
+            "candidates": 2,
+            "files": {},
+            "bytesByFile": {},
+            "totalBytes": 0,
+            "activeWorkers": 0,
+            "peakWorkers": 1
+          },
+          "network": {
+            "reservedBytes": 131072,
+            "receivedBytes": 30771,
+            "retainedBytes": 30771,
+            "overflowBytes": 0
+          },
+          "wallMs": 509.43382199999996,
+          "cpuBudget": "unsupported",
+          "message": "发现候选尚未验证，不构成谱系关系。"
+        },
+        "requests": [
+          {
+            "request": {
+              "endpoint": "/repos/sindresorhus/p-limit",
+              "status": 200,
+              "outcome": "success",
+              "reason": null,
+              "reservedBytes": 32768,
+              "receivedBytes": 5364,
+              "retainedBytes": 5364
+            },
+            "startedAt": "2026-10-09T12:44:33.412Z",
+            "wallMs": 651.3820769999998,
+            "headers": {
+              "x-ratelimit-limit": "60",
+              "x-ratelimit-remaining": "51",
+              "x-ratelimit-reset": "1791553188",
+              "x-ratelimit-used": "9",
+              "x-ratelimit-resource": "core",
+              "x-github-api-version-selected": "2026-03-10"
+            }
+          },
+          {
+            "request": {
+              "endpoint": "/repositories/71542716",
+              "status": 200,
+              "outcome": "success",
+              "reason": null,
+              "reservedBytes": 32768,
+              "receivedBytes": 5364,
+              "retainedBytes": 5364
+            },
+            "startedAt": "2026-10-09T12:44:34.064Z",
+            "wallMs": 462.1414249999998,
+            "headers": {
+              "x-ratelimit-limit": "60",
+              "x-ratelimit-remaining": "50",
+              "x-ratelimit-reset": "1791553188",
+              "x-ratelimit-used": "10",
+              "x-ratelimit-resource": "core",
+              "x-github-api-version-selected": "2026-03-10"
+            }
+          },
+          {
+            "request": {
+              "endpoint": "/repos/sindresorhus/p-limit/commits/main",
+              "status": 200,
+              "outcome": "success",
+              "reason": null,
+              "reservedBytes": 32768,
+              "receivedBytes": 4304,
+              "retainedBytes": 4304
+            },
+            "startedAt": "2026-10-09T12:44:34.526Z",
+            "wallMs": 419.2293089999994,
+            "headers": {
+              "x-ratelimit-limit": "60",
+              "x-ratelimit-remaining": "49",
+              "x-ratelimit-reset": "1791553188",
+              "x-ratelimit-used": "11",
+              "x-ratelimit-resource": "core",
+              "x-github-api-version-selected": "2026-03-10"
+            }
+          }
+        ],
+        "usage": {
+          "attempts": 4,
+          "searchAttempts": 1,
+          "candidates": 2,
+          "files": {},
+          "bytesByFile": {},
+          "totalBytes": 0,
+          "activeWorkers": 0,
+          "peakWorkers": 1
+        },
+        "network": {
+          "reservedBytes": 131072,
+          "receivedBytes": 30771,
+          "retainedBytes": 30771,
+          "overflowBytes": 0
+        },
+        "scope": "one name query, first three results, at most three candidates; no whole-GitHub coverage"
+      }
+    },
+    {
+      "id": "e423d9394a2a2e2ad218a8e6",
+      "kind": "compare",
+      "state": "partial",
+      "phase": "partial",
+      "createdAt": "2026-10-09T12:44:51.279Z",
+      "error": null,
+      "comparison": {
+        "content": {
+          "schemaVersion": "discovery-pinned-probe@1",
+          "scope": "explicit controls and selected paths only; no discovery recall claim",
+          "snapshots": [
+            {
+              "control": {
+                "name": "sindresorhus/p-limit",
+                "repositoryId": 71542716,
+                "revision": "a8a6fbec4e0e866d6d779b10889bb4f5567e70eb",
+                "selections": [
+                  {
+                    "path": "index.js",
+                    "reason": "fixed root JavaScript entry"
+                  },
+                  {
+                    "path": "index.ts",
+                    "reason": "fixed root TypeScript entry"
+                  },
+                  {
+                    "path": "src/index.js",
+                    "reason": "fixed src JavaScript entry"
+                  },
+                  {
+                    "path": "src/index.ts",
+                    "reason": "fixed src TypeScript entry"
+                  }
+                ]
+              },
+              "expectedId": 71542716,
+              "bootstrap": null,
+              "resolution": {
+                "schemaVersion": "repository-snapshot@1",
+                "requestedId": 71542716,
+                "state": "resolved",
+                "identity": {
+                  "provider": "github",
+                  "repositoryId": 71542716,
+                  "completeness": "provider_id",
+                  "fullName": "sindresorhus/p-limit",
+                  "aliases": [],
+                  "revision": "a8a6fbec4e0e866d6d779b10889bb4f5567e70eb"
+                },
+                "observations": [
+                  {
+                    "repositoryId": 71542716,
+                    "fullName": "sindresorhus/p-limit",
+                    "htmlUrl": "https://github.com/sindresorhus/p-limit",
+                    "source": "repository_metadata"
+                  }
+                ],
+                "defaultBranch": "main",
+                "tree": "dcc7e576c722ad0f7d474128a704accb0ffc6abd",
+                "parents": [
+                  "4d4ec71803d8736567249c3dde06ea82795ae7c7"
+                ],
+                "metadata": {
+                  "fork": false,
+                  "parentId": null
+                },
+                "reasons": [],
+                "requestSource": "github-rest-verified-name@1"
+              },
+              "source": {
+                "snapshot": {
+                  "identity": {
+                    "provider": "github",
+                    "repositoryId": 71542716,
+                    "completeness": "provider_id",
+                    "fullName": "sindresorhus/p-limit",
+                    "aliases": [],
+                    "revision": "a8a6fbec4e0e866d6d779b10889bb4f5567e70eb"
+                  },
+                  "files": [
+                    {
+                      "path": "index.js",
+                      "digest": "edde12a4a4dbdbe8d27161cdd0853db0bab435d5dc6c15f9f4dedc27ee9bca60",
+                      "blob": "c24de5782032605aa83636bcf455f700e3b2ada7",
+                      "bytes": 3868,
+                      "language": "javascript",
+                      "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                      "filterVersion": "source-filter@1",
+                      "classification": "application_source",
+                      "reasons": [
+                        "supported source; no exclusion heuristic matched"
+                      ]
+                    }
+                  ],
+                  "state": "partial",
+                  "pending": [
+                    "index.ts",
+                    "src/index.js",
+                    "src/index.ts"
+                  ],
+                  "reasons": [
+                    "index.ts: selected path unavailable",
+                    "src/index.js: selected path unavailable",
+                    "src/index.ts: selected path unavailable"
+                  ]
+                },
+                "selections": [
+                  {
+                    "path": "index.js",
+                    "reason": "fixed root JavaScript entry"
+                  },
+                  {
+                    "path": "index.ts",
+                    "reason": "fixed root TypeScript entry"
+                  },
+                  {
+                    "path": "src/index.js",
+                    "reason": "fixed src JavaScript entry"
+                  },
+                  {
+                    "path": "src/index.ts",
+                    "reason": "fixed src TypeScript entry"
+                  }
+                ],
+                "bindings": [
+                  {
+                    "repositoryId": 71542716,
+                    "revision": "a8a6fbec4e0e866d6d779b10889bb4f5567e70eb",
+                    "path": "index.js",
+                    "blob": "c24de5782032605aa83636bcf455f700e3b2ada7",
+                    "digest": "edde12a4a4dbdbe8d27161cdd0853db0bab435d5dc6c15f9f4dedc27ee9bca60",
+                    "bytes": 3868,
+                    "parserVersion": "typescript-ast-leaves@1/ts-5.9.3",
+                    "filterVersion": "source-filter@1"
+                  }
+                ],
+                "materializedBytes": 3868,
+                "coverage": {
+                  "scope": "explicit selected paths only",
+                  "state": "partial",
+                  "treeTruncated": false,
+                  "reasons": [
+                    "index.ts: selected path unavailable",
+                    "src/index.js: selected path unavailable",
+                    "src/index.ts: selected path unavailable"
+                  ],
+                  "pending": [
+                    "index.ts",
+                    "src/index.js",
+                    "src/index.ts"
+                  ]
+                }
+              },
+              "identityCheck": {
+                "state": "matched",
+                "repositoryId": 71542716,
+                "fullName": "sindresorhus/p-limit",
+                "reason": null
+              },
+              "state": "inconclusive"
+            },
+            {
+              "control": {
+                "name": "1inch/limit-order-protocol",
+                "repositoryId": 226565322,
+                "selections": [
+                  {
+                    "path": "index.js",
+                    "reason": "fixed root JavaScript entry"
+                  },
+                  {
+                    "path": "index.ts",
+                    "reason": "fixed root TypeScript entry"
+                  },
+                  {
+                    "path": "src/index.js",
+                    "reason": "fixed src JavaScript entry"
+                  },
+                  {
+                    "path": "src/index.ts",
+                    "reason": "fixed src TypeScript entry"
+                  }
+                ]
+              },
+              "expectedId": 226565322,
+              "bootstrap": null,
+              "resolution": {
+                "schemaVersion": "repository-snapshot@1",
+                "requestedId": 226565322,
+                "state": "resolved",
+                "identity": {
+                  "provider": "github",
+                  "repositoryId": 226565322,
+                  "completeness": "provider_id",
+                  "fullName": "1inch/limit-order-protocol",
+                  "aliases": [],
+                  "revision": "50bd1300315606a3d32e9021898374c9d0dc2335"
+                },
+                "observations": [
+                  {
+                    "repositoryId": 226565322,
+                    "fullName": "1inch/limit-order-protocol",
+                    "htmlUrl": "https://github.com/1inch/limit-order-protocol",
+                    "source": "repository_search"
+                  },
+                  {
+                    "repositoryId": 226565322,
+                    "fullName": "1inch/limit-order-protocol",
+                    "htmlUrl": "https://github.com/1inch/limit-order-protocol",
+                    "source": "repository_metadata"
+                  }
+                ],
+                "defaultBranch": "main",
+                "tree": "8e91365ff1b30fb423e879c6ad8fca69839adf33",
+                "parents": [
+                  "cb8dbe16aa8ad51c28442b28dc45f761c6c8692e"
+                ],
+                "metadata": {
+                  "fork": false,
+                  "parentId": null
+                },
+                "reasons": [],
+                "requestSource": "github-rest-verified-name@1"
+              },
+              "source": {
+                "snapshot": {
+                  "identity": {
+                    "provider": "github",
+                    "repositoryId": 226565322,
+                    "completeness": "provider_id",
+                    "fullName": "1inch/limit-order-protocol",
+                    "aliases": [],
+                    "revision": "50bd1300315606a3d32e9021898374c9d0dc2335"
+                  },
+                  "files": [],
+                  "state": "partial",
+                  "pending": [
+                    "index.js",
+                    "index.ts",
+                    "src/index.js",
+                    "src/index.ts"
+                  ],
+                  "reasons": [
+                    "index.js: selected path unavailable",
+                    "index.ts: selected path unavailable",
+                    "src/index.js: selected path unavailable",
+                    "src/index.ts: selected path unavailable"
+                  ]
+                },
+                "selections": [
+                  {
+                    "path": "index.js",
+                    "reason": "fixed root JavaScript entry"
+                  },
+                  {
+                    "path": "index.ts",
+                    "reason": "fixed root TypeScript entry"
+                  },
+                  {
+                    "path": "src/index.js",
+                    "reason": "fixed src JavaScript entry"
+                  },
+                  {
+                    "path": "src/index.ts",
+                    "reason": "fixed src TypeScript entry"
+                  }
+                ],
+                "bindings": [],
+                "materializedBytes": 0,
+                "coverage": {
+                  "scope": "explicit selected paths only",
+                  "state": "partial",
+                  "treeTruncated": false,
+                  "reasons": [
+                    "index.js: selected path unavailable",
+                    "index.ts: selected path unavailable",
+                    "src/index.js: selected path unavailable",
+                    "src/index.ts: selected path unavailable",
+                    "no eligible selected source"
+                  ],
+                  "pending": [
+                    "index.js",
+                    "index.ts",
+                    "src/index.js",
+                    "src/index.ts"
+                  ]
+                }
+              },
+              "identityCheck": {
+                "state": "matched",
+                "repositoryId": 226565322,
+                "fullName": "1inch/limit-order-protocol",
+                "reason": null
+              },
+              "state": "inconclusive"
+            }
+          ],
+          "comparisons": [
+            {
+              "name": "1inch/limit-order-protocol",
+              "candidate": null,
+              "summary": null,
+              "reason": "no eligible identity-checked pinned source",
+              "label": "unknown; unjudged"
+            }
+          ],
+          "requests": [
+            {
+              "endpoint": "/repositories/71542716",
+              "status": 200,
+              "outcome": "success",
+              "reason": null,
+              "reservedBytes": 32768,
+              "receivedBytes": 5364,
+              "retainedBytes": 5364
+            },
+            {
+              "endpoint": "/repos/sindresorhus/p-limit/commits/a8a6fbec4e0e866d6d779b10889bb4f5567e70eb",
+              "status": 200,
+              "outcome": "success",
+              "reason": null,
+              "reservedBytes": 32768,
+              "receivedBytes": 4304,
+              "retainedBytes": 4304
+            },
+            {
+              "endpoint": "/repos/sindresorhus/p-limit/git/trees/dcc7e576c722ad0f7d474128a704accb0ffc6abd",
+              "status": 200,
+              "outcome": "success",
+              "reason": null,
+              "reservedBytes": 32768,
+              "receivedBytes": 3483,
+              "retainedBytes": 3483
+            },
+            {
+              "endpoint": "/repos/sindresorhus/p-limit/git/blobs/c24de5782032605aa83636bcf455f700e3b2ada7",
+              "status": 200,
+              "outcome": "success",
+              "reason": null,
+              "reservedBytes": 32768,
+              "receivedBytes": 5625,
+              "retainedBytes": 5625
+            },
+            {
+              "endpoint": "/repos/sindresorhus/p-limit",
+              "status": 200,
+              "outcome": "success",
+              "reason": null,
+              "reservedBytes": 32768,
+              "receivedBytes": 5364,
+              "retainedBytes": 5364
+            },
+            {
+              "endpoint": "/repositories/226565322",
+              "status": 200,
+              "outcome": "success",
+              "reason": null,
+              "reservedBytes": 32768,
+              "receivedBytes": 6447,
+              "retainedBytes": 6447
+            },
+            {
+              "endpoint": "/repos/1inch/limit-order-protocol/commits/main",
+              "status": 200,
+              "outcome": "success",
+              "reason": null,
+              "reservedBytes": 32768,
+              "receivedBytes": 6447,
+              "retainedBytes": 6447
+            },
+            {
+              "endpoint": "/repos/1inch/limit-order-protocol/git/trees/8e91365ff1b30fb423e879c6ad8fca69839adf33",
+              "status": 200,
+              "outcome": "success",
+              "reason": null,
+              "reservedBytes": 32768,
+              "receivedBytes": 6249,
+              "retainedBytes": 6249
+            },
+            {
+              "endpoint": "/repos/1inch/limit-order-protocol",
+              "status": 200,
+              "outcome": "success",
+              "reason": null,
+              "reservedBytes": 32768,
+              "receivedBytes": 6447,
+              "retainedBytes": 6447
+            }
+          ],
+          "budget": {
+            "attempts": 24,
+            "searchAttempts": 2,
+            "candidates": 3,
+            "filesPerCandidate": 8,
+            "bytesPerFile": 131072,
+            "totalBytes": 2097152,
+            "wallMs": 30000,
+            "concurrency": 2,
+            "cpuMs": null
+          },
+          "networkProfile": {
+            "perResponseBytes": 32768,
+            "totalResponseBytes": 1048576
+          },
+          "usage": {
+            "attempts": 9,
+            "searchAttempts": 0,
+            "candidates": 0,
+            "files": {
+              "github:71542716@a8a6fbec4e0e866d6d779b10889bb4f5567e70eb": 1
+            },
+            "bytesByFile": {
+              "[\"github:71542716@a8a6fbec4e0e866d6d779b10889bb4f5567e70eb\",\"index.js\"]": 3868
+            },
+            "totalBytes": 3868,
+            "activeWorkers": 0,
+            "peakWorkers": 1
+          },
+          "network": {
+            "reservedBytes": 294912,
+            "receivedBytes": 49730,
+            "retainedBytes": 49730,
+            "overflowBytes": 0
+          },
+          "sourceMaterializedBytes": 3868,
+          "coverage": {
+            "state": "partial",
+            "completed": 0,
+            "inconclusive": 1
+          },
+          "verification": "pending",
+          "lineageClaim": "none",
+          "cpuBudget": "unsupported"
+        },
+        "receipt": {
+          "schemaVersion": "discovery-pinned-probe-receipt@1",
+          "contentDigest": "b22f4430489b4b9fde203cbe81822aa7a737fefad31201c4b8ba0c2d959064d1",
+          "startedAt": "2026-10-09T12:44:51.280Z",
+          "wallMs": 6113.894874000001,
+          "processCpuMs": 117.719,
+          "cpuBudget": "unsupported",
+          "cpuScope": "process including workers; observational only",
+          "requests": [
+            {
+              "request": {
+                "endpoint": "/repositories/71542716",
+                "status": 200,
+                "outcome": "success",
+                "reason": null,
+                "reservedBytes": 32768,
+                "receivedBytes": 5364,
+                "retainedBytes": 5364
+              },
+              "startedAt": "2026-10-09T12:44:51.280Z",
+              "wallMs": 2070.3293840000006,
+              "headers": {
+                "x-ratelimit-limit": "60",
+                "x-ratelimit-remaining": "46",
+                "x-ratelimit-reset": "1791553188",
+                "x-ratelimit-used": "14",
+                "x-ratelimit-resource": "core",
+                "x-github-api-version-selected": "2026-03-10"
+              }
+            },
+            {
+              "request": {
+                "endpoint": "/repos/sindresorhus/p-limit/commits/a8a6fbec4e0e866d6d779b10889bb4f5567e70eb",
+                "status": 200,
+                "outcome": "success",
+                "reason": null,
+                "reservedBytes": 32768,
+                "receivedBytes": 4304,
+                "retainedBytes": 4304
+              },
+              "startedAt": "2026-10-09T12:44:53.350Z",
+              "wallMs": 422.5105349999976,
+              "headers": {
+                "x-ratelimit-limit": "60",
+                "x-ratelimit-remaining": "45",
+                "x-ratelimit-reset": "1791553188",
+                "x-ratelimit-used": "15",
+                "x-ratelimit-resource": "core",
+                "x-github-api-version-selected": "2026-03-10"
+              }
+            },
+            {
+              "request": {
+                "endpoint": "/repos/sindresorhus/p-limit/git/trees/dcc7e576c722ad0f7d474128a704accb0ffc6abd",
+                "status": 200,
+                "outcome": "success",
+                "reason": null,
+                "reservedBytes": 32768,
+                "receivedBytes": 3483,
+                "retainedBytes": 3483
+              },
+              "startedAt": "2026-10-09T12:44:53.773Z",
+              "wallMs": 411.712733999997,
+              "headers": {
+                "x-ratelimit-limit": "60",
+                "x-ratelimit-remaining": "44",
+                "x-ratelimit-reset": "1791553188",
+                "x-ratelimit-used": "16",
+                "x-ratelimit-resource": "core",
+                "x-github-api-version-selected": "2026-03-10"
+              }
+            },
+            {
+              "request": {
+                "endpoint": "/repos/sindresorhus/p-limit/git/blobs/c24de5782032605aa83636bcf455f700e3b2ada7",
+                "status": 200,
+                "outcome": "success",
+                "reason": null,
+                "reservedBytes": 32768,
+                "receivedBytes": 5625,
+                "retainedBytes": 5625
+              },
+              "startedAt": "2026-10-09T12:44:54.186Z",
+              "wallMs": 518.8053010000003,
+              "headers": {
+                "x-ratelimit-limit": "60",
+                "x-ratelimit-remaining": "43",
+                "x-ratelimit-reset": "1791553188",
+                "x-ratelimit-used": "17",
+                "x-ratelimit-resource": "core",
+                "x-github-api-version-selected": "2026-03-10"
+              }
+            },
+            {
+              "request": {
+                "endpoint": "/repos/sindresorhus/p-limit",
+                "status": 200,
+                "outcome": "success",
+                "reason": null,
+                "reservedBytes": 32768,
+                "receivedBytes": 5364,
+                "retainedBytes": 5364
+              },
+              "startedAt": "2026-10-09T12:44:54.707Z",
+              "wallMs": 262.379619000003,
+              "headers": {
+                "x-ratelimit-limit": "60",
+                "x-ratelimit-remaining": "42",
+                "x-ratelimit-reset": "1791553188",
+                "x-ratelimit-used": "18",
+                "x-ratelimit-resource": "core",
+                "x-github-api-version-selected": "2026-03-10"
+              }
+            },
+            {
+              "request": {
+                "endpoint": "/repositories/226565322",
+                "status": 200,
+                "outcome": "success",
+                "reason": null,
+                "reservedBytes": 32768,
+                "receivedBytes": 6447,
+                "retainedBytes": 6447
+              },
+              "startedAt": "2026-10-09T12:44:54.969Z",
+              "wallMs": 473.4675869999992,
+              "headers": {
+                "x-ratelimit-limit": "60",
+                "x-ratelimit-remaining": "41",
+                "x-ratelimit-reset": "1791553188",
+                "x-ratelimit-used": "19",
+                "x-ratelimit-resource": "core",
+                "x-github-api-version-selected": "2026-03-10"
+              }
+            },
+            {
+              "request": {
+                "endpoint": "/repos/1inch/limit-order-protocol/commits/main",
+                "status": 200,
+                "outcome": "success",
+                "reason": null,
+                "reservedBytes": 32768,
+                "receivedBytes": 6447,
+                "retainedBytes": 6447
+              },
+              "startedAt": "2026-10-09T12:44:55.443Z",
+              "wallMs": 981.4998899999991,
+              "headers": {
+                "x-ratelimit-limit": "60",
+                "x-ratelimit-remaining": "40",
+                "x-ratelimit-reset": "1791553188",
+                "x-ratelimit-used": "20",
+                "x-ratelimit-resource": "core",
+                "x-github-api-version-selected": "2026-03-10"
+              }
+            },
+            {
+              "request": {
+                "endpoint": "/repos/1inch/limit-order-protocol/git/trees/8e91365ff1b30fb423e879c6ad8fca69839adf33",
+                "status": 200,
+                "outcome": "success",
+                "reason": null,
+                "reservedBytes": 32768,
+                "receivedBytes": 6249,
+                "retainedBytes": 6249
+              },
+              "startedAt": "2026-10-09T12:44:56.425Z",
+              "wallMs": 487.8340429999989,
+              "headers": {
+                "x-ratelimit-limit": "60",
+                "x-ratelimit-remaining": "39",
+                "x-ratelimit-reset": "1791553188",
+                "x-ratelimit-used": "21",
+                "x-ratelimit-resource": "core",
+                "x-github-api-version-selected": "2026-03-10"
+              }
+            },
+            {
+              "request": {
+                "endpoint": "/repos/1inch/limit-order-protocol",
+                "status": 200,
+                "outcome": "success",
+                "reason": null,
+                "reservedBytes": 32768,
+                "receivedBytes": 6447,
+                "retainedBytes": 6447
+              },
+              "startedAt": "2026-10-09T12:44:56.913Z",
+              "wallMs": 478.84446099999695,
+              "headers": {
+                "x-ratelimit-limit": "60",
+                "x-ratelimit-remaining": "38",
+                "x-ratelimit-reset": "1791553188",
+                "x-ratelimit-used": "22",
+                "x-ratelimit-resource": "core",
+                "x-github-api-version-selected": "2026-03-10"
+              }
+            }
+          ],
+          "observations": [
+            {
+              "expectedId": 71542716,
+              "bootstrap": null,
+              "resolution": [
+                {
+                  "repositoryId": 71542716,
+                  "fullName": "sindresorhus/p-limit",
+                  "htmlUrl": "https://github.com/sindresorhus/p-limit",
+                  "source": "repository_metadata",
+                  "observedAt": "2026-10-09T12:44:53.350Z"
+                }
+              ]
+            },
+            {
+              "expectedId": 226565322,
+              "bootstrap": null,
+              "resolution": [
+                {
+                  "repositoryId": 226565322,
+                  "fullName": "1inch/limit-order-protocol",
+                  "htmlUrl": "https://github.com/1inch/limit-order-protocol",
+                  "source": "repository_search",
+                  "observedAt": "2026-10-09T12:44:35.460Z"
+                },
+                {
+                  "repositoryId": 226565322,
+                  "fullName": "1inch/limit-order-protocol",
+                  "htmlUrl": "https://github.com/1inch/limit-order-protocol",
+                  "source": "repository_metadata",
+                  "observedAt": "2026-10-09T12:44:55.443Z"
+                }
+              ]
+            }
+          ],
+          "node": "v24.21.0",
+          "platform": "linux"
+        }
+      }
+    }
+  ],
+  "text": "Deep Search\nReturn to Graph\n\nAuthorized local Alpha · deterministic comparison · no Graph writes\n\nSimilarity is a measurement, not proof of ancestry. Unknown stays pending.\n\nPublic GitHub repository\nSearch candidates\n\ncompare: partial\n\nEach task: ≤24 HTTP attempts · 30 s · ≤3 candidates · select ≤2 · four entry paths · 32 KiB/response · 1 MiB reserved. CPU hard budget unsupported.\n\nPinned source comparison\n\nFile-level measurements only. Normalized scores can be high for common patterns or templates; no repository-wide similarity or lineage probability.\n\nVerification: pending · Lineage claim: none\n\n1inch/limit-order-protocol\n\nUnknown · no verified lineage claim\n\nCoverage: unavailable. no eligible identity-checked pinned source\n\nindex.js: selected path unavailable; index.ts: selected path unavailable; src/index.js: selected path unavailable; src/index.ts: selected path unavailable; no eligible selected source\n\nCannot compare: no eligible identity-checked pinned source. No zero score substituted.\n\nPinned snapshots, Git blob SHA, file bindings and incomplete paths\nCoverage, requests and resource receipt\nDownload Sidecar + receipt",
+  "errors": [],
+  "graphWrites": 0,
+  "cacheWritesByDiscovery": 0
+}

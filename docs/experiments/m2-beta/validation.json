@@ -1,0 +1,371 @@
+{
+  "checks": [
+    {
+      "cacheUnchanged": true,
+      "width": 390,
+      "status": "PASS",
+      "geometry": {
+        "x": 12,
+        "y": 12,
+        "width": 366,
+        "height": 908,
+        "overflow": false
+      },
+      "graphCameraPreserved": true,
+      "graphURLPreserved": true,
+      "graphBefore": {
+        "viewBox": "335 164.5 390 791",
+        "url": "http://127.0.0.1:39963/Kuddev/pebrel?node=repo%3Agithub%3Akuddev%2Fpebrel&mobile=evidence",
+        "ctm": [
+          1,
+          0,
+          0,
+          1,
+          -335,
+          -76.5
+        ],
+        "selection": "repo:github:kuddev/pebrel"
+      },
+      "graphAfter": {
+        "viewBox": "335 164.5 390 791",
+        "url": "http://127.0.0.1:39963/Kuddev/pebrel?node=repo%3Agithub%3Akuddev%2Fpebrel&mobile=evidence",
+        "ctm": [
+          1,
+          0,
+          0,
+          1,
+          -335,
+          -76.5
+        ],
+        "selection": "repo:github:kuddev/pebrel"
+      },
+      "cacheBefore": [
+        {
+          "path": "jobs/fc7383ac-ae3b-444f-8348-fba4306e8cea.json",
+          "sha256": "a53eb165ba70c804b9f7d0a571e45c591212e13896c4119e068de490c8c4bf93"
+        },
+        {
+          "path": "public/graphs/public/github/kuddev/pebrel@51514bd50094/v2.0.0/graph.json",
+          "sha256": "7b182465c71c711938bde5c971206ac41158c511b2e0a7b84514cdf246289edf"
+        }
+      ],
+      "cacheAfter": [
+        {
+          "path": "jobs/fc7383ac-ae3b-444f-8348-fba4306e8cea.json",
+          "sha256": "a53eb165ba70c804b9f7d0a571e45c591212e13896c4119e068de490c8c4bf93"
+        },
+        {
+          "path": "public/graphs/public/github/kuddev/pebrel@51514bd50094/v2.0.0/graph.json",
+          "sha256": "7b182465c71c711938bde5c971206ac41158c511b2e0a7b84514cdf246289edf"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "cacheUnchanged": true,
+      "width": 430,
+      "status": "PASS",
+      "geometry": {
+        "x": 12,
+        "y": 12,
+        "width": 406,
+        "height": 908,
+        "overflow": false
+      },
+      "graphCameraPreserved": true,
+      "graphURLPreserved": true,
+      "graphBefore": {
+        "viewBox": "315 164.5 430 791",
+        "url": "http://127.0.0.1:46431/Kuddev/pebrel?node=repo%3Agithub%3Akuddev%2Fpebrel&mobile=evidence",
+        "ctm": [
+          1,
+          0,
+          0,
+          1,
+          -315,
+          -76.5
+        ],
+        "selection": "repo:github:kuddev/pebrel"
+      },
+      "graphAfter": {
+        "viewBox": "315 164.5 430 791",
+        "url": "http://127.0.0.1:46431/Kuddev/pebrel?node=repo%3Agithub%3Akuddev%2Fpebrel&mobile=evidence",
+        "ctm": [
+          1,
+          0,
+          0,
+          1,
+          -315,
+          -76.5
+        ],
+        "selection": "repo:github:kuddev/pebrel"
+      },
+      "cacheBefore": [
+        {
+          "path": "jobs/f0b99f63-6b7b-448c-939c-6415a623ecc1.json",
+          "sha256": "89f3addd91aa5fdb012179ada2207eafef425a742528ad1d230d42bf7b836663"
+        },
+        {
+          "path": "public/graphs/public/github/kuddev/pebrel@51514bd50094/v2.0.0/graph.json",
+          "sha256": "7b182465c71c711938bde5c971206ac41158c511b2e0a7b84514cdf246289edf"
+        }
+      ],
+      "cacheAfter": [
+        {
+          "path": "jobs/f0b99f63-6b7b-448c-939c-6415a623ecc1.json",
+          "sha256": "89f3addd91aa5fdb012179ada2207eafef425a742528ad1d230d42bf7b836663"
+        },
+        {
+          "path": "public/graphs/public/github/kuddev/pebrel@51514bd50094/v2.0.0/graph.json",
+          "sha256": "7b182465c71c711938bde5c971206ac41158c511b2e0a7b84514cdf246289edf"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "cacheUnchanged": true,
+      "width": 1280,
+      "status": "PASS",
+      "geometry": {
+        "x": 110,
+        "y": 20,
+        "width": 1060,
+        "height": 1040,
+        "overflow": false
+      },
+      "graphCameraPreserved": true,
+      "graphURLPreserved": true,
+      "graphBefore": {
+        "viewBox": "320 42 1280 1036",
+        "url": "http://127.0.0.1:41253/kuddev/pebrel?node=repo%3Agithub%3Akuddev%2Fpebrel",
+        "ctm": [
+          1,
+          0,
+          0,
+          1,
+          -320,
+          2
+        ],
+        "selection": "repo:github:kuddev/pebrel"
+      },
+      "graphAfter": {
+        "viewBox": "320 42 1280 1036",
+        "url": "http://127.0.0.1:41253/kuddev/pebrel?node=repo%3Agithub%3Akuddev%2Fpebrel",
+        "ctm": [
+          1,
+          0,
+          0,
+          1,
+          -320,
+          2
+        ],
+        "selection": "repo:github:kuddev/pebrel"
+      },
+      "cacheBefore": [
+        {
+          "path": "jobs/20e2d45a-2d44-4edf-ae8a-931cf235b644.json",
+          "sha256": "9d94af55798cebbfb5c9032038d12b49141a6240c7c9188cfe55a78709366c91"
+        },
+        {
+          "path": "public/graphs/public/github/kuddev/pebrel@51514bd50094/v2.0.0/graph.json",
+          "sha256": "7b182465c71c711938bde5c971206ac41158c511b2e0a7b84514cdf246289edf"
+        }
+      ],
+      "cacheAfter": [
+        {
+          "path": "jobs/20e2d45a-2d44-4edf-ae8a-931cf235b644.json",
+          "sha256": "9d94af55798cebbfb5c9032038d12b49141a6240c7c9188cfe55a78709366c91"
+        },
+        {
+          "path": "public/graphs/public/github/kuddev/pebrel@51514bd50094/v2.0.0/graph.json",
+          "sha256": "7b182465c71c711938bde5c971206ac41158c511b2e0a7b84514cdf246289edf"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "cacheUnchanged": true,
+      "width": 1920,
+      "status": "PASS",
+      "geometry": {
+        "x": 430,
+        "y": 20,
+        "width": 1060,
+        "height": 1040,
+        "overflow": false
+      },
+      "graphCameraPreserved": true,
+      "graphURLPreserved": true,
+      "graphBefore": {
+        "viewBox": "0 42 1920 1036",
+        "url": "http://127.0.0.1:36817/kuddev/pebrel?node=repo%3Agithub%3Akuddev%2Fpebrel",
+        "ctm": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          2
+        ],
+        "selection": "repo:github:kuddev/pebrel"
+      },
+      "graphAfter": {
+        "viewBox": "0 42 1920 1036",
+        "url": "http://127.0.0.1:36817/kuddev/pebrel?node=repo%3Agithub%3Akuddev%2Fpebrel",
+        "ctm": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          2
+        ],
+        "selection": "repo:github:kuddev/pebrel"
+      },
+      "cacheBefore": [
+        {
+          "path": "jobs/0f546b0b-9989-4b9e-b7c5-268e15ae8f28.json",
+          "sha256": "b286f704d35f630508a333da9a3779ba8db8a0123a9e0ff741f162697dc91838"
+        },
+        {
+          "path": "public/graphs/public/github/kuddev/pebrel@51514bd50094/v2.0.0/graph.json",
+          "sha256": "7b182465c71c711938bde5c971206ac41158c511b2e0a7b84514cdf246289edf"
+        }
+      ],
+      "cacheAfter": [
+        {
+          "path": "jobs/0f546b0b-9989-4b9e-b7c5-268e15ae8f28.json",
+          "sha256": "b286f704d35f630508a333da9a3779ba8db8a0123a9e0ff741f162697dc91838"
+        },
+        {
+          "path": "public/graphs/public/github/kuddev/pebrel@51514bd50094/v2.0.0/graph.json",
+          "sha256": "7b182465c71c711938bde5c971206ac41158c511b2e0a7b84514cdf246289edf"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "mode": "multiple-search-observations-downloaded-and-revalidated",
+      "status": "PASS",
+      "ranks": [
+        1,
+        2
+      ]
+    },
+    {
+      "mode": "filtered_only",
+      "width": 390,
+      "status": "PASS",
+      "sourceReceiptDownloaded": true
+    },
+    {
+      "mode": "no_results",
+      "width": 390,
+      "status": "PASS",
+      "sourceReceiptDownloaded": false
+    },
+    {
+      "mode": "filtered_only",
+      "width": 430,
+      "status": "PASS",
+      "sourceReceiptDownloaded": true
+    },
+    {
+      "mode": "no_results",
+      "width": 430,
+      "status": "PASS",
+      "sourceReceiptDownloaded": false
+    },
+    {
+      "mode": "filtered_only",
+      "width": 1280,
+      "status": "PASS",
+      "sourceReceiptDownloaded": true
+    },
+    {
+      "mode": "no_results",
+      "width": 1280,
+      "status": "PASS",
+      "sourceReceiptDownloaded": false
+    },
+    {
+      "mode": "filtered_only",
+      "width": 1920,
+      "status": "PASS",
+      "sourceReceiptDownloaded": true
+    },
+    {
+      "mode": "no_results",
+      "width": 1920,
+      "status": "PASS",
+      "sourceReceiptDownloaded": false
+    },
+    {
+      "mode": "rate_limit",
+      "width": 390,
+      "status": "PASS",
+      "unavailableNotZero": true
+    },
+    {
+      "mode": "cancel",
+      "width": 390,
+      "status": "PASS",
+      "unavailableNotZero": true
+    },
+    {
+      "mode": "rate_limit",
+      "width": 430,
+      "status": "PASS",
+      "unavailableNotZero": true
+    },
+    {
+      "mode": "cancel",
+      "width": 430,
+      "status": "PASS",
+      "unavailableNotZero": true
+    },
+    {
+      "mode": "rate_limit",
+      "width": 1280,
+      "status": "PASS",
+      "unavailableNotZero": true
+    },
+    {
+      "mode": "cancel",
+      "width": 1280,
+      "status": "PASS",
+      "unavailableNotZero": true
+    },
+    {
+      "mode": "rate_limit",
+      "width": 1920,
+      "status": "PASS",
+      "unavailableNotZero": true
+    },
+    {
+      "mode": "cancel",
+      "width": 1920,
+      "status": "PASS",
+      "unavailableNotZero": true
+    }
+  ],
+  "transport": "official fixed Mock, not live GitHub",
+  "calls": [
+    "/repos/root/example",
+    "/repositories/1",
+    "/repos/root/example/commits/main",
+    "/search/repositories",
+    "/repositories/4",
+    "/repos/unknown/example/commits/main",
+    "/repos/root/example/git/trees/76e245e05196b79d34c5b15ce58d83e4bb33bc2d",
+    "/repos/root/example/git/trees/ab8d7a5e787720d495390aa119281207299dc8df",
+    "/repos/root/example",
+    "/repos/unknown/example/git/trees/aec380cfe05a35f1f96cb2c3bbabc27f092be8ab",
+    "/repos/unknown/example/git/trees/fe6b6ca336a02ddc9a24438d51a19cb354597123",
+    "/repos/unknown/example",
+    "/repos/root/example/git/blobs/6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+    "/repos/root/example",
+    "/repos/unknown/example/git/blobs/6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+    "/repos/unknown/example"
+  ]
+}

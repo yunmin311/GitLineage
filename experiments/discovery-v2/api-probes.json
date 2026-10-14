@@ -1,0 +1,367 @@
+{
+  "acquiredAt": "2026-10-09T05:04:17.871Z",
+  "requestCap": 24,
+  "requests": 24,
+  "probes": [
+    {
+      "url": "https://api.github.com/repos/sindresorhus/p-limit/forks?sort=oldest&per_page=1",
+      "status": 200,
+      "authenticated": true,
+      "bytes": 4999,
+      "latencyMs": 926.9768399999999,
+      "rate": {
+        "limit": "5000",
+        "remaining": "4998",
+        "used": "2",
+        "reset": "1791525705",
+        "resource": "core"
+      }
+    },
+    {
+      "url": "https://api.github.com/repos/sindresorhus/p-limit",
+      "status": 200,
+      "authenticated": true,
+      "bytes": 5471,
+      "latencyMs": 925.2037889999999,
+      "rate": {
+        "limit": "5000",
+        "remaining": "4980",
+        "used": "20",
+        "reset": "1791525300",
+        "resource": "core"
+      }
+    },
+    {
+      "url": "https://api.github.com/repos/sindresorhus/p-limit/commits/main",
+      "status": 200,
+      "authenticated": true,
+      "bytes": 4304,
+      "latencyMs": 452.8002980000001,
+      "rate": {
+        "limit": "5000",
+        "remaining": "4979",
+        "used": "21",
+        "reset": "1791525300",
+        "resource": "core"
+      }
+    },
+    {
+      "url": "https://raw.githubusercontent.com/sindresorhus/p-limit/a8a6fbec4e0e866d6d779b10889bb4f5567e70eb/index.js",
+      "status": 200,
+      "authenticated": false,
+      "bytes": 3868,
+      "latencyMs": 595.2191939999998,
+      "rate": {
+        "limit": null,
+        "remaining": null,
+        "used": null,
+        "reset": null,
+        "resource": null
+      }
+    },
+    {
+      "url": "https://raw.githubusercontent.com/sindresorhus/p-limit/a8a6fbec4e0e866d6d779b10889bb4f5567e70eb/license",
+      "status": 200,
+      "authenticated": false,
+      "bytes": 1117,
+      "latencyMs": 120.18812100000014,
+      "rate": {
+        "limit": null,
+        "remaining": null,
+        "used": null,
+        "reset": null,
+        "resource": null
+      }
+    },
+    {
+      "url": "https://api.github.com/repos/jucke/p-limit",
+      "status": 200,
+      "authenticated": true,
+      "bytes": 15719,
+      "latencyMs": 506.38346,
+      "rate": {
+        "limit": "5000",
+        "remaining": "4978",
+        "used": "22",
+        "reset": "1791525300",
+        "resource": "core"
+      }
+    },
+    {
+      "url": "https://api.github.com/repos/jucke/p-limit/commits/master",
+      "status": 200,
+      "authenticated": true,
+      "bytes": 4372,
+      "latencyMs": 465.12329,
+      "rate": {
+        "limit": "5000",
+        "remaining": "4977",
+        "used": "23",
+        "reset": "1791525300",
+        "resource": "core"
+      }
+    },
+    {
+      "url": "https://raw.githubusercontent.com/jucke/p-limit/e293f0b92536447f72ca818fcf07be8d287f1c24/index.js",
+      "status": 200,
+      "authenticated": false,
+      "bytes": 640,
+      "latencyMs": 136.06311899999946,
+      "rate": {
+        "limit": null,
+        "remaining": null,
+        "used": null,
+        "reset": null,
+        "resource": null
+      }
+    },
+    {
+      "url": "https://raw.githubusercontent.com/jucke/p-limit/e293f0b92536447f72ca818fcf07be8d287f1c24/license",
+      "status": 200,
+      "authenticated": false,
+      "bytes": 1119,
+      "latencyMs": 158.38036099999954,
+      "rate": {
+        "limit": null,
+        "remaining": null,
+        "used": null,
+        "reset": null,
+        "resource": null
+      }
+    },
+    {
+      "url": "https://api.github.com/repos/sindresorhus/yocto-queue",
+      "status": 200,
+      "authenticated": true,
+      "bytes": 5669,
+      "latencyMs": 643.7639940000008,
+      "rate": {
+        "limit": "5000",
+        "remaining": "4976",
+        "used": "24",
+        "reset": "1791525300",
+        "resource": "core"
+      }
+    },
+    {
+      "url": "https://api.github.com/repos/sindresorhus/yocto-queue/commits/main",
+      "status": 200,
+      "authenticated": true,
+      "bytes": 4348,
+      "latencyMs": 893.4759359999998,
+      "rate": {
+        "limit": "5000",
+        "remaining": "4975",
+        "used": "25",
+        "reset": "1791525300",
+        "resource": "core"
+      }
+    },
+    {
+      "url": "https://raw.githubusercontent.com/sindresorhus/yocto-queue/72a8fa96a9d389765cdf2bb9c6daba8302fc375d/index.js",
+      "status": 200,
+      "authenticated": false,
+      "bytes": 1587,
+      "latencyMs": 159.9718929999999,
+      "rate": {
+        "limit": null,
+        "remaining": null,
+        "used": null,
+        "reset": null,
+        "resource": null
+      }
+    },
+    {
+      "url": "https://raw.githubusercontent.com/sindresorhus/yocto-queue/72a8fa96a9d389765cdf2bb9c6daba8302fc375d/license",
+      "status": 200,
+      "authenticated": false,
+      "bytes": 1117,
+      "latencyMs": 123.11860399999932,
+      "rate": {
+        "limit": null,
+        "remaining": null,
+        "used": null,
+        "reset": null,
+        "resource": null
+      }
+    },
+    {
+      "url": "https://raw.githubusercontent.com/sindresorhus/yocto-queue/72a8fa96a9d389765cdf2bb9c6daba8302fc375d/readme.md",
+      "status": 200,
+      "authenticated": false,
+      "bytes": 2573,
+      "latencyMs": 399.44518400000015,
+      "rate": {
+        "limit": null,
+        "remaining": null,
+        "used": null,
+        "reset": null,
+        "resource": null
+      }
+    },
+    {
+      "url": "https://api.github.com/repos/sindresorhus/p-throttle",
+      "status": 200,
+      "authenticated": true,
+      "bytes": 5570,
+      "latencyMs": 632.7687619999997,
+      "rate": {
+        "limit": "5000",
+        "remaining": "4974",
+        "used": "26",
+        "reset": "1791525300",
+        "resource": "core"
+      }
+    },
+    {
+      "url": "https://api.github.com/repos/sindresorhus/p-throttle/commits/main",
+      "status": 200,
+      "authenticated": true,
+      "bytes": 4337,
+      "latencyMs": 527.9399380000004,
+      "rate": {
+        "limit": "5000",
+        "remaining": "4973",
+        "used": "27",
+        "reset": "1791525300",
+        "resource": "core"
+      }
+    },
+    {
+      "url": "https://raw.githubusercontent.com/sindresorhus/p-throttle/a0d20bf8c1a5f0067b1dce529b1ff013878591d3/index.js",
+      "status": 200,
+      "authenticated": false,
+      "bytes": 9716,
+      "latencyMs": 136.4586760000002,
+      "rate": {
+        "limit": null,
+        "remaining": null,
+        "used": null,
+        "reset": null,
+        "resource": null
+      }
+    },
+    {
+      "url": "https://raw.githubusercontent.com/sindresorhus/p-throttle/a0d20bf8c1a5f0067b1dce529b1ff013878591d3/license",
+      "status": 200,
+      "authenticated": false,
+      "bytes": 1117,
+      "latencyMs": 125.40474899999936,
+      "rate": {
+        "limit": null,
+        "remaining": null,
+        "used": null,
+        "reset": null,
+        "resource": null
+      }
+    },
+    {
+      "url": "https://raw.githubusercontent.com/sindresorhus/p-throttle/a0d20bf8c1a5f0067b1dce529b1ff013878591d3/readme.md",
+      "status": 200,
+      "authenticated": false,
+      "bytes": 5515,
+      "latencyMs": 353.44681599999967,
+      "rate": {
+        "limit": null,
+        "remaining": null,
+        "used": null,
+        "reset": null,
+        "resource": null
+      }
+    },
+    {
+      "url": "https://api.github.com/repos/sindresorhus/p-limit/commits/e293f0b92536447f72ca818fcf07be8d287f1c24",
+      "status": 200,
+      "authenticated": true,
+      "bytes": 4442,
+      "latencyMs": 460.035589000001,
+      "rate": {
+        "limit": "5000",
+        "remaining": "4972",
+        "used": "28",
+        "reset": "1791525300",
+        "resource": "core"
+      }
+    },
+    {
+      "url": "https://api.github.com/search/repositories?q=p-limit%20in%3Aname%20language%3AJavaScript%20fork%3Atrue&per_page=5",
+      "status": 200,
+      "authenticated": true,
+      "bytes": 26880,
+      "latencyMs": 953.0940650000011,
+      "rate": {
+        "limit": "30",
+        "remaining": "29",
+        "used": "1",
+        "reset": "1791522314",
+        "resource": "search"
+      },
+      "totalCount": 1570,
+      "incompleteResults": false,
+      "items": [
+        "sindresorhus/p-limit",
+        "1inch/limit-order-protocol",
+        "nullice/limitPNG",
+        "featurist/promise-limit",
+        "leejialing/limit-promise"
+      ]
+    },
+    {
+      "url": "https://api.github.com/search/repositories?q=%22concurrency%22%20%22promise%22%20in%3Adescription%20language%3AJavaScript&per_page=5",
+      "status": 200,
+      "authenticated": true,
+      "bytes": 27336,
+      "latencyMs": 875.9135879999994,
+      "rate": {
+        "limit": "30",
+        "remaining": "28",
+        "used": "2",
+        "reset": "1791522314",
+        "resource": "search"
+      },
+      "totalCount": 118,
+      "incompleteResults": false,
+      "items": [
+        "sindresorhus/p-limit",
+        "sindresorhus/p-map",
+        "supercharge/promise-pool",
+        "rxaviers/async-pool",
+        "timdp/es6-promise-pool"
+      ]
+    },
+    {
+      "url": "https://api.github.com/search/code?q=%22activeCount%22%20repo%3Asindresorhus%2Fp-limit%20language%3AJavaScript&per_page=3",
+      "status": 200,
+      "authenticated": true,
+      "bytes": 9488,
+      "latencyMs": 1179.163829000001,
+      "rate": {
+        "limit": "10",
+        "remaining": "9",
+        "used": "1",
+        "reset": "1791522316",
+        "resource": "code_search"
+      },
+      "totalCount": 2,
+      "incompleteResults": false,
+      "items": [
+        "sindresorhus/p-limit:index.js",
+        "sindresorhus/p-limit:test.js"
+      ]
+    },
+    {
+      "url": "https://api.github.com/search/code?q=%22activeCount%22%20repo%3Asindresorhus%2Fp-limit&per_page=1",
+      "status": 401,
+      "authenticated": false,
+      "bytes": 120,
+      "latencyMs": 267.11141599999974,
+      "rate": {
+        "limit": "60",
+        "remaining": "25",
+        "used": "35",
+        "reset": "1791524151",
+        "resource": "core"
+      }
+    }
+  ]
+}

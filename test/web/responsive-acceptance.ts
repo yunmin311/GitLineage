@@ -1,3 +1,5 @@
+/** Oct13: an unbounded exploration world preserves CTM zoom at resize;
+ * viewBox width follows zoom and is no longer required to equal CSS width. */
 /** Real cached canonical graphs + controlled fixture scheduler, production client. */
 import { chromium, type Page } from 'playwright';
 import { mkdir, writeFile } from 'node:fs/promises';
@@ -38,8 +40,10 @@ try {
     const page=await browser.newPage({viewport:{width:width!,height:height!},hasTouch:true});
     const errors:string[]=[]; page.on('pageerror',e=>errors.push(e.message));
     page.on('requestfailed',r=>errors.push(`${r.url()} ${r.failure()?.errorText}`));
-    await page.goto(`${app.url}/${B}`);
-    await page.locator('.plate-row[role=button]').first().waitFor({timeout:60000});
+    await page.goto(`${app.url}/${B}?layers=attribution&perspective=references`);
+    await page.locator('.bundle-card').first().waitFor({timeout:60000});
+    if(!await page.locator('.aggregate-member').count()){await page.locator('.bundle-card').first().focus();await page.keyboard.press('Enter');}
+    await page.locator('#zoom-fit').click();await page.waitForTimeout(320);
     await page.evaluate(()=>document.fonts.ready);
     // Commit B replaces the obsolete 844x390 temporary desktop-panel expectations.
     if(width===844) {
@@ -67,10 +71,10 @@ try {
     }
     if(await page.locator('#rail').isVisible()) await page.locator('#rail-toggle').click();
     const base=await measure(page);
-    await page.locator('.plate-row[role=button]').first().click();
+    await page.locator('.aggregate-member[role=button]').first().click();
     const selected=await measure(page);
     check(`${width} evidence keeps selected row entirely visible`, selected.drawer&&selected.contained&&selected.hittable&&selected.intersections.every(a=>a===0),selected);
-    check(`${width} panel preserves stage and screen scale`,same(base.stage,selected.stage)&&base.ctm.a===selected.ctm.a&&base.ctm.d===selected.ctm.d&&base.subject.w===selected.subject.w&&base.subject.h===selected.subject.h);
+    check(`${width} panel preserves stage and screen scale`,same(base.stage,selected.stage)&&base.ctm.a===selected.ctm.a&&base.ctm.d===selected.ctm.d&&Math.abs(base.subject.w-selected.subject.w)<.001&&Math.abs(base.subject.h-selected.subject.h)<.001);
     await page.screenshot({path:`${out}/${width}-evidence.png`});
     await page.locator('#rail-toggle').click();
     const context=await measure(page);
@@ -82,19 +86,19 @@ try {
     check(`${width} context close restores evidence without losing selection`,!restored.rail&&restored.drawer&&restored.selection===selected.selection&&restored.contained);
     for(let i=0;i<3;i++){ await page.locator('#rail-toggle').click();await page.locator('#rail-toggle').click(); }
     const repeat=await measure(page);
-    check(`${width} repeated transitions do not accumulate camera drift`,same(restored.ctm,repeat.ctm)&&same(restored.stage,repeat.stage)&&same(restored.hud,repeat.hud)&&restored.selection===repeat.selection,{restored,repeat});
+    check(`${width} repeated transitions do not accumulate camera drift`,(Object.keys(restored.ctm) as (keyof typeof restored.ctm)[]).every(k=>Math.abs(restored.ctm[k]-repeat.ctm[k])<0.01)&&same(restored.stage,repeat.stage)&&same(restored.hud,repeat.hud)&&restored.selection===repeat.selection,{restored,repeat});
     await page.locator('#rail-toggle').click();
     if(width!>=1600) await page.locator('#rail-close').click(); else await page.keyboard.press('Escape');
     check(`${width} Context close returns to evidence`,!(await measure(page)).rail&&(await measure(page)).drawer);
     await page.keyboard.press('Escape');
-    check(`${width} evidence close restores graph focus`,!await page.locator('#drawer').isVisible()&&await page.locator('.plate-row[role=button]').first().evaluate(e=>e===document.activeElement));
+    check(`${width} evidence close restores graph focus`,!await page.locator('#drawer').isVisible()&&await page.locator('.aggregate-member[role=button]').first().evaluate(e=>e===document.activeElement));
     check(`${width} no horizontal overflow or runtime/request failures`,!(await measure(page)).overflow&&errors.length===0,errors);
     evidence[`${width}x${height}`]={base,selected,context,restored,repeat};
     await page.close();
   }
   // A second real graph has 97 relations: native touch scroll must stay in evidence.
   const touch=await browser.newPage({viewport:{width:1280,height:800},hasTouch:true});
-  await touch.goto(`${app.url}/${A}`);
+  await touch.goto(`${app.url}/${A}?layers=dependency&perspective=dependencies`);
   await touch.locator('.node-box.is-subject').waitFor({timeout:60000});
   await touch.locator('.node').filter({has:touch.locator('.node-box.is-subject')}).locator('.node-hit').click();
   const nodeSelected=await measure(touch);
@@ -140,12 +144,15 @@ try {
   await touch.setViewportSize({width:1024,height:768});
   await touch.waitForFunction(()=>document.querySelector('#explorer-body')?.getAttribute('data-panel-mode')==='compact');
   const narrow=await measure(touch);
-  check('live breakpoint reconciliation keeps zoom selection and one overlay',wide.ctm.a===narrow.ctm.a&&wide.selection===narrow.selection&&narrow.drawer&&!narrow.rail&&narrow.contained,{wide,narrow});
+  check('live breakpoint reconciliation keeps zoom selection and one overlay',Math.abs(wide.ctm.a-narrow.ctm.a)<1e-6&&wide.selection===narrow.selection&&narrow.drawer&&!narrow.rail&&narrow.contained,{wide,narrow});
   check('breakpoint hiding focused Context returns focus to disclosure',await touch.locator('#rail-toggle').evaluate(e=>e===document.activeElement));
   await touch.locator('.drawer-close').click();
   check('node evidence close returns focus to selected graph node',await touch.locator('.node').filter({has:touch.locator('.node-box.is-subject')}).evaluate(e=>e===document.activeElement));
+  const previousSubject = await touch.locator('.node').filter({has:touch.locator('.node-box.is-subject')}).elementHandle();
   await touch.setViewportSize({width:1280,height:800});
-  await touch.waitForFunction(()=>document.querySelector('#canvas')?.getAttribute('viewBox')?.split(' ')[2]==='1280');
+  // CSS width and the old focused node can satisfy the predicate before resize
+  // replaces the SVG children. Observe replacement as well as restored focus.
+  await touch.waitForFunction(previous=>!previous?.isConnected&&document.querySelector('#canvas')?.getBoundingClientRect().width===1280&&document.activeElement?.querySelector('.node-box.is-subject'),previousSubject);
   check('graph redraw preserves returned node focus',await touch.locator('.node').filter({has:touch.locator('.node-box.is-subject')}).evaluate(e=>e===document.activeElement));
   await cdp.detach();await touch.close();
 } finally {

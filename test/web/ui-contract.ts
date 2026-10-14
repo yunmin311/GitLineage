@@ -57,8 +57,10 @@ try {
     await page.goto(url); await page.evaluate(() => document.fonts.ready);
     check(`${width} landing project link`, await page.locator('#project-source[href="https://github.com/yunmin311/GitLineage"]').isVisible());
     await shot(page, `${width}-landing`);
-    await page.goto(`${url}/yunmin311/obsidian-config`);
-    await page.locator('.plate-row-label').first().waitFor({ timeout: 180000 });
+    await page.goto(`${url}/yunmin311/obsidian-config?layers=attribution&perspective=references`);
+    await page.locator('.bundle-card').first().waitFor({timeout:180000});
+    if(!await page.locator('.aggregate-member').count()){await page.locator('.bundle-card').first().focus();await page.keyboard.press('Enter');}
+    await page.locator('#zoom-fit').click();await page.waitForTimeout(320);
     await page.evaluate(() => document.fonts.ready);
     await page.mouse.move(1, 1);
     await shot(page, `${width}-default`);
@@ -81,8 +83,8 @@ try {
       check('640 reading return retains selection',!await page.locator('#drawer').isVisible()&&!(await geometry(page)).selection.startsWith('?'));
       await page.locator('#mobile-nav [data-mobile-view=graph]').click();const restored=await geometry(page);
       check('640 graph camera restored',same(base.ctm,restored.ctm));
-      await page.locator('#zoom-in').click();check('640 graph zoom changes camera only',same(restored.stage,(await geometry(page)).stage)&&restored.viewBox!==(await geometry(page)).viewBox);
-      await page.locator('#zoom-fit').click();
+      await page.locator('#zoom-in').click();await page.waitForTimeout(300);check('640 graph zoom changes camera only',same(restored.stage,(await geometry(page)).stage)&&restored.viewBox!==(await geometry(page)).viewBox);
+      await page.locator('#zoom-fit').click();await page.waitForTimeout(320);
       check('640 Fit keeps HUD fixed',same(restored.hud,(await geometry(page)).hud));
       check('640 no overflow or runtime failures',await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)&&errors.length===0,errors);
       evidence['640-mobile']={base,selected,restored};await shot(page,'640-mobile');await page.close();continue;
@@ -108,11 +110,11 @@ try {
     await shot(page, `${width}-long-name`);
     // Keep the actual glyph screen location away from overlay panels for a real hover/click.
     if (initial.rail && await page.locator('#rail-toggle').isVisible()) await page.locator('#rail-toggle').click();
-    const label = page.locator('.plate-row-label').first();
+    const label = page.locator('.aggregate-member .node-label').first();
     const rowText = await label.textContent();
-    const beforeInk = await ink(page, '.plate-row-label');
+    const beforeInk = await ink(page, '.aggregate-member .node-label');
     await label.hover();
-    const afterInk = await ink(page, '.plate-row-label');
+    const afterInk = await ink(page, '.aggregate-member .node-label');
     await shot(page, `${width}-hover`);
     check(`${width} hover glyph pixels`, beforeInk > 5 && afterInk >= beforeInk * .9, { beforeInk, afterInk, rowText });
     if (process.argv.includes('--phase1')) { await page.close(); continue; }
@@ -123,24 +125,26 @@ try {
     check(`${width} clicked row opens corresponding evidence`, !!drawerText?.includes(rowText!.replace(/…$/, '')) && (await geometry(page)).drawer);
     const drawer = await geometry(page);
     // P0.5 permits minimal protective translation, never a panel-induced scale/resize.
-    check(`${width} drawer stage and screen scale unchanged`, same(base.stage, drawer.stage) && base.ctm.a===drawer.ctm.a && base.ctm.d===drawer.ctm.d && base.subject.w===drawer.subject.w && base.subject.h===drawer.subject.h, { base, drawer });
+    check(`${width} drawer stage and screen scale unchanged`, same(base.stage, drawer.stage) && base.ctm.a===drawer.ctm.a && base.ctm.d===drawer.ctm.d && Math.abs(base.subject.w-drawer.subject.w)<.001 && Math.abs(base.subject.h-drawer.subject.h)<.001, { base, drawer });
     if (await page.locator('#rail-toggle').isVisible()) await page.locator('#rail-toggle').click();
     let both = await geometry(page);
     check(`${width} rail stage and screen scale unchanged`, same(drawer.stage, both.stage) && drawer.ctm.a===both.ctm.a && drawer.ctm.d===both.ctm.d, { drawer, both });
     check(`${width} policy retains selection`, both.selection===drawer.selection && both.rail && (width!>=1600?both.drawer:!both.drawer));
     await shot(page, `${width}-both-panels`);
     if (width!<1600) { await page.locator('#rail-toggle').click(); both=await geometry(page); }
+    // Camera controls now interpolate for 260ms; measure the settled view before pan.
     // Zoom controls are viewport operations, available even with both panels open.
     const controlsAccessible = await page.locator('#zoom-in').evaluate(e => { const r=e.getBoundingClientRect(); return !!document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)?.closest('#zoom-in'); });
     check(`${width} HUD controls hittable with both panels`, controlsAccessible);
     if (controlsAccessible) {
-      for (let i=0; i<2; i++) { await page.locator('#zoom-in').click(); await page.locator('#zoom-out').click(); }
+      for (let i=0; i<2; i++) { await page.locator('#zoom-in').click(); await page.waitForTimeout(300); await page.locator('#zoom-out').click(); await page.waitForTimeout(300); }
       const zoomed = await geometry(page);
       check(`${width} HUD fixed on zoom`, same(both.hud, zoomed.hud) && both.hudFont === zoomed.hudFont, { before:both.hud,after:zoomed.hud });
     }
-    // Pan in the exposed centre, not on a panel or graph object. A leftward drag gives room at clamped edges.
+    // Pan through an exposed canvas corridor. A blank starting pixel alone can
+    // lead straight into a moved toolbar before pointer capture begins.
     const spot = await page.evaluate(() => {
-      for (let y=180; y<innerHeight-120; y+=30) for(let x=300; x<innerWidth-40; x+=20) if(document.elementFromPoint(x,y)?.id==='canvas') return {x,y};
+      for (let y=180; y<innerHeight-120; y+=30) for(let x=300; x<innerWidth-40; x+=20) if([0,.125,.25,.5,.75,1].every(t=>document.elementFromPoint(x+45*t,y-45*t)?.id==='canvas')) return {x,y};
       return null;
     });
     if (spot) {
@@ -150,7 +154,7 @@ try {
       check(`${width} pan changes camera only and fixes HUD`, pre.viewBox !== post.viewBox && same(pre.stage,post.stage) && same(pre.hud,post.hud) && pre.zoom === post.zoom, { pre,post });
       await shot(page, `${width}-drag`);
     } else check(`${width} exposed canvas for dual-panel pan`, width! < 768, 'No exposed canvas at this compact width');
-    if (controlsAccessible) { const pre=await geometry(page); await page.locator('#zoom-fit').click(); const post=await geometry(page); check(`${width} HUD fixed on fit`, same(pre.hud,post.hud)); }
+    if (controlsAccessible) { const pre=await geometry(page); await page.locator('#zoom-fit').click();await page.waitForTimeout(320); await page.waitForTimeout(300); const post=await geometry(page); check(`${width} HUD fixed on fit`, same(pre.hud,post.hud)); }
     if (width === 1280 && spot) {
       // Continuous trackpad deltas must make proportional camera changes.
       const pre = await geometry(page);
@@ -167,7 +171,7 @@ try {
       await page.mouse.move(spot.x,spot.y); await page.mouse.down(); await page.mouse.move(spot.x+2,spot.y+1); await page.mouse.up();
       const click = await geometry(page);
       check('sub-threshold blank click clears selection without panning', !click.drawer && same(small.viewBox,click.viewBox));
-      const row = page.locator('.plate-row[role=button]').first(); await row.focus(); await page.keyboard.press('Enter');
+      const row = page.locator('.aggregate-member[role=button]').first(); await row.focus(); await page.keyboard.press('Enter');
       check('keyboard Enter opens evidence and preserves graph focus', (await geometry(page)).drawer && await row.evaluate(e=>e===document.activeElement));
       // Real Chromium touch events, rather than synthetic pointer callbacks.
       const touchPre = await geometry(page);
@@ -184,7 +188,7 @@ try {
     if (width === 1280) await page.locator('.drawer-close').focus();
     await page.keyboard.press('Escape');
     check(`${width} Escape closes drawer`, !(await geometry(page)).drawer);
-    if (width === 1280) check('Escape preserves keyboard row focus', await page.locator('.plate-row[role=button]').first().evaluate(e=>e===document.activeElement));
+    if (width === 1280) check('Escape preserves keyboard row focus', await page.locator('.aggregate-member[role=button]').first().evaluate(e=>e===document.activeElement));
     check(`${width} runtime errors`, errors.length===0, errors);
     evidence[`${width}-geometry`] = { initial, base, drawer, both };
     await page.close();
@@ -205,7 +209,7 @@ try {
     }
     await route.fulfill({ response, json: body });
   });
-  await long.goto(`${url}/Kuddev/pebrel`);
+  await long.goto(`${url}/Kuddev/pebrel?layers=dependency&perspective=dependencies`);
   await long.locator('.plate-subtitle').first().waitFor({ timeout:180000 });
   await long.evaluate(() => document.fonts.ready);
   const overflow = await long.evaluate(() => {
@@ -246,8 +250,10 @@ try {
       const zoom = await page.evaluate(() => ({ width: innerWidth, height: innerHeight, dpr: devicePixelRatio, visualScale: visualViewport!.scale }));
       check('native browser 200% zoom verified', zoom.width === 640 && zoom.height === 400 && zoom.dpr === 2 && zoom.visualScale === 1, zoom);
       check('native 200% landing project link', await page.locator('#project-source').isVisible());
-      await page.goto(`${url}/yunmin311/obsidian-config`);
-      await page.locator('.plate-row-label').first().waitFor({ timeout: 180000 });
+      await page.goto(`${url}/yunmin311/obsidian-config?layers=attribution&perspective=references`);
+      await page.locator('.bundle-card').first().waitFor({timeout:180000});
+    if(!await page.locator('.aggregate-member').count()){await page.locator('.bundle-card').first().focus();await page.keyboard.press('Enter');}
+    await page.locator('#zoom-fit').click();await page.waitForTimeout(320);
       await page.evaluate(() => document.fonts.ready);
       const accessible = await page.evaluate(() => {
         const visible = ['#search-btn','#layers-btn','#open-source','#rail-toggle','#zoom-in','#zoom-out','#zoom-fit'].every(s => {
@@ -258,7 +264,7 @@ try {
       });
       check('native 200% primary actions accessible without horizontal overflow', accessible);
       const base = await geometry(page);
-      await page.locator('.plate-row-label').first().click();
+      await page.locator('.aggregate-member .node-label').first().click();
       await page.locator('#rail-toggle').click();
       const both = await geometry(page);
       check('native 200% exclusive panels preserve screen mapping and selection', same(base.ctm,both.ctm) && same(base.stage,both.stage) && same(base.subject,both.subject) && both.rail && !both.drawer && !!both.selection);

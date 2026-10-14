@@ -1,0 +1,30 @@
+{
+  "date": "2026-10-10",
+  "scope": "M2 Beta after P2 fixes and candidate overlay",
+  "runtime": "WSL2 Ubuntu-24.04; browser acceptance uses Chromium",
+  "suites": [
+    { "suite": "typecheck", "status": "PASS" },
+    { "suite": "build", "status": "PASS" },
+    { "suite": "unit", "status": "PASS", "passed": 562, "skipped": 3, "failed": 0, "total": 565 },
+    { "suite": "discovery", "status": "PASS", "passed": 118 },
+    { "suite": "phase-0", "status": "PASS", "passed": 6 },
+    { "suite": "phase-1a", "status": "PASS", "note": "Existing fixed fixtures and contracts retained" },
+    { "suite": "phase-1b", "status": "PASS", "note": "Existing fixed fixtures and contracts retained" },
+    { "suite": "phase-1c", "status": "PASS", "note": "Existing fixed fixtures and contracts retained" },
+    { "suite": "phase-1d-offline", "status": "PASS", "note": "Offline tests only; no additional live API probe" },
+    { "suite": "canvas", "status": "PASS", "checks": 113 },
+    { "suite": "landing", "status": "PASS", "checks": 40 },
+    { "suite": "analysis", "status": "PASS", "states": 16 },
+    { "suite": "preflight", "status": "PASS", "checks": 45 },
+    { "suite": "stale-a-to-b", "status": "PASS", "note": "A completed; stale B isolation verified" },
+    { "suite": "ui-contract", "status": "PASS", "checks": 75 },
+    { "suite": "responsive", "status": "PASS", "checks": 71 },
+    { "suite": "mobile", "status": "PASS", "checks": 133 },
+    { "suite": "deep-search-candidate-overlay", "status": "PASS", "scenarios": 21, "viewports": [390, 430, 1280, 1920], "receipt": "validation.json" }
+  ],
+  "limitations": [
+    "WebKit/Safari and physical devices were not tested.",
+    "The live GitHub experiment is recorded separately and is partial; it produced no source comparison measurements.",
+    "Typecheck, build, unit, canvas, and deep-search browser acceptance were rerun after the final candidate-detail and SVG CTM evidence changes; the remaining browser regression suites then passed sequentially without further production source edits."
+  ]
+}

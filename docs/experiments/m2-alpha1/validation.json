@@ -1,0 +1,101 @@
+{
+  "checks": [
+    {
+      "cacheUnchanged": true,
+      "width": 390,
+      "status": "PASS",
+      "geometry": {
+        "x": 12,
+        "y": 12,
+        "width": 366,
+        "height": 908,
+        "overflow": false
+      },
+      "graphCameraPreserved": true,
+      "graphURLPreserved": true,
+      "errors": []
+    },
+    {
+      "cacheUnchanged": true,
+      "width": 430,
+      "status": "PASS",
+      "geometry": {
+        "x": 12,
+        "y": 12,
+        "width": 406,
+        "height": 908,
+        "overflow": false
+      },
+      "graphCameraPreserved": true,
+      "graphURLPreserved": true,
+      "errors": []
+    },
+    {
+      "cacheUnchanged": true,
+      "width": 1280,
+      "status": "PASS",
+      "geometry": {
+        "x": 110,
+        "y": 20,
+        "width": 1060,
+        "height": 1040,
+        "overflow": false
+      },
+      "graphCameraPreserved": true,
+      "graphURLPreserved": true,
+      "errors": []
+    },
+    {
+      "cacheUnchanged": true,
+      "width": 1920,
+      "status": "PASS",
+      "geometry": {
+        "x": 430,
+        "y": 20,
+        "width": 1060,
+        "height": 1040,
+        "overflow": false
+      },
+      "graphCameraPreserved": true,
+      "graphURLPreserved": true,
+      "errors": []
+    },
+    {
+      "mode": "multiple-search-observations-downloaded-and-revalidated",
+      "status": "PASS",
+      "ranks": [
+        1,
+        2
+      ]
+    },
+    {
+      "mode": "rate_limit",
+      "status": "PASS",
+      "unavailableNotZero": true
+    },
+    {
+      "mode": "cancel",
+      "status": "PASS",
+      "unavailableNotZero": true
+    }
+  ],
+  "transport": "official fixed Mock, not live GitHub",
+  "calls": [
+    "/repos/root/example",
+    "/repositories/1",
+    "/repos/root/example/commits/main",
+    "/search/repositories",
+    "/repositories/4",
+    "/repos/unknown/example/commits/main",
+    "/repos/root/example/git/trees/76e245e05196b79d34c5b15ce58d83e4bb33bc2d",
+    "/repos/root/example/git/trees/ab8d7a5e787720d495390aa119281207299dc8df",
+    "/repos/root/example",
+    "/repos/unknown/example/git/trees/aec380cfe05a35f1f96cb2c3bbabc27f092be8ab",
+    "/repos/unknown/example/git/trees/fe6b6ca336a02ddc9a24438d51a19cb354597123",
+    "/repos/unknown/example",
+    "/repos/root/example/git/blobs/6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+    "/repos/root/example",
+    "/repos/unknown/example/git/blobs/6f095dec6eec57214a8a40a026a01cf7317d4b8b",
+    "/repos/unknown/example"
+  ]
+}

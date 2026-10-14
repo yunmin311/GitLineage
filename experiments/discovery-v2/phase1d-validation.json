@@ -1,0 +1,352 @@
+{
+  "schemaVersion": "discovery-phase1d-validation@1",
+  "baseline": "c9be90b5a9a81e9990362c8228f8dae4d4f965be",
+  "implementationCommit": "5075371d694f9714560c46da2c27e2b3eee1dc13",
+  "staticReceiptCommit": "b998e38b76c6a465c2af7cf2fbfe23ae9f303357",
+  "coreCommands": [
+    {
+      "name": "typecheck",
+      "command": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 5.424,
+      "logPath": "artifacts/discovery-v2/phase1d-validation/typecheck.log",
+      "logSHA256": "a9b9f7f787f5f67cf960e83b4e0fd3e5ee8a2c063adec9c910917b9015c4b81e"
+    },
+    {
+      "name": "build",
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.304,
+      "logPath": "artifacts/discovery-v2/phase1d-validation/build.log",
+      "logSHA256": "de7393bb173ced2930555f6e8043927e61124ddbd719b3a5981d65d690271130"
+    },
+    {
+      "name": "unit",
+      "command": [
+        "npm",
+        "test"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 9.795,
+      "logPath": "artifacts/discovery-v2/phase1d-validation/unit.log",
+      "logSHA256": "65d1738839e844abeeb5066ee0a12d947cb1d0cced6e2e8c4f23a61bb8406674"
+    },
+    {
+      "name": "discovery",
+      "command": [
+        "node",
+        "--test",
+        "test/discovery/*.test.ts"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 8.862,
+      "logPath": "artifacts/discovery-v2/phase1d-validation/discovery.log",
+      "logSHA256": "d51560813918ec5450e4e29afd8c5aa5ab717d148a076ff2b42edf923ee397a8"
+    },
+    {
+      "name": "phase0",
+      "command": [
+        "node",
+        "--test",
+        "experiments/discovery-v2/benchmark.test.mjs"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 1.164,
+      "logPath": "artifacts/discovery-v2/phase1d-validation/phase0.log",
+      "logSHA256": "546b01e7cb540bbbf40f4e93bf5519912e712440e8e657ba9984524717a86281"
+    },
+    {
+      "name": "phase1a",
+      "command": [
+        "node",
+        "experiments/discovery-v2/run-phase1.ts"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 4.701,
+      "logPath": "artifacts/discovery-v2/phase1d-validation/phase1a.log",
+      "logSHA256": "2bff219697e26ba13ddd7c122513d3f048be234c87f922bfac6720ade26008bb"
+    },
+    {
+      "name": "phase1c",
+      "command": [
+        "node",
+        "experiments/discovery-v2/run-phase1c.ts"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 1.351,
+      "logPath": "artifacts/discovery-v2/phase1d-validation/phase1c.log",
+      "logSHA256": "0a770c50e49851dbf0804a0608bb87577758b51286e859260cd51feb3a8015fe"
+    },
+    {
+      "name": "phase1d",
+      "command": [
+        "node",
+        "experiments/discovery-v2/run-phase1d.ts"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 1.06,
+      "logPath": "artifacts/discovery-v2/phase1d-validation/phase1d.log",
+      "logSHA256": "f09187a3ae472ea8fa100db0751b5ac5c2620b06aaa09023ea5686089503186f"
+    }
+  ],
+  "browserCommands": [
+    {
+      "name": "canvas",
+      "command": [
+        "npm",
+        "run",
+        "test:canvas"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 68.51,
+      "logPath": "artifacts/discovery-v2/phase1d-validation/canvas.log",
+      "logSHA256": "6501ecc99ea88d499a87f296efa454d688d62541bb3a433cdf8300add4e14878"
+    },
+    {
+      "name": "landing",
+      "command": [
+        "npm",
+        "run",
+        "test:landing"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 17.122,
+      "logPath": "artifacts/discovery-v2/phase1d-validation/landing.log",
+      "logSHA256": "ae04d3c2ab01da7c4d10b9e23b257840fb1f6185ce0ef1aa302f7a503e87e702"
+    },
+    {
+      "name": "analysis",
+      "command": [
+        "npm",
+        "run",
+        "test:analysis"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 21.072,
+      "logPath": "artifacts/discovery-v2/phase1d-validation/analysis.log",
+      "logSHA256": "075d9ceb78c01853b8250cdd42cfee020eb0474c8b1748b2a0bd044a3a5f355c"
+    },
+    {
+      "name": "preflight",
+      "command": [
+        "npm",
+        "run",
+        "test:preflight"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 45.878,
+      "logPath": "artifacts/discovery-v2/phase1d-validation/preflight.log",
+      "logSHA256": "e9d39f601a2cfbe221cad9fa5fe325c877579bf674b64054c75a5124fe542fc6"
+    },
+    {
+      "name": "stale",
+      "command": [
+        "npm",
+        "run",
+        "test:stale"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 26.566,
+      "logPath": "artifacts/discovery-v2/phase1d-validation/stale.log",
+      "logSHA256": "b7b8978ab132e68da1b92ba47d8e513725211f72a0d1422adc7d8afa9fbd6497"
+    },
+    {
+      "name": "ui-contract",
+      "command": [
+        "npm",
+        "run",
+        "test:ui-contract"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 20.816,
+      "logPath": "artifacts/discovery-v2/phase1d-validation/ui-contract.log",
+      "logSHA256": "abcf38c33ef65367caa9c35a6c9618fae85bc6b86a92e0ac1f3de20623f5f30b"
+    },
+    {
+      "name": "responsive",
+      "command": [
+        "npm",
+        "run",
+        "test:responsive"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 30.917,
+      "logPath": "artifacts/discovery-v2/phase1d-validation/responsive.log",
+      "logSHA256": "cb3a680d981f6d9d5fcbd96a2dd8228ccc8ac27a45d9db8efccd509b055285a3"
+    },
+    {
+      "name": "mobile",
+      "command": [
+        "npm",
+        "run",
+        "test:mobile"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 49.434,
+      "logPath": "artifacts/discovery-v2/phase1d-validation/mobile.log",
+      "logSHA256": "570e75d7f580c657fd5f84fe63194d4327a9ec45f638ac16d29ac8986cd034f4"
+    }
+  ],
+  "additionalChecks": [
+    {
+      "command": "node experiments/discovery-v2/run-search.ts",
+      "exitCode": 0,
+      "logPath": "artifacts/discovery-v2/phase1d-validation/phase1b.log",
+      "logSHA256": "8ae22c6e34ae64622083ce3b2c2a39bb002d1c9815cfe7b29c90338dd392eeb9"
+    },
+    {
+      "command": "experiment TypeScript strict noEmit (three Phase1D runners)",
+      "exitCode": 0,
+      "logPath": "/tmp/gitlineage-phase1d-experiment-typecheck.log",
+      "logSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "node experiments/discovery-v2/run-phase1d-failures.ts",
+      "exitCode": 0,
+      "logSHA256": "b3fd2d96d257ef5165ede31b0f0cc8847e75b744c37434115815f76ee7a660c1"
+    },
+    {
+      "command": "PHASE1D_README static receipt validation command",
+      "exitCode": 0,
+      "contentDigest": "03f08f5d399e45d950705813c5eae90c09389a33d6875b59299173edad5b399e"
+    }
+  ],
+  "counts": {
+    "unit": {
+      "tests": 545,
+      "passed": 542,
+      "skipped": 3,
+      "failed": 0
+    },
+    "discovery": {
+      "tests": 98,
+      "passed": 98,
+      "failed": 0
+    },
+    "newPhase1D": 15,
+    "phase0": 6,
+    "canvas": 113,
+    "landing": 40,
+    "analysisStateRecords": 16,
+    "preflight": 45,
+    "staleRecords": 6,
+    "uiContract": 75,
+    "responsive": 71,
+    "mobileChromium": 133
+  },
+  "historicalDigests": {
+    "phase1a": "546af0c31bc3434abca4f64ff8691457373a2c3449363b641f30eb53d637167c",
+    "phase1c": "a996cb856efd956807c8758432181bb9cb8dfce2477a8228505d0db8be594b84",
+    "phase1dMock": "48dbbe45c120b896fe134678dc3ccf1b892acbab1afd6b472a8f7f3321e2b4d4"
+  },
+  "browserArtifacts": [
+    {
+      "path": "artifacts/shots/v2/report.json",
+      "sha256": "bf3c1da27c05e4f7a000ee9acea0b1c4b8775f1ec4ded959e9c1038eb7729b07"
+    },
+    {
+      "path": "artifacts/shots/slice2/results.json",
+      "sha256": "bc7b9684057d800e1d3e8b6ac56aa44fab66fec9c58bd74c4154d214353a7005"
+    },
+    {
+      "path": "artifacts/slice3/fsm-report.json",
+      "sha256": "3852b67943355a1a50e24e80b6f2245408a2301f7e1a575231b54ee7a16c3352"
+    },
+    {
+      "path": "artifacts/preflight/results.json",
+      "sha256": "bf8c01d02c0e84a98766af6c5b6c82563afb61b0f6bf94745ebba07a6c563650"
+    },
+    {
+      "path": "artifacts/slice3/stale-report.json",
+      "sha256": "290d8901cba5ea4cfac660798fc2e65fb6720606d8979430d3b17059579a6ac4"
+    },
+    {
+      "path": "artifacts/ui-contract/after/results.json",
+      "sha256": "1a15237ea402265c6ec220e56913207f54f02811c2a64f1f86ac6be153f73fbf"
+    },
+    {
+      "path": "artifacts/responsive/after/results.json",
+      "sha256": "b52a11fcb14a9fa160b7df61bbc2ecf2f47df1931ff51b8f30402dddb5e4dc98"
+    },
+    {
+      "path": "artifacts/mobile/after/results.json",
+      "sha256": "7074ef45f59b5df4f6af2103dace9a2ef70fd4dea8e8405fff8102aeed5ca974"
+    }
+  ],
+  "realProbe": {
+    "command": "node experiments/discovery-v2/run-phase1d-live.ts --live",
+    "runs": 1,
+    "contentDigest": "03f08f5d399e45d950705813c5eae90c09389a33d6875b59299173edad5b399e",
+    "startedAt": "2026-10-09T11:44:05.176Z",
+    "wallMs": 10564.498809,
+    "usage": {
+      "activeWorkers": 0,
+      "attempts": 18,
+      "bytesByFile": {
+        "[\"github:71542716@a8a6fbec4e0e866d6d779b10889bb4f5567e70eb\",\"index.js\"]": 3868,
+        "[\"github:71544230@a0d20bf8c1a5f0067b1dce529b1ff013878591d3\",\"index.js\"]": 9716,
+        "[\"github:72682439@e293f0b92536447f72ca818fcf07be8d287f1c24\",\"index.js\"]": 640
+      },
+      "candidates": 2,
+      "files": {
+        "github:71542716@a8a6fbec4e0e866d6d779b10889bb4f5567e70eb": 1,
+        "github:71544230@a0d20bf8c1a5f0067b1dce529b1ff013878591d3": 1,
+        "github:72682439@e293f0b92536447f72ca818fcf07be8d287f1c24": 1
+      },
+      "peakWorkers": 1,
+      "searchAttempts": 0,
+      "totalBytes": 14224
+    },
+    "network": {
+      "overflowBytes": 0,
+      "receivedBytes": 121345,
+      "reservedBytes": 589824,
+      "retainedBytes": 121345
+    },
+    "pending": true,
+    "lineageClaim": "none",
+    "files": [
+      {
+        "path": "experiments/discovery-v2/phase1d-live-sidecar.json",
+        "sha256": "03f08f5d399e45d950705813c5eae90c09389a33d6875b59299173edad5b399e"
+      },
+      {
+        "path": "experiments/discovery-v2/phase1d-live-receipt.json",
+        "sha256": "3c699802e800b608406c0239a69bb880cde246e5dce9d1d5ca4a03a5a452b1b5"
+      }
+    ]
+  },
+  "zeroGraphWrite": {
+    "productionSourceFilesComparedToBaseline": 65,
+    "equalBytes": true,
+    "proofs": [
+      "production AST has no Discovery imports",
+      "Discovery imports limited to own modules and approved builtins",
+      "official-path Mock export under Node write permissions restricted to sidecar; Graph/cache sentinel bytes unchanged",
+      "real runner imports no production Graph/cache writer"
+    ],
+    "realRunWholeProductionCacheHashAudit": false
+  },
+  "oldStaticRecordsByteUnchanged": [
+    "experiments/discovery-v2/phase1c-live-receipt.json",
+    "experiments/discovery-v2/phase1c-live-sidecar.json",
+    "experiments/discovery-v2/phase1b-live-probe.json"
+  ],
+  "tools": "preserved; not staged",
+  "limitations": [
+    "CPU hard budget unsupported",
+    "wire bytes not absolutely bounded",
+    "commit-to-tree uses API declaration; no raw commit reconstruction/signature verification",
+    "physical mobile device not verified",
+    "WebKit executable unavailable",
+    "selected files only; no repository-wide recall or precision labels"
+  ]
+}

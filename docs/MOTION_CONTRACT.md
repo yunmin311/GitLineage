@@ -24,7 +24,7 @@ panel invariants, Escape and pixels. responsive-acceptance.ts measures seven vie
 policies, whole-target occlusion/hit tests, repeated transitions, native touch scroll/pan,
 scroll retention and live breakpoint reconciliation. panels.test.ts verifies pure policy
 and idempotent protection. Canvas retains scroll/focus and composition coverage.
-Reduced-motion remains executable in ui-contract.ts; no new animation is added.
+Reduced-motion remains executable in ui-contract.ts and unification-acceptance.ts.
 
 
 ## Commit B phone pointer ownership
@@ -44,3 +44,12 @@ Back control. Same-repository history restores camera/scroll without analysis re
 returning from Landing restores the Explorer shell. Reduced-motion has no new motion
 to suppress. mobile-acceptance.ts checks pinch midpoint geometry, pinch-to-one-finger,
 three-pointer cancellation, subsequent tap, native list/evidence scroll and history.
+
+## Graph and repository exploration refinement (2026-10-12)
+User-authorized refinement adds 260ms geometry transitions for real member expansion,
+directory changes and camera controls; instrument feedback is 160ms. Existing semantic
+status, direction and confidence markers are unchanged. Pointer-down and wheel cancel
+pending camera motion at its current geometry, then transfer ownership to native input.
+Reduced motion writes the final geometry immediately. View switching restores saved
+camera rather than fitting implicitly. unification-acceptance.ts checks intermediate,
+settled and interrupted camera geometry and the reduced-motion branch.

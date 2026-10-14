@@ -45,7 +45,7 @@ export class PackageRegistryResolver {
   private async resolveUncached(target: PackageTarget): Promise<RepositoryRef | null> {
     try {
       if (target.ecosystem === 'npm') {
-        const name = target.name.includes('/') ? target.name : `_${target.name}`;
+        const name = target.name;
         const url = new URL(`https://registry.npmjs.org/${name.split('/').map(encodeURIComponent).join('/')}/latest`);
         const payload = await this.http.fetchJson<{ repository?: { url?: string }; homepage?: string }>(url);
         return firstRepository(payload?.repository?.url, payload?.homepage);

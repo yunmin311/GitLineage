@@ -29,104 +29,28 @@ test('selection raises the parent plate, never the row', () => {
   assert.equal(depthOffset(DepthTier.Selected), 5);
 });
 
-test('a row is marked, not raised: its selection marker is a rule not a shadow', () => {
-  assert.match(code(APP), /plate-row-marker/);
-  // The marker is a fill and a stroke; the hit target is transparent so selecting a
-  // row cannot change how the row looks.
-  assert.match(CSS, /\.plate-row-marker\s*\{[^}]*stroke:\s*var\(--ink\)/);
-  assert.match(CSS, /\.plate-row-hit\s*\{[^}]*fill:\s*transparent/);
+// The Graph expansion request supersedes the old nested-row/container assertions.
+// Real members now own selection and keyboard targets; graph-expansion-acceptance
+// measures disjoint nodes, bounded batches and camera/Drawer continuity in Chromium.
+test('real member selection retains the authored node depth', () => {
+  assert.equal(depthTier({isSelected:true}), DepthTier.Selected);
+  assert.match(code(APP), /state\.selectedNodeId === node\.id/);
 });
-
-// --------------------------------------------------------------- ownership
-
-test('plate ownership is explicit membership, not a string prefix', () => {
-  const body = code(APP);
-  // `startsWith` on a selection id was an accident of naming that happened to work.
-  assert.equal(
-    /selectedEdgeId\.startsWith\(/.test(body),
-    false,
-    'ownership must not be a string-prefix test',
-  );
-  assert.match(body, /plate\.memberEdgeIds\.includes\(state\.selectedEdgeId\)/);
-  assert.match(body, /rowMembers\.includes\(state\.selectedEdgeId\)/);
+test('group ownership uses canonical membership, never name prefixes', () => {
+  assert.doesNotMatch(code(APP), /selectedEdgeId\.startsWith\(/);
+  assert.match(code(APP), /plate\.memberEdgeIds\.includes\(state\.selectedEdgeId\)/);
 });
-
-test('rows are selectable, which is what makes a selected row possible', () => {
-  const body = code(APP);
-  assert.match(body, /plate-row-hit/, 'a row needs a hit target');
-  // Selecting a row must not also toggle the plate it belongs to.
-  assert.match(body, /classList\.contains\('plate-row-hit'\)/);
+test('independent nodes are keyboard selectable', () => {
+  assert.match(code(APP), /selectNode\(node\.id\)/);
+  assert.match(code(APP), /e\.key==='Enter'/);
 });
-
-test('a selected plate draws the selected tier, and a shut plate has no rows', () => {
-  const body = code(APP);
-  /*
-   * Rows come from `plateRows`, which returns nothing for a plate that is shut, and a
-   * plate with no members is not drawn at all.
-   *
-   * The height must follow the rows actually shown, the held-back line included. An
-   * earlier version measured only the listed rows, so a plate holding six back was
-   * drawn too short and its "N more rows" line sat outside its own border.
-   *
-   * And the shown rows are no longer simply "all of them": a plate is bounded above
-   * the band, because `Kuddev/pebrel`'s single plate of 97 manifest records is over
-   * 2500 world units tall and drew straight through the edge-treatment key. Both the
-   * reserved height and the drawn height come from `plateRowsFor`, so they cannot
-   * disagree -- which is the property this test has always been about.
-   */
-  assert.match(body, /function plateRowsFor\(/, 'one function bounds a plate');
-  assert.match(body, /const rows = plateRows\(plate\)/);
-  assert.match(body, /const hiddenRows = plateHiddenRows\(plate\)/);
-  assert.match(body, /plateRowsFor\(plate, top, hiddenRows\)/, 'the renderer uses it');
-  /*
- * The placement reserves the same bounded height, so a plate never claims space it is not
- * allowed to draw into.
- *
- * This used to assert one reservation call -- `plateRowsFor(plate, ZONES.dataTop, ...)`.
- * That was correct when a fan was one plate and the reservation was therefore one line.
- * Frozen V3.3 lets a fan become several masses, so the reservation is now a PAIR: the
- * collapsed height and the worst-case expanded height, both measured by the same
- * `plateRowsFor`, and the stack is laid out from the pair. The property is unchanged and
- * stronger -- a mass is bounded by the height it reserved, and it is bounded in both
- * states rather than in one -- so the assertion follows the property, not the line.
- */
-assert.match(
-    body,
-    /const collapsed = plateRowsFor\(plate, ZONES\.dataTop, hiddenRows\)/,
-    'the placement reserves the collapsed height with the same function',
-  );
-assert.match(
-    body,
-    /const expanded = plateRowsFor\(\s*\{ \.\.\.plate, open: true, expanded: true \},\s*ZONES\.dataTop,\s*0,\s*\)/,
-    'and reserves the worst-case expanded height with it',
-  );
-assert.match(body, /layoutMassStacks\(reserved,/, 'the stack is laid out from those reservations');
-// And the draw is clipped to the slot it was given, so a mass that outgrows its slot is
-// cut back and says so rather than drawing over the mass beneath it.
-assert.match(body, /const fitsSlot = plan\.height <= position\.height \+ 1/);
-assert.match(body, /overflow: /, 'and the clipped rows are counted as held back');
-assert.match(body, /plateHeight\(rows\.length, hiddenRows, !!plate\.meta\)/);
-  // And the bound is the band, named.
-  assert.match(body, /const PLATE_BOTTOM_LIMIT = ZONES\.bandTop - 48/);
-  // A plate with no members is not drawn at all.
-  assert.match(body, /if \(plate\.count < 1\) continue;/);
-  // And the plate says what it is holding back rather than implying a shorter list --
-  // in two different words, because the two remainders are not the same fact.
-  assert.match(body, /plate-row-more/);
-  assert.match(body, /plate-row-held/);
-  assert.match(body, /more in the Drawer/);
-  assert.match(body, /more row\$\{/);
-  assert.match(body, /in this plate/);
+test('group expansion never renders a member table', () => {
+  assert.doesNotMatch(code(APP), /class: ['"]plate-row['"]/);
+  assert.doesNotMatch(code(APP), /plateRowsFor\(/);
 });
-
-test('a plate states where its claims were written, and only when it knows', () => {
-  const body = code(APP);
-  // The subtitle is the only place the reader is told the grouping is about evidence
-  // rather than about the relationship, so it is rendered from the plate's own meta.
-  assert.match(body, /if \(plate\.meta\) \{/);
-  assert.match(body, /declared in: \$\{plate\.meta\}/);
-  // "Declared in" is a place, never a category: it must not name what the claim means.
-  assert.doesNotMatch(body, /declared in: \$\{[^}]*relationshipType/);
+test('group title retains the complete evidence location', () => {
+  assert.match(code(APP), /plate\.meta\|\|plate\.relationshipType/);
+  assert.match(code(APP), /grouping only/);
 });
 
 // ------------------------------------------------------------ drawer order
@@ -237,9 +161,10 @@ test('the HUD stays in screen space and only the SVG owns camera transforms', ()
   const app = code(APP);
   assert.doesNotMatch(app, /applyFrameTransform/);
   assert.match(app, /function setCamera\(/);
-  assert.match(app, /viewBoxFor\(/);
+  // Oct13: exploration is unbounded; the fixed WORLD clamp prevents reaching new nodes.
+  assert.match(app, /const window = \{viewBox:/);
   assert.equal(/canvas\.setAttribute\('viewBox',/.test(app.replace(/function setCamera\([\s\S]*?\n}/, '')), false,
-    'all camera writes use the same clamped path');
+    'all camera writes use the same SVG path');
 });
 
 test('long content is contained rather than overflowing the drawer', () => {

@@ -1,0 +1,59 @@
+{
+  "contentDigest": "24a94897eae53a64c07e2a76682623e870f3346d599ac3b0af96384711e6a176",
+  "cpuBudget": "unsupported",
+  "node": "v24.21.0",
+  "observations": [],
+  "requests": [
+    {
+      "headers": {
+        "x-ratelimit-limit": "60",
+        "x-ratelimit-remaining": "0",
+        "x-ratelimit-reset": "1791545941",
+        "x-ratelimit-resource": "core",
+        "x-ratelimit-used": "60"
+      },
+      "request": {
+        "endpoint": "/repos/sindresorhus/p-limit",
+        "outcome": "rate_limit",
+        "reason": null,
+        "receivedBytes": 0,
+        "reservedBytes": 32768,
+        "retainedBytes": 0,
+        "status": 403
+      },
+      "startedAt": "2026-10-09T11:10:21.210Z",
+      "wallMs": 584.631603
+    },
+    {
+      "headers": {},
+      "request": {
+        "endpoint": "/repos/jucke/p-limit",
+        "outcome": "budget_denied",
+        "reason": "provider stopped by rate limit or redirect",
+        "receivedBytes": 0,
+        "reservedBytes": 0,
+        "retainedBytes": 0,
+        "status": null
+      },
+      "startedAt": "2026-10-09T11:10:21.794Z",
+      "wallMs": 0.03415000000006785
+    },
+    {
+      "headers": {},
+      "request": {
+        "endpoint": "/repos/sindresorhus/p-throttle",
+        "outcome": "budget_denied",
+        "reason": "provider stopped by rate limit or redirect",
+        "receivedBytes": 0,
+        "reservedBytes": 0,
+        "retainedBytes": 0,
+        "status": null
+      },
+      "startedAt": "2026-10-09T11:10:21.794Z",
+      "wallMs": 0.013285999999993692
+    }
+  ],
+  "schemaVersion": "discovery-public-probe-receipt@1",
+  "startedAt": "2026-10-09T11:10:21.204Z",
+  "wallMs": 590.924407
+}

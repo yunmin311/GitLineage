@@ -1,0 +1,430 @@
+{
+  "version": "synthetic-multifile@1",
+  "construction": "create-phase1-fixtures.mjs; independent Git roots, never real human labels",
+  "sources": [
+    {
+      "repository": "synthetic/copy-reinit",
+      "revision": "73b5784566b6a35423425d434ac005f2ccb23b9e",
+      "parents": [],
+      "synthetic": true,
+      "files": [
+        {
+          "path": "index.js",
+          "content": "import Queue from 'yocto-queue';\n\nexport default function pLimit(concurrency) {\n\tlet rejectOnClear = false;\n\n\tif (typeof concurrency === 'object') {\n\t\t({concurrency, rejectOnClear = false} = concurrency);\n\t}\n\n\tvalidateConcurrency(concurrency);\n\n\tif (typeof rejectOnClear !== 'boolean') {\n\t\tthrow new TypeError('Expected `rejectOnClear` to be a boolean');\n\t}\n\n\tconst queue = new Queue();\n\tlet activeCount = 0;\n\n\tconst resumeNext = () => {\n\t\t// Process the next queued function if we're under the concurrency limit\n\t\tif (activeCount < concurrency && queue.size > 0) {\n\t\t\tactiveCount++;\n\t\t\tqueue.dequeue().run();\n\t\t}\n\t};\n\n\tconst next = () => {\n\t\tactiveCount--;\n\t\tresumeNext();\n\t};\n\n\tconst run = async (function_, resolve, arguments_) => {\n\t\t// Execute the function and capture the result promise\n\t\tconst result = (async () => function_(...arguments_))();\n\n\t\t// Resolve immediately with the promise (don't wait for completion)\n\t\tresolve(result);\n\n\t\t// Wait for the function to complete (success or failure)\n\t\t// We catch errors here to prevent unhandled rejections,\n\t\t// but the original promise rejection is preserved for the caller\n\t\ttry {\n\t\t\tawait result;\n\t\t} catch {}\n\n\t\t// Decrement active count and process next queued function\n\t\tnext();\n\t};\n\n\tconst enqueue = (function_, resolve, reject, arguments_) => {\n\t\tconst queueItem = {reject};\n\n\t\t// Queue the internal resolve function instead of the run function\n\t\t// to preserve the asynchronous execution context.\n\t\tnew Promise(internalResolve => { // eslint-disable-line promise/param-names\n\t\t\tqueueItem.run = internalResolve;\n\t\t\tqueue.enqueue(queueItem);\n\t\t}).then(run.bind(undefined, function_, resolve, arguments_)); // eslint-disable-line promise/prefer-await-to-then\n\n\t\t// Start processing immediately if we haven't reached the concurrency limit\n\t\tif (activeCount < concurrency) {\n\t\t\tresumeNext();\n\t\t}\n\t};\n\n\tconst generator = (function_, ...arguments_) => new Promise((resolve, reject) => {\n\t\tenqueue(function_, resolve, reject, arguments_);\n\t});\n\n\tObject.defineProperties(generator, {\n\t\tactiveCount: {\n\t\t\tget: () => activeCount,\n\t\t},\n\t\tpendingCount: {\n\t\t\tget: () => queue.size,\n\t\t},\n\t\tclearQueue: {\n\t\t\tvalue() {\n\t\t\t\tif (!rejectOnClear) {\n\t\t\t\t\tqueue.clear();\n\t\t\t\t\treturn;\n\t\t\t\t}\n\n\t\t\t\tconst abortError = AbortSignal.abort().reason;\n\n\t\t\t\twhile (queue.size > 0) {\n\t\t\t\t\tqueue.dequeue().reject(abortError);\n\t\t\t\t}\n\t\t\t},\n\t\t},\n\t\tconcurrency: {\n\t\t\tget: () => concurrency,\n\n\t\t\tset(newConcurrency) {\n\t\t\t\tvalidateConcurrency(newConcurrency);\n\t\t\t\tconcurrency = newConcurrency;\n\n\t\t\t\tqueueMicrotask(() => {\n\t\t\t\t\t// eslint-disable-next-line no-unmodified-loop-condition\n\t\t\t\t\twhile (activeCount < concurrency && queue.size > 0) {\n\t\t\t\t\t\tresumeNext();\n\t\t\t\t\t}\n\t\t\t\t});\n\t\t\t},\n\t\t},\n\t\tmap: {\n\t\t\tasync value(iterable, function_) {\n\t\t\t\tconst promises = [];\n\n\t\t\t\ttry {\n\t\t\t\t\tArray.from(iterable, (value, index) => {\n\t\t\t\t\t\tconst promise = generator(function_, value, index);\n\t\t\t\t\t\tpromises.push(promise);\n\t\t\t\t\t\treturn promise;\n\t\t\t\t\t});\n\t\t\t\t} catch (error) {\n\t\t\t\t\t// The iterable threw, so `Promise.all` never observes the already scheduled promises. Observe them here to avoid unhandled rejections.\n\t\t\t\t\tfor (const promise of promises) {\n\t\t\t\t\t\tpromise.catch(() => {}); // eslint-disable-line promise/prefer-await-to-then\n\t\t\t\t\t}\n\n\t\t\t\t\tthrow error;\n\t\t\t\t}\n\n\t\t\t\treturn Promise.all(promises);\n\t\t\t},\n\t\t},\n\t});\n\n\treturn generator;\n}\n\nexport function limitFunction(function_, options) {\n\tconst limit = pLimit(options);\n\n\tconst limitedFunction = (...arguments_) => limit(() => function_(...arguments_));\n\tObject.defineProperty(limitedFunction, 'clearQueue', {\n\t\tvalue: limit.clearQueue,\n\t});\n\n\treturn limitedFunction;\n}\n\nfunction validateConcurrency(concurrency) {\n\tif (!((Number.isInteger(concurrency) || concurrency === Number.POSITIVE_INFINITY) && concurrency > 0)) {\n\t\tthrow new TypeError('Expected `concurrency` to be a number from 1 and up');\n\t}\n}\n",
+          "sha256": "edde12a4a4dbdbe8d27161cdd0853db0bab435d5dc6c15f9f4dedc27ee9bca60"
+        },
+        {
+          "path": "LICENSE",
+          "content": "MIT License\n\nCopyright (c) Sindre Sorhus <sindresorhus@gmail.com> (https://sindresorhus.com)\n\nPermission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n",
+          "sha256": "5c932d88256b4ab958f64a856fa48e8bd1f55bc1d96b8149c65689e0c61789d3"
+        }
+      ]
+    },
+    {
+      "repository": "synthetic/format-path",
+      "revision": "867cc93ccf663f28fda1fd79e54b89580073bf5b",
+      "parents": [],
+      "synthetic": true,
+      "files": [
+        {
+          "path": "lib/moved.js",
+          "content": "\n\nimport Queue from 'yocto-queue';\n\nexport default function pLimit(concurrency) {\n  let rejectOnClear = false;\n\n  if (typeof concurrency === 'object') {\n    ({concurrency, rejectOnClear = false} = concurrency);\n  }\n\n  validateConcurrency(concurrency);\n\n  if (typeof rejectOnClear !== 'boolean') {\n    throw new TypeError('Expected `rejectOnClear` to be a boolean');\n  }\n\n  const queue = new Queue();\n  let activeCount = 0;\n\n  const resumeNext = () => {\n    // Process the next queued function if we're under the concurrency limit\n    if (activeCount < concurrency && queue.size > 0) {\n      activeCount++;\n      queue.dequeue().run();\n    }\n  };\n\n  const next = () => {\n    activeCount--;\n    resumeNext();\n  };\n\n  const run = async (function_, resolve, arguments_) => {\n    // Execute the function and capture the result promise\n    const result = (async () => function_(...arguments_))();\n\n    // Resolve immediately with the promise (don't wait for completion)\n    resolve(result);\n\n    // Wait for the function to complete (success or failure)\n    // We catch errors here to prevent unhandled rejections,\n    // but the original promise rejection is preserved for the caller\n    try {\n      await result;\n    } catch {}\n\n    // Decrement active count and process next queued function\n    next();\n  };\n\n  const enqueue = (function_, resolve, reject, arguments_) => {\n    const queueItem = {reject};\n\n    // Queue the internal resolve function instead of the run function\n    // to preserve the asynchronous execution context.\n    new Promise(internalResolve => { // eslint-disable-line promise/param-names\n      queueItem.run = internalResolve;\n      queue.enqueue(queueItem);\n    }).then(run.bind(undefined, function_, resolve, arguments_)); // eslint-disable-line promise/prefer-await-to-then\n\n    // Start processing immediately if we haven't reached the concurrency limit\n    if (activeCount < concurrency) {\n      resumeNext();\n    }\n  };\n\n  const generator = (function_, ...arguments_) => new Promise((resolve, reject) => {\n    enqueue(function_, resolve, reject, arguments_);\n  });\n\n  Object.defineProperties(generator, {\n    activeCount: {\n      get: () => activeCount,\n    },\n    pendingCount: {\n      get: () => queue.size,\n    },\n    clearQueue: {\n      value() {\n        if (!rejectOnClear) {\n          queue.clear();\n          return;\n        }\n\n        const abortError = AbortSignal.abort().reason;\n\n        while (queue.size > 0) {\n          queue.dequeue().reject(abortError);\n        }\n      },\n    },\n    concurrency: {\n      get: () => concurrency,\n\n      set(newConcurrency) {\n        validateConcurrency(newConcurrency);\n        concurrency = newConcurrency;\n\n        queueMicrotask(() => {\n          // eslint-disable-next-line no-unmodified-loop-condition\n          while (activeCount < concurrency && queue.size > 0) {\n            resumeNext();\n          }\n        });\n      },\n    },\n    map: {\n      async value(iterable, function_) {\n        const promises = [];\n\n        try {\n          Array.from(iterable, (value, index) => {\n            const promise = generator(function_, value, index);\n            promises.push(promise);\n            return promise;\n          });\n        } catch (error) {\n          // The iterable threw, so `Promise.all` never observes the already scheduled promises. Observe them here to avoid unhandled rejections.\n          for (const promise of promises) {\n            promise.catch(() => {}); // eslint-disable-line promise/prefer-await-to-then\n          }\n\n          throw error;\n        }\n\n        return Promise.all(promises);\n      },\n    },\n  });\n\n  return generator;\n}\n\nexport function limitFunction(function_, options) {\n  const limit = pLimit(options);\n\n  const limitedFunction = (...arguments_) => limit(() => function_(...arguments_));\n  Object.defineProperty(limitedFunction, 'clearQueue', {\n    value: limit.clearQueue,\n  });\n\n  return limitedFunction;\n}\n\nfunction validateConcurrency(concurrency) {\n  if (!((Number.isInteger(concurrency) || concurrency === Number.POSITIVE_INFINITY) && concurrency > 0)) {\n    throw new TypeError('Expected `concurrency` to be a number from 1 and up');\n  }\n}\n",
+          "sha256": "96a9e6ace26dc7e59a88072d4179ac1c3d5bf8e2bff5cabf396b565b6ed1c822"
+        },
+        {
+          "path": "LICENSE",
+          "content": "MIT License\n\nCopyright (c) Sindre Sorhus <sindresorhus@gmail.com> (https://sindresorhus.com)\n\nPermission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n",
+          "sha256": "5c932d88256b4ab958f64a856fa48e8bd1f55bc1d96b8149c65689e0c61789d3"
+        }
+      ]
+    },
+    {
+      "repository": "synthetic/logic-root",
+      "revision": "a8ee1b28ce4ca23b9e35e33f77164b6b361792d7",
+      "parents": [],
+      "synthetic": true,
+      "files": [
+        {
+          "path": "src/sum.js",
+          "content": "export function sum(values) { return values.reduce((total, value) => total + value, 0); }\n",
+          "sha256": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f"
+        }
+      ]
+    },
+    {
+      "repository": "synthetic/logic-renamed",
+      "revision": "90f3ebea663fa43f97cfa4c68463f0244ed90698",
+      "parents": [],
+      "synthetic": true,
+      "files": [
+        {
+          "path": "src/add.js",
+          "content": "export function sum(items) { return items.reduce((accumulator, item) => accumulator + item, 0); }\n",
+          "sha256": "80e3345a538d9548c198ed6613c2beca5210b131c37766b0f3c3008193661541"
+        }
+      ]
+    },
+    {
+      "repository": "synthetic/template-app-a",
+      "revision": "0b5851bda9fc744bd0b5b14d1fdcae9315a5a359",
+      "parents": [],
+      "synthetic": true,
+      "files": [
+        {
+          "path": "LICENSE",
+          "content": "MIT License\n\nCopyright (c) Sindre Sorhus <sindresorhus@gmail.com> (https://sindresorhus.com)\n\nPermission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n",
+          "sha256": "5c932d88256b4ab958f64a856fa48e8bd1f55bc1d96b8149c65689e0c61789d3"
+        },
+        {
+          "path": "README.md",
+          "content": "# Independent application\nShared documentation template.",
+          "sha256": "b841449b9adce70ca8f14afdab4e9a04482211ea1bfcfcd8d00ea715ce06321a"
+        },
+        {
+          "path": "src/app.js",
+          "content": "export function sum(values) { return values.reduce((total, value) => total + value, 0); }\n",
+          "sha256": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f"
+        },
+        {
+          "path": "templates/scaffold.js",
+          "content": "export function scaffold(value) { return Promise.resolve(value).then(result => ({result})); }\n",
+          "sha256": "30f725938d231de3c7135d6b1b0ef031377a8856acfeb6112dec3e9256f15602"
+        }
+      ]
+    },
+    {
+      "repository": "synthetic/template-app-b",
+      "revision": "c2e8a257aaa5b0f730f5f5fad44fd4e2edf180fa",
+      "parents": [],
+      "synthetic": true,
+      "files": [
+        {
+          "path": "LICENSE",
+          "content": "MIT License\n\nCopyright (c) Sindre Sorhus <sindresorhus@gmail.com> (https://sindresorhus.com)\n\nPermission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n",
+          "sha256": "5c932d88256b4ab958f64a856fa48e8bd1f55bc1d96b8149c65689e0c61789d3"
+        },
+        {
+          "path": "README.md",
+          "content": "# Independent application\nShared documentation template.",
+          "sha256": "b841449b9adce70ca8f14afdab4e9a04482211ea1bfcfcd8d00ea715ce06321a"
+        },
+        {
+          "path": "src/app.js",
+          "content": "export function reverse(text) { return [...text].reverse().join(\"\"); }\n",
+          "sha256": "f4bd8e87aa00abcb820b1ae5544c4759c875b4a416076b82070106977b472c07"
+        },
+        {
+          "path": "templates/scaffold.js",
+          "content": "export function scaffold(value) { return Promise.resolve(value).then(result => ({result})); }\n",
+          "sha256": "30f725938d231de3c7135d6b1b0ef031377a8856acfeb6112dec3e9256f15602"
+        }
+      ]
+    },
+    {
+      "repository": "synthetic/generic-a",
+      "revision": "a235bc33ba98e1742675e49413ba427160195fbe",
+      "parents": [],
+      "synthetic": true,
+      "files": [
+        {
+          "path": "src/app.js",
+          "content": "export function sum(values) { return values.reduce((total, value) => total + value, 0); }\n",
+          "sha256": "4f6d042bbbd7f97f859749fc58c8eadbbe06b526a8d063054899acc466a1ae3f"
+        },
+        {
+          "path": "src/guard.js",
+          "content": "export function validate(value) { if (value === undefined) throw new TypeError(\"required\"); return Promise.resolve(value); }\n",
+          "sha256": "4ba2b919c09c320b8682d4f452846a49b1228e33f5703fcb800add93fdb763e4"
+        }
+      ]
+    },
+    {
+      "repository": "synthetic/generic-b",
+      "revision": "69840649ce923adcf13016817982fbdc57e59c51",
+      "parents": [],
+      "synthetic": true,
+      "files": [
+        {
+          "path": "lib/check.js",
+          "content": "export function validate(input) { if (input === undefined) throw new TypeError(\"required\"); return Promise.resolve(input); }\n",
+          "sha256": "cd8d306f81d681aa50d536f0a04887a149ae82075c909cc12ad96c1ae1fd42a9"
+        },
+        {
+          "path": "src/app.js",
+          "content": "export function reverse(text) { return [...text].reverse().join(\"\"); }\n",
+          "sha256": "f4bd8e87aa00abcb820b1ae5544c4759c875b4a416076b82070106977b472c07"
+        }
+      ]
+    },
+    {
+      "repository": "synthetic/small-shared",
+      "revision": "a2270925f017f3036395389bfa45043e63472bda",
+      "parents": [],
+      "synthetic": true,
+      "files": [
+        {
+          "path": "src/guard.js",
+          "content": "export function validate(value) { if (value === undefined) throw new TypeError(\"required\"); return Promise.resolve(value); }\n",
+          "sha256": "4ba2b919c09c320b8682d4f452846a49b1228e33f5703fcb800add93fdb763e4"
+        }
+      ]
+    },
+    {
+      "repository": "synthetic/large-shared",
+      "revision": "3db372d0239a097d7751a40d8737415ad0247ce1",
+      "parents": [],
+      "synthetic": true,
+      "files": [
+        {
+          "path": "src/guard.js",
+          "content": "export function validate(value) { if (value === undefined) throw new TypeError(\"required\"); return Promise.resolve(value); }\n",
+          "sha256": "4ba2b919c09c320b8682d4f452846a49b1228e33f5703fcb800add93fdb763e4"
+        },
+        {
+          "path": "src/module-0.js",
+          "content": "export function task0(input) { const marker = \"module-0\"; return input.map(row => [row, marker, 0]).filter(entry => entry.length > 0); }\n",
+          "sha256": "732336b0b927079933aeab117160894c6f9cd14248bcb52cc28e13b4c2f53aa0"
+        },
+        {
+          "path": "src/module-1.js",
+          "content": "export function task1(input) { const marker = \"module-1\"; return input.map(row => [row, marker, 1]).filter(entry => entry.length > 1); }\n",
+          "sha256": "f0218cd64b4d87a8574611bc76e144a87e1b0c10cbb281d6445a56f798e47573"
+        },
+        {
+          "path": "src/module-10.js",
+          "content": "export function task10(input) { const marker = \"module-10\"; return input.map(row => [row, marker, 10]).filter(entry => entry.length > 1); }\n",
+          "sha256": "2a5654aaa7159380e8bedffbcf589147ff5b552464eea4b8c36b72c2745efd5c"
+        },
+        {
+          "path": "src/module-11.js",
+          "content": "export function task11(input) { const marker = \"module-11\"; return input.map(row => [row, marker, 11]).filter(entry => entry.length > 2); }\n",
+          "sha256": "320a78e25f7ab349875b77d62f4f13473c4cb00df573839d4979235979011258"
+        },
+        {
+          "path": "src/module-12.js",
+          "content": "export function task12(input) { const marker = \"module-12\"; return input.map(row => [row, marker, 12]).filter(entry => entry.length > 0); }\n",
+          "sha256": "42195cfbe8416a1ec5d10308f485c0267e30f7f4d35b85154766dbad305c2905"
+        },
+        {
+          "path": "src/module-13.js",
+          "content": "export function task13(input) { const marker = \"module-13\"; return input.map(row => [row, marker, 13]).filter(entry => entry.length > 1); }\n",
+          "sha256": "19f4135c2f93adfa697917cd763b1cd07810521a19ca45eb8d24ef97dfbdf2cd"
+        },
+        {
+          "path": "src/module-14.js",
+          "content": "export function task14(input) { const marker = \"module-14\"; return input.map(row => [row, marker, 14]).filter(entry => entry.length > 2); }\n",
+          "sha256": "302cda5778c3fddc8c3fd90c5797dd6ff1a49b114aa4b83190c9d37d4a470baa"
+        },
+        {
+          "path": "src/module-15.js",
+          "content": "export function task15(input) { const marker = \"module-15\"; return input.map(row => [row, marker, 15]).filter(entry => entry.length > 0); }\n",
+          "sha256": "2fc99e364ba4b21ab79babd41ec4828c0c1e64aff506db4f74e2f4db88508ecf"
+        },
+        {
+          "path": "src/module-2.js",
+          "content": "export function task2(input) { const marker = \"module-2\"; return input.map(row => [row, marker, 2]).filter(entry => entry.length > 2); }\n",
+          "sha256": "d171d21f0d8e20fd0448d2350d4cd28c373d88fd59e35b6d9e2aab7f436cd137"
+        },
+        {
+          "path": "src/module-3.js",
+          "content": "export function task3(input) { const marker = \"module-3\"; return input.map(row => [row, marker, 3]).filter(entry => entry.length > 0); }\n",
+          "sha256": "5ba27f8bd289d38377972e8dcff693562703eacc611aa4a05640abe6f0f25e92"
+        },
+        {
+          "path": "src/module-4.js",
+          "content": "export function task4(input) { const marker = \"module-4\"; return input.map(row => [row, marker, 4]).filter(entry => entry.length > 1); }\n",
+          "sha256": "c10d9bb3dfe8dbc628aae82b03cdfb056fdfc68abe7a116149a9f6a32c0a4785"
+        },
+        {
+          "path": "src/module-5.js",
+          "content": "export function task5(input) { const marker = \"module-5\"; return input.map(row => [row, marker, 5]).filter(entry => entry.length > 2); }\n",
+          "sha256": "42c8f68bd4fd53fcaefc63e9a433a58e556a9cd2bda5ada160033bd9f48bafb3"
+        },
+        {
+          "path": "src/module-6.js",
+          "content": "export function task6(input) { const marker = \"module-6\"; return input.map(row => [row, marker, 6]).filter(entry => entry.length > 0); }\n",
+          "sha256": "ebb64b6bd569880525d57b46a948e228e11bc945a34658c928609e9e3fb81b4a"
+        },
+        {
+          "path": "src/module-7.js",
+          "content": "export function task7(input) { const marker = \"module-7\"; return input.map(row => [row, marker, 7]).filter(entry => entry.length > 1); }\n",
+          "sha256": "6c940205ffb63448d38082db8ab3bbbf604776f43f7bcb62293de670f8ee2287"
+        },
+        {
+          "path": "src/module-8.js",
+          "content": "export function task8(input) { const marker = \"module-8\"; return input.map(row => [row, marker, 8]).filter(entry => entry.length > 2); }\n",
+          "sha256": "99c59520f58701ff54e95ff4caac0333ee541637c3f80102a83335acd44fe692"
+        },
+        {
+          "path": "src/module-9.js",
+          "content": "export function task9(input) { const marker = \"module-9\"; return input.map(row => [row, marker, 9]).filter(entry => entry.length > 0); }\n",
+          "sha256": "5b168c94ee418c955c60156310ec047298deee718bff36ada60d7c43b3558979"
+        }
+      ]
+    },
+    {
+      "repository": "synthetic/filtered-mix",
+      "revision": "cc46effd5ebd05c15fb45f4489db8576d0155084",
+      "parents": [],
+      "synthetic": true,
+      "files": [
+        {
+          "path": "generated/types.js",
+          "content": "// @generated\nexport function validate(value) { if (value === undefined) throw new TypeError(\"required\"); return Promise.resolve(value); }\n",
+          "sha256": "11948662016397bdeef47f47dcc50fb1a7f8b2eef42bc802ecafe8ea59a4af01"
+        },
+        {
+          "path": "lib/x.min.js",
+          "content": "export function validate(value) { if (value === undefined) throw new TypeError(\"required\"); return Promise.resolve(value); }\n",
+          "sha256": "4ba2b919c09c320b8682d4f452846a49b1228e33f5703fcb800add93fdb763e4"
+        },
+        {
+          "path": "LICENSE",
+          "content": "MIT License\n\nCopyright (c) Sindre Sorhus <sindresorhus@gmail.com> (https://sindresorhus.com)\n\nPermission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n",
+          "sha256": "5c932d88256b4ab958f64a856fa48e8bd1f55bc1d96b8149c65689e0c61789d3"
+        },
+        {
+          "path": "package-lock.json",
+          "content": "{\"lockfileVersion\":3}",
+          "sha256": "2086223f909ecaf4b063cfc7e8187ab73e8e8a24ec7029d54e0403dee55a3265"
+        },
+        {
+          "path": "README.md",
+          "content": "# Independent application\nShared documentation template.",
+          "sha256": "b841449b9adce70ca8f14afdab4e9a04482211ea1bfcfcd8d00ea715ce06321a"
+        },
+        {
+          "path": "src/app.js",
+          "content": "export function reverse(text) { return [...text].reverse().join(\"\"); }\n",
+          "sha256": "f4bd8e87aa00abcb820b1ae5544c4759c875b4a416076b82070106977b472c07"
+        },
+        {
+          "path": "templates/scaffold.js",
+          "content": "export function scaffold(value) { return Promise.resolve(value).then(result => ({result})); }\n",
+          "sha256": "30f725938d231de3c7135d6b1b0ef031377a8856acfeb6112dec3e9256f15602"
+        },
+        {
+          "path": "thing.py",
+          "content": "print(\"unsupported language\")",
+          "sha256": "bd011e93ee57c6cc8d6873525522ff9df663cf2cbbc855f68b7b114effa8b9ae"
+        },
+        {
+          "path": "tiny.js",
+          "content": "x",
+          "sha256": "2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881"
+        },
+        {
+          "path": "vendor/sdk.js",
+          "content": "export function validate(value) { if (value === undefined) throw new TypeError(\"required\"); return Promise.resolve(value); }\n",
+          "sha256": "4ba2b919c09c320b8682d4f452846a49b1228e33f5703fcb800add93fdb763e4"
+        }
+      ]
+    },
+    {
+      "repository": "synthetic/broken",
+      "revision": "82674ef4f32da901f44228a1eed8c8a4dc7031eb",
+      "parents": [],
+      "synthetic": true,
+      "files": [
+        {
+          "path": "src/parse.js",
+          "content": "export const broken = ; // malformed source",
+          "sha256": "83107d07c669a3dd5f4426b35c494790e7365cb561fd2fd82b3f798e509374af"
+        }
+      ]
+    },
+    {
+      "repository": "synthetic/small-only",
+      "revision": "e14a2c09972ded7a8155f4aca6069de85ed587a8",
+      "parents": [],
+      "synthetic": true,
+      "files": [
+        {
+          "path": "tiny.js",
+          "content": "x",
+          "sha256": "2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881"
+        }
+      ]
+    }
+  ],
+  "cases": [
+    {
+      "target": "sindresorhus/p-limit",
+      "candidate": "synthetic/copy-reinit",
+      "label": "positive",
+      "reason": "Source copied into an independent initial Git commit; synthetic"
+    },
+    {
+      "target": "sindresorhus/p-limit",
+      "candidate": "synthetic/format-path",
+      "label": "positive",
+      "reason": "Only indentation, leading whitespace and path changed; synthetic"
+    },
+    {
+      "target": "sindresorhus/p-limit",
+      "candidate": "jucke/p-limit",
+      "label": "positive",
+      "reason": "Pinned Phase 0 public fork metadata and shared commit"
+    },
+    {
+      "target": "sindresorhus/p-limit",
+      "candidate": "sindresorhus/yocto-queue",
+      "label": "unknown",
+      "reason": "Real candidate without human lineage validation"
+    },
+    {
+      "target": "sindresorhus/p-limit",
+      "candidate": "sindresorhus/p-throttle",
+      "label": "unknown",
+      "reason": "Real candidate without human lineage validation"
+    },
+    {
+      "target": "synthetic/logic-root",
+      "candidate": "synthetic/logic-renamed",
+      "label": "positive",
+      "reason": "Manual lexical binding renames only; reduce property, literals and operators unchanged"
+    },
+    {
+      "target": "synthetic/template-app-a",
+      "candidate": "synthetic/template-app-b",
+      "label": "negative",
+      "reason": "Independently constructed apps share only scaffold/license/README"
+    },
+    {
+      "target": "synthetic/generic-a",
+      "candidate": "synthetic/generic-b",
+      "label": "negative",
+      "reason": "Independent apps with common guard; no lineage by construction"
+    },
+    {
+      "target": "synthetic/small-shared",
+      "candidate": "synthetic/large-shared",
+      "label": "negative",
+      "reason": "Independent large project includes the same generic guard"
+    },
+    {
+      "target": "synthetic/large-shared",
+      "candidate": "synthetic/small-shared",
+      "label": "negative",
+      "reason": "Reverse asymmetric pair; same shared generic guard"
+    },
+    {
+      "target": "sindresorhus/p-limit",
+      "candidate": "synthetic/filtered-mix",
+      "label": "negative",
+      "reason": "Independent application with deliberately non-source fixtures"
+    },
+    {
+      "target": "sindresorhus/p-limit",
+      "candidate": "synthetic/broken",
+      "label": "unknown",
+      "reason": "Parse failure cannot be negative"
+    },
+    {
+      "target": "sindresorhus/p-limit",
+      "candidate": "synthetic/small-only",
+      "label": "unknown",
+      "reason": "No eligible source cannot be negative"
+    }
+  ]
+}

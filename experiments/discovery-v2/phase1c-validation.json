@@ -1,0 +1,272 @@
+{
+  "schemaVersion": "discovery-phase1c-validation@1",
+  "recordedAt": "2026-10-09T11:27:08.763059+00:00",
+  "baseline": "c6aaadf8fdbdbf359ddf95ccec58afe3ce3e0b16",
+  "implementationCommit": "77fc78237e731b2a78f78fda82b9449b33186cb6",
+  "resolutionCommit": "d0df0923e5d99e09e6a009a9432b474872342195",
+  "runtime": {
+    "os": "WSL2 Ubuntu-24.04 Linux",
+    "node": "v24.21.0"
+  },
+  "typecheck": {
+    "exitCode": 0,
+    "logDigest": "a9b9f7f787f5f67cf960e83b4e0fd3e5ee8a2c063adec9c910917b9015c4b81e"
+  },
+  "experimentTypecheck": {
+    "exitCode": 0,
+    "logDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "build": {
+    "exitCode": 0,
+    "logDigest": "af3618b874083321caa1c865935aa87c81d6e11d3d1afc7c1e4b99b47696cee2"
+  },
+  "unit": {
+    "tests": 530,
+    "pass": 527,
+    "fail": 0,
+    "skipped": 3,
+    "exitCode": 0,
+    "logDigest": "a0facc93b1ade8ff59ee164fe4a0ff89d6fd7078d2c98249f7d891923718b0bb",
+    "skips": "three existing live integration opt-ins"
+  },
+  "discovery": {
+    "tests": 83,
+    "pass": 83,
+    "fail": 0,
+    "skipped": 0,
+    "exitCode": 0,
+    "logDigest": "e4ffc659aab01ffd943b4daa193ee735783f50ee04a6942777c539a7acd2766e"
+  },
+  "phase0": {
+    "tests": 6,
+    "pass": 6,
+    "fail": 0,
+    "skipped": 0,
+    "exitCode": 0,
+    "logDigest": "1c30acefbe648d76944a12580952dabc8568956c1197fd9fd6af0bee64ddd929"
+  },
+  "phase1aReplay": {
+    "contentDigest": "546af0c31bc3434abca4f64ff8691457373a2c3449363b641f30eb53d637167c",
+    "candidates": 13,
+    "state": "partial",
+    "logDigest": "ba0dee3bc2678eda26d400e44b33feb1b55906d05e64defc2c79cd1dca0555e8"
+  },
+  "browser": {
+    "canvas": {
+      "exitCode": 0,
+      "passedChecksOrStateRecords": 113,
+      "artifactPath": "artifacts/shots/v2/report.json",
+      "artifactDigest": "bf3c1da27c05e4f7a000ee9acea0b1c4b8775f1ec4ded959e9c1038eb7729b07",
+      "logDigest": "9dad3a84a7425e973e2a5473e880fc269103cbc164fd27f3da3a410660e13775"
+    },
+    "landing": {
+      "exitCode": 0,
+      "passedChecksOrStateRecords": 40,
+      "artifactPath": "artifacts/shots/slice2/results.json",
+      "artifactDigest": "bc7b9684057d800e1d3e8b6ac56aa44fab66fec9c58bd74c4154d214353a7005",
+      "logDigest": "51478eccca1add58eb3518b4509de66759f0ee64e6965b55c54a58473d11e31e"
+    },
+    "analysis": {
+      "exitCode": 0,
+      "passedChecksOrStateRecords": 16,
+      "artifactPath": "artifacts/slice3/fsm-report.json",
+      "artifactDigest": "3852b67943355a1a50e24e80b6f2245408a2301f7e1a575231b54ee7a16c3352",
+      "logDigest": "d9ea5898ae3a27d6e908e8275747c0acae9660afc5075b840d5a44051c966f20"
+    },
+    "preflight": {
+      "exitCode": 0,
+      "passedChecksOrStateRecords": 45,
+      "artifactPath": "artifacts/preflight/results.json",
+      "artifactDigest": "bf8c01d02c0e84a98766af6c5b6c82563afb61b0f6bf94745ebba07a6c563650",
+      "logDigest": "097112631f70fb7474efcc71093a145fe11dcb8bfb3cd30f23a499f7619ced34"
+    },
+    "stale": {
+      "exitCode": 0,
+      "passedChecksOrStateRecords": 6,
+      "artifactPath": "artifacts/slice3/stale-report.json",
+      "artifactDigest": "290d8901cba5ea4cfac660798fc2e65fb6720606d8979430d3b17059579a6ac4",
+      "logDigest": "57c77420ade3722b0aa03244d904f6299f44daeb21366626a39ef0b360c24d42"
+    },
+    "ui-contract": {
+      "exitCode": 0,
+      "passedChecksOrStateRecords": 75,
+      "artifactPath": "artifacts/ui-contract/after/results.json",
+      "artifactDigest": "5821af49a2abcb0061c4b819d2f209f13e688aa1c816a99d45f384de5dfe9bc1",
+      "logDigest": "a2afa436c00dcc6c7c64df1029b2e22b62f9e94d33cac14e7a7e6b693f433d39"
+    },
+    "responsive": {
+      "exitCode": 0,
+      "passedChecksOrStateRecords": 71,
+      "artifactPath": "artifacts/responsive/after/results.json",
+      "artifactDigest": "4e8b7cc5c95789cb6215e927137a4ad5360dfef515a40f9bafbb0e888ba0269a",
+      "logDigest": "27841c4be35c4dc9cea17f82181404fdd122143219e5b8c1e019344b7043656f"
+    },
+    "mobile": {
+      "exitCode": 0,
+      "passedChecksOrStateRecords": 133,
+      "artifactPath": "artifacts/mobile/after/results.json",
+      "artifactDigest": "44bdc9ca8c6e0a7348dcb44185f279faf2563a62149dc94400574efe41f95f6f",
+      "logDigest": "cd7a45d5d85d078e887f72b795c9db21f42938e847222989986be3b8c75330f7"
+    }
+  },
+  "browserExecution": [
+    {
+      "suite": "landing",
+      "exitCode": 0,
+      "wallSeconds": 17.877
+    },
+    {
+      "suite": "analysis",
+      "exitCode": 0,
+      "wallSeconds": 21.04
+    },
+    {
+      "suite": "preflight",
+      "exitCode": 0,
+      "wallSeconds": 43.609
+    },
+    {
+      "suite": "stale",
+      "exitCode": 0,
+      "wallSeconds": 26.783
+    },
+    {
+      "suite": "ui-contract",
+      "exitCode": 0,
+      "wallSeconds": 21.801
+    },
+    {
+      "suite": "responsive",
+      "exitCode": 0,
+      "wallSeconds": 28.777
+    },
+    {
+      "suite": "mobile",
+      "exitCode": 0,
+      "wallSeconds": 49.389
+    }
+  ],
+  "mobileLimitations": {
+    "environment": "Chromium CDP touch simulation",
+    "physicalDevice": "not verified",
+    "webkit": "Error: browserType.launch: Executable doesn't exist at /home/lqy/.cache/ms-playwright/webkit-2359/pw_run.sh"
+  },
+  "mock": {
+    "contentDigest": "a996cb856efd956807c8758432181bb9cb8dfce2477a8228505d0db8be594b84",
+    "coverage": {
+      "completed": 3,
+      "discovered": 3,
+      "inconclusive": 0,
+      "scope": "bounded search and explicit selected paths; no repository-wide scan",
+      "state": "completed"
+    },
+    "budget": {
+      "attempts": 24,
+      "bytesPerFile": 131072,
+      "candidates": 3,
+      "concurrency": 2,
+      "cpuMs": null,
+      "filesPerCandidate": 8,
+      "searchAttempts": 4,
+      "totalBytes": 2097152,
+      "wallMs": 30000
+    },
+    "usage": {
+      "activeWorkers": 0,
+      "attempts": 17,
+      "bytesByFile": {
+        "[\"github:1@cac1a6416a877d091954f52cae3f640c61a4e011\",\"index.js\"]": 90,
+        "[\"github:2@c7df49b85e4885242789c07867c56fba789e1929\",\"index.js\"]": 90,
+        "[\"github:3@828ee9fa75dfd9b925c19fc27eed09c087b8cdc3\",\"index.js\"]": 29,
+        "[\"github:4@23a35c48631619eefea680cd47964b5bd05a1741\",\"index.js\"]": 90
+      },
+      "candidates": 3,
+      "files": {
+        "github:1@cac1a6416a877d091954f52cae3f640c61a4e011": 1,
+        "github:2@c7df49b85e4885242789c07867c56fba789e1929": 1,
+        "github:3@828ee9fa75dfd9b925c19fc27eed09c087b8cdc3": 1,
+        "github:4@23a35c48631619eefea680cd47964b5bd05a1741": 1
+      },
+      "peakWorkers": 1,
+      "searchAttempts": 1,
+      "totalBytes": 299
+    },
+    "network": {
+      "overflowBytes": 0,
+      "receivedBytes": 2890,
+      "reservedBytes": 557056,
+      "retainedBytes": 2890
+    },
+    "sourceMaterializedBytes": 299,
+    "wallMs": 1018.175484
+  },
+  "publicProbe": {
+    "state": "inconclusive",
+    "contentDigest": "24a94897eae53a64c07e2a76682623e870f3346d599ac3b0af96384711e6a176",
+    "usage": {
+      "activeWorkers": 0,
+      "attempts": 1,
+      "bytesByFile": {},
+      "candidates": 0,
+      "files": {},
+      "peakWorkers": 1,
+      "searchAttempts": 0,
+      "totalBytes": 0
+    },
+    "network": {
+      "overflowBytes": 0,
+      "receivedBytes": 0,
+      "reservedBytes": 32768,
+      "retainedBytes": 0
+    },
+    "sourceMaterializedBytes": 0,
+    "receiptFile": "experiments/discovery-v2/phase1c-live-receipt.json",
+    "successfulRepositoryIdentities": 0,
+    "successfulComparisons": 0,
+    "reason": "403 core rate limit exhausted on first bootstrap; numeric-ID git subroutes not reached"
+  },
+  "zeroGraphWrite": {
+    "protectedSourceTrees": {
+      "src/core": {
+        "trackedFiles": 6,
+        "baselineAndHeadTreeDigest": "7b2a8a7080bd46925d15773ccbe2e654ed0bb08df4489ecd090e22084528b0b4",
+        "unchanged": true
+      },
+      "src/pipeline": {
+        "trackedFiles": 2,
+        "baselineAndHeadTreeDigest": "232d5278a7838321a099ef719b7ba50f118497224c888ab01693faf3cf23093f",
+        "unchanged": true
+      },
+      "src/collectors": {
+        "trackedFiles": 9,
+        "baselineAndHeadTreeDigest": "d54b02dc0011b3fc8eae7ed687c841ded6dd6d5ad1a6bbce0df0c1df9b0eb310",
+        "unchanged": true
+      },
+      "src/platform": {
+        "trackedFiles": 6,
+        "baselineAndHeadTreeDigest": "a9637492244fa85684f647e21646e3c0f9f6a3053bc1bc6e700cd990c3bb88c6",
+        "unchanged": true
+      },
+      "src/web": {
+        "trackedFiles": 41,
+        "baselineAndHeadTreeDigest": "4eff420923455e86b18150710c4b52f962a952719951042694cd06740f02d604",
+        "unchanged": true
+      },
+      "schemas": {
+        "trackedFiles": 1,
+        "baselineAndHeadTreeDigest": "fd1f856f442717ed231d655a52b5d2ba98b0f258ddfa4718fd1facc96cbbbda7",
+        "unchanged": true
+      }
+    },
+    "permissionTest": "Phase1C E2E exports under write-only-sidecar permission; canonical Graph/cache sentinel bytes unchanged",
+    "completedComparisons": 3,
+    "graphSentinelDigest": "2b098a1374b4e4c7daeb77443df2be5adc5757eaf0fdaa2237e6de5f108c9f71",
+    "cacheSentinelDigest": "5e72f4b3f6e7ac4f3f6d7e786b10b6d13c0f105fa0b0c0d1a9f81abef31a0eb6",
+    "productionImportBoundary": "PASS",
+    "moduleLoadFetchCalls": 0
+  },
+  "cpuHardBudget": "unsupported",
+  "productionEnabled": false,
+  "pushed": false,
+  "deployed": false
+}
