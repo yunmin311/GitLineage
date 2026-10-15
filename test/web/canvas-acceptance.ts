@@ -1642,12 +1642,16 @@ check('02 expanding reveals the held-back members',
         if (!list) return null;
         const regionTop = Math.round(n.getBoundingClientRect().top);
         const at = (t) => { n.scrollTop = t; return Math.round(list.getBoundingClientRect().top - regionTop); };
-        return { position: getComputedStyle(list).position, at700: at(700), at1400: at(1400) };
-      })()`) as { position: string; at700: number; at1400: number } | null;
+        const at700 = at(700), at1400 = at(1400);
+        const toolbarBottom = Math.round(n.querySelector('.drawer-toolbar').getBoundingClientRect().bottom - regionTop);
+        return { position: getComputedStyle(list).position, at700, at1400, toolbarBottom };
+      })()`) as { position: string; at700: number; at1400: number; toolbarBottom: number } | null;
       report['19-sticky-heading'] = sticky;
       check('19 the group heading holds while its list scrolls under it',
-        !!sticky && sticky.position === 'sticky' && sticky.at700 === 0 && sticky.at1400 === 0,
-        sticky ? `position=${sticky.position}, top@700=${sticky.at700}, top@1400=${sticky.at1400}` : 'no list heading');
+        // The persistent Inspector toolbar now owns the top edge. The heading must
+        // hold immediately below its painted bounds, rather than underneath it.
+        !!sticky && sticky.position === 'sticky' && sticky.at700 === sticky.toolbarBottom && sticky.at1400 === sticky.toolbarBottom,
+        sticky ? `position=${sticky.position}, top@700=${sticky.at700}, top@1400=${sticky.at1400}, toolbar bottom=${sticky.toolbarBottom}` : 'no list heading');
 
       // Bottom of the scroll, photographed, and the affordance states what is true.
       await scroller.evaluate(`document.querySelector('.drawer-inner').scrollTop = 999999`);

@@ -49,7 +49,7 @@
 
 <div class="searchbar" id="searchbar" hidden>
   <svg viewBox="0 0 16 16" aria-hidden="true" class="search-icon"><circle cx="7" cy="7" r="4.2"/><path d="M10.2 10.2 L14 14"/></svg>
-  <input id="search-input" placeholder="Search nodes and relationships" spellcheck="false" autocomplete="off" />
+  <input id="search-input" aria-label="Search repositories and explored objects" placeholder="Search nodes and relationships" spellcheck="false" autocomplete="off" />
   <div id="mobile-search-results" hidden></div>
   <span class="mono search-count" id="search-count"></span>
   <button class="icon-btn" id="search-close" aria-label="Close search">✕</button>
@@ -212,7 +212,7 @@
         <div class="hero-trace-node">
           <span class="hero-trace-mark" aria-hidden="true"></span>
           <p class="hero-trace-stage">relationship</p>
-          <p class="hero-trace-value">97 depends_on</p>
+          <p class="hero-trace-value">97 dependencies</p>
         </div>
         <div class="hero-trace-node">
           <span class="hero-trace-mark" aria-hidden="true"></span>
@@ -244,19 +244,16 @@
       <!-- the three column proof block -->
       <div class="trust">
         <div class="trust-cell">
-          <p class="trust-head">No LLM in the loop</p>
+          <p class="trust-head">Grounded in records</p>
           <p class="trust-body">No language model writes your provenance. Relationships come from
             Git objects, manifests and documents &mdash; records the analysis found.</p>
         </div>
         <div class="trust-cell">
-          <p class="trust-head">Every edge is checkable</p>
-          <p class="trust-body"><span class="mini-pill v">VERIFIED</span>
-            <span class="mini-pill d">DECLARED</span>
-            <span class="mini-pill t">DETECTED</span>
-            &mdash; each opens the raw evidence.</p>
+          <p class="trust-head">Evidence at every connection</p>
+          <p class="trust-body">Open a relationship to inspect its source, status and supporting evidence. Unknown relationships stay unknown.</p>
         </div>
         <div class="trust-cell">
-          <p class="trust-head">Reference is not dependency</p>
+          <p class="trust-head">Different relationships, clearly marked</p>
           <p class="trust-body">They are different canonical relationship types and are drawn
             separately. A version range is never shown as an exact version.</p>
         </div>
@@ -306,7 +303,8 @@
 
       <div class="an-quest">
         <p class="an-repo mono" id="an-repo"></p>
-        <h1 class="an-q">Where did this software come from?</h1>
+        <p class="an-kicker">Repository analysis</p>
+        <h1 class="an-q">Tracing the evidence.</h1>
       </div>
 
       <!-- the current phase is the page's live object: a raised sheet, not just big type -->
@@ -331,13 +329,13 @@
 
       <aside class="an-aside" aria-label="Job and source">
         <div class="an-grp">
-          <p class="an-grp-cap">Job</p>
-          <dl class="an-spec" id="an-job"></dl>
-        </div>
-        <div class="an-grp">
           <p class="an-grp-cap">Source</p>
           <dl class="an-spec" id="an-src"></dl>
         </div>
+        <details class="an-grp an-receipt">
+          <summary class="an-grp-cap">Analysis receipt</summary>
+          <dl class="an-spec" id="an-job"></dl>
+        </details>
       </aside>
 
       <div class="an-tail">

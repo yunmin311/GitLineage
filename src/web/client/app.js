@@ -2269,7 +2269,9 @@ function renderDrawer() {
     const actions=workspace?.repositoryActions(state.selectedNodeId);if(actions){const overview=block.querySelector(".entity-overview");if(overview)overview.after(actions);else block.append(actions);}
   }
 
-  inner.append(close, block);
+  const toolbar = el('div', { class: 'drawer-toolbar' });
+  toolbar.append(el('span', { text: 'Inspector' }), close);
+  inner.append(toolbar, block);
   revealInstrument(block);
 
   /*

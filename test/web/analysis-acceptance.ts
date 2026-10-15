@@ -95,6 +95,7 @@ for (const viewport of [{ width: 1280, height: 800 }, { width: 390, height: 844 
             && getComputedStyle(an).scrollbarWidth !== 'none',
           overflowsX: box.width > window.innerWidth + 1,
           docScrolls: document.documentElement.scrollHeight > window.innerHeight + 1,
+          receiptCollapsed: !document.querySelector('.an-receipt').hasAttribute('open'),
         };
       })()`) as Record<string, unknown>;
 
@@ -139,7 +140,7 @@ writeFileSync(`${OUT}/fsm-report.json`, JSON.stringify(results, null, 1));
 const fails = results.filter((r) => ![
   'assertSegs', 'assertLabels', 'assertOrdinal', 'assertCurrent', 'assertDone', 'assertExplorerHidden',
 ].every((k) => r[k] === true) || r.hasPercent || r.hasTimer || r.hasCount || r.staleIdentity
-  || r.nativeScrollbar || r.overflowsX || r.docScrolls);
+  || r.nativeScrollbar || r.overflowsX || r.docScrolls || !r.receiptCollapsed);
 
 console.log(`${results.length} states captured, ${fails.length} violating the contract`);
 for (const f of fails) {

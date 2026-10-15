@@ -181,8 +181,8 @@
   /* ------------------------------------------------------------ shell tokens
      The shell is the only part of the product that responds to the viewport. The
      graph world is a fixed spatial coordinate system and these do not describe it. */
-  --rail-w: 264px;
-  --drawer-w: 440px;
+  --rail-w: 320px;
+  --drawer-w: 320px;
   --bar-h: 44px;
   --hud-h: 64px;
   --strip-h: 46px;
@@ -1849,13 +1849,9 @@ a { color: inherit; }
 
 .d-eyebrow { font-family: var(--mono); font-size: 9px; letter-spacing: 0.08em; color: var(--ink-4); margin: 0 0 6px; }
 .d-head {
-  /* The identity object: V3.3's structural border plus the hard shadow.
-     This, and not a larger name, is what makes the Drawer read as stronger than the
-     rail -- the brief asks for strength through structure, surface and hue, never
-     through oversized typography. */
+  /* Inspector identities use a flat evidence band; raised objects belong to primary input and progress. */
   border: var(--bw) solid var(--rule-strong);
   border-radius: var(--r-md);
-  box-shadow: var(--sh-1);
   padding: var(--s3) var(--s4);
   margin-bottom: var(--s3);
   font-size: 17px; font-weight: 650; margin: 0 0 6px; padding-right: 52px; }
@@ -2729,3 +2725,99 @@ button:active { filter:brightness(.97); }
  .an-aside .an-row { grid-template-columns:1fr;gap:4px; }
  .an-aside .an-row .v { text-align:left; }
 }
+
+/* Reading surfaces share V3.3's text roles and spacing. Only the primary input and
+   current analysis phase use a raised surface; navigation and evidence stay flat. */
+
+.landing .sub-cap,.landing .trust-head,.landing .hero-trace-stage { letter-spacing:0;text-transform:none;font:600 11.5px/1.5 var(--sans); }
+.landing .sub-cap { width:96px;flex:none; }
+.landing .sub-row { align-items:center; }
+.landing .trust { border:0;border-top:2px solid var(--ink);border-radius:0;background:transparent;gap:24px;padding-top:20px;margin-top:32px; }
+.landing .trust-cell { background:transparent;padding:0; }
+.landing .trust-head { color:var(--ink);font-size:13px;margin-bottom:8px; }
+.landing .trust-body { font:13px/1.65 var(--sans); }
+.landing .samples a { font:500 11.5px/1.5 var(--sans);border-color:var(--rule);background:transparent; }
+.landing .samples-lab { font:600 11.5px/1.5 var(--sans); }
+.landing .foot { font:11.5px/1.65 var(--sans); }
+.landing .site-foot { line-height:1.6;margin:32px 0 0; }
+.landing .foot-links { font-family:var(--sans); }
+.analysis .an-stage { max-width:1100px;padding-top:48px;column-gap:48px; }
+.analysis .an-quest { display:flex;flex-direction:column;margin-bottom:8px; }
+.an-kicker { order:-2;font:600 11.5px/1.5 var(--sans);color:var(--brand);margin:0 0 12px; }
+.analysis .an-q { font:650 34px/1.12 var(--sans);letter-spacing:-.035em;max-width:none; }
+.analysis .an-repo { order:1;font:500 13px/1.6 var(--sans);margin:12px 0 0;color:var(--ink-2); }
+.analysis .an-phase { margin-top:16px; }
+.analysis .an-obj { padding:24px;background:var(--surface-hi); }
+.analysis .an-ptitle { font:600 28px/1.2 var(--sans);letter-spacing:-.025em; }
+.analysis .an-pk { font:600 11.5px/1.6 var(--sans);letter-spacing:0;text-transform:none; }
+.analysis .an-grp-cap { font:600 11.5px/1.5 var(--sans);text-transform:none;letter-spacing:0;border-bottom:1px solid var(--rule); }
+.analysis .an-receipt > summary { cursor:pointer;min-height:32px; }
+.analysis .an-receipt[open] > summary { margin-bottom:12px; }
+.analysis .an-tail { margin-top:24px;font:13px/1.65 var(--sans); }
+.drawer-inner { --gl-fade-top:72px; }
+.drawer-toolbar { position:sticky;top:-24px;z-index:8;display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:48px;box-sizing:border-box;margin:-24px -24px 20px;padding:0 24px;background:var(--surface);border-bottom:1px solid var(--rule);font:600 11.5px/1.5 var(--sans);color:var(--ink-3); }
+.drawer-toolbar .drawer-close { position:static;flex:none; }
+.drawer .d-head {border:0;border-left:3px solid var(--brand);border-radius:0;background:var(--brand-wash);font:600 16px/1.5 var(--sans);margin:8px 0 16px;padding:10px 12px; }
+.drawer .d-eyebrow { text-transform:none;color:var(--ink-3);margin-right:0; }
+.drawer .d-block-head { top:24px;margin-inline:-24px;padding-left:24px; }
+.drawer .d-group-head { top:64px; }
+.drawer .d-classification.category-level-1 > summary { border-radius:3px;background:var(--paper-deep); }
+.drawer .unified-node-actions { grid-template-columns:1fr 1fr;gap:8px;margin:16px 0 24px; }
+.drawer .unified-node-actions .d-action { min-height:44px;font:600 11.5px/1.5 var(--sans);padding:8px; }
+.rail-scroll .unified-navigation h3,.rail-scroll .lblk h6 { text-transform:none;letter-spacing:0; }
+.workspace-discovery-controls .deep-status { border-left:2px solid var(--brand-edge);padding:8px 12px;background:var(--brand-wash);font:12px/1.6 var(--sans); }
+.workspace-discovery-controls code,.workspace-discovery-evidence code { display:block;overflow-wrap:anywhere;white-space:normal;font:11.5px/1.65 var(--mono); }
+.git-history header { gap:16px;padding:16px 24px; }
+.history-heading { flex:1;min-width:0; }
+.git-history .history-heading h2 { margin:4px 0 0;font:600 16px/1.4 var(--sans);overflow-wrap:anywhere; }
+.history-kicker { margin:0;font:600 11.5px/1.5 var(--sans);color:var(--ink-3); }
+.history-coverage { margin:0;font:11.5px/1.65 var(--sans); }
+.history-detail { width:320px;box-sizing:border-box;padding:24px; }
+.history-detail h3 { margin:12px 0 16px; }
+.history-metadata { display:grid;grid-template-columns:72px minmax(0,1fr);gap:8px;font:11.5px/1.6 var(--sans);margin:16px 0; }
+.history-metadata dt { color:var(--ink-3); }
+.history-metadata dd { margin:0;overflow-wrap:anywhere; }
+.history-technical { border-block:1px solid var(--rule);padding:12px 0;margin:16px 0; }
+.history-technical summary { cursor:pointer;font:600 11.5px/1.6 var(--sans);color:var(--brand); }
+.history-technical code { display:block;overflow-wrap:anywhere;white-space:normal;font:11.5px/1.65 var(--mono);margin-top:12px; }
+.history-detail .history-parents { display:flex;flex-wrap:wrap;gap:8px; }
+.history-detail .history-parents .d-action { flex:1;min-width:100px; }
+.history-detail > .d-action:not(:first-child) { text-align:left;justify-content:flex-start;overflow-wrap:anywhere;background:var(--surface-hi);border-color:var(--rule); }
+.history-row { transition:background-color var(--d-fast) var(--ease),opacity var(--d-fast) var(--ease); }
+.history-footer { display:flex;align-items:center;gap:16px;padding:12px 24px;border-top:1px solid var(--rule);background:var(--surface); }
+.history-footer #history-more { width:auto;max-width:240px;min-height:44px;padding:10px 16px;flex:none; }
+.history-footer-note { font:11.5px/1.6 var(--sans);color:var(--ink-3); }
+@media(max-width:767px) {
+ .landing .sub-cap { width:auto;flex-basis:100%; }
+ .landing .trust { gap:20px; }
+ .landing .trust-cell + .trust-cell { border-top:1px solid var(--rule);padding-top:20px; }
+ .analysis .an-stage { padding:28px 20px;gap:20px; }
+ .analysis .an-q { font-size:28px; }
+ .analysis .an-ptitle { font-size:24px; }
+ .analysis .an-obj { padding:16px; }
+ .analysis .an-receipt > summary { min-height:44px;display:flex;align-items:center; }
+ .drawer-toolbar { top:-16px;margin:-16px -16px 16px;padding:0 16px; }
+ .drawer .d-block-head { top:32px;margin-inline:-16px;padding-left:16px; }
+ .drawer .d-group-head { top:72px; }
+ .git-history header { padding:12px 16px;gap:12px; }
+ .history-heading { flex-basis:calc(100% - 160px); }
+ .git-history .history-heading h2 { font-size:13px; }
+ .git-history header input { flex:1;min-width:0;width:100px; }
+ .git-history header select { max-width:150px; }
+ .history-detail { width:100%;padding:20px 16px; }
+ .history-technical summary { min-height:44px;display:flex;align-items:center; }
+ .history-footer { padding:12px 16px; }
+ .history-footer-note { display:none; }
+}
+@media(prefers-reduced-motion:no-preference) {
+ .git-history .history-detail > :not(button) { animation:reading-enter 180ms var(--ease) both; }
+ .analysis:not([hidden]) .an-quest,.analysis:not([hidden]) .an-aside { animation:reading-enter 260ms var(--ease) both; }
+ .samples a:hover { transform:translateY(-2px); }
+ .samples a { transition:transform 110ms var(--ease),border-color 110ms var(--ease); }
+}
+
+.history-technical + h4 { border-top:0;padding-top:0;margin-top:16px; }
+.deep-target { border-top:1px solid var(--rule);padding-top:16px;margin-top:20px; }
+.workspace-discovery-controls .deep-target-label { font:600 11.5px/1.5 var(--sans);color:var(--ink-3);margin:0 0 4px; }
+.workspace-discovery-controls .deep-target h3 { margin:0 0 12px;font:600 16px/1.5 var(--sans);overflow-wrap:anywhere; }
+.workspace-discovery-controls .deep-target .workspace-technical { border-top:0;padding:0; }
