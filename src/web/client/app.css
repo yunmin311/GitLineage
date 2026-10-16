@@ -2862,6 +2862,7 @@ button:active { filter:brightness(.97); }
    11.5px metadata / 13px controls and body / 16px section titles. */
 .appbar #project-source { border:0;background:transparent;color:var(--ink-2);font:500 13px/1.5 var(--sans); }
 .drawer-toolbar { font:600 13px/1.5 var(--sans);letter-spacing:0; }
+.drawer .d-data { grid-template-columns:minmax(0,104px) minmax(0,1fr); }
 .drawer-toolbar .drawer-close { display:grid;place-items:center;width:32px;height:32px;padding:0;border:1px solid transparent;background:transparent;color:var(--ink-2);font:400 22px/1 var(--sans); }
 .drawer-toolbar .drawer-close:hover { background:var(--paper-deep);border-color:var(--rule); }
 .rail-reference > summary { display:flex;align-items:center;gap:8px;min-height:36px;font:600 13px/1.5 var(--sans);color:var(--ink); }

@@ -45,5 +45,14 @@ try {
  await quota.locator('.history-load button').click();
  assert.equal(await quota.locator('#git-history').count(),0,'Quota state returns to usable graph');
  await quota.close();
+ const phone=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+ await phone.goto(app.url+'/'+A);await phone.locator('#workspace-history').waitFor();
+ await phone.locator('[data-mobile-view=relations]').click();
+ await phone.locator('#mobile-relations details').evaluateAll(ns=>ns.forEach(n=>(n as HTMLDetailsElement).open=true));
+ await phone.locator('.mobile-relation-evidence').first().click();await phone.evaluate(()=>document.fonts.ready);
+ const labels=phone.locator('.d-data dt').filter({hasText:'manifest_path'});
+ assert.ok(await labels.count()>0,'Manifest evidence is displayed on phone');
+ assert.equal(await labels.evaluateAll(ns=>ns.every(n=>n.getBoundingClientRect().height<=parseFloat(getComputedStyle(n).lineHeight)+1)),true,'Manifest field label stays intact at 390px');
+ await phone.close();
  console.log('PASS immediate home, cancelled stale response, no document reload, contextual navigation');
 }finally{await browser.close();await app.cleanup();}
