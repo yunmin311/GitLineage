@@ -1590,7 +1590,7 @@ check('02 expanding reveals the held-back members',
       const groups = await scroller.evaluate(`(() => {
         const heads = [...document.querySelectorAll('.drawer-inner .d-group-head')];
         const blockHead = [...document.querySelectorAll('.drawer-inner .d-block-head')]
-          .find((h) => /RELATIONSHIPS/.test(h.textContent));
+          .find((h) => /^Relationships /i.test(h.textContent));
         return {
           block: blockHead?.textContent?.trim() ?? '',
           blockSticky: blockHead ? getComputedStyle(blockHead).position : null,
@@ -1621,9 +1621,11 @@ check('02 expanding reveals the held-back members',
       check('19 every member is reachable and counted exactly once',
         groups.rows === summed && summed === Object.keys(payloadEvidence).length,
         `${groups.rows} rows, counts sum ${summed}, ${Object.keys(payloadEvidence).length} relationships`);
-      check('19 the block heading states the same total and file count',
-        new RegExp(`^RELATIONSHIPS \\(${summed} in ${groups.groups.length} files\\)$`).test(groups.block),
-        `heading "${groups.block}" against ${summed} in ${groups.groups.length} files`);
+      // The heading now names relationships; navigation groups are not always files.
+      // Preserve independent manifest recount and row reachability checks above.
+      check('19 the block heading states the independently recounted relationship total',
+        new RegExp(`^Relationships · ${summed}$`).test(groups.block),
+        `heading "${groups.block}" against ${summed} relationships`);
       check('19 the order is the promised total order: by count, then by path',
         rendered === ordered.map((g) => `${g.name}=${g.count}`).join(', '),
         `rendered ${rendered} | sorted ${ordered.map((g) => `${g.name}=${g.count}`).join(', ')}`);
@@ -1640,7 +1642,7 @@ check('02 expanding reveals the held-back members',
       // The group heading stays put while its own list runs under it.
       const sticky = await scroller.evaluate(`(() => {
         const n = document.querySelector('.drawer-inner');
-        const list = [...n.querySelectorAll('.d-block-head')].find((h) => /RELATIONSHIPS/.test(h.textContent));
+        const list = [...n.querySelectorAll('.d-block-head')].find((h) => /^Relationships /i.test(h.textContent));
         if (!list) return null;
         const regionTop = Math.round(n.getBoundingClientRect().top);
         const at = (t) => { n.scrollTop = t; return Math.round(list.getBoundingClientRect().top - regionTop); };

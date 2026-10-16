@@ -1172,14 +1172,14 @@ function renderRail(view) {
   // Provenance: what was analysed, and by what. Real revision, real analyzer.
   const provenance = el('div', { class: 'statline' });
   provenance.append(el('b', { text: view.subject?.label ?? '' }));
-  provenance.append(el('span', {
-    class: 'k',
-    text: `${view.revision.ref || view.revision.defaultBranch || 'HEAD'} @ ${view.revision.shortCommit}`,
-  }));
-  provenance.append(el('span', {
-    class: 'k',
-    text: `analysed ${formatTime(view.revision.analyzedAt)} \u00b7 ${view.analyzer.name} ${view.analyzer.version} \u00b7 schema ${view.schemaVersion}`,
-  }));
+  const metadata=el('dl',{class:'rail-metadata'});
+  for(const [label,value] of [
+    ['Revision',`${view.revision.ref || view.revision.defaultBranch || 'HEAD'} @ ${view.revision.shortCommit}`],
+    ['Analysed',formatTime(view.revision.analyzedAt)],
+    ['Analyzer',`${view.analyzer.name} ${view.analyzer.version}`],
+    ['Schema',view.schemaVersion],
+  ]) metadata.append(el('dt',{text:label}),el('dd',{text:String(value)}));
+  provenance.append(metadata);
   block('provenance', [provenance]);
 
   // Status: the real counts, with no interpretation added to them.
@@ -1255,9 +1255,8 @@ function renderRail(view) {
     .filter((family) => !present.has(family));
   const absentBlock = [];
   if (absent.length > 0) {
-    const chips = el('div', { class: 'g-empty' });
-    for (const family of absent) chips.append(el('span', { class: 'g-chip', text: family.replace('-', ' ') }));
-    absentBlock.push(chips);
+    const names = { ancestry: 'Ancestry', dependency: 'Dependencies', attribution: 'Attribution', 'source-identity': 'Source identity' };
+    absentBlock.push(el('p', { class: 'rail-absence', text: absent.map((family) => names[family]).join(' · ') }));
     absentBlock.push(el('p', {
       class: 'rule-note',
       text: 'Not recorded in this snapshot. This does not rule out shared ancestry.',
@@ -2562,7 +2561,7 @@ function renderNodeDrawer() {
   wrap.append(el('p', { class: 'd-eyebrow', text: node.isSubject ? 'ANALYSED REPOSITORY' : node.type.toUpperCase() }));
   wrap.append(el('p', { class: 'd-head', text: node.label }));
   const technical=el('details',{class:'workspace-technical'});technical.append(el('summary',{text:'Technical identity'}),el('p',{class:'mono',text:node.id}),el('p',{class:'d-sub',text:node.isSubject?'Analysed repository':'Related '+node.type.toLowerCase()}));
-  const hierarchy=el('div',{class:'d-hierarchy'});hierarchy.append(el('p',{class:'d-block-head',text:'EXPLORATION PATH'}));
+  const hierarchy=el('div',{class:'d-hierarchy'});hierarchy.append(el('p',{class:'d-block-head',text:'Exploration path'}));
   const path=el('ol');path.append(el('li',{text:view.subject.label}));
   const plate=state.composition?.plates.find(p=>p.memberEdgeIds.some(id=>{const e=view.edges.find(e=>e.id===id);return e&&(e.source===node.id||e.target===node.id);}));
   if(plate&&!node.isSubject){
@@ -2601,12 +2600,12 @@ function renderNodeDrawer() {
   const relBlock = el('div', { class: 'd-block' });
   relBlock.append(el('p', {
     class: 'd-block-head',
-    text: `RELATIONSHIPS (${related.length} in ${groups.length} ${groups.length === 1 ? 'file' : 'files'})`,
+    text: `Relationships · ${related.length}`,
   }));
   if (groups.length === 0) {
     relBlock.append(el('p', { class: 'node-detail', text: 'No one-hop relationship in this view.' }));
   }
-  if(groups.length) relBlock.append(el('p',{class:'d-basis',text:'Navigation groups, not repository relationships.'}));
+  if(groups.length) relBlock.append(el('p',{class:'d-basis',text:groups.length+' '+(groups.length===1?'evidence group':'evidence groups')+' · grouped for navigation only.'}));
   for (const group of groups) {
     const section = el('details', { class: 'd-group' });
     section.open = groups.length === 1 || group === groups[0];

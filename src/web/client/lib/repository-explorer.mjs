@@ -411,7 +411,8 @@ function mountRepositoryExplorer(getRepository, deep, bridge) {
       host.prepend(tools);
       tools.append(discovery);
     }
-    path.replaceChildren(btn("workspace-back", "Back", back));
+    const previousPath=path.textContent;
+    path.replaceChildren(btn("workspace-back", "Back one step", back));
     path.firstChild.disabled = !history.length;
     path.firstChild.prepend(icon("back"));
     path.append(btn("", root, returnRoot));
@@ -420,6 +421,8 @@ function mountRepositoryExplorer(getRepository, deep, bridge) {
       if (n && id !== rootId()) path.append(btn("", n.label, () => focus(id)));
     }
     path.lastElementChild?.setAttribute("aria-current", "location");
+    if(previousPath!==path.textContent&&!matchMedia('(prefers-reduced-motion: reduce)').matches)
+      path.animate([{opacity:.5,transform:'translateY(6px)'},{opacity:1,transform:'translateY(0)'}],{duration:220,easing:'cubic-bezier(.22,.61,.36,1)'});
     layers.replaceChildren();
     for (const [k, label] of kinds) {
       const b = btn("", label, () => {

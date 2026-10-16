@@ -19,21 +19,24 @@ export function openGitLog(task,{close,more,exploreFile,loading=false,error,retr
  for(const [n]of main.historyInert)n.inert=true;
  main.append(host);document.body.classList.add('history-open');
  const leave=()=>{dismissGitLog();close();};
- const header=make('header');const back=button('← Repository graph',leave);back.id='history-return';const heading=make('div',undefined,'history-heading');heading.append(make('p','Repository history','history-kicker'),make('h2',task.repository));header.append(back,heading);host.append(header);
+ const header=make('header');const back=button('← Repository graph',leave);back.id='history-return';const heading=make('div',undefined,'history-heading');heading.append(make('p','Repository history','history-kicker'),make('h2',task.repository));header.append(heading,back);host.append(header);
  if(loading||error){
   host.setAttribute('aria-busy',String(loading));
-  const panel=make('div',undefined,'history-load');
+  const panel=make('div',undefined,'history-load'+(loading?' is-pending':''));
   panel.setAttribute('role',loading?'status':'alert');
   const message=typeof error==='string'?error:error?.message;
   const quota=error?.status===429||/quota exhausted/i.test(message||'');
   const reset=(message||'').match(/resets?\s+(\d{4}-\d{2}-\d{2}T[\d:.]+Z)/i)?.[1];
-  const mark=make('span',loading?'↻':quota?'◷':'!','history-state-mark');mark.setAttribute('aria-hidden','true');panel.append(mark);
+  const mark=make('span',loading?'Reading history':quota?'Request allowance':'History unavailable','history-state-mark');panel.append(mark);
   panel.append(make('p',loading?'Reading recorded commits':quota?'Anonymous limit reached':'History could not be loaded','history-load-title'));
-  const explanation=quota?(reset?'History requests become available '+new Date(reset).toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'})+'. Your graph is still available.':'The anonymous request allowance is exhausted. Return to your graph and try later.'):message||'Fetching the repository’s commit objects and parent links. You can return to your graph at any time.';
+  const bounded=/response_bytes_exhausted|attempts_exhausted|deadline_exceeded/.test(message||'');
+  const explanation=quota?(reset?'History requests become available '+new Date(reset).toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'})+'. Your graph is still available.':'The anonymous request allowance is exhausted. Return to your graph and try later.'):bounded?'This history read reached its request limit. No commits were inferred. Your repository graph is still available.':message||'Reading recorded commits and their parent links. Your graph stays available while this request runs.';
   panel.append(make('p',explanation,'history-load-message'));
-  if(loading){const tracks=make('div',undefined,'history-pending-tracks');tracks.setAttribute('aria-hidden','true');for(let i=0;i<3;i++)tracks.append(make('span'));panel.append(tracks);}
+  if(bounded){const details=make('details',undefined,'history-error-details');details.append(make('summary','Technical reason'),make('code',message));panel.append(details);}
+  if(loading){const tracks=make('div',undefined,'history-pending-tracks');tracks.setAttribute('aria-hidden','true');
+   for(let i=0;i<6;i++){const row=make('div',undefined,'history-pending-row');row.style.setProperty('--gl-history-row',i);row.append(make('i'),make('span',undefined,'pending-message'),make('span',undefined,'pending-meta'));tracks.append(row);}panel.append(tracks);}
   if(retry&&!quota){const action=button('Try again',retry);action.id='history-retry';panel.append(action);}
-  if(quota){const action=button('Return to graph',leave);panel.append(action);}
+  if(error){const actions=make('div',undefined,'history-state-actions');const retryButton=panel.querySelector('#history-retry');if(retryButton)actions.append(retryButton);actions.append(button('Return to graph',leave));panel.append(actions);}
   host.append(panel);back.focus();return host;
  }
  const search=make('input');search.name='history-search';search.autocomplete='off';search.spellcheck=false;search.value=priorQuery;search.placeholder='Find message, author or SHA…';search.setAttribute('aria-label','Search Git history');
