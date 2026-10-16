@@ -166,20 +166,20 @@ export const ANALYSIS_FSM_TEXT = Object.freeze({
   queued: {
     key: 'queued',
     title: 'Waiting for an analysis slot',
-    sub: 'the job is accepted \u00b7 it has not entered phase 1 yet',
-    verb: 'The analysis is queued behind the concurrency cap. It has not begun resolving the repository, so no phase is current.',
+    sub: 'Your request is accepted. Analysis will begin when a slot opens.',
+    verb: 'You can return home while this request waits. No evidence has been collected yet.',
   },
   complete: {
     key: 'terminal state \u00b7 complete',
     title: 'Analysis complete',
     sub: 'graph.json validated against schema 2.0.0',
-    verb: 'The job reached its terminal complete state. This is a job FSM state, not one of the five running phases.',
+    verb: 'The graph is ready. Open relationships to inspect their evidence, or explore the repository’s Git history.',
   },
   failed: {
     key: 'terminal state \u00b7 failed',
     title: 'Analysis failed',
     sub: 'the job did not complete',
-    verb: 'The job reached its terminal failed state. This is a job FSM state, not one of the five running phases.',
+    verb: 'The analysis stopped before a graph was ready. Review the error message before trying again.',
   },
 });
 

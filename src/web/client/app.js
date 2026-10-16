@@ -383,7 +383,8 @@ function renderAnalysis(status, jobId) {
   $('an-repo').textContent = repository;
 
   const running = RUNNING_PHASES.indexOf(status);
-  if (root.dataset.phase !== status) {
+  const phaseChanged = root.dataset.phase !== status;
+  if (phaseChanged) {
     root.dataset.phase = status;
     const object = root.querySelector('.an-obj');
     if (object && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -434,6 +435,8 @@ function renderAnalysis(status, jobId) {
   const n = RUNNING_PHASES.length;
   const labels = $('an-plabels');
   const svg = $('an-svg');
+  // Polls refresh source facts, but must not restart the visible phase entrance.
+  if (!phaseChanged && labels.childElementCount === n) { state.phase = status; return; }
   /*
    * How much of the path is behind us.
    *
@@ -452,8 +455,7 @@ function renderAnalysis(status, jobId) {
    * A bare `1fr` floors each track at its `min-content` width, which is as wide as the
    * longest unbreakable word in the phase name. At 390px that made every track wider than
    * its share of the row, so the five labels overflowed and overlapped each other instead
-   * of ellipsing inside their own columns. The zero minimum is what lets `text-overflow`
-   * do its job.
+   * of fitting inside their own columns. Mobile uses shorter names within the same tracks.
    */
   labels.style.gridTemplateColumns = `repeat(${n}, minmax(0, 1fr))`;
   labels.replaceChildren();
@@ -464,16 +466,16 @@ function renderAnalysis(status, jobId) {
     labels.append(el('div', {
       class: ['an-plabel', done ? 'is-done' : '', now ? 'is-now' : ''].filter(Boolean).join(' '),
       'data-phase': phase,
-      // The full name stays reachable when the visible label is reduced to its ordinal
-      // on a narrow screen, so the axis is never five anonymous numbers.
+      // Mobile uses a short name; assistive technology retains the full phase name.
       'aria-label': `${at + 1} of ${RUNNING_PHASES.length}. ${ANALYSIS_PHASE_TEXT[phase].t}`,
     }, [
       el('span', { class: 'n', text: String(at + 1) }),
       el('span', { class: 't', text: ANALYSIS_PHASE_TEXT[phase].t }),
+      el('span', { class: 't-short', 'aria-hidden': 'true', text: ['Resolve', 'Collect', 'Connect', 'Check', 'Publish'][at] }),
     ]));
   }
 
-  const W = 1000; const pad = 20; const gap = 12; const y = 26;
+  const W = 1000; const pad = 0; const gap = 20; const y = 26;
   const segW = (W - pad * 2 - gap * (n - 1)) / n;
   const nodes = [];
   for (let i = 0; i < n; i += 1) {
@@ -2605,12 +2607,12 @@ function renderNodeDrawer() {
   if (groups.length === 0) {
     relBlock.append(el('p', { class: 'node-detail', text: 'No one-hop relationship in this view.' }));
   }
-  if(groups.length) relBlock.append(el('p',{class:'d-basis',text:groups.length+' '+(groups.length===1?'evidence group':'evidence groups')+' · grouped for navigation only.'}));
+  if(groups.length) relBlock.append(el('p',{class:'d-basis',text:groups.length+' '+(groups.length===1?'navigation group':'navigation groups')+' · open a relationship to read its evidence.'}));
   for (const group of groups) {
     const section = el('details', { class: 'd-group' });
     section.open = groups.length === 1 || group === groups[0];
     section.append(el('summary', { class: 'd-group-head' }, [
-      el('span', { class: 'mono', text: group.manifest ? group.key : `${group.key} · no manifest` }),
+      el('span', { class: group.manifest ? 'mono d-group-name' : 'd-group-name', text: group.manifest ? group.key : ({references:'References', depends_on:'Dependencies', forked_from:'Fork source', derived_from:'Derived from', shares_history_with:'Shared Git history', shares_exact_content_with:'Identical content'})[group.key] || group.key.replaceAll('_', ' ') }),
       el('span', { class: 'd-group-count r-mono', text: String(group.members.length) }),
     ]));
     const appendRow=(host,edge)=>{const other=edge.source===node.id?edge.target:edge.source;const row=el('button',{class:'bundle-row'});row.append(el('span',{class:'relationship-object',text:nameOf(other)}),el('span',{class:'relationship-kind',text:edge.label}));row.addEventListener('click',()=>{state.selectedNodeId='';selectEdge(edge.id);});host.append(row);};
