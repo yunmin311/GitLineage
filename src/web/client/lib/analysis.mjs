@@ -134,13 +134,13 @@ export const ANALYSIS_PHASE_TEXT = Object.freeze({
     k: 'collecting',
     t: 'Collecting evidence',
     s: 'manifests \u00b7 documents \u00b7 submodules \u00b7 history \u00b7 blobs',
-    v: 'Reading the evidence sources available in this repository. This phase does not report sub-progress, because the contract has no event for it.',
+    v: 'Reading manifests, documents and Git objects. The next step begins when collection finishes.',
   },
   resolving_relationships: {
     k: 'resolving_relationships',
     t: 'Resolving relationships',
     s: 'evidence records \u2192 canonical relationship types',
-    v: 'Each collected record is resolved against the ontology into one of ten canonical relationship types.',
+    v: 'Separating origins, dependencies and references, with a source record for every relationship.',
   },
   validating: {
     k: 'validating',

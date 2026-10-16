@@ -1,3 +1,11 @@
+// Dismiss without restoring a camera when navigating away from this repository.
+export function dismissGitLog(){
+ const main=document.querySelector('#explorer');
+ document.querySelector('#git-history')?.remove();
+ for(const [node,was] of main?.historyInert||[])node.inert=was;
+ if(main)delete main.historyInert;
+ document.body.classList.remove('history-open');
+}
 // Independent Git log. Edges are only recorded child -> parent SHA pairs.
 export function openGitLog(task,{close,more,exploreFile,loading=false,error,retry}){
  const prior=document.querySelector('#git-history'),priorScroll=prior?.querySelector('.history-list')?.scrollTop||0,priorSha=prior?.querySelector('.history-row.is-selected')?.dataset.sha;
@@ -10,14 +18,22 @@ export function openGitLog(task,{close,more,exploreFile,loading=false,error,retr
  if(!main.historyInert)main.historyInert=[...main.children].map(n=>[n,n.inert]);
  for(const [n]of main.historyInert)n.inert=true;
  main.append(host);document.body.classList.add('history-open');
- const leave=()=>{host.remove();for(const [n,was]of main.historyInert||[])n.inert=was;delete main.historyInert;document.body.classList.remove('history-open');close();};
+ const leave=()=>{dismissGitLog();close();};
  const header=make('header');const back=button('← Repository graph',leave);back.id='history-return';const heading=make('div',undefined,'history-heading');heading.append(make('p','Repository history','history-kicker'),make('h2',task.repository));header.append(back,heading);host.append(header);
  if(loading||error){
   host.setAttribute('aria-busy',String(loading));
   const panel=make('div',undefined,'history-load');
   panel.setAttribute('role',loading?'status':'alert');
-  panel.append(make('p',loading?'Reading Git history…':'History could not be loaded','history-load-title'),make('p',error||'Resolving the repository and reading a bounded set of verified commit objects. You can return to the graph while this finishes.','history-load-message'));
-  if(retry){const action=button('Try again',retry);action.id='history-retry';panel.append(action);}
+  const message=typeof error==='string'?error:error?.message;
+  const quota=error?.status===429||/quota exhausted/i.test(message||'');
+  const reset=(message||'').match(/resets?\s+(\d{4}-\d{2}-\d{2}T[\d:.]+Z)/i)?.[1];
+  const mark=make('span',loading?'↻':quota?'◷':'!','history-state-mark');mark.setAttribute('aria-hidden','true');panel.append(mark);
+  panel.append(make('p',loading?'Reading recorded commits':quota?'Anonymous limit reached':'History could not be loaded','history-load-title'));
+  const explanation=quota?(reset?'History requests become available '+new Date(reset).toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'})+'. Your graph is still available.':'The anonymous request allowance is exhausted. Return to your graph and try later.'):message||'Fetching the repository’s commit objects and parent links. You can return to your graph at any time.';
+  panel.append(make('p',explanation,'history-load-message'));
+  if(loading){const tracks=make('div',undefined,'history-pending-tracks');tracks.setAttribute('aria-hidden','true');for(let i=0;i<3;i++)tracks.append(make('span'));panel.append(tracks);}
+  if(retry&&!quota){const action=button('Try again',retry);action.id='history-retry';panel.append(action);}
+  if(quota){const action=button('Return to graph',leave);panel.append(action);}
   host.append(panel);back.focus();return host;
  }
  const search=make('input');search.name='history-search';search.autocomplete='off';search.spellcheck=false;search.value=priorQuery;search.placeholder='Find message, author or SHA…';search.setAttribute('aria-label','Search Git history');

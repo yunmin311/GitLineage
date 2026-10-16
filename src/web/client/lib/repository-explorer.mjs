@@ -199,7 +199,7 @@ function mountRepositoryExplorer(getRepository, deep, bridge) {
   async function request(suffix, data) {
     const response = await fetch("/api/explore" + suffix, data === void 0 ? { signal: AbortSignal.timeout(35000) } : { signal: AbortSignal.timeout(35000), method: "POST", headers: { "content-type": "application/json", "x-gitlineage-csrf": "1" }, body: JSON.stringify(data) });
     const value = await response.json();
-    if (!response.ok) throw new Error(value.error || "Exploration unavailable");
+    if (!response.ok) throw Object.assign(new Error(typeof value.error === "string" ? value.error : value.error?.message || "Exploration unavailable"), {status:response.status});
     return value;
   }
   async function operate(fn) {
@@ -317,7 +317,7 @@ function mountRepositoryExplorer(getRepository, deep, bridge) {
         if (!task.commits.length && task.error) throw new Error(task.error);
         show(task); save();
       } catch (error) {
-        if (current()) host = openGitLog({ repository: repo }, { close, error: error.message, retry: load });
+        if (current()) host = openGitLog({ repository: repo }, { close, error, retry: load });
       }
     };
     void load();

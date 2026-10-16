@@ -280,9 +280,11 @@ test('the tracer uses no gradient, blur, glow or looping animation', () => {
   assert.equal(/filter:\s*blur/.test(declared), false, 'no blur');
   // Entry transitions complement the tracer; neither is a looping decoration.
   const animations = declared.match(/@keyframes\s+([\w-]+)/g) ?? [];
-  assert.deepEqual(animations, ['@keyframes tracer-arrive', '@keyframes reading-enter']);
+  assert.deepEqual(animations, ['@keyframes tracer-arrive', '@keyframes reading-enter', '@keyframes history-read', '@keyframes history-breathe']);
   assert.match(declared, /@media\(prefers-reduced-motion:no-preference\)\s*\{[\s\S]*@keyframes reading-enter/, 'entry animation is opt-in when motion is allowed');
-  assert.equal(/animation:\s*[^;]*infinite/.test(declared), false, 'nothing loops');
+  // History uses an indeterminate activity indicator; the graph tracer still never loops.
+  const loops = [...declared.matchAll(/([^{}]+)\{[^{}]*animation:\s*[^;{}]*infinite[^{}]*\}/g)].map(m => m[1]!.trim());
+  assert.deepEqual(loops, ['.git-history[aria-busy=true] .history-state-mark', '.history-pending-tracks span'], 'only pending History indicators may loop');
   // The tracer is the one brand mark. Frozen V3.3 renamed this token from `--accent` to
   // `--brand`: it was green, which made "what is this analysis doing right now" compete
   // for the reader's attention with the three evidence-status hues. Mineral blue is now

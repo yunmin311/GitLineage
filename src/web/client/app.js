@@ -1,3 +1,4 @@
+import {dismissGitLog} from './lib/git-log.mjs';
 import {connectionFallback} from './lib/connection-fallback.mjs';
 import {classifyRelationships} from './lib/classification.mjs';
 import {spatialLayout, spatialExpansion, spatialRoute, ORIGIN} from './lib/spatial.mjs';
@@ -102,9 +103,20 @@ const LABEL_FAN_LIMIT = 2;
 const LABEL_DEGREE_LIMIT = 4;
 
 let workspace = null;
+let loadController = null;
+function cancelLoad() {
+  state.loadToken += 1;
+  loadController?.abort();
+  loadController = null;
+  if (state.pollTimer) clearTimeout(state.pollTimer);
+}
+function observationSignal() {
+  return AbortSignal.any([loadController.signal, AbortSignal.timeout(20000)]);
+}
 const state = {
   repository: null,
   view: null,
+  viewRepository: null,
   graph: null,
   meta: null,
   selectedEdgeId: '',
@@ -249,6 +261,7 @@ function navigate(repository, push = true) {
  * this only prepares the frame.
  */
 function showWorking() {
+  setHidden($('rail-toggle'), true);
   panels = initialPanels(window.innerWidth);
   applyPanels();
   // The landing is left behind as soon as a repository route is resolved, so the
@@ -634,6 +647,9 @@ function setChrome(label) {
  */
 async function load() {
   if (!state.repository) return;
+  cancelLoad();
+  dismissGitLog();
+  loadController = new AbortController();
   readUrlState();
   showWorking();
   state.phase = 'starting';
@@ -643,7 +659,7 @@ async function load() {
   const stale = () => token !== state.loadToken;
 
   const repo = state.repository;
-  const fetchOptions = { headers: { accept: 'application/json' } };
+  const fetchOptions = { headers: { accept: 'application/json' }, signal: observationSignal() };
 
   // Step 1: ask for the analysis. Cheap when it is already cached.
   let start;
@@ -692,13 +708,13 @@ async function load() {
 const VIEW_RETRY_DELAY_MS = 1500;
 
 /** Fetches the completed view-model for the current repository. */
-async function fetchView(token) {
+async function fetchView(token, attempt = 0) {
   if (token !== state.loadToken || !state.repository) return;
   const repo = state.repository;
   let viewEnvelope;
   try {
     const response = await fetch(`/api/view/${repo.owner}/${repo.name}?depth=${state.depth}`, {
-      headers: { accept: 'application/json' },
+      headers: { accept: 'application/json' }, signal: observationSignal(),
     });
     viewEnvelope = await response.json();
     if (!response.ok || !viewEnvelope.ok) {
@@ -714,15 +730,16 @@ async function fetchView(token) {
     if (token !== state.loadToken) return;
     // The job said complete but the artifact is not readable yet: a short
     // retry, not a failure.
-    if (error?.pending || error?.status === 202) {
+    if ((error?.pending || error?.status === 202) && attempt < 8) {
       await sleep(error?.retryAfterMs ?? VIEW_RETRY_DELAY_MS);
-      if (token === state.loadToken) await fetchView(token);
+      if (token === state.loadToken) await fetchView(token, attempt + 1);
       return;
     }
     hideWorking();
     showFailure(error);
     return;
   }
+  if (token !== state.loadToken) return;
   applyView(viewEnvelope);
 }
 
@@ -732,14 +749,15 @@ async function fetchView(token) {
  * Backoff is bounded by `nextDelayMs`, and polling stops on any phase this client
  * does not recognise, so it cannot spin forever.
  */
-async function pollJob(job, elapsed, stale) {
+async function pollJob(job, elapsed, stale, failures = 0) {
   if (stale()) return;
   const { jobId, statusUrl, retryAfterMs } = job;
   state.job = { jobId, statusUrl };
 
   let status;
   try {
-    const response = await fetch(statusUrl, { headers: { accept: 'application/json' } });
+    const response = await fetch(statusUrl, { headers: { accept: 'application/json' }, signal: observationSignal() });
+    if (stale()) return;
     if (response.status === 404) {
       hideWorking();
       showFailure({ message: 'the analysis job is no longer known to the server', retryable: true });
@@ -748,13 +766,19 @@ async function pollJob(job, elapsed, stale) {
     status = parseJob(await response.json());
   } catch (error) {
     if (stale()) return;
-    // A transient poll failure is retried rather than surfaced.
+    if (failures >= 2) {
+      hideWorking();
+      showFailure({ message: "The connection was interrupted. Your analysis may still be running; retry to reconnect.", retryable: true });
+      return;
+    }
+    // Retry transient observation failures without restarting the server job.
     const wait = nextDelayMs(retryAfterMs, elapsed);
     await sleep(wait);
-    if (!stale()) await pollJob(job, elapsed + wait, stale);
+    if (!stale()) await pollJob(job, elapsed + wait, stale, failures + 1);
     return;
   }
 
+  if (stale()) return;
   // An unrecognised shape stops the loop: better a clear error than an endless poll.
   if (!status) {
     hideWorking();
@@ -795,6 +819,7 @@ function sleep(ms) {
 
 /** Renders a completed view-model. */
 function applyView(viewEnvelope) {
+  setHidden($('rail-toggle'), false);
 
   const view = viewEnvelope.data;
   const meta = viewEnvelope.meta || {};
@@ -807,6 +832,7 @@ function applyView(viewEnvelope) {
   state.graph = null;
 
   state.view = view;
+  state.viewRepository = { ...state.repository };
   state.meta = meta;
   state.cacheHit = meta.cacheHit === true;
   state.resolvedRevision = meta.resolvedRevision || view.revision.commit;
@@ -1234,7 +1260,7 @@ function renderRail(view) {
     absentBlock.push(chips);
     absentBlock.push(el('p', {
       class: 'rule-note',
-      text: 'This analysis records none of these relationships. Absence of a record does not prove absence of ancestry.',
+      text: 'Not recorded in this snapshot. This does not rule out shared ancestry.',
     }));
   } else {
     absentBlock.push(el('p', {
@@ -2254,7 +2280,7 @@ function renderDrawer() {
     type: 'button',
     title: 'Close (Esc)',
     'aria-label': 'Close evidence drawer',
-    text: 'Esc',
+    text: '×',
     onclick: closeDrawer,
   });
   const block = el('div');
@@ -2857,6 +2883,12 @@ function fit() {
 // --------------------------------------------------------------------- boot
 
 function showLanding() {
+  cancelLoad();
+  dismissGitLog();
+  hideWorking();
+  state.phase = 'idle';
+  setHidden($('failure'), true);
+  setHidden($('rail-toggle'), true);
   setHidden($('landing'), false);
   setHidden($('explorer'), true);
   setHidden($('appbar-mid'), true);
@@ -2868,6 +2900,14 @@ function showLanding() {
 }
 
 function boot() {
+  document.addEventListener('click', event => {
+    const link = event.target.closest('a.brand, .samples a');
+    if (!link || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    const repository = parseRepositoryPath(new URL(link.href).pathname);
+    if (repository) navigate(repository);
+    else { history.pushState(null, '', '/'); showLanding(); }
+  });
   mobile.view = new URLSearchParams(location.search).get('mobile') || 'graph';
   setupViewport();
   for (const button of document.querySelectorAll('#mobile-nav [data-mobile-view]')) button.addEventListener('click', () => switchMobile(button.dataset.mobileView));
@@ -2991,7 +3031,8 @@ $('layers-btn').addEventListener('click', () => toggleLayers());
 
   window.addEventListener('popstate', () => {
     const repository = parseRepositoryPath(window.location.pathname);
-    if (repository && state.view && repository.owner.toLowerCase() === state.repository.owner.toLowerCase() && repository.name.toLowerCase() === state.repository.name.toLowerCase()) {
+    if (repository && state.view && state.phase !== 'starting' && $('analysis').hidden && repository.owner.toLowerCase() === state.viewRepository?.owner.toLowerCase() && repository.name.toLowerCase() === state.viewRepository?.name.toLowerCase()) {
+      state.repository = repository;
       const old = state.selectedEdgeId + state.selectedNodeId;
       const oldDepth = state.depth;
       state.depth = 200;
@@ -2999,6 +3040,9 @@ $('layers-btn').addEventListener('click', () => toggleLayers());
       mobile.view = new URLSearchParams(location.search).get('mobile') || 'graph';
       mobile.previous = history.state?.previous || 'graph';
       if (state.depth !== oldDepth) { state.refitPending = true; void load(); return; }
+      setHidden($('landing'), true);
+      setHidden($('explorer'), false);
+      setHidden($('rail-toggle'), false);
       renderChrome(state.view);
       draw();
       if (old !== state.selectedEdgeId + state.selectedNodeId) renderDrawer();
