@@ -67,6 +67,7 @@ for (const [label, width, height] of [['1920x1080', 1920, 1080], ['1280x800', 12
       legends: document.querySelectorAll('.input-card .st').length,
       depth: document.querySelectorAll('.seg-btn').length,
       samples: document.querySelectorAll('.samples a').length,
+      maintainerOnly: [...document.querySelectorAll('.samples a')].every(a => a.getAttribute('href').startsWith('/yunmin311/')),
       proofCols: document.querySelectorAll('.trust-cell').length,
       footRule: getComputedStyle(q('.site-foot')).borderTopWidth,
       deadLinks: [...document.querySelectorAll('#landing a')]
@@ -85,8 +86,8 @@ for (const [label, width, height] of [['1920x1080', 1920, 1080], ['1280x800', 12
       && (state.underprintOffset as { x: number; y: number }).y === 6,
     JSON.stringify(state.underprintOffset));
   check(`[${label}] the headline is two explicit lines`, state.lines === 2, `${state.lines}`);
-  check(`[${label}] the evidence legend, depth control and five examples are present`,
-    state.legends === 3 && state.depth === 3 && state.samples === 5,
+  check(`[${label}] the evidence legend, depth control and maintainer examples are present`,
+    state.legends === 3 && state.depth === 3 && state.samples === 2 && state.maintainerOnly === true,
     `${state.legends} chips, ${state.depth} depth, ${state.samples} samples`);
   check(`[${label}] the proof block is three columns and the footer rule is strong`,
     state.proofCols === 3 && state.footRule === '2px', `${state.proofCols} cells, rule ${state.footRule}`);

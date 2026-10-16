@@ -193,33 +193,28 @@
         </div>
       </form>
 
-      <!--
-        The one set of real counts on this page. Kuddev/pebrel is named with the revision
-        it was measured at, so the numbers can be checked and go stale visibly rather
-        than quietly. Nothing here is invented: these are analyser output.
-      -->
       <div class="hero-trace">
         <div class="hero-trace-node">
           <span class="hero-trace-mark" aria-hidden="true"></span>
           <p class="hero-trace-stage">source</p>
-          <p class="hero-trace-value">98 entities</p>
+          <p class="hero-trace-value">Repository identity</p>
         </div>
         <div class="hero-trace-node">
           <span class="hero-trace-mark" aria-hidden="true"></span>
           <p class="hero-trace-stage">evidence</p>
-          <p class="hero-trace-value">137 manifest records</p>
+          <p class="hero-trace-value">Verifiable records</p>
         </div>
         <div class="hero-trace-node">
           <span class="hero-trace-mark" aria-hidden="true"></span>
           <p class="hero-trace-stage">relationship</p>
-          <p class="hero-trace-value">97 dependencies</p>
+          <p class="hero-trace-value">Typed connections</p>
         </div>
         <div class="hero-trace-node">
           <span class="hero-trace-mark" aria-hidden="true"></span>
           <p class="hero-trace-stage">ancestry evidence</p>
-          <p class="hero-trace-value">None recorded</p>
+          <p class="hero-trace-value">Only when evidenced</p>
         </div>
-        <p class="hero-trace-note">Example trace &middot; Kuddev/pebrel &middot; rev 51514bd</p>
+        <p class="hero-trace-note">How analysis works &middot; each connection leads back to its evidence</p>
       </div>
 
       <p class="foot">
@@ -229,15 +224,12 @@
       </p>
 
       <!--
-        The four long-term acceptance datasets, plus GitLineage itself as the self case.
+        Public examples are limited to the maintainer’s own projects. Offline test fixtures remain separate.
         Real routes: each one is analysed on request and cached.
       -->
       <div class="samples">
         <span class="samples-lab">Try</span>
         <a href="/yunmin311/GitLineage">yunmin311/GitLineage</a>
-        <a href="/Kuddev/pebrel">Kuddev/pebrel</a>
-        <a href="/grpc/grpc">grpc/grpc</a>
-        <a href="/nachocebey/is">nachocebey/is</a>
         <a href="/yunmin311/obsidian-config">yunmin311/obsidian-config</a>
       </div>
 

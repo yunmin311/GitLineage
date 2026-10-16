@@ -225,7 +225,8 @@ const exampleHrefs = await landingPage.evaluate(
 ) as string[];
 await landingPage.close();
 
-check('the landing offers examples', exampleHrefs.length >= 4,
+// Public examples are deliberately limited to the owner's projects.
+check('the landing offers owned examples', exampleHrefs.length === 2 && exampleHrefs.every((href) => href.startsWith('/yunmin311/')),
   `${exampleHrefs.length} examples: ${exampleHrefs.join(' ')}`);
 
 for (const href of exampleHrefs) {

@@ -1,5 +1,5 @@
 // Independent Git log. Edges are only recorded child -> parent SHA pairs.
-export function openGitLog(task,{close,more,exploreFile}){
+export function openGitLog(task,{close,more,exploreFile,loading=false,error,retry}){
  const prior=document.querySelector('#git-history'),priorScroll=prior?.querySelector('.history-list')?.scrollTop||0,priorSha=prior?.querySelector('.history-row.is-selected')?.dataset.sha;
  const priorQuery=prior?.querySelector('input')?.value||'',priorBranch=prior?.querySelector('select')?.value;
  prior?.remove();
@@ -11,11 +11,19 @@ export function openGitLog(task,{close,more,exploreFile}){
  for(const [n]of main.historyInert)n.inert=true;
  main.append(host);document.body.classList.add('history-open');
  const leave=()=>{host.remove();for(const [n,was]of main.historyInert||[])n.inert=was;delete main.historyInert;document.body.classList.remove('history-open');close();};
- const header=make('header');const back=button('← Repository graph',leave);back.id='history-return';const heading=make('div',undefined,'history-heading');heading.append(make('p','Repository history','history-kicker'),make('h2',task.repository+' · Git history'));header.append(back,heading);
+ const header=make('header');const back=button('← Repository graph',leave);back.id='history-return';const heading=make('div',undefined,'history-heading');heading.append(make('p','Repository history','history-kicker'),make('h2',task.repository));header.append(back,heading);host.append(header);
+ if(loading||error){
+  host.setAttribute('aria-busy',String(loading));
+  const panel=make('div',undefined,'history-load');
+  panel.setAttribute('role',loading?'status':'alert');
+  panel.append(make('p',loading?'Reading Git history…':'History could not be loaded','history-load-title'),make('p',error||'Resolving the repository and reading a bounded set of verified commit objects. You can return to the graph while this finishes.','history-load-message'));
+  if(retry){const action=button('Try again',retry);action.id='history-retry';panel.append(action);}
+  host.append(panel);back.focus();return host;
+ }
  const search=make('input');search.name='history-search';search.autocomplete='off';search.spellcheck=false;search.value=priorQuery;search.placeholder='Find message, author or SHA…';search.setAttribute('aria-label','Search Git history');
  const filter=make('select');filter.setAttribute('aria-label','Highlight branch');filter.append(make('option','All branches'));for(const b of task.branches){const o=make('option',b.name);o.value=b.sha;filter.append(o);}
  if(priorBranch&&[...filter.options].some(o=>o.value===priorBranch))filter.value=priorBranch;header.append(search,filter);host.append(header);
- const coverage=make('p',`${task.commits.length} recorded commits · lines connect actual parents · unopened history remains unknown`,'history-coverage');host.append(coverage);
+ const coverage=make('p',`${task.commits.length} recorded commits · lines connect actual parents · unopened history remains unknown`,'history-coverage');host.append(coverage);if(task.error){const warning=make('p',task.error,'history-warning');warning.setAttribute('role','status');host.append(warning);}
  const body=make('div',undefined,'history-body'),list=make('div',undefined,'history-list'),detail=make('aside',undefined,'history-detail');body.append(list,detail);host.append(body);
  // Topological order, preserving provider order for independent tips.
  const bySha=new Map(task.commits.map(c=>[c.sha,c])),children=new Map(task.commits.map(c=>[c.sha,0]));
@@ -41,7 +49,11 @@ export function openGitLog(task,{close,more,exploreFile}){
  const update=()=>{const reachable=new Set(),todo=filter.selectedIndex?[filter.value]:[];while(todo.length){const id=todo.pop();if(reachable.has(id))continue;reachable.add(id);todo.push(...(bySha.get(id)?.parents||[]));}for(const row of rows.children){const c=bySha.get(row.dataset.sha),match=[c.message,c.author,c.sha].join(' ').toLowerCase().includes(search.value.toLowerCase());row.classList.toggle('is-muted',!match||(filter.selectedIndex&&!reachable.has(c.sha)));}};
  search.oninput=update;filter.onchange=update;update();
  search.onkeydown=e=>{if(e.key==='Enter'){const row=[...rows.children].find(r=>!r.classList.contains('is-muted'));if(row){row.scrollIntoView({block:'center'});select(bySha.get(row.dataset.sha));}}};
- if(task.coverage.pendingParents.length){const footer=make('footer',undefined,'history-footer'),b=button('Read earlier commits',more);b.id='history-more';footer.append(b,make('span','Continue along recorded parent links','history-footer-note'));host.append(footer);}
- if(ordered.length)select(bySha.get(priorSha)||ordered[0]);host.classList.remove('show-commit');list.scrollTop=priorScroll;if(!prior)back.focus();
+ if(task.coverage.pendingParents.length){const footer=make('footer',undefined,'history-footer'),b=button('Read earlier commits',async()=>{
+   b.disabled=true;b.textContent='Reading earlier commits…';note.textContent='Following recorded parent links…';
+   try{await more();}catch(error){if(host.isConnected)note.textContent=error.message;}
+   finally{if(host.isConnected){b.disabled=false;b.textContent='Read earlier commits';}}
+  }),note=make('span','Continue along recorded parent links','history-footer-note');note.setAttribute('role','status');b.id='history-more';footer.append(b,note);host.append(footer);}
+ if(!ordered.length){list.append(make('p','No commit objects are available in this snapshot. Return to the graph or retry from the repository.','history-empty'));}if(ordered.length)select(bySha.get(priorSha)||ordered[0]);host.classList.remove('show-commit');list.scrollTop=priorScroll;if(!prior)back.focus();
  return host;
 }

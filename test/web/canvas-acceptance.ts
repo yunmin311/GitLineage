@@ -1056,7 +1056,7 @@ check('02 expanding reveals the held-back members',
     }));
     report['10-shell'] = shell;
     check('10 the landing is the first thing a visitor sees',
-      shell.landing && shell.samples >= 4 && shell.trust === 3,
+      shell.landing && shell.samples === 2 && shell.trust === 3,
       `${shell.samples} samples, ${shell.trust} trust cells`);
     check('10 the landing fits without a scrollbar', shell.scrollY);
 
@@ -1147,14 +1147,16 @@ check('02 expanding reveals the held-back members',
       Boolean(composition.cardBelowLede) && Boolean(composition.traceBelowCard)
         && (composition.traceStages as string[]).join('>') === 'source>evidence>relationship>ancestry evidence',
       `trace below card ${composition.traceBelowCard}, stages ${(composition.traceStages as string[]).join(' > ')}`);
-    check('10 the trace states that it is an example, not this visitor result',
-      /example/i.test(String(composition.traceLabel)) && /pebrel/.test(String(composition.traceLabel)),
+    // Public showcase now uses maintainer projects only; the old third-party counts
+    // are replaced by an explicitly labelled process explanation, not visitor results.
+    check('10 the trace is labelled as a process explanation, not analysis results',
+      /How analysis works/i.test(String(composition.traceLabel)) && !/pebrel|\d+ (entities|dependencies)/i.test(String(composition.traceLabel)),
       String(composition.traceLabel));
     check('10 the evidence-status legend is inside the card',
       composition.statusChips === 3, `${composition.statusChips} status chips in the card`);
-    check('10 the five acceptance datasets are the examples, and every one is a real route',
-      composition.samples === 5
-        && (composition.sampleHrefs as string[]).every((h) => !!h && h.startsWith('/') && h !== '/'),
+    check('10 public examples use only maintainer projects with real routes',
+      composition.samples === 2
+        && (composition.sampleHrefs as string[]).every((h) => !!h && h.startsWith('/yunmin311/') && h.split('/').length === 3),
       (composition.sampleHrefs as string[]).join(' '));
     check('10 the real depth control survives the port',
       composition.depthButtons === 3, `${composition.depthButtons} depth buttons`);
