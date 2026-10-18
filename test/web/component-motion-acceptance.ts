@@ -3,7 +3,12 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { chromium } from 'playwright';
 import { fixtureServer, A } from './fixture-server.ts';
 import { unifiedFixture } from './unified-fixture.ts';
-const app=await fixtureServer({publicExploration:true,phaseDelayMs:0,explorationCooldownMs:0,explorationTransport:unifiedFixture().transport});
+const fixture=unifiedFixture();
+// Exhaust the actual provider byte budget: the service reports this in the task
+// receipt, rather than returning a synthetic HTTP 503 with a machine-coded string.
+const app=await fixtureServer({publicExploration:true,phaseDelayMs:0,explorationCooldownMs:0,
+ explorationTransport:async(url,init)=>new URL(String(url)).pathname==='/repos/kuddev/pebrel'
+  ?new Response(JSON.stringify({padding:'x'.repeat(33000)})):fixture.transport(url,init)});
 const browser=await chromium.launch();
 const out='artifacts/component-refinement';await mkdir(out,{recursive:true});
 const geometry:unknown[]=[];
@@ -13,7 +18,7 @@ try {
   const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto(app.url+'/'+A);await page.locator('#workspace-history').waitFor();
   let release!:()=>void;const gate=new Promise<void>(r=>release=r);
-  await page.route('**/api/explore',async route=>{await gate;await route.fulfill({status:503,json:{error:'commit: response_bytes_exhausted'}});});
+  await page.route('**/api/explore',async route=>{await gate;const response=await route.fetch();await route.fulfill({response});});
   await page.locator('#workspace-history').click();await page.locator('#git-history[aria-busy=true]').waitFor();
   await page.screenshot({path:`${out}/${width}-pending.png`});
   try {
