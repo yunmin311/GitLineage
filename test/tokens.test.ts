@@ -180,7 +180,8 @@ const GOLDEN: Record<string, string> = {
   '--depth-selected': '5px',
   '--depth-subject': '6px',
   // shell
-  '--rail-w': '264px',
+  // Shared 320px reading width aligns Context and Inspector; browser geometry covers stage clearance.
+  '--rail-w': '320px',
   '--bar-h': '44px',
   '--strip-h': '46px',
 };

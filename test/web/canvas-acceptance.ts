@@ -1056,7 +1056,7 @@ check('02 expanding reveals the held-back members',
     }));
     report['10-shell'] = shell;
     check('10 the landing is the first thing a visitor sees',
-      shell.landing && shell.samples >= 4 && shell.trust === 3,
+      shell.landing && shell.samples === 2 && shell.trust === 3,
       `${shell.samples} samples, ${shell.trust} trust cells`);
     check('10 the landing fits without a scrollbar', shell.scrollY);
 
@@ -1145,16 +1145,18 @@ check('02 expanding reveals the held-back members',
       `border ${composition.cardBorder}, shadow ${composition.cardShadow}`);
     check('10 the card is the primary object and the trace is secondary to it',
       Boolean(composition.cardBelowLede) && Boolean(composition.traceBelowCard)
-        && (composition.traceStages as string[]).join('>') === 'source>evidence>relationship>lineage',
+        && (composition.traceStages as string[]).join('>') === 'source>evidence>relationship>ancestry evidence',
       `trace below card ${composition.traceBelowCard}, stages ${(composition.traceStages as string[]).join(' > ')}`);
-    check('10 the trace states that it is an example, not this visitor result',
-      /example/i.test(String(composition.traceLabel)) && /pebrel/.test(String(composition.traceLabel)),
+    // Public showcase now uses maintainer projects only; the old third-party counts
+    // are replaced by an explicitly labelled process explanation, not visitor results.
+    check('10 the trace is labelled as a process explanation, not analysis results',
+      /How analysis works/i.test(String(composition.traceLabel)) && !/pebrel|\d+ (entities|dependencies)/i.test(String(composition.traceLabel)),
       String(composition.traceLabel));
     check('10 the evidence-status legend is inside the card',
       composition.statusChips === 3, `${composition.statusChips} status chips in the card`);
-    check('10 the five acceptance datasets are the examples, and every one is a real route',
-      composition.samples === 5
-        && (composition.sampleHrefs as string[]).every((h) => !!h && h.startsWith('/') && h !== '/'),
+    check('10 public examples use only maintainer projects with real routes',
+      composition.samples === 2
+        && (composition.sampleHrefs as string[]).every((h) => !!h && h.startsWith('/yunmin311/') && h.split('/').length === 3),
       (composition.sampleHrefs as string[]).join(' '));
     check('10 the real depth control survives the port',
       composition.depthButtons === 3, `${composition.depthButtons} depth buttons`);
@@ -1588,7 +1590,7 @@ check('02 expanding reveals the held-back members',
       const groups = await scroller.evaluate(`(() => {
         const heads = [...document.querySelectorAll('.drawer-inner .d-group-head')];
         const blockHead = [...document.querySelectorAll('.drawer-inner .d-block-head')]
-          .find((h) => /RELATIONSHIPS/.test(h.textContent));
+          .find((h) => /^Relationships /i.test(h.textContent));
         return {
           block: blockHead?.textContent?.trim() ?? '',
           blockSticky: blockHead ? getComputedStyle(blockHead).position : null,
@@ -1619,9 +1621,11 @@ check('02 expanding reveals the held-back members',
       check('19 every member is reachable and counted exactly once',
         groups.rows === summed && summed === Object.keys(payloadEvidence).length,
         `${groups.rows} rows, counts sum ${summed}, ${Object.keys(payloadEvidence).length} relationships`);
-      check('19 the block heading states the same total and file count',
-        new RegExp(`^RELATIONSHIPS \\(${summed} in ${groups.groups.length} files\\)$`).test(groups.block),
-        `heading "${groups.block}" against ${summed} in ${groups.groups.length} files`);
+      // The heading now names relationships; navigation groups are not always files.
+      // Preserve independent manifest recount and row reachability checks above.
+      check('19 the block heading states the independently recounted relationship total',
+        new RegExp(`^Relationships · ${summed}$`).test(groups.block),
+        `heading "${groups.block}" against ${summed} relationships`);
       check('19 the order is the promised total order: by count, then by path',
         rendered === ordered.map((g) => `${g.name}=${g.count}`).join(', '),
         `rendered ${rendered} | sorted ${ordered.map((g) => `${g.name}=${g.count}`).join(', ')}`);
@@ -1638,16 +1642,20 @@ check('02 expanding reveals the held-back members',
       // The group heading stays put while its own list runs under it.
       const sticky = await scroller.evaluate(`(() => {
         const n = document.querySelector('.drawer-inner');
-        const list = [...n.querySelectorAll('.d-block-head')].find((h) => /RELATIONSHIPS/.test(h.textContent));
+        const list = [...n.querySelectorAll('.d-block-head')].find((h) => /^Relationships /i.test(h.textContent));
         if (!list) return null;
         const regionTop = Math.round(n.getBoundingClientRect().top);
         const at = (t) => { n.scrollTop = t; return Math.round(list.getBoundingClientRect().top - regionTop); };
-        return { position: getComputedStyle(list).position, at700: at(700), at1400: at(1400) };
-      })()`) as { position: string; at700: number; at1400: number } | null;
+        const at700 = at(700), at1400 = at(1400);
+        const toolbarBottom = Math.round(n.querySelector('.drawer-toolbar').getBoundingClientRect().bottom - regionTop);
+        return { position: getComputedStyle(list).position, at700, at1400, toolbarBottom };
+      })()`) as { position: string; at700: number; at1400: number; toolbarBottom: number } | null;
       report['19-sticky-heading'] = sticky;
       check('19 the group heading holds while its list scrolls under it',
-        !!sticky && sticky.position === 'sticky' && sticky.at700 === 0 && sticky.at1400 === 0,
-        sticky ? `position=${sticky.position}, top@700=${sticky.at700}, top@1400=${sticky.at1400}` : 'no list heading');
+        // The persistent Inspector toolbar now owns the top edge. The heading must
+        // hold immediately below its painted bounds, rather than underneath it.
+        !!sticky && sticky.position === 'sticky' && sticky.at700 === sticky.toolbarBottom && sticky.at1400 === sticky.toolbarBottom,
+        sticky ? `position=${sticky.position}, top@700=${sticky.at700}, top@1400=${sticky.at1400}, toolbar bottom=${sticky.toolbarBottom}` : 'no list heading');
 
       // Bottom of the scroll, photographed, and the affordance states what is true.
       await scroller.evaluate(`document.querySelector('.drawer-inner').scrollTop = 999999`);

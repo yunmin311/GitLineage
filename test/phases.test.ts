@@ -278,11 +278,14 @@ test('the tracer uses no gradient, blur, glow or looping animation', () => {
       `every gradient in the sheet is a mask, and this one is not: ${before.slice(-40)}`);
   }
   assert.equal(/filter:\s*blur/.test(declared), false, 'no blur');
-  // The only animation is the tracer's single arrival pulse, which is declared once and
-  // applied by a class rather than by a keyframe on a moving part.
+  // Entry transitions complement the tracer; neither is a looping decoration.
   const animations = declared.match(/@keyframes\s+([\w-]+)/g) ?? [];
-  assert.deepEqual(animations, ['@keyframes tracer-arrive'], 'the only keyframe is the tracer arriving');
-  assert.equal(/animation:\s*[^;]*infinite/.test(declared), false, 'nothing loops');
+  assert.deepEqual(animations, ['@keyframes tracer-arrive', '@keyframes reading-enter', '@keyframes log-reading']);
+  assert.match(declared, /@media\(prefers-reduced-motion:no-preference\)\s*\{[\s\S]*@keyframes reading-enter/, 'entry animation is opt-in when motion is allowed');
+  // Pending History now reserves six log rows instead of a rotating alert mark and three bars.
+  // Only these indeterminate request placeholders may loop; the graph tracer still never loops.
+  const loops = [...declared.matchAll(/([^{}]+)\{[^{}]*animation:\s*[^;{}]*infinite[^{}]*\}/g)].map(m => m[1]!.trim());
+  assert.deepEqual(loops, ['.history-pending-row'], 'only pending History indicators may loop');
   // The tracer is the one brand mark. Frozen V3.3 renamed this token from `--accent` to
   // `--brand`: it was green, which made "what is this analysis doing right now" compete
   // for the reader's attention with the three evidence-status hues. Mineral blue is now

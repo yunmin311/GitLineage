@@ -49,7 +49,7 @@
 
 <div class="searchbar" id="searchbar" hidden>
   <svg viewBox="0 0 16 16" aria-hidden="true" class="search-icon"><circle cx="7" cy="7" r="4.2"/><path d="M10.2 10.2 L14 14"/></svg>
-  <input id="search-input" placeholder="Search nodes and relationships" spellcheck="false" autocomplete="off" />
+  <input id="search-input" aria-label="Search repositories and explored objects" placeholder="Search nodes and relationships" spellcheck="false" autocomplete="off" />
   <div id="mobile-search-results" hidden></div>
   <span class="mono search-count" id="search-count"></span>
   <button class="icon-btn" id="search-close" aria-label="Close search">✕</button>
@@ -193,79 +193,70 @@
         </div>
       </form>
 
-      <!--
-        The one set of real counts on this page. Kuddev/pebrel is named with the revision
-        it was measured at, so the numbers can be checked and go stale visibly rather
-        than quietly. Nothing here is invented: these are analyser output.
-      -->
-      <div class="hero-trace">
+      <section class="hero-trace reading-module" aria-label="From source to relationship">
+        <h2 class="module-heading">From source to relationship</h2>
         <div class="hero-trace-node">
           <span class="hero-trace-mark" aria-hidden="true"></span>
           <p class="hero-trace-stage">source</p>
-          <p class="hero-trace-value">98 entities</p>
+          <p class="hero-trace-value">Repository identity</p>
         </div>
         <div class="hero-trace-node">
           <span class="hero-trace-mark" aria-hidden="true"></span>
           <p class="hero-trace-stage">evidence</p>
-          <p class="hero-trace-value">137 manifest records</p>
+          <p class="hero-trace-value">Verifiable records</p>
         </div>
         <div class="hero-trace-node">
           <span class="hero-trace-mark" aria-hidden="true"></span>
           <p class="hero-trace-stage">relationship</p>
-          <p class="hero-trace-value">97 depends_on</p>
+          <p class="hero-trace-value">Typed connections</p>
         </div>
         <div class="hero-trace-node">
           <span class="hero-trace-mark" aria-hidden="true"></span>
-          <p class="hero-trace-stage">lineage</p>
-          <p class="hero-trace-value">1 repository</p>
+          <p class="hero-trace-stage">ancestry evidence</p>
+          <p class="hero-trace-value">Only when evidenced</p>
         </div>
-        <p class="hero-trace-note">Example trace &middot; Kuddev/pebrel &middot; rev 51514bd</p>
-      </div>
+        <p class="hero-trace-note">How analysis works · every connection opens its source evidence. Ancestry is shown only when supported.</p>
+      </section>
 
-      <p class="foot">
-        <span class="fine-k">Or replace</span>
-        <span class="fine-v">github</span>
-        <span class="fine-k">with</span>
-        <span class="fine-v">gitlineage</span>
-        <span class="fine-k">in any GitHub URL &mdash;</span>
-        <span class="fine-mono">github.com/o/r</span>
-        <span class="fine-k">becomes</span>
-        <span class="fine-mono">gitlineage.com/o/r</span>
+      <div class="repository-reference reading-module">
+      <p class="foot" aria-label="Repository address format">
+        <span class="fine-k">Repository address</span>
+        <code class="fine-mono">/owner/repository</code>
+
       </p>
 
       <!--
-        The four long-term acceptance datasets, plus GitLineage itself as the self case.
+        Public examples are limited to the maintainer’s own projects. Offline test fixtures remain separate.
         Real routes: each one is analysed on request and cached.
       -->
       <div class="samples">
-        <span class="samples-lab">Try</span>
+        <span class="samples-lab">Explore our projects</span>
         <a href="/yunmin311/GitLineage">yunmin311/GitLineage</a>
-        <a href="/Kuddev/pebrel">Kuddev/pebrel</a>
-        <a href="/grpc/grpc">grpc/grpc</a>
-        <a href="/nachocebey/is">nachocebey/is</a>
         <a href="/yunmin311/obsidian-config">yunmin311/obsidian-config</a>
       </div>
 
-      <!-- the three column proof block -->
-      <div class="trust">
-        <div class="trust-cell">
-          <p class="trust-head">No LLM in the loop</p>
-          <p class="trust-body">No language model writes your provenance. Relationships come from
-            Git objects, manifests and documents &mdash; records the analysis found.</p>
-        </div>
-        <div class="trust-cell">
-          <p class="trust-head">Every edge is checkable</p>
-          <p class="trust-body"><span class="mini-pill v">VERIFIED</span>
-            <span class="mini-pill d">DECLARED</span>
-            <span class="mini-pill t">DETECTED</span>
-            &mdash; each opens the raw evidence.</p>
-        </div>
-        <div class="trust-cell">
-          <p class="trust-head">Reference is not dependency</p>
-          <p class="trust-body">They are different canonical relationship types and are drawn
-            separately. A version range is never shown as an exact version.</p>
-        </div>
       </div>
+
+      <section class="evidence-guide" aria-labelledby="evidence-guide-title">
+        <h2 class="module-heading" id="evidence-guide-title">Reading your graph</h2>
+        <div class="trust reading-module">
+          <article class="trust-cell">
+            <div class="trust-symbol trust-records" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6zM9 9h6M9 13h6M9 17h4"/></svg></div>
+            <h3 class="trust-head">Grounded in records</h3>
+            <p class="trust-body">Relationships come from Git objects, manifests and documents. Open the records behind a connection to see how it was found.</p>
+          </article>
+          <article class="trust-cell">
+            <div class="trust-symbol trust-evidence" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="18" r="3"/><path d="M6 9v9h9M9 6h9v9"/></svg></div>
+            <h3 class="trust-head">Evidence at every connection</h3>
+            <p class="trust-body">Inspect the source, status and supporting evidence. Declared, verified and detected records remain clearly distinguished.</p>
+          </article>
+          <article class="trust-cell">
+            <div class="trust-symbol trust-boundaries" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/><circle cx="8" cy="6" r="2"/><circle cx="16" cy="12" r="2"/><circle cx="10" cy="18" r="2"/></svg></div>
+            <h3 class="trust-head">Different relationships, clearly marked</h3>
+            <p class="trust-body">Dependencies and references are separate from ancestry. Similarity is a lead to investigate, never proof of derivation.</p>
+          </article>
+        </div>
+      </section>
 
     </div>
 
@@ -311,17 +302,19 @@
 
       <div class="an-quest">
         <p class="an-repo mono" id="an-repo"></p>
-        <h1 class="an-q">Where did this software come from?</h1>
+        <p class="an-kicker">Repository analysis</p>
+        <h1 class="an-q">Tracing the evidence.</h1>
       </div>
 
-      <!-- the current phase is the page's live object: a raised sheet, not just big type -->
+      <section class="an-work reading-module" aria-labelledby="an-ptitle">
+      <!-- Current phase, path and explanation form one analysis instrument. -->
       <section class="an-phase">
         <div class="an-obj">
           <div class="an-pn">
             <span class="an-pk" id="an-pk"></span>
             <span class="an-rule" aria-hidden="true"></span>
           </div>
-          <p class="an-ptitle" id="an-ptitle"></p>
+          <h2 class="an-ptitle" id="an-ptitle"></h2>
           <p class="an-psub" id="an-psub"></p>
         </div>
       </section>
@@ -333,24 +326,24 @@
       </div>
 
       <p class="an-verb" id="an-verb"></p>
+      </section>
 
       <aside class="an-aside" aria-label="Job and source">
-        <div class="an-grp">
-          <p class="an-grp-cap">Job</p>
-          <dl class="an-spec" id="an-job"></dl>
-        </div>
-        <div class="an-grp">
-          <p class="an-grp-cap">Source</p>
+        <div class="an-grp reading-module">
+          <h2 class="an-grp-cap">Source</h2>
           <dl class="an-spec" id="an-src"></dl>
         </div>
+        <details class="an-grp an-receipt reading-module">
+          <summary class="an-grp-cap">Analysis receipt</summary>
+          <dl class="an-spec" id="an-job"></dl>
+        </details>
       </aside>
 
       <div class="an-tail">
-        <p><b>No percentage is shown.</b> The five phases are discrete stages the analyser
-          reports when it reaches them, not a measurable fraction of work.</p>
-        <p><b>These five phases are the whole contract.</b> Finer progress would need new
-          instrumentation emitted from <span class="mono">analyze()</span> &mdash; a change to
-          the pipeline, not to this screen.</p>
+        <p><b>Evidence first.</b> Git objects, manifests and declarations are checked before
+          relationships enter your graph. Dependencies and references do not prove ancestry.</p>
+        <p><b>Your explorer is next.</b> When analysis finishes, follow relationships,
+          inspect their evidence, or open the repository’s Git history.</p>
       </div>
 
     </div>

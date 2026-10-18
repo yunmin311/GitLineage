@@ -197,9 +197,9 @@ function mountRepositoryExplorer(getRepository, deep, bridge) {
     save();
   }
   async function request(suffix, data) {
-    const response = await fetch("/api/explore" + suffix, data === void 0 ? {} : { method: "POST", headers: { "content-type": "application/json", "x-gitlineage-csrf": "1" }, body: JSON.stringify(data) });
+    const response = await fetch("/api/explore" + suffix, data === void 0 ? { signal: AbortSignal.timeout(35000) } : { signal: AbortSignal.timeout(35000), method: "POST", headers: { "content-type": "application/json", "x-gitlineage-csrf": "1" }, body: JSON.stringify(data) });
     const value = await response.json();
-    if (!response.ok) throw new Error(value.error || "Exploration unavailable");
+    if (!response.ok) throw Object.assign(new Error(typeof value.error === "string" ? value.error : value.error?.message || "Exploration unavailable"), {status:response.status});
     return value;
   }
   async function operate(fn) {
@@ -224,7 +224,13 @@ function mountRepositoryExplorer(getRepository, deep, bridge) {
       }
     }
   }
-  async function ensure(repo, token) {
+  const pendingTasks = new Map();
+  function ensure(repo, token) {
+    const key = token + ":" + jobKey(repo);
+    if (!pendingTasks.has(key)) pendingTasks.set(key, ensureTask(repo, token).finally(() => pendingTasks.delete(key)));
+    return pendingTasks.get(key);
+  }
+  async function ensureTask(repo, token) {
     let task = jobs.get(jobKey(repo));
     const previousLimit = task?.displayHistoryLimit;
     if (task) {
@@ -282,12 +288,39 @@ function mountRepositoryExplorer(getRepository, deep, bridge) {
     return did;
   }
   function readHistory(id = rootId()) {
-    const repo=repositoryOf(id),camera=bridge.camera(),selected=bridge.selected();
-    const show=task=>openGitLog(task,{close:()=>{bridge.select(selected);bridge.restore(camera);},more:()=>void operate(async token=>{const t=await request(`/${task.id}/history`,{});if(token!==generation)return;jobs.set(jobKey(repo),t);show(t);}),exploreFile:(commit,file)=>{
-      checkpoint(id);const fid=node(ref(repo,commit.sha,"file",file.path),file.path.split("/").pop(),"file",{...file,path:file.path,repository:repo,revision:commit.sha,fromCommit:commit.sha});
-      edge(repoNode(repo),fid,"structure","changed file at commit",{commit:commit.sha,...file});refresh();focus(fid);
-    }});
-    void operate(async token=>{const task=await ensure(repo,token);show(task);});
+    const repo = repositoryOf(id), camera = bridge.camera(), selected = bridge.selected(), token = generation;
+    let host;
+    const current = () => token === generation && host?.isConnected;
+    const close = () => { bridge.select(selected); bridge.restore(camera); };
+    const show = task => {
+      host = openGitLog(task, { close, more: async () => {
+        const t = await request(`/${task.id}/history`, {});
+        if (!current()) return;
+        jobs.set(jobKey(repo), t);
+        save();
+        if (!t.revision || t.error) throw new Error(t.error || 'History unavailable');
+        show(t);
+      }, exploreFile: (commit, file) => {
+        checkpoint(id);
+        const fid = node(ref(repo, commit.sha, "file", file.path), file.path.split("/").pop(), "file", { ...file, path: file.path, repository: repo, revision: commit.sha, fromCommit: commit.sha });
+        edge(repoNode(repo), fid, "structure", "changed file at commit", { commit: commit.sha, ...file });
+        refresh(); focus(fid);
+      }});
+    };
+    const load = async () => {
+      host = openGitLog({ repository: repo }, { close, loading: true });
+      try {
+        // History owns its loading UI, independently of graph expansion's busy flag.
+        const cached = jobs.get(jobKey(repo));
+        const task = cached?.commits?.length && cached.state !== 'running' ? cached : await ensure(repo, token);
+        if (!current()) return;
+        if (!task.commits.length && task.error) throw new Error(task.error);
+        show(task); save();
+      } catch (error) {
+        if (current()) host = openGitLog({ repository: repo }, { close, error, retry: load });
+      }
+    };
+    void load();
   }
   function readStructure(id = rootId()) {
     checkpoint(id);
@@ -378,7 +411,8 @@ function mountRepositoryExplorer(getRepository, deep, bridge) {
       host.prepend(tools);
       tools.append(discovery);
     }
-    path.replaceChildren(btn("workspace-back", "Back", back));
+    const previousPath=path.textContent;
+    path.replaceChildren(btn("workspace-back", "Back one step", back));
     path.firstChild.disabled = !history.length;
     path.firstChild.prepend(icon("back"));
     path.append(btn("", root, returnRoot));
@@ -386,6 +420,9 @@ function mountRepositoryExplorer(getRepository, deep, bridge) {
       const n = find(id);
       if (n && id !== rootId()) path.append(btn("", n.label, () => focus(id)));
     }
+    path.lastElementChild?.setAttribute("aria-current", "location");
+    if(previousPath!==path.textContent&&!matchMedia('(prefers-reduced-motion: reduce)').matches)
+      path.animate([{opacity:.5,transform:'translateY(6px)'},{opacity:1,transform:'translateY(0)'}],{duration:220,easing:'cubic-bezier(.22,.61,.36,1)'});
     layers.replaceChildren();
     for (const [k, label] of kinds) {
       const b = btn("", label, () => {
@@ -404,7 +441,7 @@ function mountRepositoryExplorer(getRepository, deep, bridge) {
       b.append(indicator);
       layers.append(b);
     }
-    for (const b of nav.children) b.disabled = busy && b.id !== "workspace-return";
+    for (const b of nav.children) b.disabled = busy && !["workspace-return", "workspace-history"].includes(b.id);
   }
   function visible(canonicalPositions) {
     const enabled = [...links.values()].filter((e) => !hiddenLayers.has(e.kind));

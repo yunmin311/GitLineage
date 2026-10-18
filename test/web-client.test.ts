@@ -878,6 +878,9 @@ test('the ladder is drawn as geometry, because box-shadow cannot paint an SVG re
   const paintable = APP_CSS.replace(/\/\*[\s\S]*?\*\//g, ' ');
   const shadows = [...paintable.matchAll(/box-shadow:\s*([^;}]+)[;}]/g)].map((m) => m[1]!);
   for (const value of shadows) {
+    // The phase is now inside the raised work module. Explicitly flattening the
+    // nested object paints no shadow and preserves the single raised instrument.
+    if (value.trim() === 'none') continue;
     if (/inset/.test(value)) continue;
     if (/var\(--sh-(brand|[123])\)/.test(value)) continue;
     assert.fail(`only an inset fill or a named hard-shadow token may remain, not elevation: ${value}`);

@@ -47,7 +47,8 @@ three-pointer cancellation, subsequent tap, native list/evidence scroll and hist
 
 ## Graph and repository exploration refinement (2026-10-12)
 User-authorized refinement adds 260ms geometry transitions for real member expansion,
-directory changes and camera controls; instrument feedback is 160ms. Existing semantic
+directory changes and camera controls; panel feedback is 160ms; instrument and disclosure transitions are 220ms. Unchanged
+analysis polls retain their current phase without restarting entrances. Existing semantic
 status, direction and confidence markers are unchanged. Pointer-down and wheel cancel
 pending camera motion at its current geometry, then transfer ownership to native input.
 Reduced motion writes the final geometry immediately. View switching restores saved

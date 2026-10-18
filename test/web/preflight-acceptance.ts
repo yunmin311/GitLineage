@@ -225,7 +225,8 @@ const exampleHrefs = await landingPage.evaluate(
 ) as string[];
 await landingPage.close();
 
-check('the landing offers examples', exampleHrefs.length >= 4,
+// Public examples are deliberately limited to the owner's projects.
+check('the landing offers owned examples', exampleHrefs.length === 2 && exampleHrefs.every((href) => href.startsWith('/yunmin311/')),
   `${exampleHrefs.length} examples: ${exampleHrefs.join(' ')}`);
 
 for (const href of exampleHrefs) {
@@ -279,7 +280,7 @@ for (const href of exampleHrefs) {
   const groups = await page.evaluate(`(() => {
     const heads = [...document.querySelectorAll('.drawer-inner .d-group-head')];
     const blockHead = [...document.querySelectorAll('.drawer-inner .d-block-head')]
-      .find((h) => /RELATIONSHIPS/.test(h.textContent));
+      .find((h) => /^Relationships /i.test(h.textContent));
     return {
       block: blockHead?.textContent?.trim() ?? '',
       blockSticky: blockHead ? getComputedStyle(blockHead).position : null,
@@ -303,8 +304,10 @@ for (const href of exampleHrefs) {
   check('pebrel group counts partition every relationship',
     summed === groups.rows && groups.rows === 97, `${groups.rows} rows, counts sum ${summed}`);
   check('pebrel group headings are sticky', groups.groups.every((g) => g.sticky === 'sticky'));
-  check('pebrel block heading states the total and the file count',
-    new RegExp(`^RELATIONSHIPS \\(${groups.rows} in ${groups.groups.length} files\\)$`).test(groups.block),
+  // Evidence groups can represent manifests or other navigation groups; the
+  // total remains independently checked against every rendered relationship.
+  check('pebrel block heading states the relationship total',
+    groups.block === `Relationships · ${groups.rows}`,
     `"${groups.block}"`);
 
   // Every member must be clickable and must open its own evidence.

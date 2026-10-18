@@ -1,3 +1,4 @@
+import {dismissGitLog} from './lib/git-log.mjs';
 import {connectionFallback} from './lib/connection-fallback.mjs';
 import {classifyRelationships} from './lib/classification.mjs';
 import {spatialLayout, spatialExpansion, spatialRoute, ORIGIN} from './lib/spatial.mjs';
@@ -102,9 +103,20 @@ const LABEL_FAN_LIMIT = 2;
 const LABEL_DEGREE_LIMIT = 4;
 
 let workspace = null;
+let loadController = null;
+function cancelLoad() {
+  state.loadToken += 1;
+  loadController?.abort();
+  loadController = null;
+  if (state.pollTimer) clearTimeout(state.pollTimer);
+}
+function observationSignal() {
+  return AbortSignal.any([loadController.signal, AbortSignal.timeout(20000)]);
+}
 const state = {
   repository: null,
   view: null,
+  viewRepository: null,
   graph: null,
   meta: null,
   selectedEdgeId: '',
@@ -249,6 +261,7 @@ function navigate(repository, push = true) {
  * this only prepares the frame.
  */
 function showWorking() {
+  setHidden($('rail-toggle'), true);
   panels = initialPanels(window.innerWidth);
   applyPanels();
   // The landing is left behind as soon as a repository route is resolved, so the
@@ -370,6 +383,15 @@ function renderAnalysis(status, jobId) {
   $('an-repo').textContent = repository;
 
   const running = RUNNING_PHASES.indexOf(status);
+  const phaseChanged = root.dataset.phase !== status;
+  if (phaseChanged) {
+    root.dataset.phase = status;
+    const object = root.querySelector('.an-obj');
+    if (object && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      object.getAnimations().forEach(animation => animation.cancel());
+      object.animate([{ opacity: .45, transform: 'translateY(8px)' }, { opacity: 1, transform: 'translateY(0)' }], { duration: 260, easing: 'cubic-bezier(.2,.7,.2,1)' });
+    }
+  }
   const fsm = ANALYSIS_FSM_TEXT[status];
   const current = running >= 0 ? ANALYSIS_PHASE_TEXT[status] : null;
 
@@ -413,6 +435,8 @@ function renderAnalysis(status, jobId) {
   const n = RUNNING_PHASES.length;
   const labels = $('an-plabels');
   const svg = $('an-svg');
+  // Polls refresh source facts, but must not restart the visible phase entrance.
+  if (!phaseChanged && labels.childElementCount === n) { state.phase = status; return; }
   /*
    * How much of the path is behind us.
    *
@@ -431,8 +455,7 @@ function renderAnalysis(status, jobId) {
    * A bare `1fr` floors each track at its `min-content` width, which is as wide as the
    * longest unbreakable word in the phase name. At 390px that made every track wider than
    * its share of the row, so the five labels overflowed and overlapped each other instead
-   * of ellipsing inside their own columns. The zero minimum is what lets `text-overflow`
-   * do its job.
+   * of fitting inside their own columns. Mobile uses shorter names within the same tracks.
    */
   labels.style.gridTemplateColumns = `repeat(${n}, minmax(0, 1fr))`;
   labels.replaceChildren();
@@ -443,16 +466,16 @@ function renderAnalysis(status, jobId) {
     labels.append(el('div', {
       class: ['an-plabel', done ? 'is-done' : '', now ? 'is-now' : ''].filter(Boolean).join(' '),
       'data-phase': phase,
-      // The full name stays reachable when the visible label is reduced to its ordinal
-      // on a narrow screen, so the axis is never five anonymous numbers.
+      // Mobile uses a short name; assistive technology retains the full phase name.
       'aria-label': `${at + 1} of ${RUNNING_PHASES.length}. ${ANALYSIS_PHASE_TEXT[phase].t}`,
     }, [
       el('span', { class: 'n', text: String(at + 1) }),
       el('span', { class: 't', text: ANALYSIS_PHASE_TEXT[phase].t }),
+      el('span', { class: 't-short', 'aria-hidden': 'true', text: ['Resolve', 'Collect', 'Connect', 'Check', 'Publish'][at] }),
     ]));
   }
 
-  const W = 1000; const pad = 20; const gap = 12; const y = 26;
+  const W = 1000; const pad = 0; const gap = 20; const y = 26;
   const segW = (W - pad * 2 - gap * (n - 1)) / n;
   const nodes = [];
   for (let i = 0; i < n; i += 1) {
@@ -626,6 +649,9 @@ function setChrome(label) {
  */
 async function load() {
   if (!state.repository) return;
+  cancelLoad();
+  dismissGitLog();
+  loadController = new AbortController();
   readUrlState();
   showWorking();
   state.phase = 'starting';
@@ -635,7 +661,7 @@ async function load() {
   const stale = () => token !== state.loadToken;
 
   const repo = state.repository;
-  const fetchOptions = { headers: { accept: 'application/json' } };
+  const fetchOptions = { headers: { accept: 'application/json' }, signal: observationSignal() };
 
   // Step 1: ask for the analysis. Cheap when it is already cached.
   let start;
@@ -684,13 +710,13 @@ async function load() {
 const VIEW_RETRY_DELAY_MS = 1500;
 
 /** Fetches the completed view-model for the current repository. */
-async function fetchView(token) {
+async function fetchView(token, attempt = 0) {
   if (token !== state.loadToken || !state.repository) return;
   const repo = state.repository;
   let viewEnvelope;
   try {
     const response = await fetch(`/api/view/${repo.owner}/${repo.name}?depth=${state.depth}`, {
-      headers: { accept: 'application/json' },
+      headers: { accept: 'application/json' }, signal: observationSignal(),
     });
     viewEnvelope = await response.json();
     if (!response.ok || !viewEnvelope.ok) {
@@ -706,15 +732,16 @@ async function fetchView(token) {
     if (token !== state.loadToken) return;
     // The job said complete but the artifact is not readable yet: a short
     // retry, not a failure.
-    if (error?.pending || error?.status === 202) {
+    if ((error?.pending || error?.status === 202) && attempt < 8) {
       await sleep(error?.retryAfterMs ?? VIEW_RETRY_DELAY_MS);
-      if (token === state.loadToken) await fetchView(token);
+      if (token === state.loadToken) await fetchView(token, attempt + 1);
       return;
     }
     hideWorking();
     showFailure(error);
     return;
   }
+  if (token !== state.loadToken) return;
   applyView(viewEnvelope);
 }
 
@@ -724,14 +751,15 @@ async function fetchView(token) {
  * Backoff is bounded by `nextDelayMs`, and polling stops on any phase this client
  * does not recognise, so it cannot spin forever.
  */
-async function pollJob(job, elapsed, stale) {
+async function pollJob(job, elapsed, stale, failures = 0) {
   if (stale()) return;
   const { jobId, statusUrl, retryAfterMs } = job;
   state.job = { jobId, statusUrl };
 
   let status;
   try {
-    const response = await fetch(statusUrl, { headers: { accept: 'application/json' } });
+    const response = await fetch(statusUrl, { headers: { accept: 'application/json' }, signal: observationSignal() });
+    if (stale()) return;
     if (response.status === 404) {
       hideWorking();
       showFailure({ message: 'the analysis job is no longer known to the server', retryable: true });
@@ -740,13 +768,19 @@ async function pollJob(job, elapsed, stale) {
     status = parseJob(await response.json());
   } catch (error) {
     if (stale()) return;
-    // A transient poll failure is retried rather than surfaced.
+    if (failures >= 2) {
+      hideWorking();
+      showFailure({ message: "The connection was interrupted. Your analysis may still be running; retry to reconnect.", retryable: true });
+      return;
+    }
+    // Retry transient observation failures without restarting the server job.
     const wait = nextDelayMs(retryAfterMs, elapsed);
     await sleep(wait);
-    if (!stale()) await pollJob(job, elapsed + wait, stale);
+    if (!stale()) await pollJob(job, elapsed + wait, stale, failures + 1);
     return;
   }
 
+  if (stale()) return;
   // An unrecognised shape stops the loop: better a clear error than an endless poll.
   if (!status) {
     hideWorking();
@@ -787,6 +821,7 @@ function sleep(ms) {
 
 /** Renders a completed view-model. */
 function applyView(viewEnvelope) {
+  setHidden($('rail-toggle'), false);
 
   const view = viewEnvelope.data;
   const meta = viewEnvelope.meta || {};
@@ -799,6 +834,7 @@ function applyView(viewEnvelope) {
   state.graph = null;
 
   state.view = view;
+  state.viewRepository = { ...state.repository };
   state.meta = meta;
   state.cacheHit = meta.cacheHit === true;
   state.resolvedRevision = meta.resolvedRevision || view.revision.commit;
@@ -1138,14 +1174,14 @@ function renderRail(view) {
   // Provenance: what was analysed, and by what. Real revision, real analyzer.
   const provenance = el('div', { class: 'statline' });
   provenance.append(el('b', { text: view.subject?.label ?? '' }));
-  provenance.append(el('span', {
-    class: 'k',
-    text: `${view.revision.ref || view.revision.defaultBranch || 'HEAD'} @ ${view.revision.shortCommit}`,
-  }));
-  provenance.append(el('span', {
-    class: 'k',
-    text: `analysed ${formatTime(view.revision.analyzedAt)} \u00b7 ${view.analyzer.name} ${view.analyzer.version} \u00b7 schema ${view.schemaVersion}`,
-  }));
+  const metadata=el('dl',{class:'rail-metadata'});
+  for(const [label,value] of [
+    ['Revision',`${view.revision.ref || view.revision.defaultBranch || 'HEAD'} @ ${view.revision.shortCommit}`],
+    ['Analysed',formatTime(view.revision.analyzedAt)],
+    ['Analyzer',`${view.analyzer.name} ${view.analyzer.version}`],
+    ['Schema',view.schemaVersion],
+  ]) metadata.append(el('dt',{text:label}),el('dd',{text:String(value)}));
+  provenance.append(metadata);
   block('provenance', [provenance]);
 
   // Status: the real counts, with no interpretation added to them.
@@ -1221,12 +1257,11 @@ function renderRail(view) {
     .filter((family) => !present.has(family));
   const absentBlock = [];
   if (absent.length > 0) {
-    const chips = el('div', { class: 'g-empty' });
-    for (const family of absent) chips.append(el('span', { class: 'g-chip', text: family.replace('-', ' ') }));
-    absentBlock.push(chips);
+    const names = { ancestry: 'Ancestry', dependency: 'Dependencies', attribution: 'Attribution', 'source-identity': 'Source identity' };
+    absentBlock.push(el('p', { class: 'rail-absence', text: absent.map((family) => names[family]).join(' · ') }));
     absentBlock.push(el('p', {
       class: 'rule-note',
-      text: 'This analysis records none of these relationships. Absence of a record does not prove absence of ancestry.',
+      text: 'Not recorded in this snapshot. This does not rule out shared ancestry.',
     }));
   } else {
     absentBlock.push(el('p', {
@@ -2246,7 +2281,7 @@ function renderDrawer() {
     type: 'button',
     title: 'Close (Esc)',
     'aria-label': 'Close evidence drawer',
-    text: 'Esc',
+    text: '×',
     onclick: closeDrawer,
   });
   const block = el('div');
@@ -2261,7 +2296,9 @@ function renderDrawer() {
     const actions=workspace?.repositoryActions(state.selectedNodeId);if(actions){const overview=block.querySelector(".entity-overview");if(overview)overview.after(actions);else block.append(actions);}
   }
 
-  inner.append(close, block);
+  const toolbar = el('div', { class: 'drawer-toolbar' });
+  toolbar.append(el('span', { text: 'Inspector' }), close);
+  inner.append(toolbar, block);
   revealInstrument(block);
 
   /*
@@ -2526,7 +2563,7 @@ function renderNodeDrawer() {
   wrap.append(el('p', { class: 'd-eyebrow', text: node.isSubject ? 'ANALYSED REPOSITORY' : node.type.toUpperCase() }));
   wrap.append(el('p', { class: 'd-head', text: node.label }));
   const technical=el('details',{class:'workspace-technical'});technical.append(el('summary',{text:'Technical identity'}),el('p',{class:'mono',text:node.id}),el('p',{class:'d-sub',text:node.isSubject?'Analysed repository':'Related '+node.type.toLowerCase()}));
-  const hierarchy=el('div',{class:'d-hierarchy'});hierarchy.append(el('p',{class:'d-block-head',text:'EXPLORATION PATH'}));
+  const hierarchy=el('div',{class:'d-hierarchy'});hierarchy.append(el('p',{class:'d-block-head',text:'Exploration path'}));
   const path=el('ol');path.append(el('li',{text:view.subject.label}));
   const plate=state.composition?.plates.find(p=>p.memberEdgeIds.some(id=>{const e=view.edges.find(e=>e.id===id);return e&&(e.source===node.id||e.target===node.id);}));
   if(plate&&!node.isSubject){
@@ -2565,17 +2602,17 @@ function renderNodeDrawer() {
   const relBlock = el('div', { class: 'd-block' });
   relBlock.append(el('p', {
     class: 'd-block-head',
-    text: `RELATIONSHIPS (${related.length} in ${groups.length} ${groups.length === 1 ? 'file' : 'files'})`,
+    text: `Relationships · ${related.length}`,
   }));
   if (groups.length === 0) {
     relBlock.append(el('p', { class: 'node-detail', text: 'No one-hop relationship in this view.' }));
   }
-  if(groups.length) relBlock.append(el('p',{class:'d-basis',text:'Navigation groups, not repository relationships.'}));
+  if(groups.length) relBlock.append(el('p',{class:'d-basis',text:groups.length+' '+(groups.length===1?'navigation group':'navigation groups')+' · open a relationship to read its evidence.'}));
   for (const group of groups) {
     const section = el('details', { class: 'd-group' });
     section.open = groups.length === 1 || group === groups[0];
     section.append(el('summary', { class: 'd-group-head' }, [
-      el('span', { class: 'mono', text: group.manifest ? group.key : `${group.key} · no manifest` }),
+      el('span', { class: group.manifest ? 'mono d-group-name' : 'd-group-name', text: group.manifest ? group.key : ({references:'References', depends_on:'Dependencies', forked_from:'Fork source', derived_from:'Derived from', shares_history_with:'Shared Git history', shares_exact_content_with:'Identical content'})[group.key] || group.key.replaceAll('_', ' ') }),
       el('span', { class: 'd-group-count r-mono', text: String(group.members.length) }),
     ]));
     const appendRow=(host,edge)=>{const other=edge.source===node.id?edge.target:edge.source;const row=el('button',{class:'bundle-row'});row.append(el('span',{class:'relationship-object',text:nameOf(other)}),el('span',{class:'relationship-kind',text:edge.label}));row.addEventListener('click',()=>{state.selectedNodeId='';selectEdge(edge.id);});host.append(row);};
@@ -2847,6 +2884,12 @@ function fit() {
 // --------------------------------------------------------------------- boot
 
 function showLanding() {
+  cancelLoad();
+  dismissGitLog();
+  hideWorking();
+  state.phase = 'idle';
+  setHidden($('failure'), true);
+  setHidden($('rail-toggle'), true);
   setHidden($('landing'), false);
   setHidden($('explorer'), true);
   setHidden($('appbar-mid'), true);
@@ -2858,6 +2901,14 @@ function showLanding() {
 }
 
 function boot() {
+  document.addEventListener('click', event => {
+    const link = event.target.closest('a.brand, .samples a');
+    if (!link || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    const repository = parseRepositoryPath(new URL(link.href).pathname);
+    if (repository) navigate(repository);
+    else { history.pushState(null, '', '/'); showLanding(); }
+  });
   mobile.view = new URLSearchParams(location.search).get('mobile') || 'graph';
   setupViewport();
   for (const button of document.querySelectorAll('#mobile-nav [data-mobile-view]')) button.addEventListener('click', () => switchMobile(button.dataset.mobileView));
@@ -2981,7 +3032,8 @@ $('layers-btn').addEventListener('click', () => toggleLayers());
 
   window.addEventListener('popstate', () => {
     const repository = parseRepositoryPath(window.location.pathname);
-    if (repository && state.view && repository.owner.toLowerCase() === state.repository.owner.toLowerCase() && repository.name.toLowerCase() === state.repository.name.toLowerCase()) {
+    if (repository && state.view && state.phase !== 'starting' && $('analysis').hidden && repository.owner.toLowerCase() === state.viewRepository?.owner.toLowerCase() && repository.name.toLowerCase() === state.viewRepository?.name.toLowerCase()) {
+      state.repository = repository;
       const old = state.selectedEdgeId + state.selectedNodeId;
       const oldDepth = state.depth;
       state.depth = 200;
@@ -2989,6 +3041,9 @@ $('layers-btn').addEventListener('click', () => toggleLayers());
       mobile.view = new URLSearchParams(location.search).get('mobile') || 'graph';
       mobile.previous = history.state?.previous || 'graph';
       if (state.depth !== oldDepth) { state.refitPending = true; void load(); return; }
+      setHidden($('landing'), true);
+      setHidden($('explorer'), false);
+      setHidden($('rail-toggle'), false);
       renderChrome(state.view);
       draw();
       if (old !== state.selectedEdgeId + state.selectedNodeId) renderDrawer();
