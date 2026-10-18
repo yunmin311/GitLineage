@@ -193,7 +193,8 @@
         </div>
       </form>
 
-      <div class="hero-trace">
+      <section class="hero-trace reading-module" aria-label="From source to relationship">
+        <h2 class="module-heading">From source to relationship</h2>
         <div class="hero-trace-node">
           <span class="hero-trace-mark" aria-hidden="true"></span>
           <p class="hero-trace-stage">source</p>
@@ -214,10 +215,10 @@
           <p class="hero-trace-stage">ancestry evidence</p>
           <p class="hero-trace-value">Only when evidenced</p>
         </div>
-        <p class="hero-trace-note">How analysis works · every connection opens its source evidence.</p>
-      </div>
+        <p class="hero-trace-note">How analysis works · every connection opens its source evidence. Ancestry is shown only when supported.</p>
+      </section>
 
-      <div class="repository-reference">
+      <div class="repository-reference reading-module">
       <p class="foot" aria-label="Repository address format">
         <span class="fine-k">Repository address</span>
         <code class="fine-mono">/owner/repository</code>
@@ -236,23 +237,26 @@
 
       </div>
 
-      <!-- the three column proof block -->
-      <div class="trust">
-        <div class="trust-cell">
-          <p class="trust-head">Grounded in records</p>
-          <p class="trust-body">No language model writes your provenance. Relationships come from
-            Git objects, manifests and documents &mdash; records the analysis found.</p>
+      <section class="evidence-guide" aria-labelledby="evidence-guide-title">
+        <h2 class="module-heading" id="evidence-guide-title">Reading your graph</h2>
+        <div class="trust reading-module">
+          <article class="trust-cell">
+            <div class="trust-symbol trust-records" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6zM9 9h6M9 13h6M9 17h4"/></svg></div>
+            <h3 class="trust-head">Grounded in records</h3>
+            <p class="trust-body">Relationships come from Git objects, manifests and documents. Open the records behind a connection to see how it was found.</p>
+          </article>
+          <article class="trust-cell">
+            <div class="trust-symbol trust-evidence" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="18" r="3"/><path d="M6 9v9h9M9 6h9v9"/></svg></div>
+            <h3 class="trust-head">Evidence at every connection</h3>
+            <p class="trust-body">Inspect the source, status and supporting evidence. Declared, verified and detected records remain clearly distinguished.</p>
+          </article>
+          <article class="trust-cell">
+            <div class="trust-symbol trust-boundaries" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/><circle cx="8" cy="6" r="2"/><circle cx="16" cy="12" r="2"/><circle cx="10" cy="18" r="2"/></svg></div>
+            <h3 class="trust-head">Different relationships, clearly marked</h3>
+            <p class="trust-body">Dependencies and references are separate from ancestry. Similarity is a lead to investigate, never proof of derivation.</p>
+          </article>
         </div>
-        <div class="trust-cell">
-          <p class="trust-head">Evidence at every connection</p>
-          <p class="trust-body">Open a relationship to inspect its source, status and supporting evidence. Unknown relationships stay unknown.</p>
-        </div>
-        <div class="trust-cell">
-          <p class="trust-head">Different relationships, clearly marked</p>
-          <p class="trust-body">They are different canonical relationship types and are drawn
-            separately. A version range is never shown as an exact version.</p>
-        </div>
-      </div>
+      </section>
 
     </div>
 
@@ -302,14 +306,15 @@
         <h1 class="an-q">Tracing the evidence.</h1>
       </div>
 
-      <!-- the current phase is the page's live object: a raised sheet, not just big type -->
+      <section class="an-work reading-module" aria-labelledby="an-ptitle">
+      <!-- Current phase, path and explanation form one analysis instrument. -->
       <section class="an-phase">
         <div class="an-obj">
           <div class="an-pn">
             <span class="an-pk" id="an-pk"></span>
             <span class="an-rule" aria-hidden="true"></span>
           </div>
-          <p class="an-ptitle" id="an-ptitle"></p>
+          <h2 class="an-ptitle" id="an-ptitle"></h2>
           <p class="an-psub" id="an-psub"></p>
         </div>
       </section>
@@ -321,13 +326,14 @@
       </div>
 
       <p class="an-verb" id="an-verb"></p>
+      </section>
 
       <aside class="an-aside" aria-label="Job and source">
-        <div class="an-grp">
-          <p class="an-grp-cap">Source</p>
+        <div class="an-grp reading-module">
+          <h2 class="an-grp-cap">Source</h2>
           <dl class="an-spec" id="an-src"></dl>
         </div>
-        <details class="an-grp an-receipt">
+        <details class="an-grp an-receipt reading-module">
           <summary class="an-grp-cap">Analysis receipt</summary>
           <dl class="an-spec" id="an-job"></dl>
         </details>
