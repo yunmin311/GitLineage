@@ -199,7 +199,7 @@ function mountRepositoryExplorer(getRepository, deep, bridge) {
   async function request(suffix, data) {
     const response = await fetch("/api/explore" + suffix, data === void 0 ? { signal: AbortSignal.timeout(35000) } : { signal: AbortSignal.timeout(35000), method: "POST", headers: { "content-type": "application/json", "x-gitlineage-csrf": "1" }, body: JSON.stringify(data) });
     const value = await response.json();
-    if (!response.ok) throw Object.assign(new Error(typeof value.error === "string" ? value.error : value.error?.message || "Exploration unavailable"), {status:response.status});
+    if (!response.ok) throw Object.assign(new Error(typeof value.error === "string" ? value.error : value.error?.message || "Exploration unavailable"), {status:response.status,retryAt:value.retryAt,quota:value.quota});
     return value;
   }
   async function operate(fn) {
@@ -247,7 +247,7 @@ function mountRepositoryExplorer(getRepository, deep, bridge) {
       task = await request("/" + task.id);
     }
     if (token !== generation) throw new Error("Repository changed");
-    if (!task.revision) throw new Error(task.error || "Fixed identity unavailable");
+    if (!task.revision) throw Object.assign(new Error(task.error || "Fixed identity unavailable"), {receipt:task.receipt});
     if (previousLimit) task.displayHistoryLimit = previousLimit;
     jobs.set(jobKey(repo), task);
     if (repoNode(repo) !== rootId()) node(repoNode(repo), repo, "repository", { repository: repo, revision: task.revision });
@@ -314,7 +314,7 @@ function mountRepositoryExplorer(getRepository, deep, bridge) {
         const cached = jobs.get(jobKey(repo));
         const task = cached?.commits?.length && cached.state !== 'running' ? cached : await ensure(repo, token);
         if (!current()) return;
-        if (!task.commits.length && task.error) throw new Error(task.error);
+        if (!task.commits.length && task.error) throw Object.assign(new Error(task.error), {receipt:task.receipt});
         show(task); save();
       } catch (error) {
         if (current()) host = openGitLog({ repository: repo }, { close, error, retry: load });

@@ -37,11 +37,13 @@ try {
  await page.goBack();
  assert.equal(await page.locator('#stage').evaluate(n=>(n as HTMLElement).inert),false,'Returning graph remains interactive');
  const quota=await browser.newPage();
- await quota.route('**/api/explore',route=>route.fulfill({status:429,json:{error:'Anonymous quota exhausted; resets 2026-10-17T07:47:39.915Z'}}));
+ // The service also returns 429 for concurrency/frequency limits; retryAt is structured.
+ await quota.route('**/api/explore',route=>route.fulfill({status:429,json:{error:'Anonymous quota exhausted',retryAt:'2030-10-17T07:47:39.915Z',quota:{resetAt:'2030-10-17T07:47:39.915Z'}}}));
  await quota.goto(app.url+'/'+A);await quota.locator('#workspace-history').click();
- await quota.locator('.history-load-title').filter({hasText:'Anonymous limit reached'}).waitFor();
+ await quota.locator('.history-load-title').filter({hasText:'History temporarily limited'}).waitFor();
  assert.equal(await quota.locator('#history-retry').count(),0,'A quota refusal does not encourage futile retries');
  assert.doesNotMatch(await quota.locator('.history-load-message').innerText(),/T07:47/,'Reset date is formatted for reading');
+ assert.match(await quota.locator('.history-load-message').innerText(),/2030/,'Structured retry time is retained');
  await quota.locator('.history-load button').click();
  assert.equal(await quota.locator('#git-history').count(),0,'Quota state returns to usable graph');
  await quota.close();
