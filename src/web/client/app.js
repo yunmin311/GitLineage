@@ -2568,8 +2568,14 @@ function renderNodeDrawer() {
   overview.append(el('p',{class:'entity-description',text:node.fact || node.type}));
   const relationships = edgesForNode(view,node.id).map(id=>view.edges.find(e=>e.id===id)).filter(Boolean);
   const metrics=el('div',{class:'entity-metrics'});
-  for(const [label, count] of [['Origins',relationships.filter(e=>e.family==='ancestry').length],['Dependencies',relationships.filter(e=>e.family==='dependency').length],['References',relationships.filter(e=>['attribution','source-identity'].includes(e.family)).length]]) {
-   const item=el('div');item.append(el('strong',{text:String(count)}),el('span',{text:label}));metrics.append(item);
+  const metricDescriptions={
+   origins:'Direct relationships to this object: recorded ancestry or identical source content. Identical content does not prove derivation.',
+   dependencies:'Direct dependency relationships to this object.',
+   references:'Direct reference relationships to this object.',
+  };
+  for(const [id,label,families] of PERSPECTIVES) {
+   const count=relationships.filter(e=>families.includes(e.family)).length;
+   const item=el('div',{title:metricDescriptions[id]});item.append(el('strong',{text:String(count)}),el('span',{text:label}));metrics.append(item);
   }
   overview.append(metrics);
   if(node.isSubject&&!relationships.some(e=>e.family==='ancestry'))overview.append(el('p',{class:'entity-absence',text:'No recorded ancestry evidence. Dependencies describe use, not origin.'}));

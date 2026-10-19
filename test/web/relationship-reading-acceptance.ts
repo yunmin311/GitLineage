@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
-import { fixtureServer, A } from './fixture-server.ts';
+import { fixtureServer, A, D } from './fixture-server.ts';
 
 const app = await fixtureServer({phaseDelayMs:0});
 const browser = await chromium.launch();
@@ -48,6 +48,23 @@ try {
    assert.equal(await technical.locator('summary').evaluate(n=>{const r=n.getBoundingClientRect();return n.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));}),true,'Focused metadata remains exposed above fixed navigation');
    await page.waitForTimeout(250);
    await page.screenshot({path:`artifacts/relationship-reading/${width}-provenance.png`});
+  }
+  if (!before) {
+   const response=await page.request.get(app.url+'/api/view/'+D+'?depth=200');
+   const {data:view}=await response.json();
+   await page.goto(app.url+'/'+D+'?node='+encodeURIComponent(view.subject.id));
+   if(width<768)await page.locator('#mobile-nav [data-mobile-view=evidence]').click();
+   await page.locator('.entity-metrics').waitFor();
+   await page.screenshot({path:`artifacts/relationship-reading/${width}-counts-current.png`});
+   const metrics=await page.locator('.entity-metrics > div').evaluateAll(ns=>ns.map(n=>({label:n.querySelector('span')!.textContent,count:Number(n.querySelector('strong')!.textContent),title:n.getAttribute('title')})));
+   const relations=view.edges.filter((e:{source:string,target:string})=>e.source===view.subject.id||e.target===view.subject.id);
+   for(const [id,label,families]of [['origins','Origins',['ancestry','source-identity']],['dependencies','Dependencies',['dependency']],['references','References',['attribution']]] as const){
+    const expected=relations.filter((e:{family:string})=>(families as readonly string[]).includes(e.family)).length;
+    assert.equal(metrics.find(m=>m.label===label)!.count,expected,'Inspector '+label+' uses the same relationship grouping as canvas tools');
+    assert.equal(await page.locator('[data-perspective='+id+']').getAttribute('aria-label'),label+' · '+expected,'Root and graph totals agree for the same direct connections');
+   }
+   assert.match(metrics.find(m=>m.label==='Origins')!.title||'',/does not prove (ancestry|derivation)/,'Source identity retains its evidence boundary');
+   await page.screenshot({path:`artifacts/relationship-reading/${width}-counts.png`});
   }
   await page.close();
  }
