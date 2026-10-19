@@ -25,17 +25,18 @@ export function openGitLog(task,{close,more,exploreFile,loading=false,error,retr
   const panel=make('div',undefined,'history-load'+(loading?' is-pending':''));
   panel.setAttribute('role',loading?'status':'alert');
   const message=typeof error==='string'?error:error?.message;
-  const quota=error?.status===429||/quota exhausted/i.test(message||'');
-  const reset=(message||'').match(/resets?\s+(\d{4}-\d{2}-\d{2}T[\d:.]+Z)/i)?.[1];
-  const mark=make('span',loading?'Reading history':quota?'Request allowance':'History unavailable','history-state-mark');panel.append(mark);
-  panel.append(make('p',loading?'Reading recorded commits':quota?'Anonymous limit reached':'History could not be loaded','history-load-title'));
-  const bounded=/response_bytes_exhausted|attempts_exhausted|deadline_exceeded/.test(message||'');
-  const explanation=quota?(reset?'History requests become available '+new Date(reset).toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'})+'. Your graph is still available.':'The anonymous request allowance is exhausted. Return to your graph and try later.'):bounded?'This history read reached its request limit. No commits were inferred. Your repository graph is still available.':message||'Reading recorded commits and their parent links. Your graph stays available while this request runs.';
+  const limited=error?.status===429;
+  const reset=Number.isFinite(Date.parse(error?.retryAt))?error.retryAt:null;
+  const mark=make('span',loading?'Reading history':limited?'Request allowance':'History unavailable','history-state-mark');panel.append(mark);
+  panel.append(make('p',loading?'Reading recorded commits':limited?'History temporarily limited':'History could not be loaded','history-load-title'));
+  const failure=Array.isArray(error?.receipt?.requests)?error.receipt.requests.findLast(r=>r?.request?.outcome&&r.request.outcome!=='success')?.request:null;
+  const bounded=['response_bytes_exhausted','budget_denied','timeout'].includes(failure?.outcome);
+  const explanation=limited?(reset?'Try history again after '+new Date(reset).toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'})+'. Your graph is still available.':'History is temporarily limited. Return to your graph and try later.'):bounded?'This history read reached its request limit. No commits were inferred. Your repository graph is still available.':message||'Reading recorded commits and their parent links. Your graph stays available while this request runs.';
   panel.append(make('p',explanation,'history-load-message'));
   if(bounded){const details=make('details',undefined,'history-error-details');details.append(make('summary','Technical reason'),make('code',message));panel.append(details);}
   if(loading){const tracks=make('div',undefined,'history-pending-tracks');tracks.setAttribute('aria-hidden','true');
    for(let i=0;i<6;i++){const row=make('div',undefined,'history-pending-row');row.style.setProperty('--gl-history-row',i);row.append(make('i'),make('span',undefined,'pending-message'),make('span',undefined,'pending-meta'));tracks.append(row);}panel.append(tracks);}
-  if(retry&&!quota){const action=button('Try again',retry);action.id='history-retry';panel.append(action);}
+  if(retry&&!limited){const action=button('Try again',retry);action.id='history-retry';panel.append(action);}
   if(error){const actions=make('div',undefined,'history-state-actions');const retryButton=panel.querySelector('#history-retry');if(retryButton)actions.append(retryButton);actions.append(button('Return to graph',leave));panel.append(actions);}
   host.append(panel);back.focus();return host;
  }

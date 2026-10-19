@@ -2808,7 +2808,7 @@ button:active { filter:brightness(.97); }
 .rail-reference .lblk h6 { display:none; }
 .rail-reference .statline b { font:600 13px/1.5 var(--sans);overflow-wrap:anywhere; }
 .rail-reference .statline .k { font:11.5px/1.65 var(--sans);overflow-wrap:anywhere; }
-.history-warning { padding:12px 24px;margin:0;background:var(--declared-wash);color:var(--ink-2);font:13px/1.6 var(--sans); }
+.history-warning { padding:12px 24px;margin:0;background:var(--declared-wash);color:var(--ink-2);font:13px/1.6 var(--sans);overflow-wrap:anywhere;max-height:20vh;flex-shrink:0;overflow:auto;touch-action:pan-y; }
 .history-empty { padding:24px; }
 .git-history header { border-bottom:2px solid var(--rule-2);z-index:1; }
 .git-history #history-return { background:transparent;border-color:var(--rule-2); }
