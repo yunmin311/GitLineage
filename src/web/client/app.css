@@ -1106,25 +1106,13 @@ a { color: inherit; }
 }
 
 /* ---- the five-phase path ----
-   done = neutral ink, current = mineral blue, upcoming = a quiet hairline. The current
-   segment also carries the tracer and a solid cap, so the state is never colour alone. */
+   Fixed labels carry stage identity; only the current ordinal changes opacity.
+   Rules reflect reported stages, never elapsed time or a guessed percentage. */
 .an-path { grid-column: 1; margin-top: 24px; }
 .an-path svg { display: block; width: 100%; height: 64px; overflow: visible; }
 .an-seg { stroke: var(--rule-2); stroke-width: 2; fill: none; }
 .an-seg.is-done { stroke: var(--ink-3); }
 .an-seg.is-now { stroke: var(--brand); }
-/* The current segment is filled outright, and it does not draw itself in.
-   V3.3 animated this segment, which was right for a static preview -- one play, once.
-   Here the surface is re-rendered on every poll, roughly every 1.5s, so the draw would
-   restart five times in a run and the segment would pulse rather than read as progress.
-   The tracer still moves, and that is the motion the design is for. */
-.an-node { fill: var(--surface); stroke: var(--rule-2); stroke-width: 1.5; }
-.an-node.is-done { fill: var(--ink-3); stroke: var(--ink-3); }
-.an-node.is-now { fill: var(--brand); stroke: var(--brand); }
-/* The retired green. It is named in the comment above; nothing here paints it. */
-.an-tracer { fill: var(--brand); }
-.an-tracer-halo { fill: var(--brand); opacity: .14; }
-
 .an-plabels { display:grid;gap:12px;margin:0; }
 .an-plabel { display:flex;flex-direction:column;align-items:flex-start;gap:8px;min-width:0;padding:12px 8px 24px;border-top:1px solid var(--rule);color:var(--ink-3); }
 .an-plabel .n { display:grid;place-items:center;width:24px;height:24px;border:1px solid var(--rule-2);border-radius:50%;font:500 11.5px/1 var(--sans);background:var(--surface); }
@@ -1132,7 +1120,7 @@ a { color: inherit; }
 .an-plabel .t-short { display:none; }
 .an-plabel.is-done { color:var(--ink-2); }
 .an-plabel.is-done .n { background:var(--paper-deep); }
-.an-plabel.is-now { color:var(--brand-press);border-top-color:var(--brand);background:var(--brand-wash);border-radius:var(--r-sm); }
+.an-plabel.is-now { color:var(--brand-press);border-top-color:var(--brand);background:transparent; }
 .an-plabel.is-now .n { background:var(--brand);border-color:var(--brand);color:var(--surface-hi); }
 .an-plabel.is-now .t,.an-plabel.is-now .t-short { font-weight:600; }
 
@@ -3003,7 +2991,8 @@ button:active { filter:brightness(.97); }
  .history-pending-row { animation:log-reading 1.8s ease-in-out infinite;animation-delay:calc(var(--gl-history-row)*100ms); }
  .history-body,.history-load,.deep-status-reason[open] code { animation:reading-enter 260ms var(--ease) both; }
  .landing:not([hidden]) .hero,.deep-target,.deep-candidate,.deep-result { animation:reading-enter 260ms var(--ease) both; }
- .an-plabel.is-now { animation:reading-enter 220ms var(--ease) both; }
+ /* Refactoring UI §2.4: emphasize the marker, not an entire travelling panel. */
+ .an-plabel.is-now .n { --reading-floor:.75;animation:log-reading 1.8s ease-in-out infinite; }
  @supports(interpolate-size:allow-keywords) {
   .d-group,.d-classification,.workspace-technical,.history-technical { interpolate-size:allow-keywords; }
   .d-group::details-content,.d-classification::details-content,.workspace-technical::details-content,.history-technical::details-content { block-size:0;overflow:clip;transition:block-size 220ms var(--ease),content-visibility 220ms var(--ease);transition-behavior:allow-discrete; }
@@ -3011,7 +3000,7 @@ button:active { filter:brightness(.97); }
  }
  .deep-action,.history-state-actions .d-action { transition:background 160ms var(--ease),border-color 160ms var(--ease),transform 160ms var(--ease); }
  .deep-action:active,.history-state-actions .d-action:active { transform:translateY(1px); }
- @keyframes log-reading { 0%,100% { opacity:.45; } 50% { opacity:1; } }
+ @keyframes log-reading { 0%,100% { opacity:var(--reading-floor,.45); } 50% { opacity:1; } }
 }
 
 /* V3.3 reading modules: one raised instrument, quiet bounded reference panels.

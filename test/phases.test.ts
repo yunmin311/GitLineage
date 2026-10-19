@@ -283,9 +283,10 @@ test('the tracer uses no gradient, blur, glow or looping animation', () => {
   assert.deepEqual(animations, ['@keyframes tracer-arrive', '@keyframes reading-enter', '@keyframes log-reading']);
   assert.match(declared, /@media\(prefers-reduced-motion:no-preference\)\s*\{[\s\S]*@keyframes reading-enter/, 'entry animation is opt-in when motion is allowed');
   // Pending History now reserves six log rows instead of a rotating alert mark and three bars.
-  // Only these indeterminate request placeholders may loop; the graph tracer still never loops.
+  // Indeterminate request markers may loop. Analysis uses only its current ordinal,
+  // replacing the rejected moving phase panel; the graph tracer still never loops.
   const loops = [...declared.matchAll(/([^{}]+)\{[^{}]*animation:\s*[^;{}]*infinite[^{}]*\}/g)].map(m => m[1]!.trim());
-  assert.deepEqual(loops, ['.history-pending-row'], 'only pending History indicators may loop');
+  assert.deepEqual(loops, ['.history-pending-row', '.an-plabel.is-now .n'], 'only pending History rows and the active analysis ordinal may loop');
   // The tracer is the one brand mark. Frozen V3.3 renamed this token from `--accent` to
   // `--brand`: it was green, which made "what is this analysis doing right now" compete
   // for the reader's attention with the three evidence-status hues. Mineral blue is now

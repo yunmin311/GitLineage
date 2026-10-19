@@ -466,12 +466,13 @@ function renderAnalysis(status, jobId) {
     labels.append(el('div', {
       class: ['an-plabel', done ? 'is-done' : '', now ? 'is-now' : ''].filter(Boolean).join(' '),
       'data-phase': phase,
+      ...(now ? { 'aria-current': 'step' } : {}),
       // Mobile uses a short name; assistive technology retains the full phase name.
       'aria-label': `${at + 1} of ${RUNNING_PHASES.length}. ${ANALYSIS_PHASE_TEXT[phase].t}`,
     }, [
       el('span', { class: 'n', text: String(at + 1) }),
       el('span', { class: 't', text: ANALYSIS_PHASE_TEXT[phase].t }),
-      el('span', { class: 't-short', 'aria-hidden': 'true', text: ['Resolve', 'Collect', 'Connect', 'Check', 'Publish'][at] }),
+      el('span', { class: 't-short', 'aria-hidden': 'true', text: ['Resolve', 'Collect', 'Links', 'Check', 'Publish'][at] }),
     ]));
   }
 
@@ -483,18 +484,9 @@ function renderAnalysis(status, jobId) {
     const done = isDone(i);
     const now = current ? i === running : false;
     const cls = ['an-seg', done ? 'is-done' : '', now ? 'is-now' : ''].filter(Boolean).join(' ');
-    nodes.push(svgEl('line', { class: cls, x1: x, y1: y, x2: x + segW, y2: y }));
-    if (now) {
-      nodes.push(svgEl('line', {
-        class: 'an-seg-fill', x1: x, y1: y, x2: x + segW, y2: y,
-        style: `--len:${segW}`,
-      }));
-      nodes.push(svgEl('circle', { class: 'an-tracer-halo', cx: x + segW / 2, cy: y, r: 10 }));
-      nodes.push(svgEl('circle', { class: 'an-tracer', cx: x + segW / 2, cy: y, r: 4.5 }));
-    }
-    const ncls = ['an-node', done ? 'is-done' : '', now ? 'is-now' : ''].filter(Boolean).join(' ');
-    nodes.push(svgEl('circle', { class: ncls, cx: x, cy: y, r: 4 }));
-    nodes.push(svgEl('circle', { class: ncls, cx: x + segW, cy: y, r: 4 }));
+    // The responsive SVG carries stage rules only: circles would be stretched into
+    // ellipses by preserveAspectRatio=none. HTML ordinals own the stage markers.
+    nodes.push(svgEl('line', { class: cls, x1: x, y1: y, x2: x + segW, y2: y, 'vector-effect': 'non-scaling-stroke' }));
   }
   svg.replaceChildren(...nodes);
   state.phase = status;
