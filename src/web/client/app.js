@@ -2317,24 +2317,19 @@ function nameOf(id) {
 
 function renderEdgeDrawer(edge) {
   const view = state.view;
-  const wrap = el('div');
+  const wrap = el('div', { class: 'relationship-inspector' });
 
   wrap.append(el('p', { class: 'd-eyebrow', text: 'RELATIONSHIP' }));
   wrap.append(el('p', { class: 'd-head', text: capitalise(edge.label) }));
-  wrap.append(
-    el('p', { class: 'd-sub' }, [
-      el('span', { class: 'mono', text: `ontology ${edge.relationshipType}` }),
-      document.createTextNode(' · '),
-      el('span', { class: 'mono', text: edge.directed ? 'directional' : 'symmetric · no arrowhead' }),
-    ]),
-  );
+  wrap.append(el('p', { class: 'd-sub', text: edge.directed ? 'Directed relationship' : 'Mutual relationship · no direction implied' }));
 
-  const pair = el('p', { class: 'd-pair' });
-  pair.append(
-    el('span', { text: nameOf(edge.source) }),
-    el('span', { class: 'd-arrow', text: edge.directed ? '→' : '⇄' }),
-    el('span', { text: nameOf(edge.target) }),
-  );
+  const pair = el('div', { class: 'd-pair' });
+  for (const [role, id] of [[edge.directed ? 'From' : 'Object', edge.source], [edge.directed ? 'To' : 'Related object', edge.target]]) {
+    pair.append(el('div', { class: 'd-endpoint', 'data-endpoint': id }, [
+      el('span', { class: 'd-endpoint-role', text: role }),
+      el('span', { class: 'd-endpoint-name', text: nameOf(id) }),
+    ]));
+  }
   wrap.append(pair);
 
   const pill = el('span', { class: `d-pill st-${edge.status}` });
@@ -2353,12 +2348,13 @@ function renderEdgeDrawer(edge) {
    * implementation detail of the analysis pipeline and the frozen design subordinates
    * exactly this kind of thing below the evidence.
    */
-  const provenance = el('div', { class: 'd-block' });
-  provenance.append(el('p', { class: 'd-block-head is-provenance', text: 'PROVENANCE' }));
+  const provenance = el('details', { class: 'workspace-technical relationship-provenance' });
+  provenance.append(el('summary', { text: 'Recorded provenance' }));
   const kv = el('dl', { class: 'd-kv' });
   const row = (k, v) => {
     kv.append(el('dt', { text: k }), el('dd', { text: String(v) }));
   };
+  row('Relation', edge.relationshipType);
   row('Revision', `${view.revision.ref || view.revision.defaultBranch || 'HEAD'} @ ${view.revision.shortCommit}`);
   row('Analyzed', formatTime(view.revision.analyzedAt));
   row('Source', state.cacheHit ? `cached (${formatDuration(state.meta?.elapsedMs ?? 0)})` : 'fresh analysis');
@@ -2378,18 +2374,16 @@ function renderEdgeDrawer(edge) {
       el('p', { class: 'mono', text: `showing ${records.length} of ${edge.evidenceCount} evidence records` }),
     );
   }
-  // Evidence first, then provenance: the record is what the reader came for.
-  wrap.append(evidenceBlock);
-  wrap.append(provenance);
-
-  // Why, anchored to the raw record
+  // Interpret the record first; raw evidence still precedes technical provenance.
   const why = el('div', { class: 'd-block' });
-  why.append(el('p', { class: 'd-block-head', text: 'WHY THIS IS ' + edge.status }));
+  why.append(el('p', { class: 'd-block-head', text: 'WHAT THIS RECORD SHOWS' }));
   const whyText = verificationSentence(edge, records);
   const whyBox = el('p', { class: `d-why st-${edge.status}` });
   whyBox.textContent = whyText;
   why.append(whyBox);
   wrap.append(why);
+  wrap.append(evidenceBlock);
+  wrap.append(provenance);
 
   const actions = el('div', { class: 'd-actions' });
   const copy = el('button', { class: 'd-action', text: 'Copy link' });

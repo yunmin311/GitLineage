@@ -74,14 +74,16 @@ test('the analyzer name is not in the drawer provenance block', () => {
   assert.match(drawer, /row\('Evidence'/, 'provenance still counts the records');
 });
 
-test('the drawer block order is identity, evidence, provenance, rationale, actions', () => {
+// Rationale now precedes records so evidence boundaries are read before technical data.
+// Browser coverage in relationship-reading-acceptance checks the rendered reading order.
+test('the drawer block order is identity, rationale, evidence, provenance, actions', () => {
   const body = code(APP);
   const at = (needle: string) => body.indexOf(needle);
   const order = [
     at('text: \'RELATIONSHIP\''),
+    at('wrap.append(why)'),
     at('wrap.append(evidenceBlock)'),
     at('wrap.append(provenance)'),
-    at('WHY THIS IS '),
     at('class: \'d-actions\''),
   ];
   for (const [i, position] of order.entries()) {

@@ -1041,6 +1041,7 @@ a { color: inherit; }
    ========================================================================== */
 
 .analysis {
+  --reading-floor: .75;
   flex: 1 1 auto; min-height: 0;
   overflow-y: auto; overflow-x: hidden;
   /* Analysis-owned V3.3 steps. The Explorer's `--t-*` roles are untouched. */
@@ -2992,7 +2993,7 @@ button:active { filter:brightness(.97); }
  .history-body,.history-load,.deep-status-reason[open] code { animation:reading-enter 260ms var(--ease) both; }
  .landing:not([hidden]) .hero,.deep-target,.deep-candidate,.deep-result { animation:reading-enter 260ms var(--ease) both; }
  /* Refactoring UI §2.4: emphasize the marker, not an entire travelling panel. */
- .an-plabel.is-now .n { --reading-floor:.75;animation:log-reading 1.8s ease-in-out infinite; }
+ .an-plabel.is-now .n { animation:log-reading 1.8s ease-in-out infinite; }
  @supports(interpolate-size:allow-keywords) {
   .d-group,.d-classification,.workspace-technical,.history-technical { interpolate-size:allow-keywords; }
   .d-group::details-content,.d-classification::details-content,.workspace-technical::details-content,.history-technical::details-content { block-size:0;overflow:clip;transition:block-size 220ms var(--ease),content-visibility 220ms var(--ease);transition-behavior:allow-discrete; }
@@ -3112,3 +3113,24 @@ button:active { filter:brightness(.97); }
 @media(max-width:767px) {
  .git-history.show-commit .history-footer { display:none; }
 }
+
+/* Relationship reading: separate endpoints, interpretation, evidence and metadata.
+   Refactoring UI: hierarchy through grouping and secondary information disclosure. */
+.relationship-inspector .d-pair {
+ display:grid;gap:var(--s3);margin:var(--s4) 0;
+ padding:var(--s3) 0;border-block:1px solid var(--rule);
+}
+.relationship-inspector .d-endpoint { display:grid;gap:var(--s1);min-width:0; }
+.relationship-inspector .d-endpoint-role {
+ font:var(--t-label-size)/1.5 var(--sans);color:var(--ink-3);
+}
+.relationship-inspector .d-endpoint-name { color:var(--ink);overflow-wrap:anywhere; }
+.relationship-inspector .d-sub { margin-bottom:0; }
+.relationship-inspector .d-data { grid-template-columns:minmax(0,1fr);gap:var(--s1); }
+.relationship-inspector .d-data dt { font:var(--t-label-size)/1.5 var(--sans);color:var(--ink-3); }
+.relationship-inspector .d-data dd { margin:0 0 var(--s2);word-break:normal;overflow-wrap:anywhere; }
+.relationship-inspector .d-data dd:last-child { margin-bottom:0; }
+.relationship-inspector .d-card-loc { overflow-wrap:anywhere;word-break:normal; }
+.relationship-inspector .d-src { min-height:44px;align-content:center; }
+.relationship-inspector .relationship-provenance summary { min-height:44px;box-sizing:border-box; }
+.relationship-inspector .d-why { font:var(--t-secondary-size)/1.65 var(--sans); }

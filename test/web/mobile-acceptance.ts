@@ -69,8 +69,14 @@ try{
  await actualRow.locator('.mobile-relation-evidence').scrollIntoViewIfNeeded();
  const beforeReadingList = (await measure(page)).relationsScroll;
  await actualRow.locator('.mobile-relation-evidence').click();const reading=await measure(page);
+ // Raw relation identifiers moved into an intentional disclosure; verify them after
+ // opening it, retaining the exact status, locator, quote and record-count checks.
+ const provenance=page.locator('.relationship-provenance');
+ await provenance.locator('summary').click();
  const text=await page.locator('#drawer-inner').innerText();const cards=view!.evidenceByRelationship[edge.id]??[];
  check(`${label} exact relationship/status/all provided evidence readable`,reading.selection===edge.id&&text.includes(edge.relationshipType)&&text.includes(edge.status)&&cards.every(c=>(!c.locator||text.includes(c.locator))&&(!c.observedText||text.includes(c.observedText)))&&await page.locator('.d-card').count()===cards.length,{id:edge.id,records:cards.length,total:edge.evidenceCount,truncated:edge.evidenceTruncated});
+ await provenance.locator('summary').click();
+ await page.locator('#drawer-inner').evaluate(n=>{n.scrollTop=0;});
  await page.screenshot({path:`${out}/${width}-evidence.png`});
  await scroll(page,cdp,'#drawer-inner');const readScroll=await measure(page);
  check(`${label} Evidence native scroll never moves graph`,readScroll.evidenceScroll>0&&same(reading.camera,readScroll.camera)&&readScroll.selection===edge.id,{reading,readScroll});
