@@ -3134,3 +3134,28 @@ button:active { filter:brightness(.97); }
 .relationship-inspector .d-src { min-height:44px;align-content:center; }
 .relationship-inspector .relationship-provenance summary { min-height:44px;box-sizing:border-box; }
 .relationship-inspector .d-why { font:var(--t-secondary-size)/1.65 var(--sans); }
+
+/* History tools: quiet branch emphasis and a continuation attached to the log.
+   Refactoring UI §2.8 / §3.3: controls sized to their role, not the viewport. */
+.history-branch-picker { position:relative;order:3;flex:0 1 240px;min-width:0;font:var(--t-secondary-size)/1.5 var(--sans); }
+.history-branch-picker > summary { display:flex;align-items:center;gap:var(--s2);min-height:44px;padding-inline:var(--s3);cursor:pointer;list-style:none;border-bottom:1px solid var(--rule-2);box-sizing:border-box; }
+.history-branch-picker > summary::-webkit-details-marker { display:none; }
+.history-control-label { color:var(--ink-3);font:var(--t-label-size)/1.5 var(--sans); }
+.history-branch-picker > summary span:last-child { min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--brand);font-weight:600; }
+.history-branch-picker > summary::after { content:'⌄';margin-left:auto;color:var(--ink-3); }
+.history-branch-picker[open] > summary { border-color:var(--brand);background:var(--brand-wash); }
+.history-branch-choices { position:absolute;right:0;top:100%;width:280px;max-width:calc(100vw - 32px);max-height:320px;overflow:auto;overscroll-behavior:contain;box-sizing:border-box;padding:var(--s2);background:var(--surface-hi);border:1px solid var(--rule-2);z-index:3; }
+.history-branch-choices > p { margin:var(--s2); }
+.history-branch-choices .d-action { display:flex;align-items:center;justify-content:flex-start;gap:var(--s2);width:100%;min-height:44px;margin:0;padding:var(--s2);border:0;background:transparent;text-align:left;overflow-wrap:anywhere; }
+.history-branch-choices .d-action::before { content:'';width:var(--s3);flex:none; }
+.history-branch-choices [aria-pressed=true] { background:var(--brand-wash);color:var(--brand); }
+.history-branch-choices [aria-pressed=true]::before { content:'✓'; }
+.history-list .history-footer { flex-direction:column;align-items:flex-start;gap:var(--s2);padding:var(--s3) 0 var(--s5);border:0;background:transparent; }
+.history-list .history-footer #history-more { max-width:100%;padding:var(--s2) var(--s3);border:0;background:transparent;color:var(--brand);text-align:left; }
+.history-list #history-more::before { content:'↓';margin-right:var(--s2); }
+.history-list .history-footer-note { display:block;max-width:45ch;overflow-wrap:anywhere;margin:0 var(--s3); }
+.history-list .history-footer-note:empty { display:none; }
+@media(max-width:767px) {
+ .history-branch-picker { flex:1 1 auto; }
+ .history-branch-choices { width:100%; }
+}
