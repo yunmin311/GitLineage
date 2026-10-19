@@ -36,7 +36,7 @@
     "test:exploration": "node test/web/public-exploration-acceptance.ts && node test/web/discovery-throttle-acceptance.ts",
     "preview:workspace": "node test/web/workspace-preview.ts",
     "preview:public": "GITLINEAGE_CACHE=\"$HOME/.local/state/gitlineage-public-preview/cache\" GITLINEAGE_JOB_STORE=\"$HOME/.local/state/gitlineage-public-preview/jobs\" GITLINEAGE_PUBLIC_EXPLORATION=1 node src/web/serve.ts --host 127.0.0.1 --port 8084 --client dist/web",
-    "test:unification": "node test/web/unification-acceptance.ts && node test/web/history-loading-acceptance.ts && node test/web/component-motion-acceptance.ts && node test/web/site-language-acceptance.ts && node test/web/surface-modules-acceptance.ts && node test/web/hierarchy-refinement-acceptance.ts",
+    "test:unification": "node test/web/unification-acceptance.ts && node test/web/history-loading-acceptance.ts && node test/web/component-motion-acceptance.ts && node test/web/site-language-acceptance.ts && node test/web/surface-modules-acceptance.ts && node test/web/hierarchy-refinement-acceptance.ts && node test/web/workflow-hierarchy-acceptance.ts",
     "test:spatial-routing": "node test/web/spatial-routing-acceptance.ts"
   },
   "dependencies": {

@@ -50,7 +50,7 @@ export async function mountDeepPreview(getRepository) {
   const value=await r.json();if(!r.ok)throw Object.assign(new Error(value.error||'Preview unavailable'),{code:value.code,retryAt:value.retryAt});return value;
  }
  function blocked(path){return polling||Date.now()<nextStart||(path==='/search'&&Date.now()<nextSearch);}
- function busy(value,notify=true){if(notify)queueMicrotask(()=>listeners.forEach(fn=>fn()));const wait=Date.now()<nextStart;search.disabled=value||wait||Date.now()<nextSearch;input.disabled=value;sourcePreview.disabled=value||wait||selected.size===0||!!sourceTask;compare.disabled=value||wait||!sourceTask||fileChoices.size!==selected.size+1||[...fileChoices.values()].some(paths=>paths.size===0);cancel.hidden=!value||current?.state!=='running';}
+ function busy(value,notify=true){if(notify)queueMicrotask(()=>listeners.forEach(fn=>fn()));sourcePreview.textContent=selected.size?`Source Files · ${selected.size} selected →`:'Source Files →';const wait=Date.now()<nextStart;search.disabled=value||wait||Date.now()<nextSearch;input.disabled=value;sourcePreview.disabled=value||wait||selected.size===0||!!sourceTask;compare.disabled=value||wait||!sourceTask||fileChoices.size!==selected.size+1||[...fileChoices.values()].some(paths=>paths.size===0);cancel.hidden=!value||current?.state!=='running';}
  // One deadline timer survives repository changes. It only updates controls/text; never requests.
  function refreshWait(){clearTimeout(waitTimer);busy(polling,false);const now=Date.now(),deadline=Math.max(nextStart,nextSearch);
   if(!polling&&waitNotice){const left=Math.max(0,Math.ceil((waitNotice.until-now)/1000));status.dataset.state='notice';status.textContent=left?`${waitNotice.message} · Retry in ${left} s.`:'Ready to retry. No new request has been made.';if(!left)waitNotice=null;}
@@ -77,8 +77,11 @@ export async function mountDeepPreview(getRepository) {
   const list=output?.result?.candidates??[];
   if(!list.length)candidates.append(el('p',output?.result?.coverage.state==='complete_within_requested'?'No candidates found within this query and budget.':'Search incomplete or unavailable. See the failure receipt.'));
   for(const c of list){const card=el('article',undefined,'deep-candidate'),check=el('input');check.type='checkbox';check.value=String(c.candidate.repositoryId);check.disabled=c.candidate.conflicts.includes('name_id_collision');
-   const label=el('label'),name=el('span',`${c.candidate.fullName} · ID ${c.candidate.repositoryId}`);label.append(check,name);card.append(label,el('p','Candidate relevance: metadata search rank · code similarity: not compared','deep-note'));
-   card.append(el('p',c.discoveries.map(d=>`${d.source} · ${d.version}; ${d.reason}; query: ${d.query}; page ${d.page}; rank ${d.rank}`).join('\n'),'deep-note'),el('p','Verification: pending · Lineage claim: none','deep-warning'));
+   const label=el('label'),name=el('span',c.candidate.fullName);label.append(check,name);card.append(label,el('p',`ID ${c.candidate.repositoryId} · Metadata match · code not compared`,'deep-candidate-meta'));
+   card.append(el('p','Verification: pending · Lineage claim: none','deep-candidate-state'));
+   const provenance=el('details',undefined,'workspace-technical deep-candidate-provenance');provenance.append(el('summary','Why this candidate?'));
+   for(const d of c.discoveries)provenance.append(el('p',`${d.source} · ${d.version}; ${d.reason}; query: ${d.query}; page ${d.page}; rank ${d.rank}`));
+   card.append(provenance);
    check.addEventListener('change',()=>{if(check.checked&&selected.size>=2){check.checked=false;setStatus('Select at most two candidates.','notice');return;}check.checked?selected.add(c.candidate.repositoryId):selected.delete(c.candidate.repositoryId);busy(polling);});candidates.append(card);
   }usage(task);revealInstrument(candidates);
  }

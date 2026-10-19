@@ -3102,3 +3102,24 @@ button:active { filter:brightness(.97); }
   .an-receipt[open]::details-content { block-size:auto; }
  }
 }
+
+/* Reading hierarchy: local History navigation and Discovery candidate provenance. */
+.git-history .history-heading .history-kicker { overflow-wrap:anywhere; }
+.history-detail #history-list-return {
+ width:auto;min-height:44px;margin:0 0 var(--s3);padding:8px 0;
+ border:0;background:transparent;box-shadow:none;color:var(--ink-2);
+}
+.deep-candidate .deep-candidate-meta,.deep-candidate .deep-candidate-state {
+ margin:var(--s2) 0;font:var(--t-secondary-size)/1.6 var(--sans);overflow-wrap:anywhere;
+}
+.deep-candidate-meta { color:var(--ink-3); }
+.deep-candidate-state { color:var(--declared); }
+.deep-candidate .deep-candidate-provenance {
+ margin:var(--s3) 0 0;padding:var(--s2) 0 0;border-top:1px solid var(--rule);border-bottom:0;
+ font:var(--t-secondary-size)/1.6 var(--sans);color:var(--ink-2);
+}
+.deep-candidate .deep-candidate-provenance summary { min-height:44px;align-content:center;cursor:pointer; }
+.deep-candidate .deep-candidate-provenance p { margin:var(--s2) 0;font:var(--t-secondary-size)/1.6 var(--sans);overflow-wrap:anywhere; }
+@media(max-width:767px) {
+ .git-history.show-commit .history-footer { display:none; }
+}
