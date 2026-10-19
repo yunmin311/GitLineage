@@ -8,6 +8,7 @@ import type {FileChoice} from '../discovery-v2/preview.ts';
 import type {Transport} from '../../src/discovery/search-provider.ts';
 export type {Transport} from '../../src/discovery/search-provider.ts';
 import {createRepositoryExplorer} from './repository-explorer.ts';
+import {DiscoveryRequestError,providerRetryAt} from '../discovery-v2/request-error.ts';
 
 export function createPublicExploration(options:{transport?:Transport;cooldownMs?:number;origin?:string;trustedProxies?:string[];attemptsPerHour?:number;attemptsPerAddress?:number;startIntervalMs?:number}={}) {
  const fixedOrigin=options.origin?new URL(options.origin):null;
@@ -19,19 +20,22 @@ export function createPublicExploration(options:{transport?:Transport;cooldownMs
  const starts=new Map<string,number>(),costs=new Map<string,number>(),scope=new AsyncLocalStorage<string>();let spentAttempts=0,windowEnd=Date.now()+3600000,quotaUntil=0;
  function refresh(){if(Date.now()>=windowEnd){spentAttempts=0;windowEnd=Date.now()+3600000;costs.clear();starts.clear();}}
  const usage=()=>{refresh();return {spentAttempts,attemptsPerHour:limits.global,attemptsPerAddress:limits.address,resetAt:new Date(windowEnd).toISOString(),scope:'actual HTTP attempts charged before dispatch, including failures; per process; restart resets anonymous quota'};};
- function available(address:string){refresh();if(Date.now()<quotaUntil)throw new Error('GitHub quota unavailable until '+new Date(quotaUntil).toISOString());if(spentAttempts>=limits.global||(costs.get(address)??0)>=limits.address)throw new Error('Anonymous quota exhausted; resets '+new Date(windowEnd).toISOString());}
+ function available(address:string){refresh();
+  if(Date.now()<quotaUntil)throw new DiscoveryRequestError('GITHUB_RATE_LIMIT','GitHub quota unavailable until '+new Date(quotaUntil).toISOString(),quotaUntil);
+  if(spentAttempts>=limits.global)throw new DiscoveryRequestError('ANONYMOUS_GLOBAL_QUOTA','Anonymous quota exhausted; resets '+new Date(windowEnd).toISOString(),windowEnd);
+  if((costs.get(address)??0)>=limits.address)throw new DiscoveryRequestError('ANONYMOUS_ADDRESS_QUOTA','Anonymous quota exhausted; resets '+new Date(windowEnd).toISOString(),windowEnd);
+ }
  const send=(res:ServerResponse,status:number,value:unknown)=>{res.writeHead(status,{'content-type':'application/json','cache-control':'no-store','x-content-type-options':'nosniff'});res.end(JSON.stringify(value));};
  const transport:Transport=async(url,init)=>{
   const address=scope.getStore();if(!address)throw new Error('Request owner unavailable');available(address);spentAttempts++;costs.set(address,(costs.get(address)??0)+1);
   const response=await (options.transport??fetch)(url,init);
-  if([403,429].includes(response.status)||response.headers.get('x-ratelimit-remaining')==='0'){
-   const reset=Number(response.headers.get('x-ratelimit-reset'))*1000,retry=Number(response.headers.get('retry-after'))*1000;
-   quotaUntil=Math.max(quotaUntil,reset||0,Date.now()+(retry||60000));
+  if([403,429].includes(response.status)||response.headers.get('x-ratelimit-remaining')==='0'||response.headers.has('retry-after')){
+   quotaUntil=Math.max(quotaUntil,providerRetryAt(response.headers));
   }return response;
  };
  // Both engines consume the same process-wide provider cooldown and actual request pool.
  const engine=createPreview({...options,enrichedSearch:true,transport}),repoEngine=createRepositoryExplorer({...options,transport});
- function reserve(address:string){available(address);const last=starts.get(address);if(last!==undefined&&Date.now()-last<limits.interval)throw new Error('Anonymous frequency limit; retry in '+Math.ceil((limits.interval-(Date.now()-last))/1000)+' seconds');if(repoEngine.busy()||engineBusy())throw new Error('Shared service busy; retry after current operation');}
+ function reserve(address:string){available(address);const last=starts.get(address);if(last!==undefined&&Date.now()-last<limits.interval)throw new DiscoveryRequestError('ANONYMOUS_START_INTERVAL','Anonymous frequency limit; retry in '+Math.ceil((limits.interval-(Date.now()-last))/1000)+' seconds',last+limits.interval);if(repoEngine.busy()||engineBusy())throw new DiscoveryRequestError('SERVICE_BUSY','Shared service busy; retry after current operation');}
  function engineBusy(){return [...owners].some(([id,o])=>o.kind==='deep'&&(()=>{try{return engine.get(id).state==='running';}catch{return false;}})());}
  function debit(address:string){starts.set(address,Date.now());}
  async function handler(req:IncomingMessage,res:ServerResponse){
@@ -64,17 +68,18 @@ export function createPublicExploration(options:{transport?:Transport;cooldownMs
     const task=scope.run(address,()=>kind==='deep'?engine.startSearch(repository):repoEngine.start(repository));debit(address);remember(task.id,kind);send(res,202,{...task,serviceQuota:usage()});return;
    }
    if(['/api/deep-search/sources','/api/deep-search/compare'].includes(url.pathname)&&typeof body.searchId==='string'){
-    if(repoEngine.busy())throw new Error('Shared service busy');const owner=owned(body.searchId);if(owner.kind!=='deep')throw new Error('Search task required');
+    if(repoEngine.busy())throw new DiscoveryRequestError('SERVICE_BUSY','Shared service busy');const owner=owned(body.searchId);if(owner.kind!=='deep')throw new Error('Search task required');
     if(body.selection){const choice=body.selection as FileChoice;const source=owned(choice.sourceTaskId);if(source.searchId!==body.searchId)throw new Error('Source task mismatch');}
     available(address);const task=scope.run(address,()=>url.pathname.endsWith('/sources')?engine.startSources(body.searchId as string,body.candidateIds):engine.startCompare(body.searchId as string,body.candidateIds,body.selection as FileChoice|undefined));
     remember(task.id,'deep',body.searchId);send(res,202,{...task,serviceQuota:usage()});return;
    }
    const match=url.pathname.match(/^\/api\/(deep-search\/tasks|explore)\/([a-f0-9]{24})\/(cancel|directory|revision|history|branches|manifest)$/);
    if(match){const id=match[2]!,owner=owned(id);if(match[3]==='cancel'){owner.kind==='deep'?engine.cancel(id):repoEngine.cancel(id);send(res,200,{cancelled:true});return;}
-    if(engineBusy())throw new Error('Shared service busy');if(owner.kind!=='explore')throw new Error('Repository exploration required');
+    if(engineBusy())throw new DiscoveryRequestError('SERVICE_BUSY','Shared service busy');if(owner.kind!=='explore')throw new Error('Repository exploration required');
     available(address);const task=await scope.run(address,()=>match[3]==='directory'?repoEngine.directory(id,body.path):match[3]==='history'?repoEngine.history(id):match[3]==='branches'?repoEngine.branches(id):match[3]==='manifest'?repoEngine.manifest(id,body.path):repoEngine.revision(id,body.sha));send(res,200,{...task,serviceQuota:usage()});return;}
    send(res,400,{error:'Invalid exploration request'});
-  }catch(error){const message=error instanceof Error?error.message:'Exploration unavailable';send(res,/quota|frequency|busy|cooldown|exhausted/.test(message)?429:400,{error:message,quota:usage(),retryAt:new Date(Math.max(quotaUntil,Date.now()+limits.interval,spentAttempts>=limits.global||(costs.get(address)??0)>=limits.address?windowEnd:0)).toISOString()});}
+  }catch(error){const failure=error instanceof DiscoveryRequestError?error:new DiscoveryRequestError('INVALID_REQUEST',error instanceof Error?error.message:'Exploration unavailable',undefined,400);
+   send(res,failure.status,{error:failure.message,code:failure.code,quota:usage(),...(failure.retryAt?{retryAt:failure.retryAt}:{})});}
  }
  return {handler,usage,wait:async(id:string)=>{const o=owners.get(id);return o?.kind==='deep'?engine.wait(id):repoEngine.wait(id);},close:async()=>{await Promise.all([engine.close(),repoEngine.close()]);}};
 }

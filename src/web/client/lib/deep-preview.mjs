@@ -41,12 +41,33 @@ export async function mountDeepPreview(getRepository) {
  }
  const listeners=new Set();
  let generation=0;
- let current=null,parent=null,selected=new Set(),polling=false,sourceTask=null,fileChoices=new Map(),nextStart=0;
+ let current=null,parent=null,selected=new Set(),polling=false,sourceTask=null,fileChoices=new Map(),nextStart=0,nextSearch=0,waitTimer=null,waitNotice=null;
  dialog.addEventListener('close',()=>launcher.focus());
  // Stop Explorer shortcuts while a native modal owns focus. Its own Escape closes it.
  dialog.addEventListener('keydown',event=>{event.stopPropagation();if(capabilities.scope==='anonymous'&&event.key==='Escape'){event.preventDefault();dialog.close();}});
- async function request(path,data){const r=await fetch('/api/deep-search'+path,data===undefined?{}:{method:'POST',headers:{'content-type':'application/json','x-gitlineage-csrf':'1'},body:JSON.stringify(data)});const value=await r.json();if(!r.ok)throw new Error((value.error||'Preview unavailable')+(value.retryAt?' · Retry after '+new Date(value.retryAt).toLocaleTimeString():''));return value;}
- function busy(value){queueMicrotask(()=>listeners.forEach(fn=>fn()));const wait=Date.now()<nextStart;search.disabled=value||wait;input.disabled=value;sourcePreview.disabled=value||wait||selected.size===0||!!sourceTask;compare.disabled=value||wait||!sourceTask||fileChoices.size!==selected.size+1||[...fileChoices.values()].some(paths=>paths.size===0);cancel.hidden=!value||current?.state!=='running';}
+ async function request(path,data){
+  let r;try{r=await fetch('/api/deep-search'+path,data===undefined?{}:{method:'POST',headers:{'content-type':'application/json','x-gitlineage-csrf':'1'},body:JSON.stringify(data)});}catch{throw Object.assign(new Error('Network unavailable. Your selections are retained; retry when connected.'),{code:'NETWORK_ERROR'});}
+  const value=await r.json();if(!r.ok)throw Object.assign(new Error(value.error||'Preview unavailable'),{code:value.code,retryAt:value.retryAt});return value;
+ }
+ function blocked(path){return polling||Date.now()<nextStart||(path==='/search'&&Date.now()<nextSearch);}
+ function busy(value,notify=true){if(notify)queueMicrotask(()=>listeners.forEach(fn=>fn()));const wait=Date.now()<nextStart;search.disabled=value||wait||Date.now()<nextSearch;input.disabled=value;sourcePreview.disabled=value||wait||selected.size===0||!!sourceTask;compare.disabled=value||wait||!sourceTask||fileChoices.size!==selected.size+1||[...fileChoices.values()].some(paths=>paths.size===0);cancel.hidden=!value||current?.state!=='running';}
+ // One deadline timer survives repository changes. It only updates controls/text; never requests.
+ function refreshWait(){clearTimeout(waitTimer);busy(polling,false);const now=Date.now(),deadline=Math.max(nextStart,nextSearch);
+  if(!polling&&waitNotice){const left=Math.max(0,Math.ceil((waitNotice.until-now)/1000));status.dataset.state='notice';status.textContent=left?`${waitNotice.message} · Retry in ${left} s.`:'Ready to retry. No new request has been made.';if(!left)waitNotice=null;}
+  const hint=status.querySelector('.deep-cooldown');hint?.remove();
+  if(!polling&&!waitNotice&&deadline>now){const hint=el('span',`Next Discovery request in ${Math.ceil((deadline-now)/1000)} s.`,'deep-status-phase deep-cooldown');status.append(hint);}
+  if(deadline>now)waitTimer=setTimeout(refreshWait,Math.min(1000,deadline-now+10));
+ }
+ function requestFailure(error){const notices=new Set(['ANONYMOUS_START_INTERVAL','ANONYMOUS_ADDRESS_QUOTA','ANONYMOUS_GLOBAL_QUOTA','SERVICE_BUSY','DISCOVERY_COOLDOWN','DISCOVERY_FREQUENCY','GITHUB_RATE_LIMIT']);
+  const messages={ANONYMOUS_START_INTERVAL:'Please wait before starting a new search',ANONYMOUS_ADDRESS_QUOTA:'This address has used its hourly request allowance',ANONYMOUS_GLOBAL_QUOTA:'The shared hourly request allowance is used',SERVICE_BUSY:'The shared service is busy. Please retry after the current task',DISCOVERY_COOLDOWN:'Please wait before the next Discovery stage',DISCOVERY_FREQUENCY:'The Discovery per-minute task allowance is used',GITHUB_RATE_LIMIT:'GitHub is temporarily limiting requests'};
+  const until=Date.parse(error.retryAt),waiting=notices.has(error.code);waitNotice=null;
+  setStatus(waiting?messages[error.code]:error.message,waiting?'notice':'failed');
+  if(waiting&&Number.isFinite(until)&&until>Date.now()){
+   if(error.code==='ANONYMOUS_START_INTERVAL')nextSearch=Math.max(nextSearch,until);else nextStart=Math.max(nextStart,until);
+   waitNotice={message:messages[error.code],until};
+  }
+  refreshWait();
+ }
  function details(title,content){if(capabilities.scope==='anonymous'){const d=el('details',undefined,'workspace-technical');d.append(el('summary',title),button('',`Export JSON · ${title}`,()=>downloadJSON(content,`gitlineage-${title.toLowerCase().replace(/[^a-z0-9]+/g,'-')}.json`)));return d;}const d=el('details'),s=el('summary',title),pre=el('pre',typeof content==='string'?content:JSON.stringify(content,null,2));d.append(s,pre);return d;}
  function downloadJSON(value,name){const url=URL.createObjectURL(new Blob([JSON.stringify(value,null,2)],{type:'application/json'})),a=el('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
  function score(value){return value===null||value===undefined?'Unavailable':`${(value*100).toFixed(2)}%`;}
@@ -104,7 +125,7 @@ export async function mountDeepPreview(getRepository) {
   if(task.sourceExport)results.append(button('deep-source-download','Download source listing Sidecar',()=>downloadJSON(task.sourceExport,'gitlineage-source-sidecar.json')));
  }
  function renderScope(){const scope=document.querySelector('#deep-scope');if(scope)scope.textContent=`Selected scope: ${[...fileChoices].map(([id,paths])=>`ID ${id}: ${paths.size} file(s) [${[...paths].join(', ')}]`).join(' ↔ ')}. Cross-product file pairs; repository-wide coverage unknown. HTTP remaining: ${capabilities.budget.attempts-(sourceTask?.sources?.usage.attempts??0)}; selected blob reads + final identity checks: ${[...fileChoices.values()].reduce((n,paths)=>n+paths.size,0)+fileChoices.size}. Exhausted work stays partial.`;}
- async function startSources(){if(polling||!parent||!selected.size)return;await startTask('/sources',{searchId:parent.id,candidateIds:[...selected]});}
+ async function startSources(){if(blocked('/sources')||!parent||!selected.size)return;await startTask('/sources',{searchId:parent.id,candidateIds:[...selected]});}
  function setStatus(message,state='ready'){const changed=status.dataset.state!==state||status.firstChild?.textContent!==message;status.textContent=message;status.dataset.state=state;if(changed)revealInstrument(status);}
  function taskStatus(task){
   const names={search:'Candidate search',sources:'Source listing',compare:'Source comparison'};
@@ -113,19 +134,19 @@ export async function mountDeepPreview(getRepository) {
   if(task.state==='running'){const phase=el('span','Reading '+task.phase.replaceAll('_',' ')+'…','deep-status-phase');status.append(phase);}
   if(task.error){const reason=el('details',undefined,'deep-status-reason');reason.append(el('summary','Request details'),el('code',task.error));status.append(reason);}
  }
- async function watch(task){const version=generation;nextStart=Date.parse(task.createdAt)+capabilities.cooldownMs;current=task;polling=true;busy(true);
+ async function watch(task){const version=generation;nextStart=Math.max(nextStart,Date.parse(task.createdAt)+capabilities.cooldownMs);waitNotice=null;current=task;polling=true;busy(true);
   try{while(current.state==='running'){taskStatus(current);await new Promise(r=>setTimeout(r,capabilities.scope==='private beta'?1000:250));const update=await request(`/tasks/${task.id}`);if(version!==generation)return;current=update;}
-   if(version!==generation)return;taskStatus(current);current.kind==='search'?showSearch(current):current.kind==='sources'?showSources(current):showComparison(current);
-  }catch(error){if(version===generation)setStatus(error.message,'failed');}
-  finally{if(version===generation){polling=false;busy(false);const delay=nextStart-Date.now();if(delay>0){const cooldown=el('span','Next request after '+new Date(nextStart).toLocaleTimeString(),'deep-status-phase');status.append(cooldown);setTimeout(()=>{if(version===generation){cooldown.remove();busy(polling);}},delay+10);}}}
+   if(version!==generation)return;taskStatus(current);if(current.code)requestFailure(Object.assign(new Error(current.error||'Discovery unavailable'),{code:current.code,retryAt:current.retryAt}));current.kind==='search'?showSearch(current):current.kind==='sources'?showSources(current):showComparison(current);
+  }catch(error){if(version===generation)requestFailure(error);}
+  finally{if(version===generation){polling=false;busy(false);refreshWait();}}
  }
  // Claim the request before POST returns, and retain the generation that initiated it.
- async function startTask(path,data,prepare=()=>{}){const version=generation;polling=true;busy(true);
+ async function startTask(path,data,prepare=()=>{}){if(blocked(path))return;const version=generation;waitNotice=null;polling=true;busy(true);
   try{const task=await request(path,data);if(version!==generation){if(task.state==='running')void request(`/tasks/${task.id}/cancel`,{}).catch(()=>{});return;}prepare();await watch(task);}
-  catch(error){if(version===generation){setStatus(error.message,'failed');polling=false;busy(false);}}
+  catch(error){if(version===generation){polling=false;requestFailure(error);}}
  }
- form.addEventListener('submit',async event=>{event.preventDefault();if(polling)return;await startTask('/search',{repository:input.value},()=>{candidates.replaceChildren();results.replaceChildren();files.replaceChildren();files.hidden=false;sourceTask=null;sourcePreview.hidden=true;parent=null;selected.clear();compare.hidden=true;});});
- async function startCompare(){if(polling||!parent||!sourceTask)return;await startTask('/compare',{searchId:parent.id,candidateIds:[...selected],selection:{sourceTaskId:sourceTask.id,files:[...fileChoices].map(([repositoryId,paths])=>({repositoryId,paths:[...paths]}))}});}
+ form.addEventListener('submit',async event=>{event.preventDefault();if(blocked('/search'))return;await startTask('/search',{repository:input.value},()=>{candidates.replaceChildren();results.replaceChildren();files.replaceChildren();files.hidden=false;sourceTask=null;sourcePreview.hidden=true;parent=null;selected.clear();compare.hidden=true;});});
+ async function startCompare(){if(blocked('/compare')||!parent||!sourceTask)return;await startTask('/compare',{searchId:parent.id,candidateIds:[...selected],selection:{sourceTaskId:sourceTask.id,files:[...fileChoices].map(([repositoryId,paths])=>({repositoryId,paths:[...paths]}))}});}
 
- return {capabilities,launcher,dialog,layerLauncher,workspace:{reset(repository){generation++;if(current?.state==='running')void request(`/tasks/${current.id}/cancel`,{}).catch(()=>{});current=null;parent=null;sourceTask=null;selected.clear();fileChoices.clear();candidates.replaceChildren();files.replaceChildren();results.replaceChildren();sourcePreview.hidden=true;compare.hidden=true;polling=false;input.value=repository;setStatus('Ready to search · no request made.');busy(false);},subscribe(fn){listeners.add(fn);},get state(){return {current,parent,sourceTask,selected:[...selected],polling};}},open:()=>launcher.click(),openCandidates:()=>layerLauncher.click()};
+ return {capabilities,launcher,dialog,layerLauncher,workspace:{reset(repository){generation++;if(current?.state==='running')void request(`/tasks/${current.id}/cancel`,{}).catch(()=>{});current=null;parent=null;sourceTask=null;selected.clear();fileChoices.clear();candidates.replaceChildren();files.replaceChildren();results.replaceChildren();sourcePreview.hidden=true;compare.hidden=true;polling=false;input.value=repository;waitNotice=null;setStatus('Ready to search · no request made.');busy(false);refreshWait();},subscribe(fn){listeners.add(fn);},get state(){return {current,parent,sourceTask,selected:[...selected],polling};}},open:()=>launcher.click(),openCandidates:()=>layerLauncher.click()};
 }

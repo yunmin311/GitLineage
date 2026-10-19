@@ -427,11 +427,26 @@ points at a hard-coded host.
 | `GITLINEAGE_NO_REGISTRY` | off | disable registry lookups |
 | `GITLINEAGE_EXTRA_ALLOW_HOSTS` | empty | comma-separated outbound allowlist extension |
 | `GITLINEAGE_ANALYSIS_TIMEOUT_MS` | `900000` | per-request analysis budget |
-| `GITLINEAGE_PUBLIC_ORIGIN` | unset | public base URL, documentation only |
+| `GITLINEAGE_PUBLIC_ORIGIN` | unset | exact HTTP(S) origin checked by public exploration; no path or trailing slash |
+| `GITLINEAGE_TRUSTED_PROXIES` | empty | comma-separated exact socket peer IPs allowed to supply public exploration proxy headers; requires the fixed origin |
 | `NODE_ENV` | `development` | reported by `/healthz` |
 
 CLI flags override the environment: `--host`, `--port`, `--cache`,
 `--client <dir>`, `--no-client`, `--depth`, `--max-candidates`, `--timeout-ms`.
+
+Public exploration uses the socket address unless proxy headers are present. Those
+headers are accepted only from a configured trusted peer, with one valid client IP
+in `X-Forwarded-For` and an exact matching `X-Forwarded-Host` / `X-Forwarded-Proto`.
+Forwarded chains and other forwarded headers are rejected. The proxy must overwrite
+client-supplied headers; trusting arbitrary incoming headers is unsafe. Production
+peer addresses, header replacement and distinct real visitor identities must be
+verified in the running environment; local tests do not prove that configuration.
+
+The default address new-search interval is 10 seconds. Discovery separately limits
+stage starts to 15 seconds apart and four tasks per minute. Admission errors retain
+the diagnostic `error` string and add a stable `code` plus `retryAt` when a deadline
+is known. Busy responses have no invented deadline. Rejected starts spend no HTTP
+attempts; dispatched requests, including failures, retain their existing costs.
 
 ## Production build
 

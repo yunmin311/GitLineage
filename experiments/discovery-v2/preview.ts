@@ -1,5 +1,7 @@
 /** Local authorized experiment. No Graph/cache imports or writes; no credential discovery. */
 import {randomBytes,timingSafeEqual} from 'node:crypto';
+import {DiscoveryRequestError,providerRetryAt} from './request-error.ts';
+import type {DiscoveryErrorCode} from './request-error.ts';
 import type {IncomingMessage,ServerResponse} from 'node:http';
 import {BudgetLedger} from '../../src/discovery/budget.ts';
 import {NetworkLedger} from '../../src/discovery/network.ts';
@@ -23,7 +25,7 @@ export const PREVIEW_PROFILE=Object.freeze({...SNAPSHOT_PROFILE,searchAttempts:2
 const selections=[{path:'index.js',reason:'fixed root JavaScript entry'}, {path:'index.ts',reason:'fixed root TypeScript entry'}, {path:'src/index.js',reason:'fixed src JavaScript entry'}, {path:'src/index.ts',reason:'fixed src TypeScript entry'}];
 type SearchOutput={target:Resolution|null;result:Awaited<ReturnType<typeof discoverRepositories>>|null;requests:SnapshotReceipt[];usage:ReturnType<BudgetLedger['usage']>;network:ReturnType<NetworkLedger['usage']>;scope:string};
 export interface MatchExcerpt {repositoryId:number;firstPath:string;secondPath:string;firstDigest:string;secondDigest:string;method:string;firstChars:number[];secondChars:number[];targetText:string;candidateText:string}
-export interface PreviewTask {fragments?:MatchExcerpt[];id:string;kind:'search'|'sources'|'compare';state:'running'|'completed'|'partial'|'cancelled';phase:string;createdAt:string;error:string|null;search?:SearchOutput;comparison?:Awaited<ReturnType<typeof runPinnedProbe>>;export?:PreviewExport;sourceExport?:SourcePreviewExport;sources?:{searchTaskId:string;targetId:number;candidateIds:number[];requests:SnapshotReceipt[];repositories:SourceDirectory[];usage:ReturnType<BudgetLedger['usage']>;network:ReturnType<NetworkLedger['usage']>}}
+export interface PreviewTask {code?:DiscoveryErrorCode;retryAt?:string;fragments?:MatchExcerpt[];id:string;kind:'search'|'sources'|'compare';state:'running'|'completed'|'partial'|'cancelled';phase:string;createdAt:string;error:string|null;search?:SearchOutput;comparison?:Awaited<ReturnType<typeof runPinnedProbe>>;export?:PreviewExport;sourceExport?:SourcePreviewExport;sources?:{searchTaskId:string;targetId:number;candidateIds:number[];requests:SnapshotReceipt[];repositories:SourceDirectory[];usage:ReturnType<BudgetLedger['usage']>;network:ReturnType<NetworkLedger['usage']>}}
 export interface FileChoice {sourceTaskId:string;files:{repositoryId:number;paths:string[]}[]}
 interface Session {ledger:BudgetLedger;network:NetworkLedger;resolver:RepositorySnapshotResolver;resolutions:Map<number,Resolution>;trees:TreeCache;controller:AbortController;spent:number;started:number|null;task:PreviewTask|null;sourcesStarted:boolean;compareStarted:boolean;sourceTaskId:string|null;stages:{taskId:string;kind:string;wallMs:number;attempts:number;reservedBytes:number}[]}
 export interface PreviewOptions {transport?:Transport;cooldownMs?:number;enrichedSearch?:boolean}
@@ -40,14 +42,20 @@ export function createPreview(options:PreviewOptions={}) {
  const transport:Transport=options.transport??((url,init)=>fetch(url,init));
  function get(id:string){const task=tasks.get(id);if(!task||Date.now()-Date.parse(task.createdAt)>1800000)throw new Error('task unavailable or expired');return task;}
  function tracked(task:PreviewTask):Transport{return async(url,init)=>{const path=new URL(url).pathname;task.phase=path==='/search/repositories'?'searching candidates':path.includes('/git/blobs/')?'reading pinned source':path.includes('/git/trees/')?'reading pinned tree':path.includes('/commits/')?'pinning commit':'verifying repository ID';
-  const response=await transport(url,init);const retry=response.headers.get('retry-after');const reset=Number(response.headers.get('x-ratelimit-reset'))*1000;
-  if([403,429].includes(response.status)||response.headers.get('x-ratelimit-remaining')==='0'||retry){const delay=retry?( /^\d+$/.test(retry)?Date.now()+Number(retry)*1000:Date.parse(retry)):0;quotaUntil=Math.max(quotaUntil,reset||0,delay||0,Date.now()+60000);}
+  let response:Response;
+  try{response=await transport(url,init);}catch(error){
+   if(error instanceof DiscoveryRequestError){task.code=error.code;task.retryAt=error.retryAt;}
+   else if(!init?.signal?.aborted)task.code='NETWORK_ERROR';
+   throw error;
+  }
+  if([403,429].includes(response.status)||response.headers.get('x-ratelimit-remaining')==='0'||response.headers.has('retry-after')){quotaUntil=Math.max(quotaUntil,providerRetryAt(response.headers));task.code='GITHUB_RATE_LIMIT';task.retryAt=new Date(quotaUntil).toISOString();}
+  else if(response.status>=500)task.code='NETWORK_ERROR';
   return response;
  };}
  function begin(kind:PreviewTask['kind'],run:(task:PreviewTask,signal:AbortSignal)=>Promise<boolean>,context?:Session) {
-  const now=Date.now();if(now<quotaUntil)throw new Error('quota unavailable until '+new Date(quotaUntil).toISOString());if(active)throw new Error('preview busy: one task at a time');
-  if(now-lastStart<(options.cooldownMs??15000))throw new Error('preview cooldown: wait before starting another task');
-  while(starts[0]!==undefined&&starts[0]<now-60000)starts.shift();if(starts.length>=4)throw new Error('preview frequency limit: four tasks per minute');
+  const now=Date.now();if(now<quotaUntil)throw new DiscoveryRequestError('GITHUB_RATE_LIMIT','quota unavailable until '+new Date(quotaUntil).toISOString(),quotaUntil);if(active)throw new DiscoveryRequestError('SERVICE_BUSY','preview busy: one task at a time');
+  if(now-lastStart<(options.cooldownMs??15000))throw new DiscoveryRequestError('DISCOVERY_COOLDOWN','preview cooldown: wait before starting another task',lastStart+(options.cooldownMs??15000));
+  while(starts[0]!==undefined&&starts[0]<=now-60000)starts.shift();if(starts.length>=4)throw new DiscoveryRequestError('DISCOVERY_FREQUENCY','preview frequency limit: four tasks per minute',starts[0]!+60000);
   for(const [id,task] of tasks)if(now-Date.parse(task.createdAt)>1800000){tasks.delete(id);promises.delete(id);sessions.delete(id);}
   while(tasks.size>=12){const id=tasks.keys().next().value!;tasks.delete(id);promises.delete(id);sessions.delete(id);}
   const task:PreviewTask={id:randomBytes(12).toString('hex'),kind,state:'running',phase:'starting',createdAt:new Date(now).toISOString(),error:null};
@@ -56,7 +64,7 @@ export function createPreview(options:PreviewOptions={}) {
   const timer=setTimeout(()=>controller.abort('deadline: 30 seconds'),context?Math.max(1,context.ledger.remainingMs()):30000);
   const promise=(async()=>{
    try{const complete=await run(task,controller.signal);task.state=controller.signal.aborted?'cancelled':complete?'completed':'partial';}
-   catch(error){task.error=error instanceof Error?error.message:'preview failed';task.state=controller.signal.aborted?'cancelled':'partial';}
+   catch(error){task.code??=error instanceof DiscoveryRequestError?error.code:'INTERNAL_ERROR';if(error instanceof DiscoveryRequestError)task.retryAt=error.retryAt;task.error=error instanceof Error?error.message:'preview failed';task.state=controller.signal.aborted?'cancelled':'partial';}
    finally{
     clearTimeout(timer);
     if(controller.signal.aborted&&!task.error)task.error=String(controller.signal.reason);
