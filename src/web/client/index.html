@@ -94,7 +94,7 @@
         the headline as two layers of the same filled words in one grid cell
         the repository input card as the single most important object on the page,
           raised, 2px ink border, hard shadow
-        secondary information INSIDE that same card, one step quieter
+        analysis parameters inside the card; evidence legend below it
         then a URL helper, then the example chips, then a three column proof block,
           then a strong footer rule
 
@@ -114,7 +114,7 @@
         · The prototype drops the depth control because the prototype never had one.
           Production does, it is wired to `?depth=`, and removing a working feature to
           match a static file would be the wrong trade. It stays, inside the card,
-          one step quieter than the evidence legend.
+          secondary to the repository input.
 
       The analysis flow is untouched: `#form`, `#repo-input`, `#submit` and the sample
       anchors are the same hooks `app.js` already binds, so submitting navigates into
@@ -167,19 +167,6 @@
         </div>
 
         <!--
-          The evidence-status legend, inside the card and one step quieter than the
-          input. This is the real contract: the three statuses are what a relationship
-          can be, and each carries a shape as well as a hue, so they stay separable
-          without colour vision.
-        -->
-        <div class="sub-row">
-          <span class="sub-cap">Evidence status</span>
-          <span class="st st-d"><span class="sw"></span>Declared</span>
-          <span class="st st-v"><span class="sw"></span>Verified</span>
-          <span class="st st-t"><span class="sw"></span>Detected</span>
-        </div>
-
-        <!--
           Depth, kept because it is a real control wired to `?depth=`. Quiet on purpose:
           it changes how much is analysed, not what is claimed.
         -->
@@ -193,29 +180,42 @@
         </div>
       </form>
 
+      <!--
+        The evidence-status legend, outside the action card and quieter than the
+        input. This is the real contract: the three statuses are what a relationship
+        can be, and each carries a shape as well as a hue, so they stay separable
+        without colour vision.
+      -->
+      <div class="sub-row">
+        <span class="sub-cap">Evidence status</span>
+        <span class="st st-d"><span class="sw"></span>Declared</span>
+        <span class="st st-v"><span class="sw"></span>Verified</span>
+        <span class="st st-t"><span class="sw"></span>Detected</span>
+      </div>
+
       <section class="hero-trace reading-module" aria-label="From source to relationship">
         <h2 class="module-heading">From source to relationship</h2>
         <div class="hero-trace-node">
           <span class="hero-trace-mark" aria-hidden="true"></span>
-          <p class="hero-trace-stage">source</p>
+          <p class="hero-trace-stage">01 · Identify</p>
           <p class="hero-trace-value">Repository identity</p>
         </div>
         <div class="hero-trace-node">
           <span class="hero-trace-mark" aria-hidden="true"></span>
-          <p class="hero-trace-stage">evidence</p>
+          <p class="hero-trace-stage">02 · Collect</p>
           <p class="hero-trace-value">Verifiable records</p>
         </div>
         <div class="hero-trace-node">
           <span class="hero-trace-mark" aria-hidden="true"></span>
-          <p class="hero-trace-stage">relationship</p>
+          <p class="hero-trace-stage">03 · Connect</p>
           <p class="hero-trace-value">Typed connections</p>
         </div>
         <div class="hero-trace-node">
           <span class="hero-trace-mark" aria-hidden="true"></span>
-          <p class="hero-trace-stage">ancestry evidence</p>
-          <p class="hero-trace-value">Only when evidenced</p>
+          <p class="hero-trace-stage">04 · Verify</p>
+          <p class="hero-trace-value">Supported ancestry</p>
         </div>
-        <p class="hero-trace-note">How analysis works · every connection opens its source evidence. Ancestry is shown only when supported.</p>
+        <p class="hero-trace-note">Analysis follows the source records; open any connection to inspect its evidence.</p>
       </section>
 
       <div class="repository-reference reading-module">
@@ -247,12 +247,12 @@
           </article>
           <article class="trust-cell">
             <div class="trust-symbol trust-evidence" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="18" r="3"/><path d="M6 9v9h9M9 6h9v9"/></svg></div>
-            <h3 class="trust-head">Evidence at every connection</h3>
+            <h3 class="trust-head">Inspect each connection</h3>
             <p class="trust-body">Inspect the source, status and supporting evidence. Declared, verified and detected records remain clearly distinguished.</p>
           </article>
           <article class="trust-cell">
             <div class="trust-symbol trust-boundaries" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/><circle cx="8" cy="6" r="2"/><circle cx="16" cy="12" r="2"/><circle cx="10" cy="18" r="2"/></svg></div>
-            <h3 class="trust-head">Different relationships, clearly marked</h3>
+            <h3 class="trust-head">Relationships stay distinct</h3>
             <p class="trust-body">Dependencies and references are separate from ancestry. Similarity is a lead to investigate, never proof of derivation.</p>
           </article>
         </div>

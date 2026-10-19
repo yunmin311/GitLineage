@@ -110,15 +110,26 @@ export async function mountDeepPreview(getRepository) {
  function showSources(task){sourceTask=task;files.hidden=false;files.replaceChildren();results.replaceChildren();compare.hidden=false;sourcePreview.hidden=true;fileChoices.clear();
   for(const check of candidates.querySelectorAll('input'))check.disabled=true;
   files.append(el('h3','Source Files'),el('p','Choose the target files and candidate files. Only selected files are compared; this never means the repository was fully scanned.','deep-note'));
-  for(const [i,r]of (task.sources?.repositories??[]).entries()){const card=el('article',undefined,'deep-file-card');card.append(el('p',`Directory enumeration: ${r.coverage.enumeration??r.coverage.state} · selectable sources: ${r.coverage.eligibleFiles??r.files.filter(f=>f.selectable).length}`,'deep-note'));card.append(el('h4',`${i===0?'Target':'Candidate'}: ${r.fullName} · ID ${r.repositoryId}`),el('code',`Fixed revision: ${r.revision??'unavailable'}`,'deep-digest'));
+  for(const [i,r]of (task.sources?.repositories??[]).entries()){
+   const card=el('article',undefined,'deep-file-card');
+   card.append(el('p',i===0?'Target':'Candidate','deep-file-role'),el('h4',r.fullName),el('p',`Directory enumeration: ${r.coverage.enumeration??r.coverage.state} · selectable sources: ${r.coverage.eligibleFiles??r.files.filter(f=>f.selectable).length}`,'deep-note'));
+   // §2.1 / §3.6: choose files first; retain immutable identity on demand.
+   const identity=el('details',undefined,'workspace-technical deep-source-identity');
+   identity.append(el('summary','Pinned source identity'),el('p',`Repository ID: ${r.repositoryId}`,'deep-note'),el('code',`Fixed revision: ${r.revision??'unavailable'}`,'deep-digest'));
+   const sharedReason=r.files.filter(f=>f.selectable).map(f=>f.reason);
+   const commonReason=sharedReason.length>1&&sharedReason.every(reason=>reason===sharedReason[0])?sharedReason[0]:null;
    const chosen=new Set();fileChoices.set(r.repositoryId,chosen);let defaultChosen=false;
    for(const f of r.files){const row=el('label',undefined,'deep-file-row'),check=el('input');check.type='checkbox';check.dataset.repository=String(r.repositoryId);check.value=f.path;check.disabled=!f.selectable;
     if(f.selectable&&!defaultChosen){check.checked=true;chosen.add(f.path);defaultChosen=true;}
-    const text=el('span',`${f.path} · ${f.language} · ${f.bytes??'unknown'} bytes`);row.append(check,text);card.append(row,el('p',f.reason,'deep-note'));
+    const text=el('span',undefined,'deep-file-copy');
+    text.append(el('span',f.path,'deep-file-path'),el('span',`${f.language} · ${f.bytes??'unknown'} bytes`,'deep-file-meta'));
+    if(f.reason&&(!f.selectable||f.reason!==commonReason))text.append(el('span',f.reason,'deep-file-reason'));
+    row.append(check,text);card.append(row);
     check.addEventListener('change',()=>{if(check.checked&&chosen.size>=8){check.checked=false;setStatus('Select at most eight files per repository.','notice');return;}check.checked?chosen.add(f.path):chosen.delete(f.path);renderScope();busy(polling);});
    }
    if(!r.files.some(f=>f.selectable))card.append(el('p','No selectable source within this listing. '+r.coverage.reasons.join('; '),'deep-warning'));
-   card.append(details('Directory coverage and filter reasons',r.coverage));files.append(card);
+   if(commonReason)card.append(el('p',commonReason,'deep-note'));
+   card.append(identity,details('Directory coverage and filter reasons',r.coverage));files.append(card);
   }
   const confirmation=el('p',undefined,'deep-status');confirmation.id='deep-scope';files.append(confirmation);renderScope();
   results.append(details('Source listing cumulative usage and network receipt',task.sources));

@@ -1115,7 +1115,9 @@ check('02 expanding reveals the held-back members',
         traceBelowCard: trace.getBoundingClientRect().top > card.getBoundingClientRect().bottom,
         traceStages: [...document.querySelectorAll('.hero-trace-stage')].map((e) => e.textContent?.trim()),
         traceLabel: q('.hero-trace-note')?.textContent?.trim() || '',
-        statusChips: document.querySelectorAll('.input-card .st').length,
+        // Legend belongs to the landing, after the primary action card.
+        statusChips: document.querySelectorAll('#landing .st').length,
+        legendOutsideCard: !card.contains(q('.sub-row:not(.sub-row-depth)')),
         samples: samples.length,
         sampleHrefs: samples.map((a) => a.getAttribute('href')),
         depthButtons: document.querySelectorAll('.seg-btn').length,
@@ -1145,15 +1147,16 @@ check('02 expanding reveals the held-back members',
       `border ${composition.cardBorder}, shadow ${composition.cardShadow}`);
     check('10 the card is the primary object and the trace is secondary to it',
       Boolean(composition.cardBelowLede) && Boolean(composition.traceBelowCard)
-        && (composition.traceStages as string[]).join('>') === 'source>evidence>relationship>ancestry evidence',
+        && (composition.traceStages as string[]).join('>') === '01 · Identify>02 · Collect>03 · Connect>04 · Verify',
       `trace below card ${composition.traceBelowCard}, stages ${(composition.traceStages as string[]).join(' > ')}`);
     // Public showcase now uses maintainer projects only; the old third-party counts
     // are replaced by an explicitly labelled process explanation, not visitor results.
     check('10 the trace is labelled as a process explanation, not analysis results',
-      /How analysis works/i.test(String(composition.traceLabel)) && !/pebrel|\d+ (entities|dependencies)/i.test(String(composition.traceLabel)),
+      /Analysis follows the source records/i.test(String(composition.traceLabel)) && !/pebrel|\d+ (entities|dependencies)/i.test(String(composition.traceLabel)),
       String(composition.traceLabel));
-    check('10 the evidence-status legend is inside the card',
-      composition.statusChips === 3, `${composition.statusChips} status chips in the card`);
+    // The explanatory legend no longer shares the action card's emphasis.
+    check('10 the evidence-status legend remains complete outside the action card',
+      composition.statusChips === 3 && composition.legendOutsideCard === true, `${composition.statusChips} status chips, outside ${composition.legendOutsideCard}`);
     check('10 public examples use only maintainer projects with real routes',
       composition.samples === 2
         && (composition.sampleHrefs as string[]).every((h) => !!h && h.startsWith('/yunmin311/') && h.split('/').length === 3),

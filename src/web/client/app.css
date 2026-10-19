@@ -851,6 +851,14 @@ a { color: inherit; }
 /* Active depth is state, so it takes the brand pigment rather than the ink. */
 .seg-btn.is-active { background: var(--brand-wash); color: var(--brand-press); box-shadow: inset 0 0 0 1px var(--brand); }
 
+/* §2.4 / §2.8: one action surface, then parameters, then a reading key. */
+.landing .sub-row-depth { gap:var(--s3);margin-top:var(--s4);padding-top:var(--s3); }
+.landing .sub-row-depth .sub-cap { width:auto;flex:none; }
+.landing .seg { height:auto; }
+.landing .seg-btn { min-height:44px; }
+.landing .ld-inner > .sub-row { gap:var(--s2);margin-top:var(--s4);padding:0;border:0; }
+.landing .ld-inner > .sub-row .sub-cap { width:auto; }
+
 /* ── the example trace ────────────────────────────────────────────────────────
    The one set of real counts on this page, and it says what it is: a named repository at
    a named revision, so the numbers are checkable and go stale visibly. */
@@ -2063,9 +2071,19 @@ body.mobile-explorer .band-note { display: -webkit-box; -webkit-line-clamp: 2; -
 
 /* Alpha.1 source selection stays within the owned local-preview dialog. */
 .deep-file-card { margin-block: var(--s4); padding: var(--s4); border: 1px solid var(--rule); background: var(--surface); min-width: 0; overflow-wrap: anywhere; }
-.deep-file-row { display: flex; align-items: center; gap: var(--s3); min-height: 44px; cursor: pointer; font-family: var(--mono); font-size: var(--t-secondary-size); }
+.deep-file-row { display: flex; align-items: flex-start; gap: var(--s3); min-height: 44px; cursor: pointer; font-family: var(--mono); font-size: var(--t-secondary-size); }
 .deep-file-row input { width: 24px; height: 24px; flex-shrink: 0; accent-color: var(--brand); }
 .deep-file-row span { min-width: 0; overflow-wrap: anywhere; }
+/* Refactoring UI §2.1 / §3.6 / §4.4: identity, choice, then technical proof. */
+.deep-file-card > .deep-file-role { margin:0 0 var(--s1);font:600 var(--t-secondary-size)/1.5 var(--sans);color:var(--ink-3); }
+.deep-file-card > h4 { margin:0 0 var(--s2);font:600 var(--t-text-size)/1.5 var(--sans); }
+.deep-file-copy { display:grid;gap:var(--s1); }
+.deep-file-path { font:500 var(--t-secondary-size)/1.6 var(--mono);color:var(--ink); }
+.deep-file-meta,.deep-file-reason { font:400 var(--t-secondary-size)/1.6 var(--sans);color:var(--ink-3); }
+.deep-file-row input { margin:0; }
+.deep-file-row + .deep-file-row { border-top:1px solid var(--rule); }
+.deep-file-card .deep-source-identity { margin-top:var(--s4); }
+.deep-file-card .workspace-technical + .workspace-technical { margin-top:0;border-top:0; }
 
 /* Independent read-only discovery overlay; the SVG world remains mounted. */
 .deep-layer-launch { top: 124px; }
@@ -2601,6 +2619,10 @@ button:active { filter:brightness(.97); }
 .drawer .unified-node-actions { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:16px 0 24px; }
 .drawer .unified-node-actions .d-action { min-width:0;white-space:normal;overflow-wrap:anywhere;text-align:left;justify-content:flex-start;line-height:1.5;min-height:44px; }
 .drawer .unified-node-actions .d-action:first-child:last-child { grid-column:1/-1; }
+/* §2.8 / §3.6: navigation pairs together; local graph operation is quieter. */
+.drawer #workspace-node-collapse { grid-column:1/-1;justify-self:start;border-color:transparent;background:transparent;box-shadow:none;color:var(--ink-2); }
+.unified-navigation > h3:not(:first-child) { margin-top:var(--s5); }
+.unified-navigation .unified-search-results:empty { display:none; }
 .drawer .unified-inspector .d-quote { font:13px/1.6 var(--sans);margin:12px 0;padding:12px;border-left-color:var(--brand-edge); }
 .drawer .d-sub,.drawer .rail-note { overflow-wrap:anywhere;font:var(--t-label-size)/1.65 var(--sans); }
 .drawer .d-card-head { flex-wrap:wrap;align-items:center; }
@@ -3027,10 +3049,10 @@ button:active { filter:brightness(.97); }
 .analysis .an-work { grid-column:1;padding:24px;box-shadow:var(--sh-1);background:var(--surface-hi); }
 .analysis .an-phase { margin:0; }
 .analysis .an-obj { padding:0 0 20px;border:0;border-bottom:1px solid var(--rule);border-radius:0;box-shadow:none;background:transparent; }
-.analysis .an-pn { margin-bottom:16px; }
-.analysis .an-pk { white-space:normal; }
+.analysis .an-pn { margin-bottom:var(--s2); }
+.analysis .an-pk { white-space:normal;font-weight:400;color:var(--ink-3); }
 .analysis .an-path { margin-top:20px; }
-.analysis .an-verb { max-width:none;margin:16px 0 0;padding:12px 16px;border-left:2px solid var(--brand-edge);background:var(--brand-wash);font:400 13px/1.65 var(--sans); }
+.analysis .an-verb { max-width:none;margin:var(--s4) 0 0;padding:0;border:0;background:transparent;font:400 var(--t-text-size)/1.65 var(--sans);color:var(--ink-2); }
 .analysis .an-aside { display:grid;gap:16px;grid-row:2;align-self:start;margin:0;padding:0;border:0; }
 .analysis .an-grp { margin:0;overflow:hidden; }
 .analysis .an-grp + .an-grp { margin:0; }
@@ -3050,7 +3072,7 @@ button:active { filter:brightness(.97); }
 .analysis .an-tail b { display:block;margin-bottom:6px;font:600 13px/1.5 var(--sans);color:var(--ink); }
 .analysis[data-phase=failed] .an-work { border-color:var(--alert); }
 .analysis[data-phase=failed] .an-obj { background:transparent; }
-.analysis[data-phase=failed] .an-verb { border-color:var(--alert);background:var(--alert-wash); }
+.analysis[data-phase=failed] .an-verb { padding:var(--s3) var(--s4);border-left:2px solid var(--alert);background:var(--alert-wash); }
 .analysis[data-phase=queued] .an-obj,.analysis[data-phase=complete] .an-obj { background:transparent; }
 @media(max-width:1100px) {
  .landing .trust-cell + .trust-cell { border-left:0;border-top:1px solid var(--rule); }
@@ -3063,7 +3085,7 @@ button:active { filter:brightness(.97); }
  .analysis .an-work { padding:20px 16px; }
  .analysis .an-aside { grid-column:1;grid-row:auto; }
  .analysis .an-stage { grid-template-columns:minmax(0,1fr);gap:20px;padding-bottom:32px; }
- .analysis .an-verb { padding:12px; }
+ .analysis .an-verb { padding:0; }
  .analysis .an-tail { gap:12px; }
  .landing .hero { font-size:clamp(28px,8vw,34px); }
  .landing .samples { grid-template-columns:minmax(0,1fr);gap:8px; }
