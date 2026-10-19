@@ -4,7 +4,12 @@ import {mkdir,writeFile} from 'node:fs/promises';
 import {chromium} from 'playwright';
 import {fixtureServer,A} from './fixture-server.ts';
 import {unifiedFixture} from './unified-fixture.ts';
-const f=unifiedFixture(),app=await fixtureServer({phaseDelayMs:0,publicExploration:true,explorationCooldownMs:0,explorationTransport:f.transport});
+const f=unifiedFixture();
+// Stress a recorded file path without changing the ordinary commit/log fixture.
+const longPath='src/modules/'+('nested-directory/'.repeat(10))+'long-file-name.ts';
+const tip=f.routes.get(`/repos/${f.repos[0]!.name}/commits/${f.repos[0]!.revision}`) as {files:unknown[]};
+tip.files.push({filename:longPath,status:'added',additions:1,deletions:0});
+const app=await fixtureServer({phaseDelayMs:0,publicExploration:true,explorationCooldownMs:0,explorationTransport:f.transport});
 const geometry:unknown[]=[];
 const browser=await chromium.launch(),before=process.env.CAPTURE_BEFORE==='1';
 await mkdir('artifacts/history-controls',{recursive:true});
@@ -13,6 +18,24 @@ try {for(const width of [390,430,1280,1920]){
  await page.goto(app.url+'/'+A);await page.locator('#workspace-history').click();await page.locator('.history-row').first().waitFor();
  await page.screenshot({path:`artifacts/history-controls/${width}-${before?'before':'after'}.png`});
  if(!before){
+  const composition=await page.locator('#git-history').evaluate(n=>({header:n.querySelector('header')!.getBoundingClientRect().height,firstRow:n.querySelector('.history-row')!.getBoundingClientRect().top}));
+  assert.ok(composition.header<=(width<768?120:68),'History toolbar stays compact without pushing the log down: '+JSON.stringify(composition));
+  assert.ok(composition.firstRow<=(width<768?250:150),'Recorded commits start near the tools');
+  await page.locator('.history-row').first().click();
+  await page.screenshot({path:`artifacts/history-controls/${width}-detail.png`});
+  assert.equal(await page.locator('.history-detail-section').count(),2,'Parents and changed files have distinct reading sections');
+  const sectionBounds=await page.locator('.history-detail').evaluate(n=>({overflow:n.scrollWidth>n.clientWidth+1,targets:[...n.querySelectorAll('.history-related-row')].map(x=>x.getBoundingClientRect().height)}));
+  assert.equal(sectionBounds.overflow,false,'Commit details stay within their reading column');
+  assert.ok(sectionBounds.targets.length>=4&&sectionBounds.targets.every(h=>h>=44),'Parent and file rows retain touch targets');
+  assert.equal(await page.locator('.history-file-row').last().getAttribute('title'),longPath,'Full long paths remain available');
+  const fileTarget=page.locator('.history-file-row').last();await fileTarget.scrollIntoViewIfNeeded();
+  assert.equal(await fileTarget.evaluate(n=>{const r=n.getBoundingClientRect();return n.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));}),true,'Long file row is an exposed target in the scrolling detail');
+  const parent=page.locator('.history-parents button').first();const parentSha=await parent.getAttribute('data-parent');await parent.click();
+  assert.equal(await page.locator('.history-row.is-selected').getAttribute('data-sha'),parentSha,'Parent row locates its actual commit');
+  await page.locator('.history-technical summary').click();
+  assert.match(await page.locator('.history-technical code').innerText(),/^[0-9a-f]{40}$/,'Full commit identity remains available');
+  if(width<768)await page.locator('#history-list-return').click();
+  await page.locator('.history-row').first().click();if(width<768)await page.locator('#history-list-return').click();
   assert.equal(await page.locator('.history-list #history-more').count(),1,'Continuation belongs to the scrollable log, not a full-width footer');
   const initialCount=await page.locator('.history-row').count();
   const chooser=page.locator('.history-branch-picker');
@@ -30,7 +53,7 @@ try {for(const width of [390,430,1280,1920]){
   await chooser.locator('summary').click();
   await page.screenshot({path:`artifacts/history-controls/${width}-branches.png`});
   const bounds=await chooser.evaluate(n=>{const summary=n.querySelector('summary')!.getBoundingClientRect(),menu=n.querySelector('.history-branch-choices')!.getBoundingClientRect(),option=n.querySelector('button')!,r=option.getBoundingClientRect();return{summary:summary.toJSON(),menu:menu.toJSON(),optionHeight:r.height,hit:option.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))};});
-  geometry.push({width,...bounds});
+  geometry.push({width,composition,sectionBounds,...bounds});
   assert.ok(bounds.summary.height>=44&&bounds.optionHeight>=44&&bounds.hit,'Branch controls have exposed touch targets');
   assert.ok(bounds.menu.left>=0&&bounds.menu.right<=width&&bounds.menu.bottom<=900,'Branch choices fit the viewport');
   assert.equal(await chooser.evaluate(n=>n.scrollWidth<=n.clientWidth+1),true,'Long branch choices stay within their region');
@@ -53,6 +76,10 @@ try {for(const width of [390,430,1280,1920]){
   assert.match(await page.locator('.history-branch-picker > summary').innerText(),/feature\/modules/,'Reading earlier commits retains branch emphasis');
   assert.equal(await page.locator('input[name=history-search]').inputValue(),'Earlier','Reading earlier commits retains search');
   assert.equal(await page.locator('#git-history').evaluate(n=>n.scrollWidth<=n.clientWidth+1),true,'Controls fit narrow screens');
+  await page.locator('input[name=history-search]').fill('');await page.locator('.history-row').first().click();
+  await page.locator('.history-file-row').first().click();
+  await page.locator('#git-history').waitFor({state:'detached'});
+  assert.match(await page.locator('.unified-node.is-selected').getAttribute('aria-label')||'',/file: main\.ts/,'Changed file returns to the graph as the selected file object');
  }
  await page.close();console.log('PASS History controls',width,before?'before':'after');
 }}finally{await browser.close();await app.cleanup();await writeFile('artifacts/history-controls/geometry.json',JSON.stringify(geometry,null,2));}

@@ -20,7 +20,7 @@ export function openGitLog(task,{close,more,exploreFile,loading=false,error,retr
  for(const [n]of main.historyInert)n.inert=true;
  main.append(host);document.body.classList.add('history-open');
  const leave=()=>{dismissGitLog();close();};
- const header=make('header');const back=button('← Repository graph',leave);back.id='history-return';const heading=make('div',undefined,'history-heading');heading.append(make('p',task.repository,'history-kicker'),make('h2','Git History'));header.append(heading,back);host.append(header);
+ const header=make('header');const back=button('← Repository graph',leave);back.id='history-return';const heading=make('div',undefined,'history-heading');heading.title=task.repository;heading.append(make('p',task.repository,'history-kicker'),make('h2','Git History'));header.append(heading,back);host.append(header);
  if(loading||error){
   host.setAttribute('aria-busy',String(loading));
   const panel=make('div',undefined,'history-load'+(loading?' is-pending':''));
@@ -58,7 +58,7 @@ export function openGitLog(task,{close,more,exploreFile,loading=false,error,retr
  picker.addEventListener('keydown',event=>{if(event.key==='Escape'&&picker.open){event.preventDefault();event.stopPropagation();picker.open=false;trigger.focus();}});
  host.addEventListener('pointerdown',event=>{if(!picker.contains(event.target))picker.open=false;});
  host.addEventListener('focusin',event=>{if(!picker.contains(event.target))picker.open=false;});
- const coverage=make('p',`${task.commits.length} recorded commits · lines connect actual parents · unopened history remains unknown`,'history-coverage');host.append(coverage);if(task.error){const warning=make('p',task.error,'history-warning');warning.setAttribute('role','status');host.append(warning);}
+ const coverage=make('p',`${task.commits.length} recorded commits · Unread history remains unknown`,'history-coverage');host.append(coverage);if(task.error){const warning=make('p',task.error,'history-warning');warning.setAttribute('role','status');host.append(warning);}
  const body=make('div',undefined,'history-body'),list=make('div',undefined,'history-list'),detail=make('aside',undefined,'history-detail');body.append(list,detail);host.append(body);
  // Topological order, preserving provider order for independent tips.
  const bySha=new Map(task.commits.map(c=>[c.sha,c])),children=new Map(task.commits.map(c=>[c.sha,0]));
@@ -78,8 +78,38 @@ export function openGitLog(task,{close,more,exploreFile,loading=false,error,retr
   const dot=document.createElementNS(ns,'circle');dot.setAttribute('cx',a.x);dot.setAttribute('cy',a.y);dot.setAttribute('r','4');dot.setAttribute('fill','var(--surface-hi)');dot.setAttribute('stroke',colors[lanes.get(c.sha)%colors.length]);dot.setAttribute('stroke-width','2');svg.append(dot);
  }
  const rows=make('div',undefined,'history-rows');rows.style.paddingLeft=trackWidth+'px';list.append(svg,rows);
- const select=c=>{for(const r of rows.children)r.classList.toggle('is-selected',r.dataset.sha===c.sha);detail.replaceChildren();const listReturn=button('← Commit list',()=>{host.classList.remove('show-commit');rows.querySelector('.is-selected')?.focus({preventScroll:true});});listReturn.id='history-list-return';detail.append(listReturn,make('p','Selected commit','history-kicker'),make('h3',c.message));const metadata=make('dl',undefined,'history-metadata');metadata.append(make('dt','Author'),make('dd',c.author),make('dt','Committed'));const time=make('time',new Date(c.date).toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'}));time.dateTime=c.date;const date=make('dd');date.append(time);metadata.append(date);detail.append(metadata);const identity=make('details',undefined,'history-technical');identity.append(make('summary','Commit '+c.sha.slice(0,8)),make('code',c.sha));detail.append(identity);const parents=make('div',undefined,'history-parents');if(c.parents.length)detail.append(make('h4','Parent commits'));for(const p of c.parents){const b=button('Parent '+p.slice(0,8)+(bySha.has(p)?'':' · not loaded'),()=>{if(bySha.has(p)){select(bySha.get(p));rows.querySelector(`[data-sha="${p}"]`).scrollIntoView({block:'center'});}});b.disabled=!bySha.has(p);parents.append(b);}detail.append(parents,make('h4','Changed files'));
-  for(const f of c.changes)detail.append(button(`${f.status||'Changed'} · ${f.path}`,()=>{leave();exploreFile(c,f);}));host.classList.add('show-commit');};
+ const select=c=>{
+  for(const r of rows.children)r.classList.toggle('is-selected',r.dataset.sha===c.sha);
+  detail.replaceChildren();
+  const listReturn=button('← Commit list',()=>{host.classList.remove('show-commit');rows.querySelector('.is-selected')?.focus({preventScroll:true});});
+  listReturn.id='history-list-return';detail.append(listReturn);
+  const summary=make('div',undefined,'history-commit-summary');
+  summary.append(make('p',c.parents.length>1?'Merge commit':'Commit details','history-kicker'),make('h3',c.message));
+  const metadata=make('dl',undefined,'history-metadata');
+  metadata.append(make('dt','Author'),make('dd',c.author),make('dt','Committed'));
+  const time=make('time',new Date(c.date).toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'}));time.dateTime=c.date;
+  const date=make('dd');date.append(time);metadata.append(date);summary.append(metadata);detail.append(summary);
+  const section=(title,count)=>{const n=make('section',undefined,'history-detail-section'),h=make('h4',title);h.append(make('span',String(count),'history-section-count'));n.append(h);detail.append(n);return n;};
+  const parentSection=section('Parent commits',c.parents.length),parents=make('div',undefined,'history-parents');
+  for(const p of c.parents){
+   const parent=bySha.get(p),b=button('',()=>{if(parent){select(parent);rows.querySelector(`[data-sha="${p}"]`).scrollIntoView({block:'center'});}});
+   b.classList.add('history-related-row');b.dataset.parent=p;b.title=p;b.disabled=!parent;
+   b.append(make('span',parent?parent.message.split('\n')[0]:'Parent not loaded','history-related-title'),make('code',p.slice(0,8)));
+   parents.append(b);
+  }
+  if(!c.parents.length)parents.append(make('p','No recorded parents.','history-detail-empty'));
+  parentSection.append(parents);
+  const files=section('Changed files',c.changes.length);
+  for(const f of c.changes){
+   const b=button('',()=>{leave();exploreFile(c,f);});b.classList.add('history-related-row','history-file-row');
+   b.setAttribute('aria-label',`${f.status||'Changed'} · ${f.path}`);b.title=f.path;
+   b.append(make('span',f.path,'history-file-path'),make('span',f.status||'Changed','history-change-status'));files.append(b);
+  }
+  if(!c.changes.length)files.append(make('p','No file changes recorded.','history-detail-empty'));
+  const identity=make('details',undefined,'history-technical');
+  identity.append(make('summary','Commit identity'),make('code',c.sha));detail.append(identity);
+  host.classList.add('show-commit');
+ };
  for(const c of ordered){const row=button('',()=>select(c));row.className='history-row';row.dataset.sha=c.sha;row.style.height=rowHeight+'px';const title=make('span',c.message.split('\n')[0],'history-message'),meta=make('span',c.author+' · '+c.sha.slice(0,8),'history-meta');const branches=task.branches.filter(b=>b.sha===c.sha);for(const b of branches)title.prepend(make('span',b.name,'history-branch'));row.append(title,meta);rows.append(row);}
  const update=()=>{const reachable=new Set(),todo=branch?[branch]:[];while(todo.length){const id=todo.pop();if(reachable.has(id))continue;reachable.add(id);todo.push(...(bySha.get(id)?.parents||[]));}for(const row of rows.children){const c=bySha.get(row.dataset.sha),match=[c.message,c.author,c.sha].join(' ').toLowerCase().includes(search.value.toLowerCase());row.classList.toggle('is-muted',!match||(branch&&!reachable.has(c.sha)));}};
  search.oninput=update;update();

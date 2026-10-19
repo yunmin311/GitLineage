@@ -3159,3 +3159,50 @@ button:active { filter:brightness(.97); }
  .history-branch-picker { flex:1 1 auto; }
  .history-branch-choices { width:100%; }
 }
+
+/* History composition: one compact tool band, then a quiet reading column.
+   Refactoring UI §2.1 / §3.6 / §8.5: group by purpose, emphasize content over boxes. */
+.git-history header {
+ display:grid;grid-template-columns:minmax(120px,1fr) minmax(180px,2fr) minmax(140px,220px) auto;
+ grid-template-areas:'heading search branches back';align-items:center;
+ gap:var(--s3);padding:var(--s2) var(--s5);
+}
+.git-history .history-heading { grid-area:heading;min-width:0; }
+.git-history .history-heading h2 { margin:0;font:600 13px/1.5 var(--sans); }
+.git-history .history-heading .history-kicker { overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+.git-history header input { grid-area:search;width:100%;box-sizing:border-box;min-height:44px; }
+.git-history header .history-branch-picker { grid-area:branches;min-width:0; }
+.git-history #history-return { grid-area:back;margin:0;min-height:44px;white-space:nowrap; }
+.git-history .history-coverage { margin:0;padding:var(--s1) var(--s5);font:var(--t-secondary-size)/1.5 var(--sans); }
+.git-history .history-detail { padding:var(--s5); }
+.history-commit-summary .history-kicker { margin:0;color:var(--brand);font:600 var(--t-label-size)/1.5 var(--sans); }
+.history-commit-summary h3 { margin:var(--s2) 0 var(--s4);font:600 16px/1.5 var(--sans);overflow-wrap:anywhere; }
+.history-commit-summary .history-metadata { margin:0; }
+.history-detail .history-detail-section { margin-top:var(--s6);padding-top:var(--s4);border-top:1px solid var(--rule); }
+.history-detail .history-detail-section h4 { display:flex;align-items:baseline;gap:var(--s2);margin:0 0 var(--s2);padding:0;border:0;font:600 var(--t-label-size)/1.5 var(--sans); }
+.history-section-count { color:var(--ink-3);font-weight:400;font-variant-numeric:tabular-nums; }
+.history-detail .history-parents { display:block; }
+.history-detail .history-related-row.d-action {
+ display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:var(--s1);
+ width:100%;min-width:0;min-height:44px;box-sizing:border-box;margin:0;padding:var(--s2) 0;
+ border:0;border-radius:0;border-bottom:1px solid var(--rule);background:transparent;text-align:left;
+ font:var(--t-body-size)/1.5 var(--sans);color:var(--ink-2);
+}
+.history-detail .history-related-row:hover { color:var(--brand);background:var(--brand-wash); }
+.history-related-title { max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+.history-related-row code,.history-change-status { font:var(--t-secondary-size)/1.5 var(--sans);color:var(--ink-3); }
+.history-related-row code { font-family:var(--mono);background:transparent;padding:0; }
+.history-file-path { max-width:100%;overflow-wrap:anywhere; }
+.history-detail-empty { margin:0;color:var(--ink-3);font:var(--t-secondary-size)/1.5 var(--sans); }
+.history-detail .history-technical { margin:var(--s6) 0 0;padding-top:var(--s2);border:0;border-top:1px solid var(--rule); }
+.history-detail .history-technical summary { min-height:44px;display:flex;align-items:center;gap:var(--s2); }
+.history-technical summary::before { content:"›"; }
+.history-technical[open] summary::before { transform:rotate(90deg); }
+@media(max-width:767px) {
+ .git-history header { grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:'heading back' 'search branches';padding:var(--s2) var(--s4);gap:var(--s2); }
+ .git-history header input { font-size:16px; }
+ .git-history #history-return { justify-self:end;padding:var(--s2);font-size:var(--t-body-size); }
+ .git-history .history-branch-choices { width:280px; }
+ .git-history .history-coverage { padding-inline:var(--s4); }
+ .git-history .history-detail { padding:var(--s4); }
+}
