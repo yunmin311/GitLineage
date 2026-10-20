@@ -2121,16 +2121,24 @@ function phoneFit(targetId) {
  fitGraphBoxes([box(target),...(parent?[box(parent)]:[]),...(connection?[connection]:[]),...(!targetId&&id!==rootId?[box(root)]:[])]);
 }
 function renderOverview(){
- let host=$('graph-overview');if(!host){host=el('div',{id:'graph-overview',class:'graph-overview','aria-label':'Graph overview'});$('stage').append(host);}
- host.replaceChildren();const points=[...state.positions.entries()];if(points.length<2){setHidden(host,true);return;}setHidden(host,false);
+ let host=$('graph-overview');if(!host){
+  host=el('div',{id:'graph-overview',class:'graph-overview','aria-label':'Graph overview'});
+  const toggle=el('button',{id:'overview-toggle',class:'vp-btn',text:'Map','aria-label':'Graph overview','aria-expanded':'false','aria-controls':'overview-map',popovertarget:'overview-map'});
+  const panel=el('div',{id:'overview-map'});panel.addEventListener('toggle',e=>toggle.setAttribute('aria-expanded',String(e.newState==='open')));
+  host.append(toggle,panel);
+ }
+ const phone=isPhone(),panel=host.querySelector('#overview-map'),toggle=host.querySelector('#overview-toggle');
+ (phone?$('viewport-hud'):$('stage')).append(host);setHidden(toggle,!phone);
+ if(phone)panel.setAttribute('popover','auto');else panel.removeAttribute('popover');
+ panel.replaceChildren();const points=[...state.positions.entries()];if(points.length<2){setHidden(host,true);return;}setHidden(host,false);
  const minX=Math.min(...points.map(([,p])=>p.x))-120,minY=Math.min(...points.map(([,p])=>p.y))-60,maxX=Math.max(...points.map(([,p])=>p.x))+120,maxY=Math.max(...points.map(([,p])=>p.y))+60;
  const map=svgEl('svg',{viewBox:`${minX} ${minY} ${maxX-minX} ${maxY-minY}`,role:'button',tabindex:0,'aria-label':'Graph overview: click a neighborhood; Enter returns to the repository'});
  for(const n of $('canvas').querySelectorAll('.group-navigation-line,.unified-line,.edge-line'))map.append(svgEl('path',{d:n.getAttribute('d'),fill:'none',stroke:'var(--rule-2)','stroke-width':5}));
  for(const [id,p]of points)map.append(svgEl('rect',{x:p.x-70,y:p.y-20,width:140,height:40,rx:5,fill:id===state.view.subject.id?'var(--brand)':'var(--brand-edge)'}));
- const focus=id=>id.startsWith('category:')?phoneFit(id):id.startsWith(BUNDLE_ID_PREFIX)?focusGraphGroup(id.slice(BUNDLE_ID_PREFIX.length)):workspace?.has(id)?workspace.focus(id):(selectNode(id),phoneFit(id));
+ const focus=id=>{if(panel.matches(':popover-open'))panel.hidePopover();return id.startsWith('category:')?phoneFit(id):id.startsWith(BUNDLE_ID_PREFIX)?focusGraphGroup(id.slice(BUNDLE_ID_PREFIX.length)):workspace?.has(id)?workspace.focus(id):(selectNode(id),phoneFit(id));};
  map.onclick=e=>{const at=new DOMPoint(e.clientX,e.clientY).matrixTransform(map.getScreenCTM().inverse());const nearest=points.reduce((a,b)=>Math.hypot(b[1].x-at.x,b[1].y-at.y)<Math.hypot(a[1].x-at.x,a[1].y-at.y)?b:a);focus(nearest[0]);};
  map.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();focus(state.view.subject.id);}};
- host.append(el('span',{text:'Overview · '+points.length+' objects'}),map);
+ panel.append(el('span',{text:'Overview · '+points.length+' objects'}),map);
 }
 function locateMobile(id,kind) {
   const relationIds = kind === 'edge' ? [id] : state.view.edges.filter(e=>e.source===id || e.target===id).map(e=>e.id);
@@ -2835,8 +2843,7 @@ function fitGraphBoxes(nodes){
  const right=Math.max(...boxes.map(b=>b.x+b.width))+24,bottom=Math.max(...boxes.map(b=>b.y+b.height))+padding;
  const viewport={width:canvas.clientWidth,height:canvas.clientHeight};
  const rail=!isPhone()&&visiblePanels(panels).rail?320:0,drawer=!isPhone()&&visiblePanels(panels).drawer?400:0;
- const overviewSpace=$('graph-overview')?.getBoundingClientRect().height||56;
- const hud=$('viewport-hud').getBoundingClientRect().height+(isPhone()&&canvas.clientHeight>=600?Math.max(80,overviewSpace+24):0);
+ const hud=$('viewport-hud').getBoundingClientRect().height;
  const toolbar=$('graph-perspectives')?.offsetHeight||110;
  const availableHeight=Math.max(44,viewport.height-hud-toolbar-32);
  const scale=Math.max(1/1.2,(right-x)/Math.max(240,viewport.width-rail-drawer-48),(bottom-y)/availableHeight);
