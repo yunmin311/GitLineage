@@ -82,7 +82,7 @@ for (const viewport of [{ width: 1280, height: 800 }, { width: 390, height: 844 
           src: t('#an-src'),
           labels: [...document.querySelectorAll('#an-plabels .an-plabel')]
             .map((n) => n.textContent.replace(/\\s+/g, ' ').trim()),
-          segs: document.querySelectorAll('#an-svg .an-seg').length,
+          connectors: [...document.querySelectorAll('#an-plabels .an-plabel:not(:last-child)')].filter(n => getComputedStyle(n, '::after').content !== 'none' && parseFloat(getComputedStyle(n, '::after').width) > 0).length,
           now: document.querySelectorAll('#an-plabels .an-plabel.is-now').length,
           done: document.querySelectorAll('#an-plabels .an-plabel.is-done').length,
           explorerVisible: !document.querySelector('#explorer').hasAttribute('hidden'),
@@ -113,10 +113,11 @@ for (const viewport of [{ width: 1280, height: 800 }, { width: 390, height: 844 
     results.push({
       ...s,
       viewport: label,
-      assertSegs: s.segs === 5,
+      // Four connectors join five explicit stages; the old five SVG bars were redundant.
+      assertPath: s.connectors === 4,
       assertLabels: (s.labels as string[]).length === 5,
       assertOrdinal: isRunning
-        ? s.key === `phase ${index + 1} of 5 · ${state}`
+        ? s.key === `phase ${index + 1} of 5`
         : !String(s.key).startsWith('phase '),
       assertCurrent: isRunning ? s.now === 1 : s.now === 0,
       // `queued` is neither: a queued job has completed none of the five.
@@ -138,7 +139,7 @@ await cleanup();
 writeFileSync(`${OUT}/fsm-report.json`, JSON.stringify(results, null, 1));
 
 const fails = results.filter((r) => ![
-  'assertSegs', 'assertLabels', 'assertOrdinal', 'assertCurrent', 'assertDone', 'assertExplorerHidden',
+  'assertPath', 'assertLabels', 'assertOrdinal', 'assertCurrent', 'assertDone', 'assertExplorerHidden',
 ].every((k) => r[k] === true) || r.hasPercent || r.hasTimer || r.hasCount || r.staleIdentity
   || r.nativeScrollbar || r.overflowsX || r.docScrolls || !r.receiptCollapsed);
 

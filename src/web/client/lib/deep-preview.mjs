@@ -82,7 +82,8 @@ export async function mountDeepPreview(getRepository) {
    const provenance=el('details',undefined,'workspace-technical deep-candidate-provenance');provenance.append(el('summary','Why this candidate?'));
    for(const d of c.discoveries)provenance.append(el('p',`${d.source} · ${d.version}; ${d.reason}; query: ${d.query}; page ${d.page}; rank ${d.rank}`));
    card.append(provenance);
-   check.addEventListener('change',()=>{if(check.checked&&selected.size>=2){check.checked=false;setStatus('Select at most two candidates.','notice');return;}check.checked?selected.add(c.candidate.repositoryId):selected.delete(c.candidate.repositoryId);busy(polling);});candidates.append(card);
+   // Selection changes controls only; rebuilding the graph detaches the focused panel.
+   check.addEventListener('change',()=>{if(check.checked&&selected.size>=2){check.checked=false;setStatus('Select at most two candidates.','notice');return;}check.checked?selected.add(c.candidate.repositoryId):selected.delete(c.candidate.repositoryId);card.classList.toggle('is-selected',check.checked);busy(polling,false);});candidates.append(card);
   }usage(task);revealInstrument(candidates);
  }
  function showComparison(task){candidates.hidden=true;files.hidden=true;sourcePreview.hidden=true;compare.hidden=true;results.replaceChildren();const probe=task.comparison;if(!probe){results.append(el('p',task.error||'Comparison unavailable. No score was produced.'));return;}
@@ -128,17 +129,33 @@ export async function mountDeepPreview(getRepository) {
     text.append(el('span',f.path,'deep-file-path'),el('span',`${f.language} · ${f.bytes??'unknown'} bytes`,'deep-file-meta'));
     if(f.reason&&(!f.selectable||f.reason!==commonReason))text.append(el('span',f.reason,'deep-file-reason'));
     row.append(check,text);card.append(row);
-    check.addEventListener('change',()=>{if(check.checked&&chosen.size>=8){check.checked=false;setStatus('Select at most eight files per repository.','notice');return;}check.checked?chosen.add(f.path):chosen.delete(f.path);renderScope();busy(polling);});
+    check.addEventListener('change',()=>{if(check.checked&&chosen.size>=8){check.checked=false;setStatus('Select at most eight files per repository.','notice');return;}check.checked?chosen.add(f.path):chosen.delete(f.path);renderScope();busy(polling,false);});
    }
    if(!r.files.some(f=>f.selectable))card.append(el('p','No selectable source within this listing. '+r.coverage.reasons.join('; '),'deep-warning'));
    if(commonReason)card.append(el('p',commonReason,'deep-note'));
    card.append(identity,details('Directory coverage and filter reasons',r.coverage));files.append(card);
   }
-  const confirmation=el('p',undefined,'deep-status');confirmation.id='deep-scope';files.append(confirmation);renderScope();
+  const confirmation=el('section',undefined,'deep-scope');confirmation.id='deep-scope';
+  const receipt=el('details',undefined,'workspace-technical');receipt.id='deep-scope-details';receipt.append(el('summary','Selected paths & request budget'),el('div'));
+  files.append(confirmation,receipt);renderScope();
   results.append(details('Source listing cumulative usage and network receipt',task.sources));
   if(task.sourceExport)results.append(button('deep-source-download','Download source listing Sidecar',()=>downloadJSON(task.sourceExport,'gitlineage-source-sidecar.json')));
  }
- function renderScope(){const scope=document.querySelector('#deep-scope');if(scope)scope.textContent=`Selected scope: ${[...fileChoices].map(([id,paths])=>`ID ${id}: ${paths.size} file(s) [${[...paths].join(', ')}]`).join(' ↔ ')}. Cross-product file pairs; repository-wide coverage unknown. HTTP remaining: ${capabilities.budget.attempts-(sourceTask?.sources?.usage.attempts??0)}; selected blob reads + final identity checks: ${[...fileChoices.values()].reduce((n,paths)=>n+paths.size,0)+fileChoices.size}. Exhausted work stays partial.`;}
+ function renderScope(){
+  const scope=document.querySelector('#deep-scope'),receipt=document.querySelector('#deep-scope-details > div');
+  if(!scope||!receipt)return;
+  // §2.1 / §3.6: decision first; exact paths and costs remain available on demand.
+  // Update the contents only: disclosure state and the active file checkbox survive.
+  scope.replaceChildren(el('h4','Selected comparison','deep-scope-title'));
+  receipt.replaceChildren();
+  for(const [id,paths] of fileChoices){
+   const repository=sourceTask?.sources?.repositories.find(r=>r.repositoryId===id);
+   scope.append(el('p',`${repository?.fullName??'Repository'} · ID ${id}: ${paths.size} file(s)`,'deep-scope-choice'));
+   receipt.append(el('p',`ID ${id}: ${[...paths].join(', ')||'No files selected'}`));
+  }
+  scope.append(el('p','Selected file pairs only · repository-wide coverage unknown.','deep-note'));
+  receipt.append(el('p',`HTTP remaining: ${capabilities.budget.attempts-(sourceTask?.sources?.usage.attempts??0)}; selected blob reads + final identity checks: ${[...fileChoices.values()].reduce((n,paths)=>n+paths.size,0)+fileChoices.size}. Exhausted work stays partial.`));
+ }
  async function startSources(){if(blocked('/sources')||!parent||!selected.size)return;await startTask('/sources',{searchId:parent.id,candidateIds:[...selected]});}
  function setStatus(message,state='ready'){const changed=status.dataset.state!==state||status.firstChild?.textContent!==message;status.textContent=message;status.dataset.state=state;if(changed)revealInstrument(status);}
  function taskStatus(task){

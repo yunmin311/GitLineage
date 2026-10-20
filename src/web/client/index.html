@@ -173,9 +173,9 @@
         <div class="sub-row sub-row-depth">
           <span class="sub-cap">Depth</span>
           <span class="seg" role="group" aria-label="Analysis depth">
-            <button type="button" class="seg-btn" data-depth="0">Metadata</button>
-            <button type="button" class="seg-btn is-active" data-depth="200">Standard</button>
-            <button type="button" class="seg-btn" data-depth="600">Deep</button>
+            <button type="button" class="seg-btn" data-depth="0" aria-pressed="false">Metadata</button>
+            <button type="button" class="seg-btn is-active" data-depth="200" aria-pressed="true">Standard</button>
+            <button type="button" class="seg-btn" data-depth="600" aria-pressed="false">Deep</button>
           </span>
         </div>
       </form>
@@ -321,7 +321,6 @@
 
       <!-- the five-phase path. Three channels, so the current phase is never colour-only -->
       <div class="an-path">
-        <svg id="an-svg" viewBox="0 0 1000 64" preserveAspectRatio="none" aria-hidden="true"></svg>
         <div class="an-plabels" id="an-plabels"></div>
       </div>
 

@@ -43,7 +43,10 @@ try{
  await page.locator('#deep-files input').first().waitFor();
  assert.equal(await page.locator('#deep-files input[value="src/main.ts"]').count(),1);
  await page.locator('#deep-files input[value="src/main.ts"]').check();await page.locator('#deep-files input[value="src/extra.ts"]').check();await page.locator('#deep-files input[value="src/extra.ts"]').uncheck();
- assert.match(await page.locator('#deep-scope').innerText(),/src\/main.ts/);
+ // Exact paths moved into the optional scope receipt; retain the readable-path check.
+ await page.locator('#deep-scope-details summary').click();
+ assert.match(await page.locator('#deep-scope-details').innerText(),/src\/main.ts/);
+ await page.locator('#deep-scope-details summary').click();
  const [listingDownload]=await Promise.all([page.waitForEvent('download'),page.locator('#deep-source-download').click()]);const listingPath=resolve(out,`${width}-source-sidecar.json`);await listingDownload.saveAs(listingPath);const listingReceipt=JSON.parse(await readFile(listingPath,'utf8'));validateSourceExport(listingReceipt);
  const callsBeforeRejection=fixture.calls.length;const rejected=await page.request.post(app.url+'/api/deep-search/compare',{headers:{origin:app.url},data:{searchId:listingReceipt.searchTaskId,candidateIds:[4],selection:{sourceTaskId:listingReceipt.sourceTaskId,files:[{repositoryId:1,paths:['src/main.ts']},{repositoryId:4,paths:['lib/core.ts']}]}}});assert.equal(rejected.status(),400);assert.equal(fixture.calls.length,callsBeforeRejection);
  await page.screenshot({path:resolve(out,`${width}-source-selection.png`),fullPage:true});

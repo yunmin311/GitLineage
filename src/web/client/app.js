@@ -233,6 +233,11 @@ function readUrlState() {
     const depth = Number(urlState.depth);
     if (Number.isFinite(depth)) state.depth = depth;
   }
+  for (const button of document.querySelectorAll('[data-depth]')) {
+    const active = Number(button.dataset.depth) === state.depth;
+    button.classList.toggle('is-active', active);
+    button.setAttribute('aria-pressed', String(active));
+  }
 }
 
 function navigate(repository, push = true) {
@@ -395,9 +400,9 @@ function renderAnalysis(status, jobId) {
   const fsm = ANALYSIS_FSM_TEXT[status];
   const current = running >= 0 ? ANALYSIS_PHASE_TEXT[status] : null;
 
-  // The ordinal is language; the key beside it is the machine identifier.
+  // The ordinal gives position; the title alone names the current activity.
   $('an-pk').textContent = current
-    ? `phase ${running + 1} of ${RUNNING_PHASES.length} \u00b7 ${current.k}`
+    ? `phase ${running + 1} of ${RUNNING_PHASES.length}`
     : (fsm?.key ?? status);
   $('an-ptitle').textContent = current ? current.t : (fsm?.title ?? status);
   $('an-psub').textContent = current ? current.s : (fsm?.sub ?? '');
@@ -434,7 +439,6 @@ function renderAnalysis(status, jobId) {
   // tracer, rather than adding an endpoint.
   const n = RUNNING_PHASES.length;
   const labels = $('an-plabels');
-  const svg = $('an-svg');
   // Polls refresh source facts, but must not restart the visible phase entrance.
   if (!phaseChanged && labels.childElementCount === n) { state.phase = status; return; }
   /*
@@ -476,19 +480,6 @@ function renderAnalysis(status, jobId) {
     ]));
   }
 
-  const W = 1000; const pad = 0; const gap = 20; const y = 26;
-  const segW = (W - pad * 2 - gap * (n - 1)) / n;
-  const nodes = [];
-  for (let i = 0; i < n; i += 1) {
-    const x = pad + i * (segW + gap);
-    const done = isDone(i);
-    const now = current ? i === running : false;
-    const cls = ['an-seg', done ? 'is-done' : '', now ? 'is-now' : ''].filter(Boolean).join(' ');
-    // The responsive SVG carries stage rules only: circles would be stretched into
-    // ellipses by preserveAspectRatio=none. HTML ordinals own the stage markers.
-    nodes.push(svgEl('line', { class: cls, x1: x, y1: y, x2: x + segW, y2: y, 'vector-effect': 'non-scaling-stroke' }));
-  }
-  svg.replaceChildren(...nodes);
   state.phase = status;
 }
 
@@ -607,7 +598,6 @@ function hideWorking() {
     const node = $(id);
     if (node) node.replaceChildren();
   }
-  $('an-svg')?.replaceChildren();
   state.resolvedRevision = '';
 }
 
@@ -1433,6 +1423,7 @@ function draw() {
   const focusedEdge = document.activeElement?.getAttribute('data-edge-id');
   const focusedNode = document.activeElement?.getAttribute('data-node-id');
   const focusedCategory=document.activeElement?.getAttribute('data-category-id');
+  const focusedBundle=document.activeElement?.getAttribute('data-bundle-key');
   canvas.replaceChildren();
   if (!view) return;
 
@@ -1767,6 +1758,7 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
     Array.from(canvas.querySelectorAll('[data-node-id]')).find(node => node.getAttribute('data-node-id') === focusedNode)?.focus({ preventScroll: true });
   }
   if(focusedCategory)[...canvas.querySelectorAll('[data-category-id]')].find(n=>n.dataset.categoryId===focusedCategory)?.focus({preventScroll:true});
+  if(focusedBundle)[...canvas.querySelectorAll('.bundle-card')].find(n=>n.dataset.bundleKey===focusedBundle)?.focus({preventScroll:true});
   renderPerspective();
   let empty=$('graph-provenance-empty');if(!empty){empty=el('div',{id:'graph-provenance-empty',class:'graph-provenance-empty'});$('stage').append(empty);}
   empty.replaceChildren();setHidden(empty,edges.length>0||composition.plates.length>0||canvas.querySelectorAll('.unified-node').length>0);
@@ -2925,8 +2917,10 @@ function boot() {
 
   for (const button of document.querySelectorAll('.seg-btn')) {
     button.addEventListener('click', () => {
-      for (const other of document.querySelectorAll('.seg-btn')) other.classList.remove('is-active');
-      button.classList.add('is-active');
+      for (const other of document.querySelectorAll('.seg-btn')) {
+        other.classList.toggle('is-active', other === button);
+        other.setAttribute('aria-pressed', String(other === button));
+      }
       state.depth = Number(button.dataset.depth);
       // A different depth is a different dataset: the content bounds are not
       // comparable with what is on screen, so the camera refits deliberately.
