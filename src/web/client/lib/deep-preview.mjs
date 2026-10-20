@@ -41,12 +41,33 @@ export async function mountDeepPreview(getRepository) {
  }
  const listeners=new Set();
  let generation=0;
- let current=null,parent=null,selected=new Set(),polling=false,sourceTask=null,fileChoices=new Map(),nextStart=0;
+ let current=null,parent=null,selected=new Set(),polling=false,sourceTask=null,fileChoices=new Map(),nextStart=0,nextSearch=0,waitTimer=null,waitNotice=null;
  dialog.addEventListener('close',()=>launcher.focus());
  // Stop Explorer shortcuts while a native modal owns focus. Its own Escape closes it.
  dialog.addEventListener('keydown',event=>{event.stopPropagation();if(capabilities.scope==='anonymous'&&event.key==='Escape'){event.preventDefault();dialog.close();}});
- async function request(path,data){const r=await fetch('/api/deep-search'+path,data===undefined?{}:{method:'POST',headers:{'content-type':'application/json','x-gitlineage-csrf':'1'},body:JSON.stringify(data)});const value=await r.json();if(!r.ok)throw new Error((value.error||'Preview unavailable')+(value.retryAt?' · Retry after '+new Date(value.retryAt).toLocaleTimeString():''));return value;}
- function busy(value){queueMicrotask(()=>listeners.forEach(fn=>fn()));const wait=Date.now()<nextStart;search.disabled=value||wait;input.disabled=value;sourcePreview.disabled=value||wait||selected.size===0||!!sourceTask;compare.disabled=value||wait||!sourceTask||fileChoices.size!==selected.size+1||[...fileChoices.values()].some(paths=>paths.size===0);cancel.hidden=!value||current?.state!=='running';}
+ async function request(path,data){
+  let r;try{r=await fetch('/api/deep-search'+path,data===undefined?{}:{method:'POST',headers:{'content-type':'application/json','x-gitlineage-csrf':'1'},body:JSON.stringify(data)});}catch{throw Object.assign(new Error('Network unavailable. Your selections are retained; retry when connected.'),{code:'NETWORK_ERROR'});}
+  const value=await r.json();if(!r.ok)throw Object.assign(new Error(value.error||'Preview unavailable'),{code:value.code,retryAt:value.retryAt});return value;
+ }
+ function blocked(path){return polling||Date.now()<nextStart||(path==='/search'&&Date.now()<nextSearch);}
+ function busy(value,notify=true){if(notify)queueMicrotask(()=>listeners.forEach(fn=>fn()));sourcePreview.textContent=selected.size?`Source Files · ${selected.size} selected →`:'Source Files →';const wait=Date.now()<nextStart;search.disabled=value||wait||Date.now()<nextSearch;input.disabled=value;sourcePreview.disabled=value||wait||selected.size===0||!!sourceTask;compare.disabled=value||wait||!sourceTask||fileChoices.size!==selected.size+1||[...fileChoices.values()].some(paths=>paths.size===0);cancel.hidden=!value||current?.state!=='running';}
+ // One deadline timer survives repository changes. It only updates controls/text; never requests.
+ function refreshWait(){clearTimeout(waitTimer);busy(polling,false);const now=Date.now(),deadline=Math.max(nextStart,nextSearch);
+  if(!polling&&waitNotice){const left=Math.max(0,Math.ceil((waitNotice.until-now)/1000));status.dataset.state='notice';status.textContent=left?`${waitNotice.message} · Retry in ${left} s.`:'Ready to retry. No new request has been made.';if(!left)waitNotice=null;}
+  const hint=status.querySelector('.deep-cooldown');hint?.remove();
+  if(!polling&&!waitNotice&&deadline>now){const hint=el('span',`Next Discovery request in ${Math.ceil((deadline-now)/1000)} s.`,'deep-status-phase deep-cooldown');status.append(hint);}
+  if(deadline>now)waitTimer=setTimeout(refreshWait,Math.min(1000,deadline-now+10));
+ }
+ function requestFailure(error){const notices=new Set(['ANONYMOUS_START_INTERVAL','ANONYMOUS_ADDRESS_QUOTA','ANONYMOUS_GLOBAL_QUOTA','SERVICE_BUSY','DISCOVERY_COOLDOWN','DISCOVERY_FREQUENCY','GITHUB_RATE_LIMIT']);
+  const messages={ANONYMOUS_START_INTERVAL:'Please wait before starting a new search',ANONYMOUS_ADDRESS_QUOTA:'This address has used its hourly request allowance',ANONYMOUS_GLOBAL_QUOTA:'The shared hourly request allowance is used',SERVICE_BUSY:'The shared service is busy. Please retry after the current task',DISCOVERY_COOLDOWN:'Please wait before the next Discovery stage',DISCOVERY_FREQUENCY:'The Discovery per-minute task allowance is used',GITHUB_RATE_LIMIT:'GitHub is temporarily limiting requests'};
+  const until=Date.parse(error.retryAt),waiting=notices.has(error.code);waitNotice=null;
+  setStatus(waiting?messages[error.code]:error.message,waiting?'notice':'failed');
+  if(waiting&&Number.isFinite(until)&&until>Date.now()){
+   if(error.code==='ANONYMOUS_START_INTERVAL')nextSearch=Math.max(nextSearch,until);else nextStart=Math.max(nextStart,until);
+   waitNotice={message:messages[error.code],until};
+  }
+  refreshWait();
+ }
  function details(title,content){if(capabilities.scope==='anonymous'){const d=el('details',undefined,'workspace-technical');d.append(el('summary',title),button('',`Export JSON · ${title}`,()=>downloadJSON(content,`gitlineage-${title.toLowerCase().replace(/[^a-z0-9]+/g,'-')}.json`)));return d;}const d=el('details'),s=el('summary',title),pre=el('pre',typeof content==='string'?content:JSON.stringify(content,null,2));d.append(s,pre);return d;}
  function downloadJSON(value,name){const url=URL.createObjectURL(new Blob([JSON.stringify(value,null,2)],{type:'application/json'})),a=el('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
  function score(value){return value===null||value===undefined?'Unavailable':`${(value*100).toFixed(2)}%`;}
@@ -56,9 +77,13 @@ export async function mountDeepPreview(getRepository) {
   const list=output?.result?.candidates??[];
   if(!list.length)candidates.append(el('p',output?.result?.coverage.state==='complete_within_requested'?'No candidates found within this query and budget.':'Search incomplete or unavailable. See the failure receipt.'));
   for(const c of list){const card=el('article',undefined,'deep-candidate'),check=el('input');check.type='checkbox';check.value=String(c.candidate.repositoryId);check.disabled=c.candidate.conflicts.includes('name_id_collision');
-   const label=el('label'),name=el('span',`${c.candidate.fullName} · ID ${c.candidate.repositoryId}`);label.append(check,name);card.append(label,el('p','Candidate relevance: metadata search rank · code similarity: not compared','deep-note'));
-   card.append(el('p',c.discoveries.map(d=>`${d.source} · ${d.version}; ${d.reason}; query: ${d.query}; page ${d.page}; rank ${d.rank}`).join('\n'),'deep-note'),el('p','Verification: pending · Lineage claim: none','deep-warning'));
-   check.addEventListener('change',()=>{if(check.checked&&selected.size>=2){check.checked=false;setStatus('Select at most two candidates.','notice');return;}check.checked?selected.add(c.candidate.repositoryId):selected.delete(c.candidate.repositoryId);busy(polling);});candidates.append(card);
+   const label=el('label'),name=el('span',c.candidate.fullName);label.append(check,name);card.append(label,el('p',`ID ${c.candidate.repositoryId} · Metadata match · code not compared`,'deep-candidate-meta'));
+   card.append(el('p','Verification: pending · Lineage claim: none','deep-candidate-state'));
+   const provenance=el('details',undefined,'workspace-technical deep-candidate-provenance');provenance.append(el('summary','Why this candidate?'));
+   for(const d of c.discoveries)provenance.append(el('p',`${d.source} · ${d.version}; ${d.reason}; query: ${d.query}; page ${d.page}; rank ${d.rank}`));
+   card.append(provenance);
+   // Selection changes controls only; rebuilding the graph detaches the focused panel.
+   check.addEventListener('change',()=>{if(check.checked&&selected.size>=2){check.checked=false;setStatus('Select at most two candidates.','notice');return;}check.checked?selected.add(c.candidate.repositoryId):selected.delete(c.candidate.repositoryId);card.classList.toggle('is-selected',check.checked);busy(polling,false);});candidates.append(card);
   }usage(task);revealInstrument(candidates);
  }
  function showComparison(task){candidates.hidden=true;files.hidden=true;sourcePreview.hidden=true;compare.hidden=true;results.replaceChildren();const probe=task.comparison;if(!probe){results.append(el('p',task.error||'Comparison unavailable. No score was produced.'));return;}
@@ -89,22 +114,49 @@ export async function mountDeepPreview(getRepository) {
  function showSources(task){sourceTask=task;files.hidden=false;files.replaceChildren();results.replaceChildren();compare.hidden=false;sourcePreview.hidden=true;fileChoices.clear();
   for(const check of candidates.querySelectorAll('input'))check.disabled=true;
   files.append(el('h3','Source Files'),el('p','Choose the target files and candidate files. Only selected files are compared; this never means the repository was fully scanned.','deep-note'));
-  for(const [i,r]of (task.sources?.repositories??[]).entries()){const card=el('article',undefined,'deep-file-card');card.append(el('p',`Directory enumeration: ${r.coverage.enumeration??r.coverage.state} · selectable sources: ${r.coverage.eligibleFiles??r.files.filter(f=>f.selectable).length}`,'deep-note'));card.append(el('h4',`${i===0?'Target':'Candidate'}: ${r.fullName} · ID ${r.repositoryId}`),el('code',`Fixed revision: ${r.revision??'unavailable'}`,'deep-digest'));
+  for(const [i,r]of (task.sources?.repositories??[]).entries()){
+   const card=el('article',undefined,'deep-file-card');
+   card.append(el('p',i===0?'Target':'Candidate','deep-file-role'),el('h4',r.fullName),el('p',`Directory enumeration: ${r.coverage.enumeration??r.coverage.state} · selectable sources: ${r.coverage.eligibleFiles??r.files.filter(f=>f.selectable).length}`,'deep-note'));
+   // §2.1 / §3.6: choose files first; retain immutable identity on demand.
+   const identity=el('details',undefined,'workspace-technical deep-source-identity');
+   identity.append(el('summary','Pinned source identity'),el('p',`Repository ID: ${r.repositoryId}`,'deep-note'),el('code',`Fixed revision: ${r.revision??'unavailable'}`,'deep-digest'));
+   const sharedReason=r.files.filter(f=>f.selectable).map(f=>f.reason);
+   const commonReason=sharedReason.length>1&&sharedReason.every(reason=>reason===sharedReason[0])?sharedReason[0]:null;
    const chosen=new Set();fileChoices.set(r.repositoryId,chosen);let defaultChosen=false;
    for(const f of r.files){const row=el('label',undefined,'deep-file-row'),check=el('input');check.type='checkbox';check.dataset.repository=String(r.repositoryId);check.value=f.path;check.disabled=!f.selectable;
     if(f.selectable&&!defaultChosen){check.checked=true;chosen.add(f.path);defaultChosen=true;}
-    const text=el('span',`${f.path} · ${f.language} · ${f.bytes??'unknown'} bytes`);row.append(check,text);card.append(row,el('p',f.reason,'deep-note'));
-    check.addEventListener('change',()=>{if(check.checked&&chosen.size>=8){check.checked=false;setStatus('Select at most eight files per repository.','notice');return;}check.checked?chosen.add(f.path):chosen.delete(f.path);renderScope();busy(polling);});
+    const text=el('span',undefined,'deep-file-copy');
+    text.append(el('span',f.path,'deep-file-path'),el('span',`${f.language} · ${f.bytes??'unknown'} bytes`,'deep-file-meta'));
+    if(f.reason&&(!f.selectable||f.reason!==commonReason))text.append(el('span',f.reason,'deep-file-reason'));
+    row.append(check,text);card.append(row);
+    check.addEventListener('change',()=>{if(check.checked&&chosen.size>=8){check.checked=false;setStatus('Select at most eight files per repository.','notice');return;}check.checked?chosen.add(f.path):chosen.delete(f.path);renderScope();busy(polling,false);});
    }
    if(!r.files.some(f=>f.selectable))card.append(el('p','No selectable source within this listing. '+r.coverage.reasons.join('; '),'deep-warning'));
-   card.append(details('Directory coverage and filter reasons',r.coverage));files.append(card);
+   if(commonReason)card.append(el('p',commonReason,'deep-note'));
+   card.append(identity,details('Directory coverage and filter reasons',r.coverage));files.append(card);
   }
-  const confirmation=el('p',undefined,'deep-status');confirmation.id='deep-scope';files.append(confirmation);renderScope();
+  const confirmation=el('section',undefined,'deep-scope');confirmation.id='deep-scope';
+  const receipt=el('details',undefined,'workspace-technical');receipt.id='deep-scope-details';receipt.append(el('summary','Selected paths & request budget'),el('div'));
+  files.append(confirmation,receipt);renderScope();
   results.append(details('Source listing cumulative usage and network receipt',task.sources));
   if(task.sourceExport)results.append(button('deep-source-download','Download source listing Sidecar',()=>downloadJSON(task.sourceExport,'gitlineage-source-sidecar.json')));
  }
- function renderScope(){const scope=document.querySelector('#deep-scope');if(scope)scope.textContent=`Selected scope: ${[...fileChoices].map(([id,paths])=>`ID ${id}: ${paths.size} file(s) [${[...paths].join(', ')}]`).join(' ↔ ')}. Cross-product file pairs; repository-wide coverage unknown. HTTP remaining: ${capabilities.budget.attempts-(sourceTask?.sources?.usage.attempts??0)}; selected blob reads + final identity checks: ${[...fileChoices.values()].reduce((n,paths)=>n+paths.size,0)+fileChoices.size}. Exhausted work stays partial.`;}
- async function startSources(){if(polling||!parent||!selected.size)return;await startTask('/sources',{searchId:parent.id,candidateIds:[...selected]});}
+ function renderScope(){
+  const scope=document.querySelector('#deep-scope'),receipt=document.querySelector('#deep-scope-details > div');
+  if(!scope||!receipt)return;
+  // §2.1 / §3.6: decision first; exact paths and costs remain available on demand.
+  // Update the contents only: disclosure state and the active file checkbox survive.
+  scope.replaceChildren(el('h4','Selected comparison','deep-scope-title'));
+  receipt.replaceChildren();
+  for(const [id,paths] of fileChoices){
+   const repository=sourceTask?.sources?.repositories.find(r=>r.repositoryId===id);
+   scope.append(el('p',`${repository?.fullName??'Repository'} · ID ${id}: ${paths.size} file(s)`,'deep-scope-choice'));
+   receipt.append(el('p',`ID ${id}: ${[...paths].join(', ')||'No files selected'}`));
+  }
+  scope.append(el('p','Selected file pairs only · repository-wide coverage unknown.','deep-note'));
+  receipt.append(el('p',`HTTP remaining: ${capabilities.budget.attempts-(sourceTask?.sources?.usage.attempts??0)}; selected blob reads + final identity checks: ${[...fileChoices.values()].reduce((n,paths)=>n+paths.size,0)+fileChoices.size}. Exhausted work stays partial.`));
+ }
+ async function startSources(){if(blocked('/sources')||!parent||!selected.size)return;await startTask('/sources',{searchId:parent.id,candidateIds:[...selected]});}
  function setStatus(message,state='ready'){const changed=status.dataset.state!==state||status.firstChild?.textContent!==message;status.textContent=message;status.dataset.state=state;if(changed)revealInstrument(status);}
  function taskStatus(task){
   const names={search:'Candidate search',sources:'Source listing',compare:'Source comparison'};
@@ -113,19 +165,19 @@ export async function mountDeepPreview(getRepository) {
   if(task.state==='running'){const phase=el('span','Reading '+task.phase.replaceAll('_',' ')+'…','deep-status-phase');status.append(phase);}
   if(task.error){const reason=el('details',undefined,'deep-status-reason');reason.append(el('summary','Request details'),el('code',task.error));status.append(reason);}
  }
- async function watch(task){const version=generation;nextStart=Date.parse(task.createdAt)+capabilities.cooldownMs;current=task;polling=true;busy(true);
+ async function watch(task){const version=generation;nextStart=Math.max(nextStart,Date.parse(task.createdAt)+capabilities.cooldownMs);waitNotice=null;current=task;polling=true;busy(true);
   try{while(current.state==='running'){taskStatus(current);await new Promise(r=>setTimeout(r,capabilities.scope==='private beta'?1000:250));const update=await request(`/tasks/${task.id}`);if(version!==generation)return;current=update;}
-   if(version!==generation)return;taskStatus(current);current.kind==='search'?showSearch(current):current.kind==='sources'?showSources(current):showComparison(current);
-  }catch(error){if(version===generation)setStatus(error.message,'failed');}
-  finally{if(version===generation){polling=false;busy(false);const delay=nextStart-Date.now();if(delay>0){const cooldown=el('span','Next request after '+new Date(nextStart).toLocaleTimeString(),'deep-status-phase');status.append(cooldown);setTimeout(()=>{if(version===generation){cooldown.remove();busy(polling);}},delay+10);}}}
+   if(version!==generation)return;taskStatus(current);if(current.code)requestFailure(Object.assign(new Error(current.error||'Discovery unavailable'),{code:current.code,retryAt:current.retryAt}));current.kind==='search'?showSearch(current):current.kind==='sources'?showSources(current):showComparison(current);
+  }catch(error){if(version===generation)requestFailure(error);}
+  finally{if(version===generation){polling=false;busy(false);refreshWait();}}
  }
  // Claim the request before POST returns, and retain the generation that initiated it.
- async function startTask(path,data,prepare=()=>{}){const version=generation;polling=true;busy(true);
+ async function startTask(path,data,prepare=()=>{}){if(blocked(path))return;const version=generation;waitNotice=null;polling=true;busy(true);
   try{const task=await request(path,data);if(version!==generation){if(task.state==='running')void request(`/tasks/${task.id}/cancel`,{}).catch(()=>{});return;}prepare();await watch(task);}
-  catch(error){if(version===generation){setStatus(error.message,'failed');polling=false;busy(false);}}
+  catch(error){if(version===generation){polling=false;requestFailure(error);}}
  }
- form.addEventListener('submit',async event=>{event.preventDefault();if(polling)return;await startTask('/search',{repository:input.value},()=>{candidates.replaceChildren();results.replaceChildren();files.replaceChildren();files.hidden=false;sourceTask=null;sourcePreview.hidden=true;parent=null;selected.clear();compare.hidden=true;});});
- async function startCompare(){if(polling||!parent||!sourceTask)return;await startTask('/compare',{searchId:parent.id,candidateIds:[...selected],selection:{sourceTaskId:sourceTask.id,files:[...fileChoices].map(([repositoryId,paths])=>({repositoryId,paths:[...paths]}))}});}
+ form.addEventListener('submit',async event=>{event.preventDefault();if(blocked('/search'))return;await startTask('/search',{repository:input.value},()=>{candidates.replaceChildren();results.replaceChildren();files.replaceChildren();files.hidden=false;sourceTask=null;sourcePreview.hidden=true;parent=null;selected.clear();compare.hidden=true;});});
+ async function startCompare(){if(blocked('/compare')||!parent||!sourceTask)return;await startTask('/compare',{searchId:parent.id,candidateIds:[...selected],selection:{sourceTaskId:sourceTask.id,files:[...fileChoices].map(([repositoryId,paths])=>({repositoryId,paths:[...paths]}))}});}
 
- return {capabilities,launcher,dialog,layerLauncher,workspace:{reset(repository){generation++;if(current?.state==='running')void request(`/tasks/${current.id}/cancel`,{}).catch(()=>{});current=null;parent=null;sourceTask=null;selected.clear();fileChoices.clear();candidates.replaceChildren();files.replaceChildren();results.replaceChildren();sourcePreview.hidden=true;compare.hidden=true;polling=false;input.value=repository;setStatus('Ready to search · no request made.');busy(false);},subscribe(fn){listeners.add(fn);},get state(){return {current,parent,sourceTask,selected:[...selected],polling};}},open:()=>launcher.click(),openCandidates:()=>layerLauncher.click()};
+ return {capabilities,launcher,dialog,layerLauncher,workspace:{reset(repository){generation++;if(current?.state==='running')void request(`/tasks/${current.id}/cancel`,{}).catch(()=>{});current=null;parent=null;sourceTask=null;selected.clear();fileChoices.clear();candidates.replaceChildren();files.replaceChildren();results.replaceChildren();sourcePreview.hidden=true;compare.hidden=true;polling=false;input.value=repository;waitNotice=null;setStatus('Ready to search · no request made.');busy(false);refreshWait();},subscribe(fn){listeners.add(fn);},get state(){return {current,parent,sourceTask,selected:[...selected],polling};}},open:()=>launcher.click(),openCandidates:()=>layerLauncher.click()};
 }

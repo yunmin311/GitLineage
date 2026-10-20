@@ -43,7 +43,10 @@ try{
  await page.locator('#deep-files input').first().waitFor();
  assert.equal(await page.locator('#deep-files input[value="src/main.ts"]').count(),1);
  await page.locator('#deep-files input[value="src/main.ts"]').check();await page.locator('#deep-files input[value="src/extra.ts"]').check();await page.locator('#deep-files input[value="src/extra.ts"]').uncheck();
- assert.match(await page.locator('#deep-scope').innerText(),/src\/main.ts/);
+ // Exact paths moved into the optional scope receipt; retain the readable-path check.
+ await page.locator('#deep-scope-details summary').click();
+ assert.match(await page.locator('#deep-scope-details').innerText(),/src\/main.ts/);
+ await page.locator('#deep-scope-details summary').click();
  const [listingDownload]=await Promise.all([page.waitForEvent('download'),page.locator('#deep-source-download').click()]);const listingPath=resolve(out,`${width}-source-sidecar.json`);await listingDownload.saveAs(listingPath);const listingReceipt=JSON.parse(await readFile(listingPath,'utf8'));validateSourceExport(listingReceipt);
  const callsBeforeRejection=fixture.calls.length;const rejected=await page.request.post(app.url+'/api/deep-search/compare',{headers:{origin:app.url},data:{searchId:listingReceipt.searchTaskId,candidateIds:[4],selection:{sourceTaskId:listingReceipt.sourceTaskId,files:[{repositoryId:1,paths:['src/main.ts']},{repositoryId:4,paths:['lib/core.ts']}]}}});assert.equal(rejected.status(),400);assert.equal(fixture.calls.length,callsBeforeRejection);
  await page.screenshot({path:resolve(out,`${width}-source-selection.png`),fullPage:true});
@@ -125,7 +128,12 @@ try{
  for(const width of [390,430,1280,1920])for(const mode of ['rate_limit','cancel'] as const){
  preview=createPreview({cooldownMs:0,transport:async(_url,init)=>{if(mode==='rate_limit')return new Response('',{status:403,headers:{'x-ratelimit-remaining':'0'}});await new Promise<void>((_r,j)=>init.signal.addEventListener('abort',()=>j(new Error('cancelled')),{once:true}));throw new Error('cancelled');}});app=await fixtureServer({previewHandler:preview.handler});
  const page=await browser.newPage({viewport:{width,height:932}});await page.goto(app.url+preview.accessPath);await page.goto(app.url+'/'+A);await page.locator('#canvas .node-box').first().waitFor();await settledCamera(page);const original=await page.locator('#canvas').evaluate(el=>{const m=(el as unknown as SVGSVGElement).getScreenCTM();return{viewBox:el.getAttribute('viewBox'),ctm:m?[m.a,m.b,m.c,m.d,m.e,m.f].map(v=>Number(v.toFixed(4))):null,url:location.href,selection:new URL(location.href).searchParams.get('node')}});assert.ok(original.ctm&&original.ctm.some(Number.isFinite));const cache=await cacheProof(app.fixtureCacheRoot);await page.locator('#deep-launch').click();await page.locator('#deep-repository').fill('root/example');await page.locator('#deep-search-submit').click();
- if(mode==='cancel'){await page.locator('#deep-cancel').click();await page.waitForFunction(()=>document.querySelector('#deep-status')?.textContent?.includes('cancelled'));}else await page.waitForFunction(()=>document.querySelector('#deep-status')?.textContent?.includes('partial'));
+ if(mode==='cancel'){await page.locator('#deep-cancel').click();await page.waitForFunction(()=>document.querySelector('#deep-status')?.textContent?.includes('cancelled'));}else {
+  // Upstream throttling now has a nonfatal notice and a real deadline, rather than
+  // the old generic partial label. Unavailable results/receipt/camera checks below remain.
+  await page.locator('#deep-status[data-state=notice]').filter({hasText:'GitHub is temporarily limiting requests'}).waitFor();
+  assert.match(await page.locator('#deep-status').innerText(),/Retry in \d+ s/);
+ }
  assert.match(await page.locator('#deep-candidates').innerText(),/incomplete or unavailable/);assert.equal(await page.locator('#deep-results .deep-measurement').count(),0);
  await page.screenshot({path:resolve(out,`${mode}.png`)});checks.push({mode,width,status:'PASS',unavailableNotZero:true});await page.locator('#deep-back').click();await page.locator('#deep-candidate-layer').click();assert.equal(await page.locator('#deep-layer-dialog .deep-layer-candidate').count(),0);await page.locator('#deep-layer-close').click();assert.deepEqual(await page.locator('#canvas').evaluate(el=>{const m=(el as unknown as SVGSVGElement).getScreenCTM();return{viewBox:el.getAttribute('viewBox'),ctm:m?[m.a,m.b,m.c,m.d,m.e,m.f].map(v=>Number(v.toFixed(4))):null,url:location.href,selection:new URL(location.href).searchParams.get('node')}}),original);assert.deepEqual(await cacheProof(app.fixtureCacheRoot),cache);await page.close();await preview.close();await app.cleanup();app=undefined as never;
  }

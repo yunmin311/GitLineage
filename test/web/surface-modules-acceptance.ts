@@ -17,7 +17,7 @@ try {
   await page.evaluate(() => document.fonts.ready);
   assert.equal(await page.locator('.trust-cell h3').count(), 3, 'Each evidence explanation has a navigable heading');
   await page.locator('#landing').evaluate(n => { n.scrollTop = n.scrollHeight; });
-  await page.evaluate(async () => { await Promise.all(document.getAnimations().map(a => a.finished.catch(() => {}))); });
+  await page.evaluate(async () => { await Promise.all(document.getAnimations().filter(a => a.effect?.getComputedTiming().endTime !== Infinity).map(a => a.finished.catch(() => {}))); });
   assert.equal(await page.locator('.samples a').count(), 2);
   for (const link of await page.locator('.samples a').all()) {
    const box = await link.boundingBox(); assert.ok(box && box.width >= 44 && box.height >= 44, 'Project links have real touch targets');
@@ -42,7 +42,8 @@ try {
   await page.waitForFunction(() => document.querySelector('.an-receipt')?.hasAttribute('open'));
   await page.locator('#an-job').waitFor({ state: 'visible' });
   assert.match(await page.locator('#an-job').innerText(), /modules/, 'The job receipt is available through keyboard disclosure');
-  await page.evaluate(async () => { await Promise.all(document.getAnimations().map(a => a.finished.catch(() => {}))); });
+  // The current-stage pulse intentionally repeats; only finite entrances settle.
+  await page.evaluate(async () => { await Promise.all(document.getAnimations().filter(a => a.effect?.getComputedTiming().endTime !== Infinity).map(a => a.finished.catch(() => {}))); });
   const opened = await receipt.boundingBox();
   await page.keyboard.press('Enter');
   await page.waitForFunction(() => !document.querySelector('.an-receipt')?.hasAttribute('open'));

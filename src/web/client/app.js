@@ -233,6 +233,11 @@ function readUrlState() {
     const depth = Number(urlState.depth);
     if (Number.isFinite(depth)) state.depth = depth;
   }
+  for (const button of document.querySelectorAll('[data-depth]')) {
+    const active = Number(button.dataset.depth) === state.depth;
+    button.classList.toggle('is-active', active);
+    button.setAttribute('aria-pressed', String(active));
+  }
 }
 
 function navigate(repository, push = true) {
@@ -395,9 +400,9 @@ function renderAnalysis(status, jobId) {
   const fsm = ANALYSIS_FSM_TEXT[status];
   const current = running >= 0 ? ANALYSIS_PHASE_TEXT[status] : null;
 
-  // The ordinal is language; the key beside it is the machine identifier.
+  // The ordinal gives position; the title alone names the current activity.
   $('an-pk').textContent = current
-    ? `phase ${running + 1} of ${RUNNING_PHASES.length} \u00b7 ${current.k}`
+    ? `phase ${running + 1} of ${RUNNING_PHASES.length}`
     : (fsm?.key ?? status);
   $('an-ptitle').textContent = current ? current.t : (fsm?.title ?? status);
   $('an-psub').textContent = current ? current.s : (fsm?.sub ?? '');
@@ -434,7 +439,6 @@ function renderAnalysis(status, jobId) {
   // tracer, rather than adding an endpoint.
   const n = RUNNING_PHASES.length;
   const labels = $('an-plabels');
-  const svg = $('an-svg');
   // Polls refresh source facts, but must not restart the visible phase entrance.
   if (!phaseChanged && labels.childElementCount === n) { state.phase = status; return; }
   /*
@@ -466,37 +470,16 @@ function renderAnalysis(status, jobId) {
     labels.append(el('div', {
       class: ['an-plabel', done ? 'is-done' : '', now ? 'is-now' : ''].filter(Boolean).join(' '),
       'data-phase': phase,
+      ...(now ? { 'aria-current': 'step' } : {}),
       // Mobile uses a short name; assistive technology retains the full phase name.
       'aria-label': `${at + 1} of ${RUNNING_PHASES.length}. ${ANALYSIS_PHASE_TEXT[phase].t}`,
     }, [
       el('span', { class: 'n', text: String(at + 1) }),
       el('span', { class: 't', text: ANALYSIS_PHASE_TEXT[phase].t }),
-      el('span', { class: 't-short', 'aria-hidden': 'true', text: ['Resolve', 'Collect', 'Connect', 'Check', 'Publish'][at] }),
+      el('span', { class: 't-short', 'aria-hidden': 'true', text: ['Resolve', 'Collect', 'Links', 'Check', 'Publish'][at] }),
     ]));
   }
 
-  const W = 1000; const pad = 0; const gap = 20; const y = 26;
-  const segW = (W - pad * 2 - gap * (n - 1)) / n;
-  const nodes = [];
-  for (let i = 0; i < n; i += 1) {
-    const x = pad + i * (segW + gap);
-    const done = isDone(i);
-    const now = current ? i === running : false;
-    const cls = ['an-seg', done ? 'is-done' : '', now ? 'is-now' : ''].filter(Boolean).join(' ');
-    nodes.push(svgEl('line', { class: cls, x1: x, y1: y, x2: x + segW, y2: y }));
-    if (now) {
-      nodes.push(svgEl('line', {
-        class: 'an-seg-fill', x1: x, y1: y, x2: x + segW, y2: y,
-        style: `--len:${segW}`,
-      }));
-      nodes.push(svgEl('circle', { class: 'an-tracer-halo', cx: x + segW / 2, cy: y, r: 10 }));
-      nodes.push(svgEl('circle', { class: 'an-tracer', cx: x + segW / 2, cy: y, r: 4.5 }));
-    }
-    const ncls = ['an-node', done ? 'is-done' : '', now ? 'is-now' : ''].filter(Boolean).join(' ');
-    nodes.push(svgEl('circle', { class: ncls, cx: x, cy: y, r: 4 }));
-    nodes.push(svgEl('circle', { class: ncls, cx: x + segW, cy: y, r: 4 }));
-  }
-  svg.replaceChildren(...nodes);
   state.phase = status;
 }
 
@@ -615,7 +598,6 @@ function hideWorking() {
     const node = $(id);
     if (node) node.replaceChildren();
   }
-  $('an-svg')?.replaceChildren();
   state.resolvedRevision = '';
 }
 
@@ -1441,6 +1423,7 @@ function draw() {
   const focusedEdge = document.activeElement?.getAttribute('data-edge-id');
   const focusedNode = document.activeElement?.getAttribute('data-node-id');
   const focusedCategory=document.activeElement?.getAttribute('data-category-id');
+  const focusedBundle=document.activeElement?.getAttribute('data-bundle-key');
   canvas.replaceChildren();
   if (!view) return;
 
@@ -1775,6 +1758,7 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
     Array.from(canvas.querySelectorAll('[data-node-id]')).find(node => node.getAttribute('data-node-id') === focusedNode)?.focus({ preventScroll: true });
   }
   if(focusedCategory)[...canvas.querySelectorAll('[data-category-id]')].find(n=>n.dataset.categoryId===focusedCategory)?.focus({preventScroll:true});
+  if(focusedBundle)[...canvas.querySelectorAll('.bundle-card')].find(n=>n.dataset.bundleKey===focusedBundle)?.focus({preventScroll:true});
   renderPerspective();
   let empty=$('graph-provenance-empty');if(!empty){empty=el('div',{id:'graph-provenance-empty',class:'graph-provenance-empty'});$('stage').append(empty);}
   empty.replaceChildren();setHidden(empty,edges.length>0||composition.plates.length>0||canvas.querySelectorAll('.unified-node').length>0);
@@ -2137,16 +2121,24 @@ function phoneFit(targetId) {
  fitGraphBoxes([box(target),...(parent?[box(parent)]:[]),...(connection?[connection]:[]),...(!targetId&&id!==rootId?[box(root)]:[])]);
 }
 function renderOverview(){
- let host=$('graph-overview');if(!host){host=el('div',{id:'graph-overview',class:'graph-overview','aria-label':'Graph overview'});$('stage').append(host);}
- host.replaceChildren();const points=[...state.positions.entries()];if(points.length<2){setHidden(host,true);return;}setHidden(host,false);
+ let host=$('graph-overview');if(!host){
+  host=el('div',{id:'graph-overview',class:'graph-overview','aria-label':'Graph overview'});
+  const toggle=el('button',{id:'overview-toggle',class:'vp-btn',text:'Map','aria-label':'Graph overview','aria-expanded':'false','aria-controls':'overview-map',popovertarget:'overview-map'});
+  const panel=el('div',{id:'overview-map'});panel.addEventListener('toggle',e=>toggle.setAttribute('aria-expanded',String(e.newState==='open')));
+  host.append(toggle,panel);
+ }
+ const phone=isPhone(),panel=host.querySelector('#overview-map'),toggle=host.querySelector('#overview-toggle');
+ (phone?$('viewport-hud'):$('stage')).append(host);setHidden(toggle,!phone);
+ if(phone)panel.setAttribute('popover','auto');else panel.removeAttribute('popover');
+ panel.replaceChildren();const points=[...state.positions.entries()];if(points.length<2){setHidden(host,true);return;}setHidden(host,false);
  const minX=Math.min(...points.map(([,p])=>p.x))-120,minY=Math.min(...points.map(([,p])=>p.y))-60,maxX=Math.max(...points.map(([,p])=>p.x))+120,maxY=Math.max(...points.map(([,p])=>p.y))+60;
  const map=svgEl('svg',{viewBox:`${minX} ${minY} ${maxX-minX} ${maxY-minY}`,role:'button',tabindex:0,'aria-label':'Graph overview: click a neighborhood; Enter returns to the repository'});
  for(const n of $('canvas').querySelectorAll('.group-navigation-line,.unified-line,.edge-line'))map.append(svgEl('path',{d:n.getAttribute('d'),fill:'none',stroke:'var(--rule-2)','stroke-width':5}));
  for(const [id,p]of points)map.append(svgEl('rect',{x:p.x-70,y:p.y-20,width:140,height:40,rx:5,fill:id===state.view.subject.id?'var(--brand)':'var(--brand-edge)'}));
- const focus=id=>id.startsWith('category:')?phoneFit(id):id.startsWith(BUNDLE_ID_PREFIX)?focusGraphGroup(id.slice(BUNDLE_ID_PREFIX.length)):workspace?.has(id)?workspace.focus(id):(selectNode(id),phoneFit(id));
+ const focus=id=>{if(panel.matches(':popover-open'))panel.hidePopover();return id.startsWith('category:')?phoneFit(id):id.startsWith(BUNDLE_ID_PREFIX)?focusGraphGroup(id.slice(BUNDLE_ID_PREFIX.length)):workspace?.has(id)?workspace.focus(id):(selectNode(id),phoneFit(id));};
  map.onclick=e=>{const at=new DOMPoint(e.clientX,e.clientY).matrixTransform(map.getScreenCTM().inverse());const nearest=points.reduce((a,b)=>Math.hypot(b[1].x-at.x,b[1].y-at.y)<Math.hypot(a[1].x-at.x,a[1].y-at.y)?b:a);focus(nearest[0]);};
  map.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();focus(state.view.subject.id);}};
- host.append(el('span',{text:'Overview · '+points.length+' objects'}),map);
+ panel.append(el('span',{text:'Overview · '+points.length+' objects'}),map);
 }
 function locateMobile(id,kind) {
   const relationIds = kind === 'edge' ? [id] : state.view.edges.filter(e=>e.source===id || e.target===id).map(e=>e.id);
@@ -2252,8 +2244,14 @@ function renderDrawer() {
   const inner = $('drawer-inner');
   const key = state.selectedEdgeId + '|' + state.selectedNodeId + '|' + (isPhone() ? 'phone' : 'desktop') + '|' + state.view?.revision.commit;
   if (isPhone() && mobile.drawerGraph === state.view && inner.dataset.selectionKey === key) { applyPanels(); return; }
+  // A breakpoint rebuild changes presentation, not the reader's selected record.
+  // Retain only disclosures from the same repository/revision/selection.
+  const readingKey = [state.view?.subject.id, state.view?.revision.commit, state.selectedEdgeId, state.selectedNodeId].join('|');
+  const openedFields = inner.dataset.readingKey === readingKey
+    ? new Set([...inner.querySelectorAll('.evidence-fields[open]')].map(n => n.dataset.evidenceId)) : new Set();
   mobile.drawerGraph = state.view;
   inner.dataset.selectionKey = key;
+  inner.dataset.readingKey = readingKey;
   inner.replaceChildren();
 
   const view = state.view;
@@ -2299,6 +2297,7 @@ function renderDrawer() {
   const toolbar = el('div', { class: 'drawer-toolbar' });
   toolbar.append(el('span', { text: 'Inspector' }), close);
   inner.append(toolbar, block);
+  for (const fields of inner.querySelectorAll('.evidence-fields')) fields.open = openedFields.has(fields.dataset.evidenceId);
   revealInstrument(block);
 
   /*
@@ -2325,24 +2324,19 @@ function nameOf(id) {
 
 function renderEdgeDrawer(edge) {
   const view = state.view;
-  const wrap = el('div');
+  const wrap = el('div', { class: 'relationship-inspector' });
 
   wrap.append(el('p', { class: 'd-eyebrow', text: 'RELATIONSHIP' }));
   wrap.append(el('p', { class: 'd-head', text: capitalise(edge.label) }));
-  wrap.append(
-    el('p', { class: 'd-sub' }, [
-      el('span', { class: 'mono', text: `ontology ${edge.relationshipType}` }),
-      document.createTextNode(' · '),
-      el('span', { class: 'mono', text: edge.directed ? 'directional' : 'symmetric · no arrowhead' }),
-    ]),
-  );
+  wrap.append(el('p', { class: 'd-sub', text: edge.directed ? 'Directed relationship' : 'Mutual relationship · no direction implied' }));
 
-  const pair = el('p', { class: 'd-pair' });
-  pair.append(
-    el('span', { text: nameOf(edge.source) }),
-    el('span', { class: 'd-arrow', text: edge.directed ? '→' : '⇄' }),
-    el('span', { text: nameOf(edge.target) }),
-  );
+  const pair = el('div', { class: `d-pair${edge.directed ? ' is-directed' : ''}` });
+  for (const [role, id] of [[edge.directed ? 'From' : 'Object', edge.source], [edge.directed ? 'To' : 'Related object', edge.target]]) {
+    pair.append(el('div', { class: 'd-endpoint', 'data-endpoint': id }, [
+      el('span', { class: 'd-endpoint-role', text: role }),
+      el('span', { class: 'd-endpoint-name', text: nameOf(id) }),
+    ]));
+  }
   wrap.append(pair);
 
   const pill = el('span', { class: `d-pill st-${edge.status}` });
@@ -2361,12 +2355,13 @@ function renderEdgeDrawer(edge) {
    * implementation detail of the analysis pipeline and the frozen design subordinates
    * exactly this kind of thing below the evidence.
    */
-  const provenance = el('div', { class: 'd-block' });
-  provenance.append(el('p', { class: 'd-block-head is-provenance', text: 'PROVENANCE' }));
+  const provenance = el('details', { class: 'workspace-technical relationship-provenance' });
+  provenance.append(el('summary', { text: 'Recorded provenance' }));
   const kv = el('dl', { class: 'd-kv' });
   const row = (k, v) => {
     kv.append(el('dt', { text: k }), el('dd', { text: String(v) }));
   };
+  row('Relation', edge.relationshipType);
   row('Revision', `${view.revision.ref || view.revision.defaultBranch || 'HEAD'} @ ${view.revision.shortCommit}`);
   row('Analyzed', formatTime(view.revision.analyzedAt));
   row('Source', state.cacheHit ? `cached (${formatDuration(state.meta?.elapsedMs ?? 0)})` : 'fresh analysis');
@@ -2386,18 +2381,16 @@ function renderEdgeDrawer(edge) {
       el('p', { class: 'mono', text: `showing ${records.length} of ${edge.evidenceCount} evidence records` }),
     );
   }
-  // Evidence first, then provenance: the record is what the reader came for.
-  wrap.append(evidenceBlock);
-  wrap.append(provenance);
-
-  // Why, anchored to the raw record
+  // Interpret the record first; raw evidence still precedes technical provenance.
   const why = el('div', { class: 'd-block' });
-  why.append(el('p', { class: 'd-block-head', text: 'WHY THIS IS ' + edge.status }));
+  why.append(el('p', { class: 'd-block-head', text: 'WHAT THIS RECORD SHOWS' }));
   const whyText = verificationSentence(edge, records);
   const whyBox = el('p', { class: `d-why st-${edge.status}` });
   whyBox.textContent = whyText;
   why.append(whyBox);
   wrap.append(why);
+  wrap.append(evidenceBlock);
+  wrap.append(provenance);
 
   const actions = el('div', { class: 'd-actions' });
   const copy = el('button', { class: 'd-action', text: 'Copy link' });
@@ -2425,12 +2418,12 @@ function renderEdgeDrawer(edge) {
 function renderEvidenceCard(record, edge) {
   const owner = state.repository.owner;
   const name = state.repository.name;
-  const card = el('div', { class: 'd-card' });
+  const card = el('div', { class: `d-card st-${record.status}` });
 
   const pill = el('span', { class: `d-pill st-${record.status}`, text: record.status });
   card.append(
     el('div', { class: 'd-card-head' }, [
-      el('span', { class: 'd-card-type', text: record.type.toUpperCase() }),
+      el('span', { class: 'd-card-type', text: capitalise(record.type.replaceAll('_', ' ')) }),
       pill,
     ]),
   );
@@ -2441,13 +2434,15 @@ function renderEvidenceCard(record, edge) {
   for (const [key, value] of Object.entries(record.data || {})) {
     if (value === null || value === undefined || key === 'relationship_semantics') continue;
     const rendered = Array.isArray(value)
-      ? value.map((item) => (!isPhone() && typeof item === 'string' && item.length > 14 ? `${item.slice(0, 12)}…` : String(item))).join(', ')
+      ? value.map((item) => typeof item === 'object' ? JSON.stringify(item) : String(item)).join(', ')
       : typeof value === 'object'
         ? JSON.stringify(value)
         : String(value);
-    data.append(el('dt', { text: key }), el('dd', { text: isPhone() ? rendered : truncate(rendered, 140) }));
+    data.append(el('dt', { text: key }), el('dd', { text: rendered }));
   }
-  card.append(data);
+  // The citation is primary; retain the complete record behind a native disclosure.
+  const fields = el('details', { class: 'workspace-technical evidence-fields', 'data-evidence-id': record.id });
+  fields.append(el('summary', { text: `Recorded fields · ${data.children.length / 2}` }), data);
 
   // GitHub is secondary: the drawer is the primary destination, this is the
   // explicit "open the original" affordance.
@@ -2471,6 +2466,7 @@ function renderEvidenceCard(record, edge) {
       card.replaceChild(link, link);
     }
   }
+  if (data.children.length) card.append(fields);
   void edge;
   return card;
 }
@@ -2582,8 +2578,14 @@ function renderNodeDrawer() {
   overview.append(el('p',{class:'entity-description',text:node.fact || node.type}));
   const relationships = edgesForNode(view,node.id).map(id=>view.edges.find(e=>e.id===id)).filter(Boolean);
   const metrics=el('div',{class:'entity-metrics'});
-  for(const [label, count] of [['Origins',relationships.filter(e=>e.family==='ancestry').length],['Dependencies',relationships.filter(e=>e.family==='dependency').length],['References',relationships.filter(e=>['attribution','source-identity'].includes(e.family)).length]]) {
-   const item=el('div');item.append(el('strong',{text:String(count)}),el('span',{text:label}));metrics.append(item);
+  const metricDescriptions={
+   origins:'Direct relationships to this object: recorded ancestry or identical source content. Identical content does not prove derivation.',
+   dependencies:'Direct dependency relationships to this object.',
+   references:'Direct reference relationships to this object.',
+  };
+  for(const [id,label,families] of PERSPECTIVES) {
+   const count=relationships.filter(e=>families.includes(e.family)).length;
+   const item=el('div',{title:metricDescriptions[id]});item.append(el('strong',{text:String(count)}),el('span',{text:label}));metrics.append(item);
   }
   overview.append(metrics);
   if(node.isSubject&&!relationships.some(e=>e.family==='ancestry'))overview.append(el('p',{class:'entity-absence',text:'No recorded ancestry evidence. Dependencies describe use, not origin.'}));
@@ -2851,8 +2853,7 @@ function fitGraphBoxes(nodes){
  const right=Math.max(...boxes.map(b=>b.x+b.width))+24,bottom=Math.max(...boxes.map(b=>b.y+b.height))+padding;
  const viewport={width:canvas.clientWidth,height:canvas.clientHeight};
  const rail=!isPhone()&&visiblePanels(panels).rail?320:0,drawer=!isPhone()&&visiblePanels(panels).drawer?400:0;
- const overviewSpace=$('graph-overview')?.getBoundingClientRect().height||56;
- const hud=$('viewport-hud').getBoundingClientRect().height+(isPhone()&&canvas.clientHeight>=600?Math.max(80,overviewSpace+24):0);
+ const hud=$('viewport-hud').getBoundingClientRect().height;
  const toolbar=$('graph-perspectives')?.offsetHeight||110;
  const availableHeight=Math.max(44,viewport.height-hud-toolbar-32);
  const scale=Math.max(1/1.2,(right-x)/Math.max(240,viewport.width-rail-drawer-48),(bottom-y)/availableHeight);
@@ -2933,8 +2934,10 @@ function boot() {
 
   for (const button of document.querySelectorAll('.seg-btn')) {
     button.addEventListener('click', () => {
-      for (const other of document.querySelectorAll('.seg-btn')) other.classList.remove('is-active');
-      button.classList.add('is-active');
+      for (const other of document.querySelectorAll('.seg-btn')) {
+        other.classList.toggle('is-active', other === button);
+        other.setAttribute('aria-pressed', String(other === button));
+      }
       state.depth = Number(button.dataset.depth);
       // A different depth is a different dataset: the content bounds are not
       // comparable with what is on screen, so the camera refits deliberately.

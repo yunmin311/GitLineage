@@ -67,6 +67,8 @@ function fixtureGraph(owner = 'me', name = 'project'): LineageGraph {
 }
 
 interface HarnessOptions {
+  /** Hold an emitted phase until the HTTP observer has read it. */
+  phaseGate?: (phase: AnalysisPhaseRecord) => Promise<void>;
   /** Milliseconds each phase takes, so a test can observe an intermediate state. */
   phaseDelayMs?: number;
   fail?: boolean;
@@ -124,6 +126,7 @@ async function harness(options: HarnessOptions = {}): Promise<Harness> {
         for (const phase of order) {
           onPhase?.(phase as PipelinePhase);
           phases.push(phase);
+          await options.phaseGate?.(phase);
           if (delay > 0) await new Promise((resolve) => setTimeout(resolve, delay));
         }
         if (options.fail) throw new Error('analyzer exploded');
@@ -306,15 +309,24 @@ test('POST /api/analysis returns 202 immediately and the job completes', async (
 });
 
 test('the job walks the real phase sequence and reports no percentage', async () => {
-  const h = await harness({ phaseDelayMs: 40 });
+  // A loaded runner can flush several queued store writes between HTTP polls.
+  // Acknowledge each real API state instead of relying on a 40ms sampling window.
+  const gates = new Map(RUNNING_PHASES.map(phase => {
+    let release!: () => void;
+    const promise = new Promise<void>(resolve => { release = resolve; });
+    return [phase, { promise, resolve: release }] as const;
+  }));
+  const h = await harness({ phaseGate: phase => gates.get(phase as typeof RUNNING_PHASES[number])!.promise });
   try {
     const { body } = await post(h.base, '/api/analysis/me/project');
-    const observed: string[] = [];
+    assert.equal(body.status, 'queued');
+    const observed: string[] = [body.status];
     const started = Date.now();
     for (;;) {
       const job = await getJob(h.base, body.jobId);
       const status = job.body.data.status;
       if (observed[observed.length - 1] !== status) observed.push(status);
+      gates.get(status)?.resolve();
       if (isTerminalPhase(status)) break;
       assert.ok(Date.now() - started < 20_000, 'polling terminates');
       await new Promise((r) => setTimeout(r, 15));
@@ -333,6 +345,7 @@ test('the job walks the real phase sequence and reports no percentage', async ()
     assert.equal(JSON.stringify(full).includes('percent'), false);
     assert.equal(JSON.stringify(full).includes('progress'), false);
   } finally {
+    for (const gate of gates.values()) gate.resolve();
     await h.close();
   }
 });

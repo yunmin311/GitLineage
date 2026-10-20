@@ -48,13 +48,14 @@ const snapshot = async (tag: string) => {
       analysisVisible: !document.querySelector('#analysis')?.hasAttribute('hidden'),
       explorerVisible: !document.querySelector('#explorer')?.hasAttribute('hidden'),
       anKey: t('#an-pk'),
+      anPhase: document.querySelector('#an-plabels [aria-current="step"]')?.getAttribute('data-phase') || '',
       anTitle: t('#an-ptitle'),
       anSub: t('#an-psub'),
       anRepo: t('#an-repo'),
       anJob: t('#an-job'),
       anSrc: t('#an-src'),
       anLabels: [...document.querySelectorAll('#an-plabels .an-plabel')].map((n) => n.textContent.replace(/\\s+/g,' ').trim()),
-      anSegs: document.querySelectorAll('#an-svg .an-seg').length,
+      anMarkers: document.querySelectorAll('#an-plabels .n').length,
       anNow: document.querySelectorAll('#an-plabels .an-plabel.is-now').length,
       anDone: document.querySelectorAll('#an-plabels .an-plabel.is-done').length,
     };
@@ -118,6 +119,7 @@ await browser.close();
 await cleanup();
 const failed = leakReport.some(r => r.staleIdentity || r.staleCounts || r.staleEvidence || r.staleRevision || r.graphBehindSurface);
 const complete = String(onB.route).toLowerCase() === ('/' + B).toLowerCase() && Number(onB.canvasNodes) > 0;
-const observed = ['resolving', 'collecting', 'resolving_relationships', 'validating', 'publishing'].every(p => [...seen.values()].some(s => String(s.anKey).endsWith(p)));
+// The visible key is an ordinal now; the active stage owns its stable phase identity.
+const observed = ['resolving', 'collecting', 'resolving_relationships', 'validating', 'publishing'].every(p => [...seen.values()].some(s => s.anPhase === p));
 console.log('STALE verdict', { failed, complete, observed, errors });
 if (failed || !complete || !observed || errors.length) process.exitCode = 1;

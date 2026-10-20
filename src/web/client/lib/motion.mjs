@@ -4,8 +4,10 @@ const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 const key = n => n.dataset.categoryId || n.dataset.nodeId || n.dataset.bundleKey || n.dataset.node || n.dataset.relationshipId;
 export function stopMotion(root) { active.get(root)?.(); active.delete(root); }
 export function captureMotion(root) {
+ // Capture the painted frame before cancellation restores the final DOM geometry.
+ const snapshot = new Map([...root.querySelectorAll('[data-category-id], [data-node-id], [data-bundle-key], [data-node], [data-relationship-id]')].map(n => [key(n), {rect:n.getBoundingClientRect(),opacity:Number(getComputedStyle(n).opacity),paths:[...n.querySelectorAll('path')].map(p=>p.getAttribute('d'))}]));
  stopMotion(root);
- return new Map([...root.querySelectorAll('[data-category-id], [data-node-id], [data-bundle-key], [data-node], [data-relationship-id]')].map(n => [key(n), {rect:n.getBoundingClientRect(),paths:[...n.querySelectorAll('path')].map(p=>p.getAttribute('d'))}]));
+ return snapshot;
 }
 export function transitionScene(root, before) {
  if (reduced() || !before.size) return;
@@ -15,12 +17,13 @@ export function transitionScene(root, before) {
   const old=before.get(key(n)),rect=n.getBoundingClientRect();
   const dx=old?(old.rect.x-rect.x)/matrix.a:0,dy=old?(old.rect.y-rect.y)/matrix.d:8;
   const base=n.getAttribute('transform')?.replace(/translate\(([-\d.]+),\s*([-\d.]+)\)/g,'translate($1px, $2px)')||'';
-  if(!n.dataset.relationshipId&&(dx||dy||!old))animations.push(n.animate([{transform:`translate(${dx}px, ${dy}px) ${base}`,opacity:old?1:0},{transform:`translate(0px, 0px) ${base}`,opacity:1}],{duration:260,easing:'cubic-bezier(.22,.61,.36,1)'}));
+  if(!n.dataset.relationshipId&&(dx||dy||!old))animations.push(n.animate([{transform:`translate(${dx}px, ${dy}px) ${base}`,opacity:old?old.opacity??1:0},{transform:`translate(0px, 0px) ${base}`,opacity:1}],{duration:260,easing:'cubic-bezier(.22,.61,.36,1)'}));
   if(old)for(const [i,p]of [...n.querySelectorAll('path')].entries()) {
-   const end=p.getAttribute('d'),start=old.paths[i];if(!start||!end||start.replace(/[-\d.]+/g,'#')!==end.replace(/[-\d.]+/g,'#'))continue;
+   const end=p.getAttribute('d'),start=old.paths[i];if(!start||!end||start===end||start.replace(/[-\d.]+/g,'#')!==end.replace(/[-\d.]+/g,'#'))continue;
    const from=start.match(/-?\d*\.?\d+/g)?.map(Number),to=end.match(/-?\d*\.?\d+/g)?.map(Number);if(from?.length===to?.length)paths.push({p,end,from,to});
   }
  }
+ if(!animations.length&&!paths.length)return;
  let frame=0,start=performance.now();
  const finish=()=>{cancelAnimationFrame(frame);for(const a of animations)a.cancel();for(const {p,end}of paths)p.setAttribute('d',end);};active.set(root,finish);
  const tick=now=>{const t=Math.max(0,Math.min(1,(now-start)/260)),ease=1-(1-t)**3;for(const {p,end,from,to}of paths){let i=0;p.setAttribute('d',end.replace(/-?\d*\.?\d+/g,()=>String(from[i]+(to[i]-from[i++])*ease)));}if(t<1)frame=requestAnimationFrame(tick);else active.delete(root);};frame=requestAnimationFrame(tick);

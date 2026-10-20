@@ -12,8 +12,8 @@ async function settleUI(page:import('playwright').Page) {
  await page.evaluate(async()=>{await Promise.all(document.getAnimations().filter(a=>a.effect?.getComputedTiming().endTime!==Infinity).map(a=>a.finished.catch(()=>{})));});
 }
 async function progressInk(page:import('playwright').Page) {
- const box=await page.locator('.an-seg.is-now').boundingBox();assert.ok(box);
- const png=await page.screenshot({clip:{x:box.x+4,y:box.y-2,width:box.width-8,height:4}});
+ const box=await page.locator('.an-plabel.is-now .n').boundingBox();assert.ok(box);
+ const png=await page.screenshot({clip:{x:box.x,y:box.y,width:box.width,height:box.height}});
  const decoder=await browser.newPage();
  try{return await decoder.evaluate(async data=>{
   const img=new Image();img.src=`data:image/png;base64,${data}`;await img.decode();
@@ -32,15 +32,18 @@ try {
   await page.route('**/api/analysis/jobs/language-check',route=>route.fulfill({json:{jobId:'language-check',status:'collecting',repository:B}}));
   await page.goto(`${app.url}/${B}?tracer-test=1`);await page.locator('#analysis:not([hidden]) .an-plabel').first().waitFor();await page.evaluate(()=>document.fonts.ready);
   const steps=await page.locator('.an-path').evaluate(n=>{
-   const labels=[...n.querySelectorAll('.an-plabel')];const bar=n.querySelector('svg')!.getBoundingClientRect();
-   return {bar:bar.toJSON(),labels:labels.map(e=>{const name=e.querySelector(innerWidth<768?'.t-short':'.t')!;const ordinal=e.querySelector('.n')!;return {box:e.getBoundingClientRect().toJSON(),name:name.textContent,nameDisplay:getComputedStyle(name).display,ordinal:getComputedStyle(ordinal).display};})};
+   const labels=[...n.querySelectorAll('.an-plabel')];
+   return {labels:labels.map(e=>{const name=e.querySelector(innerWidth<768?'.t-short':'.t')!;const ordinal=e.querySelector('.n')!;return {box:e.getBoundingClientRect().toJSON(),name:name.textContent,nameDisplay:getComputedStyle(name).display,ordinal:getComputedStyle(ordinal).display,marker:ordinal.getBoundingClientRect().toJSON(),connector:{width:getComputedStyle(e,'::after').width,top:getComputedStyle(e,'::after').top}};})};
   });
   assert.equal(steps.labels.length,5);
-  for(const step of steps.labels){assert.notEqual(step.ordinal,'none');assert.notEqual(step.nameDisplay,'none');assert.ok(step.name);assert.ok(steps.bar.bottom<=step.box.bottom+1&&steps.bar.top>=step.box.top,'Progress line belongs inside the stage labels');assert.ok(step.box.left>=0&&step.box.right<=width);}
+  for(const step of steps.labels){assert.notEqual(step.ordinal,'none');assert.notEqual(step.nameDisplay,'none');assert.ok(step.name);assert.equal(step.marker.width,step.marker.height,'Stage markers remain circular');assert.ok(step.marker.top>=step.box.top&&step.marker.bottom<=step.box.bottom,'Marker belongs to its stage');assert.ok(step.box.left>=0&&step.box.right<=width);}
+  // The former bottom SVG rules duplicated the phase markers. The path now joins
+  // adjacent ordinal centres; verify its painted marker and connector placement.
+  for(const step of steps.labels.slice(0,-1)){assert.ok(parseFloat(step.connector.width)>0);assert.equal(parseFloat(step.connector.top),step.marker.height/2);}
   assert.equal(await page.evaluate(()=>{const before=document.querySelector('.an-plabel.is-now');window.__setPhaseForTest?.('collecting');return before===document.querySelector('.an-plabel.is-now');}),true,'An unchanged poll retains labels and does not restart their animation');
   const motion=await page.evaluate(()=>{window.__setPhaseForTest?.('validating');const node=document.querySelector('.an-obj')!;const a=node.getAnimations()[0]!;a.pause();a.currentTime=0;const start=getComputedStyle(node).opacity;a.currentTime=260;return{start,end:getComputedStyle(node).opacity};});
   assert.notEqual(motion.start,motion.end,'A phase change paints distinct frames');
-  await page.waitForTimeout(280);assert.ok(await progressInk(page)>4,'The active progress line paints above its stage background');await page.screenshot({path:`${out}/${width}-analysis.png`});
+  await page.waitForTimeout(280);assert.ok(await progressInk(page)>4,'The current stage marker paints its brand pigment');await page.screenshot({path:`${out}/${width}-analysis.png`});
   await page.emulateMedia({reducedMotion:'reduce'});await page.evaluate(()=>window.__setPhaseForTest?.('publishing'));
   assert.equal(await page.locator('.an-plabel.is-now').evaluate(n=>n.getAnimations().length),0,'Reduced motion keeps current step readable without animation');
   await page.emulateMedia({reducedMotion:'no-preference'});

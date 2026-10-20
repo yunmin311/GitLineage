@@ -64,7 +64,8 @@ for (const [label, width, height] of [['1920x1080', 1920, 1080], ['1280x800', 12
         return { x: Math.round(u.x - f.x), y: Math.round(u.y - f.y) };
       })(),
       lines: document.querySelectorAll('.hero-line').length,
-      legends: document.querySelectorAll('.input-card .st').length,
+      // The reading legend now follows the form; its meaning and three statuses stay unchanged.
+      legends: document.querySelectorAll('#landing .st').length,
       depth: document.querySelectorAll('.seg-btn').length,
       samples: document.querySelectorAll('.samples a').length,
       maintainerOnly: [...document.querySelectorAll('.samples a')].every(a => a.getAttribute('href').startsWith('/yunmin311/')),

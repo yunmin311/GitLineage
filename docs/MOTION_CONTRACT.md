@@ -54,3 +54,15 @@ pending camera motion at its current geometry, then transfer ownership to native
 Reduced motion writes the final geometry immediately. View switching restores saved
 camera rather than fitting implicitly. unification-acceptance.ts checks intermediate,
 settled and interrupted camera geometry and the reduced-motion branch.
+
+## UI/Motion closeout (2026-10-20)
+- One entrance owner per surface; nested text/card entrances must not multiply opacity
+  or displacement. Commit selection updates reading content without replaying each block.
+- Spatial expansion retains the last painted node position and opacity when interrupted,
+  then resolves to the latest DOM state in 260ms. Unchanged scenes schedule no animation.
+- Panel contents use 160ms feedback; instrument/disclosure changes use 220ms. Waiting
+  markers communicate pending work; they never imply measured progress or trigger requests.
+- Hover displacement applies only to fine pointers with hover. Reduced motion skips
+  spatial/entrance transitions and keeps loading, status, focus and evidence readable.
+- motion-continuity-acceptance.ts records painted expansion frames, interruption geometry,
+  rapid reversal, focus, reduced motion and History camera restoration at four widths.
