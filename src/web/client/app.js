@@ -2244,8 +2244,14 @@ function renderDrawer() {
   const inner = $('drawer-inner');
   const key = state.selectedEdgeId + '|' + state.selectedNodeId + '|' + (isPhone() ? 'phone' : 'desktop') + '|' + state.view?.revision.commit;
   if (isPhone() && mobile.drawerGraph === state.view && inner.dataset.selectionKey === key) { applyPanels(); return; }
+  // A breakpoint rebuild changes presentation, not the reader's selected record.
+  // Retain only disclosures from the same repository/revision/selection.
+  const readingKey = [state.view?.subject.id, state.view?.revision.commit, state.selectedEdgeId, state.selectedNodeId].join('|');
+  const openedFields = inner.dataset.readingKey === readingKey
+    ? new Set([...inner.querySelectorAll('.evidence-fields[open]')].map(n => n.dataset.evidenceId)) : new Set();
   mobile.drawerGraph = state.view;
   inner.dataset.selectionKey = key;
+  inner.dataset.readingKey = readingKey;
   inner.replaceChildren();
 
   const view = state.view;
@@ -2291,6 +2297,7 @@ function renderDrawer() {
   const toolbar = el('div', { class: 'drawer-toolbar' });
   toolbar.append(el('span', { text: 'Inspector' }), close);
   inner.append(toolbar, block);
+  for (const fields of inner.querySelectorAll('.evidence-fields')) fields.open = openedFields.has(fields.dataset.evidenceId);
   revealInstrument(block);
 
   /*
@@ -2323,7 +2330,7 @@ function renderEdgeDrawer(edge) {
   wrap.append(el('p', { class: 'd-head', text: capitalise(edge.label) }));
   wrap.append(el('p', { class: 'd-sub', text: edge.directed ? 'Directed relationship' : 'Mutual relationship · no direction implied' }));
 
-  const pair = el('div', { class: 'd-pair' });
+  const pair = el('div', { class: `d-pair${edge.directed ? ' is-directed' : ''}` });
   for (const [role, id] of [[edge.directed ? 'From' : 'Object', edge.source], [edge.directed ? 'To' : 'Related object', edge.target]]) {
     pair.append(el('div', { class: 'd-endpoint', 'data-endpoint': id }, [
       el('span', { class: 'd-endpoint-role', text: role }),
@@ -2411,12 +2418,12 @@ function renderEdgeDrawer(edge) {
 function renderEvidenceCard(record, edge) {
   const owner = state.repository.owner;
   const name = state.repository.name;
-  const card = el('div', { class: 'd-card' });
+  const card = el('div', { class: `d-card st-${record.status}` });
 
   const pill = el('span', { class: `d-pill st-${record.status}`, text: record.status });
   card.append(
     el('div', { class: 'd-card-head' }, [
-      el('span', { class: 'd-card-type', text: record.type.toUpperCase() }),
+      el('span', { class: 'd-card-type', text: capitalise(record.type.replaceAll('_', ' ')) }),
       pill,
     ]),
   );
@@ -2427,13 +2434,15 @@ function renderEvidenceCard(record, edge) {
   for (const [key, value] of Object.entries(record.data || {})) {
     if (value === null || value === undefined || key === 'relationship_semantics') continue;
     const rendered = Array.isArray(value)
-      ? value.map((item) => (!isPhone() && typeof item === 'string' && item.length > 14 ? `${item.slice(0, 12)}…` : String(item))).join(', ')
+      ? value.map((item) => typeof item === 'object' ? JSON.stringify(item) : String(item)).join(', ')
       : typeof value === 'object'
         ? JSON.stringify(value)
         : String(value);
-    data.append(el('dt', { text: key }), el('dd', { text: isPhone() ? rendered : truncate(rendered, 140) }));
+    data.append(el('dt', { text: key }), el('dd', { text: rendered }));
   }
-  card.append(data);
+  // The citation is primary; retain the complete record behind a native disclosure.
+  const fields = el('details', { class: 'workspace-technical evidence-fields', 'data-evidence-id': record.id });
+  fields.append(el('summary', { text: `Recorded fields · ${data.children.length / 2}` }), data);
 
   // GitHub is secondary: the drawer is the primary destination, this is the
   // explicit "open the original" affordance.
@@ -2457,6 +2466,7 @@ function renderEvidenceCard(record, edge) {
       card.replaceChild(link, link);
     }
   }
+  if (data.children.length) card.append(fields);
   void edge;
   return card;
 }

@@ -52,6 +52,7 @@ try {
  await phone.locator('[data-mobile-view=relations]').click();
  await phone.locator('#mobile-relations details').evaluateAll(ns=>ns.forEach(n=>(n as HTMLDetailsElement).open=true));
  await phone.locator('.mobile-relation-evidence').first().click();await phone.evaluate(()=>document.fonts.ready);
+ await phone.locator('.evidence-fields summary').first().click();
  const labels=phone.locator('.d-data dt').filter({hasText:'manifest_path'});
  assert.ok(await labels.count()>0,'Manifest evidence is displayed on phone');
  assert.equal(await labels.evaluateAll(ns=>ns.every(n=>n.getBoundingClientRect().height<=parseFloat(getComputedStyle(n).lineHeight)+1)),true,'Manifest field label stays intact at 390px');

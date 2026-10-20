@@ -168,7 +168,10 @@ try{
  await stress.goto(`${app.url}/${A}`);await stress.locator('.node-box.is-subject').waitFor();
  await stress.evaluate(id=>{history.pushState({},'',`?edge=${encodeURIComponent(id)}`);dispatchEvent(new PopStateEvent('popstate'));},stressEdge);
  await stress.locator('#drawer').waitFor();
- check('controlled long-data desktop fixture is truncated before phone transition',!(await stress.locator('#drawer-inner').innerText()).includes(longText));
+ // Fields are now disclosed, not truncated. Keep the full-value and breakpoint checks.
+ await stress.locator('.evidence-fields summary').first().focus();await stress.keyboard.press('Enter');
+ await stress.waitForFunction(text=>document.getElementById('drawer-inner')?.innerText.includes(text),longText);
+ check('controlled long-data desktop fixture is readable on demand',(await stress.locator('#drawer-inner').innerText()).includes(longText));
  await stress.locator('.drawer-close').focus();await stress.setViewportSize({width:390,height:844});await stress.waitForFunction(()=>document.body.classList.contains('mobile-explorer'));
  check('phone breakpoint restores focus from hidden desktop close',await stress.evaluate(()=>{const e=document.activeElement!;const r=e.getBoundingClientRect();return e!==document.body&&r.width>0&&r.height>0;}));
  await stress.locator('#mobile-nav [data-mobile-view=evidence]').click();

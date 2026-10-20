@@ -34,6 +34,15 @@ try {
    });
    assert.ok(order,'Meaning and evidence boundary are explained before raw records');
    assert.equal(await drawer.evaluate(n=>n.scrollWidth<=n.clientWidth+1),true,'Long identifiers remain within Inspector');
+   const fields=drawer.locator('details.evidence-fields').first();
+   assert.equal(await fields.count(),1,'Evidence fields remain available in a secondary disclosure');
+   assert.equal(await fields.getAttribute('open'),null,'Raw fields do not displace the citation');
+   await fields.locator('summary').focus();
+   await page.keyboard.press('Enter');
+   await page.waitForFunction(()=>document.querySelector('details.evidence-fields')?.hasAttribute('open'));
+   assert.ok(await fields.locator('dt').count()>0,'The original record remains inspectable');
+   await fields.locator('summary').focus();await page.keyboard.press('Enter');
+   await page.waitForFunction(()=>!document.querySelector('details.evidence-fields')?.hasAttribute('open'));
    const pair=drawer.locator('.d-pair');
    assert.equal(await pair.locator('[data-endpoint]').count(),2,'Both real relationship endpoints are present');
    const selection = new URL(page.url()).searchParams.get('edge');

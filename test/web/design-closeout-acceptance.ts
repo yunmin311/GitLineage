@@ -22,7 +22,8 @@ try {for(const width of [1920,1280,430,390]) {
    assert.equal(await page.locator('.seg').evaluate(n=>getComputedStyle(n).borderTopWidth),'0px','Parameters are not another framed navigation bar');
   }
   await page.locator('#landing').evaluate(n=>n.scrollTop=n.scrollHeight);await page.screenshot({path:`${out}/${width}-landing-lower.png`});
-  if(!baseline&&width>=1280){const tops=await page.locator('.trust-body').evaluateAll(ns=>ns.map(n=>n.getBoundingClientRect().top));assert.ok(Math.max(...tops)-Math.min(...tops)<1,'Peer reading cards share their paragraph baseline');}
+  // The guide is now a reading ledger beside an illustrative connection, rather than three peer cards.
+  if(!baseline){const columns=await page.locator('.trust-cell').evaluateAll(ns=>ns.map(n=>({heading:n.querySelector('h3')!.getBoundingClientRect().left,body:n.querySelector('p')!.getBoundingClientRect().left})));for(const c of columns)assert.ok(Math.abs(c.heading-c.body)<1,'Each explanation shares its heading alignment');assert.match(await page.locator('.relationship-specimen figcaption').innerText(),/Illustration/,'The specimen is explicitly separate from analyzed results');}
   await page.route('**/api/analysis/'+B.toLowerCase(),r=>r.fulfill({status:202,json:{jobId:'closeout',status:'collecting',statusUrl:'/api/analysis/jobs/closeout',retryAfterMs:1500}}));
   await page.route('**/api/analysis/jobs/closeout',r=>r.fulfill({json:{jobId:'closeout',status:'collecting',repository:B}}));
   await page.goto(`${app.url}/${B}?tracer-test=1`);await page.locator('.an-plabel.is-now').waitFor();

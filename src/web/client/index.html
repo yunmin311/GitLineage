@@ -239,6 +239,15 @@
 
       <section class="evidence-guide" aria-labelledby="evidence-guide-title">
         <h2 class="module-heading" id="evidence-guide-title">Reading your graph</h2>
+        <!-- An explicitly illustrative record, never a result from the analyzer. -->
+        <div class="evidence-desk">
+          <figure class="relationship-specimen" aria-labelledby="specimen-caption">
+            <figcaption id="specimen-caption">Anatomy of a connection <span>Illustration</span></figcaption>
+            <div class="specimen-object"><span>01 · Repository</span><strong>Source project</strong></div>
+            <div class="specimen-connection"><span>declares a dependency</span></div>
+            <div class="specimen-object specimen-package"><span>02 · Package</span><strong>Referenced package</strong></div>
+            <div class="specimen-record"><span>Supporting record</span><code>Cargo.toml</code><p>A manifest records composition.<br>It does not establish ancestry.</p></div>
+          </figure>
         <div class="trust reading-module">
           <article class="trust-cell">
             <div class="trust-symbol trust-records" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6zM9 9h6M9 13h6M9 17h4"/></svg></div>
@@ -255,6 +264,7 @@
             <h3 class="trust-head">Relationships stay distinct</h3>
             <p class="trust-body">Dependencies and references are separate from ancestry. Similarity is a lead to investigate, never proof of derivation.</p>
           </article>
+        </div>
         </div>
       </section>
 
