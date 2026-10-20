@@ -3215,7 +3215,7 @@ button:active { filter:brightness(.97); }
 @media(max-width:767px){
  #explorer-body .graph-overview{position:static;flex:none;width:auto;padding:0;border:0;background:none;pointer-events:auto}
  #overview-toggle{font:500 11px var(--sans);width:44px;height:44px}
- #overview-map[popover]{inset:auto 12px calc(112px + env(safe-area-inset-bottom)) auto;margin:0;padding:12px;width:min(300px,calc(100vw - 24px));border:1px solid var(--rule-2);border-radius:3px;background:var(--surface-hi);color:var(--ink);box-shadow:0 3px 0 var(--rule)}
+ #overview-map[popover]{inset:auto 12px calc(112px + env(safe-area-inset-bottom)) auto;margin:0;padding:12px;width:min(300px,calc(100vw - 24px));border:1px solid var(--rule-2);border-radius:3px;background:var(--surface-hi);color:var(--ink);box-shadow:var(--sh-1)}
  #overview-map[popover] svg{height:180px;touch-action:manipulation}
  #overview-map[popover]::backdrop{background:transparent}
 }
