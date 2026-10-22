@@ -10,7 +10,7 @@ import type {ProviderOptions} from './search-provider.ts';
 import {parseObservation} from './search-contract.ts';
 import type {IdentityObservation} from './search-contract.ts';
 import {collectSources,validateSelections} from './source-collection.ts';
-import type {TreeCache,SourceSelection} from './source-collection.ts';
+import type {TreeCache,SourceSelection,SourceReadCache} from './source-collection.ts';
 import {pinnedCandidate} from './e2e.ts';
 import {runComparison} from './worker.ts';
 import {validateCandidate,validateUsage} from './contract.ts';
@@ -20,10 +20,10 @@ import {stableJSON} from './offline.ts';
 import {sha256} from './snapshot.ts';
 import type {SourceSnapshot} from './snapshot.ts';
 export interface ProbeControl {name:string;repositoryId:number|null;revision?:string;selections:SourceSelection[];observations?:IdentityObservation[]}
-export interface ProbeOptions extends ProviderOptions {onComparison?:(candidate:DiscoveryCandidate,target:SourceSnapshot,source:SourceSnapshot)=>void;now?:()=>string;profile?:BudgetProfile;signal?:AbortSignal;discoveryById?:Map<number,DiscoveryCandidate['discoveries']>;context?:{network:NetworkLedger;resolver:RepositorySnapshotResolver;resolutions:Map<number,Resolution>;trees:TreeCache}}
+export interface ProbeOptions extends ProviderOptions {onComparison?:(candidate:DiscoveryCandidate,target:SourceSnapshot,source:SourceSnapshot)=>void;now?:()=>string;profile?:BudgetProfile;signal?:AbortSignal;discoveryById?:Map<number,DiscoveryCandidate['discoveries']>;context?:{network:NetworkLedger;resolver:RepositorySnapshotResolver;resolutions:Map<number,Resolution>;trees:TreeCache;readCache?:SourceReadCache}}
 type Check={state:'matched'|'not_attempted'|'unavailable'|'id_conflict'|'name_changed';repositoryId:number|null;fullName:string|null;reason:string|null};
 function view(source:Awaited<ReturnType<typeof collectSources>>){return {...source,snapshot:source.snapshot?{identity:source.snapshot.identity,files:source.snapshot.files,state:source.snapshot.state,pending:source.snapshot.pending,reasons:source.snapshot.reasons}:null};}
-function timeless(r:Resolution){return {...r,observations:r.observations.map(({observedAt,...o})=>o)};}
+function timeless(r:Resolution){const copy=structuredClone(r);return {...copy,observations:copy.observations.map(({observedAt,...o})=>o)};}
 export async function runPinnedProbe(controls:ProbeControl[],options:ProbeOptions={}){
  if(!Array.isArray(controls)||controls.length<2||controls.length>3)throw new TypeError('two or three explicit controls required');
  const names=new Set<string>(),ids=new Set<number>();for(const c of controls){if(!/^[a-z0-9][a-z0-9-]{0,38}\/[a-z0-9_.-]{1,100}$/.test(c.name)||['.','..'].includes(c.name.split('/')[1]!)||names.has(c.name)||c.repositoryId!==null&&(!Number.isSafeInteger(c.repositoryId)||c.repositoryId<1||ids.has(c.repositoryId))||c.revision!==undefined&&!fullSHA(c.revision))throw new TypeError('invalid explicit control');names.add(c.name);if(c.repositoryId!==null)ids.add(c.repositoryId);validateSelections(c.selections);}
@@ -40,7 +40,7 @@ export async function runPinnedProbe(controls:ProbeControl[],options:ProbeOption
   // Explicit caller names are aliases only, not fabricated Search observations.
   const resolution=options.context?.resolutions.get(expectedId)??await resolver.resolve(expectedId,[...(control.observations??[]),...(observation?[observation]:[])],control.revision);
   if(!observation&&resolution.identity&&resolution.identity.fullName!==control.name)resolution.reasons.push('caller_name_metadata_disagreement');
-  const source=await collectSources(resolution,control.selections,resolver,options.context?.trees);
+  const source=await collectSources(resolution,control.selections,resolver,options.context?.trees,options.context?.readCache);
   const check:Check={state:'not_attempted',repositoryId:null,fullName:null,reason:'pre-resolution unavailable'};
   if(resolution.identity){const canonical=resolution.identity.fullName,raw=await resolver.provider.get(`/repos/${canonical}`,network),post=raw?parseObservation(raw,now(),'repository_metadata'):null;
    check.state=!post?'unavailable':post.repositoryId!==expectedId?'id_conflict':post.fullName!==canonical?'name_changed':'matched';check.repositoryId=post?.repositoryId??null;check.fullName=post?.fullName??null;check.reason=check.state==='matched'?null:post?`final identity: ${check.state}`:'final metadata: '+resolver.provider.failure();

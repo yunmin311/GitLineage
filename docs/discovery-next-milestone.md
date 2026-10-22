@@ -1,7 +1,9 @@
 # Next Milestone proposal: representative source selection
 
-Status: Proposed, not implemented. This is the next core capability slice after
-V3.3 / Relationship Map engineering closure; it does not reopen visual design.
+Status: Superseded by the implemented [Discovery V3](discovery-v3.md) on 2026-10-22.
+The proposal below records the frozen prior scope. V3 expands it to a complete
+manual-review and repeated multi-file comparison flow without raising budgets.
+It does not reopen visual design. No automatic V3.1/V3.2 follow-up is scheduled.
 
 ## Existing implementation checked
 

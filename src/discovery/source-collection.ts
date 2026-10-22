@@ -8,6 +8,8 @@ import type {FileRecord} from './contract.ts';
 export interface SourceSelection {path:string;reason:string;expectedDigest?:string}
 export interface SourceBinding {repositoryId:number;revision:string;path:string;blob:string;digest:string;bytes:number;parserVersion:string;filterVersion:string}
 export interface CollectedSources {snapshot:SourceSnapshot|null;selections:SourceSelection[];bindings:SourceBinding[];materializedBytes:number;coverage:{scope:'explicit selected paths only';state:'completed'|'partial'|'unavailable';treeTruncated:boolean;reasons:string[];pending:string[]}}
+/** Session-only cache of validated immutable source, bounded by the original file/byte ledger. */
+export type SourceReadCache=Map<string,{file:FileRecord;content:string}>;
 export interface TreeEntry {path:string;mode:string;type:string;sha:string;size?:number}
 /** Nonrecursive Git tree hash. API order is not authoritative: Git sorts directories
  * with a trailing slash and hashes raw mode/name/NUL/object-ID bytes. */
@@ -29,7 +31,7 @@ export function validateSelections(selections:SourceSelection[]):void {
  if(!Array.isArray(selections)||selections.length>8)throw new TypeError('at most eight explicit paths');
  const seen=new Set<string>();for(const item of selections){if(!item||Object.keys(item).some(k=>!['path','reason','expectedDigest'].includes(k))||typeof item.path!=='string'||item.path.length>256||item.path.includes('\\')||item.path.split('/').length>4||item.path.split('/').some(x=>!x||x==='.'||x==='..'||/[\x00-\x1f]/.test(x))||typeof item.reason!=='string'||!item.reason.length||item.reason.length>150||seen.has(item.path)||item.expectedDigest!==undefined&&!/^[a-f0-9]{64}$/.test(item.expectedDigest))throw new TypeError('invalid source selection');seen.add(item.path);}
 }
-export async function collectSources(resolution:Resolution,selections:SourceSelection[],resolver:RepositorySnapshotResolver,verifiedTrees?:TreeCache):Promise<CollectedSources>{
+export async function collectSources(resolution:Resolution,selections:SourceSelection[],resolver:RepositorySnapshotResolver,verifiedTrees?:TreeCache,readCache?:SourceReadCache):Promise<CollectedSources>{
  validateResolution(resolution);validateSelections(selections);
  const out:CollectedSources={snapshot:null,selections:structuredClone(selections),bindings:[],materializedBytes:0,coverage:{scope:'explicit selected paths only',state:'unavailable',treeTruncated:false,reasons:[],pending:[]}};
  if(!resolution.identity||!resolution.tree){out.coverage.reasons.push(...resolution.reasons);out.coverage.pending=selections.map(s=>s.path);return out;}
@@ -49,6 +51,12 @@ export async function collectSources(resolution:Resolution,selections:SourceSele
    resolver.network.budget.guard();const parts=selection.path.split('/');let hash=resolution.tree;let entry:TreeEntry|undefined;
    for(let i=0;i<parts.length;i++){entry=(await tree(hash)).find(e=>e.path===parts[i]);if(!entry)throw new Error('selected path unavailable');if(i<parts.length-1){if(entry.type!=='tree')throw new Error('selected directory unavailable');hash=entry.sha;}}
    if(!entry||entry.type!=='blob'||!['100644','100755'].includes(entry.mode)||entry.size===undefined)throw new Error('selected path is not a regular sized source blob');
+   const cacheKey=JSON.stringify([resolution.requestedId,identity.revision,selection.path]),cached=readCache?.get(cacheKey);
+   if(cached){
+    if(cached.file.blob!==entry.sha||cached.file.bytes!==entry.size||selection.expectedDigest!==undefined&&cached.file.digest!==selection.expectedDigest)throw new Error('cached source binding mismatch');
+    const file=structuredClone(cached.file);snapshot.files.push(file);out.materializedBytes+=file.bytes;out.bindings.push({repositoryId:resolution.requestedId,revision:identity.revision,path:file.path,blob:file.blob,digest:file.digest,bytes:file.bytes,parserVersion:file.parserVersion,filterVersion:file.filterVersion});
+    if(file.classification==='application_source')snapshot.sources.push({record:file,content:cached.content});else out.coverage.reasons.push(`${file.path}: filtered ${file.classification}: ${file.reasons.join('; ')}`);continue;
+   }
    resolver.network.budget.file(key,selection.path);resolver.network.budget.bytes(key,selection.path,entry.size);
    const raw=await resolver.provider.get(resolver.objectEndpoint(resolution,'blobs',entry.sha),resolver.network);if(!raw)throw new Error(`blob: ${resolver.provider.failure()}`);const b=record(raw);
    if(b.sha!==entry.sha||b.size!==entry.size||b.encoding!=='base64'||typeof b.content!=='string')throw new Error('blob identity or byte count mismatch');
@@ -57,6 +65,7 @@ export async function collectSources(resolution:Resolution,selections:SourceSele
    if(bytes.length!==entry.size||gitBlob(bytes)!==entry.sha)throw new Error('Git blob digest mismatch');const digest=sha256(bytes);if(selection.expectedDigest!==undefined&&digest!==selection.expectedDigest)throw new Error('SHA-256 digest mismatch');
    const content=new TextDecoder('utf-8',{fatal:true}).decode(bytes),filter=classify(selection.path,content);
    const file:FileRecord={path:selection.path,digest,blob:entry.sha,bytes:bytes.length,language:/\.[cm]?js$/.test(selection.path)?'javascript':/\.[cm]?ts$/.test(selection.path)?'typescript':'unknown',parserVersion:PARSER_VERSION,filterVersion:FILTER_VERSION,...filter};
+   readCache?.set(cacheKey,{file:structuredClone(file),content});
    snapshot.files.push(file);out.bindings.push({repositoryId:resolution.requestedId,revision:identity.revision,path:file.path,blob:file.blob,digest:file.digest,bytes:file.bytes,parserVersion:file.parserVersion,filterVersion:file.filterVersion});
    if(file.classification==='application_source')snapshot.sources.push({record:file,content});else out.coverage.reasons.push(`${file.path}: filtered ${file.classification}: ${file.reasons.join('; ')}`);
   }catch(error){const reason=error instanceof TypeError?'invalid UTF-8 or provider object':error instanceof Error?error.message:'source collection failed';snapshot.state='partial';snapshot.pending.push(selection.path);snapshot.reasons.push(`${selection.path}: ${reason}`);}

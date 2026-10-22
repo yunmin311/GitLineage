@@ -46,9 +46,14 @@ justify further UI changes. Device-level acceptance remains open independently.
 Local evidence, raw measurements, screenshots and release/device checklists are in
 `artifacts/integration-closeout/`; CI evidence is also attached to the linked runs.
 The design stage is closed; unconditional production readiness is not claimed.
-Next core slice: [representative source selection](discovery-next-milestone.md),
-proposed only, preserving `verification: pending` / `lineageClaim: none` and the
-separation of canonical graph, presentation view and Discovery candidates.
+Discovery V3 now implements [representative source comparison](discovery-v3.md)
+in the existing enabled exploration flow: bounded deterministic recommendations,
+manual overrides, multi-file worker results, digest-bound review and cumulative-budget
+repeat comparisons. The earlier [proposal](discovery-next-milestone.md) is superseded
+by that delivered scope. It preserves `verification: pending` / `lineageClaim: none`
+and the separation of canonical graph, presentation view and Discovery candidates.
+Authored-corpus coverage improves under unchanged caps; live candidate relevance and
+normalized-token false observations remain explicit limits, not solved provenance.
 
 ## Decision
 
