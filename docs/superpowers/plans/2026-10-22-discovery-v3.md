@@ -1,0 +1,15 @@
+# Discovery V3 delivery plan and frozen acceptance baseline
+
+Baseline: origin/main 5da98b38ec54e5d65e6272861c530586f0533147; existing local closeout documentation 4b25978 retained. User specification in the 2026-10-22 request is authoritative. No Graph/schema/provenance promotion, production changes, higher budgets, or global visual redesign.
+
+- [x] Task 1: deterministic representative selection (pure bounded-list input), RED/GREEN unit tests. Rank diversity of modules and supported languages, avoid duplicate blobs and path-level configuration/test noise, account for size and shared HTTP/byte/file ceilings. Unsupported languages and unread content stay explicitly unknown. Freeze benchmark labels and budgets before running either strategy.
+- [x] Task 2: compatible preview integration and versioned review receipt, RED/GREEN real-provider/worker tests. Preserve existing exports. Capture selected/read/filtered/pending paths, file pair outcomes and coverage denominators. Enable explicit revised selections using a bounded verified-content session cache; retain cumulative reservations, final identity checks, cancellation, deadline and frequency limits.
+- [x] Task 3: existing Discovery UI recommendation, reasons, file-level review, uncovered modules, manual override and recompare. Chromium desktop/mobile actual production bundle checks, graph/camera/URL/cache preservation, keyboard and Reduced Motion. Keep existing layout and visual tokens.
+- [x] Task 4: fixed corpus, equal-budget baseline/new/manual comparison through real provider/worker pipeline, measured request/byte/time costs, independently declared relevance labels, degenerations and quality gate. Document actual results, not inferred improvement.
+- [ ] Task 5: typecheck, unit, build, Discovery/browser/UI regressions, final branch review, fix proven important issues, commit/push independent branch and PR; await relevant CI. No merge.
+
+Interfaces: selector returns selected paths and metadata-only reasons; preview validates the same bounded listing before collection. Review receipt derives only from validated legacy export and binds its digest. Cache stores digest-checked bytes only, scoped to repository/revision/path; budgets never reset between comparisons. Browser consumes additive task fields and keeps manual choices authoritative.
+
+Benchmark predeclared gate: across fixed labeled cases, representative selection must improve macro effective-module recall and labeled source-byte coverage over the previous first-selectable-file default, without higher hard caps, higher invalid-source rate, or lower successful selected-pair completion on complete fixtures. Include a same-file-count first-N ablation to expose gains due only to selecting more files. No claim of GitHub-wide recall or real-world precision from constructed fixtures. Report failed/partial/truncated/unlisted separately. Manual is an oracle reference only when labels make the selection comparable, not a typical-user claim.
+
+Progress and decisions are recorded in artifacts/discovery-v3/ledger.md (retained acceptance evidence).

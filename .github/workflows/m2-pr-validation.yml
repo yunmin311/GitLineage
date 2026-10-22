@@ -41,6 +41,9 @@ jobs:
       - name: Offline Discovery tests
         run: node --test 'test/discovery/**/*.test.ts'
 
+      - name: Discovery V3 equal-budget quality benchmark
+        run: npm run benchmark:discovery
+
       - name: Unit tests
         run: npm test
 
@@ -88,6 +91,9 @@ jobs:
 
       - name: Deep Search and candidate layer browser acceptance
         run: npm run test:deep-search
+
+      - name: Discovery V3 representative selection and manual review
+        run: npm run test:discovery-v3-browser
 
       - name: Anonymous repository exploration browser acceptance
         run: npm run test:exploration

@@ -39,7 +39,10 @@
     "test:unification": "node test/web/unification-acceptance.ts && node test/web/history-loading-acceptance.ts && node test/web/component-motion-acceptance.ts && node test/web/site-language-acceptance.ts && node test/web/surface-modules-acceptance.ts && node test/web/hierarchy-refinement-acceptance.ts && node test/web/workflow-hierarchy-acceptance.ts && node test/web/relationship-reading-acceptance.ts && node test/web/history-controls-acceptance.ts && node test/web/design-closeout-acceptance.ts && node test/web/motion-continuity-acceptance.ts && node test/web/overview-acceptance.ts",
     "test:spatial-routing": "node test/web/spatial-routing-acceptance.ts",
     "test:history-return": "node test/web/history-return-acceptance.ts",
-    "test:site-continuity": "node test/web/site-continuity-acceptance.ts && npm run test:history-return"
+    "test:site-continuity": "node test/web/site-continuity-acceptance.ts && npm run test:history-return",
+    "test:discovery-v3": "node --test test/discovery/representative-selection.test.ts test/discovery/discovery-v3.test.ts",
+    "benchmark:discovery": "node experiments/discovery-v3/benchmark.ts",
+    "test:discovery-v3-browser": "node test/web/discovery-v3-acceptance.ts"
   },
   "dependencies": {
     "smol-toml": "^1.4.2"

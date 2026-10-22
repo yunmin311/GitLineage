@@ -88,6 +88,7 @@ export async function mountDeepPreview(getRepository) {
  }
  function showComparison(task){candidates.hidden=true;files.hidden=true;sourcePreview.hidden=true;compare.hidden=true;results.replaceChildren();const probe=task.comparison;if(!probe){results.append(el('p',task.error||'Comparison unavailable. No score was produced.'));return;}
   results.append(el('h3','Pinned source comparison'),el('p','File-level measurements only. Normalized scores can be high for common patterns or templates; no repository-wide similarity or lineage probability.','deep-note'),el('p','Verification: pending · Lineage claim: none','deep-warning'));
+  if(task.review)showReview(task);
   if(capabilities.scope==='anonymous')for(const r of task.export?.selection?.repositories??[]){const read=probe.content.snapshots.find(s=>s.expectedId===r.repositoryId)?.source;const selected=task.export.selection.selected?.find(f=>f.repositoryId===r.repositoryId)?.paths??[];results.append(el('p',`${r.fullName}: ${r.files.length} listed · ${selected.length} selected · ${read?.bindings?.length??0} read · ${r.coverage.filtered?.length??0} filtered · ${r.coverage.unlistedDirectories?.length??0} directories unlisted. Repository-wide coverage unknown.`,'deep-note'));}
 
   for(const [i,result] of probe.content.comparisons.entries()){
@@ -109,11 +110,21 @@ export async function mountDeepPreview(getRepository) {
    card.append(details('Pinned snapshots, Git blob SHA, file bindings and incomplete paths',{target,source,summary:result.summary,coverage:result.candidate?.coverage}));results.append(card);
   }usage(task);revealInstrument(results);
   results.append(details('Original search provenance — observation, not verified evidence',task.export?.provenance??'Unavailable'),details('Listed / unlisted / selected scope and combined stage costs',task.export?.selection??'Legacy explicit paths'));
+  if(sourceTask)results.append(button('deep-revise','Adjust files & compare again',()=>{files.hidden=false;compare.hidden=false;compare.textContent='Compare revised scope';renderScope();busy(polling,false);files.scrollIntoView();const first=files.querySelector('input:not(:disabled)');first?.focus();}));
   const download=button('deep-download','Download Sidecar + receipt',()=>{const url=URL.createObjectURL(new Blob([JSON.stringify(task.export??probe,null,2)],{type:'application/json'})),a=el('a');a.href=url;a.download='gitlineage-deep-sidecar.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});const exports=el('details',undefined,'workspace-technical');exports.append(el('summary','Export comparison & receipt'),download);results.append(exports);
+ }
+ function showReview(task){
+  const review=task.review,section=el('section');section.id='deep-review';section.append(el('h4','Multi-module review'),el('p','Sample observations only · repository-wide coverage unknown. Unread content is not negative evidence.','deep-warning'));
+  for(const r of review.repositories){section.append(el('p',`${r.fullName}: ${r.read.length}/${r.selected.length} selected files read; ${r.included.length} source files included. Read modules: ${r.readModules.join(', ')||'none'}. Uncovered listed modules: ${r.uncoveredListedModules.join(', ')||'none'}.`,'deep-note'),el('p',`Not read: ${r.pending.join(', ')||'none selected'}. Not selected: ${r.notSelected.join(', ')||'none listed'}. Unlisted directories: ${r.unlistedDirectories.join(', ')||'none'}. Unsupported paths: ${r.unsupported.join(', ')||'none listed'}.`,'deep-note'),el('p',`Source-byte sample: ${r.byteCoverage.readSourceBytes}/${r.byteCoverage.listedEligibleBytes} listed eligible bytes. ${r.byteCoverage.scope}.`,'deep-note'));if(r.filtered.length)section.append(el('p',`Read but excluded: ${r.filtered.map(f=>f.path+' ('+f.reason+')').join(', ')}`,'deep-note'));}
+  const labels={exact_match:'Exact match',partial_similarity:'Partial similarity observation',no_obvious_similarity:'No obvious similarity under this rule',unavailable:'Unavailable — not a negative result'};
+  for(const c of review.comparisons){section.append(el('p',`${c.completedPairs}/${c.expectedSelectedPairs} selected pairs compared · ${c.scope}`,'deep-note'));for(const [outcome,label]of Object.entries(labels))section.append(el('p',`${label}: ${c.pairs.filter(p=>p.outcome===outcome).length}`,'deep-note'));const pairs=el('details',undefined,'workspace-technical');pairs.append(el('summary','File outcomes & coverage'));
+   for(const p of c.pairs)pairs.append(el('p',`${p.firstPath} ↔ ${p.secondPath}: ${labels[p.outcome]}`,'deep-note'));section.append(pairs);}
+  section.append(el('p',review.outcomeRule+'. Similarity cannot establish copying or ancestry. Review pinned source and matched fragments below.','deep-note'),button('deep-review-download','Download review + pinned evidence',()=>downloadJSON({review:task.review,export:task.export},'gitlineage-discovery-v3-review.json')));results.append(section);
  }
  function showSources(task){sourceTask=task;files.hidden=false;files.replaceChildren();results.replaceChildren();compare.hidden=false;sourcePreview.hidden=true;fileChoices.clear();
   for(const check of candidates.querySelectorAll('input'))check.disabled=true;
   files.append(el('h3','Source Files'),el('p','Choose the target files and candidate files. Only selected files are compared; this never means the repository was fully scanned.','deep-note'));
+  if(task.recommendation){files.append(el('p','Recommended sample: module and language diversity within the current request budget. Metadata only; generated content and low-information files are checked after reading. You can change every choice.','deep-note'),button('deep-recommendations','Use recommendations',()=>{for(const [id,chosen]of fileChoices){chosen.clear();for(const f of task.recommendation.repositories.find(r=>r.repositoryId===id)?.selected??[])chosen.add(f.path);}for(const check of files.querySelectorAll('input[type=checkbox]'))check.checked=fileChoices.get(Number(check.dataset.repository))?.has(check.value)??false;renderScope();busy(polling,false);}));}
   for(const [i,r]of (task.sources?.repositories??[]).entries()){
    const card=el('article',undefined,'deep-file-card');
    card.append(el('p',i===0?'Target':'Candidate','deep-file-role'),el('h4',r.fullName),el('p',`Directory enumeration: ${r.coverage.enumeration??r.coverage.state} · selectable sources: ${r.coverage.eligibleFiles??r.files.filter(f=>f.selectable).length}`,'deep-note'));
@@ -122,16 +133,19 @@ export async function mountDeepPreview(getRepository) {
    identity.append(el('summary','Pinned source identity'),el('p',`Repository ID: ${r.repositoryId}`,'deep-note'),el('code',`Fixed revision: ${r.revision??'unavailable'}`,'deep-digest'));
    const sharedReason=r.files.filter(f=>f.selectable).map(f=>f.reason);
    const commonReason=sharedReason.length>1&&sharedReason.every(reason=>reason===sharedReason[0])?sharedReason[0]:null;
+   const recommendation=task.recommendation?.repositories.find(x=>x.repositoryId===r.repositoryId);
    const chosen=new Set();fileChoices.set(r.repositoryId,chosen);let defaultChosen=false;
    for(const f of r.files){const row=el('label',undefined,'deep-file-row'),check=el('input');check.type='checkbox';check.dataset.repository=String(r.repositoryId);check.value=f.path;check.disabled=!f.selectable;
-    if(f.selectable&&!defaultChosen){check.checked=true;chosen.add(f.path);defaultChosen=true;}
+    if(f.selectable&&(recommendation?recommendation.selected.some(s=>s.path===f.path):!defaultChosen)){check.checked=true;chosen.add(f.path);defaultChosen=true;}
     const text=el('span',undefined,'deep-file-copy');
     text.append(el('span',f.path,'deep-file-path'),el('span',`${f.language} · ${f.bytes??'unknown'} bytes`,'deep-file-meta'));
+    const recommended=recommendation?.selected.find(s=>s.path===f.path);if(recommended)text.append(el('span',recommended.reason,'deep-file-reason'));
     if(f.reason&&(!f.selectable||f.reason!==commonReason))text.append(el('span',f.reason,'deep-file-reason'));
     row.append(check,text);card.append(row);
     check.addEventListener('change',()=>{if(check.checked&&chosen.size>=8){check.checked=false;setStatus('Select at most eight files per repository.','notice');return;}check.checked?chosen.add(f.path):chosen.delete(f.path);renderScope();busy(polling,false);});
    }
    if(!r.files.some(f=>f.selectable))card.append(el('p','No selectable source within this listing. '+r.coverage.reasons.join('; '),'deep-warning'));
+   if(recommendation)card.append(el('p',`Uncovered listed modules: ${recommendation.uncoveredModules.join(', ')||'none in recommended sample'}. Unlisted directories: ${recommendation.unlistedDirectories.join(', ')||'none'}. Repository-wide coverage unknown.`,'deep-note'));
    if(commonReason)card.append(el('p',commonReason,'deep-note'));
    card.append(identity,details('Directory coverage and filter reasons',r.coverage));files.append(card);
   }
@@ -154,7 +168,7 @@ export async function mountDeepPreview(getRepository) {
    receipt.append(el('p',`ID ${id}: ${[...paths].join(', ')||'No files selected'}`));
   }
   scope.append(el('p','Selected file pairs only · repository-wide coverage unknown.','deep-note'));
-  receipt.append(el('p',`HTTP remaining: ${capabilities.budget.attempts-(sourceTask?.sources?.usage.attempts??0)}; selected blob reads + final identity checks: ${[...fileChoices.values()].reduce((n,paths)=>n+paths.size,0)+fileChoices.size}. Exhausted work stays partial.`));
+  receipt.append(el('p',`HTTP remaining: ${capabilities.budget.attempts-(current?.comparison?.content.usage.attempts??sourceTask?.sources?.usage.attempts??0)}; selected reads (previously validated content may be reused) + final identity checks: ${[...fileChoices.values()].reduce((n,paths)=>n+paths.size,0)+fileChoices.size}. Exhausted work stays partial.`));
  }
  async function startSources(){if(blocked('/sources')||!parent||!selected.size)return;await startTask('/sources',{searchId:parent.id,candidateIds:[...selected]});}
  function setStatus(message,state='ready'){const changed=status.dataset.state!==state||status.firstChild?.textContent!==message;status.textContent=message;status.dataset.state=state;if(changed)revealInstrument(status);}

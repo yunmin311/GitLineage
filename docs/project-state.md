@@ -4,6 +4,57 @@ Decisions here are binding on the implementation unless this file is changed.
 Anything not listed as a decision is a proposal and must not be treated as
 settled.
 
+## Design engineering closure — 2026-10-22
+
+V3.3 and Relationship Map are closed as a design stage. PR [#7](https://github.com/yunmin311/GitLineage/pull/7)
+was normally merged at `5da98b38ec54e5d65e6272861c530586f0533147`.
+Do not open another visual Milestone for minor differences. Only demonstrated
+functional, accessibility, browser-compatibility or serious performance regressions
+justify further UI changes. Device-level acceptance remains open independently.
+
+- **Merged-main verification:** native [ARM64 / live / image](https://github.com/yunmin311/GitLineage/actions/runs/39783929489)
+  and manually dispatched [full M2](https://github.com/yunmin311/GitLineage/actions/runs/39784908215)
+  both passed on that exact merge SHA. Stable UI remains a PR-only, path-filtered
+  workflow; its PR result is not a separate post-merge result.
+- **Cross-browser:** Linux Playwright WebKit 26.6 passed Site Continuity, History
+  Return, component motion, unified workspace and History controls on the final
+  production bundle. Four widths (1920/1280/430/390), keyboard and Reduced Motion
+  were exercised. History Return measured 44px high with all nine hit probes
+  reachable in ready and failed states at every width. This does not certify
+  macOS Safari, iOS, physical touch or pinch.
+- **Sustained browser sampling:** Chromium, WSL2 x86_64, four sequential three-minute
+  samples, 2,125 action iterations. Recorded canonical fixtures had 15/43/98 nodes;
+  synthetic stress supplied 1,298 presentation nodes without changing canonical data.
+  Recorded-fixture frame P99 was about 16.8ms; synthetic P99 was 33.4ms with 47
+  interaction long tasks (maximum 71ms). Grouping bounds the painted scene: this
+  does not certify 1,298 simultaneously painted nodes, hardware GPU performance,
+  mobile thermals or production cold analysis.
+- **Unresolved local test observation:** two full unit runs failed the real-engine
+  Private Beta test at `test/discovery/private-beta.test.ts:39` with an absent export.
+  A later unmodified standard run passed (622 pass, zero fail, three existing live
+  skips), as did isolated diagnostics and 12 concurrent isolated samples. Both main
+  CI unit runs passed. The intermittent failure's cause is unconfirmed; retries
+  are not a fix. It remains a release qualification item, not a reason to redesign.
+- **Release audit, read only:** no branch protection/rulesets/required checks were
+  configured. Main push runs ARM64; the full M2 release check requires dispatch.
+  Production was clean at `868c488d6d5358b05899ad8e777e320ca0037c0e`, not the new main.
+  Public and on-disk asset hashes agreed. The existing rollback restores
+  `dd5d70109fe42ef1d46eb5f053e6795f6da39aa3`; a future release must snapshot the
+  currently running version. No deployment, restart, production data/configuration
+  change or administrator-rule change occurred.
+
+Local evidence, raw measurements, screenshots and release/device checklists are in
+`artifacts/integration-closeout/`; CI evidence is also attached to the linked runs.
+The design stage is closed; unconditional production readiness is not claimed.
+Discovery V3 now implements [representative source comparison](discovery-v3.md)
+in the existing enabled exploration flow: bounded deterministic recommendations,
+manual overrides, multi-file worker results, digest-bound review and cumulative-budget
+repeat comparisons. The earlier [proposal](discovery-next-milestone.md) is superseded
+by that delivered scope. It preserves `verification: pending` / `lineageClaim: none`
+and the separation of canonical graph, presentation view and Discovery candidates.
+Authored-corpus coverage improves under unchanged caps; live candidate relevance and
+normalized-token false observations remain explicit limits, not solved provenance.
+
 ## Decision
 
 Confirmed and implemented in this repository.
@@ -152,7 +203,9 @@ These counts and live runs are historical, not evidence for the current M2 HEAD.
 Current M2 acceptance is tracked by the PR workflows `M2 PR validation` and
 `P0/P0.5 stable UI validation` on the same final development commit. Offline
 Chromium fixtures, fixed Mock GitHub Transport and isolated trusted TLS/Caddy
-staging do not establish fresh GitHub API, WebKit or physical-device acceptance.
+staging do not by themselves establish fresh GitHub API, WebKit or physical-device
+acceptance. See the dated closure above for the separately executed merged-main
+live and Linux WebKit checks; physical-device acceptance remains unverified.
 
 Superseded run note: 89 tests at the direction-audit commit, 130 at the Phase 1
 commit, 209 at the async-jobs commit. The Phase 2 run is recorded in the
@@ -191,7 +244,8 @@ different cache root from the one in use.
 
 The provisioning and credential inventory recorded during this earlier validation
 is obsolete. This PR does not inspect or modify OCI, Caddy, TLS, DNS or production
-configuration. The current live deployment is not verified here.
+configuration. That historical validation did not verify the current live deployment;
+the dated closure above records the later read-only version/hash inspection.
 
 The live validation above was driven through a Cloudflare Quick Tunnel, which
 worked and then failed repeatedly for reasons outside the application: TLS

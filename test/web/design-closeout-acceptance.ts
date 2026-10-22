@@ -75,7 +75,12 @@ try {for(const width of [1920,1280,430,390]) {
    const detail=page.locator('#deep-scope-details');assert.equal(await detail.getAttribute('open'),null);
    await detail.locator('summary').click();assert.match(await detail.innerText(),/HTTP remaining/,'Exact budget remains readable');
    await detail.locator('summary').click();
-   const extra=page.locator('.deep-file-card').first().locator('input:enabled').last();await extra.focus();await page.keyboard.press('Space');
+   // V3 recommends multiple files; establish a manual single-file scope before testing keyboard addition.
+   const choices=page.locator('.deep-file-card').first().locator('input:enabled');
+   assert.equal(await choices.count(),2,'Fixture supplies two selectable files');
+   const extra=choices.last();await extra.uncheck();
+   assert.match(await scope.innerText(),/ID 1: 1 file\(s\)/,'Manual review can reduce the recommended scope');
+   await extra.focus();await page.keyboard.press('Space');
    assert.match(await scope.innerText(),/ID 1: 2 file\(s\)/,'Scope updates with retained selections');
    assert.equal(await extra.evaluate(n=>document.activeElement===n),true,'Updating scope never steals checkbox focus');
   }
