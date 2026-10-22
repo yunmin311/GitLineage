@@ -34,6 +34,7 @@ const result = await build({
 await mkdir(outDir, { recursive: true });
 await cp(resolve(clientDir, 'index.html'), resolve(outDir, 'index.html'));
 await cp(resolve(clientDir, 'app.css'), resolve(outDir, 'app.css'));
+await cp(resolve(clientDir, 'site.css'), resolve(outDir, 'site.css'));
 
 /*
  * The typeface itself.
@@ -59,7 +60,7 @@ const assets = [
 ];
 // Copied, not bundled, so esbuild does not know about it -- record it explicitly or the
 // manifest would under-report what is actually being served.
-for (const name of ['app.css', 'fonts.css', 'index.html']) {
+for (const name of ['app.css', 'site.css', 'fonts.css', 'index.html']) {
   const info = await stat(resolve(outDir, name));
   assets.push({ file: name, bytes: info.size });
 }

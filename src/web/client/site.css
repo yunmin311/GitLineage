@@ -1,0 +1,604 @@
+
+/* Accepted site continuity: relationship map and contextual surfaces. */
+/* Accepted relationship-map composition. */
+html[data-design]{--lab-structure:hsl(170 34% 30%);--lab-structure-wash:hsl(170 30% 91%);--lab-observation:hsl(278 25% 38%);--lab-observation-wash:hsl(278 30% 93%);--lab-blue:var(--brand);--lab-teal:var(--lab-structure);--lab-ochre:var(--declared);--lab-pale:var(--brand-wash);--lab-yellow:var(--surface-hi)}
+html[data-design] .appbar{border-bottom:1px solid var(--ink);box-shadow:none}
+html[data-design] .ld-inner{max-width:1320px;width:calc(100% - 112px);padding-top:72px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px 56px}
+html[data-design] .hero{font-size:clamp(38px,4vw,66px);line-height:1.04;letter-spacing:-.06em;margin:20px 0 24px;font-weight:650}
+html[data-design] .hero-line{display:block;white-space:normal}html[data-design] .hero-u{display:none}html[data-design] .hero-f{white-space:normal}
+html[data-design] .eyebrow{margin:0;font-size:12px}html[data-design] .eyebrow-t{text-transform:none;letter-spacing:0;color:var(--lab-blue)}html[data-design] .eyebrow-rule{display:none}
+html[data-design] .lede{font:400 16px/1.65 var(--sans);margin:0 0 28px;max-width:47ch;color:var(--ink-2)}
+html[data-design] .input-card{margin:0;border:1px solid var(--ink);box-shadow:var(--sh-1);border-radius:5px;background:var(--surface-hi)}
+html[data-design] .input-row{padding:10px;gap:8px}html[data-design] #repo-input{font-size:14px;min-width:0}html[data-design] .field{min-width:0}html[data-design] #submit{background:var(--lab-blue);color:#fff;border-color:var(--lab-blue);font:600 13px/1.3 var(--sans);padding:14px 16px;border-radius:3px;white-space:nowrap}
+html[data-design] .sub-row-depth{padding:10px 14px;background:var(--lab-pale);border-top:1px solid var(--rule)}
+html[data-design] .lab-intro>.sub-row{font-size:11px;margin:18px 0 0;gap:12px;flex-wrap:wrap}html[data-design] .lab-intro>.sub-row .sub-cap{display:none}
+html[data-design] .repository-reference{margin-top:28px;padding:0!important;border:0!important;background:none!important}html[data-design] .repository-reference .foot{display:none}html[data-design] .samples{gap:7px!important}html[data-design] .samples-lab{font-size:12px!important;font-weight:400!important}html[data-design] .samples a{font-size:11px!important;min-height:38px!important;padding:8px!important;background:transparent!important}
+.lab-map{position:relative;align-self:stretch;min-width:0;padding:22px 24px;background:var(--lab-pale);border:1px solid var(--brand-edge);border-radius:8px;display:flex;flex-direction:column;justify-content:center;overflow:hidden}
+.lab-map-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;font:600 12px/1.4 var(--sans)}.lab-illustration{font-size:10px;font-weight:400;color:var(--ink-2);border:1px solid var(--brand-edge);border-radius:3px;padding:3px 6px}
+.lab-map svg{display:block;width:100%;height:auto;overflow:visible;margin:18px 0 12px}.lab-map path{fill:none;stroke-width:2.5;stroke:currentColor}.lab-map rect{fill:#fdfcf8;stroke:currentColor;stroke-width:1.5}.lab-map text{font:600 15px var(--sans);fill:var(--ink)}.lab-map .lab-small{font:400 11px var(--sans)}.lab-root rect{fill:var(--lab-blue);stroke:var(--lab-blue);stroke-width:2}.lab-root text{fill:white}.lab-root circle{fill:var(--lab-yellow)}.lab-port circle{fill:var(--surface-hi);stroke:var(--lab-blue);stroke-width:2}
+.lab-branch{transition:opacity var(--d-move) var(--ease);color:var(--lab-blue)}.lab-branch.dependencies{color:var(--lab-ochre)}.lab-branch.references{color:var(--lab-teal)}
+.lab-map[data-focus=ancestry] .lab-branch:not(.ancestry),.lab-map[data-focus=dependencies] .lab-branch:not(.dependencies),.lab-map[data-focus=references] .lab-branch:not(.references){opacity:.58}
+.lab-map-controls{display:flex;gap:6px;flex-wrap:wrap}.lab-map-controls button{font:500 12px/1.4 var(--sans);border:1px solid transparent;border-radius:4px;padding:9px 10px;min-height:40px;background:transparent;color:var(--ink);cursor:pointer;transition:background 140ms ease,border-color 140ms ease}.lab-map-controls button[aria-pressed=true]{background:var(--surface-hi);border-color:var(--brand-edge);box-shadow:0 2px 0 var(--brand-edge)}.lab-map-note{font:400 12px/1.6 var(--sans);min-height:39px;margin:12px 0 20px;color:var(--ink-2);max-width:52ch}.lab-open{display:flex;justify-content:space-between;font:600 13px/1.5 var(--sans);color:var(--lab-blue);text-decoration:none;border-top:1px solid var(--brand-edge);padding-top:14px;min-height:32px;align-items:center}
+html[data-design] .hero-trace{grid-column:1/-1;margin-top:12px;padding:24px 0 16px!important;position:relative}html[data-design] .hero-trace-node{padding:16px 16px 16px 0}html[data-design] .evidence-guide{grid-column:1/-1;margin:0 0 48px}.lab-map path{stroke-dasharray:700;stroke-dashoffset:700;transition:stroke-dashoffset var(--d-trace) var(--ease)}.lab-ready path{stroke-dashoffset:0}
+/* A: asymmetric atlas. The product's subject, not a marketing card, carries the page. */
+html[data-design=atlas] .hero-line:first-child{max-width:9ch}html[data-design=atlas] .hero{color:var(--lab-blue)}
+html[data-design=atlas] .lab-map{border-radius:var(--r-md);background:var(--brand-wash)}
+@media(min-width:1600px){html[data-design] .ld-inner{padding-top:88px;gap:56px 88px}}
+@media(max-width:1000px){html[data-design] .ld-inner{width:calc(100% - 56px);gap:32px;grid-template-columns:1fr 1fr}html[data-design] .hero{font-size:40px}html[data-design] .input-row{flex-direction:column}html[data-design] #submit{width:100%}}
+@media(max-width:767px){html[data-design] .ld-inner{width:calc(100% - 40px);padding-top:32px!important;display:flex;flex-direction:column;gap:28px}html[data-design] .hero{font-size:44px!important;line-height:1.04;margin:16px 0 20px!important}html[data-design] .hero-line:first-child{max-width:10ch}html[data-design] .lede{font-size:14px}html[data-design] .lab-map{padding:18px;min-height:0;display:flex!important;gap:0;border-radius:5px}html[data-design] .lab-map svg{max-height:none;margin:16px 0!important}html[data-design] .lab-map-heading{font-size:11px}.lab-illustration{font-size:9px}.lab-map-controls{gap:2px}.lab-map-controls button{min-height:44px;font-size:11px;padding:8px}.lab-map-note{min-height:40px;margin:12px 0}.lab-open{padding-top:14px}html[data-design] .lab-intro{display:block!important}html[data-design] .hero-trace{order:2;margin:0!important}html[data-design] .evidence-guide{order:3}}
+@media(prefers-reduced-motion:reduce){.lab-map path,.lab-branch,.lab-map-controls button,html[data-design] .workspace-link{transition:none!important}.lab-map path{stroke-dashoffset:0}}
+/* Render review: remove the inherited 852px production column before testing the new compositions. */
+html[data-design] .landing{max-width:none;padding:0;margin:0 auto}
+html[data-design] .ld-inner{margin:0 auto}
+html[data-design] .hero-f{color:inherit}
+html[data-design] .lab-map{align-self:start}
+html[data-design] .landing .site-foot{max-width:1320px;margin:0 auto;padding:24px 0;width:calc(100% - 112px)}
+html[data-design] .lab-map svg{min-height:300px}
+@media(max-width:767px){html[data-design] .landing{padding:0}html[data-design] .ld-inner{width:calc(100% - 40px)}html[data-design] .lab-intro{order:0}html[data-design] .lab-map{order:1;width:100%;box-sizing:border-box}html[data-design] .lab-map svg{min-height:0}html[data-design] .landing .site-foot{width:calc(100% - 40px)}html[data-design] .lab-intro{width:100%}html[data-design] .sub-row-depth{gap:8px}html[data-design] .seg{display:flex;flex-wrap:wrap;gap:4px}}
+html[data-design] .landing:not([hidden]) .ld-inner{animation:none}
+
+/* Continuity pass: hierarchy before color (§2.1); accepted pigments first (§5.3).
+   Primary: subject and active operation. Secondary: relationship family / reading focus.
+   Tertiary: technical metadata stays neutral. Status badges retain V3.3 hues and shapes.
+   Teal = structure, plum = exploratory observation, neither implies verified ancestry. */
+html[data-design] .hero,html[data-design] .eyebrow-t{color:var(--ink)}
+html[data-design] .lab-map{border-color:var(--rule-2)}
+html[data-design] .lab-map .references{color:var(--lab-observation)}
+html[data-design] .lab-map .dependencies{color:var(--declared)}
+html[data-design] .lab-map .ancestry{color:var(--verified)}
+html[data-design] .lab-root rect{fill:var(--brand);stroke:var(--brand)}
+html[data-design] .lab-root circle{fill:var(--surface-hi)}
+html[data-design] .lab-map-controls [aria-pressed=true]{background:var(--control-wash);border-color:var(--control-ink);color:var(--control-ink);box-shadow:inset 0 1px 0 #ffffffb3,0 2px 0 var(--control-ink)}
+html[data-design] .evidence-guide{border-top:2px solid var(--ink)}
+html[data-design] .evidence-guide .st-v{background:var(--verified-wash)}
+html[data-design] .evidence-guide .st-d{background:var(--declared-wash)}
+html[data-design] #canvas .node-box.is-subject{fill:var(--brand-wash);stroke:var(--brand);stroke-width:2}
+html[data-design] #canvas .family-dependency .bundle-card-box{fill:var(--declared-wash);stroke:var(--declared)}
+html[data-design] #canvas .family-attribution .bundle-card-box{fill:var(--lab-observation-wash);stroke:var(--lab-observation)}
+html[data-design] #canvas .family-ancestry .bundle-card-box{fill:var(--verified-wash);stroke:var(--verified)}
+html[data-design] #canvas .classification-box{fill:color-mix(in srgb,var(--declared-wash) 70%,var(--surface-hi));stroke:var(--declared)}
+html[data-design] #canvas .category-level-2 .classification-box{fill:color-mix(in srgb,var(--declared-wash) 30%,var(--surface-hi));stroke:var(--declared)}
+html[data-design] #canvas .kind-directory .node-box{fill:var(--lab-structure-wash);stroke:var(--lab-structure)}
+html[data-design] #canvas .kind-file .node-box{fill:var(--surface-hi);stroke:var(--lab-structure)}
+html[data-design] #canvas :is(.kind-candidate,.kind-similarity) .node-box{fill:var(--lab-observation-wash);stroke:var(--lab-observation)}
+html[data-design] #canvas .node.is-selected .node-box{stroke:var(--ink);stroke-width:2.5}
+html[data-design] .graph-perspectives [data-perspective=dependencies][aria-pressed=true]{color:var(--declared);background:var(--declared-wash);border-color:var(--declared)}
+html[data-design] .graph-perspectives [data-perspective=references][aria-pressed=true]{color:var(--lab-observation);background:var(--lab-observation-wash);border-color:var(--lab-observation)}
+html[data-design] .drawer .d-pair{background:var(--brand-wash);border-inline-start:3px solid var(--brand);padding:var(--s3);border-radius:var(--r-sm)}
+html[data-design] .drawer .d-why.st-VERIFIED{background:var(--verified-wash);border-inline-start:3px solid var(--verified);padding:var(--s3)}
+html[data-design] .drawer .d-why.st-DECLARED{background:var(--declared-wash);border-inline-start:3px solid var(--declared);padding:var(--s3)}
+html[data-design] .drawer .d-why.st-DETECTED{background:var(--detected-wash);border-inline-start:3px solid var(--detected);padding:var(--s3)}
+html[data-design] .drawer .d-hierarchy li:last-child{color:var(--lab-structure)}
+html[data-design] .an-plabel.is-now{background:var(--brand-wash);border-radius:var(--r-sm)}
+html[data-design] .phase.is-current{border-inline-start:3px solid var(--brand);background:var(--brand-wash)}
+html[data-design] .deep-heading{border-bottom-color:var(--lab-observation)}
+html[data-design] .deep-candidate{border-inline-start:3px solid var(--lab-observation);background:color-mix(in srgb,var(--lab-observation-wash) 45%,var(--surface-hi))}
+html[data-design] .deep-candidate.is-selected{background:var(--lab-observation-wash);border-color:var(--lab-observation)}
+html[data-design] .deep-candidate input{accent-color:var(--lab-observation)}
+html[data-design] .deep-scope{border-top-color:var(--lab-observation)}
+html[data-design] .git-history header{background:var(--brand-wash);border-bottom-color:var(--brand-edge)}
+html[data-design] .history-row.is-selected{background:var(--brand-wash);box-shadow:inset 3px 0 var(--brand)}
+html[data-design] .history-commit-summary{border-top:3px solid var(--brand);padding-top:var(--s3)}
+html[data-design] .history-detail .history-change-status{color:var(--declared);background:var(--declared-wash);padding:2px 6px;border-radius:var(--r-sm)}
+html[data-design] .history-detail .history-technical{color:var(--ink-2)}
+
+/* Controls: one overhead light source; elevation encodes action, not decoration.
+   Refactoring UI §6 / animate: press feedback, local state, no layout motion. */
+html[data-design] :where(#submit,#deep-search-submit){
+ border-color:var(--brand-press);box-shadow:inset 0 1px 0 #ffffff38,0 3px 0 var(--brand-press),0 5px 8px #17150f14;
+ transition:transform var(--d-fast) var(--ease);
+}
+html[data-design] :where(.lab-map-controls button,#workspace-history,#workspace-expand,#history-return,.d-actions button){
+ box-shadow:inset 0 1px 0 #ffffffb3,0 2px 0 var(--rule-2);border:1px solid var(--rule-2);background:var(--surface-hi);
+ transition:transform var(--d-fast) var(--ease);
+}
+html[data-design] .lab-map-controls button{--control-ink:var(--verified);--control-wash:var(--verified-wash)}
+html[data-design] .lab-map-controls [data-branch=dependencies]{--control-ink:var(--declared);--control-wash:var(--declared-wash)}
+html[data-design] .lab-map-controls [data-branch=references]{--control-ink:var(--lab-observation);--control-wash:var(--lab-observation-wash)}
+html[data-design] :where(#submit,#deep-search-submit,.lab-map-controls button,#workspace-history,#workspace-expand,#history-return,.d-actions button):active:not(:disabled){transform:translateY(2px);box-shadow:inset 0 1px 0 #ffffff38}
+html[data-design] :where(#submit,#deep-search-submit,.lab-map-controls button,#workspace-history,#workspace-expand,#history-return,.d-actions button):disabled{box-shadow:none;transform:none}
+html[data-design] .lab-map-controls button:focus-visible{outline:2px solid var(--brand);outline-offset:4px}
+html[data-design] .lab-open span{transition:transform var(--d-fast) var(--ease)}
+@media(hover:hover) and (pointer:fine){
+ html[data-design] :where(#submit,#deep-search-submit,.lab-map-controls button,#workspace-history,#workspace-expand,#history-return,.d-actions button):hover:not(:disabled):not(:active){transform:translateY(-1px)}
+ html[data-design] .lab-open:hover span{transform:translate(2px,-2px)}
+}
+@media(prefers-reduced-motion:reduce){
+ html[data-design] :where(#submit,#deep-search-submit,.lab-map-controls button,#workspace-history,#workspace-expand,#history-return,.d-actions button,.lab-open span){transition:none!important;transform:none!important}
+}
+
+/* Accepted site presentation. V3.3 paper + mineral pigments.
+   Identity -> action -> evidence -> receipt. Raised controls, quiet reading surfaces.
+   Refactoring UI hierarchy/depth, frontend-design composition, animate feedback. */
+html[data-design]{
+ --site-blue:#33485A;--site-blue-light:#DCE8F1;--site-blue-edge:#8BA2B5;
+ --site-teal:#226A61;--site-teal-light:#D9EEE7;--site-teal-edge:#81B4A5;
+ --site-plum:#704780;--site-plum-light:#EBE0F2;--site-plum-edge:#B39AC2;
+ --site-clay:#985B3D;--site-clay-light:#F7E3D5;--site-clay-edge:#C89C81;
+ --site-ochre:#795D1C;--site-ochre-light:#F1E7C4;
+ --site-raised:inset 0 1px 0 #ffffffb3,0 2px 0 var(--control-edge,var(--rule-2)),0 4px 6px #17150f0b;
+ --site-pressed:inset 0 1px 2px #17150f18;
+}
+html[data-design] :where(button,a,input,summary):focus-visible{outline:2px solid var(--brand);outline-offset:3px}
+html[data-design] :where(input[type=text],input[type=search],input:not([type])){box-shadow:inset 0 1px 2px #17150f0d}
+/* LANDING: the map stays the hero. The explanation becomes an actual sequence,
+   followed by a spacious evidence reading desk, rather than repeated cards. */
+html[data-design] .ld-inner{row-gap:48px}
+html[data-design] .input-card{border-color:var(--brand-edge);border-radius:6px;box-shadow:0 4px 0 var(--brand-wash),0 8px 18px #17150f0b}
+html[data-design] .input-row{padding:12px;gap:12px}
+html[data-design] #repo-input{min-height:44px;font-size:14px}
+html[data-design] .sub-row-depth{background:var(--brand-wash);padding:12px 16px}
+html[data-design] .seg button{border-radius:3px;min-height:32px;font-weight:500}
+html[data-design] .seg button[aria-pressed=true]{background:var(--site-blue-light);color:var(--site-blue);border-color:var(--site-blue-edge);box-shadow:var(--site-raised)}
+html[data-design] #submit{min-height:48px;box-shadow:inset 0 1px 0 #ffffff55,0 3px 0 var(--brand-press),0 5px 8px #17150f14}
+html[data-design] .lab-map{box-shadow:0 4px 0 var(--rule),0 12px 24px #17150f08}
+html[data-design] .lab-map-heading{font-size:13px}
+html[data-design] .lab-map-controls{gap:8px}
+html[data-design] .lab-map-controls button{background:var(--surface-hi);border-color:var(--control-ink);color:var(--control-ink);font-weight:600}
+html[data-design] .lab-map-controls button[aria-pressed=true]{background:var(--control-wash);color:var(--control-ink);box-shadow:inset 0 1px 0 #ffffffb3,0 2px 0 var(--control-ink)}
+html[data-design] .landing .hero-trace{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;padding:0!important;border:0;background:none;margin-top:8px}
+html[data-design] .hero-trace>.module-heading{padding:0 0 16px;margin:0;font:600 16px/1.4 var(--sans);letter-spacing:-.02em;color:var(--ink)}
+html[data-design] .landing .hero-trace-node{--step-ink:var(--site-blue);--step-wash:var(--site-blue-light);position:relative;padding:24px;min-height:152px;background:var(--step-wash);border:0;border-top:4px solid var(--step-ink)}
+html[data-design] .landing .hero-trace-node:nth-of-type(2){--step-ink:var(--site-clay);--step-wash:var(--site-clay-light)}
+html[data-design] .landing .hero-trace-node:nth-of-type(3){--step-ink:var(--site-plum);--step-wash:var(--site-plum-light)}
+html[data-design] .landing .hero-trace-node:nth-of-type(4){--step-ink:var(--site-teal);--step-wash:var(--site-teal-light)}
+html[data-design] .hero-trace-mark{display:none}
+html[data-design] .landing .hero-trace-stage{font:500 12px/1.5 var(--sans);color:var(--step-ink);margin:0 0 22px}
+html[data-design] .landing .hero-trace-value{font:600 20px/1.25 var(--sans);letter-spacing:-.03em;max-width:15ch;color:var(--step-ink)}
+html[data-design] .landing .hero-trace-note{padding:16px 0 0;font:400 12px/1.65 var(--sans);max-width:76ch}
+html[data-design] .evidence-guide{padding-top:24px;border-top:1px solid var(--rule-2);margin-bottom:16px}
+html[data-design] .evidence-guide>.module-heading{font:600 24px/1.2 var(--sans);letter-spacing:-.035em;margin:0 0 24px}
+html[data-design] .evidence-desk{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:48px;background:none;border:0}
+html[data-design] .relationship-specimen{margin:0;padding:28px;background:var(--site-clay-light);border:1px solid var(--site-clay-edge);border-radius:6px}
+html[data-design] .relationship-specimen figcaption{color:var(--site-clay);margin-bottom:24px}
+html[data-design] .specimen-object{background:var(--surface-hi);border-color:var(--site-clay-edge);border-radius:4px;padding:16px;font-weight:600;box-shadow:0 2px 0 var(--site-clay-edge)}
+html[data-design] .specimen-connection{color:var(--site-clay);padding-block:16px}
+html[data-design] .specimen-record{margin-top:24px;color:var(--site-clay)}
+html[data-design] .landing .trust{display:flex;flex-direction:column;background:none;border:0;padding:0;gap:0}
+html[data-design] .landing .trust-cell{display:grid;grid-template-columns:40px minmax(0,1fr);column-gap:16px;padding:20px 0;border:0;border-bottom:1px solid var(--rule)}
+html[data-design] .landing .trust-cell:first-child{padding-top:0}
+html[data-design] .landing .trust-symbol{grid-row:1/3;background:var(--site-teal-light);color:var(--site-teal);width:40px;height:40px;display:grid;place-items:center;border-radius:5px}
+html[data-design] .landing .trust-cell:nth-child(2) .trust-symbol{color:var(--site-clay);background:var(--site-clay-light)}
+html[data-design] .landing .trust-cell:nth-child(3) .trust-symbol{color:var(--site-plum);background:var(--site-plum-light)}
+html[data-design] .landing .trust-head{font:600 15px/1.4 var(--sans);margin:0 0 6px;letter-spacing:-.01em}
+html[data-design] .landing .trust-body{font:400 13px/1.65 var(--sans);margin:0;max-width:50ch}
+/* ANALYSIS: a phase instrument, not a generic waiting card. Progress is real
+   reported phase state. No percentage, looped travelling block or invented ETA. */
+html[data-design] .an-stage{max-width:1180px;padding:48px 40px;column-gap:40px;row-gap:32px}
+html[data-design] .an-quest{border-bottom:1px solid var(--rule-2);padding-bottom:24px;position:relative}
+html[data-design] .an-repo{font:500 14px/1.5 var(--mono);color:var(--brand);overflow-wrap:anywhere}
+html[data-design] .an-q{font:600 clamp(28px,3.4vw,44px)/1.08 var(--sans);letter-spacing:-.045em;margin:12px 0 0;max-width:17ch}
+html[data-design] .an-kicker{display:none}
+html[data-design] .an-work{padding:32px;background:var(--brand-wash);border:1px solid var(--brand-edge);border-radius:6px;box-shadow:0 4px 0 var(--rule)}
+html[data-design] .an-obj{min-width:0;width:100%;border:0;background:none;padding:0}
+html[data-design] .an-pn{gap:12px;margin-bottom:24px}
+html[data-design] .an-pk{font:600 44px/1 var(--sans);letter-spacing:-.04em;color:var(--brand)}
+html[data-design] .an-rule{background:var(--brand-edge)}
+html[data-design] .an-ptitle{font:600 24px/1.2 var(--sans);letter-spacing:-.025em;color:var(--brand-press);margin:0 0 12px}
+html[data-design] .an-psub{font:400 14px/1.6 var(--sans);color:var(--brand);max-width:48ch;min-height:44px}
+html[data-design] .an-path{margin-top:32px;padding:0;border:0}
+html[data-design] .an-plabels{gap:6px}
+html[data-design] .an-plabel{padding:12px 4px;border:0;background:none;min-width:0;align-items:flex-start}
+html[data-design] .an-plabel::after{display:none}
+html[data-design] .an-plabel .n{border-radius:3px;width:26px;height:26px;font:600 12px/26px var(--sans);background:var(--surface-hi);border:1px solid var(--brand-edge);color:var(--brand);animation:none}
+html[data-design] .an-plabel .t{font:500 11px/1.4 var(--sans);color:var(--brand)}
+html[data-design] .an-plabel.is-now{background:var(--site-blue-light);border-radius:4px;box-shadow:inset 0 1px 0 #ffffffb3}
+html[data-design] .an-plabel.is-now .n{background:var(--site-blue);border-color:var(--site-blue);color:white}
+html[data-design] .an-plabel.is-now :is(.t,.t-short){color:var(--site-blue);font-weight:600}
+html[data-design] .an-plabel.is-done .n{background:var(--site-teal);color:white;border-color:var(--site-teal)}
+html[data-design] .an-verb{font:400 12px/1.6 var(--sans);color:var(--brand);margin-top:20px;min-height:32px}
+html[data-design] .an-aside{gap:24px}
+html[data-design] .an-grp{padding:0 0 20px;border:0;border-bottom:1px solid var(--rule-2);background:none}
+html[data-design] .an-grp-cap{font:600 13px/1.5 var(--sans);color:var(--ink);margin-bottom:16px}
+html[data-design] .an-spec{font-size:12px;line-height:1.65}
+html[data-design] .an-tail{gap:32px;border:0;padding:0}
+html[data-design] .an-tail p{border-inline-start:3px solid var(--site-teal-edge);padding-left:16px;font:400 12px/1.6 var(--sans)}
+/* WORKSPACE: consistent tool weights with distinct task pigments. Existing
+   stage / panel dimensions and graph positions remain owned by the app. */
+html[data-design] .appbar{background:var(--surface-hi);border-bottom:1px solid var(--rule-2);box-shadow:0 2px 0 #17150f05}
+html[data-design] .appbar :is(.crumb-repo,#project-source){font:600 13px/1.4 var(--sans)}
+html[data-design] .repository-navigation.unified-tools{background:var(--surface);border-bottom:1px solid var(--rule-2);gap:8px;padding-inline:16px}
+html[data-design] .repository-navigation.unified-tools button{--control-edge:var(--site-blue-edge);--tool-ink:var(--site-blue);--tool-wash:var(--site-blue-light);border:1px solid var(--control-edge);border-radius:4px;background:var(--surface-hi);color:var(--tool-ink);font:600 12px/1.4 var(--sans);box-shadow:var(--site-raised);min-height:34px;transition:transform var(--d-fast) var(--ease)}
+html[data-design] #workspace-structure{--control-edge:var(--site-teal-edge);--tool-ink:var(--site-teal);--tool-wash:var(--site-teal-light);background:var(--tool-wash)}
+html[data-design] #workspace-candidates{--control-edge:var(--site-plum-edge);--tool-ink:var(--site-plum);--tool-wash:var(--site-plum-light);background:var(--tool-wash)}
+html[data-design] #workspace-history{background:var(--site-blue-light)}
+html[data-design] #workspace-return{margin-left:auto;box-shadow:none;border-color:transparent;background:none;font-weight:500}
+html[data-design] .repository-navigation.unified-tools button:active:not(:disabled){transform:translateY(2px);box-shadow:var(--site-pressed)}
+html[data-design] .repository-navigation.unified-tools button:disabled{box-shadow:none;transform:none}
+html[data-design] .rail{background:var(--surface-hi);border-right-color:var(--rule-2)}
+html[data-design] .rail-scroll{padding:24px 20px;gap:12px}
+html[data-design] .unified-navigation{padding:0 0 16px;border-bottom:1px solid var(--rule-2)}
+html[data-design] .unified-navigation h3{font:600 12px/1.5 var(--sans);letter-spacing:0;text-transform:none;color:var(--ink);margin:0 0 12px}
+html[data-design] .unified-path{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px}
+html[data-design] .unified-path button{font:500 12px/1.4 var(--sans);padding:8px 10px;border:1px solid var(--rule);background:var(--surface);border-radius:4px;min-height:34px}
+html[data-design] .unified-path button[aria-current]{background:var(--brand-wash);color:var(--brand-press);border-color:var(--brand-edge);font-weight:600}
+html[data-design] .workspace-search{border:1px solid var(--rule-2);border-radius:4px;background:var(--surface);padding:10px 12px;gap:10px;box-shadow:inset 0 1px 2px #17150f0b;margin-bottom:24px}
+html[data-design] .workspace-search input{background:transparent;border:0;box-shadow:none;font:400 12px/1.5 var(--sans);min-width:0;width:100%}
+html[data-design] .unified-layer-controls{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+html[data-design] .unified-layer-controls button{display:flex;align-items:center;gap:8px;min-height:40px;padding:10px;border:1px solid var(--rule-2);border-radius:4px;background:var(--surface-hi);font:500 12px/1.4 var(--sans);text-align:left}
+html[data-design] .unified-layer-controls [data-layer=structure][aria-pressed=true]{background:var(--site-teal-light);color:var(--site-teal);border-color:var(--site-teal-edge)}
+html[data-design] .unified-layer-controls [data-layer=dependency][aria-pressed=true]{background:var(--site-clay-light);color:var(--site-clay);border-color:var(--site-clay-edge)}
+html[data-design] .unified-layer-controls [data-layer=observation][aria-pressed=true],html[data-design] .unified-layer-controls [data-layer=similarity][aria-pressed=true]{background:var(--site-plum-light);color:var(--site-plum);border-color:var(--site-plum-edge)}
+html[data-design] .rail-note{font:400 12px/1.6 var(--sans);margin:16px 0 0}
+html[data-design] .rail .lblk{padding:12px 0;margin:0;border:0}
+html[data-design] .rail .lblk h6{font:600 12px/1.5 var(--sans);letter-spacing:0;text-transform:none;margin:0 0 12px;color:var(--ink)}
+html[data-design] .census{gap:8px}
+html[data-design] .census .cc{padding:12px;background:var(--surface);border:0;border-radius:4px}
+html[data-design] .census .cc .v{font:600 24px/1 var(--sans);letter-spacing:-.025em;color:var(--brand)}
+html[data-design] .rail-reference{font:400 12px/1.6 var(--sans);border:0;border-bottom:1px solid var(--rule);padding:16px 0}
+html[data-design] .rail-reference summary{font-weight:500;color:var(--ink-2)}
+/* INSPECTOR: identity, interpretation, readable records. Technical receipts
+   remain disclosures; no field/data contract is changed by this study. */
+html[data-design] .drawer{background:var(--surface-hi);border-left-color:var(--rule-2)}
+html[data-design] .drawer-inner{padding:24px}
+html[data-design] .d-eyebrow{font:500 11px/1.5 var(--sans);letter-spacing:0;text-transform:none;color:var(--brand);margin:0 40px 8px 0}
+html[data-design] .d-head{font:600 24px/1.15 var(--sans);letter-spacing:-.035em;overflow-wrap:anywhere;margin:0 32px 8px 0}
+html[data-design] .d-sub{font:400 12px/1.6 var(--sans);margin:0 0 20px}
+html[data-design] .drawer .d-pair{background:var(--brand-wash);padding:20px;border:1px solid var(--brand-edge);border-radius:5px;gap:20px;margin:20px 0}
+html[data-design] .d-endpoint-role{font:500 11px/1.5 var(--sans);color:var(--brand)}
+html[data-design] .d-endpoint-name{font:600 14px/1.4 var(--sans);color:var(--brand-press);overflow-wrap:anywhere}
+html[data-design] .d-pill{border-radius:3px;font:600 10px/1.4 var(--sans);padding:4px 6px}
+html[data-design] .d-block{margin-top:28px;padding-top:0;border:0}
+html[data-design] .d-block-head{font:600 12px/1.5 var(--sans);letter-spacing:0;text-transform:none;color:var(--ink);margin-bottom:12px}
+html[data-design] .d-why{font:400 13px/1.7 var(--sans);border-radius:4px}
+html[data-design] .d-card{border:1px solid var(--rule-2);border-radius:5px;padding:16px;margin:12px 0;background:var(--surface)}
+html[data-design] .d-card-head{margin-bottom:12px;align-items:center;gap:8px}
+html[data-design] .d-card-type{font:600 12px/1.5 var(--sans)}
+html[data-design] .d-card-loc{font:400 11px/1.6 var(--mono);overflow-wrap:anywhere}
+html[data-design] .d-quote{margin:16px 0;padding:12px 16px;background:var(--surface-hi);border-inline-start:3px solid var(--site-clay-edge);font:400 12px/1.65 var(--mono);white-space:pre-wrap;overflow-wrap:anywhere}
+html[data-design] .d-data{font-size:11px;line-height:1.6;min-width:0}
+html[data-design] .d-data :is(dd,dt),html[data-design] .d-hierarchy{overflow-wrap:anywhere;min-width:0}
+html[data-design] .d-hierarchy{border:0;padding:16px;margin-block:20px;font-size:12px;background:var(--site-teal-light);border-radius:5px}
+html[data-design] .drawer .workspace-technical{margin-top:24px;padding-top:16px;border-top:1px solid var(--rule);font:400 11px/1.6 var(--sans)}
+html[data-design] .d-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:24px;padding-top:20px;border-top:1px solid var(--rule)}
+html[data-design] .d-actions :is(button,a){min-height:36px;padding:9px 12px;font:500 12px/1.4 var(--sans);border-radius:4px}
+html[data-design] #workspace-expand{background:var(--site-teal-light);color:var(--site-teal);border-color:var(--site-teal-edge);--control-edge:var(--site-teal-edge);box-shadow:var(--site-raised)}
+/* DISCOVERY: a deliberate tool nested in the explorer, not an unrelated form. */
+html[data-design] .workspace-discovery-controls{margin-top:24px;padding-top:24px;border-top:3px solid var(--site-plum)}
+.site-discovery-heading{margin:0 0 20px;font:600 20px/1.2 var(--sans);letter-spacing:-.025em;color:var(--site-plum)}
+html[data-design] .deep-note{font:400 12px/1.6 var(--sans);margin:0 0 12px}
+html[data-design] .deep-warning{font:400 11px/1.6 var(--sans);padding:12px;background:var(--site-plum-light);color:var(--site-plum);border:0;border-radius:4px;margin:12px 0 20px}
+html[data-design] .deep-form{gap:12px}
+html[data-design] .deep-form label{font:600 12px/1.4 var(--sans)}
+html[data-design] #deep-repository{min-height:42px;padding:10px 12px;border-radius:4px;border:1px solid var(--site-plum-edge);background:var(--surface-hi);font:400 12px/1.4 var(--sans);width:100%;min-width:0}
+html[data-design] #deep-search-submit{background:var(--site-plum);border:1px solid var(--site-plum);color:white;min-height:40px;border-radius:4px;font-weight:600;box-shadow:inset 0 1px 0 #ffffff45,0 3px 0 #4E315B,0 5px 6px #17150f10}
+html[data-design] .deep-status{font:400 12px/1.65 var(--sans);padding:12px 0;overflow-wrap:anywhere}
+html[data-design] .deep-limits{margin:12px 0 20px;font-size:11px}
+html[data-design] .deep-candidate{padding:16px 12px;margin:12px 0;border:1px solid var(--site-plum-edge);background:var(--surface-hi);border-radius:5px}
+html[data-design] .deep-candidate.is-selected{background:var(--site-plum-light);box-shadow:inset 0 0 0 1px var(--site-plum)}
+html[data-design] .deep-candidate :is(h3,h4,strong){font:600 13px/1.5 var(--sans);overflow-wrap:anywhere}
+html[data-design] .deep-candidate input{width:18px;height:18px;accent-color:var(--site-plum);flex:none}
+/* HISTORY: a time reader with a compact instrument header, not another canvas.
+   Row heights/padding stay untouched: SVG rails are computed from those metrics. */
+html[data-design] .git-history header{background:var(--site-blue-light);color:var(--site-blue);border-bottom:1px solid var(--site-blue-edge);padding:8px 24px;gap:12px}
+html[data-design] .history-heading{margin-right:auto;min-width:0}
+html[data-design] .history-kicker{font:500 11px/1.5 var(--sans);letter-spacing:0;text-transform:none}
+html[data-design] .history-heading .history-kicker{color:var(--site-blue);overflow-wrap:anywhere;margin:0 0 2px}
+html[data-design] .history-heading h2{font:600 16px/1.4 var(--sans);letter-spacing:-.025em;margin:0;color:var(--site-blue)}
+html[data-design] .git-history header input{background:#F9FAF7;border:1px solid var(--brand-edge);border-radius:4px;min-height:38px;padding:10px 12px;color:var(--ink);font:400 12px/1.4 var(--sans)}
+html[data-design] .history-branch-picker summary,html[data-design] #history-return{background:var(--surface-hi);border:1px solid var(--brand-edge);border-radius:4px;color:var(--brand);box-shadow:inset 0 1px 0 white,0 2px 0 var(--brand-press);min-height:38px;padding:10px 12px;font:500 12px/1.4 var(--sans)}
+html[data-design] .history-branch-choices{background:var(--surface-hi);color:var(--ink);box-shadow:0 6px 16px #17150f20;border-color:var(--brand-edge)}
+html[data-design] .history-coverage{background:var(--brand-wash);border-bottom:1px solid var(--brand-edge);padding:12px 24px;color:var(--brand);font:400 12px/1.6 var(--sans)}
+html[data-design] .history-list{background:var(--surface-hi)}
+html[data-design] .history-message{font-weight:500;font-size:13px;letter-spacing:-.01em}
+html[data-design] .history-meta{font-size:11px;color:var(--ink-3)}
+html[data-design] .history-row.is-selected{background:var(--site-blue-light);box-shadow:inset 0 0 0 1px var(--site-blue-edge)}
+html[data-design] .history-branch{background:var(--site-teal-light);color:var(--site-teal);border:1px solid var(--site-teal-edge);border-radius:3px}
+html[data-design] .history-detail{background:var(--surface);padding:24px;border-left:1px solid var(--rule-2)}
+html[data-design] .history-commit-summary{border-top:3px solid var(--brand);padding:20px 0 24px;margin-bottom:0}
+html[data-design] .history-commit-summary .history-kicker{color:var(--brand);margin-bottom:12px}
+html[data-design] .history-commit-summary h3{font:600 24px/1.2 var(--sans);letter-spacing:-.035em;overflow-wrap:anywhere;margin:0 0 16px}
+html[data-design] .history-metadata{font:400 12px/1.6 var(--sans);overflow-wrap:anywhere}
+html[data-design] .history-detail-section{padding:20px 0;border-top:1px solid var(--rule);margin:0}
+html[data-design] .history-detail-section h4{font:600 12px/1.5 var(--sans);letter-spacing:0;text-transform:none;margin:0 0 12px}
+html[data-design] .history-related-row,html[data-design] .history-file-row{background:var(--surface-hi);border:1px solid var(--rule-2);border-radius:4px;padding:10px 12px;min-height:38px;font:400 12px/1.5 var(--mono);color:var(--brand);overflow-wrap:anywhere;box-shadow:0 1px 0 var(--rule)}
+html[data-design] .history-related-row{margin:0}
+html[data-design] .history-technical{font:400 11px/1.6 var(--sans);margin-top:20px}
+/* Feedback only: no ambient motion. New content settles, selection registers,
+   controls compress. Existing graph geometry/camera motion remains authoritative. */
+html[data-design] :where(.seg button,.unified-path button,.unified-layer-controls button,.history-related-row,.history-file-row,.history-branch-picker summary){transition:transform var(--d-fast) var(--ease)}
+html[data-design] :where(.seg button,.unified-path button,.unified-layer-controls button,.history-related-row,.history-file-row,.history-branch-picker summary):active:not(:disabled){transform:translateY(1px)}
+@media(hover:hover) and (pointer:fine){
+ html[data-design] .repository-navigation.unified-tools button:hover:not(:disabled){background:var(--tool-wash);transform:translateY(-1px)}
+ html[data-design] .history-related-row:hover,html[data-design] .history-file-row:hover{border-color:var(--brand-edge);background:var(--brand-wash)}
+}
+@media(max-width:1023px){
+ html[data-design] .evidence-desk{gap:24px}
+ html[data-design] .landing .hero-trace-node{padding:20px 16px}
+ html[data-design] .an-stage{padding:32px 24px;gap:24px;grid-template-columns:minmax(0,1fr) 220px}
+ html[data-design] .an-work{padding:24px}
+}
+@media(max-width:767px){
+ html[data-design] .ld-inner{row-gap:32px}
+ html[data-design] .landing .hero-trace{grid-template-columns:1fr 1fr}
+ html[data-design] .hero-trace>.module-heading{font-size:15px}
+ html[data-design] .landing .hero-trace-node{padding:20px 16px;min-height:144px}
+ html[data-design] .landing .hero-trace-value{font-size:18px;max-width:13ch}
+ html[data-design] .landing .hero-trace-stage{margin-bottom:16px;font-size:11px}
+ html[data-design] .evidence-desk{grid-template-columns:1fr;gap:24px}
+ html[data-design] .evidence-guide>.module-heading{font-size:24px}
+ html[data-design] .relationship-specimen{padding:24px}
+ html[data-design] .landing .trust-cell{padding:20px 0}
+ html[data-design] .an-stage{display:flex;flex-direction:column;padding:24px 20px;gap:24px}
+ html[data-design] .an-work{padding:24px 20px}
+ html[data-design] .an-pk{font-size:36px}
+ html[data-design] .an-ptitle{font-size:22px}
+ html[data-design] .an-psub{min-height:44px;font-size:13px}
+ html[data-design] .an-plabel{align-items:center;padding:12px 2px}
+ html[data-design] .an-plabel .t-short{font-size:10px;line-height:1.4}
+ html[data-design] .an-aside{display:grid;grid-template-columns:1fr;gap:16px}
+ html[data-design] .an-tail{display:grid;grid-template-columns:1fr;gap:16px}
+ html[data-design] .repository-navigation.unified-tools{gap:8px;padding-inline:12px}
+ html[data-design] .repository-navigation.unified-tools button{min-height:40px;flex-shrink:0}
+ html[data-design] #workspace-return{margin-left:0}
+ html[data-design] .rail-scroll,html[data-design] .drawer-inner{padding:24px 20px}
+ html[data-design] .unified-path button,html[data-design] .unified-layer-controls button{min-height:44px}
+ html[data-design] .d-head{font-size:26px}
+ html[data-design] .d-actions :is(button,a){min-height:44px;display:inline-flex;align-items:center}
+ html[data-design] #deep-search-submit,html[data-design] #deep-repository{min-height:44px}
+ html[data-design] .git-history header{padding:8px 16px;gap:8px}
+ html[data-design] .history-heading{width:100%;flex-basis:100%}
+ html[data-design] .history-heading h2{font-size:14px}
+ html[data-design] .git-history header input{min-height:44px;min-width:0}
+ html[data-design] .history-branch-picker summary,html[data-design] #history-return{min-height:44px}
+ html[data-design] .history-coverage{padding:12px 20px;font-size:11px}
+ html[data-design] .history-detail{padding:20px;border:0}
+ html[data-design] .history-related-row,html[data-design] .history-file-row{min-height:44px}
+}
+@media(prefers-reduced-motion:reduce){
+ html[data-design] :where(button,a,summary){transition:none!important}
+ html[data-design] :where(button,a,summary):active,html[data-design] :where(button,a,summary):hover{transform:none!important}
+}
+/* Pixel review corrections: phase count is context, not the headline. Give the
+   current object a single identity surface; keep its evidence separate. */
+html[data-design] .analysis .an-pn{margin-bottom:20px}
+html[data-design] .analysis .an-pk{font:500 12px/1.5 var(--sans);letter-spacing:0;color:var(--brand)}
+html[data-design] .analysis .an-obj{padding-left:76px;position:relative;min-height:124px}
+html[data-design] .analysis .an-work{position:relative}
+html[data-design] .analysis .an-work::before{content:attr(data-step);position:absolute;top:32px;left:32px;color:var(--brand);font:600 44px/1 var(--sans);letter-spacing:-.045em}
+html[data-design] .analysis .an-grp-cap{padding:0 0 12px;background:none;border:0;font:600 13px/1.5 var(--sans)}
+html[data-design] .analysis .an-spec{padding:0}
+html[data-design] .analysis .an-tail>p{padding:4px 0 4px 16px;border:0;border-inline-start:3px solid var(--site-teal-edge);border-radius:0;background:none;font-size:12px}
+html[data-design] .site-object-heading{--object-ink:var(--brand);--object-wash:var(--brand-wash);--object-edge:var(--brand-edge);background:var(--object-wash);border-top:3px solid var(--object-ink);padding:20px;border-radius:4px;margin-bottom:24px}
+html[data-design] .site-object-heading[data-kind=structure]{--object-ink:var(--site-teal);--object-wash:var(--site-teal-light);--object-edge:var(--site-teal-edge)}
+html[data-design] .site-object-heading[data-kind=discovery]{--object-ink:var(--site-plum);--object-wash:var(--site-plum-light);--object-edge:var(--site-plum-edge)}
+html[data-design] .site-object-heading .d-eyebrow{color:var(--object-ink);margin-right:0}
+html[data-design] .site-object-heading .d-head{margin-right:0;color:var(--object-ink)}
+html[data-design] .site-object-heading .d-sub{color:var(--object-ink);margin:12px 0 0}
+html[data-design] .unified-node-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:24px 0}
+html[data-design] .unified-node-actions button{min-height:44px;border:1px solid var(--rule-2);border-radius:4px;padding:12px;font:500 12px/1.45 var(--sans);text-align:left;background:var(--surface-hi);box-shadow:inset 0 1px 0 white,0 2px 0 var(--rule);transition:transform var(--d-fast) var(--ease)}
+html[data-design] .unified-node-actions #workspace-expand{background:var(--site-teal-light);border-color:var(--site-teal-edge);color:var(--site-teal);box-shadow:inset 0 1px 0 #ffffffa3,0 2px 0 var(--site-teal-edge)}
+html[data-design] .unified-node-actions #workspace-file-candidates{color:var(--site-plum);background:var(--site-plum-light);border-color:var(--site-plum-edge)}
+html[data-design] .unified-node-actions button:active{transform:translateY(2px);box-shadow:var(--site-pressed)}
+html[data-design] .drawer .d-hierarchy .d-block-head{font:600 12px/1.5 var(--sans);text-transform:none;border:0;margin-bottom:12px}
+html[data-design] .history-detail .history-related-row.d-action{background:var(--surface-hi);border:1px solid var(--rule-2);border-radius:4px;padding:12px;margin:8px 0;font-size:12px;box-shadow:0 1px 0 var(--rule)}
+html[data-design] .history-detail .history-related-row.d-action code{margin-top:6px;color:var(--ink-3)}
+@media(max-width:1023px){html[data-design] .analysis .an-work::before{top:24px;left:24px}}
+@media(max-width:767px){html[data-design] .analysis .an-work::before{left:20px;font-size:36px}html[data-design] .analysis .an-obj{padding-left:58px;min-height:144px}}
+@media(prefers-reduced-motion:reduce){html[data-design] .unified-node-actions button{transition:none}html[data-design] .unified-node-actions button:active{transform:none}}
+/* The mobile Evidence header already owns the title and dismiss action. */
+@media(max-width:767px){html[data-design] body.mobile-explorer .drawer-toolbar{display:none}}
+
+/* Interaction continuity, not another entrance layer.
+   Native details keep their summary, focus, DOM identity and semantic open state.
+   Unsupported browsers retain their normal instantaneous disclosure behavior. */
+@supports (interpolate-size:allow-keywords){
+ html[data-design] :is(.workspace-technical,.history-technical,.an-receipt,.rail-reference){interpolate-size:allow-keywords}
+ html[data-design] :is(.workspace-technical,.history-technical,.an-receipt,.rail-reference)::details-content{
+  block-size:0;overflow:clip;
+  transition:block-size 220ms var(--ease),content-visibility 220ms allow-discrete;
+ }
+ html[data-design] :is(.workspace-technical,.history-technical,.an-receipt,.rail-reference)[open]::details-content{block-size:auto}
+ html[data-design][data-site-input=keyboard] :is(.workspace-technical,.history-technical,.an-receipt,.rail-reference)::details-content{transition:none}
+}
+/* Selection remains visibly anchored after the pointer leaves. No card translation
+   or row-height change: History rail and graph coordinates retain their owners. */
+html[data-design] .deep-candidate{position:relative;transition:background-color var(--d-fast) var(--ease),box-shadow var(--d-fast) var(--ease)}
+html[data-design] .history-row{transition:background-color var(--d-fast) var(--ease),box-shadow var(--d-fast) var(--ease)}
+html[data-design] :is(.seg button,.graph-perspectives button){transition:background-color var(--d-fast) var(--ease),border-color var(--d-fast) var(--ease),color var(--d-fast) var(--ease)}
+html[data-design] .lab-map-controls{position:relative;padding-bottom:8px}
+html[data-design] .lab-map-controls button{position:relative}
+html[data-design] .lab-map-controls button::after{content:'';position:absolute;left:-1px;right:-1px;bottom:-8px;height:2px;background:var(--control-ink);opacity:0;pointer-events:none}
+html[data-design] .lab-map-controls button[aria-pressed=true]::after{opacity:1}
+html[data-design][data-site-input=keyboard] :is(.site-branch-cursor,.deep-candidate,.history-row,.seg button,.graph-perspectives button){transition:none}
+@media(prefers-reduced-motion:reduce){
+ html[data-design] :is(.workspace-technical,.history-technical,.an-receipt,.rail-reference)::details-content,
+ html[data-design] :is(.site-branch-cursor,.deep-candidate,.history-row,.seg button,.graph-perspectives button){transition:none}
+}
+/* Home interaction pass: controls lift, selected content anchors, records stay flat.
+   No node translation: the illustration's path endpoints remain attached. */
+html[data-design] .lab-map .lab-record-port{fill:var(--surface-hi);stroke:var(--declared);stroke-width:1.5}
+html[data-design] .lab-branch rect{transition:fill var(--d-fast) var(--ease),filter var(--d-fast) var(--ease)}
+html[data-design] .lab-branch path{transition:stroke-dashoffset var(--d-trace) var(--ease)}
+html[data-design] .lab-map[data-preview=ancestry] .ancestry,
+html[data-design] .lab-map[data-preview=dependencies] .dependencies,
+html[data-design] .lab-map[data-preview=references] .references{opacity:1}
+html[data-design] .lab-map[data-preview=ancestry] .ancestry rect{fill:var(--verified-wash)}
+html[data-design] .lab-map[data-preview=dependencies] .dependencies rect{fill:var(--declared-wash)}
+html[data-design] .lab-map[data-preview=references] .references rect{fill:var(--lab-observation-wash)}
+html[data-design] .landing .hero-trace-node{padding:0;min-height:0;box-shadow:inset 0 -2px 0 color-mix(in srgb,var(--step-ink) 20%,transparent)}
+html[data-design] .hero-trace-toggle{position:relative;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;box-sizing:border-box;width:100%;height:100%;min-height:152px;padding:24px 24px 36px;border:0;background:transparent;color:var(--step-ink);text-align:left;cursor:pointer;transition:background-color var(--d-fast) var(--ease),box-shadow var(--d-fast) var(--ease)}
+html[data-design] .hero-trace-toggle .hero-trace-stage,html[data-design] .hero-trace-toggle .hero-trace-value{display:block}
+html[data-design] .hero-trace-toggle[aria-expanded=true]{background:color-mix(in srgb,var(--step-wash) 65%,var(--surface-hi));box-shadow:inset 0 -3px 0 var(--step-ink)}
+html[data-design] .hero-trace-disclose{position:absolute;bottom:12px;right:20px;font:400 20px/1 var(--sans);transition:transform var(--d-fast) var(--ease)}
+html[data-design] .hero-trace-toggle[aria-expanded=true] .hero-trace-disclose{transform:rotate(45deg)}
+html[data-design] .hero-trace-detail{grid-column:1/-1;display:grid;grid-template-rows:0fr;visibility:hidden;transition:grid-template-rows 220ms var(--ease),visibility 220ms;}
+html[data-design] .hero-trace-detail>div{overflow:hidden;min-height:0}
+html[data-design] .hero-trace-detail p{border:1px solid var(--rule);border-radius:4px;background:var(--surface);padding:16px 20px;margin:20px 0 0;max-width:76ch;font:400 14px/1.65 var(--sans);color:var(--ink-2)}
+html[data-design] .hero-trace-detail.is-open{grid-template-rows:1fr;visibility:visible}
+html[data-design] .hero-trace-toggle:focus-visible{outline:2px solid var(--step-ink);outline-offset:-6px}
+html[data-design] .input-card:focus-within{box-shadow:0 4px 0 var(--brand-edge),0 8px 18px #17150f0b;outline:1px solid var(--brand)}
+html[data-design] .lab-open{border-radius:0 0 4px 4px;transition:background-color var(--d-fast) var(--ease)}
+@media(hover:hover) and (pointer:fine){
+ html[data-design] .hero-trace-toggle:hover{background:color-mix(in srgb,var(--step-wash) 55%,var(--surface-hi))}
+ html[data-design] .hero-trace-toggle:hover .hero-trace-disclose{transform:rotate(90deg)}
+ html[data-design] .hero-trace-toggle[aria-expanded=true]:hover .hero-trace-disclose{transform:rotate(45deg)}
+ html[data-design] .lab-open:hover{background:color-mix(in srgb,var(--brand-wash) 65%,var(--surface-hi))}
+ html[data-design] .landing .samples a:hover{background:var(--surface-hi)!important;border-color:var(--brand-edge);box-shadow:0 2px 0 var(--brand-edge);transform:translateY(-1px)}
+}
+@media(max-width:767px){html[data-design] .hero-trace-toggle{min-height:144px;padding:20px 16px 36px}html[data-design] .hero-trace-detail p{font-size:13px;padding-inline:16px}}
+html[data-design][data-site-input=keyboard] :is(.hero-trace-detail,.hero-trace-disclose){transition:none}
+@media(prefers-reduced-motion:reduce){html[data-design] :is(.hero-trace-detail,.hero-trace-disclose,.lab-branch rect,.lab-branch path){transition:none!important}}
+html[data-design] .lab-map .lab-record-link{stroke-dasharray:3 4;stroke-dashoffset:0;stroke-width:1.5}
+html[data-design] #submit{display:inline-flex;align-items:center;justify-content:center;gap:12px}
+html[data-design] #submit::after{content:'↗';display:inline-block;transition:transform var(--d-fast) var(--ease)}
+@media(hover:hover) and (pointer:fine){html[data-design] #submit:hover:not(:disabled)::after{transform:translate(2px,-2px)}}
+@media(prefers-reduced-motion:reduce){html[data-design] #submit::after{transition:none;transform:none!important}}
+
+/* Sidebar continuity: semantic surfaces, numbered context and tactile actions.
+   Static records stay still; only controls respond to pointer interaction. */
+html[data-design] .drawer .d-hierarchy ol{counter-reset:exploration;display:grid;gap:6px;margin:0;padding:0;list-style:none}
+html[data-design] .drawer .d-hierarchy ol::before{content:none}
+html[data-design] .drawer .d-hierarchy li{counter-increment:exploration;display:grid;grid-template-columns:26px minmax(0,1fr);align-items:start;column-gap:10px;padding:10px;min-height:32px;line-height:1.5;border-radius:3px}
+html[data-design] .drawer .d-hierarchy li::before{content:counter(exploration,decimal-leading-zero);position:static;grid-column:1;width:26px;height:20px;border:0;border-radius:3px;background:var(--surface-hi);color:var(--site-teal);font:600 10px/20px var(--sans);text-align:center}
+html[data-design] .drawer .d-hierarchy li:last-child{background:#ffffff80;color:var(--site-teal)}
+html[data-design] .drawer .d-hierarchy li:last-child::before{background:var(--site-teal);color:white}
+html[data-design] .drawer .d-classification.category-level-2{border-left:0;padding-left:0;margin-left:12px}
+html[data-design] .drawer :is(.d-quote,.d-why){border-inline-start:0}
+html[data-design] .drawer .d-group{margin:14px 0;border:0}
+html[data-design] .drawer .d-group-head{position:sticky;background:var(--site-plum-light);color:var(--site-plum);padding:12px;border:1px solid var(--site-plum-edge);border-radius:5px;box-shadow:inset 0 1px 0 #ffffffb3,0 2px 0 var(--site-plum-edge)}
+html[data-design] .drawer .d-group-name{font:600 12px/1.5 var(--sans)}
+html[data-design] .drawer .d-group-count{color:var(--site-plum);padding:3px 6px;border-radius:3px;background:#ffffffb3}
+html[data-design] .drawer .bundle-row{margin:4px 0;padding:10px 12px;border:1px solid transparent;border-radius:4px;min-height:44px;background:var(--surface-hi);transition:background-color 140ms var(--ease),box-shadow 140ms var(--ease)}
+html[data-design] .drawer .bundle-row .relationship-object{font:500 12px/1.5 var(--sans)}
+html[data-design] .drawer .d-classification.category-level-1>summary{background:var(--site-blue-light);color:var(--site-blue);border:0;padding:10px;border-radius:4px;min-height:44px}
+html[data-design] .rail .tk-row{padding:10px;border-radius:4px;background:var(--site-blue-light);gap:10px;font:500 12px/1.5 var(--sans);margin:0}
+html[data-design] .rail .tk-row:has(.is-package){background:var(--site-clay-light);color:var(--site-clay)}
+html[data-design] .rail .tk-row:has(.is-external-project){background:var(--site-plum-light);color:var(--site-plum)}
+html[data-design] .rail .tk-row .k{margin-left:auto;font-size:11px;color:inherit}
+html[data-design] .rail-reference{margin:4px 0;padding:0;border:1px solid var(--rule-2);border-radius:5px;background:var(--surface);overflow:clip}
+html[data-design] .rail-reference>summary{min-height:44px;padding:12px;font:600 12px/1.5 var(--sans);color:var(--site-blue);background:var(--site-blue-light)}
+html[data-design] .rail-reference .lblk{padding:16px 12px;border-bottom:0}
+html[data-design] .unified-layer-controls button{box-shadow:inset 0 1px 0 #ffffffb3,0 2px 0 var(--rule-2);transition:transform 160ms var(--ease),box-shadow 160ms var(--ease)}
+html[data-design] .unified-layer-controls button:active{box-shadow:var(--site-pressed)}
+@media(hover:hover) and (pointer:fine){
+ html[data-design] .unified-layer-controls button:hover:not(:active){transform:translateY(-1px);box-shadow:inset 0 1px 0 #ffffffb3,0 3px 0 var(--rule-2),0 5px 8px #17150f0c}
+ html[data-design] .drawer .bundle-row:hover{background:var(--site-plum-light);box-shadow:inset 0 1px 0 #ffffffb3,0 2px 0 var(--site-plum-edge)}
+ html[data-design] .lab-map-controls button:hover:not(:active){transform:none;filter:brightness(1.03)}
+}
+@media(prefers-reduced-motion:reduce){html[data-design] .unified-layer-controls button,html[data-design] .drawer .bundle-row{transition:none;transform:none!important}}
+
+/* Corrections tied to the seven reported surfaces. Pseudo markers must not
+   occupy the same space as text; informational notes have no vertical rule. */
+html[data-design] .entity-absence{border:0;padding:12px 14px;background:var(--site-blue-light);border-radius:4px;color:var(--site-blue)}
+html[data-design] .rail-scroll .unified-path::before,
+html[data-design] .rail-scroll .unified-path button::before{content:none}
+html[data-design] .rail-scroll .unified-path button{padding:10px 12px;min-height:44px;overflow-wrap:anywhere}
+html[data-design] .rail-scroll .unified-path button:first-child{padding-left:12px}
+html[data-design] .graph-perspective-tabs{gap:8px;flex-wrap:wrap}
+html[data-design] .graph-perspective-tabs button{height:auto;min-height:44px;padding:10px 16px;line-height:1.5}
+html[data-design] :is(.relationship-specimen,.lab-map){transition:transform var(--d-fast) var(--ease),box-shadow var(--d-fast) var(--ease)}
+@media(hover:hover) and (pointer:fine){
+ html[data-design] :is(.relationship-specimen,.lab-map):hover{transform:translateY(-3px);box-shadow:2px 5px 0 var(--rule-2),0 10px 18px #17150f12}
+}
+@media(max-width:767px){html[data-design] .graph-perspective-tabs{gap:6px}html[data-design] .graph-perspective-tabs button{padding:10px 12px;min-width:max-content;flex:1 0 auto}}
+@media(prefers-reduced-motion:reduce){html[data-design] :is(.relationship-specimen,.lab-map){transition:none!important;transform:none!important}}
+
+/* One native disclosure primitive, inherited from the approved Analysis details.
+   Keep existing children and selectors intact: evidence and receipts own their data. */
+html[data-design] details.site-disclosure{margin:12px 0;padding:0;border:1px solid var(--rule-2);border-radius:5px;background:var(--surface);overflow:clip;min-width:0}
+html[data-design] details.site-disclosure>summary{display:flex;align-items:center;gap:8px;box-sizing:border-box;min-height:44px;margin:0;padding:12px;font:600 12px/1.5 var(--sans);color:var(--site-blue);background:var(--site-blue-light);border:0;border-radius:0;list-style:none;cursor:pointer;overflow-wrap:anywhere}
+html[data-design] details.site-disclosure>summary::-webkit-details-marker{display:none}
+html[data-design] details.site-disclosure>summary::before{content:'›';display:block;flex:0 0 8px;width:8px;color:currentColor;transform:none;transition:transform var(--d-fast) var(--ease)}
+html[data-design] details.site-disclosure[open]>summary{border-bottom:1px solid var(--rule-2)}
+html[data-design] details.site-disclosure[open]>summary::before{transform:rotate(90deg)}
+html[data-design] details.site-disclosure>summary::after{content:none}
+html[data-design] details.site-disclosure>:not(summary){box-sizing:border-box;max-width:calc(100% - 24px);margin:12px;overflow-wrap:anywhere}
+html[data-design] details.site-disclosure>.lblk{max-width:none;margin:0;padding:16px 12px;border:0}
+html[data-design] details.site-disclosure>:is(pre,code){display:block;white-space:pre-wrap;word-break:break-word}
+html[data-design] details.site-disclosure .deep-note{line-height:1.65}
+html[data-design] details.site-disclosure>details{margin:12px}
+/* Analysis: a quiet instrument with a readable phase and a stable five-stop path.
+   No duplicate giant ordinal, travelling fill or invented progress. */
+html[data-design] .analysis .an-work{background:var(--surface-hi);border-color:var(--rule-2);box-shadow:0 3px 0 var(--rule);padding:28px}
+html[data-design] .analysis .an-work::before{content:none}
+html[data-design] .analysis .an-obj{padding:0 0 20px;min-height:136px;border-bottom:1px solid var(--rule)}
+html[data-design] .analysis .an-pn{margin-bottom:12px}
+html[data-design] .analysis .an-pk{font:600 12px/1.5 var(--sans);color:var(--site-blue)}
+html[data-design] .analysis .an-rule{display:none}
+html[data-design] .analysis .an-ptitle{font-size:26px;line-height:1.25;color:var(--ink);max-width:28ch}
+html[data-design] .analysis .an-psub{color:var(--ink-2);min-height:0;margin:0;max-width:55ch}
+html[data-design] .analysis .an-path{margin-top:20px}
+html[data-design] .analysis .an-plabel{padding:10px 8px;gap:10px}
+html[data-design] .analysis .an-plabel.is-now{background:var(--site-blue-light);box-shadow:none}
+html[data-design] .analysis .an-verb{margin:16px 0 0;min-height:42px;color:var(--ink-2)}
+html[data-design] .analysis .an-aside>.an-grp{border:1px solid var(--rule-2);border-radius:5px;background:var(--surface);box-shadow:none}
+html[data-design] .analysis .an-aside>.an-grp>.an-grp-cap{padding:12px;background:var(--site-blue-light);color:var(--site-blue);border-bottom:1px solid var(--rule-2);min-height:44px}
+html[data-design] .analysis .an-aside .an-spec{padding:4px 12px 12px}
+html[data-design] .analysis .an-tail>p{padding:16px;border:1px solid var(--rule);border-radius:5px;background:var(--surface);font-size:12px}
+@media(max-width:767px){
+ html[data-design] .analysis .an-stage{padding:28px 20px;row-gap:24px}
+ html[data-design] .analysis .an-aside{align-self:stretch;width:100%;min-width:0}
+ html[data-design] .analysis .an-work{padding:20px}
+ html[data-design] .analysis .an-obj{padding:0 0 16px;min-height:142px}
+ html[data-design] .analysis .an-ptitle{font-size:22px}
+ html[data-design] .analysis .an-plabel{padding:8px 2px;align-items:center}
+ html[data-design] .analysis .an-plabel .t-short{font-size:10px;line-height:1.4}
+}
+@media(prefers-reduced-motion:reduce){html[data-design] details.site-disclosure>summary::before{transition:none}}
+
+/* Site-wide reading and control grammar. Pigment identifies the task, depth
+   identifies an action. Reading regions never tilt or follow the cursor. */
+html[data-design] :is(.rail,.drawer,.git-history,.workspace-discovery-controls){--action-ink:var(--site-blue);--action-wash:var(--site-blue-light);--action-edge:var(--site-blue-edge)}
+html[data-design] .workspace-discovery-controls{--action-ink:var(--site-plum);--action-wash:var(--site-plum-light);--action-edge:var(--site-plum-edge)}
+html[data-design] .drawer:has(.site-object-heading[data-kind=structure]){--action-ink:var(--site-teal);--action-wash:var(--site-teal-light);--action-edge:var(--site-teal-edge)}
+html[data-design] :is(.site-action,.history-branch-picker>summary){box-sizing:border-box;min-height:44px;padding:10px 12px;border:1px solid var(--action-edge,var(--rule-2));border-radius:4px;background:var(--surface-hi);color:var(--action-ink,var(--ink));font:500 12px/1.5 var(--sans);text-align:start;box-shadow:inset 0 1px 0 #ffffffb3,0 2px 0 var(--action-edge,var(--rule-2));transition:transform var(--d-fast) var(--ease),box-shadow var(--d-fast) var(--ease),background-color var(--d-fast) var(--ease)}
+html[data-design] .site-action:disabled{box-shadow:none;transform:none;cursor:default}
+html[data-design] .site-action:active:not(:disabled){transform:translateY(1px);box-shadow:var(--site-pressed)}
+html[data-design] .site-action[aria-pressed=true]{background:var(--action-wash);border-color:var(--action-ink)}
+html[data-design] :is(#deep-source-preview,#deep-compare){width:100%;background:var(--site-plum-light);font-weight:600;margin-block:12px 20px}
+html[data-design] .deep-candidate{border:1px solid var(--site-plum-edge);padding:16px;transition:background-color var(--d-fast) var(--ease),box-shadow var(--d-fast) var(--ease)}
+html[data-design] .deep-candidate label{display:flex;align-items:flex-start;gap:12px;min-height:44px;padding:10px 0;font:600 13px/1.5 var(--sans);overflow-wrap:anywhere;cursor:pointer}
+html[data-design] .deep-candidate label input{margin:0;min-width:18px;min-height:18px}
+html[data-design] .deep-candidate :is(.deep-candidate-meta,.deep-candidate-state){font:400 11px/1.65 var(--sans);color:var(--ink-2);margin:8px 0}
+html[data-design] .deep-candidate.is-selected{background:var(--site-plum-light);box-shadow:inset 0 0 0 1px var(--site-plum)}
+html[data-design] :is(.deep-file-card,.deep-result){min-width:0;background:var(--surface-hi);border:1px solid var(--rule-2);border-radius:5px;padding:16px;margin:20px 0}
+html[data-design] :is(.deep-file-card,.deep-result)>h4{font:600 16px/1.4 var(--sans);color:var(--site-plum);letter-spacing:-.02em;margin:8px 0 16px;overflow-wrap:anywhere}
+html[data-design] .deep-file-role{display:inline-flex;font:600 11px/1.5 var(--sans);padding:4px 8px;background:var(--site-plum-light);color:var(--site-plum);border-radius:3px;margin:0}
+html[data-design] .deep-file-row{display:flex;align-items:flex-start;gap:12px;min-height:44px;box-sizing:border-box;padding:12px 8px;border:1px solid transparent;border-bottom-color:var(--rule);border-radius:3px;margin-block:4px;cursor:pointer;transition:background-color var(--d-fast) var(--ease),border-color var(--d-fast) var(--ease)}
+html[data-design] .deep-file-row:has(input:checked){border-color:var(--site-teal-edge);background:var(--site-teal-light)}
+html[data-design] .deep-file-row input{width:18px;height:18px;flex:0 0 18px;margin:1px 0;accent-color:var(--site-teal)}
+html[data-design] .deep-file-copy{min-width:0;display:grid;gap:6px}
+html[data-design] .deep-file-path{font:500 12px/1.5 var(--mono);overflow-wrap:anywhere;word-break:normal}
+html[data-design] :is(.deep-file-meta,.deep-file-reason){font:400 11px/1.6 var(--sans);overflow-wrap:anywhere;color:var(--ink-2)}
+html[data-design] .deep-scope{padding:16px;border:1px solid var(--site-plum-edge);border-radius:5px;background:var(--site-plum-light)}
+html[data-design] .deep-scope-title{font:600 14px/1.5 var(--sans);color:var(--site-plum)}
+html[data-design] .workspace-measurement-picker{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0}
+html[data-design] .workspace-measurement-picker .site-action{flex:1 1 auto}
+html[data-design] .deep-result :is(pre,code){white-space:pre-wrap;overflow-wrap:anywhere}
+html[data-design] .workspace-discovery-controls .deep-status[data-state]{font-size:12px;line-height:1.65;box-shadow:none}
+html[data-design] .deep-status[data-state=completed]{background:var(--site-teal-light);border-color:var(--site-teal-edge);color:var(--site-teal)}
+html[data-design] .deep-status[data-state=notice]{background:var(--site-ochre-light);color:var(--site-ochre)}
+html[data-design] .deep-status[data-state=failed]{background:var(--site-clay-light);color:var(--site-clay)}
+html[data-design] .deep-status[data-state=running]{background:var(--site-plum-light);color:var(--site-plum)}
+html[data-design] details.site-disclosure>summary:focus-visible{outline-offset:-3px}
+html[data-design] .site-foot{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;padding:24px 0;font:400 12px/1.65 var(--sans);color:var(--ink-2)}
+html[data-design] .site-foot>span:first-child{max-width:64ch}
+html[data-design] .site-foot .foot-links{display:flex;gap:12px;flex-wrap:wrap}
+html[data-design] .site-foot a{display:inline-flex;align-items:center;min-height:44px;padding:8px 12px;border:1px solid var(--rule-2);border-radius:4px;background:var(--surface-hi);font-weight:500;color:var(--site-blue);text-decoration:none;box-shadow:0 2px 0 var(--rule)}
+html[data-design] .history-coverage{padding:6px 24px;background:var(--surface);color:var(--ink-2)}
+html[data-design] .history-heading .history-kicker{font-size:11px}
+html[data-design] .history-commit-summary{border-top:0;background:var(--site-blue-light);padding:16px;border-radius:5px}
+html[data-design] .history-commit-summary h3{font-size:20px;line-height:1.35}
+html[data-design] .history-detail .history-detail-section{margin-top:24px}
+html[data-design] .history-detail .history-file-row{background:var(--site-teal-light);border-color:var(--site-teal-edge);color:var(--site-teal)}
+@media(hover:hover) and (pointer:fine){
+ html[data-design] .site-action:hover:not(:disabled):not(:active){transform:translateY(-1px);background:var(--action-wash,var(--surface));box-shadow:inset 0 1px 0 #ffffffb3,0 3px 0 var(--action-edge,var(--rule-2)),0 5px 8px #17150f0b}
+ html[data-design] .deep-file-row:hover{border-color:var(--site-teal-edge)}
+ html[data-design] .deep-candidate:has(label:hover){border-color:var(--site-plum);box-shadow:0 2px 0 var(--site-plum-edge)}
+ html[data-design] .site-foot a:hover{background:var(--site-blue-light)}
+}
+@media(max-width:767px){
+ html[data-design] .site-foot{flex-direction:column;gap:16px}
+ html[data-design] .git-history header input{font-size:16px;padding:8px;min-height:44px}
+ html[data-design] .git-history header :is(#history-return,.history-branch-picker>summary){padding:8px;min-height:44px;font-size:11px}
+ html[data-design] .history-coverage{padding:6px 16px;font-size:11px}
+ html[data-design] :is(.deep-file-card,.deep-result){padding:12px}
+}
+html[data-design][data-site-input=keyboard] .site-action{transition:none;transform:none!important}
+@media(prefers-reduced-motion:reduce){
+ html[data-design] :is(.site-action,.deep-candidate,.deep-file-row){transition:none!important;transform:none!important}
+}
+
+html[data-design] .history-file-path{display:block;min-width:0;font:400 12px/1.65 var(--mono);overflow-wrap:anywhere}
+html[data-design] .history-detail .history-file-row.d-action{background:var(--site-teal-light);border-color:var(--site-teal-edge);color:var(--site-teal)}
