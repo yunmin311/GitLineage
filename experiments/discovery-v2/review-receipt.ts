@@ -1,4 +1,4 @@
-/** Additive V3 review receipt. Legacy preview/candidate/Graph export formats are unchanged. */
+/** Versioned review receipt. V3 @1 remains verifiable; preview/candidate/Graph exports are unchanged. */
 import {stableJSON} from '../../src/discovery/offline.ts';
 import {sha256} from '../../src/discovery/snapshot.ts';
 import {validatePreviewExport} from './preview-contract.ts';
@@ -25,15 +25,22 @@ export function createReviewReceipt(exported:PreviewExport,recommendation?:Recom
    let outcome:PairOutcome='unavailable';
    if(exact?.state==='completed'&&exact.score===1)outcome='exact_match';
    else if(strict?.state==='completed'&&normalized?.state==='completed')outcome=(strict.sharedShingles??0)>=5||(normalized.sharedShingles??0)>=5?'partial_similarity':'no_obvious_similarity';
-   pairs.push({firstPath:first.path,secondPath:second.path,outcome,firstDigest:exact?.firstDigest??null,secondDigest:exact?.secondDigest??null,strict:strict?{state:strict.state,score:strict.score,shared:strict.sharedShingles,first:strict.firstShingles,second:strict.secondShingles}:null,normalized:normalized?{state:normalized.state,score:normalized.score,shared:normalized.sharedShingles,first:normalized.firstShingles,second:normalized.secondShingles}:null,reason:outcome==='unavailable'?'unread, filtered, parser/token limit or failed identity/worker; never a negative result':outcome==='exact_match'?'digest-checked identical Git blobs':'observation rule: at least five shared distinct 5-token shingles in strict or identifier-normalized mode; syntax/templates can satisfy this rule; not statistical significance'});
+   const priority=outcome==='exact_match'?'exact':outcome==='unavailable'?'unavailable':outcome==='no_obvious_similarity'?'no_signal':strict?.reasons.some(r=>r.startsWith('review-priority@1:review:'))?'review':'limited';
+   pairs.push({priority,priorityReason:priority==='exact'?'Identical bytes; identity does not establish provenance':priority==='limited'?'Limited distinctive strict-token support; inspect raw measurements; renamed shared implementations can also fall here':strict?.reasons.find(r=>r.startsWith('review-priority@1:'))??'No review-priority annotation available',firstPath:first.path,secondPath:second.path,outcome,firstDigest:exact?.firstDigest??null,secondDigest:exact?.secondDigest??null,strict:strict?{state:strict.state,score:strict.score,shared:strict.sharedShingles,first:strict.firstShingles,second:strict.secondShingles}:null,normalized:normalized?{state:normalized.state,score:normalized.score,shared:normalized.sharedShingles,first:normalized.firstShingles,second:normalized.secondShingles}:null,reason:outcome==='unavailable'?'unread, filtered, parser/token limit or failed identity/worker; never a negative result':outcome==='exact_match'?'digest-checked identical Git blobs':'observation rule: at least five shared distinct 5-token shingles in strict or identifier-normalized mode; syntax/templates can satisfy this rule; not statistical significance'});
   }
   return {repositoryId:candidate.expectedId,expectedSelectedPairs:pairs.length,completedPairs:pairs.filter(p=>p.outcome!=='unavailable').length,pairs,aggregate:result.summary,scope:'Cartesian pairs of explicitly selected paths; unavailable pairs remain in denominator; aggregate distinct shingle sets deduplicate repeated tokens, not average file scores'};
  });
- const body={schemaVersion:'discovery-review-receipt@1' as const,previewContentDigest:exported.contentDigest,selectionVersion:recommendation?.schemaVersion??null,scope:'bounded selected source observations; code similarity does not prove copying, derivation or ancestry',outcomeRule:'exact blob equality; otherwise >=5 shared distinct strict or normalized 5-token shingles is a partial similarity observation; fewer means no obvious similarity under this rule; unavailable is never zero',repositories,comparisons,costs:exported.selection?.combined??{usage:content.usage,network:content.network},verification:'pending' as const,lineageClaim:'none' as const};
+ const body={schemaVersion:'discovery-review-receipt@2' as const,previewContentDigest:exported.contentDigest,selectionVersion:recommendation?.schemaVersion??null,scope:'bounded selected source observations; code similarity does not prove copying, derivation or ancestry',outcomeRule:'exact blob equality; otherwise >=5 shared distinct strict or normalized 5-token shingles is a partial similarity observation; fewer means no obvious similarity under this rule; unavailable is never zero',repositories,comparisons,costs:exported.selection?.combined??{usage:content.usage,network:content.network},verification:'pending' as const,lineageClaim:'none' as const};
  return {...body,contentDigest:sha256(stableJSON(body))};
 }
 export type ReviewReceipt=ReturnType<typeof createReviewReceipt>;
-export function validateReviewReceipt(receipt:ReviewReceipt,exported:PreviewExport,recommendation?:Recommendation):void {
- const expected=createReviewReceipt(exported,recommendation);
+export function validateReviewReceipt(receipt:unknown,exported:PreviewExport,recommendation?:Recommendation):void {
+ let expected:unknown=createReviewReceipt(exported,recommendation);
+ // V3 @1 has no priority annotations. Reconstruct its exact sealed shape.
+ if(receipt&&typeof receipt==='object'&&'schemaVersion' in receipt&&receipt.schemaVersion==='discovery-review-receipt@1'){
+  const {contentDigest,...body}=expected as ReviewReceipt;
+  const legacy={...body,schemaVersion:'discovery-review-receipt@1',comparisons:body.comparisons.map(c=>({...c,pairs:c.pairs.map(({priority,priorityReason,...pair})=>pair)}))};
+  expected={...legacy,contentDigest:sha256(stableJSON(legacy))};
+ }
  if(stableJSON(expected)!==stableJSON(receipt))throw new TypeError('review receipt does not match pinned export or digest');
 }

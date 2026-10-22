@@ -1,5 +1,6 @@
 // CPU work lives in the worker. Source is data, never executed.
 import ts from 'typescript';
+import {reviewPriority} from './review-priority.ts';
 import type { Measurement, MatchRange } from './contract.ts';
 import type { SourceSnapshot } from './snapshot.ts';
 import { sha256 } from './snapshot.ts';
@@ -40,10 +41,11 @@ export function compareSnapshots(first:SourceSnapshot,second:SourceSnapshot) {
     for(const method of ['strict_token5','normalized_token5'] as const){
       const field=method==='strict_token5'?'strict':'normalized';
       if(x.p.error||y.p.error){measurements.push({...common,method,state:'unavailable',score:null,sharedShingles:null,firstShingles:null,secondShingles:null,firstCoverage:null,secondCoverage:null,ranges:[],reasons:[x.p.error,y.p.error].filter((v):v is string=>v!==null)});continue;}
-      const ax=x.p[field],by=y.p[field],shared=[...ax.keys()].filter(k=>by.has(k)).sort();const ranges:MatchRange[]=shared.slice(0,MAX_RANGES).map(hash=>{
+      const ax=x.p[field],by=y.p[field],shared=[...ax.keys()].filter(k=>by.has(k)).sort();const priority=field==='strict'?reviewPriority(common.firstPath,common.secondPath,shared.flatMap(hash=>x.p.tokens.slice(ax.get(hash)!,ax.get(hash)!+5).map(t=>t.text)),shared.length):null;
+      const ranges:MatchRange[]=shared.slice(0,MAX_RANGES).map(hash=>{
         const i=ax.get(hash)!,j=by.get(hash)!;return{first:[i,i+5],second:[j,j+5],firstChars:[x.p.tokens[i]!.start,x.p.tokens[i+4]!.end],secondChars:[y.p.tokens[j]!.start,y.p.tokens[j+4]!.end],fingerprint:hash};
       });const stats=setStats(new Set(ax.keys()),new Set(by.keys()));
-      measurements.push({...common,method,state:'completed',score:stats.score,sharedShingles:stats.shared,firstShingles:stats.first,secondShingles:stats.second,firstCoverage:stats.firstCoverage,secondCoverage:stats.secondCoverage,ranges,rangesTruncated:shared.length>MAX_RANGES});
+      measurements.push({...common,method,state:'completed',score:stats.score,sharedShingles:stats.shared,firstShingles:stats.first,secondShingles:stats.second,firstCoverage:stats.firstCoverage,secondCoverage:stats.secondCoverage,ranges,rangesTruncated:shared.length>MAX_RANGES,reasons:priority?[`review-priority@1:${priority.level}: ${priority.reason}; distinct terms=${priority.distinctiveTerms}; strict shared=${priority.strictShared}`]:[]});
     }
   }
   const failures=[...a,...b].filter(x=>x.p.error).map(x=>`${x.f.record.path}: ${x.p.error}`);

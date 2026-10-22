@@ -1,0 +1,463 @@
+{
+  "method": "Purpose-labeled controlled candidate sets using actual public metadata; not a sample of live search precision. Rich is deliberately a related cross-language counterexample. Public source fetched at pinned revisions. Acquisition costs are separate from zero-request replay.",
+  "groups": [
+    {
+      "target": "sindresorhus/p-limit",
+      "candidates": [
+        {
+          "name": "1inch/limit-order-protocol",
+          "relevant": false
+        },
+        {
+          "name": "sindresorhus/p-queue",
+          "relevant": true
+        },
+        {
+          "name": "sindresorhus/p-map",
+          "relevant": true
+        },
+        {
+          "name": "mcollina/fastq",
+          "relevant": true
+        }
+      ]
+    },
+    {
+      "target": "chalk/chalk",
+      "candidates": [
+        {
+          "name": "styled-components/styled-components",
+          "relevant": false
+        },
+        {
+          "name": "chalk/ansi-styles",
+          "relevant": true
+        },
+        {
+          "name": "Textualize/rich",
+          "relevant": true
+        },
+        {
+          "name": "sindresorhus/p-limit",
+          "relevant": false
+        }
+      ]
+    },
+    {
+      "target": "vitejs/vite",
+      "candidates": [
+        {
+          "name": "vuejs/core",
+          "relevant": false
+        },
+        {
+          "name": "webpack/webpack",
+          "relevant": true
+        },
+        {
+          "name": "rollup/rollup",
+          "relevant": true
+        },
+        {
+          "name": "vitest-dev/vitest",
+          "relevant": false
+        }
+      ]
+    }
+  ],
+  "repositories": {
+    "sindresorhus/p-limit": {
+      "id": 71542716,
+      "full_name": "sindresorhus/p-limit",
+      "html_url": "https://github.com/sindresorhus/p-limit",
+      "description": "Run multiple promise-returning & async functions with limited concurrency",
+      "language": "JavaScript",
+      "topics": [],
+      "default_branch": "main"
+    },
+    "1inch/limit-order-protocol": {
+      "id": 226565322,
+      "full_name": "1inch/limit-order-protocol",
+      "html_url": "https://github.com/1inch/limit-order-protocol",
+      "description": null,
+      "language": "JavaScript",
+      "topics": [],
+      "default_branch": "main"
+    },
+    "sindresorhus/p-queue": {
+      "id": 72200120,
+      "full_name": "sindresorhus/p-queue",
+      "html_url": "https://github.com/sindresorhus/p-queue",
+      "description": "Promise queue with concurrency control",
+      "language": "TypeScript",
+      "topics": [
+        "async-functions",
+        "async-queue",
+        "node-module",
+        "npm-package",
+        "promise",
+        "promise-queue",
+        "queue",
+        "queue-data-stucture"
+      ],
+      "default_branch": "main"
+    },
+    "sindresorhus/p-map": {
+      "id": 71526722,
+      "full_name": "sindresorhus/p-map",
+      "html_url": "https://github.com/sindresorhus/p-map",
+      "description": "Map over promises concurrently",
+      "language": "JavaScript",
+      "topics": [
+        "async",
+        "async-await",
+        "async-functions",
+        "await",
+        "concurrency",
+        "iteration",
+        "javascript",
+        "mapper",
+        "nodejs",
+        "parallel",
+        "promise",
+        "promises"
+      ],
+      "default_branch": "main"
+    },
+    "mcollina/fastq": {
+      "id": 37368217,
+      "full_name": "mcollina/fastq",
+      "html_url": "https://github.com/mcollina/fastq",
+      "description": "Fast, in memory work queue",
+      "language": "JavaScript",
+      "topics": [],
+      "default_branch": "master"
+    },
+    "chalk/chalk": {
+      "id": 11855195,
+      "full_name": "chalk/chalk",
+      "html_url": "https://github.com/chalk/chalk",
+      "description": "\ud83d\udd8d Terminal string styling done right",
+      "language": "JavaScript",
+      "topics": [
+        "ansi",
+        "ansi-escape-codes",
+        "chalk",
+        "cli",
+        "color",
+        "commandline",
+        "console",
+        "javascript",
+        "strip-ansi",
+        "terminal",
+        "terminal-emulators"
+      ],
+      "default_branch": "main"
+    },
+    "styled-components/styled-components": {
+      "id": 65794292,
+      "full_name": "styled-components/styled-components",
+      "html_url": "https://github.com/styled-components/styled-components",
+      "description": "Fast, expressive styling for React. Server components, client components, streaming SSR, React Native\u2014one API.",
+      "language": "TypeScript",
+      "topics": [
+        "css",
+        "css-in-js",
+        "react",
+        "reactnative",
+        "rsc",
+        "styled-components"
+      ],
+      "default_branch": "main"
+    },
+    "chalk/ansi-styles": {
+      "id": 11803168,
+      "full_name": "chalk/ansi-styles",
+      "html_url": "https://github.com/chalk/ansi-styles",
+      "description": "ANSI escape codes for styling strings in the terminal",
+      "language": "JavaScript",
+      "topics": [
+        "chalk"
+      ],
+      "default_branch": "main"
+    },
+    "Textualize/rich": {
+      "id": 220809393,
+      "full_name": "Textualize/rich",
+      "html_url": "https://github.com/Textualize/rich",
+      "description": "Rich is a Python library for rich text and beautiful formatting in the terminal.",
+      "language": "Python",
+      "topics": [
+        "ansi-colors",
+        "emoji",
+        "markdown",
+        "progress-bar",
+        "progress-bar-python",
+        "python",
+        "python-library",
+        "python3",
+        "rich",
+        "syntax-highlighting",
+        "tables",
+        "terminal",
+        "terminal-color",
+        "traceback",
+        "tracebacks-rich",
+        "tui"
+      ],
+      "default_branch": "main"
+    },
+    "vitejs/vite": {
+      "id": 257485422,
+      "full_name": "vitejs/vite",
+      "html_url": "https://github.com/vitejs/vite",
+      "description": "Next generation frontend tooling. It's fast!",
+      "language": "TypeScript",
+      "topics": [
+        "build-tool",
+        "dev-server",
+        "frontend",
+        "hmr",
+        "vite"
+      ],
+      "default_branch": "main"
+    },
+    "vuejs/core": {
+      "id": 137078487,
+      "full_name": "vuejs/core",
+      "html_url": "https://github.com/vuejs/core",
+      "description": "\ud83d\udd96 Vue.js is a progressive, incrementally-adoptable JavaScript framework for building UI on the web.",
+      "language": "TypeScript",
+      "topics": [],
+      "default_branch": "main"
+    },
+    "webpack/webpack": {
+      "id": 3678731,
+      "full_name": "webpack/webpack",
+      "html_url": "https://github.com/webpack/webpack",
+      "description": "A bundler for javascript and friends. Packs many modules into a few bundled assets. Code Splitting allows for loading parts of the application on demand. Through \"loaders\", modules can be CommonJs, AMD, ES6 modules, CSS, Images, JSON, Coffeescript, LESS, ... and your custom stuff.",
+      "language": "JavaScript",
+      "topics": [
+        "amd",
+        "build-tool",
+        "commonjs",
+        "compiler",
+        "es2015",
+        "es6",
+        "esm",
+        "javascript",
+        "javascript-compiler",
+        "javascript-modules",
+        "loaders",
+        "module-bundler",
+        "plugins",
+        "web",
+        "web-performance",
+        "webpack"
+      ],
+      "default_branch": "main"
+    },
+    "rollup/rollup": {
+      "id": 35640229,
+      "full_name": "rollup/rollup",
+      "html_url": "https://github.com/rollup/rollup",
+      "description": "Next-generation ES module bundler",
+      "language": "JavaScript",
+      "topics": [],
+      "default_branch": "master"
+    },
+    "vitest-dev/vitest": {
+      "id": 434708679,
+      "full_name": "vitest-dev/vitest",
+      "html_url": "https://github.com/vitest-dev/vitest",
+      "description": "Next generation testing framework powered by Vite.",
+      "language": "TypeScript",
+      "topics": [
+        "test",
+        "testing-tools",
+        "vite"
+      ],
+      "default_branch": "main"
+    }
+  },
+  "sources": [
+    {
+      "repository": "sindresorhus/p-limit",
+      "revision": "a8a6fbec4e0e866d6d779b10889bb4f5567e70eb",
+      "path": "index.js",
+      "blob": "c24de5782032605aa83636bcf455f700e3b2ada7",
+      "bytes": 3868,
+      "sha256": "edde12a4a4dbdbe8d27161cdd0853db0bab435d5dc6c15f9f4dedc27ee9bca60",
+      "fixture": "sindresorhus--p-limit.js",
+      "license": "sindresorhus--p-limit.LICENSE"
+    },
+    {
+      "repository": "jucke/p-limit",
+      "revision": "e293f0b92536447f72ca818fcf07be8d287f1c24",
+      "path": "index.js",
+      "blob": "6008403a98879d80c8cbff6f43e5634e3a5fd9ce",
+      "bytes": 640,
+      "sha256": "b89479e9f48bd6e7a90931a164cdec0b9ae203ea4e31ddb2329865cdf0b391f3",
+      "fixture": "jucke--p-limit.js",
+      "license": "jucke--p-limit.LICENSE"
+    },
+    {
+      "repository": "chalk/chalk",
+      "revision": "47fc05abd46171b235e24174cd2dba83d25bf037",
+      "path": "source/index.js",
+      "blob": "5726777461090234d359adaf6895c3188810f1e1",
+      "bytes": 8334,
+      "sha256": "02abae0091d42e077f06e10c0918cf671707d1c73235bcb5d486ed66084ec7b4",
+      "fixture": "chalk--chalk.js",
+      "license": "chalk--chalk.LICENSE"
+    },
+    {
+      "repository": "mcollina/fastq",
+      "revision": "63cf7a58d1197acf431174acff11f3fb6b77e8c4",
+      "path": "queue.js",
+      "blob": "7333a5f4eaeff3e81c5e0cd5bc0fd9057bfa8534",
+      "bytes": 7242,
+      "sha256": "579c7f5b4bad6ff8fc70bd83f73f90ffbc07defff4950db75a030490e54eb5d2",
+      "fixture": "mcollina--fastq.js",
+      "license": "mcollina--fastq.LICENSE"
+    }
+  ],
+  "acquisition": {
+    "requests": [
+      {
+        "path": "repos/sindresorhus/p-limit",
+        "bytes": 5471,
+        "ms": 2138.5358909974457
+      },
+      {
+        "path": "repos/1inch/limit-order-protocol",
+        "bytes": 6554,
+        "ms": 1250.563321998925
+      },
+      {
+        "path": "repos/sindresorhus/p-queue",
+        "bytes": 5554,
+        "ms": 1216.419162999955
+      },
+      {
+        "path": "repos/sindresorhus/p-map",
+        "bytes": 5476,
+        "ms": 1170.4201669999748
+      },
+      {
+        "path": "repos/mcollina/fastq",
+        "bytes": 5097,
+        "ms": 1101.5264999987266
+      },
+      {
+        "path": "repos/chalk/chalk",
+        "bytes": 6082,
+        "ms": 1133.4166779997759
+      },
+      {
+        "path": "repos/styled-components/styled-components",
+        "bytes": 7439,
+        "ms": 1167.2906870007864
+      },
+      {
+        "path": "repos/chalk/ansi-styles",
+        "bytes": 6224,
+        "ms": 1190.4579859983642
+      },
+      {
+        "path": "repos/Textualize/rich",
+        "bytes": 6489,
+        "ms": 1177.1329219991458
+      },
+      {
+        "path": "repos/vitejs/vite",
+        "bytes": 6034,
+        "ms": 1137.4730030001956
+      },
+      {
+        "path": "repos/vuejs/core",
+        "bytes": 5975,
+        "ms": 1138.5542550015089
+      },
+      {
+        "path": "repos/webpack/webpack",
+        "bytes": 6610,
+        "ms": 1225.5907699982345
+      },
+      {
+        "path": "repos/rollup/rollup",
+        "bytes": 6038,
+        "ms": 1763.705976998608
+      },
+      {
+        "path": "repos/vitest-dev/vitest",
+        "bytes": 6318,
+        "ms": 1549.2017149990716
+      },
+      {
+        "path": "repos/sindresorhus/p-limit/commits?per_page=1",
+        "bytes": 3348,
+        "ms": 1118.9295160002075
+      },
+      {
+        "path": "repos/sindresorhus/p-limit/contents/index.js?ref=a8a6fbec4e0e866d6d779b10889bb4f5567e70eb",
+        "bytes": 6287,
+        "ms": 1050.1046599965775
+      },
+      {
+        "path": "repos/jucke/p-limit/commits?per_page=1",
+        "bytes": 3323,
+        "ms": 1118.489389999013
+      },
+      {
+        "path": "repos/jucke/p-limit/contents/index.js?ref=e293f0b92536447f72ca818fcf07be8d287f1c24",
+        "bytes": 1791,
+        "ms": 1352.7488590007124
+      },
+      {
+        "path": "repos/chalk/chalk/commits?per_page=1",
+        "bytes": 3279,
+        "ms": 1156.9141740001214
+      },
+      {
+        "path": "repos/chalk/chalk/contents/source/index.js?ref=47fc05abd46171b235e24174cd2dba83d25bf037",
+        "bytes": 12418,
+        "ms": 1677.7112960007798
+      },
+      {
+        "path": "repos/mcollina/fastq/commits?per_page=1",
+        "bytes": 4427,
+        "ms": 1573.5526159987785
+      },
+      {
+        "path": "repos/mcollina/fastq/contents/queue.js?ref=63cf7a58d1197acf431174acff11f3fb6b77e8c4",
+        "bytes": 10891,
+        "ms": 1683.680195001216
+      },
+      {
+        "path": "repos/sindresorhus/p-limit/license?ref=a8a6fbec4e0e866d6d779b10889bb4f5567e70eb",
+        "bytes": 2624,
+        "ms": 2580.722696999146
+      },
+      {
+        "path": "repos/jucke/p-limit/license?ref=e293f0b92536447f72ca818fcf07be8d287f1c24",
+        "bytes": 2575,
+        "ms": 2706.3578099987353
+      },
+      {
+        "path": "repos/chalk/chalk/license?ref=47fc05abd46171b235e24174cd2dba83d25bf037",
+        "bytes": 2561,
+        "ms": 1403.181218996906
+      },
+      {
+        "path": "repos/mcollina/fastq/license?ref=63cf7a58d1197acf431174acff11f3fb6b77e8c4",
+        "bytes": 2093,
+        "ms": 2356.06316600024
+      }
+    ],
+    "count": 26,
+    "bytes": 140978,
+    "wallMs": 29112.14768699938,
+    "licenseMs": 9046.324891995027
+  }
+}

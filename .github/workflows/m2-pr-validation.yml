@@ -44,6 +44,9 @@ jobs:
       - name: Discovery V3 equal-budget quality benchmark
         run: npm run benchmark:discovery
 
+      - name: Discovery V4 fixed relevance and interpretation benchmark
+        run: npm run benchmark:discovery-v4
+
       - name: Unit tests
         run: npm test
 
@@ -94,6 +97,9 @@ jobs:
 
       - name: Discovery V3 representative selection and manual review
         run: npm run test:discovery-v3-browser
+
+      - name: Discovery V4 relevance, manual review and interpretation
+        run: npm run test:discovery-v4-browser
 
       - name: Anonymous repository exploration browser acceptance
         run: npm run test:exploration
