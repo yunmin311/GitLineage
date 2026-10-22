@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "discovery-v4-benchmark@1",
+  "method": "Same metadata set and source pairs for V3 and V4. V3 original input order and >=5 strict/normalized shingles; V4 changes review priority only; every raw measurement and summary checked against frozen V3 engine at main 01563bc7. Alternating-order direct engine timing; production V4 worker additionally checked. Source worker under unchanged preview caps. All 24 input permutations per four-candidate set guard against favorable input ordering. Curated candidate sets expose ranking, not live-search recall or statistical precision. Public source and authored counterexamples reported separately by kind. Frozen labels precede algorithm execution. Authored cross-path positives include exact bytes and known core fragments; negatives mean no labeled distinctive shared implementation, not proof of independent authorship.",
+  "environment": {
+    "node": "v24.21.0",
+    "platform": "linux",
+    "arch": "x64"
+  },
+  "corpusDigest": "f320ebe1c3674d1257427c9756534ab8512c5fca1f6e27fea14e64ce53d1681a",
+  "summary": {
+    "candidateCases": 3,
+    "candidateCount": 12,
+    "v3Top2": 0.5,
+    "v4Top2": 0.6666666666666666,
+    "orderRobustness": {
+      "permutations": 72,
+      "v3Mean": 0.5833333333333334,
+      "v4Mean": 0.7777777777777777,
+      "worse": 0
+    },
+    "falseRecommendations": 0,
+    "relevantAbstentions": [
+      "mcollina/fastq",
+      "Textualize/rich",
+      "rollup/rollup"
+    ],
+    "sourceCases": 72,
+    "negativePairs": 42,
+    "lowValuePromotedV3": 25,
+    "lowValuePromotedV4": 1,
+    "valuablePairs": 30,
+    "valuablePromotedV3": 30,
+    "valuablePromotedV4": 30,
+    "valuablePriorityLoss": [],
+    "rawEvidenceLoss": 0,
+    "additionalMeasurementJSONBytes": 11332,
+    "replayRequests": 0,
+    "replayResponseBytes": 0,
+    "sourceBytes": 69669,
+    "wallMs": 20016.618395,
+    "engineWallMs": {
+      "v3": 103.19884699999841,
+      "v4": 86.51724600000318
+    },
+    "engineCpuMs": {
+      "v3": 178.12300000000005,
+      "v4": 164.29899999999995
+    }
+  },
+  "gate": {
+    "rankingImproved": true,
+    "noFalseRecommendations": true,
+    "lowValueReduced": true,
+    "valuablePriorityRetained": true
+  },
+  "sourcePositiveBreakdown": {
+    "exactPairs": 13,
+    "nonExactPairs": 17
+  },
+  "remainingFalsePriority": [
+    "public-unrelated"
+  ],
+  "acquisition": {
+    "count": 26,
+    "bytes": 140978,
+    "wallMs": 29112.14768699938,
+    "licenseMs": 9046.324891995027
+  },
+  "rawEvidence": "artifacts/discovery-v4/benchmark/results.json; emitted by npm run benchmark:discovery-v4 and retained in M2 CI artifacts"
+}

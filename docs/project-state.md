@@ -55,6 +55,26 @@ and the separation of canonical graph, presentation view and Discovery candidate
 Authored-corpus coverage improves under unchanged caps; live candidate relevance and
 normalized-token false observations remain explicit limits, not solved provenance.
 
+## Discovery V4 — relevance and review interpretation
+
+V3 was normally merged as PR #8 at `01563bc7394a5d900c85f557b3e9867947fabc69`;
+its exact merged-main ARM64 CI passed. [Discovery V4](discovery-v4.md) reuses already
+returned metadata to order admitted candidates with explicit purpose reasons or abstain,
+and adds cautious review priority over unchanged raw multi-file measurements. It keeps
+manual choices and all budgets. New `@2` review receipts also preserve `@1` validation.
+
+The fixed, purpose-labeled public-metadata pools improve useful top-two fraction from
+58.3% to 77.8% across all input orders. In 72 source pairs, priority false observations
+fall from 25/42 to 1/42, while all 30 valuable pairs and every baseline raw measurement
+remain available. These are small fixed-set results, not live-search recall or proven
+lineage. Sparse/cross-language metadata and incidental identifier overlap remain limits.
+The design stage remains closed; no production enablement or deployment occurs here.
+
+Capability estimate: **82%**, +4 percentage points over the user-approved 78% baseline,
+below this round's 84% ceiling; 18% remains. The increase reflects an integrated,
+measured relevance/interpretation improvement, not code or test counts. Stronger live
+retrieval and provenance evidence remain substantial work.
+
 ## Decision
 
 Confirmed and implemented in this repository.

@@ -1,3 +1,4 @@
+import {metadata,relevance} from './relevance.ts';
 import { BudgetLedger, OFFLINE_PROFILE } from './budget.ts';
 import type { BudgetProfile } from './budget.ts';
 import { NetworkLedger, NETWORK_PROFILE } from './network.ts';
@@ -11,7 +12,7 @@ import type { IdentityObservation, SearchCandidate, SearchDiscovery } from './se
 export { buildQueryPlan } from './query.ts';
 export { comparisonIdentity } from './search-contract.ts';
 export const SEARCH_PROFILE:Readonly<BudgetProfile>=Object.freeze({...OFFLINE_PROFILE,attempts:40,searchAttempts:4,candidates:16,wallMs:120000});
-export interface SearchOptions {transport?:Transport;profile?:BudgetProfile;token?:string;signal?:AbortSignal;timeoutMs?:number;network?:NetworkProfile;now?:()=>string}
+export interface SearchOptions {targetMetadata?:unknown;transport?:Transport;profile?:BudgetProfile;token?:string;signal?:AbortSignal;timeoutMs?:number;network?:NetworkProfile;now?:()=>string}
 export type CoverageState='complete_within_requested'|'partial_budget'|'partial_provider'|'unavailable'|'cancelled'|'not_attempted';
 export interface QueryReceipt {state:CoverageState;query:number;requestedPages:number[];completedPages:number[];totalCount:number|null;incompleteResults:boolean;returnedItems:number;unfetchedAccessiblePages:number|null;beyondWindow:number|null}
 export async function discoverRepositories(inputPlan:QueryPlan,options:SearchOptions={},shared?:NetworkLedger) {
@@ -23,6 +24,7 @@ export async function discoverRepositories(inputPlan:QueryPlan,options:SearchOpt
  const started=performance.now(),attempts:AttemptReceipt[]=[],queries:QueryReceipt[]=plan.queries.map((_,query)=>({state:'not_attempted',query,requestedPages:[],completedPages:[],totalCount:null,incompleteResults:false,returnedItems:0,unfetchedAccessiblePages:null,beyondWindow:null}));
  const records=new Map<number,{observations:IdentityObservation[];discoveries:SearchDiscovery[]}>(),buckets=plan.queries.map(()=>[] as number[]);
  const rejectedIdentities:{query:number;page:number;rank:number;reason:'invalid_or_missing_identity'|'credential_reflection'}[]=[];
+ const targetMetadata=metadata(options.targetMetadata,options.token),observedMetadata=new Map<number,ReturnType<typeof metadata>>();
  const candidates:SearchCandidate[]=[],admitted=new Map<number,SearchCandidate>();
  const quota=Math.max(1,Math.floor(profile.candidates/plan.queries.length)),admissions=plan.queries.map(()=>0);
  const admit=(id:number)=>{if(admitted.has(id))return true;try{ledger.candidate(`github:${id}`);}catch{budgetPartial=true;return false;}const record=records.get(id)!;const c:SearchCandidate={schemaVersion:'discovery-candidate@2',target:structuredClone(plan.target),candidate:mergeIdentity(record.observations),discoveries:record.discoveries,similarity:[],supportingFiles:[],verification:{state:'pending',canonicalEvidenceIds:[]},lineageClaim:'none',comparison:{state:'unexecuted',reason:'revision unresolved'}};admitted.set(id,c);candidates.push(c);return true;};
@@ -42,6 +44,7 @@ export async function discoverRepositories(inputPlan:QueryPlan,options:SearchOpt
   const observedAt=options.now?.()??new Date().toISOString();if(!Number.isFinite(Date.parse(observedAt)))throw new TypeError('invalid receipt clock');
   for(let rank=0;rank<data.items.length;rank++){
    const observation=parseObservation(data.items[rank],observedAt);if(!observation||options.token&&observation.fullName.includes(options.token.toLowerCase())){rejectedIdentity++;rejectedIdentities.push({query:index,page,rank:rank+1,reason:observation?'credential_reflection':'invalid_or_missing_identity'});providerPartial=true;continue;}
+   observedMetadata.set(observation.repositoryId,metadata(data.items[rank],options.token));
    if(plan.target.repositoryId!==null&&observation.repositoryId===plan.target.repositoryId||plan.target.repositoryId===null&&observation.fullName===plan.target.fullName.toLowerCase()){excludedTarget++;continue;}
    let record=records.get(observation.repositoryId);if(!record){record={observations:[],discoveries:[]};records.set(observation.repositoryId,record);}
    record.observations.push(observation);record.discoveries.push({source:'repository_search',version:'github-rest-repository-search@1',query:query.q,querySource:query.source,reason:query.reason,page,rank:(page-1)*plan.perPage+rank+1,observedAt});
@@ -67,8 +70,11 @@ export async function discoverRepositories(inputPlan:QueryPlan,options:SearchOpt
   const qa=attempts.filter(a=>a.query===qr.query);
   qr.state=qa.some(a=>a.outcome==='cancelled')?'cancelled':qa.some(a=>['budget_denied','response_bytes_exhausted'].includes(a.outcome))?'partial_budget':!qa.some(a=>a.reservedBytes)?'not_attempted':!qr.completedPages.length?'unavailable':qr.incompleteResults||qr.unfetchedAccessiblePages||qr.beyondWindow||qa.some(a=>a.outcome!=='success')||rejectedIdentities.some(r=>r.query===qr.query)?'partial_provider':'complete_within_requested';
  }
+ const assessments=candidates.map((c,index)=>({repositoryId:c.candidate.repositoryId,metadata:observedMetadata.get(c.candidate.repositoryId)!,...relevance(targetMetadata,observedMetadata.get(c.candidate.repositoryId)!),index})).sort((a,b)=>b.order-a.order||a.index-b.index);
+ candidates.sort((a,b)=>assessments.findIndex(r=>r.repositoryId===a.candidate.repositoryId)-assessments.findIndex(r=>r.repositoryId===b.candidate.repositoryId));
  for(const c of candidates)validateSearchCandidate(c);
  return{schemaVersion:'discovery-search-sidecar@2' as const,candidateSchema:'discovery-candidate@2' as const,plan,candidates,queries,attempts,rejectedIdentities,
   coverage:{state,scope:'bounded public repository metadata search; never all GitHub',plannedQueries:plan.queries.length,attemptedQueries:new Set(attempts.filter(a=>a.reservedBytes).map(a=>a.query)).size,requestedPages:queries.reduce((n,q)=>n+q.requestedPages.length,0),completedPages,returnedItems,uniqueObserved:records.size,processedCandidates:candidates.length,rejectedIdentity,rejectedBudget,excludedTarget,accessibleWindow:1000,uncompletedPlanned:queries.map(q=>({query:q.query,pages:Array.from({length:plan.pages},(_,i)=>i+1).filter(p=>!q.completedPages.includes(p)&&(q.totalCount===null||(p-1)*plan.perPage<Math.min(q.totalCount,1000)))})).filter(q=>q.pages.length)},
+  relevance:{version:'metadata-review-order@1',target:targetMetadata,candidates:assessments.map(({index,...r})=>r),scope:'admitted bounded search results only; not all returned or all GitHub repositories',sufficient:assessments.some(r=>r.level==='supported')},
   budget:ledger.profile,networkProfile:network.profile,usage:ledger.usage(),network:network.usage(),wallMs:performance.now()-started,cpuBudget:'unsupported',message:candidates.length?'发现候选尚未验证，不构成谱系关系。':'在本次查询范围与预算下，未发现候选。'};
 }

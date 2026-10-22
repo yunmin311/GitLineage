@@ -106,7 +106,7 @@ export function createPreview(options:PreviewOptions={}) {
    if(options.enrichedSearch&&raw&&typeof raw==='object'){const metadata=raw as Record<string,unknown>;
     try{plan=buildQueryPlan(target.identity,{language:typeof metadata.language==='string'?metadata.language:undefined,description:typeof metadata.description==='string'?metadata.description.slice(0,512):undefined},{perPage:3,pages:1});}catch{task.error='Unsafe or unsupported metadata query terms omitted; repository name query retained';}
    }
-   result=await discoverRepositories(plan,{transport:tracked(task)},network);
+   result=await discoverRepositories(plan,{transport:tracked(task),targetMetadata:raw},network);
   }
   task.search={target:structuredClone(target),result,requests:structuredClone(resolver.provider.receipts),usage:ledger.usage(),network:network.usage(),scope:options.enrichedSearch?'bounded name and description queries, language when provided, first page, at most three unique IDs; no whole-GitHub coverage':'one name query, first three results, at most three candidates; no whole-GitHub coverage'};
   if(!target?.identity)task.error=target?.reasons.join('; ')??'bootstrap: '+resolver.provider.failure();
