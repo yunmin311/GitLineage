@@ -12,7 +12,7 @@ html[data-design] .input-card{margin:0;border:1px solid var(--ink);box-shadow:va
 html[data-design] .input-row{padding:10px;gap:8px}html[data-design] #repo-input{font-size:14px;min-width:0}html[data-design] .field{min-width:0}html[data-design] #submit{background:var(--lab-blue);color:#fff;border-color:var(--lab-blue);font:600 13px/1.3 var(--sans);padding:14px 16px;border-radius:3px;white-space:nowrap}
 html[data-design] .sub-row-depth{padding:10px 14px;background:var(--lab-pale);border-top:1px solid var(--rule)}
 html[data-design] .lab-intro>.sub-row{font-size:11px;margin:18px 0 0;gap:12px;flex-wrap:wrap}html[data-design] .lab-intro>.sub-row .sub-cap{display:none}
-html[data-design] .repository-reference{margin-top:28px;padding:0!important;border:0!important;background:none!important}html[data-design] .repository-reference .foot{display:none}html[data-design] .samples{gap:7px!important}html[data-design] .samples-lab{font-size:12px!important;font-weight:400!important}html[data-design] .samples a{font-size:11px!important;min-height:38px!important;padding:8px!important;background:transparent!important}
+html[data-design] .repository-reference{margin-top:28px;padding:0!important;border:0!important;background:none!important}html[data-design] .repository-reference .foot{display:none}html[data-design] .samples{gap:7px!important}html[data-design] .samples-lab{font-size:12px!important;font-weight:400!important}html[data-design] .samples a{font-size:11px!important;min-height:44px!important;padding:8px!important;background:transparent!important}
 .lab-map{position:relative;align-self:stretch;min-width:0;padding:22px 24px;background:var(--lab-pale);border:1px solid var(--brand-edge);border-radius:8px;display:flex;flex-direction:column;justify-content:center;overflow:hidden}
 .lab-map-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;font:600 12px/1.4 var(--sans)}.lab-illustration{font-size:10px;font-weight:400;color:var(--ink-2);border:1px solid var(--brand-edge);border-radius:3px;padding:3px 6px}
 .lab-map svg{display:block;width:100%;height:auto;overflow:visible;margin:18px 0 12px}.lab-map path{fill:none;stroke-width:2.5;stroke:currentColor}.lab-map rect{fill:#fdfcf8;stroke:currentColor;stroke-width:1.5}.lab-map text{font:600 15px var(--sans);fill:var(--ink)}.lab-map .lab-small{font:400 11px var(--sans)}.lab-root rect{fill:var(--lab-blue);stroke:var(--lab-blue);stroke-width:2}.lab-root text{fill:white}.lab-root circle{fill:var(--lab-yellow)}.lab-port circle{fill:var(--surface-hi);stroke:var(--lab-blue);stroke-width:2}
@@ -128,7 +128,7 @@ html[data-design] .input-card{border-color:var(--brand-edge);border-radius:6px;b
 html[data-design] .input-row{padding:12px;gap:12px}
 html[data-design] #repo-input{min-height:44px;font-size:14px}
 html[data-design] .sub-row-depth{background:var(--brand-wash);padding:12px 16px}
-html[data-design] .seg button{border-radius:3px;min-height:32px;font-weight:500}
+html[data-design] .seg button{border-radius:3px;min-height:44px;font-weight:500}
 html[data-design] .seg button[aria-pressed=true]{background:var(--site-blue-light);color:var(--site-blue);border-color:var(--site-blue-edge);box-shadow:var(--site-raised)}
 html[data-design] #submit{min-height:48px;box-shadow:inset 0 1px 0 #ffffff55,0 3px 0 var(--brand-press),0 5px 8px #17150f14}
 html[data-design] .lab-map{box-shadow:0 4px 0 var(--rule),0 12px 24px #17150f08}
@@ -276,7 +276,7 @@ html[data-design] .history-kicker{font:500 11px/1.5 var(--sans);letter-spacing:0
 html[data-design] .history-heading .history-kicker{color:var(--site-blue);overflow-wrap:anywhere;margin:0 0 2px}
 html[data-design] .history-heading h2{font:600 16px/1.4 var(--sans);letter-spacing:-.025em;margin:0;color:var(--site-blue)}
 html[data-design] .git-history header input{background:#F9FAF7;border:1px solid var(--brand-edge);border-radius:4px;min-height:38px;padding:10px 12px;color:var(--ink);font:400 12px/1.4 var(--sans)}
-html[data-design] .history-branch-picker summary,html[data-design] #history-return{background:var(--surface-hi);border:1px solid var(--brand-edge);border-radius:4px;color:var(--brand);box-shadow:inset 0 1px 0 white,0 2px 0 var(--brand-press);min-height:38px;padding:10px 12px;font:500 12px/1.4 var(--sans)}
+html[data-design] .history-branch-picker summary,html[data-design] #history-return{background:var(--surface-hi);border:1px solid var(--brand-edge);border-radius:4px;color:var(--brand);box-shadow:inset 0 1px 0 white,0 2px 0 var(--brand-press);min-height:44px;padding:10px 12px;font:500 12px/1.4 var(--sans)}
 html[data-design] .history-branch-choices{background:var(--surface-hi);color:var(--ink);box-shadow:0 6px 16px #17150f20;border-color:var(--brand-edge)}
 html[data-design] .history-coverage{background:var(--brand-wash);border-bottom:1px solid var(--brand-edge);padding:12px 24px;color:var(--brand);font:400 12px/1.6 var(--sans)}
 html[data-design] .history-list{background:var(--surface-hi)}
@@ -340,7 +340,6 @@ html[data-design] :where(.seg button,.unified-path button,.unified-layer-control
  html[data-design] .history-heading{width:100%;flex-basis:100%}
  html[data-design] .history-heading h2{font-size:14px}
  html[data-design] .git-history header input{min-height:44px;min-width:0}
- html[data-design] .history-branch-picker summary,html[data-design] #history-return{min-height:44px}
  html[data-design] .history-coverage{padding:12px 20px;font-size:11px}
  html[data-design] .history-detail{padding:20px;border:0}
  html[data-design] .history-related-row,html[data-design] .history-file-row{min-height:44px}
