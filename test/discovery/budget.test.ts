@@ -25,3 +25,12 @@ test('missing caps and prototype-like bucket names cannot bypass accounting',()=
  assert.throws(()=>new BudgetLedger({cpuMs:null} as never));
  const l=new BudgetLedger({...OFFLINE_PROFILE,filesPerCandidate:1});l.file('__proto__','x');assert.throws(()=>l.file('__proto__','y'));assert.equal(l.usage().files['__proto__'],1);
 });
+test('partial search accounting keeps identity keys and caps without permitting cancelled work',()=>{
+ const c=new AbortController(),l=new BudgetLedger({...OFFLINE_PROFILE,candidates:1},c.signal);
+ c.abort();l.recordObservedCandidate('github:20');l.recordObservedCandidate('github:20');
+ assert.equal(l.usage().candidates,1);assert.throws(()=>l.recordObservedCandidate('github:21'),/candidates/);
+ assert.throws(()=>l.file('github:20','index.js'),/cancelled/);assert.throws(()=>l.attempt(),/cancelled/);assert.throws(()=>l.worker(),/cancelled/);
+ let clock=0;const d=new BudgetLedger({...OFFLINE_PROFILE,candidates:1},undefined,()=>clock);
+ d.recordObservedCandidate('github:20');d.candidate('github:20');assert.equal(d.usage().candidates,1);
+ clock=30000;d.recordObservedCandidate('github:20');assert.throws(()=>d.candidate('github:20'),/deadline/);
+});

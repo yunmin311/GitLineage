@@ -26,8 +26,8 @@ export async function discoverRepositories(inputPlan:QueryPlan,options:SearchOpt
  const rejectedIdentities:{query:number;page:number;rank:number;reason:'invalid_or_missing_identity'|'credential_reflection'}[]=[];
  const targetMetadata=metadata(options.targetMetadata,options.token),observedMetadata=new Map<number,ReturnType<typeof metadata>>();
  const candidates:SearchCandidate[]=[],admitted=new Map<number,SearchCandidate>();
- const quota=Math.max(1,Math.floor(profile.candidates/plan.queries.length)),admissions=plan.queries.map(()=>0);
- const admit=(id:number)=>{if(admitted.has(id))return true;try{ledger.candidate(`github:${id}`);}catch{budgetPartial=true;return false;}const record=records.get(id)!;const c:SearchCandidate={schemaVersion:'discovery-candidate@2',target:structuredClone(plan.target),candidate:mergeIdentity(record.observations),discoveries:record.discoveries,similarity:[],supportingFiles:[],verification:{state:'pending',canonicalEvidenceIds:[]},lineageClaim:'none',comparison:{state:'unexecuted',reason:'revision unresolved'}};admitted.set(id,c);candidates.push(c);return true;};
+ const quota=Math.max(1,Math.floor(profile.candidates/plan.queries.length));
+ const admit=(id:number)=>{if(admitted.has(id))return true;try{ledger.recordObservedCandidate(`github:${id}`);}catch{budgetPartial=true;return false;}const record=records.get(id)!;const c:SearchCandidate={schemaVersion:'discovery-candidate@2',target:structuredClone(plan.target),candidate:mergeIdentity(record.observations),discoveries:record.discoveries,similarity:[],supportingFiles:[],verification:{state:'pending',canonicalEvidenceIds:[]},lineageClaim:'none',comparison:{state:'unexecuted',reason:'revision unresolved'}};admitted.set(id,c);candidates.push(c);return true;};
  let stopped=false,budgetPartial=false,providerPartial=false,cancelled=false,rejectedIdentity=0,returnedItems=0,excludedTarget=0;
  // Page rounds distribute request budget across sources before deeper pages.
  for(let page=1;page<=plan.pages&&!stopped;page++)for(let index=0;index<plan.queries.length&&!stopped;index++){
@@ -49,16 +49,18 @@ export async function discoverRepositories(inputPlan:QueryPlan,options:SearchOpt
    let record=records.get(observation.repositoryId);if(!record){record={observations:[],discoveries:[]};records.set(observation.repositoryId,record);}
    record.observations.push(observation);record.discoveries.push({source:'repository_search',version:'github-rest-repository-search@1',query:query.q,querySource:query.source,reason:query.reason,page,rank:(page-1)*plan.perPage+rank+1,observedAt});
    if(!buckets[index]!.includes(observation.repositoryId))buckets[index]!.push(observation.repositoryId);
-   if(!admitted.has(observation.repositoryId)&&admissions[index]!<quota&&admit(observation.repositoryId))admissions[index]=(admissions[index]??0)+1;
-   const existing=admitted.get(observation.repositoryId);if(existing)existing.candidate=mergeIdentity(record.observations);
   }
  }
- let rejectedBudget=0;
- // Admit reserved per-query shares as pages arrive. Remaining capacity is filled
- // round-robin only while the ledger allows scheduling. Prior admissions survive
- // cancellation and keep all subsequent successful observation reasons.
- const selected=new Set<number>();
- for(let rank=0;rank<Math.max(0,...buckets.map(b=>b.length));rank++)for(const bucket of buckets){const id=bucket[rank];if(id===undefined||selected.has(id))continue;selected.add(id);if(!admit(id))rejectedBudget++;}
+ // Select only after all obtainable pages. Reserve each source's fair share
+ // from its best observations, then use relevance for the remaining shared slots.
+ // Stable ties retain provider order; identity deduplication never loses receipts.
+ const scores=new Map([...records.keys()].map(id=>[id,relevance(targetMetadata,observedMetadata.get(id)!).order]));
+ const ranked=buckets.map(bucket=>[...bucket].sort((a,b)=>scores.get(b)!-scores.get(a)!));
+ for(let turn=0;turn<quota&&candidates.length<profile.candidates;turn++)for(const bucket of ranked){
+  const id=bucket.find(id=>!admitted.has(id));if(id!==undefined&&candidates.length<profile.candidates)admit(id);
+ }
+ for(const id of [...records.keys()].sort((a,b)=>scores.get(b)!-scores.get(a)!))if(candidates.length<profile.candidates)admit(id);
+ const rejectedBudget=records.size-candidates.length;if(rejectedBudget)budgetPartial=true;
  // Name collisions inspect all valid observations, including non-admitted IDs.
  const names=new Map<string,Set<number>>();if(plan.target.repositoryId!==null)names.set(plan.target.fullName.toLowerCase(),new Set([plan.target.repositoryId]));for(const [id,r]of records)for(const o of r.observations){let ids=names.get(o.fullName);if(!ids){ids=new Set();names.set(o.fullName,ids);}ids.add(id);}
  for(const c of candidates)if(c.candidate.observations.some(o=>names.get(o.fullName)!.size>1)){c.candidate.conflicts.push('name_id_collision');c.candidate.completeness='incomplete';providerPartial=true;}
@@ -75,6 +77,7 @@ export async function discoverRepositories(inputPlan:QueryPlan,options:SearchOpt
  for(const c of candidates)validateSearchCandidate(c);
  return{schemaVersion:'discovery-search-sidecar@2' as const,candidateSchema:'discovery-candidate@2' as const,plan,candidates,queries,attempts,rejectedIdentities,
   coverage:{state,scope:'bounded public repository metadata search; never all GitHub',plannedQueries:plan.queries.length,attemptedQueries:new Set(attempts.filter(a=>a.reservedBytes).map(a=>a.query)).size,requestedPages:queries.reduce((n,q)=>n+q.requestedPages.length,0),completedPages,returnedItems,uniqueObserved:records.size,processedCandidates:candidates.length,rejectedIdentity,rejectedBudget,excludedTarget,accessibleWindow:1000,uncompletedPlanned:queries.map(q=>({query:q.query,pages:Array.from({length:plan.pages},(_,i)=>i+1).filter(p=>!q.completedPages.includes(p)&&(q.totalCount===null||(p-1)*plan.perPage<Math.min(q.totalCount,1000)))})).filter(q=>q.pages.length)},
-  relevance:{version:'metadata-review-order@1',target:targetMetadata,candidates:assessments.map(({index,...r})=>r),scope:'admitted bounded search results only; not all returned or all GitHub repositories',sufficient:assessments.some(r=>r.level==='supported')},
+  admission:{policy:'relevance within fair query shares, then relevance across remaining observations; stable provider-order ties',observations:[...records].map(([repositoryId,record])=>({repositoryId,...record,metadata:observedMetadata.get(repositoryId)!,admitted:admitted.has(repositoryId)}))},
+  relevance:{version:'metadata-review-order@1',target:targetMetadata,candidates:assessments.map(({index,...r})=>r),scope:'admission considers all successfully returned bounded observations; not unrequested pages or all GitHub repositories',sufficient:assessments.some(r=>r.level==='supported')},
   budget:ledger.profile,networkProfile:network.profile,usage:ledger.usage(),network:network.usage(),wallMs:performance.now()-started,cpuBudget:'unsupported',message:candidates.length?'发现候选尚未验证，不构成谱系关系。':'在本次查询范围与预算下，未发现候选。'};
 }

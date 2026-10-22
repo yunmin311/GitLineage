@@ -1,0 +1,1150 @@
+{
+  "protocol": "docs/discovery-admission.md",
+  "baselineCommit": "f0a4ef3d40edaa139f0fa33a5c7c9f75227fe52e",
+  "samples": [
+    {
+      "repository": "sindresorhus/p-limit",
+      "capturedAt": "2026-10-22T15:48:10.628Z",
+      "plan": {
+        "version": "repository-query-plan@1",
+        "target": {
+          "provider": "github",
+          "repositoryId": 71542716,
+          "completeness": "provider_id",
+          "fullName": "sindresorhus/p-limit",
+          "aliases": [],
+          "revision": "a8a6fbec4e0e866d6d779b10889bb4f5567e70eb"
+        },
+        "queries": [
+          {
+            "q": "p-limit in:name language:javascript is:public fork:true",
+            "source": "repository_name",
+            "reason": "fixed target repository name"
+          },
+          {
+            "q": "multiple promise-returning async in:name,description language:javascript is:public fork:true",
+            "source": "description",
+            "reason": "first three distinct description terms"
+          }
+        ],
+        "perPage": 3,
+        "pages": 1
+      },
+      "targetMetadata": {
+        "description": "Run multiple promise-returning & async functions with limited concurrency",
+        "language": "JavaScript",
+        "topics": []
+      },
+      "responses": [
+        {
+          "url": "https://api.github.com/search/repositories?q=p-limit+in%3Aname+language%3Ajavascript+is%3Apublic+fork%3Atrue&per_page=3&page=1",
+          "status": 200,
+          "bytes": 15999,
+          "wallMs": 1058.7979299999997,
+          "body": {
+            "total_count": 1589,
+            "incomplete_results": false,
+            "items": [
+              {
+                "id": 71542716,
+                "full_name": "sindresorhus/p-limit",
+                "html_url": "https://github.com/sindresorhus/p-limit",
+                "description": "Run multiple promise-returning & async functions with limited concurrency",
+                "language": "JavaScript",
+                "topics": [],
+                "fork": false
+              },
+              {
+                "id": 226565322,
+                "full_name": "1inch/limit-order-protocol",
+                "html_url": "https://github.com/1inch/limit-order-protocol",
+                "description": null,
+                "language": "JavaScript",
+                "topics": [],
+                "fork": false
+              },
+              {
+                "id": 60833257,
+                "full_name": "nullice/limitPNG",
+                "html_url": "https://github.com/nullice/limitPNG",
+                "description": "PNG image compression tool (GUI use Electron)",
+                "language": "JavaScript",
+                "topics": [
+                  "electron",
+                  "png"
+                ],
+                "fork": false
+              }
+            ]
+          }
+        },
+        {
+          "url": "https://api.github.com/search/repositories?q=multiple+promise-returning+async+in%3Aname%2Cdescription+language%3Ajavascript+is%3Apublic+fork%3Atrue&per_page=3&page=1",
+          "status": 200,
+          "bytes": 16181,
+          "wallMs": 648.2089739999992,
+          "body": {
+            "total_count": 210,
+            "incomplete_results": false,
+            "items": [
+              {
+                "id": 71542716,
+                "full_name": "sindresorhus/p-limit",
+                "html_url": "https://github.com/sindresorhus/p-limit",
+                "description": "Run multiple promise-returning & async functions with limited concurrency",
+                "language": "JavaScript",
+                "topics": [],
+                "fork": false
+              },
+              {
+                "id": 134316219,
+                "full_name": "rxaviers/async-pool",
+                "html_url": "https://github.com/rxaviers/async-pool",
+                "description": "Run multiple promise-returning & async functions with limited concurrency using native ES6/ES7",
+                "language": "JavaScript",
+                "topics": [],
+                "fork": false
+              },
+              {
+                "id": 212301367,
+                "full_name": "leejialing/limit-promise",
+                "html_url": "https://github.com/leejialing/limit-promise",
+                "description": "Run multiple promise-returning & async functions with limited concurrency",
+                "language": "JavaScript",
+                "topics": [],
+                "fork": false
+              }
+            ]
+          }
+        }
+      ],
+      "baseline": {
+        "ids": [
+          134316219,
+          226565322,
+          60833257
+        ],
+        "names": [
+          "rxaviers/async-pool",
+          "1inch/limit-order-protocol",
+          "nullice/limitpng"
+        ],
+        "usage": {
+          "attempts": 5,
+          "searchAttempts": 2,
+          "candidates": 3,
+          "files": {},
+          "bytesByFile": {},
+          "totalBytes": 0,
+          "activeWorkers": 0,
+          "peakWorkers": 1
+        },
+        "network": {
+          "reservedBytes": 163840,
+          "receivedBytes": 47382,
+          "retainedBytes": 47382,
+          "overflowBytes": 0
+        },
+        "coverage": {
+          "state": "partial_budget",
+          "scope": "bounded public repository metadata search; never all GitHub",
+          "plannedQueries": 2,
+          "attemptedQueries": 2,
+          "requestedPages": 2,
+          "completedPages": 2,
+          "returnedItems": 6,
+          "uniqueObserved": 4,
+          "processedCandidates": 3,
+          "rejectedIdentity": 0,
+          "rejectedBudget": 1,
+          "excludedTarget": 2,
+          "accessibleWindow": 1000,
+          "uncompletedPlanned": []
+        }
+      },
+      "acquisition": {
+        "requests": 5,
+        "responseBytes": 47382,
+        "wallMs": 4271.535452999999
+      },
+      "labels": [
+        {
+          "repositoryId": 226565322,
+          "name": "1inch/limit-order-protocol",
+          "label": "irrelevant",
+          "reason": "Decentralized exchange order protocol, not async concurrency control"
+        },
+        {
+          "repositoryId": 60833257,
+          "name": "nullice/limitPNG",
+          "label": "irrelevant",
+          "reason": "PNG compression desktop application"
+        },
+        {
+          "repositoryId": 134316219,
+          "name": "rxaviers/async-pool",
+          "label": "useful",
+          "reason": "Independent bounded async concurrency implementation"
+        },
+        {
+          "repositoryId": 212301367,
+          "name": "leejialing/limit-promise",
+          "label": "useful",
+          "reason": "Same async concurrency task; shared source must be inspected separately"
+        }
+      ]
+    },
+    {
+      "repository": "chalk/chalk",
+      "capturedAt": "2026-10-22T15:48:14.935Z",
+      "plan": {
+        "version": "repository-query-plan@1",
+        "target": {
+          "provider": "github",
+          "repositoryId": 11855195,
+          "completeness": "provider_id",
+          "fullName": "chalk/chalk",
+          "aliases": [],
+          "revision": "47fc05abd46171b235e24174cd2dba83d25bf037"
+        },
+        "queries": [
+          {
+            "q": "chalk in:name language:javascript is:public fork:true",
+            "source": "repository_name",
+            "reason": "fixed target repository name"
+          },
+          {
+            "q": "terminal string styling in:name,description language:javascript is:public fork:true",
+            "source": "description",
+            "reason": "first three distinct description terms"
+          }
+        ],
+        "perPage": 3,
+        "pages": 1
+      },
+      "targetMetadata": {
+        "description": "\ud83d\udd8d Terminal string styling done right",
+        "language": "JavaScript",
+        "topics": [
+          "ansi",
+          "ansi-escape-codes",
+          "cli",
+          "color",
+          "commandline",
+          "console",
+          "javascript",
+          "strip-ansi",
+          "terminal",
+          "terminal-emulators"
+        ]
+      },
+      "responses": [
+        {
+          "url": "https://api.github.com/search/repositories?q=chalk+in%3Aname+language%3Ajavascript+is%3Apublic+fork%3Atrue&per_page=3&page=1",
+          "status": 200,
+          "bytes": 54,
+          "wallMs": 1136.656094,
+          "body": {
+            "total_count": 0,
+            "incomplete_results": true,
+            "items": []
+          }
+        },
+        {
+          "url": "https://api.github.com/search/repositories?q=terminal+string+styling+in%3Aname%2Cdescription+language%3Ajavascript+is%3Apublic+fork%3Atrue&per_page=3&page=1",
+          "status": 200,
+          "bytes": 15660,
+          "wallMs": 752.3417640000007,
+          "body": {
+            "total_count": 3700,
+            "incomplete_results": false,
+            "items": [
+              {
+                "id": 11855195,
+                "full_name": "chalk/chalk",
+                "html_url": "https://github.com/chalk/chalk",
+                "description": "\ud83d\udd8d Terminal string styling done right",
+                "language": "JavaScript",
+                "topics": [
+                  "ansi",
+                  "ansi-escape-codes",
+                  "chalk",
+                  "cli",
+                  "color",
+                  "commandline",
+                  "console",
+                  "javascript",
+                  "strip-ansi",
+                  "terminal",
+                  "terminal-emulators"
+                ],
+                "fork": false
+              },
+              {
+                "id": 38341094,
+                "full_name": "chalk/chalk-cli",
+                "html_url": "https://github.com/chalk/chalk-cli",
+                "description": "Terminal string styling done right",
+                "language": "JavaScript",
+                "topics": [],
+                "fork": false
+              },
+              {
+                "id": 59317443,
+                "full_name": "jaywcjlove/colors-cli",
+                "html_url": "https://github.com/jaywcjlove/colors-cli",
+                "description": " \u0ca0_\u0ca0  Terminal string styling done right.",
+                "language": "JavaScript",
+                "topics": [
+                  "256",
+                  "ansi",
+                  "ansi-escape",
+                  "cli",
+                  "color",
+                  "colors",
+                  "colors-cli",
+                  "colour",
+                  "command-line",
+                  "command-line-tool",
+                  "console",
+                  "log",
+                  "nodejs",
+                  "rgb",
+                  "shell",
+                  "style",
+                  "styles",
+                  "terminal",
+                  "xterm"
+                ],
+                "fork": false
+              }
+            ]
+          }
+        }
+      ],
+      "baseline": {
+        "ids": [
+          59317443,
+          38341094
+        ],
+        "names": [
+          "jaywcjlove/colors-cli",
+          "chalk/chalk-cli"
+        ],
+        "usage": {
+          "attempts": 5,
+          "searchAttempts": 2,
+          "candidates": 2,
+          "files": {},
+          "bytesByFile": {},
+          "totalBytes": 0,
+          "activeWorkers": 0,
+          "peakWorkers": 1
+        },
+        "network": {
+          "reservedBytes": 163840,
+          "receivedBytes": 31870,
+          "retainedBytes": 31870,
+          "overflowBytes": 0
+        },
+        "coverage": {
+          "state": "partial_provider",
+          "scope": "bounded public repository metadata search; never all GitHub",
+          "plannedQueries": 2,
+          "attemptedQueries": 2,
+          "requestedPages": 2,
+          "completedPages": 2,
+          "returnedItems": 3,
+          "uniqueObserved": 2,
+          "processedCandidates": 2,
+          "rejectedIdentity": 0,
+          "rejectedBudget": 0,
+          "excludedTarget": 1,
+          "accessibleWindow": 1000,
+          "uncompletedPlanned": []
+        }
+      },
+      "acquisition": {
+        "requests": 5,
+        "responseBytes": 31870,
+        "wallMs": 3972.4396320000005
+      },
+      "labels": [
+        {
+          "repositoryId": 38341094,
+          "name": "chalk/chalk-cli",
+          "label": "useful",
+          "reason": "Terminal styling CLI in the chalk organization; ecosystem relationship is not Git ancestry"
+        },
+        {
+          "repositoryId": 59317443,
+          "name": "jaywcjlove/colors-cli",
+          "label": "useful",
+          "reason": "Independent terminal styling implementation"
+        }
+      ]
+    },
+    {
+      "repository": "vitejs/vite",
+      "capturedAt": "2026-10-22T15:48:18.916Z",
+      "plan": {
+        "version": "repository-query-plan@1",
+        "target": {
+          "provider": "github",
+          "repositoryId": 257485422,
+          "completeness": "provider_id",
+          "fullName": "vitejs/vite",
+          "aliases": [],
+          "revision": "4ca25e1d3a24cb3343352f781a276cbfd2d206d6"
+        },
+        "queries": [
+          {
+            "q": "vite in:name language:typescript is:public fork:true",
+            "source": "repository_name",
+            "reason": "fixed target repository name"
+          },
+          {
+            "q": "next generation frontend in:name,description language:typescript is:public fork:true",
+            "source": "description",
+            "reason": "first three distinct description terms"
+          }
+        ],
+        "perPage": 3,
+        "pages": 1
+      },
+      "targetMetadata": {
+        "description": "Next generation frontend tooling. It's fast!",
+        "language": "TypeScript",
+        "topics": [
+          "build-tool",
+          "dev-server",
+          "frontend",
+          "hmr"
+        ]
+      },
+      "responses": [
+        {
+          "url": "https://api.github.com/search/repositories?q=vite+in%3Aname+language%3Atypescript+is%3Apublic+fork%3Atrue&per_page=3&page=1",
+          "status": 200,
+          "bytes": 15235,
+          "wallMs": 802.4614429999983,
+          "body": {
+            "total_count": 93872,
+            "incomplete_results": false,
+            "items": [
+              {
+                "id": 257485422,
+                "full_name": "vitejs/vite",
+                "html_url": "https://github.com/vitejs/vite",
+                "description": "Next generation frontend tooling. It's fast!",
+                "language": "TypeScript",
+                "topics": [
+                  "build-tool",
+                  "dev-server",
+                  "frontend",
+                  "hmr",
+                  "vite"
+                ],
+                "fork": false
+              },
+              {
+                "id": 533871213,
+                "full_name": "module-federation/vite",
+                "html_url": "https://github.com/module-federation/vite",
+                "description": "Vite Plugin for Module Federation ",
+                "language": "TypeScript",
+                "topics": [],
+                "fork": false
+              },
+              {
+                "id": 342372268,
+                "full_name": "nuxt/vite",
+                "html_url": "https://github.com/nuxt/vite",
+                "description": "\u26a1  Vite Experience with Nuxt 2",
+                "language": "TypeScript",
+                "topics": [],
+                "fork": false
+              }
+            ]
+          }
+        },
+        {
+          "url": "https://api.github.com/search/repositories?q=next+generation+frontend+in%3Aname%2Cdescription+language%3Atypescript+is%3Apublic+fork%3Atrue&per_page=3&page=1",
+          "status": 200,
+          "bytes": 15565,
+          "wallMs": 795.4981269999989,
+          "body": {
+            "total_count": 8772,
+            "incomplete_results": false,
+            "items": [
+              {
+                "id": 257485422,
+                "full_name": "vitejs/vite",
+                "html_url": "https://github.com/vitejs/vite",
+                "description": "Next generation frontend tooling. It's fast!",
+                "language": "TypeScript",
+                "topics": [
+                  "build-tool",
+                  "dev-server",
+                  "frontend",
+                  "hmr",
+                  "vite"
+                ],
+                "fork": false
+              },
+              {
+                "id": 121770401,
+                "full_name": "owncloud/web",
+                "html_url": "https://github.com/owncloud/web",
+                "description": ":dragon_face: Next generation frontend for ownCloud Infinite Scale",
+                "language": "TypeScript",
+                "topics": [
+                  "file-sync",
+                  "frontend",
+                  "infinite-scale",
+                  "ocis",
+                  "owncloud",
+                  "owncloud-web",
+                  "self-hosted",
+                  "spa",
+                  "typescript",
+                  "vue"
+                ],
+                "fork": false
+              },
+              {
+                "id": 170884642,
+                "full_name": "smapiot/piral",
+                "html_url": "https://github.com/smapiot/piral",
+                "description": "\ud83d\ude80 Framework for next generation web apps using micro frontends. \u2b50\ufe0f Star to support our work! ",
+                "language": "TypeScript",
+                "topics": [
+                  "app",
+                  "awesome",
+                  "blazing",
+                  "frontend",
+                  "hacktoberfest",
+                  "micro-frontend",
+                  "microfrontend",
+                  "microfrontends",
+                  "microfrontends-demo",
+                  "microservices",
+                  "modules",
+                  "nextgen",
+                  "piral",
+                  "portal",
+                  "react",
+                  "spa",
+                  "typescript",
+                  "web",
+                  "webapp",
+                  "webapplication"
+                ],
+                "fork": false
+              }
+            ]
+          }
+        }
+      ],
+      "baseline": {
+        "ids": [
+          533871213,
+          121770401,
+          342372268
+        ],
+        "names": [
+          "module-federation/vite",
+          "owncloud/web",
+          "nuxt/vite"
+        ],
+        "usage": {
+          "attempts": 5,
+          "searchAttempts": 2,
+          "candidates": 3,
+          "files": {},
+          "bytesByFile": {},
+          "totalBytes": 0,
+          "activeWorkers": 0,
+          "peakWorkers": 1
+        },
+        "network": {
+          "reservedBytes": 163840,
+          "receivedBytes": 49123,
+          "retainedBytes": 49123,
+          "overflowBytes": 0
+        },
+        "coverage": {
+          "state": "partial_budget",
+          "scope": "bounded public repository metadata search; never all GitHub",
+          "plannedQueries": 2,
+          "attemptedQueries": 2,
+          "requestedPages": 2,
+          "completedPages": 2,
+          "returnedItems": 6,
+          "uniqueObserved": 4,
+          "processedCandidates": 3,
+          "rejectedIdentity": 0,
+          "rejectedBudget": 1,
+          "excludedTarget": 2,
+          "accessibleWindow": 1000,
+          "uncompletedPlanned": []
+        }
+      },
+      "acquisition": {
+        "requests": 5,
+        "responseBytes": 49123,
+        "wallMs": 3704.2311089999985
+      },
+      "labels": [
+        {
+          "repositoryId": 533871213,
+          "name": "module-federation/vite",
+          "label": "useful",
+          "reason": "Vite build plugin; integration comparison is useful, not a substitute build engine"
+        },
+        {
+          "repositoryId": 342372268,
+          "name": "nuxt/vite",
+          "label": "useful",
+          "reason": "Vite build integration for Nuxt; useful integration comparison"
+        },
+        {
+          "repositoryId": 121770401,
+          "name": "owncloud/web",
+          "label": "irrelevant",
+          "reason": "Cloud storage frontend application, not frontend build tooling"
+        },
+        {
+          "repositoryId": 170884642,
+          "name": "smapiot/piral",
+          "label": "unknown",
+          "reason": "Microfrontend application framework; metadata does not establish comparable build implementation"
+        }
+      ]
+    },
+    {
+      "repository": "gin-gonic/gin",
+      "capturedAt": "2026-10-22T15:48:22.627Z",
+      "plan": {
+        "version": "repository-query-plan@1",
+        "target": {
+          "provider": "github",
+          "repositoryId": 20904437,
+          "completeness": "provider_id",
+          "fullName": "gin-gonic/gin",
+          "aliases": [],
+          "revision": "0f09c3a9b4626d9fe9979cf4d0521d6ae32ab646"
+        },
+        "queries": [
+          {
+            "q": "gin in:name language:go is:public fork:true",
+            "source": "repository_name",
+            "reason": "fixed target repository name"
+          },
+          {
+            "q": "high-performance http framework in:name,description language:go is:public fork:true",
+            "source": "description",
+            "reason": "first three distinct description terms"
+          }
+        ],
+        "perPage": 3,
+        "pages": 1
+      },
+      "targetMetadata": {
+        "description": "Gin is a high-performance HTTP web framework written in Go. It provides a Martini-like API but with significantly better performance\u2014up to 40 times faster\u2014thanks to httprouter. Gin is designed for building REST APIs, web applications, and microservices.",
+        "language": "Go",
+        "topics": [
+          "framework",
+          "go",
+          "middleware",
+          "performance",
+          "router",
+          "server"
+        ]
+      },
+      "responses": [
+        {
+          "url": "https://api.github.com/search/repositories?q=gin+in%3Aname+language%3Ago+is%3Apublic+fork%3Atrue&per_page=3&page=1",
+          "status": 200,
+          "bytes": 16835,
+          "wallMs": 750.6907870000014,
+          "body": {
+            "total_count": 48099,
+            "incomplete_results": false,
+            "items": [
+              {
+                "id": 20904437,
+                "full_name": "gin-gonic/gin",
+                "html_url": "https://github.com/gin-gonic/gin",
+                "description": "Gin is a high-performance HTTP web framework written in Go. It provides a Martini-like API but with significantly better performance\u2014up to 40 times faster\u2014thanks to httprouter. Gin is designed for building REST APIs, web applications, and microservices.",
+                "language": "Go",
+                "topics": [
+                  "framework",
+                  "gin",
+                  "go",
+                  "middleware",
+                  "performance",
+                  "router",
+                  "server"
+                ],
+                "fork": false
+              },
+              {
+                "id": 11663059,
+                "full_name": "codegangsta/gin",
+                "html_url": "https://github.com/codegangsta/gin",
+                "description": "Live reload utility for Go web servers",
+                "language": "Go",
+                "topics": [],
+                "fork": false
+              },
+              {
+                "id": 205679232,
+                "full_name": "flipped-aurora/gin-vue-admin",
+                "html_url": "https://github.com/flipped-aurora/gin-vue-admin",
+                "description": "\ud83d\ude80Vite+Vue3+Gin\u62e5\u6709AI\u8f85\u52a9\u7684\u57fa\u7840\u5f00\u53d1\u5e73\u53f0\uff0c\u4f01\u4e1a\u7ea7\u4e1a\u52a1AI+\u5f00\u53d1\u89e3\u51b3\u65b9\u6848\uff0c\u5185\u7f6emcp\u8f85\u52a9\u670d\u52a1\uff0c\u5185\u7f6eskills\u7ba1\u7406\uff0c\u652f\u6301TS\u548cJS\u6df7\u7528\u3002\u5b83\u96c6\u6210\u4e86JWT\u9274\u6743\u3001\u6743\u9650\u7ba1\u7406\u3001\u52a8\u6001\u8def\u7531\u3001\u663e\u9690\u53ef\u63a7\u7ec4\u4ef6\u3001\u5206\u9875\u5c01\u88c5\u3001\u591a\u70b9\u767b\u5f55\u62e6\u622a\u3001\u8d44\u6e90\u6743\u9650\u3001\u4e0a\u4f20\u4e0b\u8f7d\u3001\u4ee3\u7801\u751f\u6210\u5668\u3001\u8868\u5355\u751f\u6210\u5668\u548c\u53ef\u914d\u7f6e\u7684\u5bfc\u5165\u5bfc\u51fa\u7b49\u5f00\u53d1\u5fc5\u5907\u529f\u80fd\u3002",
+                "language": "Go",
+                "topics": [
+                  "admin",
+                  "ai",
+                  "casbin",
+                  "claw",
+                  "element-ui",
+                  "gin",
+                  "gin-admin",
+                  "gin-vue-admin",
+                  "go",
+                  "go-admin",
+                  "golang",
+                  "gorm",
+                  "i18n",
+                  "jwt",
+                  "mcp",
+                  "skills",
+                  "vibecoding",
+                  "vue",
+                  "vue-admin",
+                  "vue3"
+                ],
+                "fork": false
+              }
+            ]
+          }
+        },
+        {
+          "url": "https://api.github.com/search/repositories?q=high-performance+http+framework+in%3Aname%2Cdescription+language%3Ago+is%3Apublic+fork%3Atrue&per_page=3&page=1",
+          "status": 200,
+          "bytes": 15713,
+          "wallMs": 806.5217069999999,
+          "body": {
+            "total_count": 1480,
+            "incomplete_results": false,
+            "items": [
+              {
+                "id": 491539130,
+                "full_name": "cloudwego/hertz",
+                "html_url": "https://github.com/cloudwego/hertz",
+                "description": "Go HTTP framework with high-performance and strong-extensibility for building micro-services.",
+                "language": "Go",
+                "topics": [
+                  "go",
+                  "http",
+                  "microservices"
+                ],
+                "fork": false
+              },
+              {
+                "id": 20904437,
+                "full_name": "gin-gonic/gin",
+                "html_url": "https://github.com/gin-gonic/gin",
+                "description": "Gin is a high-performance HTTP web framework written in Go. It provides a Martini-like API but with significantly better performance\u2014up to 40 times faster\u2014thanks to httprouter. Gin is designed for building REST APIs, web applications, and microservices.",
+                "language": "Go",
+                "topics": [
+                  "framework",
+                  "gin",
+                  "go",
+                  "middleware",
+                  "performance",
+                  "router",
+                  "server"
+                ],
+                "fork": false
+              },
+              {
+                "id": 160064008,
+                "full_name": "xgfone/ship",
+                "html_url": "https://github.com/xgfone/ship",
+                "description": " A flexible, powerful, high performance and minimalist Go Web HTTP router framework.",
+                "language": "Go",
+                "topics": [
+                  "go",
+                  "go-mux",
+                  "go-route",
+                  "go-router",
+                  "golang",
+                  "http",
+                  "http-router",
+                  "http-routing",
+                  "mux",
+                  "route",
+                  "router",
+                  "routes"
+                ],
+                "fork": false
+              }
+            ]
+          }
+        }
+      ],
+      "baseline": {
+        "ids": [
+          491539130,
+          11663059,
+          205679232
+        ],
+        "names": [
+          "cloudwego/hertz",
+          "codegangsta/gin",
+          "flipped-aurora/gin-vue-admin"
+        ],
+        "usage": {
+          "attempts": 5,
+          "searchAttempts": 2,
+          "candidates": 3,
+          "files": {},
+          "bytesByFile": {},
+          "totalBytes": 0,
+          "activeWorkers": 0,
+          "peakWorkers": 1
+        },
+        "network": {
+          "reservedBytes": 163840,
+          "receivedBytes": 50798,
+          "retainedBytes": 50798,
+          "overflowBytes": 0
+        },
+        "coverage": {
+          "state": "partial_budget",
+          "scope": "bounded public repository metadata search; never all GitHub",
+          "plannedQueries": 2,
+          "attemptedQueries": 2,
+          "requestedPages": 2,
+          "completedPages": 2,
+          "returnedItems": 6,
+          "uniqueObserved": 4,
+          "processedCandidates": 3,
+          "rejectedIdentity": 0,
+          "rejectedBudget": 1,
+          "excludedTarget": 2,
+          "accessibleWindow": 1000,
+          "uncompletedPlanned": []
+        }
+      },
+      "acquisition": {
+        "requests": 5,
+        "responseBytes": 50798,
+        "wallMs": 3574.896689000003
+      },
+      "labels": [
+        {
+          "repositoryId": 11663059,
+          "name": "codegangsta/gin",
+          "label": "irrelevant",
+          "reason": "Live reload utility rather than HTTP routing framework"
+        },
+        {
+          "repositoryId": 205679232,
+          "name": "flipped-aurora/gin-vue-admin",
+          "label": "unknown",
+          "reason": "Gin-based admin application; frontend/backend metadata alone does not establish useful framework implementation comparison"
+        },
+        {
+          "repositoryId": 491539130,
+          "name": "cloudwego/hertz",
+          "label": "useful",
+          "reason": "Independent Go HTTP framework"
+        },
+        {
+          "repositoryId": 160064008,
+          "name": "xgfone/ship",
+          "label": "useful",
+          "reason": "Independent Go HTTP router/framework"
+        }
+      ]
+    },
+    {
+      "repository": "pallets/flask",
+      "capturedAt": "2026-10-22T15:48:26.208Z",
+      "plan": {
+        "version": "repository-query-plan@1",
+        "target": {
+          "provider": "github",
+          "repositoryId": 596892,
+          "completeness": "provider_id",
+          "fullName": "pallets/flask",
+          "aliases": [],
+          "revision": "d086db856be187255b8ec61ef409357393020f32"
+        },
+        "queries": [
+          {
+            "q": "flask in:name language:python is:public fork:true",
+            "source": "repository_name",
+            "reason": "fixed target repository name"
+          },
+          {
+            "q": "python micro framework in:name,description language:python is:public fork:true",
+            "source": "description",
+            "reason": "first three distinct description terms"
+          }
+        ],
+        "perPage": 3,
+        "pages": 1
+      },
+      "targetMetadata": {
+        "description": "The Python micro framework for building web applications.",
+        "language": "Python",
+        "topics": [
+          "jinja",
+          "pallets",
+          "python",
+          "web-framework",
+          "werkzeug",
+          "wsgi"
+        ]
+      },
+      "responses": [
+        {
+          "url": "https://api.github.com/search/repositories?q=flask+in%3Aname+language%3Apython+is%3Apublic+fork%3Atrue&per_page=3&page=1",
+          "status": 200,
+          "bytes": 15629,
+          "wallMs": 783.9200679999994,
+          "body": {
+            "total_count": 440102,
+            "incomplete_results": false,
+            "items": [
+              {
+                "id": 596892,
+                "full_name": "pallets/flask",
+                "html_url": "https://github.com/pallets/flask",
+                "description": "The Python micro framework for building web applications.",
+                "language": "Python",
+                "topics": [
+                  "flask",
+                  "jinja",
+                  "pallets",
+                  "python",
+                  "web-framework",
+                  "werkzeug",
+                  "wsgi"
+                ],
+                "fork": false
+              },
+              {
+                "id": 531311184,
+                "full_name": "railwayapp-templates/flask",
+                "html_url": "https://github.com/railwayapp-templates/flask",
+                "description": null,
+                "language": "Python",
+                "topics": [],
+                "fork": false
+              },
+              {
+                "id": 252345234,
+                "full_name": "roytuts/flask",
+                "html_url": "https://github.com/roytuts/flask",
+                "description": null,
+                "language": "Python",
+                "topics": [],
+                "fork": false
+              }
+            ]
+          }
+        },
+        {
+          "url": "https://api.github.com/search/repositories?q=python+micro+framework+in%3Aname%2Cdescription+language%3Apython+is%3Apublic+fork%3Atrue&per_page=3&page=1",
+          "status": 200,
+          "bytes": 15612,
+          "wallMs": 772.0280990000028,
+          "body": {
+            "total_count": 12350,
+            "incomplete_results": false,
+            "items": [
+              {
+                "id": 596892,
+                "full_name": "pallets/flask",
+                "html_url": "https://github.com/pallets/flask",
+                "description": "The Python micro framework for building web applications.",
+                "language": "Python",
+                "topics": [
+                  "flask",
+                  "jinja",
+                  "pallets",
+                  "python",
+                  "web-framework",
+                  "werkzeug",
+                  "wsgi"
+                ],
+                "fork": false
+              },
+              {
+                "id": 239940,
+                "full_name": "bottlepy/bottle",
+                "html_url": "https://github.com/bottlepy/bottle",
+                "description": "bottle.py is a fast and simple micro-framework for python web-applications.",
+                "language": "Python",
+                "topics": [
+                  "bottle",
+                  "python",
+                  "rest",
+                  "web-framework",
+                  "wsgi"
+                ],
+                "fork": false
+              },
+              {
+                "id": 110288200,
+                "full_name": "pallets/quart",
+                "html_url": "https://github.com/pallets/quart",
+                "description": "An async Python micro framework for building web applications. ",
+                "language": "Python",
+                "topics": [
+                  "asgi",
+                  "asyncio",
+                  "flask",
+                  "jinja",
+                  "python",
+                  "quart",
+                  "web-framework"
+                ],
+                "fork": false
+              }
+            ]
+          }
+        }
+      ],
+      "baseline": {
+        "ids": [
+          239940,
+          531311184,
+          252345234
+        ],
+        "names": [
+          "bottlepy/bottle",
+          "railwayapp-templates/flask",
+          "roytuts/flask"
+        ],
+        "usage": {
+          "attempts": 5,
+          "searchAttempts": 2,
+          "candidates": 3,
+          "files": {},
+          "bytesByFile": {},
+          "totalBytes": 0,
+          "activeWorkers": 0,
+          "peakWorkers": 1
+        },
+        "network": {
+          "reservedBytes": 163840,
+          "receivedBytes": 48461,
+          "retainedBytes": 48461,
+          "overflowBytes": 0
+        },
+        "coverage": {
+          "state": "partial_budget",
+          "scope": "bounded public repository metadata search; never all GitHub",
+          "plannedQueries": 2,
+          "attemptedQueries": 2,
+          "requestedPages": 2,
+          "completedPages": 2,
+          "returnedItems": 6,
+          "uniqueObserved": 4,
+          "processedCandidates": 3,
+          "rejectedIdentity": 0,
+          "rejectedBudget": 1,
+          "excludedTarget": 2,
+          "accessibleWindow": 1000,
+          "uncompletedPlanned": []
+        }
+      },
+      "acquisition": {
+        "requests": 5,
+        "responseBytes": 48461,
+        "wallMs": 3555.8708490000045
+      },
+      "labels": [
+        {
+          "repositoryId": 531311184,
+          "name": "railwayapp-templates/flask",
+          "label": "unknown",
+          "reason": "No description; deployment template name alone is insufficient"
+        },
+        {
+          "repositoryId": 252345234,
+          "name": "roytuts/flask",
+          "label": "unknown",
+          "reason": "No description; repository name alone is insufficient"
+        },
+        {
+          "repositoryId": 239940,
+          "name": "bottlepy/bottle",
+          "label": "useful",
+          "reason": "Independent Python micro web framework"
+        },
+        {
+          "repositoryId": 110288200,
+          "name": "pallets/quart",
+          "label": "useful",
+          "reason": "Async reimplementation of Flask API; separate source review needed for sharing"
+        }
+      ]
+    }
+  ],
+  "labelPolicy": "Purpose labels fixed after baseline capture, before admission implementation; no relevance level/order used. See docs/discovery-admission.md.",
+  "plannedTargets": [
+    "sindresorhus/p-limit",
+    "chalk/chalk",
+    "vitejs/vite",
+    "gin-gonic/gin",
+    "pallets/flask",
+    "yunmin311/GitLineage"
+  ],
+  "failedTargets": [
+    {
+      "repository": "yunmin311/GitLineage",
+      "capturedAt": "2026-10-22T15:48:29.771Z",
+      "state": "partial",
+      "reason": "commit: response_bytes_exhausted",
+      "usage": {
+        "attempts": 3,
+        "searchAttempts": 0,
+        "candidates": 0,
+        "files": {},
+        "bytesByFile": {},
+        "totalBytes": 0,
+        "activeWorkers": 0,
+        "peakWorkers": 1
+      },
+      "requests": [
+        {
+          "url": "https://api.github.com/repos/yunmin311/gitlineage",
+          "status": 200,
+          "bytes": 6508,
+          "wallMs": 711.9114050000026
+        },
+        {
+          "url": "https://api.github.com/repositories/1397145837",
+          "status": 200,
+          "bytes": 6508,
+          "wallMs": 741.9223270000002
+        },
+        {
+          "url": "https://api.github.com/repos/yunmin311/gitlineage/commits/main",
+          "status": 200,
+          "bytes": 141037,
+          "wallMs": 1239.4926479999995
+        }
+      ],
+      "scope": "bootstrap failed before search; excluded from admission fractions, included in acquisition failures"
+    }
+  ]
+}
