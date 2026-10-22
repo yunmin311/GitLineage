@@ -29,6 +29,10 @@ test('build.mjs produces a self-contained shell pointing at the bundle', async (
   const manifest = JSON.parse(await readFile(join(root, 'dist/web/build-manifest.json'), 'utf8'));
   assert.ok(Array.isArray(manifest.assets) && manifest.assets.length > 0);
   assert.equal(manifest.origin, 'runtime', 'no origin is baked into the build');
+  assert.match(shell, /href="\/site\.css"/, 'Accepted presentation is loaded by the production shell');
+  assert.ok(manifest.assets.some((asset: {file:string})=>asset.file==='site.css'));
+  assert.equal(await readFile(join(root,'dist/web/site.css'),'utf8'), await readFile(join(root,'src/web/client/site.css'),'utf8'));
+  assert.doesNotMatch(await readFile(join(root,'src/web/client/lib/site-presentation.mjs'),'utf8'), /Open offline workspace|design-workspace-v2|lab-picker|fetch\(/, 'Presentation has no fixture picker or request owner');
 
   const bundle = await readFile(join(root, 'dist/web/assets/app.js'), 'utf8');
   assert.ok(bundle.length < 200_000, 'the bundle is minified, not a copy of the source tree');

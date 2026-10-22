@@ -1,3 +1,4 @@
+import { mountSitePresentation } from './lib/site-presentation.mjs';
 import {dismissGitLog} from './lib/git-log.mjs';
 import {connectionFallback} from './lib/connection-fallback.mjs';
 import {classifyRelationships} from './lib/classification.mjs';
@@ -3079,6 +3080,7 @@ $('layers-btn').addEventListener('click', () => toggleLayers());
 
 installTracerTestStepper();
 boot();
+mountSitePresentation();
 
 void mountDeepPreview(() => state.repository).then(deep => { if(deep?.capabilities.scope==='anonymous') workspace=mountRepositoryExplorer(() => state.repository, deep, {
  root:()=>state.view?.nodes.find(n=>n.id===state.view.subject.id),nodes:()=>state.view?.nodes||[],revision:()=>state.view?.revision.commit,selected:()=>state.selectedNodeId||state.selectedEdgeId,camera:()=>({box:$('canvas').getAttribute('viewBox'),zoom:state.zoom}),

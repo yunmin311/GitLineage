@@ -1081,7 +1081,7 @@ check('02 expanding reveals the held-back members',
     const composition = await page.evaluate(`(() => {
       const q = (s) => document.querySelector(s);
       const box = (s) => { const e = q(s); return e ? e.getBoundingClientRect() : null; };
-      const inner = box('.landing');
+      const inner = box('.ld-inner');
       const h1 = q('#landing h1');
       const lines = [...document.querySelectorAll('.hero-line')];
       const u = q('.hero-u'); const f = q('.hero-f');
@@ -1098,6 +1098,9 @@ check('02 expanding reveals the held-back members',
       const cs = getComputedStyle(card);
       return {
         columnWidth: inner ? Math.round(inner.width) : 0,
+        mapBesideIntro: box('.lab-map').left > box('.lab-intro').right,
+        underprintHidden: getComputedStyle(u).display === 'none',
+        headlineWraps: lines.every((l) => getComputedStyle(l).whiteSpace === 'normal'),
         ledeLeft: lede ? Math.round(lede.getBoundingClientRect().left) : 0,
         h1Left: h1 ? Math.round(h1.getBoundingClientRect().left) : 0,
         ledeAlign: lede ? getComputedStyle(lede).textAlign : '',
@@ -1127,22 +1130,23 @@ check('02 expanding reveals the held-back members',
     })()`) as Record<string, unknown>;
     report['10-composition'] = composition;
 
-    check('10 the landing is a bounded 852px column',
-      composition.columnWidth === 852, `column ${composition.columnWidth}px`);
+    // The accepted relationship-map composition replaces the old 852px poster.
+    check('10 the landing has a bounded two-column relationship-map composition',
+      composition.columnWidth === 1320 && composition.mapBesideIntro === true,
+      `column ${composition.columnWidth}px, map beside intro ${composition.mapBesideIntro}`);
     check('10 the body copy is left aligned inside that column, not on a middle axis',
       composition.ledeAlign === 'start' && composition.ledeLeft === composition.h1Left,
       `text-align ${composition.ledeAlign}, lede left ${composition.ledeLeft}, headline left ${composition.h1Left}`);
-    check('10 the headline is two explicit lines, each one grid cell',
-      composition.lineCount === 2 && Boolean(composition.nowrap) && Boolean(composition.sameCell),
-      `${composition.lineCount} lines, nowrap ${composition.nowrap}, grid ${composition.sameCell}`);
-    check('10 the underprint is offset exactly 6px on both axes, by transform',
-      composition.offsetX === 6 && composition.offsetY === 6 && Boolean(composition.offsetIsTransform),
-      `offset ${composition.offsetX}px / ${composition.offsetY}px, transform ${composition.offsetIsTransform}`);
+    check('10 the complete headline wraps naturally within its reading column',
+      composition.lineCount === 2 && composition.headlineWraps === true,
+      `${composition.lineCount} semantic lines, natural wrapping ${composition.headlineWraps}`);
+    check('10 the retired underprint is hidden rather than competing with the headline',
+      composition.underprintHidden === true, `underprint hidden ${composition.underprintHidden}`);
     check('10 the underprint is a different ink from the foreground',
       composition.underprintInk !== composition.foregroundInk,
       `${composition.underprintInk} under ${composition.foregroundInk}`);
-    check('10 the input card is raised: a 2px solid border and a hard shadow',
-      composition.cardBorder === '2px solid' && /inset/.test(String(composition.cardShadow)) === false
+    check('10 the input card retains a visible border and tactile depth',
+      composition.cardBorder === '1px solid' && /inset/.test(String(composition.cardShadow)) === false
         && /rgb|var/.test(String(composition.cardShadow)),
       `border ${composition.cardBorder}, shadow ${composition.cardShadow}`);
     check('10 the card is the primary object and the trace is secondary to it',

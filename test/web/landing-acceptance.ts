@@ -55,7 +55,9 @@ for (const [label, width, height] of [['1920x1080', 1920, 1080], ['1280x800', 12
     const r = (s) => { const e = q(s); return e ? e.getBoundingClientRect() : null; };
     const doc = document.documentElement;
     return {
-      column: Math.round(r('.landing').width),
+      column: Math.round(r('.ld-inner').width),
+      mapBesideIntro: r('.lab-map').left > r('.lab-intro').right,
+      retiredUnderprintHidden: getComputedStyle(q('.hero-u')).display === 'none',
       hScroll: doc.scrollWidth - doc.clientWidth,
       docScrolls: doc.scrollHeight > window.innerHeight,
       columnOverflow: (() => { const el = q('#landing'); return el.scrollWidth - el.clientWidth; })(),
@@ -78,14 +80,12 @@ for (const [label, width, height] of [['1920x1080', 1920, 1080], ['1280x800', 12
   })()`) as Record<string, unknown>;
   writeFileSync(`${OUT}/${label}-state.json`, JSON.stringify(state, null, 1));
 
-  check(`[${label}] bounded 852px column`, state.column === 852, `${state.column}px`);
+  // Accepted two-column map replaces the retired 852px poster composition.
+  check(`[${label}] bounded relationship-map composition`, state.column === Math.min(1320, width - 112) && state.mapBesideIntro === true, `${state.column}px, map beside intro ${state.mapBesideIntro}`);
   check(`[${label}] no horizontal overflow`, Number(state.hScroll) <= 0 && Number(state.columnOverflow) <= 0,
     `document ${state.hScroll}px, column ${state.columnOverflow}px`);
   check(`[${label}] the document itself does not scroll`, state.docScrolls === false);
-  check(`[${label}] the underprint is offset exactly 6/6`,
-    (state.underprintOffset as { x: number; y: number }).x === 6
-      && (state.underprintOffset as { x: number; y: number }).y === 6,
-    JSON.stringify(state.underprintOffset));
+  check(`[${label}] retired duplicate underprint is hidden`, state.retiredUnderprintHidden === true);
   check(`[${label}] the headline is two explicit lines`, state.lines === 2, `${state.lines}`);
   check(`[${label}] the evidence legend, depth control and maintainer examples are present`,
     state.legends === 3 && state.depth === 3 && state.samples === 2 && state.maintainerOnly === true,

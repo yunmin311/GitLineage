@@ -82,7 +82,7 @@ for (const viewport of [{ width: 1280, height: 800 }, { width: 390, height: 844 
           src: t('#an-src'),
           labels: [...document.querySelectorAll('#an-plabels .an-plabel')]
             .map((n) => n.textContent.replace(/\\s+/g, ' ').trim()),
-          connectors: [...document.querySelectorAll('#an-plabels .an-plabel:not(:last-child)')].filter(n => getComputedStyle(n, '::after').content !== 'none' && parseFloat(getComputedStyle(n, '::after').width) > 0).length,
+          orderedStages: (() => { const nodes = [...document.querySelectorAll('#an-plabels .an-plabel')]; return nodes.length === 5 && nodes.every((n,i) => n.querySelector('.n')?.textContent.trim() === String(i+1) && n.getBoundingClientRect().width > 0 && (i === 0 || n.getBoundingClientRect().left >= nodes[i-1].getBoundingClientRect().right - 1)); })(),
           now: document.querySelectorAll('#an-plabels .an-plabel.is-now').length,
           done: document.querySelectorAll('#an-plabels .an-plabel.is-done').length,
           explorerVisible: !document.querySelector('#explorer').hasAttribute('hidden'),
@@ -113,8 +113,8 @@ for (const viewport of [{ width: 1280, height: 800 }, { width: 390, height: 844 
     results.push({
       ...s,
       viewport: label,
-      // Four connectors join five explicit stages; the old five SVG bars were redundant.
-      assertPath: s.connectors === 4,
+      // Accepted modular steps retain the ordered path without decorative connector bars.
+      assertPath: s.orderedStages === true,
       assertLabels: (s.labels as string[]).length === 5,
       assertOrdinal: isRunning
         ? s.key === `phase ${index + 1} of 5`
