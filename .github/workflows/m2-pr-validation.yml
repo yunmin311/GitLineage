@@ -47,6 +47,9 @@ jobs:
       - name: Discovery V4 fixed relevance and interpretation benchmark
         run: npm run benchmark:discovery-v4
 
+      - name: Captured real-search candidate admission benchmark
+        run: npm run benchmark:discovery-admission
+
       - name: Unit tests
         run: npm test
 
@@ -100,6 +103,9 @@ jobs:
 
       - name: Discovery V4 relevance, manual review and interpretation
         run: npm run test:discovery-v4-browser
+
+      - name: Candidate admission, receipts and bounded failure browser acceptance
+        run: npm run test:discovery-admission-browser
 
       - name: Anonymous repository exploration browser acceptance
         run: npm run test:exploration

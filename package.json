@@ -44,7 +44,9 @@
     "benchmark:discovery": "node experiments/discovery-v3/benchmark.ts",
     "test:discovery-v3-browser": "node test/web/discovery-v3-acceptance.ts",
     "benchmark:discovery-v4": "node experiments/discovery-v4/benchmark.ts",
-    "test:discovery-v4-browser": "node test/web/discovery-v4-acceptance.ts"
+    "test:discovery-v4-browser": "node test/web/discovery-v4-acceptance.ts",
+    "benchmark:discovery-admission": "node experiments/discovery-admission/benchmark.ts",
+    "test:discovery-admission-browser": "node test/web/discovery-admission-acceptance.ts"
   },
   "dependencies": {
     "smol-toml": "^1.4.2"

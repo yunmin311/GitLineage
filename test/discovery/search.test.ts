@@ -8,6 +8,20 @@ const item=(id=20,name='other/p-limit')=>({id,full_name:name,html_url:`https://g
 const response=(items:unknown[]=[],extra={})=>new Response(JSON.stringify({total_count:items.length,incomplete_results:false,items,...extra}));
 const plan=()=>buildQueryPlan(fixed,{description:'Concurrency limiting utilities',language:'JavaScript',topics:['concurrency']});
 const run=(transport:SearchOptions['transport'],options:Partial<SearchOptions>={})=>discoverRepositories(plan(),{transport,...options});
+test('admission ranks all returned observations before fair source shares and useful leftovers',async()=>{
+ const p=buildQueryPlan(fixed,{description:'Concurrent promise limit'});
+ const useful=(id:number)=>({...item(id,`other/repo${id}`),description:'Concurrent promise limit',language:'JavaScript'});
+ let calls=0;const r=await discoverRepositories(p,{targetMetadata:{description:'Concurrent promise limit',language:'JavaScript'},profile:{...SEARCH_PROFILE,candidates:3},transport:async()=>response(++calls===1?[item(1),item(2)]:[item(3),useful(4),useful(5)])});
+ assert.deepEqual(new Set(r.candidates.map(c=>c.candidate.repositoryId)),new Set([1,4,5]));
+ assert.equal(r.usage.candidates,3);assert.equal(r.usage.searchAttempts,2);assert.equal(r.coverage.rejectedBudget,2);
+ assert.equal(r.admission.observations.length,5);assert.equal(r.admission.observations.find(r=>r.repositoryId===2)!.admitted,false);
+ assert.equal(r.candidates.find(c=>c.candidate.repositoryId===4)!.discoveries[0]!.rank,2);
+});
+test('later pages can improve admission without discarding duplicate identities or query provenance',async()=>{
+ const p=buildQueryPlan(fixed,{}, {perPage:2,pages:2});let n=0;
+ const r=await discoverRepositories(p,{targetMetadata:{description:'Concurrent promise limit'},profile:{...SEARCH_PROFILE,candidates:1},transport:async()=>response(++n===1?[item(1),item(2)]:[{...item(2),description:'Concurrent promise limit'},item(3)],{total_count:4})});
+ assert.deepEqual(r.candidates.map(c=>c.candidate.repositoryId),[2]);assert.equal(r.candidates[0]!.discoveries.length,2);assert.equal(r.candidates[0]!.candidate.observations.length,2);assert.equal(r.usage.candidates,1);
+});
 test('deterministic bounded plans reject sensitive input and qualifier injection',()=>{
  assert.deepEqual(plan(),plan());assert.equal(plan().queries.length,3);
  assert.throws(()=>buildQueryPlan(fixed,{description:'ghp_abcdefghijklmnopqrstuvwxyz0123456789'}));
@@ -75,6 +89,7 @@ test('fixed host, explicit auth, manual redirects and headers',async()=>{
 test('cancellation after a completed query retains admitted candidate and its receipt',async()=>{
  const c=new AbortController();let calls=0;const r=await run(async()=>{if(++calls===2)c.abort();return response([item()]);},{signal:c.signal});
  assert.equal(calls,2);assert.equal(r.coverage.state,'cancelled');assert.equal(r.candidates.length,1);assert.equal(r.candidates[0]!.discoveries.length,1);assert.equal(r.usage.activeWorkers,0);
+ assert.equal(r.usage.candidates,1);assert.equal(r.admission.observations.length,1);
 });
 test('body timeout cancels stalled reader; no half JSON becomes a candidate',async()=>{
  let cancellations=0;const r=await discoverRepositories(buildQueryPlan(fixed,{}),{timeoutMs:5,transport:async()=>new Response(new ReadableStream({start(c){c.enqueue(Buffer.from('{"items":['));},cancel(){cancellations++;}}))});

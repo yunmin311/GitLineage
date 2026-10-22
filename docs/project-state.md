@@ -4,6 +4,30 @@ Decisions here are binding on the implementation unless this file is changed.
 Anything not listed as a decision is a proposal and must not be treated as
 settled.
 
+## Discovery candidate admission closeout — 2026-10-23
+
+V4 PR #9 was normally merged at `f0a4ef3d40edaa139f0fa33a5c7c9f75227fe52e`;
+[its merged-main ARM64/live/image run](https://github.com/yunmin311/GitLineage/actions/runs/39807603005)
+passed. [Bounded admission](discovery-admission.md) now considers already returned
+observations before filling fair query shares and relevance-ordered remaining slots.
+No new search, scoring rule, budget, dependency or production module was added.
+Excluded observations and original query/rank/identity receipts remain inspectable.
+
+On five successful frozen real-search captures (one additional target failed bootstrap),
+useful admissions improve from 7/14 to 10/14 and useful top-two from 6/10 to 9/10.
+No useful admission loss was observed on that set; weak metadata remains a limitation.
+Four real browser source comparisons completed with pinned/downloaded evidence, including
+an independently recorded GitHub fork. Vite only reached configuration files; Go had
+no supported source, Flask live searches were empty and GitLineage's large commit
+response still exceeded the existing cap. These are not successful core-source comparisons.
+
+Estimated overall capability is 85% (+3 from 82%; this round cap 88%, remaining 15%).
+Next-round theoretical cap is 90%, conditional on authorized limited release and real
+user validation. Prioritize that release decision over more Discovery versions.
+No deployment is performed or implied. Device-level gaps and historical Private Beta
+intermittency remain separate release qualifications. Final feature CI is reported
+against the development commit/PR; the merge-main CI above is not its substitute.
+
 ## Design engineering closure — 2026-10-22
 
 V3.3 and Relationship Map are closed as a design stage. PR [#7](https://github.com/yunmin311/GitLineage/pull/7)

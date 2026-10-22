@@ -36,7 +36,11 @@ export class BudgetLedger {
     this.fits(c.attempts+1,p.attempts,'attempts'); if(search) this.fits(c.searchAttempts+1,p.searchAttempts,'searchAttempts');
     c.attempts++; if(search)c.searchAttempts++;
   }
-  candidate(key:string):void { this.guard(); if(this.candidateKeys.has(key))return;
+  candidate(key:string):void { this.guard(); this.recordObservedCandidate(key); }
+  /** Final accounting of already obtained search observations, including partial
+   * results after cancellation/deadline. This schedules no work; every subsequent
+   * network/file/worker operation still calls guard(). No reservation is refunded. */
+  recordObservedCandidate(key:string):void { if(this.candidateKeys.has(key))return;
     this.fits(this.counts.candidates+1,this.profile.candidates,'candidates'); this.candidateKeys.add(key); this.counts.candidates++;
   }
   file(candidate:string,path:string):void { this.guard(); const key=JSON.stringify([candidate,path]);
