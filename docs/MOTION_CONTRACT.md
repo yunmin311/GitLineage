@@ -66,3 +66,24 @@ settled and interrupted camera geometry and the reduced-motion branch.
   spatial/entrance transitions and keeps loading, status, focus and evidence readable.
 - motion-continuity-acceptance.ts records painted expansion frames, interruption geometry,
   rapid reversal, focus, reduced motion and History camera restoration at four widths.
+
+## Relationship Map acceptance clarification (2026-10-22)
+
+Analysis phase entrances have one owner (`.an-obj`, 260ms). Enabling Reduced Motion
+during an entrance cancels that entrance and exposes the final readable state; phase
+updates under Reduced Motion also cancel a preceding animation. An unchanged poll must
+retain its current marker without restarting motion. Independent phase markers replace
+the obsolete connector decoration accepted before PR #6. Site Continuity exercises
+the live preference switch; site-language retains distinct-frame and painted-marker
+checks. The accepted small HTML surface shadows do not authorize animated blur,
+continuous reading-region motion or changes to graph/camera timing.
+
+The accepted PR #6 Landing is static, overriding its former reading entrance.
+Keyboard candidate feedback is immediate; local pointer feedback still transitions.
+Motion acceptance must transfer ownership through real pointer input before
+measuring that transition, and must retain graph interruption/reversal checks.
+
+Pointer commit selection may settle the whole History detail pane once in 220ms
+(`site-context`); individual text blocks must not animate. Keyboard commit selection
+and Reduced Motion remain immediate. This scopes the existing no-cascade rule to
+the accepted PR #6 context feedback instead of forbidding its single pane owner.

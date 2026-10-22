@@ -183,3 +183,52 @@ Phone focus preserves readable local neighborhoods, with an overview for orienta
 Panel, touch, stale-response, selection, focus and exact return contracts remain required.
 Acceptance checks actual pixels, world and screen bounds, semantic edges, unique IDs,
 multiple branches, recursive structure, history tracks and refresh restoration.
+
+## Accepted Relationship Map presentation (PR #6; 2026-10-22 clarification)
+
+The accepted site presentation loads `site.css` after `app.css`. Its blue identity,
+teal structure, plum observation and clay dependency **control surfaces** identify
+tasks; they do not replace VERIFIED / DECLARED / DETECTED evidence status tokens,
+canonical edge paint, direction or evidence meaning. Existing canonical token golden
+tests remain mandatory. The custom-property resolution guard covers both stylesheets;
+Site Continuity compares computed canonical status tokens and edge/status paint with
+the site layer enabled and disabled against a real production bundle.
+
+The accepted raised HTML controls and cards include small ambient blur shadows and
+inset highlights (`--site-raised`, `--site-pressed` and local surface shadows).
+This is a scoped exception to the original hard-offset-only depth vocabulary for
+site presentation. It does not authorize blurred graph geometry, new floating panels,
+camera/layout changes or removal of the hard-offset base tokens. Reading surfaces
+remain quiet; depth identifies actions, never evidence confidence.
+
+Analysis uses five separate numbered phase markers without inter-marker connectors.
+Labels must remain ordered, readable, non-overlapping, with exactly one current phase
+while running. The former connector assertion is obsolete; phase/poll/motion and
+painted current-marker checks remain required. History return and branch triggers
+have minimum 44px real hit targets at desktop and phone widths, as do homepage
+project links and analysis-depth actions. Below 768px, Analysis modules occupy
+the full content width in vertical reading order. PR #6 uses flex there; inactive
+computed grid declarations are not evidence of an occupied extra column.
+The accepted Landing is static: its site layer disables the former reading entrance.
+Discovery uses an accepted 14px scope heading. Keyboard selection feedback is
+immediate; pointer selection retains its local color transition. Tests must use
+real pointer input to transfer ownership when checking that transition. History
+pointer selection may settle one detail pane in 220ms; its text blocks have no
+separate entrances, and keyboard / Reduced Motion reading is immediate.
+Discovery's accepted compact square checkbox sits inside a minimum 44px label;
+the entire label must toggle the control, including its edge, and keyboard Space
+must operate the same input. The former exact 24px glyph assertion does not
+describe this presentation; the full target and text-allocation checks still apply.
+
+Release checks: both ARM64 PR jobs (stable UI and M2) must pass on the proposed head;
+`npm run test:site-continuity` runs all six surfaces plus History target/state checks
+at 1920, 1280, 430 and 390px. M2 additionally retains the complete unification,
+motion, History, routing, safety and TLS suites. Main/manual `arm64-validate` now
+rebuilds after unit tests and runs Site Continuity and unification before live/API/image
+validation. Workflow inclusion does not itself configure GitHub branch protection:
+required-check enforcement and a passing main/manual run for the release SHA must be
+confirmed separately before deployment. The read-only GitHub audit on 2026-10-22
+reported main as unprotected with no repository rulesets; this change does not enable
+administrative enforcement. CI evidence is retained for 14 days; archive
+the release evidence outside Actions before expiry. Chromium simulation does not
+certify WebKit, physical touch/pinch or sustained frame rate.

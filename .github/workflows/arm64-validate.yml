@@ -85,6 +85,31 @@ jobs:
       - name: Offline test suite
         run: npm test
 
+      # Unit tests can rewrite dist/web. Rebuild once before browser acceptance.
+      - name: Rebuild the final production browser bundle
+        run: npm run build
+
+      - name: Install Chromium for Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Relationship Map release regression
+        run: |
+          find dist/web -type f -print0 | sort -z | xargs -0 sha256sum > "$RUNNER_TEMP/gitlineage-web-build.sha256"
+          npm run test:site-continuity
+          npm run test:unification
+
+      - name: Confirm browser tests used the unchanged production bundle
+        if: always()
+        run: sha256sum --check "$RUNNER_TEMP/gitlineage-web-build.sha256"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: arm64-design-evidence-${{ github.sha }}
+          path: artifacts/
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Live analysis suite against real repositories
         env:
           # The pipeline reads a token through `gh auth token`; GITHUB_TOKEN

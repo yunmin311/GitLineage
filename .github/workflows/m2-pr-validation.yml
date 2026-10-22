@@ -83,6 +83,9 @@ jobs:
       - name: Mobile browser acceptance
         run: npm run test:mobile
 
+      - name: Relationship Map site continuity and History return
+        run: npm run test:site-continuity
+
       - name: Deep Search and candidate layer browser acceptance
         run: npm run test:deep-search
 
@@ -98,4 +101,13 @@ jobs:
       - name: Trusted loopback TLS and Caddy Private Beta staging
         run: npm run test:private-beta-tls
       - name: Confirm browser tests used the unchanged production bundle
+        if: always()
         run: sha256sum --check "$RUNNER_TEMP/gitlineage-web-build.sha256"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: m2-browser-evidence-${{ github.sha }}
+          path: artifacts/
+          if-no-files-found: error
+          retention-days: 14

@@ -379,6 +379,10 @@ function renderTracer(tracer, index) {
  * counted, timed or interpolated: no percentage, no collector sub-progress, no record
  * total.
  */
+const analysisMotionPreference = matchMedia('(prefers-reduced-motion: reduce)');
+analysisMotionPreference.addEventListener('change', () => {
+  if (analysisMotionPreference.matches) document.querySelector('.an-obj')?.getAnimations().forEach(animation => animation.cancel());
+});
 function renderAnalysis(status, jobId) {
   const root = $('analysis');
   if (!root) return;
@@ -393,8 +397,8 @@ function renderAnalysis(status, jobId) {
   if (phaseChanged) {
     root.dataset.phase = status;
     const object = root.querySelector('.an-obj');
-    if (object && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      object.getAnimations().forEach(animation => animation.cancel());
+    object?.getAnimations().forEach(animation => animation.cancel());
+    if (object && !analysisMotionPreference.matches) {
       object.animate([{ opacity: .45, transform: 'translateY(8px)' }, { opacity: 1, transform: 'translateY(0)' }], { duration: 260, easing: 'cubic-bezier(.2,.7,.2,1)' });
     }
   }

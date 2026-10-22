@@ -291,7 +291,12 @@ function mountRepositoryExplorer(getRepository, deep, bridge) {
     const repo = repositoryOf(id), camera = bridge.camera(), selected = bridge.selected(), token = generation;
     let host;
     const current = () => token === generation && host?.isConnected;
-    const close = () => { bridge.select(selected); bridge.restore(camera); };
+    const close = () => {
+      // History overlays the existing selection. Re-render only if navigation
+      // changed it, so open evidence disclosures and reading position survive.
+      if (bridge.selected() !== selected) bridge.select(selected, links.has(selected), true);
+      bridge.restore(camera);
+    };
     const show = task => {
       host = openGitLog(task, { close, more: async () => {
         const t = await request(`/${task.id}/history`, {});
