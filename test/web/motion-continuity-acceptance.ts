@@ -12,7 +12,9 @@ try {for(const width of [390,430,1280,1920]) {
  page.setDefaultTimeout(12000);const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto(app.url);await page.locator('.hero').waitFor();
  const entrance=await page.locator('.hero').evaluate(n=>{let count=0;for(let p:Element|null=n;p;p=p.parentElement)if(getComputedStyle(p).animationName.includes('reading-enter'))count++;return count;});
- assert.equal(entrance,1,'Landing has one entrance owner rather than nested opacity/translation');
+ // PR #6 deliberately makes Landing static (site.css cancels reading-enter).
+ assert.equal(entrance,0,'Accepted static Landing has no nested opacity/translation entrances');
+ assert.equal(await page.locator('.hero').evaluate(n=>getComputedStyle(n).opacity),'1','The static headline is fully painted');
  await page.waitForTimeout(300);await page.screenshot({path:`${out}/${width}-landing.png`});
  await page.goto(app.url+'/'+A);await page.locator('.bundle-card').first().waitFor();await page.waitForTimeout(300);
  // Exercise the actual motion module against the real rendered world. A controlled
@@ -58,7 +60,14 @@ try {for(const width of [390,430,1280,1920]) {
  assert.equal(await page.locator('#canvas').evaluate(n=>n.getAnimations({subtree:true}).length),0,'Reduced motion writes final graph without animation');
  await page.emulateMedia({reducedMotion:'no-preference'});const before=await page.locator('#canvas').getAttribute('viewBox');await page.locator('#workspace-history').click();await page.locator('.history-row').first().waitFor();await page.waitForTimeout(300);
  await page.locator('.history-row').nth(1).click();if(width<768)await page.locator('#history-list-return').click();await page.locator('.history-row').first().click();
- assert.equal(await page.locator('.history-detail').evaluate(n=>n.getAnimations({subtree:true}).length),0,'Commit reading does not replay entrances for every text block');
+ // Accepted pointer context feedback has one 220ms owner on the whole pane,
+ // never a cascade of animations on individual commit text blocks.
+ await page.waitForFunction(()=>document.querySelector('.history-detail')!.getAnimations().some(a=>a.id==='site-context'));
+ const readingMotion=await page.locator('.history-detail').evaluate(n=>n.getAnimations({subtree:true}).map(a=>{a.pause();return{id:a.id,owner:(a.effect as KeyframeEffect).target===n,duration:a.effect!.getTiming().duration};}));
+ assert.deepEqual(readingMotion,[{id:'site-context',owner:true,duration:220}],'Pointer reading feedback has one pane owner and no nested text entrances');
+ if(width<768){await page.locator('#history-list-return').focus();await page.keyboard.press('Enter');}
+ await page.locator('.history-row').nth(1).focus();await page.keyboard.press('Enter');
+ assert.equal(await page.locator('.history-detail').evaluate(n=>n.getAnimations({subtree:true}).length),0,'Keyboard commit reading is immediate without nested entrances');
  await page.screenshot({path:`${out}/${width}-history.png`});await page.locator('#history-return').click();assert.equal(await page.locator('#canvas').getAttribute('viewBox'),before);
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);assert.deepEqual(errors,[]);
  const longTasks=await page.evaluate(()=>(window as unknown as {__motionLongTasks:number[]}).__motionLongTasks);results.push({width,probe,frames,longTasks});await page.close();

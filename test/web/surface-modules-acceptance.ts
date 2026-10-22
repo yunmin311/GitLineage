@@ -19,8 +19,19 @@ try {
   await page.locator('#landing').evaluate(n => { n.scrollTop = n.scrollHeight; });
   await page.evaluate(async () => { await Promise.all(document.getAnimations().filter(a => a.effect?.getComputedTiming().endTime !== Infinity).map(a => a.finished.catch(() => {}))); });
   assert.equal(await page.locator('.samples a').count(), 2);
+  await page.locator('.samples').scrollIntoViewIfNeeded();
   for (const link of await page.locator('.samples a').all()) {
    const box = await link.boundingBox(); assert.ok(box && box.width >= 44 && box.height >= 44, 'Project links have real touch targets');
+   const hits = await link.evaluate(n => {
+    const b = n.getBoundingClientRect();
+    return [.1,.5,.9].flatMap(x => [.1,.5,.9].map(y => {
+     const target = document.elementFromPoint(b.x + b.width*x, b.y + b.height*y);
+     return target === n || n.contains(target);
+    }));
+   });
+   assert.ok(hits.every(Boolean), 'Project link touch area remains unobstructed');
+   await link.focus();
+   assert.equal(await link.evaluate(n => n === document.activeElement), true, 'Project links remain keyboard reachable');
    assert.match(await link.getAttribute('href') ?? '', /^\/yunmin311\//, 'Public examples belong to the maintainer');
   }
   const landing = await page.locator('#landing').evaluate(n => ({ box:n.getBoundingClientRect().toJSON(),
@@ -63,8 +74,15 @@ try {
    modules: [...n.querySelectorAll('.an-work,.an-grp,.an-tail > p')].map(e => e.getBoundingClientRect().toJSON()) }));
   for (const box of geometry.modules) assert.ok(box.left >= 0 && box.right <= width + 1, 'Modules stay inside the screen');
   if (width < 768) {
-   const columns = await page.locator('.an-stage').evaluate(n => getComputedStyle(n).gridTemplateColumns.split(' ').length);
-   assert.equal(columns, 1, 'The stacked analysis layout does not retain an empty sidebar column');
+   // PR #6 stacks this surface with flex. grid-template-columns remains a
+   // computed but inactive declaration; measure the actual occupied layout.
+   const stack = await page.locator('.an-stage').evaluate(n => {
+    const css = getComputedStyle(n);
+    return { available: n.clientWidth - parseFloat(css.paddingLeft) - parseFloat(css.paddingRight),
+     children: [...n.children].map(e => e.getBoundingClientRect().toJSON()) };
+   });
+   for (const box of stack.children) assert.ok(Math.abs(box.width-stack.available)<1, 'Stacked modules occupy the content width without an empty sidebar');
+   for (let i=1;i<stack.children.length;i++) assert.ok(stack.children[i]!.top>=stack.children[i-1]!.bottom, 'Stacked modules preserve reading order without overlap');
   }
   assert.ok(geometry.scroll <= geometry.client + 1, 'Analysis does not clip horizontal content');
   assert.deepEqual(errors, []); readings.push(geometry);

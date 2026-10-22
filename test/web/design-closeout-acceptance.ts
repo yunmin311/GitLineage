@@ -50,9 +50,12 @@ try {for(const width of [1920,1280,430,390]) {
    assert.equal(await page.locator('#canvas').getAttribute('viewBox'),camera,'Choosing comparison scope preserves the graph camera');
    assert.equal(await page.locator('.deep-candidate.is-selected').count(),1,'Selection has a visible local surface');
    await page.emulateMedia({reducedMotion:'no-preference'});
+   // The accepted site makes keyboard feedback immediate. Use a real pointer
+   // click to transfer input ownership before testing the pointer transition.
+   assert.equal(await choice.evaluate(n=>getComputedStyle(n.closest('.deep-candidate')!).transitionProperty),'none','Keyboard feedback remains immediate');
+   await choice.click();
    const feedback=await choice.evaluate(input=>{
     const card=input.closest('.deep-candidate')!;getComputedStyle(card).backgroundColor;
-    (input as HTMLInputElement).click();getComputedStyle(card).backgroundColor;
     const transitions=card.getAnimations();transitions.forEach(a=>{a.pause();a.currentTime=0;});
     const first=getComputedStyle(card).backgroundColor;
     transitions.forEach(a=>a.currentTime=Number(a.effect!.getTiming().duration)/2);
@@ -67,7 +70,7 @@ try {for(const width of [1920,1280,430,390]) {
   const scope=page.locator('#deep-scope');await scope.scrollIntoViewIfNeeded();
   await page.screenshot({path:`${out}/${width}-scope.png`});
   if(!baseline){
-   assert.equal(await scope.locator('h4').evaluate(n=>parseFloat(getComputedStyle(n).fontSize)),13.5,'Scope heading uses the shared type role');
+   assert.equal(await scope.locator('h4').evaluate(n=>parseFloat(getComputedStyle(n).fontSize)),14,'Scope heading uses the accepted Relationship Map 14px role');
    assert.doesNotMatch(await scope.innerText(),/HTTP remaining|selected blob reads/,'Machine receipt does not obscure the next action');
    const detail=page.locator('#deep-scope-details');assert.equal(await detail.getAttribute('open'),null);
    await detail.locator('summary').click();assert.match(await detail.innerText(),/HTTP remaining/,'Exact budget remains readable');

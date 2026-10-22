@@ -37,9 +37,11 @@ try {
   });
   assert.equal(steps.labels.length,5);
   for(const step of steps.labels){assert.notEqual(step.ordinal,'none');assert.notEqual(step.nameDisplay,'none');assert.ok(step.name);assert.equal(step.marker.width,step.marker.height,'Stage markers remain circular');assert.ok(step.marker.top>=step.box.top&&step.marker.bottom<=step.box.bottom,'Marker belongs to its stage');assert.ok(step.box.left>=0&&step.box.right<=width);}
-  // The former bottom SVG rules duplicated the phase markers. The path now joins
-  // adjacent ordinal centres; verify its painted marker and connector placement.
-  for(const step of steps.labels.slice(0,-1)){assert.ok(parseFloat(step.connector.width)>0);assert.equal(parseFloat(step.connector.top),step.marker.height/2);}
+  // PR #6 intentionally removed inter-marker connectors (site.css ::after is
+  // display:none). Keep the behavioral contract: five ordered, readable phases
+  // with exactly one current phase; do not resurrect the superseded decoration.
+  for(let i=1;i<steps.labels.length;i++)assert.ok(steps.labels[i]!.box.left>=steps.labels[i-1]!.box.right,'Phase labels do not overlap or reverse order');
+  assert.equal(await page.locator('.an-plabel.is-now').count(),1,'Exactly one reported phase is current');
   assert.equal(await page.evaluate(()=>{const before=document.querySelector('.an-plabel.is-now');window.__setPhaseForTest?.('collecting');return before===document.querySelector('.an-plabel.is-now');}),true,'An unchanged poll retains labels and does not restart their animation');
   const motion=await page.evaluate(()=>{window.__setPhaseForTest?.('validating');const node=document.querySelector('.an-obj')!;const a=node.getAnimations()[0]!;a.pause();a.currentTime=0;const start=getComputedStyle(node).opacity;a.currentTime=260;return{start,end:getComputedStyle(node).opacity};});
   assert.notEqual(motion.start,motion.end,'A phase change paints distinct frames');
@@ -94,7 +96,13 @@ try {
   await page.locator('#deep-candidates').evaluate(async n=>{await Promise.all(n.getAnimations({subtree:true}).map(a=>a.finished.catch(()=>{})));});
   await page.locator('#deep-candidates input').first().scrollIntoViewIfNeeded();
   const choices=await page.locator('.deep-candidate label').evaluateAll(nodes=>nodes.map(n=>{const input=n.querySelector('input')!.getBoundingClientRect();const text=n.querySelector('span')!.getBoundingClientRect();return {input:input.toJSON(),text:text.toJSON(),label:n.getBoundingClientRect().toJSON()};}));
-  for(const choice of choices){assert.equal(choice.input.width,24,'Candidate checkbox keeps its own width instead of inheriting the search field width');assert.equal(choice.input.height,24);assert.ok(choice.text.width>=choice.label.width-40,'Repository name receives the available row width');assert.ok(choice.label.height>=44,'The complete label remains a touch target');}
+  // The accepted Relationship Map uses compact square glyphs inside full-row
+  // labels. Test their shape, text allocation and actual 44px label interaction.
+  for(const choice of choices){assert.equal(choice.input.width,choice.input.height,'Candidate checkbox remains square');assert.ok(choice.input.width<choice.label.width/2,'Checkbox does not inherit the search field width');assert.ok(choice.text.width>=choice.label.width-40,'Repository name receives the available row width');assert.ok(choice.label.height>=44,'The complete label remains a touch target');}
+  const label=page.locator('.deep-candidate label').first(),input=label.locator('input');
+  const checked=await input.isChecked();await label.click({position:{x:(await label.boundingBox())!.width-4,y:4}});
+  assert.equal(await input.isChecked(),!checked,'The label edge toggles its checkbox');
+  await input.focus();await page.keyboard.press('Space');assert.equal(await input.isChecked(),checked,'Keyboard toggles the same candidate');
   await settleUI(page);await page.screenshot({path:`${out}/${width}-discovery-results.png`});
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);assert.deepEqual(errors,[]);
   measurements.push({width,steps,ready,state,errors});await page.close();
