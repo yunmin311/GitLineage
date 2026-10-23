@@ -1,0 +1,434 @@
+[
+  {
+    "scenario": "A",
+    "steps": [
+      {
+        "path": "/api/explore",
+        "status": 202,
+        "state": "partial",
+        "error": null,
+        "requests": 12,
+        "total": 12,
+        "commits": 6,
+        "directories": 1
+      },
+      {
+        "path": "/api/explore/acfa1ff2405bb8f4424688a3/directory",
+        "status": 200,
+        "state": "partial",
+        "error": null,
+        "requests": 2,
+        "total": 14,
+        "commits": 6,
+        "directories": 2
+      },
+      {
+        "path": "/api/explore/acfa1ff2405bb8f4424688a3/history",
+        "status": 200,
+        "state": "partial",
+        "error": "Final repository identity changed or unavailable; snapshot withheld",
+        "requests": 6,
+        "total": 20,
+        "commits": 0,
+        "directories": 0
+      },
+      {
+        "path": "/api/explore/acfa1ff2405bb8f4424688a3/directory",
+        "status": 429,
+        "error": "Anonymous quota exhausted; resets 2026-10-23T07:59:16.629Z",
+        "requests": 0,
+        "total": 20,
+        "code": "ANONYMOUS_ADDRESS_QUOTA"
+      }
+    ],
+    "requests": [
+      {
+        "url": "https://api.github.com/repos/root/example",
+        "status": 200,
+        "bytes": 117
+      },
+      {
+        "url": "https://api.github.com/repositories/1",
+        "status": 200,
+        "bytes": 117
+      },
+      {
+        "url": "https://api.github.com/repos/root/example/commits/main",
+        "status": 200,
+        "bytes": 213
+      },
+      {
+        "url": "https://api.github.com/repos/root/example/git/trees/43734c9f90497be98104bb78a2f9b98cc4f3bcbd",
+        "status": 200,
+        "bytes": 171
+      },
+      {
+        "url": "https://api.github.com/repos/root/example/branches?per_page=3&page=1",
+        "status": 200,
+        "bytes": 2
+      },
+      {
+        "url": "https://api.github.com/repos/root/example/commits/1df100c2ab0c038da39e664637ffdff2776e3f13",
+        "status": 200,
+        "bytes": 213
+      },
+      {
+        "url": "https://api.github.com/repos/root/example/commits/0000000000000000000000000000000000000078",
+        "status": 200,
+        "bytes": 213
+      },
+      {
+        "url": "https://api.github.com/repos/root/example/commits/0000000000000000000000000000000000000079",
+        "status": 200,
+        "bytes": 213
+      },
+      {
+        "url": "https://api.github.com/repos/root/example/commits/000000000000000000000000000000000000007a",
+        "status": 200,
+        "bytes": 213
+      },
+      {
+        "url": "https://api.github.com/repos/root/example/commits/000000000000000000000000000000000000007b",
+        "status": 200,
+        "bytes": 213
+      },
+      {
+        "url": "https://api.github.com/repos/root/example/commits/000000000000000000000000000000000000007c",
+        "status": 200,
+        "bytes": 213
+      },
+      {
+        "url": "https://api.github.com/repos/root/example",
+        "status": 200,
+        "bytes": 117
+      },
+      {
+        "url": "https://api.github.com/repos/root/example/git/trees/6dc990e9445efa512deda3ec235eab2fdcc8917f",
+        "status": 200,
+        "bytes": 185
+      },
+      {
+        "url": "https://api.github.com/repos/root/example",
+        "status": 200,
+        "bytes": 117
+      },
+      {
+        "url": "https://api.github.com/repos/root/example/commits/000000000000000000000000000000000000007d",
+        "status": 200,
+        "bytes": 213
+      },
+      {
+        "url": "https://api.github.com/repos/root/example/commits/000000000000000000000000000000000000007e",
+        "status": 200,
+        "bytes": 213
+      },
+      {
+        "url": "https://api.github.com/repos/root/example/commits/000000000000000000000000000000000000007f",
+        "status": 200,
+        "bytes": 213
+      },
+      {
+        "url": "https://api.github.com/repos/root/example/commits/0000000000000000000000000000000000000080",
+        "status": 200,
+        "bytes": 213
+      },
+      {
+        "url": "https://api.github.com/repos/root/example/commits/0000000000000000000000000000000000000081",
+        "status": 200,
+        "bytes": 213
+      },
+      {
+        "url": "https://api.github.com/repos/root/example/commits/0000000000000000000000000000000000000082",
+        "status": 200,
+        "bytes": 213
+      }
+    ],
+    "bytes": 3595,
+    "limits": {
+      "address": 20,
+      "global": 60
+    },
+    "scope": "Fixed offline Git objects and metadata, exact same transport and 20/60 budget; graph cache excluded (no upstream cost)"
+  },
+  {
+    "scenario": "B",
+    "steps": [
+      {
+        "path": "/api/deep-search/search",
+        "status": 202,
+        "state": "completed",
+        "error": null,
+        "requests": 4,
+        "total": 4
+      },
+      {
+        "path": "/api/deep-search/sources",
+        "status": 202,
+        "state": "completed",
+        "error": null,
+        "requests": 8,
+        "total": 12
+      },
+      {
+        "path": "/api/deep-search/compare",
+        "status": 202,
+        "state": "completed",
+        "error": null,
+        "requests": 4,
+        "total": 16,
+        "comparisons": {
+          "state": "completed",
+          "completed": 1,
+          "inconclusive": 0
+        }
+      }
+    ],
+    "requests": [
+      {
+        "url": "https://api.github.com/repos/root/example",
+        "status": 200,
+        "bytes": 117
+      },
+      {
+        "url": "https://api.github.com/repositories/1",
+        "status": 200,
+        "bytes": 117
+      },
+      {
+        "url": "https://api.github.com/repos/root/example/commits/main",
+        "status": 200,
+        "bytes": 213
+      },
+      {
+        "url": "https://api.github.com/search/repositories?q=example+in%3Aname+is%3Apublic+fork%3Atrue&per_page=3&page=1",
+        "status": 200,
+        "bytes": 303
+      },
+      {
+        "url": "https://api.github.com/repositories/4",
+        "status": 200,
+        "bytes": 123
+      },
+      {
+        "url": "https://api.github.com/repos/unknown/example/commits/main",
+        "status": 200,
+        "bytes": 213
+      },
+      {
+        "url": "https://api.github.com/repos/root/example/git/trees/43734c9f90497be98104bb78a2f9b98cc4f3bcbd",
+        "status": 200,
+        "bytes": 171
+      },
+      {
+        "url": "https://api.github.com/repos/root/example/git/trees/6dc990e9445efa512deda3ec235eab2fdcc8917f",
+        "status": 200,
+        "bytes": 185
+      },
+      {
+        "url": "https://api.github.com/repos/root/example",
+        "status": 200,
+        "bytes": 117
+      },
+      {
+        "url": "https://api.github.com/repos/unknown/example/git/trees/43734c9f90497be98104bb78a2f9b98cc4f3bcbd",
+        "status": 200,
+        "bytes": 171
+      },
+      {
+        "url": "https://api.github.com/repos/unknown/example/git/trees/6dc990e9445efa512deda3ec235eab2fdcc8917f",
+        "status": 200,
+        "bytes": 185
+      },
+      {
+        "url": "https://api.github.com/repos/unknown/example",
+        "status": 200,
+        "bytes": 123
+      },
+      {
+        "url": "https://api.github.com/repos/root/example/git/blobs/be777766a971d0a2198abb5406030a94cbd1250a",
+        "status": 200,
+        "bytes": 181
+      },
+      {
+        "url": "https://api.github.com/repos/root/example",
+        "status": 200,
+        "bytes": 117
+      },
+      {
+        "url": "https://api.github.com/repos/unknown/example/git/blobs/be777766a971d0a2198abb5406030a94cbd1250a",
+        "status": 200,
+        "bytes": 181
+      },
+      {
+        "url": "https://api.github.com/repos/unknown/example",
+        "status": 200,
+        "bytes": 123
+      }
+    ],
+    "bytes": 2640,
+    "limits": {
+      "address": 20,
+      "global": 60
+    },
+    "scope": "Fixed offline Git objects and metadata, exact same transport and 20/60 budget; graph cache excluded (no upstream cost)"
+  },
+  {
+    "scenario": "C",
+    "steps": [
+      {
+        "path": "/api/explore",
+        "status": 202,
+        "state": "partial",
+        "error": null,
+        "requests": 12,
+        "total": 12,
+        "commits": 6,
+        "directories": 1
+      },
+      {
+        "path": "/api/explore/52581aa66b920b3af095fe05/directory",
+        "status": 200,
+        "state": "partial",
+        "error": null,
+        "requests": 2,
+        "total": 14,
+        "commits": 6,
+        "directories": 2
+      },
+      {
+        "path": "/api/explore",
+        "status": 202,
+        "state": "partial",
+        "error": "Final repository identity changed or unavailable; snapshot withheld",
+        "requests": 6,
+        "total": 20,
+        "commits": 0,
+        "directories": 0
+      },
+      {
+        "path": "/api/explore/12be26ad5c4a5a278ba3baeb/directory",
+        "status": 429,
+        "error": "Anonymous quota exhausted; resets 2026-10-23T07:59:17.064Z",
+        "requests": 0,
+        "total": 20,
+        "code": "ANONYMOUS_ADDRESS_QUOTA"
+      },
+      {
+        "path": "/api/explore",
+        "status": 429,
+        "error": "Anonymous quota exhausted; resets 2026-10-23T07:59:17.064Z",
+        "requests": 0,
+        "total": 20,
+        "code": "ANONYMOUS_ADDRESS_QUOTA"
+      }
+    ],
+    "requests": [
+      {
+        "url": "https://api.github.com/repos/root/example",
+        "status": 200,
+        "bytes": 117
+      },
+      {
+        "url": "https://api.github.com/repositories/1",
+        "status": 200,
+        "bytes": 117
+      },
+      {
+        "url": "https://api.github.com/repos/root/example/commits/main",
+        "status": 200,
+        "bytes": 213
+      },
+      {
+        "url": "https://api.github.com/repos/root/example/git/trees/43734c9f90497be98104bb78a2f9b98cc4f3bcbd",
+        "status": 200,
+        "bytes": 171
+      },
+      {
+        "url": "https://api.github.com/repos/root/example/branches?per_page=3&page=1",
+        "status": 200,
+        "bytes": 2
+      },
+      {
+        "url": "https://api.github.com/repos/root/example/commits/1df100c2ab0c038da39e664637ffdff2776e3f13",
+        "status": 200,
+        "bytes": 213
+      },
+      {
+        "url": "https://api.github.com/repos/root/example/commits/0000000000000000000000000000000000000078",
+        "status": 200,
+        "bytes": 213
+      },
+      {
+        "url": "https://api.github.com/repos/root/example/commits/0000000000000000000000000000000000000079",
+        "status": 200,
+        "bytes": 213
+      },
+      {
+        "url": "https://api.github.com/repos/root/example/commits/000000000000000000000000000000000000007a",
+        "status": 200,
+        "bytes": 213
+      },
+      {
+        "url": "https://api.github.com/repos/root/example/commits/000000000000000000000000000000000000007b",
+        "status": 200,
+        "bytes": 213
+      },
+      {
+        "url": "https://api.github.com/repos/root/example/commits/000000000000000000000000000000000000007c",
+        "status": 200,
+        "bytes": 213
+      },
+      {
+        "url": "https://api.github.com/repos/root/example",
+        "status": 200,
+        "bytes": 117
+      },
+      {
+        "url": "https://api.github.com/repos/root/example/git/trees/6dc990e9445efa512deda3ec235eab2fdcc8917f",
+        "status": 200,
+        "bytes": 185
+      },
+      {
+        "url": "https://api.github.com/repos/root/example",
+        "status": 200,
+        "bytes": 117
+      },
+      {
+        "url": "https://api.github.com/repos/other/example",
+        "status": 200,
+        "bytes": 119
+      },
+      {
+        "url": "https://api.github.com/repositories/3",
+        "status": 200,
+        "bytes": 119
+      },
+      {
+        "url": "https://api.github.com/repos/other/example/commits/main",
+        "status": 200,
+        "bytes": 213
+      },
+      {
+        "url": "https://api.github.com/repos/other/example/git/trees/43734c9f90497be98104bb78a2f9b98cc4f3bcbd",
+        "status": 200,
+        "bytes": 171
+      },
+      {
+        "url": "https://api.github.com/repos/other/example/branches?per_page=3&page=1",
+        "status": 200,
+        "bytes": 2
+      },
+      {
+        "url": "https://api.github.com/repos/other/example/commits/ec12196f0882476cd6d9f8fe6f1ab5ea9b0c8204",
+        "status": 200,
+        "bytes": 213
+      }
+    ],
+    "bytes": 3154,
+    "limits": {
+      "address": 20,
+      "global": 60
+    },
+    "scope": "Fixed offline Git objects and metadata, exact same transport and 20/60 budget; graph cache excluded (no upstream cost)"
+  }
+]

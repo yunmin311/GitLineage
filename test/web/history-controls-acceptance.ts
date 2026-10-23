@@ -16,6 +16,9 @@ await mkdir('artifacts/history-controls',{recursive:true});
 try {for(const width of [390,430,1280,1920]){
  const page=await browser.newPage({viewport:{width,height:900},isMobile:width<768,hasTouch:width<768,reducedMotion:'reduce'});
  await page.goto(app.url+'/'+A);await page.locator('#workspace-history').click();await page.locator('.history-row').first().waitFor();
+ // Parent and branch objects are now read on demand; keep the original control assertions.
+ assert.equal(await page.locator('.history-row').count(),1);await page.locator('#history-more').click();await page.waitForFunction(()=>document.querySelectorAll('.history-row').length>1);
+ await page.locator('.history-branch-picker summary').click();await page.getByRole('button',{name:'Read next branch tips',exact:true}).click();await page.locator('.history-branch-picker').getByRole('button',{name:'feature/modules',exact:true}).waitFor();await page.locator('.history-heading').click();
  await page.screenshot({path:`artifacts/history-controls/${width}-${before?'before':'after'}.png`});
  if(!before){
   const composition=await page.locator('#git-history').evaluate(n=>({header:n.querySelector('header')!.getBoundingClientRect().height,firstRow:n.querySelector('.history-row')!.getBoundingClientRect().top}));

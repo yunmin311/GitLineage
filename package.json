@@ -26,7 +26,7 @@
     "test:analysis": "node test/web/analysis-acceptance.ts && node test/web/analysis-indicator-acceptance.ts",
     "test:preflight": "node test/web/preflight-acceptance.ts",
     "test:responsive": "node test/web/responsive-acceptance.ts",
-    "test:mobile": "node test/web/mobile-acceptance.ts",
+    "test:mobile": "node test/web/mobile-acceptance.ts && node test/web/initial-neighborhood-acceptance.ts",
     "test:stale": "node test/web/stale-acceptance.ts && node test/web/navigation-loading-acceptance.ts && node test/web/history-state-closeout.ts",
     "preview:deep": "node experiments/discovery-v2/serve-preview.ts",
     "test:deep-search": "node test/web/deep-search-acceptance.ts",

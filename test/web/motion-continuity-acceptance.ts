@@ -59,6 +59,8 @@ try {for(const width of [390,430,1280,1920]) {
  await page.emulateMedia({reducedMotion:'reduce'});await group.focus();await page.keyboard.press('Enter');await page.keyboard.press('Enter');
  assert.equal(await page.locator('#canvas').evaluate(n=>n.getAnimations({subtree:true}).length),0,'Reduced motion writes final graph without animation');
  await page.emulateMedia({reducedMotion:'no-preference'});const before=await page.locator('#canvas').getAttribute('viewBox');await page.locator('#workspace-history').click();await page.locator('.history-row').first().waitFor();await page.waitForTimeout(300);
+ // Older commits are now explicit reads; keep the original two-commit motion checks.
+ await page.locator('#history-more').click();await page.waitForFunction(()=>document.querySelectorAll('.history-row').length>1);
  await page.locator('.history-row').nth(1).click();if(width<768)await page.locator('#history-list-return').click();await page.locator('.history-row').first().click();
  // Accepted pointer context feedback has one 220ms owner on the whole pane,
  // never a cascade of animations on individual commit text blocks.

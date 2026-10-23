@@ -26,10 +26,13 @@ export function validateResolution(value:unknown):asserts value is Resolution {
  }else if(r.identity!==null||r.tree!==null||!r.reasons.length)throw new TypeError('invalid unresolved state');
 }
 export class RepositorySnapshotResolver {
+ /** Validated commit response from the latest resolution; never serialized as new evidence. */
+ resolvedCommit:unknown=null;
  readonly provider:SnapshotProvider;private historical:boolean;private now:()=>string;readonly network:NetworkLedger;
  constructor(network:NetworkLedger,options:ProviderOptions&{now?:()=>string;historicalRoutes?:boolean}={}){this.historical=options.historicalRoutes===true;this.network=network;this.now=options.now??(()=>new Date().toISOString());this.provider=new SnapshotProvider(options,this.now);}
  objectEndpoint(resolution:Resolution,kind:'trees'|'blobs',sha:string):string {validateResolution(resolution);if(!resolution.identity||!fullSHA(sha))throw new TypeError('unresolved object identity');return `${resolution.requestSource==='github-rest-id-scoped@1'?`/repositories/${resolution.requestedId}`:`/repos/${resolution.identity.fullName}`}/git/${kind}/${sha}`;}
  async resolve(id:number,observations:IdentityObservation[]=[],expectedRevision?:string):Promise<Resolution>{
+  this.resolvedCommit=null;
   if(!Number.isSafeInteger(id)||id<1||expectedRevision!==undefined&&!fullSHA(expectedRevision))throw new TypeError('invalid requested identity');
   const r:Resolution={schemaVersion:'repository-snapshot@1',requestedId:id,state:'inconclusive',identity:null,observations:structuredClone(observations),defaultBranch:null,tree:null,parents:[],metadata:{fork:null,parentId:null},reasons:[],requestSource:this.historical?'github-rest-id-scoped@1':'github-rest-verified-name@1'};
   try{
@@ -41,7 +44,7 @@ export class RepositorySnapshotResolver {
    const commit=await this.provider.get(`${this.historical?`/repositories/${id}`:`/repos/${observed.fullName}`}/commits/${encodeURIComponent(expectedRevision??r.defaultBranch)}`,this.network);if(!commit)throw new Error(`commit: ${this.provider.failure()}`);const c=record(commit),tree=record(record(c.commit).tree).sha;
    if(!fullSHA(c.sha)||!fullSHA(tree)||expectedRevision&&c.sha!==expectedRevision)throw new Error('invalid full commit or tree SHA');
    if(!Array.isArray(c.parents)||c.parents.some(p=>!fullSHA(record(p).sha)))throw new Error('invalid commit parents');
-   const merged=mergeIdentity(r.observations);r.identity={provider:'github',repositoryId:id,completeness:'provider_id',fullName:merged.fullName,aliases:merged.aliases,revision:c.sha};r.tree=tree;r.parents=c.parents.map(p=>String(record(p).sha));r.state='resolved';
+   const merged=mergeIdentity(r.observations);r.identity={provider:'github',repositoryId:id,completeness:'provider_id',fullName:merged.fullName,aliases:merged.aliases,revision:c.sha};r.tree=tree;r.parents=c.parents.map(p=>String(record(p).sha));r.state='resolved';this.resolvedCommit=commit;
    if(merged.conflicts.length)r.reasons.push(...merged.conflicts);
   }catch(error){r.state='inconclusive';r.identity=null;r.tree=null;r.reasons.push(error instanceof TypeError?'invalid full commit or tree SHA':error instanceof Error?error.message:'resolution failed');}
   validateResolution(r);return r;

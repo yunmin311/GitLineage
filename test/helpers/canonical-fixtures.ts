@@ -5,6 +5,7 @@ import { buildView, type ViewGraph } from '../../src/web/view-model.ts';
 const FIXTURES = resolve(import.meta.dirname, '..', 'fixtures', 'canonical');
 
 export type CanonicalFixtureName =
+  | 'expressjs__express'
   | 'Kuddev__pebrel'
   | 'grpc__grpc'
   | 'nachocebey__is'

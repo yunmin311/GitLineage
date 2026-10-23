@@ -257,6 +257,7 @@ export async function analyze(options: AnalyzeOptions): Promise<AnalyzeResult> {
           },
         });
       }
+      addDiagnostics(registry.diagnostics);
       extractors.add('package-registry-metadata@1');
     }
   }

@@ -21,6 +21,7 @@ export async function fixtureServer(previewOptions: FixtureServerOptions = {}) {
     [C, 'mobile-grpc-grpc-724b3ccb'],
     [D, 'nachocebey__is'],
     [E, 'gitlineage-root'],
+    ['expressjs/express', 'expressjs__express'],
   ] as const) graphs.set(repo.toLowerCase(), canonicalGraph(name));
   const graphFor = (target: string) => {
     const graph = graphs.get(target.replace(/^https:\/\/github.com\//, '').toLowerCase());

@@ -1,0 +1,3506 @@
+[
+  {
+    "name": "grpc/grpc",
+    "width": 1280,
+    "initial": {
+      "nodes": [
+        {
+          "id": "repo:github:grpc/grpc",
+          "label": "grpc/grpc",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:grpc/grpc-swift",
+          "label": "grpc/grpc-swift",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:grpc/grpc-web",
+          "label": "grpc/grpc-web",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:whatwg/streams",
+          "label": "whatwg/streams",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:cel-expr/cel-c",
+          "label": "cel-expr/cel-c",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:census-instrumentation/opencensus-proto",
+          "label": "census-instrumentation/opencensus-proto",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:envoyproxy/protoc-gen-validate",
+          "label": "bufbuild/protoc-gen-validate",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:google/benchmark",
+          "label": "google/benchmark",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:google/bloaty",
+          "label": "google/bloaty",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:cncf/xds",
+          "label": "cncf/xds",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:googlecloudplatform/autosharding",
+          "label": "googlecloudplatform/autosharding",
+          "inViewport": true
+        }
+      ],
+      "drawnCanonicalEdges": [
+        "rel_60f71f0e20b2bb21",
+        "rel_42e4c8402a2e205f",
+        "rel_d014790214d49ecc",
+        "rel_06633e40ca1ac029",
+        "rel_778910531fb783dd"
+      ],
+      "representedMemberTargets": [
+        "repo:github:grpc/grpc-swift",
+        "repo:github:grpc/grpc-web",
+        "repo:github:whatwg/streams",
+        "repo:github:cel-expr/cel-c",
+        "repo:github:cncf/xds",
+        "repo:github:googlecloudplatform/autosharding"
+      ],
+      "plates": [
+        {
+          "key": "depends_on/DECLARED",
+          "bounds": {
+            "x": 659.44775390625,
+            "y": 457.92620849609375,
+            "width": 158.46307373046875,
+            "height": 66.26641845703125,
+            "top": 457.92620849609375,
+            "right": 817.9108276367188,
+            "bottom": 524.192626953125,
+            "left": 659.44775390625
+          },
+          "world": {},
+          "label": "depends on ×6, 6 depends on relationships, grouped",
+          "expanded": "false"
+        },
+        {
+          "key": "references/DECLARED",
+          "bounds": {
+            "x": 659.44775390625,
+            "y": 211.58810424804688,
+            "width": 158.46307373046875,
+            "height": 66.26638793945312,
+            "top": 211.58810424804688,
+            "right": 817.9108276367188,
+            "bottom": 277.8544921875,
+            "left": 659.44775390625
+          },
+          "world": {},
+          "label": "references ×11, 11 references relationships, grouped",
+          "expanded": "true"
+        },
+        {
+          "key": "uses_submodule/VERIFIED",
+          "bounds": {
+            "x": 659.44775390625,
+            "y": 603.4241333007812,
+            "width": 158.46307373046875,
+            "height": 66.26641845703125,
+            "top": 603.4241333007812,
+            "right": 817.9108276367188,
+            "bottom": 669.6905517578125,
+            "left": 659.44775390625
+          },
+          "world": {},
+          "label": "uses submodule ×20, 20 uses submodule relationships, grouped",
+          "expanded": "true"
+        }
+      ],
+      "bodyText": "GitLineage\nContext\ngrpc/grpc\n/\n724b3cc\npartial\nLayers\nGitHub\nidentical content\n×2 blobs\nidentical content\n×1 blobs\nidentical content\n×1 blobs\nidentical content\n×1 blobs\nidentical content\n×1 blobs\ndepends on\nDEPENDENCIES · 6 members\nExplore neighborhood\nreferences\nREFERENCES · 11 members\nFocus\nExplore more\nuses submodule\nDEPENDENCIES · 20 members\nFocus\nExplore more\ngrpc/grpc\nmaster · Apache-2.0\nSUBJECT\ngrpc/grpc-swift\nREPOSITORY\ngrpc/grpc-web\nREPOSITORY\nwhatwg/streams\nREPOSITORY\ncel-expr/cel-c\nmaster\ncensus-instrumentation/ope…\nmaster\nbufbuild/protoc-gen-valida…\nmain\ngoogle/benchmark\nmain\ngoogle/bloaty\nmain\ncncf/xds\nmain\ngooglecloudplatform/autosh…\nREPOSITORY\nDirected\nMutual\nNavigation group\n11 objects · 11 shown relationships · 0 exploration links · 3 plates grouping 37\n−\n+\n⤢\nOrigins · 5\nDependencies · 26\nReferences · 11\n\nNo recorded ancestry evidence · dependencies are separate claims.\n\nOverview · 14 objects",
+      "overflow": false
+    },
+    "expanded": {
+      "nodes": [
+        {
+          "id": "repo:github:grpc/grpc",
+          "label": "grpc/grpc",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:fullstorydev/grpcurl",
+          "label": "fullstorydev/grpcurl",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:grpc/grpc-dart",
+          "label": "grpc/grpc-dart",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:grpc/grpc-dotnet",
+          "label": "grpc/grpc-dotnet",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:grpc/grpc-go",
+          "label": "grpc/grpc-go",
+          "inViewport": false
+        },
+        {
+          "id": "repo:github:grpc/grpc-java",
+          "label": "grpc/grpc-java",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:grpc/grpc-kotlin",
+          "label": "grpc/grpc-kotlin",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:grpc/grpc-node",
+          "label": "grpc/grpc-node",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:grpc/grpc-swift",
+          "label": "grpc/grpc-swift",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:grpc/grpc-web",
+          "label": "grpc/grpc-web",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:whatwg/fetch",
+          "label": "whatwg/fetch",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:whatwg/streams",
+          "label": "whatwg/streams",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:cel-expr/cel-c",
+          "label": "cel-expr/cel-c",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:census-instrumentation/opencensus-proto",
+          "label": "census-instrumentation/opencensus-proto",
+          "inViewport": false
+        },
+        {
+          "id": "repo:github:envoyproxy/protoc-gen-validate",
+          "label": "bufbuild/protoc-gen-validate",
+          "inViewport": false
+        },
+        {
+          "id": "repo:github:google/benchmark",
+          "label": "google/benchmark",
+          "inViewport": false
+        },
+        {
+          "id": "repo:github:google/bloaty",
+          "label": "google/bloaty",
+          "inViewport": false
+        },
+        {
+          "id": "repo:github:cncf/xds",
+          "label": "cncf/xds",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:googlecloudplatform/autosharding",
+          "label": "googlecloudplatform/autosharding",
+          "inViewport": true
+        }
+      ],
+      "drawnCanonicalEdges": [
+        "rel_60f71f0e20b2bb21",
+        "rel_42e4c8402a2e205f",
+        "rel_d014790214d49ecc",
+        "rel_06633e40ca1ac029",
+        "rel_778910531fb783dd"
+      ],
+      "representedMemberTargets": [
+        "repo:github:fullstorydev/grpcurl",
+        "repo:github:grpc/grpc-dart",
+        "repo:github:grpc/grpc-dotnet",
+        "repo:github:grpc/grpc-go",
+        "repo:github:grpc/grpc-java",
+        "repo:github:grpc/grpc-kotlin",
+        "repo:github:grpc/grpc-node",
+        "repo:github:grpc/grpc-swift",
+        "repo:github:grpc/grpc-web",
+        "repo:github:whatwg/fetch",
+        "repo:github:whatwg/streams",
+        "repo:github:cel-expr/cel-c",
+        "repo:github:cncf/xds",
+        "repo:github:googlecloudplatform/autosharding"
+      ],
+      "plates": [
+        {
+          "key": "depends_on/DECLARED",
+          "bounds": {
+            "x": 473.44622802734375,
+            "y": 590.593017578125,
+            "width": 224.7965087890625,
+            "height": 94.00579833984375,
+            "top": 590.593017578125,
+            "right": 698.2427368164062,
+            "bottom": 684.5988159179688,
+            "left": 473.44622802734375
+          },
+          "world": {},
+          "label": "depends on ×6, 6 depends on relationships, grouped",
+          "expanded": "false"
+        },
+        {
+          "key": "references/DECLARED",
+          "bounds": {
+            "x": 473.44622802734375,
+            "y": 241.13662719726562,
+            "width": 224.7965087890625,
+            "height": 94.00582885742188,
+            "top": 241.13662719726562,
+            "right": 698.2427368164062,
+            "bottom": 335.1424560546875,
+            "left": 473.44622802734375
+          },
+          "world": {},
+          "label": "references ×11, 11 references relationships, grouped",
+          "expanded": "true"
+        },
+        {
+          "key": "uses_submodule/VERIFIED",
+          "bounds": {
+            "x": 473.44622802734375,
+            "y": 796.9970703125,
+            "width": 224.7965087890625,
+            "height": 94.005859375,
+            "top": 796.9970703125,
+            "right": 698.2427368164062,
+            "bottom": 891.0029296875,
+            "left": 473.44622802734375
+          },
+          "world": {},
+          "label": "uses submodule ×20, 20 uses submodule relationships, grouped",
+          "expanded": "true"
+        }
+      ],
+      "bodyText": "GitLineage\nContext\ngrpc/grpc\n/\n724b3cc\npartial\nLayers\nGitHub\nidentical content\n×2 blobs\nidentical content\n×1 blobs\nidentical content\n×1 blobs\nidentical content\n×1 blobs\nidentical content\n×1 blobs\ndepends on\nDEPENDENCIES · 6 members\nExplore neighborhood\nreferences\nREFERENCES · 11 members\nFocus\nuses submodule\nDEPENDENCIES · 20 members\nFocus\nExplore more\ngrpc/grpc\nmaster · Apache-2.0\nSUBJECT\nfullstorydev/grpcurl\nmaster\ngrpc/grpc-dart\nREPOSITORY\ngrpc/grpc-dotnet\nREPOSITORY\ngrpc/grpc-go\nREPOSITORY\ngrpc/grpc-java\nREPOSITORY\ngrpc/grpc-kotlin\nREPOSITORY\ngrpc/grpc-node\nREPOSITORY\ngrpc/grpc-swift\nREPOSITORY\ngrpc/grpc-web\nREPOSITORY\nwhatwg/fetch\nREPOSITORY\nwhatwg/streams\nREPOSITORY\ncel-expr/cel-c\nmaster\ncensus-instrumentation/open…\nmaster\nbufbuild/protoc-gen-validate\nmain\ngoogle/benchmark\nmain\ngoogle/bloaty\nmain\ncncf/xds\nmain\ngooglecloudplatform/autosh…\nREPOSITORY\nDirected\nMutual\nNavigation group\n19 objects · 19 shown relationships · 0 exploration links · 3 plates grouping 37\n−\n+\n⤢\nOrigins · 5\nDependencies · 26\nReferences · 11\n\nNo recorded ancestry evidence · dependencies are separate claims.\n\nOverview · 22 objects",
+      "overflow": false
+    },
+    "actions": 2,
+    "interaction": "real Focus click/tap and keyboard expansion",
+    "errors": [],
+    "blocked": []
+  },
+  {
+    "name": "grpc/grpc",
+    "width": 390,
+    "initial": {
+      "nodes": [
+        {
+          "id": "repo:github:grpc/grpc",
+          "label": "grpc/grpc",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:cel-expr/cel-c",
+          "label": "cel-expr/cel-c",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:census-instrumentation/opencensus-proto",
+          "label": "census-instrumentation/opencensus-proto",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:envoyproxy/protoc-gen-validate",
+          "label": "bufbuild/protoc-gen-validate",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:google/benchmark",
+          "label": "google/benchmark",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:google/bloaty",
+          "label": "google/bloaty",
+          "inViewport": false
+        }
+      ],
+      "drawnCanonicalEdges": [
+        "rel_60f71f0e20b2bb21",
+        "rel_42e4c8402a2e205f",
+        "rel_d014790214d49ecc",
+        "rel_06633e40ca1ac029",
+        "rel_778910531fb783dd"
+      ],
+      "representedMemberTargets": [
+        "repo:github:cel-expr/cel-c"
+      ],
+      "plates": [
+        {
+          "key": "depends_on/DECLARED",
+          "bounds": {
+            "x": 44.93878936767578,
+            "y": 530.9183349609375,
+            "width": 191.93878173828125,
+            "height": 80.26531982421875,
+            "top": 530.9183349609375,
+            "right": 236.87757110595703,
+            "bottom": 611.1836547851562,
+            "left": 44.93878936767578
+          },
+          "world": {},
+          "label": "depends on ×6, 6 depends on relationships, grouped",
+          "expanded": "false"
+        },
+        {
+          "key": "references/DECLARED",
+          "bounds": {
+            "x": 453.2449035644531,
+            "y": -36.1734619140625,
+            "width": 191.93875122070312,
+            "height": 80.26530456542969,
+            "top": -36.1734619140625,
+            "right": 645.1836547851562,
+            "bottom": 44.09184265136719,
+            "left": 453.2449035644531
+          },
+          "world": {},
+          "label": "references ×11, 11 references relationships, grouped",
+          "expanded": "false"
+        },
+        {
+          "key": "uses_submodule/VERIFIED",
+          "bounds": {
+            "x": 268.2857360839844,
+            "y": 530.9183349609375,
+            "width": 191.93875122070312,
+            "height": 80.26531982421875,
+            "top": 530.9183349609375,
+            "right": 460.2244873046875,
+            "bottom": 611.1836547851562,
+            "left": 268.2857360839844
+          },
+          "world": {},
+          "label": "uses submodule ×20, 20 uses submodule relationships, grouped",
+          "expanded": "true"
+        }
+      ],
+      "bodyText": "GitLineage\ngrpc/grpc\n724b3cc\npartial\nidentical content\n×2 blobs\nidentical content\n×1 blobs\nidentical content\n×1 blobs\nidentical content\n×1 blobs\nidentical content\n×1 blobs\ndepends on\nDEPENDENCIES · 6 members\nExplore neighborhood\nreferences\nREFERENCES · 11 members\nExplore neighborhood\nuses submodule\nDEPENDENCIES · 20 members\nFocus\nExplore more\ngrpc/grpc\nmaster · Apache-2.0\nSUBJECT\ncel-expr/cel-c\nmaster\ncensus-instrumentation/ope…\nmaster\nbufbuild/protoc-gen-valida…\nmain\ngoogle/benchmark\nmain\ngoogle/bloaty\nmain\n6 objects · 6 shown relationships · 0 exploration links · 3 plates grouping 37\n−\n+\n⤢\nMap\nOrigins · 5\nDependencies · 26\nReferences · 11\n\nNo recorded ancestry evidence · dependencies are separate claims.\n\ndepends on · 6\nreferences · 11\nuses submodule · 20\nidentical content · cel-expr/cel-c\nidentical content · census-instrumentation/opencensus-proto\nidentical content · bufbuild/protoc-gen-validate\nidentical content · google/benchmark\nidentical content · google/bloaty\nGraph\nRelations\nEvidence",
+      "overflow": false
+    },
+    "expanded": {
+      "nodes": [
+        {
+          "id": "repo:github:grpc/grpc",
+          "label": "grpc/grpc",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:cel-expr/cel-c",
+          "label": "cel-expr/cel-c",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:census-instrumentation/opencensus-proto",
+          "label": "census-instrumentation/opencensus-proto",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:envoyproxy/protoc-gen-validate",
+          "label": "bufbuild/protoc-gen-validate",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:google/benchmark",
+          "label": "google/benchmark",
+          "inViewport": false
+        },
+        {
+          "id": "repo:github:google/bloaty",
+          "label": "google/bloaty",
+          "inViewport": false
+        },
+        {
+          "id": "repo:github:cncf/xds",
+          "label": "cncf/xds",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:envoyproxy/data-plane-api",
+          "label": "envoyproxy/data-plane-api",
+          "inViewport": false
+        },
+        {
+          "id": "repo:github:google/googletest",
+          "label": "google/googletest",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:googlecloudplatform/autosharding",
+          "label": "googlecloudplatform/autosharding",
+          "inViewport": true
+        }
+      ],
+      "drawnCanonicalEdges": [
+        "rel_60f71f0e20b2bb21",
+        "rel_42e4c8402a2e205f",
+        "rel_d014790214d49ecc",
+        "rel_06633e40ca1ac029",
+        "rel_778910531fb783dd"
+      ],
+      "representedMemberTargets": [
+        "repo:github:cel-expr/cel-c",
+        "repo:github:cncf/xds",
+        "repo:github:envoyproxy/data-plane-api",
+        "repo:github:google/bloaty",
+        "repo:github:google/googletest",
+        "repo:github:googlecloudplatform/autosharding"
+      ],
+      "plates": [
+        {
+          "key": "depends_on/DECLARED",
+          "bounds": {
+            "x": -549,
+            "y": 405.0000305175781,
+            "width": 264,
+            "height": 110.39999389648438,
+            "top": 405.0000305175781,
+            "right": -285,
+            "bottom": 515.4000244140625,
+            "left": -549
+          },
+          "world": {},
+          "label": "depends on ×6, 6 depends on relationships, grouped",
+          "expanded": "false"
+        },
+        {
+          "key": "references/DECLARED",
+          "bounds": {
+            "x": 319.79998779296875,
+            "y": -374.9999694824219,
+            "width": 264,
+            "height": 110.39999389648438,
+            "top": -374.9999694824219,
+            "right": 583.7999877929688,
+            "bottom": -264.5999755859375,
+            "left": 319.79998779296875
+          },
+          "world": {},
+          "label": "references ×11, 11 references relationships, grouped",
+          "expanded": "false"
+        },
+        {
+          "key": "uses_submodule/VERIFIED",
+          "bounds": {
+            "x": 65.4000015258789,
+            "y": 405.0000305175781,
+            "width": 265.20001220703125,
+            "height": 111.60000610351562,
+            "top": 405.0000305175781,
+            "right": 330.60001373291016,
+            "bottom": 516.6000366210938,
+            "left": 65.4000015258789
+          },
+          "world": {},
+          "label": "uses submodule ×20, 20 uses submodule relationships, grouped",
+          "expanded": "true"
+        }
+      ],
+      "bodyText": "GitLineage\ngrpc/grpc\n724b3cc\npartial\nidentical content\n×2 blobs\nidentical content\n×1 blobs\nidentical content\n×1 blobs\nidentical content\n×1 blobs\nidentical content\n×1 blobs\ndepends on\nDEPENDENCIES · 6 members\nExplore neighborhood\nreferences\nREFERENCES · 11 members\nExplore neighborhood\nuses submodule\nDEPENDENCIES · 20 members\nFocus\nExplore more\ngrpc/grpc\nmaster · Apache-2.0\nSUBJECT\ncel-expr/cel-c\nmaster\ncensus-instrumentation/o…\nmaster\nbufbuild/protoc-gen-vali…\nmain\ngoogle/benchmark\nmain\ngoogle/bloaty\nmain\ncncf/xds\nmain\nenvoyproxy/data-plane-api\nmain\ngoogle/googletest\nREPOSITORY\ngooglecloudplatform/autoshar…\nREPOSITORY\n10 objects · 11 shown relationships · 0 exploration links · 3 plates grouping 37\n−\n+\n⤢\nMap\nOrigins · 5\nDependencies · 26\nReferences · 11\n\nNo recorded ancestry evidence · dependencies are separate claims.\n\nExplore cel-expr/cel-c\ndepends on · 6\nreferences · 11\nuses submodule · 20\nidentical content · cel-expr/cel-c\nidentical content · census-instrumentation/opencensus-proto\nidentical content · bufbuild/protoc-gen-validate\nidentical content · google/benchmark\nidentical content · google/bloaty\n‹\ncel-expr/cel-c\n›\nGraph\nRelations\nEvidence",
+      "overflow": false
+    },
+    "actions": 2,
+    "interaction": "real Focus click/tap and keyboard expansion",
+    "errors": [],
+    "blocked": []
+  },
+  {
+    "name": "grpc/grpc",
+    "width": 430,
+    "initial": {
+      "nodes": [
+        {
+          "id": "repo:github:grpc/grpc",
+          "label": "grpc/grpc",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:cel-expr/cel-c",
+          "label": "cel-expr/cel-c",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:census-instrumentation/opencensus-proto",
+          "label": "census-instrumentation/opencensus-proto",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:envoyproxy/protoc-gen-validate",
+          "label": "bufbuild/protoc-gen-validate",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:google/benchmark",
+          "label": "google/benchmark",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:google/bloaty",
+          "label": "google/bloaty",
+          "inViewport": false
+        }
+      ],
+      "drawnCanonicalEdges": [
+        "rel_60f71f0e20b2bb21",
+        "rel_42e4c8402a2e205f",
+        "rel_d014790214d49ecc",
+        "rel_06633e40ca1ac029",
+        "rel_778910531fb783dd"
+      ],
+      "representedMemberTargets": [
+        "repo:github:cel-expr/cel-c"
+      ],
+      "plates": [
+        {
+          "key": "depends_on/DECLARED",
+          "bounds": {
+            "x": 47.38778305053711,
+            "y": 509.18365478515625,
+            "width": 214.38775634765625,
+            "height": 89.653076171875,
+            "top": 509.18365478515625,
+            "right": 261.77553939819336,
+            "bottom": 598.8367309570312,
+            "left": 47.38778305053711
+          },
+          "world": {},
+          "label": "depends on ×6, 6 depends on relationships, grouped",
+          "expanded": "false"
+        },
+        {
+          "key": "references/DECLARED",
+          "bounds": {
+            "x": 503.4490051269531,
+            "y": -124.23471069335938,
+            "width": 214.38778686523438,
+            "height": 89.65306854248047,
+            "top": -124.23471069335938,
+            "right": 717.8367919921875,
+            "bottom": -34.581642150878906,
+            "left": 503.4490051269531
+          },
+          "world": {},
+          "label": "references ×11, 11 references relationships, grouped",
+          "expanded": "false"
+        },
+        {
+          "key": "uses_submodule/VERIFIED",
+          "bounds": {
+            "x": 296.857177734375,
+            "y": 509.18365478515625,
+            "width": 214.38775634765625,
+            "height": 89.653076171875,
+            "top": 509.18365478515625,
+            "right": 511.24493408203125,
+            "bottom": 598.8367309570312,
+            "left": 296.857177734375
+          },
+          "world": {},
+          "label": "uses submodule ×20, 20 uses submodule relationships, grouped",
+          "expanded": "true"
+        }
+      ],
+      "bodyText": "GitLineage\ngrpc/grpc\n724b3cc\npartial\nidentical content\n×2 blobs\nidentical content\n×1 blobs\nidentical content\n×1 blobs\nidentical content\n×1 blobs\nidentical content\n×1 blobs\ndepends on\nDEPENDENCIES · 6 members\nExplore neighborhood\nreferences\nREFERENCES · 11 members\nExplore neighborhood\nuses submodule\nDEPENDENCIES · 20 members\nFocus\nExplore more\ngrpc/grpc\nmaster · Apache-2.0\nSUBJECT\ncel-expr/cel-c\nmaster\ncensus-instrumentation/ope…\nmaster\nbufbuild/protoc-gen-valida…\nmain\ngoogle/benchmark\nmain\ngoogle/bloaty\nmain\n6 objects · 6 shown relationships · 0 exploration links · 3 plates grouping 37\n−\n+\n⤢\nMap\nOrigins · 5\nDependencies · 26\nReferences · 11\n\nNo recorded ancestry evidence · dependencies are separate claims.\n\ndepends on · 6\nreferences · 11\nuses submodule · 20\nidentical content · cel-expr/cel-c\nidentical content · census-instrumentation/opencensus-proto\nidentical content · bufbuild/protoc-gen-validate\nidentical content · google/benchmark\nidentical content · google/bloaty\nGraph\nRelations\nEvidence",
+      "overflow": false
+    },
+    "expanded": {
+      "nodes": [
+        {
+          "id": "repo:github:grpc/grpc",
+          "label": "grpc/grpc",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:cel-expr/cel-c",
+          "label": "cel-expr/cel-c",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:census-instrumentation/opencensus-proto",
+          "label": "census-instrumentation/opencensus-proto",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:envoyproxy/protoc-gen-validate",
+          "label": "bufbuild/protoc-gen-validate",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:google/benchmark",
+          "label": "google/benchmark",
+          "inViewport": false
+        },
+        {
+          "id": "repo:github:google/bloaty",
+          "label": "google/bloaty",
+          "inViewport": false
+        },
+        {
+          "id": "repo:github:cncf/xds",
+          "label": "cncf/xds",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:envoyproxy/data-plane-api",
+          "label": "envoyproxy/data-plane-api",
+          "inViewport": false
+        },
+        {
+          "id": "repo:github:google/googletest",
+          "label": "google/googletest",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:googlecloudplatform/autosharding",
+          "label": "googlecloudplatform/autosharding",
+          "inViewport": true
+        }
+      ],
+      "drawnCanonicalEdges": [
+        "rel_60f71f0e20b2bb21",
+        "rel_42e4c8402a2e205f",
+        "rel_d014790214d49ecc",
+        "rel_06633e40ca1ac029",
+        "rel_778910531fb783dd"
+      ],
+      "representedMemberTargets": [
+        "repo:github:cel-expr/cel-c",
+        "repo:github:cncf/xds",
+        "repo:github:envoyproxy/data-plane-api",
+        "repo:github:google/bloaty",
+        "repo:github:google/googletest",
+        "repo:github:googlecloudplatform/autosharding"
+      ],
+      "plates": [
+        {
+          "key": "depends_on/DECLARED",
+          "bounds": {
+            "x": -528.9999389648438,
+            "y": 380,
+            "width": 263.9999694824219,
+            "height": 110.39999389648438,
+            "top": 380,
+            "right": -264.9999694824219,
+            "bottom": 490.3999938964844,
+            "left": -528.9999389648438
+          },
+          "world": {},
+          "label": "depends on ×6, 6 depends on relationships, grouped",
+          "expanded": "false"
+        },
+        {
+          "key": "references/DECLARED",
+          "bounds": {
+            "x": 339.8000183105469,
+            "y": -400,
+            "width": 263.9999694824219,
+            "height": 110.39999389648438,
+            "top": -400,
+            "right": 603.7999877929688,
+            "bottom": -289.6000061035156,
+            "left": 339.8000183105469
+          },
+          "world": {},
+          "label": "references ×11, 11 references relationships, grouped",
+          "expanded": "false"
+        },
+        {
+          "key": "uses_submodule/VERIFIED",
+          "bounds": {
+            "x": 85.4000244140625,
+            "y": 380,
+            "width": 265.1999816894531,
+            "height": 111.5999755859375,
+            "top": 380,
+            "right": 350.6000061035156,
+            "bottom": 491.5999755859375,
+            "left": 85.4000244140625
+          },
+          "world": {},
+          "label": "uses submodule ×20, 20 uses submodule relationships, grouped",
+          "expanded": "true"
+        }
+      ],
+      "bodyText": "GitLineage\ngrpc/grpc\n724b3cc\npartial\nidentical content\n×2 blobs\nidentical content\n×1 blobs\nidentical content\n×1 blobs\nidentical content\n×1 blobs\nidentical content\n×1 blobs\ndepends on\nDEPENDENCIES · 6 members\nExplore neighborhood\nreferences\nREFERENCES · 11 members\nExplore neighborhood\nuses submodule\nDEPENDENCIES · 20 members\nFocus\nExplore more\ngrpc/grpc\nmaster · Apache-2.0\nSUBJECT\ncel-expr/cel-c\nmaster\ncensus-instrumentation/o…\nmaster\nbufbuild/protoc-gen-vali…\nmain\ngoogle/benchmark\nmain\ngoogle/bloaty\nmain\ncncf/xds\nmain\nenvoyproxy/data-plane-api\nmain\ngoogle/googletest\nREPOSITORY\ngooglecloudplatform/autoshar…\nREPOSITORY\n10 objects · 11 shown relationships · 0 exploration links · 3 plates grouping 37\n−\n+\n⤢\nMap\nOrigins · 5\nDependencies · 26\nReferences · 11\n\nNo recorded ancestry evidence · dependencies are separate claims.\n\nExplore cel-expr/cel-c\ndepends on · 6\nreferences · 11\nuses submodule · 20\nidentical content · cel-expr/cel-c\nidentical content · census-instrumentation/opencensus-proto\nidentical content · bufbuild/protoc-gen-validate\nidentical content · google/benchmark\nidentical content · google/bloaty\n‹\ncel-expr/cel-c\n›\nGraph\nRelations\nEvidence",
+      "overflow": false
+    },
+    "actions": 2,
+    "interaction": "real Focus click/tap and keyboard expansion",
+    "errors": [],
+    "blocked": []
+  },
+  {
+    "name": "vitest-dev/vitest",
+    "width": 1280,
+    "initial": {
+      "nodes": [
+        {
+          "id": "repo:github:vitest-dev/vitest",
+          "label": "vitest-dev/vitest",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:chai",
+          "label": "npm:chai",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:lit",
+          "label": "npm:lit",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:react-is",
+          "label": "npm:react-is",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:vitest-dev/istanbuljs",
+          "label": "vitest-dev/istanbuljs",
+          "inViewport": true
+        },
+        {
+          "id": "project:sponsors/vitest-dev",
+          "label": "sponsors/vitest-dev",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:capricorn86/happy-dom",
+          "label": "capricorn86/happy-dom",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:unjs/std-env",
+          "label": "unjs/std-env",
+          "inViewport": true
+        }
+      ],
+      "drawnCanonicalEdges": [
+        "rel_2a214c982fcb6631"
+      ],
+      "representedMemberTargets": [
+        "pkg:npm:chai",
+        "pkg:npm:lit",
+        "pkg:npm:react-is",
+        "repo:github:capricorn86/happy-dom",
+        "repo:github:unjs/std-env"
+      ],
+      "plates": [
+        {
+          "key": "depends_on/DECLARED",
+          "bounds": {
+            "x": 605.150390625,
+            "y": 257.5657958984375,
+            "width": 132.18804931640625,
+            "height": 55.27862548828125,
+            "top": 257.5657958984375,
+            "right": 737.3384399414062,
+            "bottom": 312.84442138671875,
+            "left": 605.150390625
+          },
+          "world": {},
+          "label": "depends on remainder ×18, 18 depends on relationships, grouped",
+          "expanded": "true"
+        },
+        {
+          "key": "depends_on/DECLARED::manifest::docs ×9",
+          "bounds": {
+            "x": 605.150390625,
+            "y": 382.5435791015625,
+            "width": 132.18804931640625,
+            "height": 55.27862548828125,
+            "top": 382.5435791015625,
+            "right": 737.3384399414062,
+            "bottom": 437.82220458984375,
+            "left": 605.150390625
+          },
+          "world": {},
+          "label": "docs ×9, 9 depends on relationships, grouped",
+          "expanded": "false"
+        },
+        {
+          "key": "depends_on/DECLARED::manifest::package.json ×14",
+          "bounds": {
+            "x": 605.150390625,
+            "y": 459.4529724121094,
+            "width": 132.18804931640625,
+            "height": 55.278594970703125,
+            "top": 459.4529724121094,
+            "right": 737.3384399414062,
+            "bottom": 514.7315673828125,
+            "left": 605.150390625
+          },
+          "world": {},
+          "label": "package.json ×14, 14 depends on relationships, grouped",
+          "expanded": "false"
+        },
+        {
+          "key": "depends_on/DECLARED::manifest::packages/browser ×6",
+          "bounds": {
+            "x": 605.150390625,
+            "y": 536.3623657226562,
+            "width": 132.18804931640625,
+            "height": 55.27862548828125,
+            "top": 536.3623657226562,
+            "right": 737.3384399414062,
+            "bottom": 591.6409912109375,
+            "left": 605.150390625
+          },
+          "world": {},
+          "label": "packages/browser ×6, 6 depends on relationships, grouped",
+          "expanded": "false"
+        },
+        {
+          "key": "depends_on/DECLARED::manifest::packages/mocker ×5",
+          "bounds": {
+            "x": 605.150390625,
+            "y": 613.2717895507812,
+            "width": 132.18804931640625,
+            "height": 55.27862548828125,
+            "top": 613.2717895507812,
+            "right": 737.3384399414062,
+            "bottom": 668.5504150390625,
+            "left": 605.150390625
+          },
+          "world": {},
+          "label": "packages/mocker ×5, 5 depends on relationships, grouped",
+          "expanded": "false"
+        },
+        {
+          "key": "depends_on/DECLARED::manifest::packages/ui ×15",
+          "bounds": {
+            "x": 605.150390625,
+            "y": 690.18115234375,
+            "width": 132.18804931640625,
+            "height": 55.27862548828125,
+            "top": 690.18115234375,
+            "right": 737.3384399414062,
+            "bottom": 745.4597778320312,
+            "left": 605.150390625
+          },
+          "world": {},
+          "label": "packages/ui ×15, 15 depends on relationships, grouped",
+          "expanded": "false"
+        },
+        {
+          "key": "depends_on/DECLARED::manifest::packages/vitest ×16",
+          "bounds": {
+            "x": 605.150390625,
+            "y": 767.090576171875,
+            "width": 132.18804931640625,
+            "height": 55.27862548828125,
+            "top": 767.090576171875,
+            "right": 737.3384399414062,
+            "bottom": 822.3692016601562,
+            "left": 605.150390625
+          },
+          "world": {},
+          "label": "packages/vitest ×16, 16 depends on relationships, grouped",
+          "expanded": "false"
+        },
+        {
+          "key": "references/DECLARED",
+          "bounds": {
+            "x": 605.150390625,
+            "y": 199.88375854492188,
+            "width": 132.18804931640625,
+            "height": 55.27862548828125,
+            "top": 199.88375854492188,
+            "right": 737.3384399414062,
+            "bottom": 255.16238403320312,
+            "left": 605.150390625
+          },
+          "world": {},
+          "label": "references ×18, 18 references relationships, grouped",
+          "expanded": "true"
+        }
+      ],
+      "bodyText": "GitLineage\nContext\nvitest-dev/vitest\n/\n964e1a4\npartial\nLayers\nGitHub\nfork source\ndepends on remainder\nDEPENDENCIES · 18 members\nFocus\nExplore more\ndocs\nDEPENDENCIES · 9 members\nExplore neighborhood\npackage.json\nDEPENDENCIES · 14 members\nExplore neighborhood\npackages/browser\nDEPENDENCIES · 6 members\nExplore neighborhood\npackages/mocker\nDEPENDENCIES · 5 members\nExplore neighborhood\npackages/ui\nDEPENDENCIES · 15 members\nExplore neighborhood\npackages/vitest\nDEPENDENCIES · 16 members\nExplore neighborhood\nreferences\nREFERENCES · 18 members\nFocus\nExplore more\n− Runtime\n7 relationships · scope\n− Development\n11 relationships · scope\nvitest-dev/vitest\nmain · MIT\nSUBJECT\nnpm:chai\nPACKAGE · RUNTIME\nnpm:lit\nPACKAGE · RUNTIME\nnpm:react-is\nPACKAGE · DEVELOPMENT\nvitest-dev/istanbuljs\nREPOSITORY\nsponsors/vitest-dev\nEXTERNALPROJECT\ncapricorn86/happy-dom\nmaster\nunjs/std-env\nREPOSITORY\nDirected\nMutual\nNavigation group\n8 objects · 9 shown relationships · 0 exploration links · 8 plates grouping 101\n−\n+\n⤢\nOrigins · 1\nDependencies · 83\nReferences · 18\n\nRecorded relationships · layers share one exploration space.\n\nOverview · 18 objects",
+      "overflow": false
+    },
+    "expanded": {
+      "nodes": [
+        {
+          "id": "repo:github:vitest-dev/vitest",
+          "label": "vitest-dev/vitest",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:ast-v8-to-istanbul",
+          "label": "npm:ast-v8-to-istanbul",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:chai",
+          "label": "npm:chai",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:convert-source-map",
+          "label": "npm:convert-source-map",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:fastify",
+          "label": "npm:fastify",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:lit",
+          "label": "npm:lit",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:magicast",
+          "label": "npm:magicast",
+          "inViewport": false
+        },
+        {
+          "id": "pkg:npm:pathe",
+          "label": "npm:pathe",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:playwright",
+          "label": "npm:playwright",
+          "inViewport": false
+        },
+        {
+          "id": "pkg:npm:react-is",
+          "label": "npm:react-is",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:tinyrainbow",
+          "label": "npm:tinyrainbow",
+          "inViewport": false
+        },
+        {
+          "id": "pkg:npm:vitest",
+          "label": "npm:vitest",
+          "inViewport": false
+        },
+        {
+          "id": "repo:github:vitest-dev/istanbuljs",
+          "label": "vitest-dev/istanbuljs",
+          "inViewport": false
+        },
+        {
+          "id": "project:sponsors/vitest-dev",
+          "label": "sponsors/vitest-dev",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:capricorn86/happy-dom",
+          "label": "capricorn86/happy-dom",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:unjs/std-env",
+          "label": "unjs/std-env",
+          "inViewport": true
+        }
+      ],
+      "drawnCanonicalEdges": [
+        "rel_2a214c982fcb6631"
+      ],
+      "representedMemberTargets": [
+        "pkg:npm:ast-v8-to-istanbul",
+        "pkg:npm:chai",
+        "pkg:npm:convert-source-map",
+        "pkg:npm:fastify",
+        "pkg:npm:lit",
+        "pkg:npm:magicast",
+        "pkg:npm:pathe",
+        "pkg:npm:playwright",
+        "pkg:npm:react-is",
+        "pkg:npm:tinyrainbow",
+        "pkg:npm:vitest",
+        "repo:github:capricorn86/happy-dom",
+        "repo:github:unjs/std-env"
+      ],
+      "plates": [
+        {
+          "key": "depends_on/DECLARED",
+          "bounds": {
+            "x": 390.37908935546875,
+            "y": 264.016357421875,
+            "width": 221.43792724609375,
+            "height": 92.601318359375,
+            "top": 264.016357421875,
+            "right": 611.8170166015625,
+            "bottom": 356.61767578125,
+            "left": 390.37908935546875
+          },
+          "world": {},
+          "label": "depends on remainder ×18, 18 depends on relationships, grouped",
+          "expanded": "true"
+        },
+        {
+          "key": "depends_on/DECLARED::manifest::docs ×9",
+          "bounds": {
+            "x": 390.37908935546875,
+            "y": 473.3758239746094,
+            "width": 221.43792724609375,
+            "height": 92.60128784179688,
+            "top": 473.3758239746094,
+            "right": 611.8170166015625,
+            "bottom": 565.9771118164062,
+            "left": 390.37908935546875
+          },
+          "world": {},
+          "label": "docs ×9, 9 depends on relationships, grouped",
+          "expanded": "false"
+        },
+        {
+          "key": "depends_on/DECLARED::manifest::package.json ×14",
+          "bounds": {
+            "x": 390.37908935546875,
+            "y": 602.21240234375,
+            "width": 221.43792724609375,
+            "height": 92.601318359375,
+            "top": 602.21240234375,
+            "right": 611.8170166015625,
+            "bottom": 694.813720703125,
+            "left": 390.37908935546875
+          },
+          "world": {},
+          "label": "package.json ×14, 14 depends on relationships, grouped",
+          "expanded": "false"
+        },
+        {
+          "key": "depends_on/DECLARED::manifest::packages/browser ×6",
+          "bounds": {
+            "x": 390.37908935546875,
+            "y": 731.0490112304688,
+            "width": 221.43792724609375,
+            "height": 92.601318359375,
+            "top": 731.0490112304688,
+            "right": 611.8170166015625,
+            "bottom": 823.6503295898438,
+            "left": 390.37908935546875
+          },
+          "world": {},
+          "label": "packages/browser ×6, 6 depends on relationships, grouped",
+          "expanded": "false"
+        },
+        {
+          "key": "depends_on/DECLARED::manifest::packages/mocker ×5",
+          "bounds": {
+            "x": 390.37908935546875,
+            "y": 859.8856201171875,
+            "width": 221.43792724609375,
+            "height": 92.601318359375,
+            "top": 859.8856201171875,
+            "right": 611.8170166015625,
+            "bottom": 952.4869384765625,
+            "left": 390.37908935546875
+          },
+          "world": {},
+          "label": "packages/mocker ×5, 5 depends on relationships, grouped",
+          "expanded": "false"
+        },
+        {
+          "key": "depends_on/DECLARED::manifest::packages/ui ×15",
+          "bounds": {
+            "x": 390.37908935546875,
+            "y": 988.7222290039062,
+            "width": 221.43792724609375,
+            "height": 92.60125732421875,
+            "top": 988.7222290039062,
+            "right": 611.8170166015625,
+            "bottom": 1081.323486328125,
+            "left": 390.37908935546875
+          },
+          "world": {},
+          "label": "packages/ui ×15, 15 depends on relationships, grouped",
+          "expanded": "false"
+        },
+        {
+          "key": "depends_on/DECLARED::manifest::packages/vitest ×16",
+          "bounds": {
+            "x": 390.37908935546875,
+            "y": 1117.558837890625,
+            "width": 221.43792724609375,
+            "height": 92.601318359375,
+            "top": 1117.558837890625,
+            "right": 611.8170166015625,
+            "bottom": 1210.16015625,
+            "left": 390.37908935546875
+          },
+          "world": {},
+          "label": "packages/vitest ×16, 16 depends on relationships, grouped",
+          "expanded": "false"
+        },
+        {
+          "key": "references/DECLARED",
+          "bounds": {
+            "x": 390.37908935546875,
+            "y": 167.388916015625,
+            "width": 221.43792724609375,
+            "height": 92.601318359375,
+            "top": 167.388916015625,
+            "right": 611.8170166015625,
+            "bottom": 259.990234375,
+            "left": 390.37908935546875
+          },
+          "world": {},
+          "label": "references ×18, 18 references relationships, grouped",
+          "expanded": "true"
+        }
+      ],
+      "bodyText": "GitLineage\nContext\nvitest-dev/vitest\n/\n964e1a4\npartial\nLayers\nGitHub\nfork source\ndepends on remainder\nDEPENDENCIES · 18 members\nFocus\nExplore more\ndocs\nDEPENDENCIES · 9 members\nExplore neighborhood\npackage.json\nDEPENDENCIES · 14 members\nExplore neighborhood\npackages/browser\nDEPENDENCIES · 6 members\nExplore neighborhood\npackages/mocker\nDEPENDENCIES · 5 members\nExplore neighborhood\npackages/ui\nDEPENDENCIES · 15 members\nExplore neighborhood\npackages/vitest\nDEPENDENCIES · 16 members\nExplore neighborhood\nreferences\nREFERENCES · 18 members\nFocus\nExplore more\n− Runtime\n7 relationships · scope\n− Development\n11 relationships · scope\nvitest-dev/vitest\nmain · MIT\nSUBJECT\nnpm:ast-v8-to-istanbul\nPACKAGE · RUNTIME\nnpm:chai\nPACKAGE · RUNTIME\nnpm:convert-source-map\nPACKAGE · RUNTIME\nnpm:fastify\nPACKAGE · DEVELOPMENT\nnpm:lit\nPACKAGE · RUNTIME\nnpm:magicast\nPACKAGE · RUNTIME\nnpm:pathe\nPACKAGE · DEVELOPMENT\nnpm:playwright\nPACKAGE · DEVELOPMENT\nnpm:react-is\nPACKAGE · DEVELOPMENT\nnpm:tinyrainbow\nPACKAGE · RUNTIME\nnpm:vitest\nPACKAGE · DEVELOPMENT\nvitest-dev/istanbuljs\nREPOSITORY\nsponsors/vitest-dev\nEXTERNALPROJECT\ncapricorn86/happy-dom\nmaster\nunjs/std-env\nREPOSITORY\nDirected\nMutual\nNavigation group\n16 objects · 17 shown relationships · 0 exploration links · 8 plates grouping 101\n−\n+\n⤢\nOrigins · 1\nDependencies · 83\nReferences · 18\n\nRecorded relationships · layers share one exploration space.\n\nOverview · 26 objects",
+      "overflow": false
+    },
+    "actions": 2,
+    "interaction": "real Focus click/tap and keyboard expansion",
+    "errors": [],
+    "blocked": []
+  },
+  {
+    "name": "vitest-dev/vitest",
+    "width": 390,
+    "initial": {
+      "nodes": [
+        {
+          "id": "repo:github:vitest-dev/vitest",
+          "label": "vitest-dev/vitest",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:lit",
+          "label": "npm:lit",
+          "inViewport": false
+        },
+        {
+          "id": "repo:github:vitest-dev/istanbuljs",
+          "label": "vitest-dev/istanbuljs",
+          "inViewport": true
+        }
+      ],
+      "drawnCanonicalEdges": [
+        "rel_2a214c982fcb6631"
+      ],
+      "representedMemberTargets": [
+        "pkg:npm:lit"
+      ],
+      "plates": [
+        {
+          "key": "depends_on/DECLARED",
+          "bounds": {
+            "x": -513.4285278320312,
+            "y": 530.9183349609375,
+            "width": 191.93875122070312,
+            "height": 80.26531982421875,
+            "top": 530.9183349609375,
+            "right": -321.4897766113281,
+            "bottom": 611.1836547851562,
+            "left": -513.4285278320312
+          },
+          "world": {},
+          "label": "depends on remainder ×18, 18 depends on relationships, grouped",
+          "expanded": "true"
+        },
+        {
+          "key": "depends_on/DECLARED::manifest::docs ×9",
+          "bounds": {
+            "x": -178.40814208984375,
+            "y": 530.9183349609375,
+            "width": 191.9387664794922,
+            "height": 80.26531982421875,
+            "top": 530.9183349609375,
+            "right": 13.530624389648438,
+            "bottom": 611.1836547851562,
+            "left": -178.40814208984375
+          },
+          "world": {},
+          "label": "docs ×9, 9 depends on relationships, grouped",
+          "expanded": "false"
+        },
+        {
+          "key": "depends_on/DECLARED::manifest::package.json ×14",
+          "bounds": {
+            "x": 44.93878936767578,
+            "y": 530.9183349609375,
+            "width": 191.93878173828125,
+            "height": 80.26531982421875,
+            "top": 530.9183349609375,
+            "right": 236.87757110595703,
+            "bottom": 611.1836547851562,
+            "left": 44.93878936767578
+          },
+          "world": {},
+          "label": "package.json ×14, 14 depends on relationships, grouped",
+          "expanded": "false"
+        },
+        {
+          "key": "depends_on/DECLARED::manifest::packages/browser ×6",
+          "bounds": {
+            "x": 268.2857360839844,
+            "y": 530.9183349609375,
+            "width": 191.93875122070312,
+            "height": 80.26531982421875,
+            "top": 530.9183349609375,
+            "right": 460.2244873046875,
+            "bottom": 611.1836547851562,
+            "left": 268.2857360839844
+          },
+          "world": {},
+          "label": "packages/browser ×6, 6 depends on relationships, grouped",
+          "expanded": "false"
+        },
+        {
+          "key": "depends_on/DECLARED::manifest::packages/mocker ×5",
+          "bounds": {
+            "x": 491.6326599121094,
+            "y": 530.9183349609375,
+            "width": 191.93875122070312,
+            "height": 80.26531982421875,
+            "top": 530.9183349609375,
+            "right": 683.5714111328125,
+            "bottom": 611.1836547851562,
+            "left": 491.6326599121094
+          },
+          "world": {},
+          "label": "packages/mocker ×5, 5 depends on relationships, grouped",
+          "expanded": "false"
+        },
+        {
+          "key": "depends_on/DECLARED::manifest::packages/ui ×15",
+          "bounds": {
+            "x": 714.9796142578125,
+            "y": 530.9183349609375,
+            "width": 191.93878173828125,
+            "height": 80.26531982421875,
+            "top": 530.9183349609375,
+            "right": 906.9183959960938,
+            "bottom": 611.1836547851562,
+            "left": 714.9796142578125
+          },
+          "world": {},
+          "label": "packages/ui ×15, 15 depends on relationships, grouped",
+          "expanded": "false"
+        },
+        {
+          "key": "depends_on/DECLARED::manifest::packages/vitest ×16",
+          "bounds": {
+            "x": 938.3265380859375,
+            "y": 530.9183349609375,
+            "width": 191.938720703125,
+            "height": 80.26531982421875,
+            "top": 530.9183349609375,
+            "right": 1130.2652587890625,
+            "bottom": 611.1836547851562,
+            "left": 938.3265380859375
+          },
+          "world": {},
+          "label": "packages/vitest ×16, 16 depends on relationships, grouped",
+          "expanded": "false"
+        },
+        {
+          "key": "references/DECLARED",
+          "bounds": {
+            "x": 453.2449035644531,
+            "y": -36.1734619140625,
+            "width": 191.93875122070312,
+            "height": 80.26530456542969,
+            "top": -36.1734619140625,
+            "right": 645.1836547851562,
+            "bottom": 44.09184265136719,
+            "left": 453.2449035644531
+          },
+          "world": {},
+          "label": "references ×18, 18 references relationships, grouped",
+          "expanded": "false"
+        }
+      ],
+      "bodyText": "GitLineage\nvitest-dev/vitest\n964e1a4\npartial\nfork source\ndepends on remainder\nDEPENDENCIES · 18 members\nFocus\nExplore more\ndocs\nDEPENDENCIES · 9 members\nExplore neighborhood\npackage.json\nDEPENDENCIES · 14 members\nExplore neighborhood\npackages/browser\nDEPENDENCIES · 6 members\nExplore neighborhood\npackages/mocker\nDEPENDENCIES · 5 members\nExplore neighborhood\npackages/ui\nDEPENDENCIES · 15 members\nExplore neighborhood\npackages/vitest\nDEPENDENCIES · 16 members\nExplore neighborhood\nreferences\nREFERENCES · 18 members\nExplore neighborhood\n− Runtime\n7 relationships · scope\n− Development\n11 relationships · scope\nvitest-dev/vitest\nmain · MIT\nSUBJECT\nnpm:lit\nPACKAGE · RUNTIME\nvitest-dev/istanbuljs\nREPOSITORY\n3 objects · 4 shown relationships · 0 exploration links · 8 plates grouping 101\n−\n+\n⤢\nMap\nOrigins · 1\nDependencies · 83\nReferences · 18\n\nRecorded relationships · layers share one exploration space.\n\ndepends on remainder · 18\ndocs · 9\npackage.json · 14\npackages/browser · 6\npackages/mocker · 5\npackages/ui · 15\npackages/vitest · 16\nreferences · 18\nfork source · vitest-dev/istanbuljs\nGraph\nRelations\nEvidence",
+      "overflow": false
+    },
+    "expanded": {
+      "nodes": [
+        {
+          "id": "repo:github:vitest-dev/vitest",
+          "label": "vitest-dev/vitest",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:bumpp",
+          "label": "npm:bumpp",
+          "inViewport": false
+        },
+        {
+          "id": "pkg:npm:changelogithub",
+          "label": "npm:changelogithub",
+          "inViewport": false
+        },
+        {
+          "id": "pkg:npm:lit",
+          "label": "npm:lit",
+          "inViewport": false
+        },
+        {
+          "id": "pkg:npm:premove",
+          "label": "npm:premove",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:rollup-plugin-dts",
+          "label": "npm:rollup-plugin-dts",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:rollup-plugin-license",
+          "label": "npm:rollup-plugin-license",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:tinyglobby",
+          "label": "npm:tinyglobby",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:typescript",
+          "label": "npm:typescript",
+          "inViewport": false
+        },
+        {
+          "id": "pkg:npm:unplugin-isolated-decl",
+          "label": "npm:unplugin-isolated-decl",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:unplugin-oxc",
+          "label": "npm:unplugin-oxc",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:zx",
+          "label": "npm:zx",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:vitest-dev/istanbuljs",
+          "label": "vitest-dev/istanbuljs",
+          "inViewport": true
+        }
+      ],
+      "drawnCanonicalEdges": [
+        "rel_2a214c982fcb6631"
+      ],
+      "representedMemberTargets": [
+        "pkg:npm:bumpp",
+        "pkg:npm:changelogithub",
+        "pkg:npm:lit",
+        "pkg:npm:premove",
+        "pkg:npm:rollup-plugin-dts",
+        "pkg:npm:rollup-plugin-license",
+        "pkg:npm:tinyglobby",
+        "pkg:npm:typescript",
+        "pkg:npm:unplugin-isolated-decl",
+        "pkg:npm:unplugin-oxc",
+        "pkg:npm:zx"
+      ],
+      "plates": [
+        {
+          "key": "depends_on/DECLARED",
+          "bounds": {
+            "x": -212.7692108154297,
+            "y": 255.04232788085938,
+            "width": 144.69229125976562,
+            "height": 60.5076904296875,
+            "top": 255.04232788085938,
+            "right": -68.07691955566406,
+            "bottom": 315.5500183105469,
+            "left": -212.7692108154297
+          },
+          "world": {},
+          "label": "depends on remainder ×18, 18 depends on relationships, grouped",
+          "expanded": "true"
+        },
+        {
+          "key": "depends_on/DECLARED::manifest::docs ×9",
+          "bounds": {
+            "x": 39.78462219238281,
+            "y": 255.04232788085938,
+            "width": 144.6923065185547,
+            "height": 60.5076904296875,
+            "top": 255.04232788085938,
+            "right": 184.4769287109375,
+            "bottom": 315.5500183105469,
+            "left": 39.78462219238281
+          },
+          "world": {},
+          "label": "docs ×9, 9 depends on relationships, grouped",
+          "expanded": "false"
+        },
+        {
+          "key": "depends_on/DECLARED::manifest::package.json ×14",
+          "bounds": {
+            "x": 208.15383911132812,
+            "y": 255.04232788085938,
+            "width": 145.35000610351562,
+            "height": 61.165374755859375,
+            "top": 255.04232788085938,
+            "right": 353.50384521484375,
+            "bottom": 316.20770263671875,
+            "left": 208.15383911132812
+          },
+          "world": {},
+          "label": "package.json ×14, 14 depends on relationships, grouped",
+          "expanded": "true"
+        },
+        {
+          "key": "depends_on/DECLARED::manifest::packages/browser ×6",
+          "bounds": {
+            "x": 376.5230712890625,
+            "y": 255.04232788085938,
+            "width": 144.69232177734375,
+            "height": 60.5076904296875,
+            "top": 255.04232788085938,
+            "right": 521.2153930664062,
+            "bottom": 315.5500183105469,
+            "left": 376.5230712890625
+          },
+          "world": {},
+          "label": "packages/browser ×6, 6 depends on relationships, grouped",
+          "expanded": "false"
+        },
+        {
+          "key": "depends_on/DECLARED::manifest::packages/mocker ×5",
+          "bounds": {
+            "x": 544.8922729492188,
+            "y": 255.04232788085938,
+            "width": 144.69232177734375,
+            "height": 60.5076904296875,
+            "top": 255.04232788085938,
+            "right": 689.5845947265625,
+            "bottom": 315.5500183105469,
+            "left": 544.8922729492188
+          },
+          "world": {},
+          "label": "packages/mocker ×5, 5 depends on relationships, grouped",
+          "expanded": "false"
+        },
+        {
+          "key": "depends_on/DECLARED::manifest::packages/ui ×15",
+          "bounds": {
+            "x": 713.2615356445312,
+            "y": 255.04232788085938,
+            "width": 144.6922607421875,
+            "height": 60.5076904296875,
+            "top": 255.04232788085938,
+            "right": 857.9537963867188,
+            "bottom": 315.5500183105469,
+            "left": 713.2615356445312
+          },
+          "world": {},
+          "label": "packages/ui ×15, 15 depends on relationships, grouped",
+          "expanded": "false"
+        },
+        {
+          "key": "depends_on/DECLARED::manifest::packages/vitest ×16",
+          "bounds": {
+            "x": 881.6307373046875,
+            "y": 255.04232788085938,
+            "width": 144.6922607421875,
+            "height": 60.5076904296875,
+            "top": 255.04232788085938,
+            "right": 1026.322998046875,
+            "bottom": 315.5500183105469,
+            "left": 881.6307373046875
+          },
+          "world": {},
+          "label": "packages/vitest ×16, 16 depends on relationships, grouped",
+          "expanded": "false"
+        },
+        {
+          "key": "references/DECLARED",
+          "bounds": {
+            "x": 515.953857421875,
+            "y": -172.4576416015625,
+            "width": 144.6922607421875,
+            "height": 60.50767517089844,
+            "top": -172.4576416015625,
+            "right": 660.6461181640625,
+            "bottom": -111.94996643066406,
+            "left": 515.953857421875
+          },
+          "world": {},
+          "label": "references ×18, 18 references relationships, grouped",
+          "expanded": "false"
+        }
+      ],
+      "bodyText": "GitLineage\nvitest-dev/vitest\n964e1a4\npartial\nfork source\ndepends on remainder\nDEPENDENCIES · 18 membe…\nFocus\nExplore more\ndocs\nDEPENDENCIES · 9 members\nExplore neighborhood\npackage.json\nDEPENDENCIES · 14 membe…\nFocus\nExplore more\npackages/browser\nDEPENDENCIES · 6 members\nExplore neighborhood\npackages/mocker\nDEPENDENCIES · 5 members\nExplore neighborhood\npackages/ui\nDEPENDENCIES · 15 members\nExplore neighborhood\npackages/vitest\nDEPENDENCIES · 16 members\nExplore neighborhood\nreferences\nREFERENCES · 18 members\nExplore neighborhood\n− Runtime\n7 relationships · scope\n− Development\n11 relationships · scope\n− Development\n14 relationships · scope\n− Declared here only\n12 relationships · declaration sites\n− Shared across modules\n2 relationships · declaration sites\nvitest-dev/vitest\nmain · MIT\nSUBJECT\nnpm:bumpp\nPACKAGE · DEVELOPMENT\nnpm:changelogithub\nPACKAGE · DEVELOPMENT\nnpm:lit\nPACKAGE · RUNTIME\nnpm:premove\nPACKAGE · DEVELOPMENT\nnpm:rollup-plugin-dts\nPACKAGE · DEVELOPMENT\nnpm:rollup-plugin-license\nPACKAGE · DEVELOPMENT\nnpm:tinyglobby\nPACKAGE · DEVELOPMENT\nnpm:typescript\nPACKAGE · DEVELOPMENT\nnpm:unplugin-isolated-decl\nPACKAGE · DEVELOPMENT\nnpm:unplugin-oxc\nPACKAGE · DEVELOPMENT\nnpm:zx\nPACKAGE · DEVELOPMENT\nvitest-dev/istanbuljs\nREPOSITORY\n13 objects · 17 shown relationships · 0 exploration links · 8 plates grouping 101\n−\n+\n⤢\nMap\nOrigins · 1\nDependencies · 83\nReferences · 18\n\nRecorded relationships · layers share one exploration space.\n\nExplore npm:unplugin-oxc\n\npackage.json → Development → Declared here only\n\ndepends on remainder · 18\ndocs · 9\npackage.json · 14\npackages/browser · 6\npackages/mocker · 5\npackages/ui · 15\npackages/vitest · 16\nreferences · 18\nfork source · vitest-dev/istanbuljs\n‹\nnpm:unplugin-oxc\n›\nGraph\nRelations\nEvidence",
+      "overflow": false
+    },
+    "actions": 3,
+    "interaction": "real Focus click/tap and keyboard expansion",
+    "errors": [],
+    "blocked": []
+  },
+  {
+    "name": "vitest-dev/vitest",
+    "width": 430,
+    "initial": {
+      "nodes": [
+        {
+          "id": "repo:github:vitest-dev/vitest",
+          "label": "vitest-dev/vitest",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:lit",
+          "label": "npm:lit",
+          "inViewport": false
+        },
+        {
+          "id": "repo:github:vitest-dev/istanbuljs",
+          "label": "vitest-dev/istanbuljs",
+          "inViewport": true
+        }
+      ],
+      "drawnCanonicalEdges": [
+        "rel_2a214c982fcb6631"
+      ],
+      "representedMemberTargets": [
+        "pkg:npm:lit"
+      ],
+      "plates": [
+        {
+          "key": "depends_on/DECLARED",
+          "bounds": {
+            "x": -576.2857055664062,
+            "y": 509.18365478515625,
+            "width": 214.38778686523438,
+            "height": 89.653076171875,
+            "top": 509.18365478515625,
+            "right": -361.8979187011719,
+            "bottom": 598.8367309570312,
+            "left": -576.2857055664062
+          },
+          "world": {},
+          "label": "depends on remainder ×18, 18 depends on relationships, grouped",
+          "expanded": "true"
+        },
+        {
+          "key": "depends_on/DECLARED::manifest::docs ×9",
+          "bounds": {
+            "x": -202.08160400390625,
+            "y": 509.18365478515625,
+            "width": 214.38775634765625,
+            "height": 89.653076171875,
+            "top": 509.18365478515625,
+            "right": 12.30615234375,
+            "bottom": 598.8367309570312,
+            "left": -202.08160400390625
+          },
+          "world": {},
+          "label": "docs ×9, 9 depends on relationships, grouped",
+          "expanded": "false"
+        },
+        {
+          "key": "depends_on/DECLARED::manifest::package.json ×14",
+          "bounds": {
+            "x": 47.38778305053711,
+            "y": 509.18365478515625,
+            "width": 214.38775634765625,
+            "height": 89.653076171875,
+            "top": 509.18365478515625,
+            "right": 261.77553939819336,
+            "bottom": 598.8367309570312,
+            "left": 47.38778305053711
+          },
+          "world": {},
+          "label": "package.json ×14, 14 depends on relationships, grouped",
+          "expanded": "false"
+        },
+        {
+          "key": "depends_on/DECLARED::manifest::packages/browser ×6",
+          "bounds": {
+            "x": 296.857177734375,
+            "y": 509.18365478515625,
+            "width": 214.38775634765625,
+            "height": 89.653076171875,
+            "top": 509.18365478515625,
+            "right": 511.24493408203125,
+            "bottom": 598.8367309570312,
+            "left": 296.857177734375
+          },
+          "world": {},
+          "label": "packages/browser ×6, 6 depends on relationships, grouped",
+          "expanded": "false"
+        },
+        {
+          "key": "depends_on/DECLARED::manifest::packages/mocker ×5",
+          "bounds": {
+            "x": 546.3265380859375,
+            "y": 509.18365478515625,
+            "width": 214.38775634765625,
+            "height": 89.653076171875,
+            "top": 509.18365478515625,
+            "right": 760.7142944335938,
+            "bottom": 598.8367309570312,
+            "left": 546.3265380859375
+          },
+          "world": {},
+          "label": "packages/mocker ×5, 5 depends on relationships, grouped",
+          "expanded": "false"
+        },
+        {
+          "key": "depends_on/DECLARED::manifest::packages/ui ×15",
+          "bounds": {
+            "x": 795.7959594726562,
+            "y": 509.18365478515625,
+            "width": 214.38775634765625,
+            "height": 89.653076171875,
+            "top": 509.18365478515625,
+            "right": 1010.1837158203125,
+            "bottom": 598.8367309570312,
+            "left": 795.7959594726562
+          },
+          "world": {},
+          "label": "packages/ui ×15, 15 depends on relationships, grouped",
+          "expanded": "false"
+        },
+        {
+          "key": "depends_on/DECLARED::manifest::packages/vitest ×16",
+          "bounds": {
+            "x": 1045.265380859375,
+            "y": 509.18365478515625,
+            "width": 214.3876953125,
+            "height": 89.653076171875,
+            "top": 509.18365478515625,
+            "right": 1259.653076171875,
+            "bottom": 598.8367309570312,
+            "left": 1045.265380859375
+          },
+          "world": {},
+          "label": "packages/vitest ×16, 16 depends on relationships, grouped",
+          "expanded": "false"
+        },
+        {
+          "key": "references/DECLARED",
+          "bounds": {
+            "x": 503.4490051269531,
+            "y": -124.23471069335938,
+            "width": 214.38778686523438,
+            "height": 89.65306854248047,
+            "top": -124.23471069335938,
+            "right": 717.8367919921875,
+            "bottom": -34.581642150878906,
+            "left": 503.4490051269531
+          },
+          "world": {},
+          "label": "references ×18, 18 references relationships, grouped",
+          "expanded": "false"
+        }
+      ],
+      "bodyText": "GitLineage\nvitest-dev/vitest\n964e1a4\npartial\nfork source\ndepends on remainder\nDEPENDENCIES · 18 members\nFocus\nExplore more\ndocs\nDEPENDENCIES · 9 members\nExplore neighborhood\npackage.json\nDEPENDENCIES · 14 members\nExplore neighborhood\npackages/browser\nDEPENDENCIES · 6 members\nExplore neighborhood\npackages/mocker\nDEPENDENCIES · 5 members\nExplore neighborhood\npackages/ui\nDEPENDENCIES · 15 members\nExplore neighborhood\npackages/vitest\nDEPENDENCIES · 16 members\nExplore neighborhood\nreferences\nREFERENCES · 18 members\nExplore neighborhood\n− Runtime\n7 relationships · scope\n− Development\n11 relationships · scope\nvitest-dev/vitest\nmain · MIT\nSUBJECT\nnpm:lit\nPACKAGE · RUNTIME\nvitest-dev/istanbuljs\nREPOSITORY\n3 objects · 4 shown relationships · 0 exploration links · 8 plates grouping 101\n−\n+\n⤢\nMap\nOrigins · 1\nDependencies · 83\nReferences · 18\n\nRecorded relationships · layers share one exploration space.\n\ndepends on remainder · 18\ndocs · 9\npackage.json · 14\npackages/browser · 6\npackages/mocker · 5\npackages/ui · 15\npackages/vitest · 16\nreferences · 18\nfork source · vitest-dev/istanbuljs\nGraph\nRelations\nEvidence",
+      "overflow": false
+    },
+    "expanded": {
+      "nodes": [
+        {
+          "id": "repo:github:vitest-dev/vitest",
+          "label": "vitest-dev/vitest",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:bumpp",
+          "label": "npm:bumpp",
+          "inViewport": false
+        },
+        {
+          "id": "pkg:npm:changelogithub",
+          "label": "npm:changelogithub",
+          "inViewport": false
+        },
+        {
+          "id": "pkg:npm:lit",
+          "label": "npm:lit",
+          "inViewport": false
+        },
+        {
+          "id": "pkg:npm:premove",
+          "label": "npm:premove",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:rollup-plugin-dts",
+          "label": "npm:rollup-plugin-dts",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:rollup-plugin-license",
+          "label": "npm:rollup-plugin-license",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:tinyglobby",
+          "label": "npm:tinyglobby",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:typescript",
+          "label": "npm:typescript",
+          "inViewport": false
+        },
+        {
+          "id": "pkg:npm:unplugin-isolated-decl",
+          "label": "npm:unplugin-isolated-decl",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:unplugin-oxc",
+          "label": "npm:unplugin-oxc",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:zx",
+          "label": "npm:zx",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:vitest-dev/istanbuljs",
+          "label": "vitest-dev/istanbuljs",
+          "inViewport": false
+        }
+      ],
+      "drawnCanonicalEdges": [
+        "rel_2a214c982fcb6631"
+      ],
+      "representedMemberTargets": [
+        "pkg:npm:bumpp",
+        "pkg:npm:changelogithub",
+        "pkg:npm:lit",
+        "pkg:npm:premove",
+        "pkg:npm:rollup-plugin-dts",
+        "pkg:npm:rollup-plugin-license",
+        "pkg:npm:tinyglobby",
+        "pkg:npm:typescript",
+        "pkg:npm:unplugin-isolated-decl",
+        "pkg:npm:unplugin-oxc",
+        "pkg:npm:zx"
+      ],
+      "plates": [
+        {
+          "key": "depends_on/DECLARED",
+          "bounds": {
+            "x": -240.46151733398438,
+            "y": 193.96539306640625,
+            "width": 161.61537170410156,
+            "height": 67.5845947265625,
+            "top": 193.96539306640625,
+            "right": -78.84614562988281,
+            "bottom": 261.54998779296875,
+            "left": -240.46151733398438
+          },
+          "world": {},
+          "label": "depends on remainder ×18, 18 depends on relationships, grouped",
+          "expanded": "true"
+        },
+        {
+          "key": "depends_on/DECLARED::manifest::docs ×9",
+          "bounds": {
+            "x": 41.630775451660156,
+            "y": 193.96539306640625,
+            "width": 161.61538696289062,
+            "height": 67.5845947265625,
+            "top": 193.96539306640625,
+            "right": 203.24616241455078,
+            "bottom": 261.54998779296875,
+            "left": 41.630775451660156
+          },
+          "world": {},
+          "label": "docs ×9, 9 depends on relationships, grouped",
+          "expanded": "false"
+        },
+        {
+          "key": "depends_on/DECLARED::manifest::package.json ×14",
+          "bounds": {
+            "x": 229.6923065185547,
+            "y": 193.96539306640625,
+            "width": 162.34999084472656,
+            "height": 68.3192138671875,
+            "top": 193.96539306640625,
+            "right": 392.04229736328125,
+            "bottom": 262.28460693359375,
+            "left": 229.6923065185547
+          },
+          "world": {},
+          "label": "package.json ×14, 14 depends on relationships, grouped",
+          "expanded": "true"
+        },
+        {
+          "key": "depends_on/DECLARED::manifest::packages/browser ×6",
+          "bounds": {
+            "x": 417.75384521484375,
+            "y": 193.96539306640625,
+            "width": 161.6153564453125,
+            "height": 67.5845947265625,
+            "top": 193.96539306640625,
+            "right": 579.3692016601562,
+            "bottom": 261.54998779296875,
+            "left": 417.75384521484375
+          },
+          "world": {},
+          "label": "packages/browser ×6, 6 depends on relationships, grouped",
+          "expanded": "false"
+        },
+        {
+          "key": "depends_on/DECLARED::manifest::packages/mocker ×5",
+          "bounds": {
+            "x": 605.8153686523438,
+            "y": 193.96539306640625,
+            "width": 161.6153564453125,
+            "height": 67.5845947265625,
+            "top": 193.96539306640625,
+            "right": 767.4307250976562,
+            "bottom": 261.54998779296875,
+            "left": 605.8153686523438
+          },
+          "world": {},
+          "label": "packages/mocker ×5, 5 depends on relationships, grouped",
+          "expanded": "false"
+        },
+        {
+          "key": "depends_on/DECLARED::manifest::packages/ui ×15",
+          "bounds": {
+            "x": 793.8768920898438,
+            "y": 193.96539306640625,
+            "width": 161.61541748046875,
+            "height": 67.5845947265625,
+            "top": 193.96539306640625,
+            "right": 955.4923095703125,
+            "bottom": 261.54998779296875,
+            "left": 793.8768920898438
+          },
+          "world": {},
+          "label": "packages/ui ×15, 15 depends on relationships, grouped",
+          "expanded": "false"
+        },
+        {
+          "key": "depends_on/DECLARED::manifest::packages/vitest ×16",
+          "bounds": {
+            "x": 981.9384155273438,
+            "y": 193.96539306640625,
+            "width": 161.61541748046875,
+            "height": 67.5845947265625,
+            "top": 193.96539306640625,
+            "right": 1143.5538330078125,
+            "bottom": 261.54998779296875,
+            "left": 981.9384155273438
+          },
+          "world": {},
+          "label": "packages/vitest ×16, 16 depends on relationships, grouped",
+          "expanded": "false"
+        },
+        {
+          "key": "references/DECLARED",
+          "bounds": {
+            "x": 573.4923095703125,
+            "y": -283.5345764160156,
+            "width": 161.6153564453125,
+            "height": 67.5845947265625,
+            "top": -283.5345764160156,
+            "right": 735.107666015625,
+            "bottom": -215.94998168945312,
+            "left": 573.4923095703125
+          },
+          "world": {},
+          "label": "references ×18, 18 references relationships, grouped",
+          "expanded": "false"
+        }
+      ],
+      "bodyText": "GitLineage\nvitest-dev/vitest\n964e1a4\npartial\nfork source\ndepends on remainder\nDEPENDENCIES · 18 members\nFocus\nExplore more\ndocs\nDEPENDENCIES · 9 members\nExplore neighborhood\npackage.json\nDEPENDENCIES · 14 members\nFocus\nExplore more\npackages/browser\nDEPENDENCIES · 6 members\nExplore neighborhood\npackages/mocker\nDEPENDENCIES · 5 members\nExplore neighborhood\npackages/ui\nDEPENDENCIES · 15 members\nExplore neighborhood\npackages/vitest\nDEPENDENCIES · 16 members\nExplore neighborhood\nreferences\nREFERENCES · 18 members\nExplore neighborhood\n− Runtime\n7 relationships · scope\n− Development\n11 relationships · scope\n− Development\n14 relationships · scope\n− Declared here only\n12 relationships · declaration sites\n− Shared across modules\n2 relationships · declaration sites\nvitest-dev/vitest\nmain · MIT\nSUBJECT\nnpm:bumpp\nPACKAGE · DEVELOPMENT\nnpm:changelogithub\nPACKAGE · DEVELOPMENT\nnpm:lit\nPACKAGE · RUNTIME\nnpm:premove\nPACKAGE · DEVELOPMENT\nnpm:rollup-plugin-dts\nPACKAGE · DEVELOPMENT\nnpm:rollup-plugin-license\nPACKAGE · DEVELOPMENT\nnpm:tinyglobby\nPACKAGE · DEVELOPMENT\nnpm:typescript\nPACKAGE · DEVELOPMENT\nnpm:unplugin-isolated-decl\nPACKAGE · DEVELOPMENT\nnpm:unplugin-oxc\nPACKAGE · DEVELOPMENT\nnpm:zx\nPACKAGE · DEVELOPMENT\nvitest-dev/istanbuljs\nREPOSITORY\n13 objects · 17 shown relationships · 0 exploration links · 8 plates grouping 101\n−\n+\n⤢\nMap\nOrigins · 1\nDependencies · 83\nReferences · 18\n\nRecorded relationships · layers share one exploration space.\n\nExplore npm:unplugin-oxc\n\npackage.json → Development → Declared here only\n\ndepends on remainder · 18\ndocs · 9\npackage.json · 14\npackages/browser · 6\npackages/mocker · 5\npackages/ui · 15\npackages/vitest · 16\nreferences · 18\nfork source · vitest-dev/istanbuljs\n‹\nnpm:unplugin-oxc\n›\nGraph\nRelations\nEvidence",
+      "overflow": false
+    },
+    "actions": 3,
+    "interaction": "real Focus click/tap and keyboard expansion",
+    "errors": [],
+    "blocked": []
+  },
+  {
+    "name": "expressjs/express",
+    "width": 1280,
+    "initial": {
+      "nodes": [
+        {
+          "id": "repo:github:expressjs/express",
+          "label": "expressjs/express",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:express-session",
+          "label": "npm:express-session",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:finalhandler",
+          "label": "npm:finalhandler",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:nyc",
+          "label": "npm:nyc",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:expressjs/discussions",
+          "label": "expressjs/discussions",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:expressjs/expressjs.com",
+          "label": "expressjs/expressjs.com",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:ladjs/consolidate",
+          "label": "ladjs/consolidate",
+          "inViewport": true
+        }
+      ],
+      "drawnCanonicalEdges": [],
+      "representedMemberTargets": [
+        "pkg:npm:express-session",
+        "pkg:npm:finalhandler",
+        "pkg:npm:nyc",
+        "repo:github:expressjs/discussions",
+        "repo:github:expressjs/expressjs.com",
+        "repo:github:ladjs/consolidate"
+      ],
+      "plates": [
+        {
+          "key": "depends_on/DECLARED",
+          "bounds": {
+            "x": 415.32989501953125,
+            "y": 664.6262817382812,
+            "width": 199.30413818359375,
+            "height": 83.3453369140625,
+            "top": 664.6262817382812,
+            "right": 614.634033203125,
+            "bottom": 747.9716186523438,
+            "left": 415.32989501953125
+          },
+          "world": {},
+          "label": "depends on ×44, 44 depends on relationships, grouped",
+          "expanded": "true"
+        },
+        {
+          "key": "references/DECLARED",
+          "bounds": {
+            "x": 415.32989501953125,
+            "y": 229.7809295654297,
+            "width": 199.30413818359375,
+            "height": 83.34535217285156,
+            "top": 229.7809295654297,
+            "right": 614.634033203125,
+            "bottom": 313.12628173828125,
+            "left": 415.32989501953125
+          },
+          "world": {},
+          "label": "references ×4, 4 references relationships, grouped",
+          "expanded": "true"
+        }
+      ],
+      "bodyText": "GitLineage\nContext\nexpressjs/express\n/\n7ef9844\nanalyzed\nLayers\nGitHub\ndepends on\nDEPENDENCIES · 44 members\nFocus\nExplore more\nreferences\nREFERENCES · 4 members\nFocus\nExplore more\n− Development\n16 relationships · scope\n− Runtime\n28 relationships · scope\nexpressjs/express\nmaster · MIT\nSUBJECT\nnpm:express-session\nPACKAGE · DEVELOPMENT\nnpm:finalhandler\nPACKAGE · RUNTIME\nnpm:nyc\nPACKAGE · DEVELOPMENT\nexpressjs/discussions\nmaster\nexpressjs/expressjs.com\nmain\nladjs/consolidate\nmaster · fork\nDirected\nMutual\nNavigation group\n7 objects · 8 shown relationships · 0 exploration links · 2 plates grouping 48\n−\n+\n⤢\nOrigins · 0\nDependencies · 44\nReferences · 4\n\nNo recorded ancestry evidence · dependencies are separate claims.\n\nOverview · 11 objects",
+      "overflow": false
+    },
+    "expanded": {
+      "nodes": [
+        {
+          "id": "repo:github:expressjs/express",
+          "label": "expressjs/express",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:accepts",
+          "label": "npm:accepts",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:connect-redis",
+          "label": "npm:connect-redis",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:cookie-signature",
+          "label": "npm:cookie-signature",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:ejs",
+          "label": "npm:ejs",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:express-session",
+          "label": "npm:express-session",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:finalhandler",
+          "label": "npm:finalhandler",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:method-override",
+          "label": "npm:method-override",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:mocha",
+          "label": "npm:mocha",
+          "inViewport": false
+        },
+        {
+          "id": "pkg:npm:nyc",
+          "label": "npm:nyc",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:send",
+          "label": "npm:send",
+          "inViewport": false
+        },
+        {
+          "id": "pkg:npm:statuses",
+          "label": "npm:statuses",
+          "inViewport": false
+        },
+        {
+          "id": "repo:github:expressjs/discussions",
+          "label": "expressjs/discussions",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:expressjs/expressjs.com",
+          "label": "expressjs/expressjs.com",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:ladjs/consolidate",
+          "label": "ladjs/consolidate",
+          "inViewport": false
+        }
+      ],
+      "drawnCanonicalEdges": [],
+      "representedMemberTargets": [
+        "pkg:npm:accepts",
+        "pkg:npm:connect-redis",
+        "pkg:npm:cookie-signature",
+        "pkg:npm:ejs",
+        "pkg:npm:express-session",
+        "pkg:npm:finalhandler",
+        "pkg:npm:method-override",
+        "pkg:npm:mocha",
+        "pkg:npm:nyc",
+        "pkg:npm:send",
+        "pkg:npm:statuses",
+        "repo:github:expressjs/discussions",
+        "repo:github:expressjs/expressjs.com",
+        "repo:github:ladjs/consolidate"
+      ],
+      "plates": [
+        {
+          "key": "depends_on/DECLARED",
+          "bounds": {
+            "x": 390.37908935546875,
+            "y": 448.21246337890625,
+            "width": 221.43792724609375,
+            "height": 92.60125732421875,
+            "top": 448.21246337890625,
+            "right": 611.8170166015625,
+            "bottom": 540.813720703125,
+            "left": 390.37908935546875
+          },
+          "world": {},
+          "label": "depends on ×44, 44 depends on relationships, grouped",
+          "expanded": "true"
+        },
+        {
+          "key": "references/DECLARED",
+          "bounds": {
+            "x": 390.37908935546875,
+            "y": -34.92478942871094,
+            "width": 221.43792724609375,
+            "height": 92.60130310058594,
+            "top": -34.92478942871094,
+            "right": 611.8170166015625,
+            "bottom": 57.676513671875,
+            "left": 390.37908935546875
+          },
+          "world": {},
+          "label": "references ×4, 4 references relationships, grouped",
+          "expanded": "true"
+        }
+      ],
+      "bodyText": "GitLineage\nContext\nexpressjs/express\n/\n7ef9844\nanalyzed\nLayers\nGitHub\ndepends on\nDEPENDENCIES · 44 members\nFocus\nExplore more\nreferences\nREFERENCES · 4 members\nFocus\nExplore more\n− Development\n16 relationships · scope\n− Runtime\n28 relationships · scope\nexpressjs/express\nmaster · MIT\nSUBJECT\nnpm:accepts\nPACKAGE · RUNTIME\nnpm:connect-redis\nPACKAGE · DEVELOPMENT\nnpm:cookie-signature\nPACKAGE · RUNTIME\nnpm:ejs\nPACKAGE · DEVELOPMENT\nnpm:express-session\nPACKAGE · DEVELOPMENT\nnpm:finalhandler\nPACKAGE · RUNTIME\nnpm:method-override\nPACKAGE · DEVELOPMENT\nnpm:mocha\nPACKAGE · DEVELOPMENT\nnpm:nyc\nPACKAGE · DEVELOPMENT\nnpm:send\nPACKAGE · RUNTIME\nnpm:statuses\nPACKAGE · RUNTIME\nexpressjs/discussions\nmaster\nexpressjs/expressjs.com\nmain\nladjs/consolidate\nmaster · fork\nDirected\nMutual\nNavigation group\n15 objects · 16 shown relationships · 0 exploration links · 2 plates grouping 48\n−\n+\n⤢\nOrigins · 0\nDependencies · 44\nReferences · 4\n\nNo recorded ancestry evidence · dependencies are separate claims.\n\nOverview · 19 objects",
+      "overflow": false
+    },
+    "actions": 2,
+    "interaction": "real Focus click/tap and keyboard expansion",
+    "errors": [],
+    "blocked": []
+  },
+  {
+    "name": "expressjs/express",
+    "width": 390,
+    "initial": {
+      "nodes": [
+        {
+          "id": "repo:github:expressjs/express",
+          "label": "expressjs/express",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:nyc",
+          "label": "npm:nyc",
+          "inViewport": false
+        }
+      ],
+      "drawnCanonicalEdges": [],
+      "representedMemberTargets": [
+        "pkg:npm:nyc"
+      ],
+      "plates": [
+        {
+          "key": "depends_on/DECLARED",
+          "bounds": {
+            "x": 65.4000015258789,
+            "y": 541.4000244140625,
+            "width": 264,
+            "height": 110.39996337890625,
+            "top": 541.4000244140625,
+            "right": 329.4000015258789,
+            "bottom": 651.7999877929688,
+            "left": 65.4000015258789
+          },
+          "world": {},
+          "label": "depends on ×44, 44 depends on relationships, grouped",
+          "expanded": "true"
+        },
+        {
+          "key": "references/DECLARED",
+          "bounds": {
+            "x": 473.3999938964844,
+            "y": -238.60000610351562,
+            "width": 264.0000305175781,
+            "height": 110.39999389648438,
+            "top": -238.60000610351562,
+            "right": 737.4000244140625,
+            "bottom": -128.20001220703125,
+            "left": 473.3999938964844
+          },
+          "world": {},
+          "label": "references ×4, 4 references relationships, grouped",
+          "expanded": "false"
+        }
+      ],
+      "bodyText": "GitLineage\nexpressjs/express\n7ef9844\nanalyzed\ndepends on\nDEPENDENCIES · 44 members\nFocus\nExplore more\nreferences\nREFERENCES · 4 members\nExplore neighborhood\n− Development\n16 relationships · scope\n− Runtime\n28 relationships · scope\nexpressjs/express\nmaster · MIT\nSUBJECT\nnpm:nyc\nPACKAGE · DEVELOPMENT\n2 objects · 3 shown relationships · 0 exploration links · 2 plates grouping 48\n−\n+\n⤢\nMap\nOrigins · 0\nDependencies · 44\nReferences · 4\n\nNo recorded ancestry evidence · dependencies are separate claims.\n\ndepends on · 44\nreferences · 4\nGraph\nRelations\nEvidence",
+      "overflow": false
+    },
+    "expanded": {
+      "nodes": [
+        {
+          "id": "repo:github:expressjs/express",
+          "label": "expressjs/express",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:accepts",
+          "label": "npm:accepts",
+          "inViewport": false
+        },
+        {
+          "id": "pkg:npm:connect-redis",
+          "label": "npm:connect-redis",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:express-session",
+          "label": "npm:express-session",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:finalhandler",
+          "label": "npm:finalhandler",
+          "inViewport": false
+        },
+        {
+          "id": "pkg:npm:nyc",
+          "label": "npm:nyc",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:statuses",
+          "label": "npm:statuses",
+          "inViewport": false
+        }
+      ],
+      "drawnCanonicalEdges": [],
+      "representedMemberTargets": [
+        "pkg:npm:accepts",
+        "pkg:npm:connect-redis",
+        "pkg:npm:express-session",
+        "pkg:npm:finalhandler",
+        "pkg:npm:nyc",
+        "pkg:npm:statuses"
+      ],
+      "plates": [
+        {
+          "key": "depends_on/DECLARED",
+          "bounds": {
+            "x": 260.9135437011719,
+            "y": 282.956787109375,
+            "width": 207.3580322265625,
+            "height": 87.25927734375,
+            "top": 282.956787109375,
+            "right": 468.2715759277344,
+            "bottom": 370.216064453125,
+            "left": 260.9135437011719
+          },
+          "world": {},
+          "label": "depends on ×44, 44 depends on relationships, grouped",
+          "expanded": "true"
+        },
+        {
+          "key": "references/DECLARED",
+          "bounds": {
+            "x": 579.9259033203125,
+            "y": -326.91973876953125,
+            "width": 206.41973876953125,
+            "height": 86.32098388671875,
+            "top": -326.91973876953125,
+            "right": 786.3456420898438,
+            "bottom": -240.5987548828125,
+            "left": 579.9259033203125
+          },
+          "world": {},
+          "label": "references ×4, 4 references relationships, grouped",
+          "expanded": "false"
+        }
+      ],
+      "bodyText": "GitLineage\nexpressjs/express\n7ef9844\nanalyzed\ndepends on\nDEPENDENCIES · 44 member…\nFocus\nExplore more\nreferences\nREFERENCES · 4 members\nExplore neighborhood\n− Development\n16 relationships · scope\n− Runtime\n28 relationships · scope\nexpressjs/express\nmaster · MIT\nSUBJECT\nnpm:accepts\nPACKAGE · RUNTIME\nnpm:connect-redis\nPACKAGE · DEVELOPMENT\nnpm:express-session\nPACKAGE · DEVELOPMENT\nnpm:finalhandler\nPACKAGE · RUNTIME\nnpm:nyc\nPACKAGE · DEVELOPMENT\nnpm:statuses\nPACKAGE · RUNTIME\n7 objects · 8 shown relationships · 0 exploration links · 2 plates grouping 48\n−\n+\n⤢\nMap\nOrigins · 0\nDependencies · 44\nReferences · 4\n\nNo recorded ancestry evidence · dependencies are separate claims.\n\nExplore npm:nyc\n\ndepends on → Development\n\ndepends on · 44\nreferences · 4\n‹\nnpm:nyc\n›\nGraph\nRelations\nEvidence",
+      "overflow": false
+    },
+    "actions": 2,
+    "interaction": "real Focus click/tap and keyboard expansion",
+    "errors": [],
+    "blocked": []
+  },
+  {
+    "name": "expressjs/express",
+    "width": 430,
+    "initial": {
+      "nodes": [
+        {
+          "id": "repo:github:expressjs/express",
+          "label": "expressjs/express",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:nyc",
+          "label": "npm:nyc",
+          "inViewport": false
+        }
+      ],
+      "drawnCanonicalEdges": [],
+      "representedMemberTargets": [
+        "pkg:npm:nyc"
+      ],
+      "plates": [
+        {
+          "key": "depends_on/DECLARED",
+          "bounds": {
+            "x": 85.4000244140625,
+            "y": 516.4000244140625,
+            "width": 264,
+            "height": 110.39996337890625,
+            "top": 516.4000244140625,
+            "right": 349.4000244140625,
+            "bottom": 626.7999877929688,
+            "left": 85.4000244140625
+          },
+          "world": {},
+          "label": "depends on ×44, 44 depends on relationships, grouped",
+          "expanded": "true"
+        },
+        {
+          "key": "references/DECLARED",
+          "bounds": {
+            "x": 493.4000244140625,
+            "y": -263.5999755859375,
+            "width": 264,
+            "height": 110.40000915527344,
+            "top": -263.5999755859375,
+            "right": 757.4000244140625,
+            "bottom": -153.19996643066406,
+            "left": 493.4000244140625
+          },
+          "world": {},
+          "label": "references ×4, 4 references relationships, grouped",
+          "expanded": "false"
+        }
+      ],
+      "bodyText": "GitLineage\nexpressjs/express\n7ef9844\nanalyzed\ndepends on\nDEPENDENCIES · 44 members\nFocus\nExplore more\nreferences\nREFERENCES · 4 members\nExplore neighborhood\n− Development\n16 relationships · scope\n− Runtime\n28 relationships · scope\nexpressjs/express\nmaster · MIT\nSUBJECT\nnpm:nyc\nPACKAGE · DEVELOPMENT\n2 objects · 3 shown relationships · 0 exploration links · 2 plates grouping 48\n−\n+\n⤢\nMap\nOrigins · 0\nDependencies · 44\nReferences · 4\n\nNo recorded ancestry evidence · dependencies are separate claims.\n\ndepends on · 44\nreferences · 4\nGraph\nRelations\nEvidence",
+      "overflow": false
+    },
+    "expanded": {
+      "nodes": [
+        {
+          "id": "repo:github:expressjs/express",
+          "label": "expressjs/express",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:accepts",
+          "label": "npm:accepts",
+          "inViewport": false
+        },
+        {
+          "id": "pkg:npm:connect-redis",
+          "label": "npm:connect-redis",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:express-session",
+          "label": "npm:express-session",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:finalhandler",
+          "label": "npm:finalhandler",
+          "inViewport": false
+        },
+        {
+          "id": "pkg:npm:nyc",
+          "label": "npm:nyc",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:statuses",
+          "label": "npm:statuses",
+          "inViewport": false
+        }
+      ],
+      "drawnCanonicalEdges": [],
+      "representedMemberTargets": [
+        "pkg:npm:accepts",
+        "pkg:npm:connect-redis",
+        "pkg:npm:express-session",
+        "pkg:npm:finalhandler",
+        "pkg:npm:nyc",
+        "pkg:npm:statuses"
+      ],
+      "plates": [
+        {
+          "key": "depends_on/DECLARED",
+          "bounds": {
+            "x": 288.62274169921875,
+            "y": 225.14476013183594,
+            "width": 231.61041259765625,
+            "height": 97.46501159667969,
+            "top": 225.14476013183594,
+            "right": 520.233154296875,
+            "bottom": 322.6097717285156,
+            "left": 288.62274169921875
+          },
+          "world": {},
+          "label": "depends on ×44, 44 depends on relationships, grouped",
+          "expanded": "true"
+        },
+        {
+          "key": "references/DECLARED",
+          "bounds": {
+            "x": 644.9464721679688,
+            "y": -456.0623779296875,
+            "width": 230.56243896484375,
+            "height": 96.41702270507812,
+            "top": -456.0623779296875,
+            "right": 875.5089111328125,
+            "bottom": -359.6453552246094,
+            "left": 644.9464721679688
+          },
+          "world": {},
+          "label": "references ×4, 4 references relationships, grouped",
+          "expanded": "false"
+        }
+      ],
+      "bodyText": "GitLineage\nexpressjs/express\n7ef9844\nanalyzed\ndepends on\nDEPENDENCIES · 44 members\nFocus\nExplore more\nreferences\nREFERENCES · 4 members\nExplore neighborhood\n− Development\n16 relationships · scope\n− Runtime\n28 relationships · scope\nexpressjs/express\nmaster · MIT\nSUBJECT\nnpm:accepts\nPACKAGE · RUNTIME\nnpm:connect-redis\nPACKAGE · DEVELOPMENT\nnpm:express-session\nPACKAGE · DEVELOPMENT\nnpm:finalhandler\nPACKAGE · RUNTIME\nnpm:nyc\nPACKAGE · DEVELOPMENT\nnpm:statuses\nPACKAGE · RUNTIME\n7 objects · 8 shown relationships · 0 exploration links · 2 plates grouping 48\n−\n+\n⤢\nMap\nOrigins · 0\nDependencies · 44\nReferences · 4\n\nNo recorded ancestry evidence · dependencies are separate claims.\n\nExplore npm:nyc\n\ndepends on → Development\n\ndepends on · 44\nreferences · 4\n‹\nnpm:nyc\n›\nGraph\nRelations\nEvidence",
+      "overflow": false
+    },
+    "actions": 2,
+    "interaction": "real Focus click/tap and keyboard expansion",
+    "errors": [],
+    "blocked": []
+  },
+  {
+    "name": "nachocebey/is",
+    "width": 1280,
+    "initial": {
+      "nodes": [
+        {
+          "id": "repo:github:nachocebey/is",
+          "label": "nachocebey/is",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:jsdom",
+          "label": "npm:jsdom",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:tempy",
+          "label": "npm:tempy",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:typescript",
+          "label": "npm:typescript",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:sindresorhus/is",
+          "label": "sindresorhus/is",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:sindresorhus/file-type",
+          "label": "sindresorhus/file-type",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:sindresorhus/is-empty-iterable",
+          "label": "sindresorhus/is-empty-iterable",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:sindresorhus/is-error-constructor",
+          "label": "sindresorhus/is-error-constructor",
+          "inViewport": true
+        }
+      ],
+      "drawnCanonicalEdges": [
+        "rel_0650192de92c7a9b",
+        "rel_3b0344d5890f0179",
+        "rel_db2892b35b44e6a1"
+      ],
+      "representedMemberTargets": [
+        "pkg:npm:jsdom",
+        "pkg:npm:tempy",
+        "pkg:npm:typescript",
+        "repo:github:sindresorhus/file-type",
+        "repo:github:sindresorhus/is-empty-iterable",
+        "repo:github:sindresorhus/is-error-constructor"
+      ],
+      "plates": [
+        {
+          "key": "depends_on/DECLARED",
+          "bounds": {
+            "x": 663.1966552734375,
+            "y": 660.8905029296875,
+            "width": 189.009765625,
+            "height": 79.04046630859375,
+            "top": 660.8905029296875,
+            "right": 852.2064208984375,
+            "bottom": 739.9309692382812,
+            "left": 663.1966552734375
+          },
+          "world": {},
+          "label": "depends on ×8, 8 depends on relationships, grouped",
+          "expanded": "true"
+        },
+        {
+          "key": "references/DECLARED",
+          "bounds": {
+            "x": 663.1966552734375,
+            "y": 248.50558471679688,
+            "width": 189.009765625,
+            "height": 79.04043579101562,
+            "top": 248.50558471679688,
+            "right": 852.2064208984375,
+            "bottom": 327.5460205078125,
+            "left": 663.1966552734375
+          },
+          "world": {},
+          "label": "references ×10, 10 references relationships, grouped",
+          "expanded": "true"
+        }
+      ],
+      "bodyText": "GitLineage\nContext\nnachocebey/is\n/\ne9c026c\nanalyzed\nLayers\nGitHub\nfork source\nidentical content\n×19 blobs\nshares history\n×200 commits\ndepends on\nDEPENDENCIES · 8 members\nFocus\nExplore more\nreferences\nREFERENCES · 10 members\nFocus\nExplore more\nnachocebey/is\nmain · fork · MIT\nSUBJECT\nnpm:jsdom\nPACKAGE\nnpm:tempy\nPACKAGE\nnpm:typescript\nPACKAGE\nsindresorhus/is\nmain\nsindresorhus/file-type\nmain\nsindresorhus/is-empty-iterable\nmain\nsindresorhus/is-error-constru…\nmain\nDirected\nMutual\nNavigation group\n8 objects · 9 shown relationships · 0 exploration links · 2 plates grouping 18\n−\n+\n⤢\nOrigins · 3\nDependencies · 8\nReferences · 10\n\nRecorded relationships · layers share one exploration space.\n\nOverview · 10 objects",
+      "overflow": false
+    },
+    "expanded": {
+      "nodes": [
+        {
+          "id": "repo:github:nachocebey/is",
+          "label": "nachocebey/is",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:del-cli",
+          "label": "npm:del-cli",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:expect-type",
+          "label": "npm:expect-type",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:jsdom",
+          "label": "npm:jsdom",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:rxjs",
+          "label": "npm:rxjs",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:tempy",
+          "label": "npm:tempy",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:typescript",
+          "label": "npm:typescript",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:xo",
+          "label": "npm:xo",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:zen-observable",
+          "label": "npm:zen-observable",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:sindresorhus/is",
+          "label": "sindresorhus/is",
+          "inViewport": false
+        },
+        {
+          "id": "repo:github:sindresorhus/file-type",
+          "label": "sindresorhus/file-type",
+          "inViewport": false
+        },
+        {
+          "id": "repo:github:sindresorhus/is-empty-iterable",
+          "label": "sindresorhus/is-empty-iterable",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:sindresorhus/is-error-constructor",
+          "label": "sindresorhus/is-error-constructor",
+          "inViewport": false
+        }
+      ],
+      "drawnCanonicalEdges": [
+        "rel_0650192de92c7a9b",
+        "rel_3b0344d5890f0179",
+        "rel_db2892b35b44e6a1"
+      ],
+      "representedMemberTargets": [
+        "pkg:npm:del-cli",
+        "pkg:npm:expect-type",
+        "pkg:npm:jsdom",
+        "pkg:npm:rxjs",
+        "pkg:npm:tempy",
+        "pkg:npm:typescript",
+        "pkg:npm:xo",
+        "pkg:npm:zen-observable",
+        "repo:github:sindresorhus/file-type",
+        "repo:github:sindresorhus/is-empty-iterable",
+        "repo:github:sindresorhus/is-error-constructor"
+      ],
+      "plates": [
+        {
+          "key": "depends_on/DECLARED",
+          "bounds": {
+            "x": 449.47247314453125,
+            "y": 441.0693054199219,
+            "width": 257.1536865234375,
+            "height": 107.53701782226562,
+            "top": 441.0693054199219,
+            "right": 706.6261596679688,
+            "bottom": 548.6063232421875,
+            "left": 449.47247314453125
+          },
+          "world": {},
+          "label": "depends on ×8, 8 depends on relationships, grouped",
+          "expanded": "true"
+        },
+        {
+          "key": "references/DECLARED",
+          "bounds": {
+            "x": 449.47247314453125,
+            "y": -119.99331665039062,
+            "width": 257.1536865234375,
+            "height": 107.53699493408203,
+            "top": -119.99331665039062,
+            "right": 706.6261596679688,
+            "bottom": -12.456321716308594,
+            "left": 449.47247314453125
+          },
+          "world": {},
+          "label": "references ×10, 10 references relationships, grouped",
+          "expanded": "true"
+        }
+      ],
+      "bodyText": "GitLineage\nContext\nnachocebey/is\n/\ne9c026c\nanalyzed\nLayers\nGitHub\nfork source\nidentical content\n×19 blobs\nshares history\n×200 commits\ndepends on\nDEPENDENCIES · 8 members\nFocus\nreferences\nREFERENCES · 10 members\nFocus\nExplore more\nnachocebey/is\nmain · fork · MIT\nSUBJECT\nnpm:del-cli\nPACKAGE\nnpm:expect-type\nPACKAGE\nnpm:jsdom\nPACKAGE\nnpm:rxjs\nPACKAGE\nnpm:tempy\nPACKAGE\nnpm:typescript\nPACKAGE\nnpm:xo\nPACKAGE\nnpm:zen-observable\nPACKAGE\nsindresorhus/is\nmain\nsindresorhus/file-type\nmain\nsindresorhus/is-empty-iterable\nmain\nsindresorhus/is-error-constru…\nmain\nDirected\nMutual\nNavigation group\n13 objects · 14 shown relationships · 0 exploration links · 2 plates grouping 18\n−\n+\n⤢\nOrigins · 3\nDependencies · 8\nReferences · 10\n\nRecorded relationships · layers share one exploration space.\n\nOverview · 15 objects",
+      "overflow": false
+    },
+    "actions": 2,
+    "interaction": "real Focus click/tap and keyboard expansion",
+    "errors": [],
+    "blocked": []
+  },
+  {
+    "name": "nachocebey/is",
+    "width": 390,
+    "initial": {
+      "nodes": [
+        {
+          "id": "repo:github:nachocebey/is",
+          "label": "nachocebey/is",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:sindresorhus/is",
+          "label": "sindresorhus/is",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:sindresorhus/is-error-constructor",
+          "label": "sindresorhus/is-error-constructor",
+          "inViewport": false
+        }
+      ],
+      "drawnCanonicalEdges": [
+        "rel_0650192de92c7a9b",
+        "rel_3b0344d5890f0179",
+        "rel_db2892b35b44e6a1"
+      ],
+      "representedMemberTargets": [
+        "repo:github:sindresorhus/is-error-constructor"
+      ],
+      "plates": [
+        {
+          "key": "depends_on/DECLARED",
+          "bounds": {
+            "x": 65.4000015258789,
+            "y": 541.4000244140625,
+            "width": 264,
+            "height": 110.39996337890625,
+            "top": 541.4000244140625,
+            "right": 329.4000015258789,
+            "bottom": 651.7999877929688,
+            "left": 65.4000015258789
+          },
+          "world": {},
+          "label": "depends on ×8, 8 depends on relationships, grouped",
+          "expanded": "false"
+        },
+        {
+          "key": "references/DECLARED",
+          "bounds": {
+            "x": 473.3999938964844,
+            "y": -238.60000610351562,
+            "width": 264.0000305175781,
+            "height": 110.39999389648438,
+            "top": -238.60000610351562,
+            "right": 737.4000244140625,
+            "bottom": -128.20001220703125,
+            "left": 473.3999938964844
+          },
+          "world": {},
+          "label": "references ×10, 10 references relationships, grouped",
+          "expanded": "true"
+        }
+      ],
+      "bodyText": "GitLineage\nnachocebey/is\ne9c026c\nanalyzed\nfork source\nidentical content\n×19 blobs\nshares history\n×200 commits\ndepends on\nDEPENDENCIES · 8 members\nExplore neighborhood\nreferences\nREFERENCES · 10 members\nFocus\nExplore more\nnachocebey/is\nmain · fork · MIT\nSUBJECT\nsindresorhus/is\nmain\nsindresorhus/is-error-constru…\nmain\n3 objects · 4 shown relationships · 0 exploration links · 2 plates grouping 18\n−\n+\n⤢\nMap\nOrigins · 3\nDependencies · 8\nReferences · 10\n\nRecorded relationships · layers share one exploration space.\n\ndepends on · 8\nreferences · 10\nfork source · sindresorhus/is\nGraph\nRelations\nEvidence",
+      "overflow": false
+    },
+    "expanded": {
+      "nodes": [
+        {
+          "id": "repo:github:nachocebey/is",
+          "label": "nachocebey/is",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:del-cli",
+          "label": "npm:del-cli",
+          "inViewport": false
+        },
+        {
+          "id": "pkg:npm:expect-type",
+          "label": "npm:expect-type",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:jsdom",
+          "label": "npm:jsdom",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:rxjs",
+          "label": "npm:rxjs",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:tempy",
+          "label": "npm:tempy",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:typescript",
+          "label": "npm:typescript",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:xo",
+          "label": "npm:xo",
+          "inViewport": false
+        },
+        {
+          "id": "pkg:npm:zen-observable",
+          "label": "npm:zen-observable",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:sindresorhus/is",
+          "label": "sindresorhus/is",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:sindresorhus/is-error-constructor",
+          "label": "sindresorhus/is-error-constructor",
+          "inViewport": false
+        }
+      ],
+      "drawnCanonicalEdges": [
+        "rel_0650192de92c7a9b",
+        "rel_3b0344d5890f0179",
+        "rel_db2892b35b44e6a1"
+      ],
+      "representedMemberTargets": [
+        "pkg:npm:del-cli",
+        "pkg:npm:expect-type",
+        "pkg:npm:jsdom",
+        "pkg:npm:rxjs",
+        "pkg:npm:tempy",
+        "pkg:npm:typescript",
+        "pkg:npm:xo",
+        "pkg:npm:zen-observable",
+        "repo:github:sindresorhus/is-error-constructor"
+      ],
+      "plates": [
+        {
+          "key": "depends_on/DECLARED",
+          "bounds": {
+            "x": 140.81478881835938,
+            "y": 436.4073791503906,
+            "width": 207.3580322265625,
+            "height": 87.25924682617188,
+            "top": 436.4073791503906,
+            "right": 348.1728210449219,
+            "bottom": 523.6666259765625,
+            "left": 140.81478881835938
+          },
+          "world": {},
+          "label": "depends on ×8, 8 depends on relationships, grouped",
+          "expanded": "true"
+        },
+        {
+          "key": "references/DECLARED",
+          "bounds": {
+            "x": 459.8271179199219,
+            "y": -173.46914672851562,
+            "width": 206.41976928710938,
+            "height": 86.32096862792969,
+            "top": -173.46914672851562,
+            "right": 666.2468872070312,
+            "bottom": -87.14817810058594,
+            "left": 459.8271179199219
+          },
+          "world": {},
+          "label": "references ×10, 10 references relationships, grouped",
+          "expanded": "true"
+        }
+      ],
+      "bodyText": "GitLineage\nnachocebey/is\ne9c026c\nanalyzed\nfork source\nidentical content\n×19 blobs\nshares history\n×200 commits\ndepends on\nDEPENDENCIES · 8 members\nFocus\nreferences\nREFERENCES · 10 members\nFocus\nExplore more\nnachocebey/is\nmain · fork · MIT\nSUBJECT\nnpm:del-cli\nPACKAGE\nnpm:expect-type\nPACKAGE\nnpm:jsdom\nPACKAGE\nnpm:rxjs\nPACKAGE\nnpm:tempy\nPACKAGE\nnpm:typescript\nPACKAGE\nnpm:xo\nPACKAGE\nnpm:zen-observable\nPACKAGE\nsindresorhus/is\nmain\nsindresorhus/is-error-constr…\nmain\n11 objects · 12 shown relationships · 0 exploration links · 2 plates grouping 18\n−\n+\n⤢\nMap\nOrigins · 3\nDependencies · 8\nReferences · 10\n\nRecorded relationships · layers share one exploration space.\n\nExplore npm:tempy\ndepends on · 8\nreferences · 10\nfork source · sindresorhus/is\n‹\nnpm:tempy\n›\nGraph\nRelations\nEvidence",
+      "overflow": false
+    },
+    "actions": 3,
+    "interaction": "real Focus click/tap and keyboard expansion",
+    "errors": [],
+    "blocked": []
+  },
+  {
+    "name": "nachocebey/is",
+    "width": 430,
+    "initial": {
+      "nodes": [
+        {
+          "id": "repo:github:nachocebey/is",
+          "label": "nachocebey/is",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:sindresorhus/is",
+          "label": "sindresorhus/is",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:sindresorhus/is-error-constructor",
+          "label": "sindresorhus/is-error-constructor",
+          "inViewport": false
+        }
+      ],
+      "drawnCanonicalEdges": [
+        "rel_0650192de92c7a9b",
+        "rel_3b0344d5890f0179",
+        "rel_db2892b35b44e6a1"
+      ],
+      "representedMemberTargets": [
+        "repo:github:sindresorhus/is-error-constructor"
+      ],
+      "plates": [
+        {
+          "key": "depends_on/DECLARED",
+          "bounds": {
+            "x": 85.4000244140625,
+            "y": 516.4000244140625,
+            "width": 264,
+            "height": 110.39996337890625,
+            "top": 516.4000244140625,
+            "right": 349.4000244140625,
+            "bottom": 626.7999877929688,
+            "left": 85.4000244140625
+          },
+          "world": {},
+          "label": "depends on ×8, 8 depends on relationships, grouped",
+          "expanded": "false"
+        },
+        {
+          "key": "references/DECLARED",
+          "bounds": {
+            "x": 493.4000244140625,
+            "y": -263.5999755859375,
+            "width": 264,
+            "height": 110.40000915527344,
+            "top": -263.5999755859375,
+            "right": 757.4000244140625,
+            "bottom": -153.19996643066406,
+            "left": 493.4000244140625
+          },
+          "world": {},
+          "label": "references ×10, 10 references relationships, grouped",
+          "expanded": "true"
+        }
+      ],
+      "bodyText": "GitLineage\nnachocebey/is\ne9c026c\nanalyzed\nfork source\nidentical content\n×19 blobs\nshares history\n×200 commits\ndepends on\nDEPENDENCIES · 8 members\nExplore neighborhood\nreferences\nREFERENCES · 10 members\nFocus\nExplore more\nnachocebey/is\nmain · fork · MIT\nSUBJECT\nsindresorhus/is\nmain\nsindresorhus/is-error-constru…\nmain\n3 objects · 4 shown relationships · 0 exploration links · 2 plates grouping 18\n−\n+\n⤢\nMap\nOrigins · 3\nDependencies · 8\nReferences · 10\n\nRecorded relationships · layers share one exploration space.\n\ndepends on · 8\nreferences · 10\nfork source · sindresorhus/is\nGraph\nRelations\nEvidence",
+      "overflow": false
+    },
+    "expanded": {
+      "nodes": [
+        {
+          "id": "repo:github:nachocebey/is",
+          "label": "nachocebey/is",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:del-cli",
+          "label": "npm:del-cli",
+          "inViewport": false
+        },
+        {
+          "id": "pkg:npm:expect-type",
+          "label": "npm:expect-type",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:jsdom",
+          "label": "npm:jsdom",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:rxjs",
+          "label": "npm:rxjs",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:tempy",
+          "label": "npm:tempy",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:typescript",
+          "label": "npm:typescript",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:xo",
+          "label": "npm:xo",
+          "inViewport": false
+        },
+        {
+          "id": "pkg:npm:zen-observable",
+          "label": "npm:zen-observable",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:sindresorhus/is",
+          "label": "sindresorhus/is",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:sindresorhus/is-error-constructor",
+          "label": "sindresorhus/is-error-constructor",
+          "inViewport": false
+        }
+      ],
+      "drawnCanonicalEdges": [
+        "rel_0650192de92c7a9b",
+        "rel_3b0344d5890f0179",
+        "rel_db2892b35b44e6a1"
+      ],
+      "representedMemberTargets": [
+        "pkg:npm:del-cli",
+        "pkg:npm:expect-type",
+        "pkg:npm:jsdom",
+        "pkg:npm:rxjs",
+        "pkg:npm:tempy",
+        "pkg:npm:typescript",
+        "pkg:npm:xo",
+        "pkg:npm:zen-observable",
+        "repo:github:sindresorhus/is-error-constructor"
+      ],
+      "plates": [
+        {
+          "key": "depends_on/DECLARED",
+          "bounds": {
+            "x": 154.47735595703125,
+            "y": 398.23870849609375,
+            "width": 231.61041259765625,
+            "height": 97.46499633789062,
+            "top": 398.23870849609375,
+            "right": 386.0877685546875,
+            "bottom": 495.7037048339844,
+            "left": 154.47735595703125
+          },
+          "world": {},
+          "label": "depends on ×8, 8 depends on relationships, grouped",
+          "expanded": "true"
+        },
+        {
+          "key": "references/DECLARED",
+          "bounds": {
+            "x": 510.80108642578125,
+            "y": -282.9684143066406,
+            "width": 230.5623779296875,
+            "height": 96.4169921875,
+            "top": -282.9684143066406,
+            "right": 741.3634643554688,
+            "bottom": -186.55142211914062,
+            "left": 510.80108642578125
+          },
+          "world": {},
+          "label": "references ×10, 10 references relationships, grouped",
+          "expanded": "true"
+        }
+      ],
+      "bodyText": "GitLineage\nnachocebey/is\ne9c026c\nanalyzed\nfork source\nidentical content\n×19 blobs\nshares history\n×200 commits\ndepends on\nDEPENDENCIES · 8 members\nFocus\nreferences\nREFERENCES · 10 members\nFocus\nExplore more\nnachocebey/is\nmain · fork · MIT\nSUBJECT\nnpm:del-cli\nPACKAGE\nnpm:expect-type\nPACKAGE\nnpm:jsdom\nPACKAGE\nnpm:rxjs\nPACKAGE\nnpm:tempy\nPACKAGE\nnpm:typescript\nPACKAGE\nnpm:xo\nPACKAGE\nnpm:zen-observable\nPACKAGE\nsindresorhus/is\nmain\nsindresorhus/is-error-constru…\nmain\n11 objects · 12 shown relationships · 0 exploration links · 2 plates grouping 18\n−\n+\n⤢\nMap\nOrigins · 3\nDependencies · 8\nReferences · 10\n\nRecorded relationships · layers share one exploration space.\n\nExplore npm:tempy\ndepends on · 8\nreferences · 10\nfork source · sindresorhus/is\n‹\nnpm:tempy\n›\nGraph\nRelations\nEvidence",
+      "overflow": false
+    },
+    "actions": 3,
+    "interaction": "real Focus click/tap and keyboard expansion",
+    "errors": [],
+    "blocked": []
+  },
+  {
+    "name": "octocat/spoon-knife",
+    "width": 1280,
+    "initial": {
+      "nodes": [
+        {
+          "id": "repo:github:octocat/spoon-knife",
+          "label": "octocat/Spoon-Knife",
+          "inViewport": true
+        }
+      ],
+      "drawnCanonicalEdges": [],
+      "representedMemberTargets": [],
+      "plates": [],
+      "bodyText": "GitLineage\nContext\noctocat/Spoon-Knife\n/\nd0dd1f6\nanalyzed\nLayers\nGitHub\noctocat/Spoon-Knife\nmain\nSUBJECT\nDirected\nMutual\nNavigation group\n1 objects · 0 shown relationships · 0 exploration links\n−\n+\n⤢\nOrigins · 0\nDependencies · 0\nReferences · 0\n\nNo recorded ancestry evidence · dependencies are separate claims.\n\nNo ancestry found in this bounded analysis\n\nThis bounded analysis found no verified fork or derivation record; unscanned relationships remain unknown. Explore the fixed repository structure and Git history, or switch to a separate relationship layer.",
+      "overflow": false
+    },
+    "expanded": {
+      "nodes": [
+        {
+          "id": "repo:github:octocat/spoon-knife",
+          "label": "octocat/Spoon-Knife",
+          "inViewport": true
+        }
+      ],
+      "drawnCanonicalEdges": [],
+      "representedMemberTargets": [],
+      "plates": [],
+      "bodyText": "GitLineage\nContext\noctocat/Spoon-Knife\n/\nd0dd1f6\nanalyzed\nLayers\nGitHub\noctocat/Spoon-Knife\nmain\nSUBJECT\nDirected\nMutual\nNavigation group\n1 objects · 0 shown relationships · 0 exploration links\n−\n+\n⤢\nOrigins · 0\nDependencies · 0\nReferences · 0\n\nNo recorded ancestry evidence · dependencies are separate claims.\n\nNo ancestry found in this bounded analysis\n\nThis bounded analysis found no verified fork or derivation record; unscanned relationships remain unknown. Explore the fixed repository structure and Git history, or switch to a separate relationship layer.",
+      "overflow": false
+    },
+    "actions": 0,
+    "interaction": "no relationship group",
+    "errors": [],
+    "blocked": []
+  },
+  {
+    "name": "octocat/spoon-knife",
+    "width": 390,
+    "initial": {
+      "nodes": [
+        {
+          "id": "repo:github:octocat/spoon-knife",
+          "label": "octocat/Spoon-Knife",
+          "inViewport": true
+        }
+      ],
+      "drawnCanonicalEdges": [],
+      "representedMemberTargets": [],
+      "plates": [],
+      "bodyText": "GitLineage\noctocat/Spoon-Knife\nd0dd1f6\nanalyzed\noctocat/Spoon-Knife\nmain\nSUBJECT\n1 objects · 0 shown relationships · 0 exploration links\n−\n+\n⤢\nOrigins · 0\nDependencies · 0\nReferences · 0\n\nNo recorded ancestry evidence · dependencies are separate claims.\n\nNo ancestry found in this bounded analysis\n\nThis bounded analysis found no verified fork or derivation record; unscanned relationships remain unknown. Explore the fixed repository structure and Git history, or switch to a separate relationship layer.\n\nGraph\nRelations\nEvidence",
+      "overflow": false
+    },
+    "expanded": {
+      "nodes": [
+        {
+          "id": "repo:github:octocat/spoon-knife",
+          "label": "octocat/Spoon-Knife",
+          "inViewport": true
+        }
+      ],
+      "drawnCanonicalEdges": [],
+      "representedMemberTargets": [],
+      "plates": [],
+      "bodyText": "GitLineage\noctocat/Spoon-Knife\nd0dd1f6\nanalyzed\noctocat/Spoon-Knife\nmain\nSUBJECT\n1 objects · 0 shown relationships · 0 exploration links\n−\n+\n⤢\nOrigins · 0\nDependencies · 0\nReferences · 0\n\nNo recorded ancestry evidence · dependencies are separate claims.\n\nNo ancestry found in this bounded analysis\n\nThis bounded analysis found no verified fork or derivation record; unscanned relationships remain unknown. Explore the fixed repository structure and Git history, or switch to a separate relationship layer.\n\nGraph\nRelations\nEvidence",
+      "overflow": false
+    },
+    "actions": 0,
+    "interaction": "no relationship group",
+    "errors": [],
+    "blocked": []
+  },
+  {
+    "name": "octocat/spoon-knife",
+    "width": 430,
+    "initial": {
+      "nodes": [
+        {
+          "id": "repo:github:octocat/spoon-knife",
+          "label": "octocat/Spoon-Knife",
+          "inViewport": true
+        }
+      ],
+      "drawnCanonicalEdges": [],
+      "representedMemberTargets": [],
+      "plates": [],
+      "bodyText": "GitLineage\noctocat/Spoon-Knife\nd0dd1f6\nanalyzed\noctocat/Spoon-Knife\nmain\nSUBJECT\n1 objects · 0 shown relationships · 0 exploration links\n−\n+\n⤢\nOrigins · 0\nDependencies · 0\nReferences · 0\n\nNo recorded ancestry evidence · dependencies are separate claims.\n\nNo ancestry found in this bounded analysis\n\nThis bounded analysis found no verified fork or derivation record; unscanned relationships remain unknown. Explore the fixed repository structure and Git history, or switch to a separate relationship layer.\n\nGraph\nRelations\nEvidence",
+      "overflow": false
+    },
+    "expanded": {
+      "nodes": [
+        {
+          "id": "repo:github:octocat/spoon-knife",
+          "label": "octocat/Spoon-Knife",
+          "inViewport": true
+        }
+      ],
+      "drawnCanonicalEdges": [],
+      "representedMemberTargets": [],
+      "plates": [],
+      "bodyText": "GitLineage\noctocat/Spoon-Knife\nd0dd1f6\nanalyzed\noctocat/Spoon-Knife\nmain\nSUBJECT\n1 objects · 0 shown relationships · 0 exploration links\n−\n+\n⤢\nOrigins · 0\nDependencies · 0\nReferences · 0\n\nNo recorded ancestry evidence · dependencies are separate claims.\n\nNo ancestry found in this bounded analysis\n\nThis bounded analysis found no verified fork or derivation record; unscanned relationships remain unknown. Explore the fixed repository structure and Git history, or switch to a separate relationship layer.\n\nGraph\nRelations\nEvidence",
+      "overflow": false
+    },
+    "actions": 0,
+    "interaction": "no relationship group",
+    "errors": [],
+    "blocked": []
+  },
+  {
+    "name": "sindresorhus/yocto-queue",
+    "width": 1280,
+    "initial": {
+      "nodes": [
+        {
+          "id": "repo:github:sindresorhus/yocto-queue",
+          "label": "sindresorhus/yocto-queue",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:ava",
+          "label": "npm:ava",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:tsd",
+          "label": "npm:tsd",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:xo",
+          "label": "npm:xo",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:sindresorhus/quick-lru",
+          "label": "sindresorhus/quick-lru",
+          "inViewport": true
+        }
+      ],
+      "drawnCanonicalEdges": [
+        "rel_51a482b120cb51e1"
+      ],
+      "representedMemberTargets": [
+        "pkg:npm:ava",
+        "pkg:npm:tsd",
+        "pkg:npm:xo"
+      ],
+      "plates": [
+        {
+          "key": "depends_on/DECLARED",
+          "bounds": {
+            "x": 449.47247314453125,
+            "y": 510.88720703125,
+            "width": 257.1536865234375,
+            "height": 107.5369873046875,
+            "top": 510.88720703125,
+            "right": 706.6261596679688,
+            "bottom": 618.4241943359375,
+            "left": 449.47247314453125
+          },
+          "world": {},
+          "label": "depends on ×3, 3 depends on relationships, grouped",
+          "expanded": "true"
+        }
+      ],
+      "bodyText": "GitLineage\nContext\nsindresorhus/yocto-queue\n/\n72a8fa9\npartial\nLayers\nGitHub\nreferences\ndepends on\nDEPENDENCIES · 3 members\nFocus\nsindresorhus/yocto-queue\nmain · MIT\nSUBJECT\nnpm:ava\nPACKAGE\nnpm:tsd\nPACKAGE\nnpm:xo\nPACKAGE\nsindresorhus/quick-lru\nmain\nDirected\nMutual\nNavigation group\n5 objects · 4 shown relationships · 0 exploration links · 1 plate grouping 3\n−\n+\n⤢\nOrigins · 0\nDependencies · 3\nReferences · 1\n\nNo recorded ancestry evidence · dependencies are separate claims.\n\ndepends on\ndepends on\ndepends on\nreferences\nOverview · 6 objects",
+      "overflow": false
+    },
+    "expanded": {
+      "nodes": [
+        {
+          "id": "repo:github:sindresorhus/yocto-queue",
+          "label": "sindresorhus/yocto-queue",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:ava",
+          "label": "npm:ava",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:tsd",
+          "label": "npm:tsd",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:xo",
+          "label": "npm:xo",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:sindresorhus/quick-lru",
+          "label": "sindresorhus/quick-lru",
+          "inViewport": true
+        }
+      ],
+      "drawnCanonicalEdges": [
+        "rel_51a482b120cb51e1"
+      ],
+      "representedMemberTargets": [
+        "pkg:npm:ava",
+        "pkg:npm:tsd",
+        "pkg:npm:xo"
+      ],
+      "plates": [
+        {
+          "key": "depends_on/DECLARED",
+          "bounds": {
+            "x": 449.47247314453125,
+            "y": 463.06927490234375,
+            "width": 257.1536865234375,
+            "height": 107.5369873046875,
+            "top": 463.06927490234375,
+            "right": 706.6261596679688,
+            "bottom": 570.6062622070312,
+            "left": 449.47247314453125
+          },
+          "world": {},
+          "label": "depends on ×3, 3 depends on relationships, grouped",
+          "expanded": "true"
+        }
+      ],
+      "bodyText": "GitLineage\nContext\nsindresorhus/yocto-queue\n/\n72a8fa9\npartial\nLayers\nGitHub\nreferences\ndepends on\nDEPENDENCIES · 3 members\nFocus\nsindresorhus/yocto-queue\nmain · MIT\nSUBJECT\nnpm:ava\nPACKAGE\nnpm:tsd\nPACKAGE\nnpm:xo\nPACKAGE\nsindresorhus/quick-lru\nmain\nDirected\nMutual\nNavigation group\n5 objects · 4 shown relationships · 0 exploration links · 1 plate grouping 3\n−\n+\n⤢\nOrigins · 0\nDependencies · 3\nReferences · 1\n\nNo recorded ancestry evidence · dependencies are separate claims.\n\ndepends on\ndepends on\ndepends on\nreferences\nOverview · 6 objects",
+      "overflow": false
+    },
+    "actions": 1,
+    "interaction": "real Focus click/tap and keyboard expansion",
+    "errors": [],
+    "blocked": []
+  },
+  {
+    "name": "sindresorhus/yocto-queue",
+    "width": 390,
+    "initial": {
+      "nodes": [
+        {
+          "id": "repo:github:sindresorhus/yocto-queue",
+          "label": "sindresorhus/yocto-queue",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:tsd",
+          "label": "npm:tsd",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:sindresorhus/quick-lru",
+          "label": "sindresorhus/quick-lru",
+          "inViewport": true
+        }
+      ],
+      "drawnCanonicalEdges": [
+        "rel_51a482b120cb51e1"
+      ],
+      "representedMemberTargets": [
+        "pkg:npm:tsd"
+      ],
+      "plates": [
+        {
+          "key": "depends_on/DECLARED",
+          "bounds": {
+            "x": 65.4000015258789,
+            "y": 588.4000244140625,
+            "width": 264,
+            "height": 110.39996337890625,
+            "top": 588.4000244140625,
+            "right": 329.4000015258789,
+            "bottom": 698.7999877929688,
+            "left": 65.4000015258789
+          },
+          "world": {},
+          "label": "depends on ×3, 3 depends on relationships, grouped",
+          "expanded": "true"
+        }
+      ],
+      "bodyText": "GitLineage\nsindresorhus/yocto-queue\n72a8fa9\npartial\nreferences\ndepends on\nDEPENDENCIES · 3 members\nFocus\nExplore more\nsindresorhus/yocto-queue\nmain · MIT\nSUBJECT\nnpm:tsd\nPACKAGE\nsindresorhus/quick-lru\nmain\n3 objects · 2 shown relationships · 0 exploration links · 1 plate grouping 3\n−\n+\n⤢\nMap\nOrigins · 0\nDependencies · 3\nReferences · 1\n\nNo recorded ancestry evidence · dependencies are separate claims.\n\ndepends on\ndepends on\ndepends on\nreferences\ndepends on · 3\nreferences · sindresorhus/quick-lru\nGraph\nRelations\nEvidence",
+      "overflow": false
+    },
+    "expanded": {
+      "nodes": [
+        {
+          "id": "repo:github:sindresorhus/yocto-queue",
+          "label": "sindresorhus/yocto-queue",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:ava",
+          "label": "npm:ava",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:tsd",
+          "label": "npm:tsd",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:xo",
+          "label": "npm:xo",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:sindresorhus/quick-lru",
+          "label": "sindresorhus/quick-lru",
+          "inViewport": true
+        }
+      ],
+      "drawnCanonicalEdges": [
+        "rel_51a482b120cb51e1"
+      ],
+      "representedMemberTargets": [
+        "pkg:npm:ava",
+        "pkg:npm:tsd",
+        "pkg:npm:xo"
+      ],
+      "plates": [
+        {
+          "key": "depends_on/DECLARED",
+          "bounds": {
+            "x": 142.93753051757812,
+            "y": 491.81817626953125,
+            "width": 199.23483276367188,
+            "height": 83.84088134765625,
+            "top": 491.81817626953125,
+            "right": 342.17236328125,
+            "bottom": 575.6590576171875,
+            "left": 142.93753051757812
+          },
+          "world": {},
+          "label": "depends on ×3, 3 depends on relationships, grouped",
+          "expanded": "true"
+        }
+      ],
+      "bodyText": "GitLineage\nsindresorhus/yocto-queue\n72a8fa9\npartial\nreferences\ndepends on\nDEPENDENCIES · 3 members\nFocus\nsindresorhus/yocto-queue\nmain · MIT\nSUBJECT\nnpm:ava\nPACKAGE\nnpm:tsd\nPACKAGE\nnpm:xo\nPACKAGE\nsindresorhus/quick-lru\nmain\n5 objects · 4 shown relationships · 0 exploration links · 1 plate grouping 3\n−\n+\n⤢\nMap\nOrigins · 0\nDependencies · 3\nReferences · 1\n\nNo recorded ancestry evidence · dependencies are separate claims.\n\nExplore npm:tsd\ndepends on\ndepends on\ndepends on\nreferences\ndepends on · 3\nreferences · sindresorhus/quick-lru\n‹\nnpm:tsd\n›\nGraph\nRelations\nEvidence",
+      "overflow": false
+    },
+    "actions": 2,
+    "interaction": "real Focus click/tap and keyboard expansion",
+    "errors": [],
+    "blocked": []
+  },
+  {
+    "name": "sindresorhus/yocto-queue",
+    "width": 430,
+    "initial": {
+      "nodes": [
+        {
+          "id": "repo:github:sindresorhus/yocto-queue",
+          "label": "sindresorhus/yocto-queue",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:tsd",
+          "label": "npm:tsd",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:sindresorhus/quick-lru",
+          "label": "sindresorhus/quick-lru",
+          "inViewport": true
+        }
+      ],
+      "drawnCanonicalEdges": [
+        "rel_51a482b120cb51e1"
+      ],
+      "representedMemberTargets": [
+        "pkg:npm:tsd"
+      ],
+      "plates": [
+        {
+          "key": "depends_on/DECLARED",
+          "bounds": {
+            "x": 85.4000244140625,
+            "y": 538.4000244140625,
+            "width": 264,
+            "height": 110.39996337890625,
+            "top": 538.4000244140625,
+            "right": 349.4000244140625,
+            "bottom": 648.7999877929688,
+            "left": 85.4000244140625
+          },
+          "world": {},
+          "label": "depends on ×3, 3 depends on relationships, grouped",
+          "expanded": "true"
+        }
+      ],
+      "bodyText": "GitLineage\nsindresorhus/yocto-queue\n72a8fa9\npartial\nreferences\ndepends on\nDEPENDENCIES · 3 members\nFocus\nExplore more\nsindresorhus/yocto-queue\nmain · MIT\nSUBJECT\nnpm:tsd\nPACKAGE\nsindresorhus/quick-lru\nmain\n3 objects · 2 shown relationships · 0 exploration links · 1 plate grouping 3\n−\n+\n⤢\nMap\nOrigins · 0\nDependencies · 3\nReferences · 1\n\nNo recorded ancestry evidence · dependencies are separate claims.\n\ndepends on\ndepends on\ndepends on\nreferences\ndepends on · 3\nreferences · sindresorhus/quick-lru\nGraph\nRelations\nEvidence",
+      "overflow": false
+    },
+    "expanded": {
+      "nodes": [
+        {
+          "id": "repo:github:sindresorhus/yocto-queue",
+          "label": "sindresorhus/yocto-queue",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:ava",
+          "label": "npm:ava",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:tsd",
+          "label": "npm:tsd",
+          "inViewport": true
+        },
+        {
+          "id": "pkg:npm:xo",
+          "label": "npm:xo",
+          "inViewport": true
+        },
+        {
+          "id": "repo:github:sindresorhus/quick-lru",
+          "label": "sindresorhus/quick-lru",
+          "inViewport": false
+        }
+      ],
+      "drawnCanonicalEdges": [
+        "rel_51a482b120cb51e1"
+      ],
+      "representedMemberTargets": [
+        "pkg:npm:ava",
+        "pkg:npm:tsd",
+        "pkg:npm:xo"
+      ],
+      "plates": [
+        {
+          "key": "depends_on/DECLARED",
+          "bounds": {
+            "x": 154.47735595703125,
+            "y": 424.2386779785156,
+            "width": 231.61041259765625,
+            "height": 97.46505737304688,
+            "top": 424.2386779785156,
+            "right": 386.0877685546875,
+            "bottom": 521.7037353515625,
+            "left": 154.47735595703125
+          },
+          "world": {},
+          "label": "depends on ×3, 3 depends on relationships, grouped",
+          "expanded": "true"
+        }
+      ],
+      "bodyText": "GitLineage\nsindresorhus/yocto-queue\n72a8fa9\npartial\nreferences\ndepends on\nDEPENDENCIES · 3 members\nFocus\nsindresorhus/yocto-queue\nmain · MIT\nSUBJECT\nnpm:ava\nPACKAGE\nnpm:tsd\nPACKAGE\nnpm:xo\nPACKAGE\nsindresorhus/quick-lru\nmain\n5 objects · 4 shown relationships · 0 exploration links · 1 plate grouping 3\n−\n+\n⤢\nMap\nOrigins · 0\nDependencies · 3\nReferences · 1\n\nNo recorded ancestry evidence · dependencies are separate claims.\n\nExplore npm:tsd\ndepends on\ndepends on\ndepends on\nreferences\ndepends on · 3\nreferences · sindresorhus/quick-lru\n‹\nnpm:tsd\n›\nGraph\nRelations\nEvidence",
+      "overflow": false
+    },
+    "actions": 2,
+    "interaction": "real Focus click/tap and keyboard expansion",
+    "errors": [],
+    "blocked": []
+  }
+]

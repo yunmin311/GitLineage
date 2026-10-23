@@ -42,14 +42,14 @@ test('tree digest mismatch is explicit partial, not an empty repository',async()
  const task=engine.start('root/example');await engine.wait(task.id);assert.equal(task.state,'partial');assert.match(task.error!,/tree identity/);assert.equal(task.directories.length,0);await engine.close();
 });
 
-test('history preserves merge parents and marks the six-object window partial',async()=>{
+test('history defers older objects and preserves merge parents in explicit six-object pages',async()=>{
  const f=treeFixture(),root=f.repos[0]!,tree=(f.routes.get(`/repos/${root.name}/commits/${root.revision}`) as any).commit.tree.sha;
  const parents=Array.from({length:7},(_,i)=>(i+1).toString(16).repeat(40));
  const object=(sha:string,next:string[])=>({sha,commit:{tree:{sha:tree},author:null,message:'Observed merge'},parents:next.map(sha=>({sha}))});
  f.routes.set(`/repos/${root.name}/commits/${root.revision}`,object(root.revision,[parents[0]!,parents[1]!]));f.routes.set(`/repos/${root.name}/commits/main`,object(root.revision,[parents[0]!,parents[1]!]));
  for(let i=0;i<parents.length;i++)f.routes.set(`/repos/${root.name}/commits/${parents[i]}`,object(parents[i]!,i<5?[parents[i+2]!]:[]));
  const engine=createRepositoryExplorer({transport:async(url,init)=>new URL(url).pathname.endsWith('/branches')?new Response('[]'):f.transport(url,init)});
- try{const task=engine.start(root.name);await engine.wait(task.id);assert.equal(task.state,'partial');assert.equal(task.commits.length,6);assert.equal(task.commits[0]!.parents.length,2);assert.match(task.coverage.history,/partial/);assert.ok(task.coverage.pendingParents.length);assert.equal(task.historyAnchor,root.revision);assert.equal(task.commits[0]!.author,'Unknown author');assert.ok((task.receipt as any).usage.attempts<=24);}finally{await engine.close();}
+ try{const task=engine.start(root.name);await engine.wait(task.id);assert.equal(task.state,'partial');assert.equal(task.commits.length,1);await engine.history(task.id);assert.equal(task.commits.length,7);assert.equal(task.commits[0]!.parents.length,2);assert.match(task.coverage.history,/partial/);assert.ok(task.coverage.pendingParents.length);assert.equal(task.historyAnchor,root.revision);assert.equal(task.commits[0]!.author,'Unknown author');assert.ok((task.receipt as any).usage.attempts<=24);}finally{await engine.close();}
 });
 
 test('cancelled anonymous task retains charged attempts; forged proxy headers cannot start work',async()=>{
@@ -63,6 +63,8 @@ test('directory continuation passes six reads; history pages retain parent ident
  const tree=(f.routes.get(`/repos/${root.name}/commits/${root.revision}`) as any).commit.tree.sha;
  const chain=[root.revision,...Array.from({length:12},(_,i)=>(i+10).toString(16).padStart(40,'0'))];
  for(let i=0;i<chain.length;i++)f.routes.set(`/repos/${root.name}/commits/${chain[i]}`,{sha:chain[i],commit:{tree:{sha:tree},author:null,message:'Continue history'},parents:i+1<chain.length?[{sha:chain[i+1]}]:[]});
+ // Both immutable SHA and branch resolution must describe the same head.
+ f.routes.set(`/repos/${root.name}/commits/main`,f.routes.get(`/repos/${root.name}/commits/${root.revision}`));
  const engine=createRepositoryExplorer({transport:async(url,init)=>new URL(url).pathname.endsWith('/branches')?new Response('[]'):f.transport(url,init)});
  try{const t=engine.start(root.name);await engine.wait(t.id);for(let i=0;i<9;i++)await engine.directory(t.id,`d${i}`);assert.equal(t.directories.length,10,t.error??'');await engine.history(t.id);await engine.history(t.id);assert.equal(t.commits.length,13);assert.equal(new Set(t.commits.map(c=>c.sha)).size,13);assert.deepEqual(t.coverage.pendingParents,[]);assert.ok((t.receipt as any).usage.attempts>24);assert.ok((t.receipt as any).stages.every((s:any)=>s.usage.attempts<=24));assert.equal(t.lineageClaim,'none');}finally{await engine.close();}
 });
