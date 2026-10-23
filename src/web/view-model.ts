@@ -602,7 +602,7 @@ export function buildView(graph: LineageGraph, options: BuildViewOptions = {}): 
       isEmpty: edges.length === 0,
       reason:
         edges.length === 0
-          ? 'No relationship in this repository could be supported by evidence. This is a result, not a failure.'
+          ? 'This bounded analysis found no evidence-supported relationships. Unscanned content and undiscovered repositories remain unknown.'
           : '',
     },
     partial: {

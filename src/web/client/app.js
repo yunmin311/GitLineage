@@ -1767,8 +1767,19 @@ if (!state.hasFitted || shouldRefit(state.refitPending ? RefitTrigger.Dataset : 
   renderPerspective();
   let empty=$('graph-provenance-empty');if(!empty){empty=el('div',{id:'graph-provenance-empty',class:'graph-provenance-empty'});$('stage').append(empty);}
   empty.replaceChildren();setHidden(empty,edges.length>0||composition.plates.length>0||canvas.querySelectorAll('.unified-node').length>0);
-  if(edges.length===0&&composition.plates.length===0){empty.append(el('h2',{text:state.perspective==='origins'?'No recorded ancestry':'No recorded relationships in this layer'}),el('p',{text:state.perspective==='origins'?'This analysis has no verified fork or derivation record. Explore the fixed repository structure and Git history, or switch to a separate relationship layer.':'Choose another relationship layer, or return to the previous exploration focus.'}));}
-  if(isPhone()&&state.refitMobile){if(edges.length>0&&positions.size<=3)fitGraphBoxes([...canvas.querySelectorAll('.node-box')]);else phoneFit();state.refitMobile=false;}
+  if(edges.length===0&&composition.plates.length===0){empty.append(el('h2',{text:state.perspective==='origins'?'No ancestry found in this bounded analysis':'No relationships found in this scanned layer'}),el('p',{text:state.perspective==='origins'?'This bounded analysis found no verified fork or derivation record; unscanned relationships remain unknown. Explore the fixed repository structure and Git history, or switch to a separate relationship layer.':'Choose another relationship layer, or return to the previous exploration focus.'}));}
+  if(isPhone()&&state.refitMobile){
+    // Fit one real neighborhood, not just the root and not every folded member.
+    const root=positions.get(view.subject.id);
+    const nearest=[...canvas.querySelectorAll('.bundle-card')].sort((a,b)=>{
+      const distance=n=>{const p=positions.get(BUNDLE_ID_PREFIX+n.dataset.bundleKey);return Math.hypot(p.x-root.x,p.y-root.y);};
+      return distance(a)-distance(b);
+    })[0];
+    if(nearest)fitGraphBoxes([canvas.querySelector('.node.is-subject .node-box'),nearest.querySelector('.bundle-card-box')]);
+    else if(edges.length>0&&positions.size<=3)fitGraphBoxes([...canvas.querySelectorAll('.node-box')]);
+    else phoneFit();
+    state.refitMobile=false;
+  }
   renderBundles();
   renderLayersPop();
   renderRail(view);

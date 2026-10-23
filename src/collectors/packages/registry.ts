@@ -2,6 +2,7 @@ import type { HttpClient } from '../../platform/http.ts';
 import { resolveRepositoryRef, type RepositoryRef } from '../../platform/url.ts';
 import { LIMITS } from '../../platform/limits.ts';
 import type { Ecosystem } from './manifests.ts';
+import type { JsonValue } from '../../core/model.ts';
 
 export const COLLECTOR_REGISTRY = 'package-registry';
 export const EXTRACTOR_REGISTRY = 'package-registry-metadata@1';
@@ -23,6 +24,7 @@ export class PackageRegistryResolver {
   private readonly http: HttpClient;
   private readonly memo = new Map<string, RepositoryRef | null>();
   private lookups = 0;
+  readonly diagnostics: {code:string;message:string;context:Record<string,JsonValue>}[] = [];
 
   constructor(http: HttpClient) {
     this.http = http;
@@ -63,6 +65,7 @@ export class PackageRegistryResolver {
         return firstRepository(payload?.info?.home_page ?? undefined);
       }
     } catch {
+      this.diagnostics.push({code:'registry_lookup_failed',message:'Package registry lookup failed; source repository metadata remains unknown.',context:{ecosystem:target.ecosystem,name:target.name}});
       return null;
     }
     return null;

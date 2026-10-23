@@ -1,0 +1,2034 @@
+[
+  {
+    "name": "pycqa/isort",
+    "path": "/srv/gitlineage/cache/public/graphs/public/github/pycqa/isort@d93953fa5c9f/v2.0.0/graph.json",
+    "revision": {
+      "commit": "d93953fa5c9f188db31b9006cb681de1126e5967",
+      "defaultBranch": "main",
+      "resolvedAt": "2026-10-05T10:33:50.936Z"
+    },
+    "generatedAt": "2026-10-05T10:33:50.936Z",
+    "nodes": 13,
+    "repositoryPeers": 7,
+    "repositoryPeerNames": [
+      "actions/checkout",
+      "actions/setup-python",
+      "pyodide/pyodide",
+      "pypa/pipx",
+      "psf/black",
+      "python/mypy_extensions",
+      "SethMMorton/natsort"
+    ],
+    "canonicalEdges": 13,
+    "relationshipTypes": {
+      "depends_on": 5,
+      "references": 8
+    },
+    "evidence": 13,
+    "evidenceTypes": {
+      "document_reference": 5,
+      "package_manifest": 5,
+      "package_registry_metadata": 3
+    },
+    "viewNodes": 11,
+    "viewEdges": 10,
+    "outsideOneHop": 3,
+    "nonRootEdges": [
+      {
+        "id": "rel_88f304c761eebfa2",
+        "type": "references",
+        "source": "pkg:pypi:black",
+        "target": "repo:github:psf/black",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_5cf887a3420d7071"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_58835ff2d7fb45d6",
+        "type": "references",
+        "source": "pkg:pypi:mypy-extensions",
+        "target": "repo:github:python/mypy_extensions",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_1f08937fb256be96"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_abfbc4a5284bf4c7",
+        "type": "references",
+        "source": "pkg:pypi:natsort",
+        "target": "repo:github:sethmmorton/natsort",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_25d90697d6632d1e"
+        ],
+        "attributes": {}
+      }
+    ],
+    "viewPartial": true,
+    "diagnostics": [
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/configuration/config_files.md:116 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/configuration/config_files.md",
+          "line": 116,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/configuration/options.md:12 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/configuration/options.md",
+          "line": 12,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/configuration/options.md:1493 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/configuration/options.md",
+          "line": 1493,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/configuration/options.md:1766 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/configuration/options.md",
+          "line": 1766,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/configuration/options.md:1781 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/configuration/options.md",
+          "line": 1781,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/configuration/profiles.md:56 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/configuration/profiles.md",
+          "line": 56,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/contributing/3.-code-of-conduct.md:84 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/contributing/3.-code-of-conduct.md",
+          "line": 84,
+          "phrases": [
+            "adapted from"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/contributing/4.-acknowledgements.md:275 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/contributing/4.-acknowledgements.md",
+          "line": 275,
+          "phrases": [
+            "thanks to"
+          ]
+        }
+      }
+    ],
+    "analyzer": {
+      "name": "gitlineage-analyzer",
+      "version": "0.2.0",
+      "schemaVersion": "2.0.0",
+      "namespace": "public",
+      "extractors": [
+        "explicit-attribution@1",
+        "explicit-reference@1",
+        "github-fork-metadata@1",
+        "github-repository-identity@1",
+        "lockfile-dependency@1",
+        "manifest-dependency@1",
+        "package-registry-metadata@1"
+      ],
+      "adapters": [
+        "package-registry"
+      ],
+      "limitsApplied": {
+        "history_depth": 200,
+        "tree_entries": 120000,
+        "document_bytes": 262144,
+        "manifest_bytes": 2097152,
+        "dependency_facts": 400,
+        "registry_lookups": 25,
+        "candidate_count": 12
+      }
+    }
+  },
+  {
+    "name": "vitest-dev/vitest",
+    "path": "/srv/gitlineage/cache/public/graphs/public/github/vitest-dev/vitest@964e1a4404c3/v2.0.0/graph.json",
+    "revision": {
+      "commit": "964e1a4404c31bf8fd37cb05ea0095483b506802",
+      "defaultBranch": "main",
+      "resolvedAt": "2026-10-04T05:37:07.460Z"
+    },
+    "generatedAt": "2026-10-04T05:37:07.460Z",
+    "nodes": 103,
+    "repositoryPeers": 18,
+    "repositoryPeerNames": [
+      "antfu-collective/ni",
+      "capricorn86/happy-dom",
+      "jsdom/jsdom",
+      "lukeed/uvu",
+      "mmkal/expect-type",
+      "sinonjs/fake-timers",
+      "stackblitz-labs/pkg.pr.new",
+      "tc39/proposal-explicit-resource-management",
+      "testing-library/jest-dom",
+      "testing-library/react-testing-library",
+      "testing-library/svelte-testing-library",
+      "testing-library/vue-testing-library",
+      "tinylibs/tinybench",
+      "unjs/std-env",
+      "vitejs/vite",
+      "vitest-community/vitest-browser-react",
+      "vitest-dev/benchmarks",
+      "vitest-dev/istanbuljs"
+    ],
+    "canonicalEdges": 102,
+    "relationshipTypes": {
+      "depends_on": 83,
+      "forked_from": 1,
+      "references": 18
+    },
+    "evidence": 177,
+    "evidenceTypes": {
+      "document_attribution": 1,
+      "document_reference": 21,
+      "package_manifest": 155
+    },
+    "viewNodes": 103,
+    "viewEdges": 102,
+    "outsideOneHop": 0,
+    "nonRootEdges": [],
+    "viewPartial": true,
+    "diagnostics": [
+      {
+        "code": "dependency_limit_applied",
+        "level": "warning",
+        "message": "dependency facts were truncated to 155 entries",
+        "context": {
+          "dropped": 6
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in CONTRIBUTING.md:126 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "CONTRIBUTING.md",
+          "line": 126,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in README.md:98 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "README.md",
+          "line": 98,
+          "phrases": [
+            "thanks to"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/api/advanced/artifacts.md:33 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/api/advanced/artifacts.md",
+          "line": 33,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/api/advanced/test-case.md:52 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/api/advanced/test-case.md",
+          "line": 52,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/api/advanced/test-project.md:101 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/api/advanced/test-project.md",
+          "line": 101,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/api/advanced/test-suite.md:52 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/api/advanced/test-suite.md",
+          "line": 52,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/api/advanced/vitest.md:231 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/api/advanced/vitest.md",
+          "line": 231,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/api/advanced/vitest.md:233 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/api/advanced/vitest.md",
+          "line": 233,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/api/advanced/vitest.md:279 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/api/advanced/vitest.md",
+          "line": 279,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/api/advanced/vitest.md:302 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/api/advanced/vitest.md",
+          "line": 302,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/api/advanced/vitest.md:305 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/api/advanced/vitest.md",
+          "line": 305,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/api/advanced/vitest.md:328 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/api/advanced/vitest.md",
+          "line": 328,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/api/advanced/vitest.md:538 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/api/advanced/vitest.md",
+          "line": 538,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/api/browser/context.md:224 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/api/browser/context.md",
+          "line": 224,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/api/browser/context.md:376 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/api/browser/context.md",
+          "line": 376,
+          "phrases": [
+            "inspired by"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/api/browser/locators.md:10 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/api/browser/locators.md",
+          "line": 10,
+          "phrases": [
+            "fork of"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/blog/vitest-3.md:51 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/blog/vitest-3.md",
+          "line": 51,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/blog/vitest-4-1.md:48 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/blog/vitest-4-1.md",
+          "line": 48,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/blog/vitest-4-1.md:95 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/blog/vitest-4-1.md",
+          "line": 95,
+          "phrases": [
+            "inspired by"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/blog/vitest-4-1.md:484 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/blog/vitest-4-1.md",
+          "line": 484,
+          "phrases": [
+            "thanks to"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/blog/vitest-4.md:49 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/blog/vitest-4.md",
+          "line": 49,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/blog/vitest-4.md:342 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/blog/vitest-4.md",
+          "line": 342,
+          "phrases": [
+            "thanks to"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/blog/vitest-5.md:49 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/blog/vitest-5.md",
+          "line": 49,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/blog/vitest-5.md:239 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/blog/vitest-5.md",
+          "line": 239,
+          "phrases": [
+            "thanks to"
+          ]
+        }
+      },
+      {
+        "code": "candidate_limit_applied",
+        "level": "warning",
+        "message": "only the first 12 of 18 candidate repositories were analysed",
+        "context": {
+          "dropped": 6
+        }
+      }
+    ],
+    "analyzer": {
+      "name": "gitlineage-analyzer",
+      "version": "0.2.0",
+      "schemaVersion": "2.0.0",
+      "namespace": "public",
+      "extractors": [
+        "explicit-attribution@1",
+        "explicit-reference@1",
+        "github-fork-metadata@1",
+        "github-repository-identity@1",
+        "lockfile-dependency@1",
+        "manifest-dependency@1",
+        "package-registry-metadata@1"
+      ],
+      "adapters": [
+        "package-registry"
+      ],
+      "limitsApplied": {
+        "history_depth": 200,
+        "tree_entries": 120000,
+        "document_bytes": 262144,
+        "manifest_bytes": 2097152,
+        "dependency_facts": 400,
+        "registry_lookups": 25,
+        "candidate_count": 12
+      }
+    }
+  },
+  {
+    "name": "yunmin311/governance-framework",
+    "path": "/srv/gitlineage/cache/public/graphs/public/github/yunmin311/governance-framework@5c6a8a141873/v2.0.0/graph.json",
+    "revision": {
+      "commit": "5c6a8a1418736653408d7efebd153fe994494c88",
+      "defaultBranch": "main",
+      "resolvedAt": "2026-10-23T06:04:08.174Z"
+    },
+    "generatedAt": "2026-10-23T06:04:08.174Z",
+    "nodes": 1,
+    "repositoryPeers": 0,
+    "repositoryPeerNames": [],
+    "canonicalEdges": 0,
+    "relationshipTypes": {},
+    "evidence": 0,
+    "evidenceTypes": {},
+    "viewNodes": 1,
+    "viewEdges": 0,
+    "outsideOneHop": 0,
+    "nonRootEdges": [],
+    "viewPartial": false,
+    "diagnostics": [],
+    "analyzer": {
+      "name": "gitlineage-analyzer",
+      "version": "0.2.0",
+      "schemaVersion": "2.0.0",
+      "namespace": "public",
+      "extractors": [
+        "explicit-attribution@1",
+        "explicit-reference@1",
+        "github-fork-metadata@1",
+        "github-repository-identity@1"
+      ],
+      "adapters": [],
+      "limitsApplied": {
+        "history_depth": 200,
+        "tree_entries": 120000,
+        "document_bytes": 262144,
+        "manifest_bytes": 2097152,
+        "dependency_facts": 400,
+        "registry_lookups": 25,
+        "candidate_count": 12
+      }
+    }
+  },
+  {
+    "name": "yunmin311/anatomical-symptom-interface",
+    "path": "/srv/gitlineage/cache/public/graphs/public/github/yunmin311/anatomical-symptom-interface@333735369e32/v2.0.0/graph.json",
+    "revision": {
+      "commit": "333735369e32cde8679cc95d784b4abbff8a2a50",
+      "defaultBranch": "main",
+      "resolvedAt": "2026-10-05T11:22:57.241Z"
+    },
+    "generatedAt": "2026-10-05T11:22:57.241Z",
+    "nodes": 10,
+    "repositoryPeers": 0,
+    "repositoryPeerNames": [],
+    "canonicalEdges": 9,
+    "relationshipTypes": {
+      "depends_on": 9
+    },
+    "evidence": 15,
+    "evidenceTypes": {
+      "package_manifest": 15
+    },
+    "viewNodes": 10,
+    "viewEdges": 9,
+    "outsideOneHop": 0,
+    "nonRootEdges": [],
+    "viewPartial": true,
+    "diagnostics": [
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/02-data-model.md:281 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/02-data-model.md",
+          "line": 281,
+          "phrases": [
+            "derived from"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/02-data-model.md:313 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/02-data-model.md",
+          "line": 313,
+          "phrases": [
+            "derived from"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/03-tech-stack.md:73 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/03-tech-stack.md",
+          "line": 73,
+          "phrases": [
+            "derived from"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/design/phase1a-anatomy-workspace.md:108 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/design/phase1a-anatomy-workspace.md",
+          "line": 108,
+          "phrases": [
+            "derived from"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/design/v1-product-audit.md:308 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/design/v1-product-audit.md",
+          "line": 308,
+          "phrases": [
+            "derived from"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/research/anatomy-visual-v2.md:4 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/research/anatomy-visual-v2.md",
+          "line": 4,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/research/anatomy-visual-v2.md:84 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/research/anatomy-visual-v2.md",
+          "line": 84,
+          "phrases": [
+            "derived from"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/research/anatomy-visual-v2.md:432 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/research/anatomy-visual-v2.md",
+          "line": 432,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/research/products-to-reuse.md:114 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/research/products-to-reuse.md",
+          "line": 114,
+          "phrases": [
+            "derived from"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/research/safety-regulatory.md:128 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/research/safety-regulatory.md",
+          "line": 128,
+          "phrases": [
+            "based on"
+          ]
+        }
+      }
+    ],
+    "analyzer": {
+      "name": "gitlineage-analyzer",
+      "version": "0.2.0",
+      "schemaVersion": "2.0.0",
+      "namespace": "public",
+      "extractors": [
+        "explicit-attribution@1",
+        "explicit-reference@1",
+        "github-fork-metadata@1",
+        "github-repository-identity@1",
+        "lockfile-dependency@1",
+        "manifest-dependency@1",
+        "package-registry-metadata@1"
+      ],
+      "adapters": [
+        "package-registry"
+      ],
+      "limitsApplied": {
+        "history_depth": 200,
+        "tree_entries": 120000,
+        "document_bytes": 262144,
+        "manifest_bytes": 2097152,
+        "dependency_facts": 400,
+        "registry_lookups": 25,
+        "candidate_count": 12
+      }
+    }
+  },
+  {
+    "name": "yunmin311/context-distiller",
+    "path": "/srv/gitlineage/cache/public/graphs/public/github/yunmin311/context-distiller@db578c2238df/v2.0.0/graph.json",
+    "revision": {
+      "commit": "db578c2238df7153ac50ab7d4e2b1c7235554185",
+      "defaultBranch": "main",
+      "resolvedAt": "2026-10-23T06:03:11.625Z"
+    },
+    "generatedAt": "2026-10-23T06:03:11.625Z",
+    "nodes": 9,
+    "repositoryPeers": 2,
+    "repositoryPeerNames": [
+      "danielmiessler/Fabric",
+      "react/react"
+    ],
+    "canonicalEdges": 9,
+    "relationshipTypes": {
+      "depends_on": 6,
+      "references": 3
+    },
+    "evidence": 10,
+    "evidenceTypes": {
+      "document_reference": 2,
+      "package_manifest": 6,
+      "package_registry_metadata": 2
+    },
+    "viewNodes": 8,
+    "viewEdges": 7,
+    "outsideOneHop": 2,
+    "nonRootEdges": [
+      {
+        "id": "rel_eb1634e05e461455",
+        "type": "references",
+        "source": "pkg:npm:react-dom",
+        "target": "repo:github:react/react",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_88a1aba98fd95f1a"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_f9b360cc1188185a",
+        "type": "references",
+        "source": "pkg:npm:react",
+        "target": "repo:github:react/react",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_65b44cd55ed02615"
+        ],
+        "attributes": {}
+      }
+    ],
+    "viewPartial": true,
+    "diagnostics": [],
+    "analyzer": {
+      "name": "gitlineage-analyzer",
+      "version": "0.2.0",
+      "schemaVersion": "2.0.0",
+      "namespace": "public",
+      "extractors": [
+        "explicit-attribution@1",
+        "explicit-reference@1",
+        "github-fork-metadata@1",
+        "github-repository-identity@1",
+        "lockfile-dependency@1",
+        "manifest-dependency@1",
+        "package-registry-metadata@1"
+      ],
+      "adapters": [
+        "package-registry"
+      ],
+      "limitsApplied": {
+        "history_depth": 200,
+        "tree_entries": 120000,
+        "document_bytes": 262144,
+        "manifest_bytes": 2097152,
+        "dependency_facts": 400,
+        "registry_lookups": 25,
+        "candidate_count": 12
+      }
+    }
+  },
+  {
+    "name": "yunmin311/obsidian-config",
+    "path": "/srv/gitlineage/cache/public/graphs/public/github/yunmin311/obsidian-config@3982a219c102/v2.0.0/graph.json",
+    "revision": {
+      "commit": "3982a219c1027a7128b2dc0d056d211e7f7e5b96",
+      "defaultBranch": "master",
+      "resolvedAt": "2026-10-03T05:04:57.531Z"
+    },
+    "generatedAt": "2026-10-03T05:04:57.531Z",
+    "nodes": 15,
+    "repositoryPeers": 12,
+    "repositoryPeerNames": [
+      "blacksmithgu/obsidian-dataview",
+      "PKM-er/obsidian-editing-toolbar",
+      "iBlinkQ/immersive-folder",
+      "kh4f/flexplorer",
+      "liamcain/obsidian-calendar-plugin",
+      "community-archive/obsidian-style-settings",
+      "obsidian-tasks-group/obsidian-tasks",
+      "scambier/obsidian-omnisearch",
+      "shabegom/buttons",
+      "SilentVoid13/Templater",
+      "TfTHacker/obsidian42-brat",
+      "Vinzent03/obsidian-git"
+    ],
+    "canonicalEdges": 14,
+    "relationshipTypes": {
+      "references": 14
+    },
+    "evidence": 14,
+    "evidenceTypes": {
+      "document_reference": 14
+    },
+    "viewNodes": 15,
+    "viewEdges": 14,
+    "outsideOneHop": 0,
+    "nonRootEdges": [],
+    "viewPartial": false,
+    "diagnostics": [],
+    "analyzer": {
+      "name": "gitlineage-analyzer",
+      "version": "0.2.0",
+      "schemaVersion": "2.0.0",
+      "namespace": "public",
+      "extractors": [
+        "explicit-attribution@1",
+        "explicit-reference@1",
+        "github-fork-metadata@1",
+        "github-repository-identity@1"
+      ],
+      "adapters": [],
+      "limitsApplied": {
+        "history_depth": 200,
+        "tree_entries": 120000,
+        "document_bytes": 262144,
+        "manifest_bytes": 2097152,
+        "dependency_facts": 400,
+        "registry_lookups": 25,
+        "candidate_count": 12
+      }
+    }
+  },
+  {
+    "name": "yunmin311/gitlineage",
+    "path": "/srv/gitlineage/cache/public/graphs/public/github/yunmin311/gitlineage@c9727aa58226/v2.0.0/graph.json",
+    "revision": {
+      "commit": "c9727aa58226d680d35636d720264b1b42787e41",
+      "defaultBranch": "main",
+      "resolvedAt": "2026-10-05T11:21:03.167Z"
+    },
+    "generatedAt": "2026-10-05T11:21:03.167Z",
+    "nodes": 10,
+    "repositoryPeers": 3,
+    "repositoryPeerNames": [
+      "o/r",
+      "owner/name",
+      "x/y"
+    ],
+    "canonicalEdges": 9,
+    "relationshipTypes": {
+      "depends_on": 6,
+      "references": 3
+    },
+    "evidence": 10,
+    "evidenceTypes": {
+      "document_reference": 3,
+      "package_lockfile": 1,
+      "package_manifest": 6
+    },
+    "viewNodes": 10,
+    "viewEdges": 9,
+    "outsideOneHop": 0,
+    "nonRootEdges": [],
+    "viewPartial": true,
+    "diagnostics": [
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/integration-validation.md:30 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/integration-validation.md",
+          "line": 30,
+          "phrases": [
+            "fork of"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/integration-validation.md:68 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/integration-validation.md",
+          "line": 68,
+          "phrases": [
+            "based on",
+            "derived from"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/integration-validation.md:86 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/integration-validation.md",
+          "line": 86,
+          "phrases": [
+            "fork of"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/project-state.md:24 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/project-state.md",
+          "line": 24,
+          "phrases": [
+            "thanks to"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/project-state.md:64 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/project-state.md",
+          "line": 64,
+          "phrases": [
+            "inspired by"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/relationship-ontology.md:80 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/relationship-ontology.md",
+          "line": 80,
+          "phrases": [
+            "port of"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/relationship-ontology.md:121 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/relationship-ontology.md",
+          "line": 121,
+          "phrases": [
+            "based on",
+            "inspired by"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/relationship-ontology.md:131 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/relationship-ontology.md",
+          "line": 131,
+          "phrases": [
+            "based on",
+            "inspired by"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/relationship-ontology.md:132 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/relationship-ontology.md",
+          "line": 132,
+          "phrases": [
+            "derived from",
+            "adapted from",
+            "port of"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/relationship-ontology.md:133 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/relationship-ontology.md",
+          "line": 133,
+          "phrases": [
+            "fork of"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/relationship-ontology.md:134 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/relationship-ontology.md",
+          "line": 134,
+          "phrases": [
+            "thanks to"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/relationship-ontology.md:136 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/relationship-ontology.md",
+          "line": 136,
+          "phrases": [
+            "thanks to"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/web-slice.md:59 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/web-slice.md",
+          "line": 59,
+          "phrases": [
+            "derived from"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/web-slice.md:330 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/web-slice.md",
+          "line": 330,
+          "phrases": [
+            "derived from"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/web-slice.md:375 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/web-slice.md",
+          "line": 375,
+          "phrases": [
+            "derived from"
+          ]
+        }
+      },
+      {
+        "code": "candidate_unavailable",
+        "level": "warning",
+        "message": "candidate o/r could not be analysed: unexpected status 404 for https://api.github.com/repos/o/r"
+      },
+      {
+        "code": "candidate_unavailable",
+        "level": "warning",
+        "message": "candidate owner/name could not be analysed: unexpected status 404 for https://api.github.com/repos/owner/name"
+      },
+      {
+        "code": "candidate_unavailable",
+        "level": "warning",
+        "message": "candidate x/y could not be analysed: unexpected status 404 for https://api.github.com/repos/x/y"
+      }
+    ],
+    "analyzer": {
+      "name": "gitlineage-analyzer",
+      "version": "0.2.0",
+      "schemaVersion": "2.0.0",
+      "namespace": "public",
+      "extractors": [
+        "explicit-attribution@1",
+        "explicit-reference@1",
+        "github-fork-metadata@1",
+        "github-repository-identity@1",
+        "lockfile-dependency@1",
+        "manifest-dependency@1",
+        "package-registry-metadata@1"
+      ],
+      "adapters": [
+        "package-registry"
+      ],
+      "limitsApplied": {
+        "history_depth": 200,
+        "tree_entries": 120000,
+        "document_bytes": 262144,
+        "manifest_bytes": 2097152,
+        "dependency_facts": 400,
+        "registry_lookups": 25,
+        "candidate_count": 12
+      }
+    }
+  },
+  {
+    "name": "grpc/grpc",
+    "path": "/srv/gitlineage/cache/public/graphs/public/github/grpc/grpc@724b3ccb608b/v2.0.0/graph.json",
+    "revision": {
+      "commit": "724b3ccb608b8ac7e51482a15113edfd94bb28ba",
+      "defaultBranch": "master",
+      "resolvedAt": "2026-10-03T05:05:17.837Z"
+    },
+    "generatedAt": "2026-10-03T05:05:17.837Z",
+    "nodes": 43,
+    "repositoryPeers": 36,
+    "repositoryPeerNames": [
+      "abseil/abseil-cpp",
+      "c-ares/c-ares",
+      "cel-expr/cel-c",
+      "census-instrumentation/opencensus-proto",
+      "cncf/xds",
+      "coveragepy/coveragepy",
+      "cython/cython",
+      "envoyproxy/data-plane-api",
+      "bufbuild/protoc-gen-validate",
+      "fullstorydev/grpcurl",
+      "google/benchmark",
+      "google/bloaty",
+      "google/boringssl",
+      "google/cel-spec",
+      "google/googletest",
+      "google/re2",
+      "googleapis/googleapis",
+      "googlecloudplatform/autosharding",
+      "grpc/grpc-dart",
+      "grpc/grpc-dotnet",
+      "grpc/grpc-go",
+      "grpc/grpc-java",
+      "grpc/grpc-kotlin",
+      "grpc/grpc-node",
+      "grpc/grpc-proto",
+      "grpc/grpc-swift",
+      "grpc/grpc-web",
+      "madler/zlib",
+      "open-telemetry/opentelemetry-cpp",
+      "open-telemetry/opentelemetry-proto",
+      "protocolbuffers/protobuf",
+      "pypa/setuptools",
+      "pypa/wheel",
+      "python/typing_extensions",
+      "whatwg/fetch",
+      "whatwg/streams"
+    ],
+    "canonicalEdges": 47,
+    "relationshipTypes": {
+      "depends_on": 6,
+      "references": 16,
+      "shares_exact_content_with": 5,
+      "uses_submodule": 20
+    },
+    "evidence": 48,
+    "evidenceTypes": {
+      "document_reference": 11,
+      "git_blob_identity": 6,
+      "git_submodule_entry": 20,
+      "package_manifest": 6,
+      "package_registry_metadata": 5
+    },
+    "viewNodes": 38,
+    "viewEdges": 42,
+    "outsideOneHop": 5,
+    "nonRootEdges": [
+      {
+        "id": "rel_cfdcc65205a824e3",
+        "type": "references",
+        "source": "pkg:pypi:coverage",
+        "target": "repo:github:coveragepy/coveragepy",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_8198fd1813934323"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_8f9504dc8b4aab53",
+        "type": "references",
+        "source": "pkg:pypi:cython",
+        "target": "repo:github:cython/cython",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_7828a0d26836c3c8"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_de3915357ea3f7da",
+        "type": "references",
+        "source": "pkg:pypi:setuptools",
+        "target": "repo:github:pypa/setuptools",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_8276f6286810d527"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_0d830fefc4e27807",
+        "type": "references",
+        "source": "pkg:pypi:typing-extensions",
+        "target": "repo:github:python/typing_extensions",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_f7d78da26f1077b8"
+        ],
+        "attributes": {}
+      },
+      {
+        "id": "rel_cd27b201dec5f040",
+        "type": "references",
+        "source": "pkg:pypi:wheel",
+        "target": "repo:github:pypa/wheel",
+        "directed": true,
+        "status": "DECLARED",
+        "evidenceIds": [
+          "ev_0829d943f9c5a11b"
+        ],
+        "attributes": {}
+      }
+    ],
+    "viewPartial": true,
+    "diagnostics": [
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in CONTRIBUTING.md:62 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "CONTRIBUTING.md",
+          "line": 62,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in CONTRIBUTING.md:150 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "CONTRIBUTING.md",
+          "line": 150,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in LICENSE:231 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "LICENSE",
+          "line": 231,
+          "phrases": [
+            "derived from"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in doc/PROTOCOL-HTTP2.md:62 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "doc/PROTOCOL-HTTP2.md",
+          "line": 62,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in doc/PROTOCOL-HTTP2.md:251 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "doc/PROTOCOL-HTTP2.md",
+          "line": 251,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in doc/c-style-guide.md:36 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "doc/c-style-guide.md",
+          "line": 36,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in doc/compression_cookbook.md:17 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "doc/compression_cookbook.md",
+          "line": 17,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in doc/compression_cookbook.md:107 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "doc/compression_cookbook.md",
+          "line": 107,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in doc/core/default_http_proxy_mapper.md:16 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "doc/core/default_http_proxy_mapper.md",
+          "line": 16,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in doc/core/default_http_proxy_mapper.md:37 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "doc/core/default_http_proxy_mapper.md",
+          "line": 37,
+          "phrases": [
+            "port of"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in doc/core/grpc-polling-engines.md:114 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "doc/core/grpc-polling-engines.md",
+          "line": 114,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in doc/grpc_xds_features.md:58 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "doc/grpc_xds_features.md",
+          "line": 58,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "candidate_limit_applied",
+        "level": "warning",
+        "message": "only the first 12 of 36 candidate repositories were analysed",
+        "context": {
+          "dropped": 24
+        }
+      },
+      {
+        "code": "exact_content_detected",
+        "level": "info",
+        "message": "2 identical blob(s) shared with cel-expr/cel-c",
+        "context": {
+          "target": "cel-expr/cel-c",
+          "matched_blob_count": 2,
+          "evidence_truncated": false
+        }
+      },
+      {
+        "code": "exact_content_detected",
+        "level": "info",
+        "message": "1 identical blob(s) shared with census-instrumentation/opencensus-proto",
+        "context": {
+          "target": "census-instrumentation/opencensus-proto",
+          "matched_blob_count": 1,
+          "evidence_truncated": false
+        }
+      },
+      {
+        "code": "exact_content_detected",
+        "level": "info",
+        "message": "1 identical blob(s) shared with envoyproxy/protoc-gen-validate",
+        "context": {
+          "target": "envoyproxy/protoc-gen-validate",
+          "matched_blob_count": 1,
+          "evidence_truncated": false
+        }
+      },
+      {
+        "code": "exact_content_detected",
+        "level": "info",
+        "message": "1 identical blob(s) shared with google/benchmark",
+        "context": {
+          "target": "google/benchmark",
+          "matched_blob_count": 1,
+          "evidence_truncated": false
+        }
+      },
+      {
+        "code": "exact_content_detected",
+        "level": "info",
+        "message": "1 identical blob(s) shared with google/bloaty",
+        "context": {
+          "target": "google/bloaty",
+          "matched_blob_count": 1,
+          "evidence_truncated": false
+        }
+      }
+    ],
+    "analyzer": {
+      "name": "gitlineage-analyzer",
+      "version": "0.2.0",
+      "schemaVersion": "2.0.0",
+      "namespace": "public",
+      "extractors": [
+        "explicit-attribution@1",
+        "explicit-reference@1",
+        "git-blob-identity@1",
+        "github-fork-metadata@1",
+        "github-repository-identity@1",
+        "gitmodules-entry@1",
+        "lockfile-dependency@1",
+        "manifest-dependency@1",
+        "package-registry-metadata@1"
+      ],
+      "adapters": [
+        "package-registry"
+      ],
+      "limitsApplied": {
+        "history_depth": 200,
+        "tree_entries": 120000,
+        "document_bytes": 262144,
+        "manifest_bytes": 2097152,
+        "dependency_facts": 400,
+        "registry_lookups": 25,
+        "candidate_count": 12
+      }
+    }
+  },
+  {
+    "name": "grpc/grpc-java",
+    "path": "/srv/gitlineage/cache/public/graphs/public/github/grpc/grpc-java@1084e9707d05/v2.0.0/graph.json",
+    "revision": {
+      "commit": "1084e9707d05a64dcb16a934bc03f7e2f68d013e",
+      "defaultBranch": "master",
+      "resolvedAt": "2026-10-03T04:37:52.966Z"
+    },
+    "generatedAt": "2026-10-03T04:37:52.966Z",
+    "nodes": 8,
+    "repositoryPeers": 7,
+    "repositoryPeerNames": [
+      "bazel-contrib/rules_jvm_external",
+      "bazelbuild/rules_proto",
+      "google/error-prone",
+      "google/protobuf-gradle-plugin",
+      "grpc/grpc-java-api-checker",
+      "grpc/proposal",
+      "trustin/os-maven-plugin"
+    ],
+    "canonicalEdges": 7,
+    "relationshipTypes": {
+      "references": 7
+    },
+    "evidence": 7,
+    "evidenceTypes": {
+      "document_reference": 7
+    },
+    "viewNodes": 8,
+    "viewEdges": 7,
+    "outsideOneHop": 0,
+    "nonRootEdges": [],
+    "viewPartial": true,
+    "diagnostics": [
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in README.md:267 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "README.md",
+          "line": 267,
+          "phrases": [
+            "based on"
+          ]
+        }
+      }
+    ],
+    "analyzer": {
+      "name": "gitlineage-analyzer",
+      "version": "0.2.0",
+      "schemaVersion": "2.0.0",
+      "namespace": "public",
+      "extractors": [
+        "explicit-attribution@1",
+        "explicit-reference@1",
+        "github-fork-metadata@1",
+        "github-repository-identity@1"
+      ],
+      "adapters": [],
+      "limitsApplied": {
+        "history_depth": 200,
+        "tree_entries": 120000,
+        "document_bytes": 262144,
+        "manifest_bytes": 2097152,
+        "dependency_facts": 400,
+        "registry_lookups": 25,
+        "candidate_count": 12
+      }
+    }
+  },
+  {
+    "name": "expressjs/express",
+    "path": "/srv/gitlineage/cache/public/graphs/public/github/expressjs/express@7ef98448f8b3/v2.0.0/graph.json",
+    "revision": {
+      "commit": "7ef98448f8b38099ab1ded55e458538ad47a51e7",
+      "defaultBranch": "master",
+      "resolvedAt": "2026-10-03T03:44:17.798Z"
+    },
+    "generatedAt": "2026-10-03T03:44:17.798Z",
+    "nodes": 49,
+    "repositoryPeers": 4,
+    "repositoryPeerNames": [
+      "expressjs/discussions",
+      "expressjs/expressjs.com",
+      "expressjs/generator",
+      "ladjs/consolidate"
+    ],
+    "canonicalEdges": 48,
+    "relationshipTypes": {
+      "depends_on": 44,
+      "references": 4
+    },
+    "evidence": 48,
+    "evidenceTypes": {
+      "document_reference": 4,
+      "package_manifest": 44
+    },
+    "viewNodes": 49,
+    "viewEdges": 48,
+    "outsideOneHop": 0,
+    "nonRootEdges": [],
+    "viewPartial": false,
+    "diagnostics": [],
+    "analyzer": {
+      "name": "gitlineage-analyzer",
+      "version": "0.2.0",
+      "schemaVersion": "2.0.0",
+      "namespace": "public",
+      "extractors": [
+        "explicit-attribution@1",
+        "explicit-reference@1",
+        "github-fork-metadata@1",
+        "github-repository-identity@1",
+        "lockfile-dependency@1",
+        "manifest-dependency@1",
+        "package-registry-metadata@1"
+      ],
+      "adapters": [
+        "package-registry"
+      ],
+      "limitsApplied": {
+        "history_depth": 200,
+        "tree_entries": 120000,
+        "document_bytes": 262144,
+        "manifest_bytes": 2097152,
+        "dependency_facts": 400,
+        "registry_lookups": 25,
+        "candidate_count": 12
+      }
+    }
+  },
+  {
+    "name": "sindresorhus/yocto-queue",
+    "path": "/srv/gitlineage/cache/public/graphs/public/github/sindresorhus/yocto-queue@72a8fa96a9d3/v2.0.0/graph.json",
+    "revision": {
+      "commit": "72a8fa96a9d389765cdf2bb9c6daba8302fc375d",
+      "defaultBranch": "main",
+      "resolvedAt": "2026-10-22T18:49:37.856Z"
+    },
+    "generatedAt": "2026-10-22T18:49:37.856Z",
+    "nodes": 5,
+    "repositoryPeers": 1,
+    "repositoryPeerNames": [
+      "sindresorhus/quick-lru"
+    ],
+    "canonicalEdges": 4,
+    "relationshipTypes": {
+      "depends_on": 3,
+      "references": 1
+    },
+    "evidence": 4,
+    "evidenceTypes": {
+      "document_reference": 1,
+      "package_manifest": 3
+    },
+    "viewNodes": 5,
+    "viewEdges": 4,
+    "outsideOneHop": 0,
+    "nonRootEdges": [],
+    "viewPartial": true,
+    "diagnostics": [
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in readme.md:7 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "readme.md",
+          "line": 7,
+          "phrases": [
+            "based on"
+          ]
+        }
+      }
+    ],
+    "analyzer": {
+      "name": "gitlineage-analyzer",
+      "version": "0.2.0",
+      "schemaVersion": "2.0.0",
+      "namespace": "public",
+      "extractors": [
+        "explicit-attribution@1",
+        "explicit-reference@1",
+        "github-fork-metadata@1",
+        "github-repository-identity@1",
+        "lockfile-dependency@1",
+        "manifest-dependency@1",
+        "package-registry-metadata@1"
+      ],
+      "adapters": [
+        "package-registry"
+      ],
+      "limitsApplied": {
+        "history_depth": 200,
+        "tree_entries": 120000,
+        "document_bytes": 262144,
+        "manifest_bytes": 2097152,
+        "dependency_facts": 400,
+        "registry_lookups": 25,
+        "candidate_count": 12
+      }
+    }
+  },
+  {
+    "name": "kuddev/pebrel",
+    "path": "/srv/gitlineage/cache/public/graphs/public/github/kuddev/pebrel@9dd3d6491bfa/v2.0.0/graph.json",
+    "revision": {
+      "commit": "9dd3d6491bfaaf902a4a3a248c02f36a47abae2d",
+      "defaultBranch": "main",
+      "resolvedAt": "2026-10-04T06:30:34.438Z"
+    },
+    "generatedAt": "2026-10-04T06:30:34.438Z",
+    "nodes": 98,
+    "repositoryPeers": 0,
+    "repositoryPeerNames": [],
+    "canonicalEdges": 97,
+    "relationshipTypes": {
+      "depends_on": 97
+    },
+    "evidence": 137,
+    "evidenceTypes": {
+      "package_manifest": 137
+    },
+    "viewNodes": 98,
+    "viewEdges": 97,
+    "outsideOneHop": 0,
+    "nonRootEdges": [],
+    "viewPartial": true,
+    "diagnostics": [
+      {
+        "code": "dependency_limit_applied",
+        "level": "warning",
+        "message": "dependency facts were truncated to 137 entries",
+        "context": {
+          "dropped": 7
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in LICENSE:87 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "LICENSE",
+          "line": 87,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in LICENSE:210 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "LICENSE",
+          "line": 210,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in LICENSE:519 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "LICENSE",
+          "line": 519,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in LICENSE:527 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "LICENSE",
+          "line": 527,
+          "phrases": [
+            "based on"
+          ]
+        }
+      },
+      {
+        "code": "attribution_phrase_without_repository_url",
+        "level": "warning",
+        "message": "attribution phrase in docs/release-notes/v2.0.0.md:261 has no repository URL within the attribution window and was not converted into a relationship",
+        "context": {
+          "path": "docs/release-notes/v2.0.0.md",
+          "line": 261,
+          "phrases": [
+            "thanks to"
+          ]
+        }
+      }
+    ],
+    "analyzer": {
+      "name": "gitlineage-analyzer",
+      "version": "0.2.0",
+      "schemaVersion": "2.0.0",
+      "namespace": "public",
+      "extractors": [
+        "explicit-attribution@1",
+        "explicit-reference@1",
+        "github-fork-metadata@1",
+        "github-repository-identity@1",
+        "lockfile-dependency@1",
+        "manifest-dependency@1",
+        "package-registry-metadata@1"
+      ],
+      "adapters": [
+        "package-registry"
+      ],
+      "limitsApplied": {
+        "history_depth": 200,
+        "tree_entries": 120000,
+        "document_bytes": 262144,
+        "manifest_bytes": 2097152,
+        "dependency_facts": 400,
+        "registry_lookups": 25,
+        "candidate_count": 12
+      }
+    }
+  },
+  {
+    "name": "nachocebey/is",
+    "path": "/srv/gitlineage/cache/public/graphs/public/github/nachocebey/is@e9c026c611c1/v2.0.0/graph.json",
+    "revision": {
+      "commit": "e9c026c611c1160eaad50da00be4e676b626018f",
+      "defaultBranch": "main",
+      "resolvedAt": "2026-10-03T05:04:59.002Z"
+    },
+    "generatedAt": "2026-10-03T05:04:59.002Z",
+    "nodes": 20,
+    "repositoryPeers": 11,
+    "repositoryPeerNames": [
+      "sindresorhus/environment",
+      "sindresorhus/file-type",
+      "sindresorhus/has-emoji",
+      "sindresorhus/is",
+      "sindresorhus/is-array-sorted",
+      "sindresorhus/is-blob",
+      "sindresorhus/is-empty-iterable",
+      "sindresorhus/is-error-constructor",
+      "sindresorhus/is-ip",
+      "sindresorhus/is-observable",
+      "sindresorhus/is-stream"
+    ],
+    "canonicalEdges": 21,
+    "relationshipTypes": {
+      "depends_on": 8,
+      "forked_from": 1,
+      "references": 10,
+      "shares_exact_content_with": 1,
+      "shares_history_with": 1
+    },
+    "evidence": 39,
+    "evidenceTypes": {
+      "document_reference": 10,
+      "git_blob_identity": 19,
+      "git_shared_commits": 1,
+      "github_fork_metadata": 1,
+      "package_manifest": 8
+    },
+    "viewNodes": 20,
+    "viewEdges": 21,
+    "outsideOneHop": 0,
+    "nonRootEdges": [],
+    "viewPartial": false,
+    "diagnostics": [
+      {
+        "code": "exact_content_detected",
+        "level": "info",
+        "message": "19 identical blob(s) shared with sindresorhus/is",
+        "context": {
+          "target": "sindresorhus/is",
+          "matched_blob_count": 19,
+          "evidence_truncated": false
+        }
+      }
+    ],
+    "analyzer": {
+      "name": "gitlineage-analyzer",
+      "version": "0.2.0",
+      "schemaVersion": "2.0.0",
+      "namespace": "public",
+      "extractors": [
+        "explicit-attribution@1",
+        "explicit-reference@1",
+        "git-blob-identity@1",
+        "git-history-containment@1",
+        "git-shared-commits@1",
+        "github-fork-metadata@1",
+        "github-repository-identity@1",
+        "lockfile-dependency@1",
+        "manifest-dependency@1",
+        "package-registry-metadata@1"
+      ],
+      "adapters": [
+        "package-registry"
+      ],
+      "limitsApplied": {
+        "history_depth": 200,
+        "tree_entries": 120000,
+        "document_bytes": 262144,
+        "manifest_bytes": 2097152,
+        "dependency_facts": 400,
+        "registry_lookups": 25,
+        "candidate_count": 12
+      }
+    }
+  },
+  {
+    "name": "octocat/spoon-knife",
+    "path": ".cache/public/graphs/public/github/octocat/spoon-knife@d0dd1f61b33d/v2.0.0/graph.json",
+    "revision": {
+      "commit": "d0dd1f61b33d64e29d8bc1372a94ef6a2fee76a9",
+      "defaultBranch": "main",
+      "resolvedAt": "2026-10-05T09:34:51.791Z"
+    },
+    "generatedAt": "2026-10-05T09:34:51.791Z",
+    "nodes": 1,
+    "repositoryPeers": 0,
+    "repositoryPeerNames": [],
+    "canonicalEdges": 0,
+    "relationshipTypes": {},
+    "evidence": 0,
+    "evidenceTypes": {},
+    "viewNodes": 1,
+    "viewEdges": 0,
+    "outsideOneHop": 0,
+    "nonRootEdges": [],
+    "viewPartial": false,
+    "diagnostics": [],
+    "analyzer": {
+      "name": "gitlineage-analyzer",
+      "version": "0.2.0",
+      "schemaVersion": "2.0.0",
+      "namespace": "public",
+      "extractors": [
+        "explicit-attribution@1",
+        "explicit-reference@1",
+        "github-fork-metadata@1",
+        "github-repository-identity@1"
+      ],
+      "adapters": [],
+      "limitsApplied": {
+        "history_depth": 200,
+        "tree_entries": 120000,
+        "document_bytes": 262144,
+        "manifest_bytes": 2097152,
+        "dependency_facts": 400,
+        "registry_lookups": 25,
+        "candidate_count": 12
+      }
+    }
+  }
+]

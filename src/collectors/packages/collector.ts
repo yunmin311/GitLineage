@@ -72,12 +72,13 @@ export function collectPackageDependencies(input: {
     facts.push(...parsed.facts);
   }
 
-  const deduped = dedupeFacts(facts).slice(0, limit);
-  if (deduped.length < facts.length) {
+  const unique = dedupeFacts(facts);
+  const deduped = unique.slice(0, limit);
+  if (deduped.length < unique.length) {
     diagnostics.push({
       code: 'dependency_limit_applied',
       message: `dependency facts were truncated to ${deduped.length} entries`,
-      context: { dropped: facts.length - deduped.length },
+      context: { dropped: unique.length - deduped.length },
     });
   }
 

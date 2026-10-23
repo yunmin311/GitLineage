@@ -7,7 +7,7 @@ export function dismissGitLog(){
  document.body.classList.remove('history-open');
 }
 // Independent Git log. Edges are only recorded child -> parent SHA pairs.
-export function openGitLog(task,{close,more,exploreFile,loading=false,error,retry}){
+export function openGitLog(task,{close,more,branches,exploreFile,loading=false,error,retry}){
  const prior=document.querySelector('#git-history'),priorScroll=prior?.querySelector('.history-list')?.scrollTop||0,priorSha=prior?.querySelector('.history-row.is-selected')?.dataset.sha;
  const continueFocused=!!prior&&(prior.querySelector('#history-more')===document.activeElement||(prior.dataset.continuationFocus==='true'&&document.activeElement===document.body)),priorIds=new Set([...prior?.querySelectorAll('.history-row')||[]].map(n=>n.dataset.sha));
  const priorQuery=prior?.querySelector('input')?.value||'',priorBranch=prior?.dataset.branch||'';
@@ -54,6 +54,11 @@ export function openGitLog(task,{close,more,exploreFile,loading=false,error,retr
  const refreshBranch=()=>{host.dataset.branch=branch;branchLabel.textContent=options.find(b=>b.sha===branch)?.name||'All branches';branchLabel.title=branchLabel.textContent;
   for(const choice of choices.querySelectorAll('button'))choice.setAttribute('aria-pressed',String(choice.dataset.branch===branch));};
  for(const option of options){const choice=button(option.name,()=>{branch=option.sha;refreshBranch();update();picker.open=false;trigger.focus();});choice.dataset.branch=option.sha;choices.append(choice);}
+ if(branches&&!task.coverage.branches.startsWith('All branch pages')){
+  const note=make('p',task.coverage.branches,'history-footer-note');note.setAttribute('role','status');
+  const read=button('Read next branch tips',async()=>{read.disabled=true;try{await branches();}catch(error){note.textContent=error.message;}finally{read.disabled=false;}});
+  choices.append(read,note);
+ }
  picker.append(choices);refreshBranch();header.append(search,picker);host.append(header);
  picker.addEventListener('keydown',event=>{if(event.key==='Escape'&&picker.open){event.preventDefault();event.stopPropagation();picker.open=false;trigger.focus();}});
  host.addEventListener('pointerdown',event=>{if(!picker.contains(event.target))picker.open=false;});

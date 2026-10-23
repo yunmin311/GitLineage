@@ -20,10 +20,10 @@ export function createPublicExploration(options:{transport?:Transport;cooldownMs
  const starts=new Map<string,number>(),costs=new Map<string,number>(),scope=new AsyncLocalStorage<string>();let spentAttempts=0,windowEnd=Date.now()+3600000,quotaUntil=0;
  function refresh(){if(Date.now()>=windowEnd){spentAttempts=0;windowEnd=Date.now()+3600000;costs.clear();starts.clear();}}
  const usage=()=>{refresh();return {spentAttempts,attemptsPerHour:limits.global,attemptsPerAddress:limits.address,resetAt:new Date(windowEnd).toISOString(),scope:'actual HTTP attempts charged before dispatch, including failures; per process; restart resets anonymous quota'};};
- function available(address:string){refresh();
+ function available(address:string,attempts=1){refresh();
   if(Date.now()<quotaUntil)throw new DiscoveryRequestError('GITHUB_RATE_LIMIT','GitHub quota unavailable until '+new Date(quotaUntil).toISOString(),quotaUntil);
-  if(spentAttempts>=limits.global)throw new DiscoveryRequestError('ANONYMOUS_GLOBAL_QUOTA','Anonymous quota exhausted; resets '+new Date(windowEnd).toISOString(),windowEnd);
-  if((costs.get(address)??0)>=limits.address)throw new DiscoveryRequestError('ANONYMOUS_ADDRESS_QUOTA','Anonymous quota exhausted; resets '+new Date(windowEnd).toISOString(),windowEnd);
+  if(spentAttempts+attempts>limits.global)throw new DiscoveryRequestError('ANONYMOUS_GLOBAL_QUOTA','Anonymous quota exhausted; resets '+new Date(windowEnd).toISOString(),windowEnd);
+  if((costs.get(address)??0)+attempts>limits.address)throw new DiscoveryRequestError('ANONYMOUS_ADDRESS_QUOTA','Anonymous quota exhausted; resets '+new Date(windowEnd).toISOString(),windowEnd);
  }
  const send=(res:ServerResponse,status:number,value:unknown)=>{res.writeHead(status,{'content-type':'application/json','cache-control':'no-store','x-content-type-options':'nosniff'});res.end(JSON.stringify(value));};
  const transport:Transport=async(url,init)=>{
@@ -34,7 +34,7 @@ export function createPublicExploration(options:{transport?:Transport;cooldownMs
   }return response;
  };
  // Both engines consume the same process-wide provider cooldown and actual request pool.
- const engine=createPreview({...options,enrichedSearch:true,transport}),repoEngine=createRepositoryExplorer({...options,transport});
+ const engine=createPreview({...options,enrichedSearch:true,transport}),repoEngine=createRepositoryExplorer({...options,transport,beforeRead:attempts=>{const address=scope.getStore();if(!address)throw new Error('Request owner unavailable');available(address,attempts);},remainingRequests:()=>Math.min(limits.global-spentAttempts,limits.address-(costs.get(scope.getStore()!)??0))});
  function reserve(address:string){available(address);const last=starts.get(address);if(last!==undefined&&Date.now()-last<limits.interval)throw new DiscoveryRequestError('ANONYMOUS_START_INTERVAL','Anonymous frequency limit; retry in '+Math.ceil((limits.interval-(Date.now()-last))/1000)+' seconds',last+limits.interval);if(repoEngine.busy()||engineBusy())throw new DiscoveryRequestError('SERVICE_BUSY','Shared service busy; retry after current operation');}
  function engineBusy(){return [...owners].some(([id,o])=>o.kind==='deep'&&(()=>{try{return engine.get(id).state==='running';}catch{return false;}})());}
  function debit(address:string){starts.set(address,Date.now());}
@@ -76,7 +76,9 @@ export function createPublicExploration(options:{transport?:Transport;cooldownMs
    const match=url.pathname.match(/^\/api\/(deep-search\/tasks|explore)\/([a-f0-9]{24})\/(cancel|directory|revision|history|branches|manifest)$/);
    if(match){const id=match[2]!,owner=owned(id);if(match[3]==='cancel'){owner.kind==='deep'?engine.cancel(id):repoEngine.cancel(id);send(res,200,{cancelled:true});return;}
     if(engineBusy())throw new DiscoveryRequestError('SERVICE_BUSY','Shared service busy');if(owner.kind!=='explore')throw new Error('Repository exploration required');
-    available(address);const task=await scope.run(address,()=>match[3]==='directory'?repoEngine.directory(id,body.path):match[3]==='history'?repoEngine.history(id):match[3]==='branches'?repoEngine.branches(id):match[3]==='manifest'?repoEngine.manifest(id,body.path):repoEngine.revision(id,body.sha));send(res,200,{...task,serviceQuota:usage()});return;}
+    const key=match[3]==='directory'||match[3]==='manifest'?'path':match[3]==='revision'?'sha':null;
+    if(Object.keys(body).join()!==(key??''))throw new Error('Invalid exploration arguments');
+    const task=await scope.run(address,()=>match[3]==='directory'?repoEngine.directory(id,body.path):match[3]==='history'?repoEngine.history(id):match[3]==='branches'?repoEngine.branches(id):match[3]==='manifest'?repoEngine.manifest(id,body.path):repoEngine.revision(id,body.sha));send(res,200,{...task,serviceQuota:usage()});return;}
    send(res,400,{error:'Invalid exploration request'});
   }catch(error){const failure=error instanceof DiscoveryRequestError?error:new DiscoveryRequestError('INVALID_REQUEST',error instanceof Error?error.message:'Exploration unavailable',undefined,400);
    send(res,failure.status,{error:failure.message,code:failure.code,quota:usage(),...(failure.retryAt?{retryAt:failure.retryAt}:{})});}

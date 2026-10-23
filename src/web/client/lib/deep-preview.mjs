@@ -28,7 +28,7 @@ export async function mountDeepPreview(getRepository) {
  const layerLauncher=button('deep-candidate-layer','Discovered Candidates',()=>{renderLayer();layer[capabilities.scope==='anonymous'?'show':'showModal']();layer.querySelector('button').focus();});layerLauncher.classList.add('deep-launch','deep-layer-launch');document.body.append(layerLauncher);
  layer.addEventListener('keydown',event=>{event.stopPropagation();if(capabilities.scope==='anonymous'&&event.key==='Escape'){event.preventDefault();layer.close();}});layer.addEventListener('close',()=>{if(!dialog.open)layerLauncher.focus();});
  function renderLayer(){layerList.replaceChildren();if(parent?.search?.target?.identity)layerList.append(el('p',`Search target: ${parent.search.target.identity.fullName} · ID ${parent.search.target.identity.repositoryId} · ${parent.search.target.identity.revision}`,'deep-digest'));const list=parent?.search?.result?.candidates??[];
-  if(!list.length)layerList.append(el('p',current?.state==='running'?'Search still running. No observations available yet.':parent?.state==='completed'?'No candidates within the requested query.':'No candidates available; search may be incomplete or cancelled.'));
+  if(!list.length)layerList.append(el('p',current?.state==='running'?'Search still running. No observations available yet.':parent?.state==='completed'?'No candidates in this bounded search; other queries and unscanned pages remain unknown.':'No candidates available; search may be incomplete or cancelled.'));
   for(const c of list){const result=current?.comparison?.content.comparisons.find(r=>r.candidate?.candidate.repositoryId===c.candidate.repositoryId);
    const measured=result?.candidate?.similarity?.length>0;
    const card=button('',`${c.candidate.fullName} · ID ${c.candidate.repositoryId} · ${measured?'Pinned file measurements available':'Not compared — no score'}`,()=>{
@@ -61,10 +61,11 @@ export async function mountDeepPreview(getRepository) {
  function requestFailure(error){const notices=new Set(['ANONYMOUS_START_INTERVAL','ANONYMOUS_ADDRESS_QUOTA','ANONYMOUS_GLOBAL_QUOTA','SERVICE_BUSY','DISCOVERY_COOLDOWN','DISCOVERY_FREQUENCY','GITHUB_RATE_LIMIT']);
   const messages={ANONYMOUS_START_INTERVAL:'Please wait before starting a new search',ANONYMOUS_ADDRESS_QUOTA:'This address has used its hourly request allowance',ANONYMOUS_GLOBAL_QUOTA:'The shared hourly request allowance is used',SERVICE_BUSY:'The shared service is busy. Please retry after the current task',DISCOVERY_COOLDOWN:'Please wait before the next Discovery stage',DISCOVERY_FREQUENCY:'The Discovery per-minute task allowance is used',GITHUB_RATE_LIMIT:'GitHub is temporarily limiting requests'};
   const until=Date.parse(error.retryAt),waiting=notices.has(error.code);waitNotice=null;
-  setStatus(waiting?messages[error.code]:error.message,waiting?'notice':'failed');
+  const explanation=['ANONYMOUS_ADDRESS_QUOTA','ANONYMOUS_GLOBAL_QUOTA','GITHUB_RATE_LIMIT'].includes(error.code)?'. Unread content remains unknown; a request limit is not evidence of no relationships.':'';
+  setStatus(waiting?messages[error.code]+explanation:error.message,waiting?'notice':'failed');
   if(waiting&&Number.isFinite(until)&&until>Date.now()){
    if(error.code==='ANONYMOUS_START_INTERVAL')nextSearch=Math.max(nextSearch,until);else nextStart=Math.max(nextStart,until);
-   waitNotice={message:messages[error.code],until};
+   waitNotice={message:messages[error.code]+explanation,until};
   }
   refreshWait();
  }
@@ -75,9 +76,11 @@ export async function mountDeepPreview(getRepository) {
  function showSearch(task){inspection.replaceChildren();candidates.hidden=false;parent=task;selected=new Set();candidates.replaceChildren();results.replaceChildren();files.replaceChildren();sourceTask=null;fileChoices.clear();compare.hidden=true;sourcePreview.hidden=false;
   const output=task.search;if(output?.target?.identity){const target=output.target.identity;const heading=el('div',undefined,'deep-target');heading.append(el('p','Search target','deep-target-label'),el('h3',target.fullName));const identity=el('details',undefined,'workspace-technical');identity.append(el('summary','Pinned target identity'),el('p',`Repository ID ${target.repositoryId}`),el('code',target.revision,'deep-digest'));heading.append(identity);candidates.append(heading);}
   const list=output?.result?.candidates??[], relevance=output?.result?.relevance;
+  const unscanned=(output?.result?.queries??[]).reduce((n,q)=>n+(q.unfetchedAccessiblePages??0),0);
+  if(unscanned)candidates.append(el('p',`${unscanned} accessible search page(s) were not fetched within this budget. These results do not cover all matches.`,'deep-warning'));
   if(output?.result?.admission)candidates.append(el('p',`Admission considered ${output.result.coverage.uniqueObserved} observed identities within the fetched results: best metadata matches within fair query shares, then best remaining matches. Original ranks and excluded observations are in the resource receipt. This is not verified provenance.`,'deep-note'));
   if(list.length&&relevance&&!relevance.sufficient)candidates.append(el('p','No sufficiently relevant candidates found within this query and budget. Observations below remain available for manual review.','deep-warning'));
-  if(!list.length)candidates.append(el('p',output?.result?.coverage.state==='complete_within_requested'?'No candidates found within this query and budget.':'Search incomplete or unavailable. See the failure receipt.'));
+  if(!list.length)candidates.append(el('p',output?.result?.coverage.state==='complete_within_requested'?'This bounded search found no candidates. Unscanned pages and other queries remain unknown.':'Search incomplete or unavailable. See the failure receipt.'));
   for(const c of list){const card=el('article',undefined,'deep-candidate'),check=el('input');check.type='checkbox';check.value=String(c.candidate.repositoryId);check.disabled=c.candidate.conflicts.includes('name_id_collision');
    const label=el('label'),name=el('span',c.candidate.fullName);label.append(check,name);card.append(label,el('p',`ID ${c.candidate.repositoryId} · Metadata match · code not compared`,'deep-candidate-meta'));
    const assessment=relevance?.candidates.find(r=>r.repositoryId===c.candidate.repositoryId);
@@ -148,7 +151,7 @@ export async function mountDeepPreview(getRepository) {
     row.append(check,text);card.append(row);
     check.addEventListener('change',()=>{if(check.checked&&chosen.size>=8){check.checked=false;setStatus('Select at most eight files per repository.','notice');return;}check.checked?chosen.add(f.path):chosen.delete(f.path);renderScope();busy(polling,false);});
    }
-   if(!r.files.some(f=>f.selectable))card.append(el('p','No selectable source within this listing. '+r.coverage.reasons.join('; '),'deep-warning'));
+   if(!r.files.some(f=>f.selectable))card.append(el('p','No selectable JS/TS source within this bounded listing. Unsupported languages (including Go and HTML) have not been compared; this is not evidence of no similar source. '+r.coverage.reasons.join('; '),'deep-warning'));
    if(recommendation)card.append(el('p',`Uncovered listed modules: ${recommendation.uncoveredModules.join(', ')||'none in recommended sample'}. Unlisted directories: ${recommendation.unlistedDirectories.join(', ')||'none'}. Repository-wide coverage unknown.`,'deep-note'));
    if(commonReason)card.append(el('p',commonReason,'deep-note'));
    card.append(identity,details('Directory coverage and filter reasons',r.coverage));files.append(card);
@@ -179,7 +182,8 @@ export async function mountDeepPreview(getRepository) {
  function taskStatus(task){
   const names={search:'Candidate search',sources:'Source listing',compare:'Source comparison'};
   const states={completed:'complete',partial:'partial results',failed:'unavailable',cancelled:'cancelled',running:'in progress'};
-  setStatus((names[task.kind]||task.kind)+' · '+(states[task.state]||task.state),task.state);
+  const incompleteSearch=task.kind==='search'&&task.state==='completed'&&task.search?.result?.coverage?.state!=='complete_within_requested';
+  setStatus((names[task.kind]||task.kind)+' · '+(incompleteSearch?'bounded results · search coverage incomplete':states[task.state]||task.state),incompleteSearch?'partial':task.state);
   if(task.state==='running'){const phase=el('span','Reading '+task.phase.replaceAll('_',' ')+'…','deep-status-phase');status.append(phase);}
   if(task.error){const reason=el('details',undefined,'deep-status-reason');reason.append(el('summary','Request details'),el('code',task.error));status.append(reason);}
  }

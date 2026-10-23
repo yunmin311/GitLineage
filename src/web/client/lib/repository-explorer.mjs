@@ -305,6 +305,14 @@ function mountRepositoryExplorer(getRepository, deep, bridge) {
         save();
         if (!t.revision || t.error) throw new Error(t.error || 'History unavailable');
         show(t);
+      }, branches: async () => {
+        const t = await request(`/${task.id}/branches`, {});
+        if (!current()) return;
+        jobs.set(jobKey(repo), t); save();
+        if (!t.revision || t.error) throw new Error(t.error || 'Branch tips unavailable');
+        show(t);
+        const picker = host.querySelector('.history-branch-picker');
+        picker.open = true; picker.querySelector('summary').focus();
       }, exploreFile: (commit, file) => {
         checkpoint(id);
         const fid = node(ref(repo, commit.sha, "file", file.path), file.path.split("/").pop(), "file", { ...file, path: file.path, repository: repo, revision: commit.sha, fromCommit: commit.sha });
